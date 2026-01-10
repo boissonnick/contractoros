@@ -28,6 +28,7 @@ export function AuthProvider({ children }: { children?: React.ReactNode }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+      
       if (currentUser) {
         try {
           const userDocRef = doc(db, 'users', currentUser.uid);
@@ -36,15 +37,18 @@ export function AuthProvider({ children }: { children?: React.ReactNode }) {
           if (userDoc.exists()) {
             setProfile(userDoc.data() as UserProfile);
           } else {
+            console.warn("User authenticated but no profile found in Firestore.");
             setProfile(null); 
           }
         } catch (error) {
+          // Prevent UI crash if Firestore is unreachable or permissions fail
           console.error("Error fetching user profile:", error);
           setProfile(null);
         }
       } else {
         setProfile(null);
       }
+      
       setLoading(false);
     });
 
@@ -52,7 +56,13 @@ export function AuthProvider({ children }: { children?: React.ReactNode }) {
   }, []);
 
   const signOut = async () => {
-    await firebaseSignOut(auth);
+    try {
+      await firebaseSignOut(auth);
+      setProfile(null);
+      setUser(null);
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
   };
 
   return (
