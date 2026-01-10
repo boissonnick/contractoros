@@ -1,9 +1,9 @@
 "use client";
 
-import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import * as firestore from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+import firebase from "firebase/app";
+import "firebase/auth";
+import "firebase/firestore";
+import "firebase/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCDMqT_jPC9BwFqhM2fXPB7g6Wg7pnIvWc",
@@ -15,8 +15,8 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase only once
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const app = !firebase.apps.length ? firebase.initializeApp(firebaseConfig) : firebase.app();
 
-export const auth = getAuth(app);
-export const db = firestore.getFirestore(app);
-export const storage = getStorage(app);
+export const auth = firebase.auth();
+export const db = firebase.firestore();
+export const storage = firebase.storage();

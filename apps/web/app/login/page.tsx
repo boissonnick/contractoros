@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from 'react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { auth } from '../../lib/firebase/config';
 
@@ -18,7 +17,7 @@ export default function LoginPage() {
     setError('');
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await auth.signInWithEmailAndPassword(email, password);
       // AuthGuard in layouts will handle redirection based on role
       router.push('/projects'); 
     } catch (err: any) {
