@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -19,7 +20,7 @@ const clientNavItems: NavItem[] = [
   { label: 'Messages', href: '/portal/client/messages', icon: ChatBubbleLeftRightIcon },
 ];
 
-function ClientLayoutContent({ children }: { children: React.ReactNode }) {
+function ClientLayoutContent({ children }: { children?: React.ReactNode }) {
   const { profile, signOut } = useAuth();
 
   return (

@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -22,7 +23,7 @@ const internalNavItems: NavItem[] = [
   { label: 'Crew', href: '/projects/crew', icon: UserGroupIcon },
 ];
 
-function InternalLayoutContent({ children }: { children: React.ReactNode }) {
+function InternalLayoutContent({ children }: { children?: React.ReactNode }) {
   const { profile, signOut } = useAuth();
 
   return (

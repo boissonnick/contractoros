@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -17,7 +18,7 @@ const subNavItems: NavItem[] = [
   { label: 'Punch List', href: '/portal/sub/punchlist', icon: WrenchScrewdriverIcon },
 ];
 
-function SubLayoutContent({ children }: { children: React.ReactNode }) {
+function SubLayoutContent({ children }: { children?: React.ReactNode }) {
   const { profile, signOut } = useAuth();
 
   return (
