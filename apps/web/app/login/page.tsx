@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../lib/firebase/config';
 
 export default function LoginPage() {
@@ -17,7 +18,7 @@ export default function LoginPage() {
     setError('');
 
     try {
-      await auth.signInWithEmailAndPassword(email, password);
+      await signInWithEmailAndPassword(auth, email, password);
       // AuthGuard in layouts will handle redirection based on role
       router.push('/projects'); 
     } catch (err: any) {
