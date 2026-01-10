@@ -1,0 +1,8 @@
+{
+  "name": "contractoros",
+  "private": true,
+  "scripts": {
+    "build": "cd apps/web && npm install && npm run build",
+    "start": "cd apps/web && npm run start"
+  }
+}
