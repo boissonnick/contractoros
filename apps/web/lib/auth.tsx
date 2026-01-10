@@ -2,8 +2,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, onAuthStateChanged, signOut as firebaseSignOut } from 'firebase/auth';
 import * as firestore from 'firebase/firestore';
-import { auth, db } from '../lib/firebase/config';
-import { UserProfile, UserRole } from '../types';
+import { auth, db } from '@/lib/firebase/config';
+import { UserProfile } from '@/types';
 
 interface AuthContextType {
   user: User | null;
@@ -31,12 +31,10 @@ export function AuthProvider({ children }: { children?: React.ReactNode }) {
       setUser(currentUser);
       if (currentUser) {
         try {
-          // Fetch user profile from Firestore to get Role and OrgId
           const userDoc = await firestore.getDoc(firestore.doc(db, 'users', currentUser.uid));
           if (userDoc.exists()) {
             setProfile(userDoc.data() as UserProfile);
           } else {
-            // Fallback for new users or missing profiles
             setProfile(null); 
           }
         } catch (error) {
