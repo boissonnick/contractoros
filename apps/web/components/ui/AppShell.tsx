@@ -1,7 +1,10 @@
-import React from 'react';
+"use client";
+
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { NavItem } from '@/types';
+import { NavItem, UserRole } from '@/types';
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 
 interface AppShellProps {
   children: React.ReactNode;
