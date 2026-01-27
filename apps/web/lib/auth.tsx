@@ -5,6 +5,7 @@ import { auth, db } from '@/lib/firebase/config';
 import { UserProfile } from '@/types';
 
 const AUTH_TIMEOUT_MS = 10_000;
+const FIRESTORE_TIMEOUT_MS = 8_000;
 
 interface AuthContextType {
   user: User | null;
@@ -24,6 +25,15 @@ const AuthContext = createContext<AuthContextType>({
 
 export const useAuth = () => useContext(AuthContext);
 
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms)
+    ),
+  ]);
+}
+
 export function AuthProvider({ children }: { children?: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -41,7 +51,11 @@ export function AuthProvider({ children }: { children?: React.ReactNode }) {
       if (currentUser) {
         try {
           const userDocRef = doc(db, 'users', currentUser.uid);
-          const userDoc = await getDoc(userDocRef);
+          const userDoc = await withTimeout(
+            getDoc(userDocRef),
+            FIRESTORE_TIMEOUT_MS,
+            'Firestore profile fetch'
+          );
 
           if (userDoc.exists()) {
             setProfile(userDoc.data() as UserProfile);
@@ -50,7 +64,6 @@ export function AuthProvider({ children }: { children?: React.ReactNode }) {
             setProfile(null);
           }
         } catch (error) {
-          // Prevent UI crash if Firestore is unreachable or permissions fail
           console.error("Error fetching user profile:", error);
           setProfile(null);
         }
