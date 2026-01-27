@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
 import { doc, updateDoc, setDoc, Timestamp } from 'firebase/firestore';
-import { Button, Input, Card } from '@/components/ui';
+import { Button, Input, Card, toast } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import {
   BuildingOfficeIcon,
@@ -48,7 +48,7 @@ const roleOptions: { id: UserRole; title: string; description: string; icon: Rea
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { user, profile } = useAuth();
+  const { user, profile, loading } = useAuth();
   const [currentStep, setCurrentStep] = useState<Step>('role');
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
   const [saving, setSaving] = useState(false);
@@ -58,6 +58,13 @@ export default function OnboardingPage() {
     companyName: '',
     trade: '',
   });
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!loading && user === null) {
+      router.replace('/login');
+    }
+  }, [user, loading, router]);
 
   // Pre-fill name from auth
   useEffect(() => {
@@ -145,7 +152,7 @@ export default function OnboardingPage() {
 
     } catch (error) {
       console.error('Error completing onboarding:', error);
-      alert('Something went wrong. Please try again.');
+      toast.error('Something went wrong. Please try again.');
     } finally {
       setSaving(false);
     }

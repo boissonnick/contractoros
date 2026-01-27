@@ -1,0 +1,300 @@
+"use client";
+
+/**
+ * Export utilities for PDF and Excel generation.
+ *
+ * Usage:
+ *   import { exportToPDF, exportToExcel, exportToCSV } from '@/lib/exports';
+ *
+ *   // PDF — generates and downloads a branded PDF document
+ *   await exportToPDF({
+ *     title: 'Daily Log - March 15, 2025',
+ *     subtitle: 'Kitchen Remodel Project',
+ *     sections: [
+ *       { heading: 'Work Performed', content: 'Installed cabinets...' },
+ *       { heading: 'Materials', content: '12 cabinet units, 24 hinges...' },
+ *     ],
+ *     metadata: { project: 'Kitchen Remodel', date: '2025-03-15', author: 'John Smith' },
+ *   });
+ *
+ *   // Excel — generates and downloads an Excel file with styled headers
+ *   await exportToExcel({
+ *     filename: 'timesheet-march-2025',
+ *     sheets: [{
+ *       name: 'Timesheet',
+ *       columns: [
+ *         { header: 'Date', key: 'date', width: 15 },
+ *         { header: 'Hours', key: 'hours', width: 10 },
+ *       ],
+ *       data: [
+ *         { date: '2025-03-01', hours: 8 },
+ *       ],
+ *     }],
+ *   });
+ *
+ *   // CSV — quick data export
+ *   exportToCSV({
+ *     filename: 'expenses',
+ *     headers: ['Date', 'Category', 'Amount'],
+ *     rows: [['2025-03-01', 'Materials', '$500']],
+ *   });
+ */
+
+// ============================================
+// PDF Export
+// ============================================
+
+interface PDFSection {
+  heading: string;
+  content: string;
+  type?: 'text' | 'table' | 'list';
+  tableData?: { headers: string[]; rows: string[][] };
+  listItems?: string[];
+}
+
+interface PDFExportOptions {
+  title: string;
+  subtitle?: string;
+  sections: PDFSection[];
+  metadata?: Record<string, string>;
+  filename?: string;
+  orientation?: 'portrait' | 'landscape';
+}
+
+export async function exportToPDF(options: PDFExportOptions): Promise<void> {
+  // Dynamic import to avoid bundle bloat
+  const pdfMakeModule = await import('pdfmake/build/pdfmake');
+  const pdfFontsModule = await import('pdfmake/build/vfs_fonts');
+
+  const pdfMake = pdfMakeModule.default || pdfMakeModule;
+
+  // Set up fonts
+  const fontsAny = pdfFontsModule as any;
+  if (fontsAny.pdfMake?.vfs) {
+    pdfMake.vfs = fontsAny.pdfMake.vfs;
+  } else if (fontsAny.default?.pdfMake?.vfs) {
+    pdfMake.vfs = fontsAny.default.pdfMake.vfs;
+  }
+
+  const content: any[] = [];
+
+  // Header
+  content.push({
+    text: 'ContractorOS',
+    style: 'brand',
+    margin: [0, 0, 0, 4],
+  });
+
+  content.push({
+    text: options.title,
+    style: 'header',
+    margin: [0, 0, 0, 4],
+  });
+
+  if (options.subtitle) {
+    content.push({
+      text: options.subtitle,
+      style: 'subheader',
+      margin: [0, 0, 0, 12],
+    });
+  }
+
+  // Metadata
+  if (options.metadata) {
+    const metaEntries = Object.entries(options.metadata);
+    if (metaEntries.length > 0) {
+      content.push({
+        columns: metaEntries.map(([key, value]) => ({
+          text: [
+            { text: `${key}: `, bold: true, fontSize: 9, color: '#6b7280' },
+            { text: value, fontSize: 9, color: '#374151' },
+          ],
+        })),
+        margin: [0, 0, 0, 16],
+      });
+      content.push({
+        canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 1, lineColor: '#e5e7eb' }],
+        margin: [0, 0, 0, 16],
+      });
+    }
+  }
+
+  // Sections
+  for (const section of options.sections) {
+    content.push({
+      text: section.heading,
+      style: 'sectionHeader',
+      margin: [0, 8, 0, 6],
+    });
+
+    if (section.type === 'table' && section.tableData) {
+      content.push({
+        table: {
+          headerRows: 1,
+          widths: section.tableData.headers.map(() => '*'),
+          body: [
+            section.tableData.headers.map(h => ({ text: h, bold: true, fontSize: 9, fillColor: '#f3f4f6' })),
+            ...section.tableData.rows.map(row =>
+              row.map(cell => ({ text: cell, fontSize: 9 }))
+            ),
+          ],
+        },
+        layout: 'lightHorizontalLines',
+        margin: [0, 0, 0, 12],
+      });
+    } else if (section.type === 'list' && section.listItems) {
+      content.push({
+        ul: section.listItems.map(item => ({ text: item, fontSize: 10 })),
+        margin: [0, 0, 0, 12],
+      });
+    } else {
+      content.push({
+        text: section.content,
+        style: 'body',
+        margin: [0, 0, 0, 12],
+      });
+    }
+  }
+
+  const docDefinition: any = {
+    pageSize: 'LETTER',
+    pageOrientation: options.orientation || 'portrait',
+    pageMargins: [40, 40, 40, 60],
+    content,
+    styles: {
+      brand: { fontSize: 10, bold: true, color: '#2563eb' },
+      header: { fontSize: 18, bold: true, color: '#111827' },
+      subheader: { fontSize: 12, color: '#6b7280' },
+      sectionHeader: { fontSize: 12, bold: true, color: '#1f2937' },
+      body: { fontSize: 10, color: '#374151', lineHeight: 1.4 },
+    },
+    footer: (currentPage: number, pageCount: number) => ({
+      columns: [
+        { text: `Generated by ContractorOS — ${new Date().toLocaleDateString()}`, fontSize: 8, color: '#9ca3af', margin: [40, 0, 0, 0] },
+        { text: `Page ${currentPage} of ${pageCount}`, fontSize: 8, color: '#9ca3af', alignment: 'right', margin: [0, 0, 40, 0] },
+      ],
+    }),
+  };
+
+  const filename = options.filename || options.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  pdfMake.createPdf(docDefinition).download(`${filename}.pdf`);
+}
+
+// ============================================
+// Excel Export
+// ============================================
+
+interface ExcelColumn {
+  header: string;
+  key: string;
+  width?: number;
+}
+
+interface ExcelSheet {
+  name: string;
+  columns: ExcelColumn[];
+  data: Record<string, any>[];
+}
+
+interface ExcelExportOptions {
+  filename: string;
+  sheets: ExcelSheet[];
+}
+
+export async function exportToExcel(options: ExcelExportOptions): Promise<void> {
+  // Dynamic import to avoid bundle bloat
+  const ExcelJS = (await import('exceljs')).default;
+
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'ContractorOS';
+  workbook.created = new Date();
+
+  for (const sheet of options.sheets) {
+    const ws = workbook.addWorksheet(sheet.name);
+
+    // Set columns
+    ws.columns = sheet.columns.map(col => ({
+      header: col.header,
+      key: col.key,
+      width: col.width || 15,
+    }));
+
+    // Style header row
+    const headerRow = ws.getRow(1);
+    headerRow.font = { bold: true, size: 11, color: { argb: 'FF1F2937' } };
+    headerRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFF3F4F6' },
+    };
+    headerRow.border = {
+      bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+    };
+    headerRow.height = 24;
+
+    // Add data rows
+    for (const row of sheet.data) {
+      const dataRow = ws.addRow(row);
+      dataRow.font = { size: 10, color: { argb: 'FF374151' } };
+    }
+
+    // Auto-filter
+    if (sheet.data.length > 0) {
+      ws.autoFilter = {
+        from: { row: 1, column: 1 },
+        to: { row: sheet.data.length + 1, column: sheet.columns.length },
+      };
+    }
+  }
+
+  // Generate and download
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
+  downloadBlob(blob, `${options.filename}.xlsx`);
+}
+
+// ============================================
+// CSV Export (lightweight, no external dependencies)
+// ============================================
+
+interface CSVExportOptions {
+  filename: string;
+  headers: string[];
+  rows: (string | number)[][];
+}
+
+export function exportToCSV(options: CSVExportOptions): void {
+  const escape = (val: string | number): string => {
+    const str = String(val);
+    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+  };
+
+  const lines = [
+    options.headers.map(escape).join(','),
+    ...options.rows.map(row => row.map(escape).join(',')),
+  ];
+
+  const csv = lines.join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  downloadBlob(blob, `${options.filename}.csv`);
+}
+
+// ============================================
+// Helper: Trigger browser download
+// ============================================
+
+function downloadBlob(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
-import { Button, Input, Textarea, Select, Card } from '@/components/ui';
+import { Button, Input, Textarea, Select, Card, toast } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import {
   BuildingOfficeIcon,
@@ -138,7 +138,7 @@ export default function NewProjectPage() {
       router.push(`/dashboard/projects/${projectRef.id}`);
     } catch (error) {
       console.error('Error creating project:', error);
-      alert('Failed to create project. Please try again.');
+      toast.error('Failed to create project. Please try again.');
     } finally {
       setSaving(false);
     }

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
 import { collection, addDoc, Timestamp, query, where, getDocs } from 'firebase/firestore';
-import { Button, Input, Card, Select } from '@/components/ui';
+import { Button, Input, Card, Select, toast } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import {
   UserPlusIcon,
@@ -142,7 +142,7 @@ export default function TeamInvitePage() {
       }
 
       if (existingEmails.size > 0 && existingEmails.size === validInvites.length) {
-        alert('All invites were already sent or users already exist.');
+        toast.warning('All invites were already sent or users already exist.');
       } else {
         setSent(true);
         setTimeout(() => {
@@ -151,7 +151,7 @@ export default function TeamInvitePage() {
       }
     } catch (error) {
       console.error('Error sending invites:', error);
-      alert('Something went wrong. Please try again.');
+      toast.error('Something went wrong. Please try again.');
     } finally {
       setSending(false);
     }

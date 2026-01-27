@@ -15,7 +15,7 @@ import {
   getDoc,
   Timestamp
 } from 'firebase/firestore';
-import { Button, Card, Input, Avatar, Badge } from '@/components/ui';
+import { Button, Card, Input, Avatar, Badge, toast } from '@/components/ui';
 import { cn, formatDate } from '@/lib/utils';
 import Link from 'next/link';
 import {
@@ -150,7 +150,7 @@ export default function ProjectLogsPage({ params }: { params: Promise<{ id: stri
       loadProjectAndLogs();
     } catch (error) {
       console.error('Error creating log:', error);
-      alert('Failed to create log. Please try again.');
+      toast.error('Failed to create log. Please try again.');
     } finally {
       setSaving(false);
     }
