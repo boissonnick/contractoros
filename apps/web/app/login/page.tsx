@@ -53,7 +53,18 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
+    let didResolve = false;
+
+    // Safety timeout: show login form if auth check hangs
+    const timer = setTimeout(() => {
+      if (!didResolve) {
+        console.warn('Auth check timed out, showing login form');
+        setCheckingAuth(false);
+      }
+    }, 5000);
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      didResolve = true;
       if (user) {
         try {
           await handlePostAuth(user.uid, router);
@@ -64,7 +75,10 @@ export default function LoginPage() {
       }
       setCheckingAuth(false);
     });
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      clearTimeout(timer);
+    };
   }, [router]);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
