@@ -1,9 +1,0 @@
-{
-  "name": "ContractorOS",
-  "description": "A field-first operations system for general contracting companies, featuring role-based portals, project management, and scheduling.",
-  "requestFramePermissions": [
-    "camera",
-    "microphone",
-    "geolocation"
-  ]
-}
