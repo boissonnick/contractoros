@@ -1,0 +1,23 @@
+# Dependencies (reinstalled during build)
+node_modules
+
+# Build output (rebuilt during build)
+.next
+
+# Version control
+.git
+
+# IDE / editor
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test / dev artifacts
+coverage
+.env.test.local
+.env.development.local

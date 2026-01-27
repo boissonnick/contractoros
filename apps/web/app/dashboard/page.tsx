@@ -14,6 +14,7 @@ import {
   ArrowTrendingUpIcon,
   PlusIcon,
 } from '@heroicons/react/24/outline';
+import { FirestoreError } from '@/components/ui';
 
 interface StatCardProps {
   title: string;
@@ -75,15 +76,18 @@ export default function DashboardPage() {
   });
   const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchDashboardData() {
-      if (!profile?.orgId) {
-        setLoading(false);
-        return;
-      }
+  const fetchDashboardData = React.useCallback(async () => {
+    if (!profile?.orgId) {
+      setLoading(false);
+      return;
+    }
 
-      try {
+    setLoading(true);
+    setFetchError(null);
+
+    try {
         // Fetch active projects count
         const projectsQuery = query(
           collection(db, 'projects'),
@@ -124,18 +128,28 @@ export default function DashboardPage() {
         ]);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
+        setFetchError('Failed to load dashboard data. The database may be unreachable.');
       } finally {
         setLoading(false);
       }
-    }
-
-    fetchDashboardData();
   }, [profile?.orgId]);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <FirestoreError message={fetchError} onRetry={fetchDashboardData} />
       </div>
     );
   }

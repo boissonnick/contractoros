@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { Project, ProjectStatus } from '@/types';
+import { FirestoreError } from '@/components/ui';
 import {
   PlusIcon,
   MagnifyingGlassIcon,
@@ -29,37 +30,42 @@ export default function ProjectsPage() {
   const { profile } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<ProjectStatus | 'all'>('all');
 
-  useEffect(() => {
-    async function fetchProjects() {
-      if (!profile?.orgId) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const projectsQuery = query(
-          collection(db, 'projects'),
-          where('orgId', '==', profile.orgId),
-          orderBy('createdAt', 'desc')
-        );
-        const snapshot = await getDocs(projectsQuery);
-        const projectsData = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as Project[];
-        setProjects(projectsData);
-      } catch (error) {
-        console.error('Error fetching projects:', error);
-      } finally {
-        setLoading(false);
-      }
+  const fetchProjects = React.useCallback(async () => {
+    if (!profile?.orgId) {
+      setLoading(false);
+      return;
     }
 
-    fetchProjects();
+    setLoading(true);
+    setFetchError(null);
+
+    try {
+      const projectsQuery = query(
+        collection(db, 'projects'),
+        where('orgId', '==', profile.orgId),
+        orderBy('createdAt', 'desc')
+      );
+      const snapshot = await getDocs(projectsQuery);
+      const projectsData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Project[];
+      setProjects(projectsData);
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+      setFetchError('Failed to load projects. The database may be unreachable.');
+    } finally {
+      setLoading(false);
+    }
   }, [profile?.orgId]);
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
 
   const filteredProjects = projects.filter(project => {
     const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -73,6 +79,14 @@ export default function ProjectsPage() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <FirestoreError message={fetchError} onRetry={fetchProjects} />
       </div>
     );
   }
