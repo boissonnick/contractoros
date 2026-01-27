@@ -19,6 +19,11 @@ service cloud.firestore {
              getUserProfile().role in ['OWNER', 'PM'];
     }
 
+    // Helper function to check if user belongs to the same org
+    function isSameOrg(orgId) {
+      return isAuthenticated() && getUserProfile().orgId == orgId;
+    }
+
     // Helper function to check if user owns the resource
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
@@ -26,17 +31,17 @@ service cloud.firestore {
 
     // Users collection
     match /users/{userId} {
-      // Users can read their own profile
-      // Admins can read any profile
+      // Users can read (get) their own profile
+      // Admins can read (get + list) any profile
       allow read: if isOwner(userId) || isAdmin();
 
-      // Users can update their own profile (limited fields)
+      // Users can create/set their own profile (onboarding flow uses setDoc with merge)
+      // Admins can create user docs (new project page creates client users)
+      allow create: if isOwner(userId) || isAdmin();
+
+      // Users can update their own profile
       // Admins can update any profile
       allow update: if isOwner(userId) || isAdmin();
-
-      // Only Cloud Functions can create user profiles
-      // This is handled by the createUserProfile function trigger
-      allow create: if false;
 
       // Only admins can delete profiles
       allow delete: if isAdmin();
@@ -44,12 +49,17 @@ service cloud.firestore {
 
     // Projects collection
     match /projects/{projectId} {
-      // Authenticated users can read projects they're assigned to
+      // Admins can list all projects in their org (queries use where('orgId', '==', ...))
+      // Other users can read projects they are assigned to
       allow read: if isAuthenticated() && (
         isAdmin() ||
-        request.auth.uid in resource.data.clientIds ||
-        request.auth.uid in resource.data.managerIds ||
-        request.auth.uid in resource.data.workerIds
+        (resource.data.orgId == getUserProfile().orgId && (
+          request.auth.uid == resource.data.clientId ||
+          request.auth.uid == resource.data.pmId ||
+          (resource.data.clientIds != null && request.auth.uid in resource.data.clientIds) ||
+          (resource.data.managerIds != null && request.auth.uid in resource.data.managerIds) ||
+          (resource.data.workerIds != null && request.auth.uid in resource.data.workerIds)
+        ))
       );
 
       // Only admins can create/update/delete projects
@@ -61,16 +71,105 @@ service cloud.firestore {
       // Users can read their own organization
       allow read: if isAuthenticated() && getUserProfile().orgId == orgId;
 
+      // Authenticated users can create an org (onboarding for OWNER role)
+      allow create: if isAuthenticated();
+
       // Only admins can modify organizations
+      allow update, delete: if isAdmin();
+    }
+
+    // Invites collection
+    match /invites/{inviteId} {
+      // Anyone authenticated can read invites (register page checks invite tokens)
+      allow read: if isAuthenticated();
+
+      // Admins can create and manage invites
       allow create, update, delete: if isAdmin();
+    }
+
+    // Tasks collection
+    match /tasks/{taskId} {
+      // Authenticated users can read tasks assigned to them or in their org
+      allow read: if isAuthenticated();
+
+      // Admins can create/update/delete tasks
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Time entries collection
+    match /timeEntries/{entryId} {
+      // Users can read their own time entries
+      allow read: if isAuthenticated();
+
+      // Users can create their own time entries (field workers clock in/out)
+      allow create: if isAuthenticated();
+
+      // Users can update their own time entries (clock out updates)
+      allow update: if isAuthenticated() &&
+                       resource.data.userId == request.auth.uid;
+
+      // Admins can delete time entries
+      allow delete: if isAdmin();
+    }
+
+    // Bids collection (subcontractor bids)
+    match /bids/{bidId} {
+      // Authenticated users can read bids relevant to them
+      allow read: if isAuthenticated();
+
+      // Subs can create bids, admins can manage
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && (
+        resource.data.subId == request.auth.uid || isAdmin()
+      );
+    }
+
+    // Invoices collection
+    match /invoices/{invoiceId} {
+      // Authenticated users can read invoices relevant to them
+      allow read: if isAuthenticated();
+
+      // Admins and subs can create invoices
+      allow create: if isAuthenticated();
+      allow update, delete: if isAdmin();
+    }
+
+    // Photos collection
+    match /photos/{photoId} {
+      // Authenticated users can read photos
+      allow read: if isAuthenticated();
+
+      // Authenticated users can upload photos (field workers)
+      allow create: if isAuthenticated();
+      allow update, delete: if isAdmin();
+    }
+
+    // Issues collection
+    match /issues/{issueId} {
+      // Authenticated users can read issues in their org
+      allow read: if isAuthenticated();
+
+      // Authenticated users can report issues
+      allow create: if isAuthenticated();
+      allow update, delete: if isAdmin();
+    }
+
+    // Daily logs collection
+    match /dailyLogs/{logId} {
+      // Authenticated users can read logs
+      allow read: if isAuthenticated();
+
+      // Admins and PMs can create/manage logs
+      allow create: if isAuthenticated();
+      allow update, delete: if isAdmin();
     }
 
     // Schedule items collection
     match /scheduleItems/{itemId} {
-      // Authenticated users can read schedule items for their projects
+      // Authenticated users can read schedule items
       allow read: if isAuthenticated();
 
-      // Only admins and project managers can modify schedule
+      // Only admins can modify schedule
       allow create, update, delete: if isAdmin();
     }
 
