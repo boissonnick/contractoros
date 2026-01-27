@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
@@ -16,6 +16,7 @@ import {
   ArrowRightIcon,
   CurrencyDollarIcon,
 } from '@heroicons/react/24/outline';
+import { FirestoreError } from '@/components/ui';
 
 export default function ClientDashboard() {
   const { user, profile } = useAuth();
@@ -23,56 +24,61 @@ export default function ClientDashboard() {
   const [recentPhotos, setRecentPhotos] = useState<ProjectPhoto[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchData() {
-      if (!user?.uid) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        // Fetch client's projects
-        const projectsQuery = query(
-          collection(db, 'projects'),
-          where('clientId', '==', user.uid),
-          orderBy('createdAt', 'desc')
-        );
-        const projectsSnap = await getDocs(projectsQuery);
-        const projectsData = projectsSnap.docs.map(d => ({ id: d.id, ...d.data() })) as Project[];
-        setProjects(projectsData);
-
-        // Fetch recent photos from their projects
-        if (projectsData.length > 0) {
-          const projectIds = projectsData.map(p => p.id);
-          const photosQuery = query(
-            collection(db, 'photos'),
-            where('projectId', 'in', projectIds.slice(0, 10)),
-            orderBy('createdAt', 'desc'),
-            limit(6)
-          );
-          const photosSnap = await getDocs(photosQuery);
-          setRecentPhotos(photosSnap.docs.map(d => ({ id: d.id, ...d.data() })) as ProjectPhoto[]);
-        }
-
-        // Fetch invoices
-        const invoicesQuery = query(
-          collection(db, 'invoices'),
-          where('clientId', '==', user.uid),
-          orderBy('issueDate', 'desc')
-        );
-        const invoicesSnap = await getDocs(invoicesQuery);
-        setInvoices(invoicesSnap.docs.map(d => ({ id: d.id, ...d.data() })) as Invoice[]);
-
-      } catch (error) {
-        console.error('Error fetching client data:', error);
-      } finally {
-        setLoading(false);
-      }
+  const fetchData = useCallback(async () => {
+    if (!user?.uid) {
+      setLoading(false);
+      return;
     }
 
-    fetchData();
+    setFetchError(null);
+    setLoading(true);
+
+    try {
+      // Fetch client's projects
+      const projectsQuery = query(
+        collection(db, 'projects'),
+        where('clientId', '==', user.uid),
+        orderBy('createdAt', 'desc')
+      );
+      const projectsSnap = await getDocs(projectsQuery);
+      const projectsData = projectsSnap.docs.map(d => ({ id: d.id, ...d.data() })) as Project[];
+      setProjects(projectsData);
+
+      // Fetch recent photos from their projects
+      if (projectsData.length > 0) {
+        const projectIds = projectsData.map(p => p.id);
+        const photosQuery = query(
+          collection(db, 'photos'),
+          where('projectId', 'in', projectIds.slice(0, 10)),
+          orderBy('createdAt', 'desc'),
+          limit(6)
+        );
+        const photosSnap = await getDocs(photosQuery);
+        setRecentPhotos(photosSnap.docs.map(d => ({ id: d.id, ...d.data() })) as ProjectPhoto[]);
+      }
+
+      // Fetch invoices
+      const invoicesQuery = query(
+        collection(db, 'invoices'),
+        where('clientId', '==', user.uid),
+        orderBy('issueDate', 'desc')
+      );
+      const invoicesSnap = await getDocs(invoicesQuery);
+      setInvoices(invoicesSnap.docs.map(d => ({ id: d.id, ...d.data() })) as Invoice[]);
+
+    } catch (error) {
+      console.error('Error fetching client data:', error);
+      setFetchError('Failed to load data. The database may be unreachable.');
+    } finally {
+      setLoading(false);
+    }
   }, [user?.uid]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   if (loading) {
     return (
@@ -80,6 +86,10 @@ export default function ClientDashboard() {
         <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
+  }
+
+  if (fetchError) {
+    return <FirestoreError message={fetchError} onRetry={fetchData} />;
   }
 
   const activeProject = projects.find(p => p.status === 'active');

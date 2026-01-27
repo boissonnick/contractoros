@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
@@ -15,6 +15,7 @@ import {
   ExclamationCircleIcon,
   ArrowRightIcon,
 } from '@heroicons/react/24/outline';
+import { FirestoreError } from '@/components/ui';
 
 const bidStatusConfig: Record<BidStatus, { label: string; color: string; icon: React.ComponentType<{ className?: string }> }> = {
   draft: { label: 'Draft', color: 'bg-gray-100 text-gray-700', icon: DocumentTextIcon },
@@ -36,44 +37,49 @@ export default function SubDashboard() {
     totalEarnings: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchData() {
-      if (!user?.uid) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        // Fetch bids
-        const bidsQuery = query(
-          collection(db, 'bids'),
-          where('subId', '==', user.uid),
-          orderBy('createdAt', 'desc')
-        );
-        const bidsSnap = await getDocs(bidsQuery);
-        const bidsData = bidsSnap.docs.map(d => ({ id: d.id, ...d.data() })) as Bid[];
-        setBids(bidsData);
-
-        // Calculate stats
-        const activeBids = bidsData.filter(b => ['submitted', 'under_review'].includes(b.status)).length;
-        const acceptedBids = bidsData.filter(b => b.status === 'accepted').length;
-
-        setStats({
-          activeBids,
-          acceptedBids,
-          pendingPayments: 0, // Would calculate from invoices
-          totalEarnings: bidsData.filter(b => b.status === 'accepted').reduce((sum, b) => sum + b.amount, 0),
-        });
-      } catch (error) {
-        console.error('Error fetching sub data:', error);
-      } finally {
-        setLoading(false);
-      }
+  const fetchData = useCallback(async () => {
+    if (!user?.uid) {
+      setLoading(false);
+      return;
     }
 
-    fetchData();
+    setFetchError(null);
+    setLoading(true);
+
+    try {
+      // Fetch bids
+      const bidsQuery = query(
+        collection(db, 'bids'),
+        where('subId', '==', user.uid),
+        orderBy('createdAt', 'desc')
+      );
+      const bidsSnap = await getDocs(bidsQuery);
+      const bidsData = bidsSnap.docs.map(d => ({ id: d.id, ...d.data() })) as Bid[];
+      setBids(bidsData);
+
+      // Calculate stats
+      const activeBids = bidsData.filter(b => ['submitted', 'under_review'].includes(b.status)).length;
+      const acceptedBids = bidsData.filter(b => b.status === 'accepted').length;
+
+      setStats({
+        activeBids,
+        acceptedBids,
+        pendingPayments: 0, // Would calculate from invoices
+        totalEarnings: bidsData.filter(b => b.status === 'accepted').reduce((sum, b) => sum + b.amount, 0),
+      });
+    } catch (error) {
+      console.error('Error fetching sub data:', error);
+      setFetchError('Failed to load data. The database may be unreachable.');
+    } finally {
+      setLoading(false);
+    }
   }, [user?.uid]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   if (loading) {
     return (
@@ -81,6 +87,10 @@ export default function SubDashboard() {
         <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
+  }
+
+  if (fetchError) {
+    return <FirestoreError message={fetchError} onRetry={fetchData} />;
   }
 
   const recentBids = bids.slice(0, 5);

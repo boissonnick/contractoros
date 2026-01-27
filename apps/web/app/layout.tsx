@@ -4,7 +4,10 @@ import Providers from '@/components/Providers';
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: 'ContractorOS',
+  title: {
+    default: 'ContractorOS',
+    template: '%s | ContractorOS',
+  },
   description: 'Field-first contractor management platform',
 };
 

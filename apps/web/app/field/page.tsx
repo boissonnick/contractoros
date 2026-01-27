@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
@@ -18,6 +18,7 @@ import {
   CalendarDaysIcon,
   ClipboardDocumentCheckIcon,
 } from '@heroicons/react/24/outline';
+import { FirestoreError } from '@/components/ui';
 
 export default function FieldPage() {
   const { user, profile } = useAuth();
@@ -25,6 +26,7 @@ export default function FieldPage() {
   const [todaysTasks, setTodaysTasks] = useState<Task[]>([]);
   const [todaysSchedule, setTodaysSchedule] = useState<ScheduleAssignment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [clockingIn, setClockingIn] = useState(false);
   const [elapsedTime, setElapsedTime] = useState('00:00:00');
   const [location, setLocation] = useState<GeolocationPosition | null>(null);
@@ -66,45 +68,49 @@ export default function FieldPage() {
   }, [activeEntry]);
 
   // Fetch data
-  useEffect(() => {
-    async function fetchData() {
-      if (!user?.uid || !profile?.orgId) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        // Check for active time entry
-        const activeQuery = query(
-          collection(db, 'timeEntries'),
-          where('userId', '==', user.uid),
-          where('status', '==', 'active')
-        );
-        const activeSnap = await getDocs(activeQuery);
-        if (!activeSnap.empty) {
-          setActiveEntry({ id: activeSnap.docs[0].id, ...activeSnap.docs[0].data() } as TimeEntry);
-        }
-
-        // Fetch today's tasks
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const tasksQuery = query(
-          collection(db, 'tasks'),
-          where('assignedTo', 'array-contains', user.uid),
-          where('status', 'in', ['assigned', 'in_progress'])
-        );
-        const tasksSnap = await getDocs(tasksQuery);
-        setTodaysTasks(tasksSnap.docs.map(d => ({ id: d.id, ...d.data() })) as Task[]);
-
-      } catch (error) {
-        console.error('Error fetching field data:', error);
-      } finally {
-        setLoading(false);
-      }
+  const fetchData = useCallback(async () => {
+    if (!user?.uid || !profile?.orgId) {
+      setLoading(false);
+      return;
     }
 
-    fetchData();
+    setFetchError(null);
+    setLoading(true);
+
+    try {
+      // Check for active time entry
+      const activeQuery = query(
+        collection(db, 'timeEntries'),
+        where('userId', '==', user.uid),
+        where('status', '==', 'active')
+      );
+      const activeSnap = await getDocs(activeQuery);
+      if (!activeSnap.empty) {
+        setActiveEntry({ id: activeSnap.docs[0].id, ...activeSnap.docs[0].data() } as TimeEntry);
+      }
+
+      // Fetch today's tasks
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tasksQuery = query(
+        collection(db, 'tasks'),
+        where('assignedTo', 'array-contains', user.uid),
+        where('status', 'in', ['assigned', 'in_progress'])
+      );
+      const tasksSnap = await getDocs(tasksQuery);
+      setTodaysTasks(tasksSnap.docs.map(d => ({ id: d.id, ...d.data() })) as Task[]);
+
+    } catch (error) {
+      console.error('Error fetching field data:', error);
+      setFetchError('Failed to load data. The database may be unreachable.');
+    } finally {
+      setLoading(false);
+    }
   }, [user?.uid, profile?.orgId]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleClockIn = async () => {
     if (!user?.uid || !profile?.orgId) return;
@@ -167,6 +173,10 @@ export default function FieldPage() {
         <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
+  }
+
+  if (fetchError) {
+    return <FirestoreError message={fetchError} onRetry={fetchData} />;
   }
 
   const now = new Date();
