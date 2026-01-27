@@ -4,8 +4,9 @@
   "version": "0.1.0",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "start": "next start -H 0.0.0.0 -p $PORT"
+    "build": "next build && npm run postbuild",
+    "postbuild": "cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/ 2>/dev/null || true",
+    "start": "HOSTNAME=0.0.0.0 node .next/standalone/server.js"
   },
   "dependencies": {
     "next": "^14.2.0",
