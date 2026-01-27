@@ -2,7 +2,7 @@
 FROM node:20-slim AS deps
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
+COPY apps/web/package.json apps/web/package-lock.json* ./
 RUN npm install
 
 # ---------- Build ----------
@@ -10,7 +10,7 @@ FROM node:20-slim AS builder
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY apps/web/ ./
 
 RUN npm run build
 
