@@ -51,7 +51,7 @@ steps:
       - '1'
       - '--max-instances'
       - '10'
-      - '--startup-cpu-boost'
+      - '--cpu-boost'
     id: 'deploy-cloud-run'
     waitFor: ['push-image-sha']
 
