@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build && npm run postbuild",
-    "postbuild": "cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/ 2>/dev/null || true",
+    "postbuild": "node -e \"const fs=require('fs'),g=require('path').join('.next','static','css');if(!fs.existsSync(g)){process.exit(0)}const f=fs.readdirSync(g).find(x=>x.endsWith('.css'));if(!f){console.error('ERROR: No CSS file found');process.exit(1)}const c=fs.readFileSync(g+'/'+f,'utf8');if(c.includes('@tailwind base')){console.error('ERROR: Tailwind CSS not compiled — raw @tailwind directives in output. Check that tailwindcss is installed.');process.exit(1)}console.log('CSS verified:',f,c.length,'bytes')\" && cp -r .next/static .next/standalone/.next/ && (cp -r public .next/standalone/ 2>/dev/null || true)",
     "start": "HOSTNAME=0.0.0.0 node .next/standalone/server.js",
     "lint": "next lint",
     "type-check": "tsc --noEmit"
