@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
 import { collection, query, where, getDocs, doc, updateDoc, deleteDoc, Timestamp } from 'firebase/firestore';
-import { Button, Card, Avatar, Badge, EmptyState } from '@/components/ui';
+import { Button, Card, Avatar, Badge, EmptyState, toast } from '@/components/ui';
 import { cn, formatRelativeTime } from '@/lib/utils';
 import {
   UserPlusIcon,
@@ -106,7 +106,7 @@ export default function TeamPage() {
       setInvites(invites.filter(i => i.id !== inviteId));
     } catch (error) {
       console.error('Error canceling invite:', error);
-      alert('Failed to cancel invitation.');
+      toast.error('Failed to cancel invitation.');
     }
   };
 
@@ -116,11 +116,11 @@ export default function TeamPage() {
         createdAt: Timestamp.now(),
         expiresAt: Timestamp.fromDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)),
       });
-      alert('Invitation resent successfully!');
+      toast.success('Invitation resent successfully!');
       loadTeamData();
     } catch (error) {
       console.error('Error resending invite:', error);
-      alert('Failed to resend invitation.');
+      toast.error('Failed to resend invitation.');
     }
   };
 

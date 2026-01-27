@@ -6,12 +6,12 @@ import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCDMqT_jPC9BwFqhM2fXPB7g6Wg7pnIvWc",
-  authDomain: "contractoros-483812.firebaseapp.com",
-  projectId: "contractoros-483812",
-  storageBucket: "contractoros-483812.firebasestorage.app",
-  messagingSenderId: "424251610296",
-  appId: "1:424251610296:web:2f4d83a982a578306cd04d",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyCDMqT_jPC9BwFqhM2fXPB7g6Wg7pnIvWc",
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "contractoros-483812.firebaseapp.com",
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "contractoros-483812",
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "contractoros-483812.firebasestorage.app",
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "424251610296",
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:424251610296:web:2f4d83a982a578306cd04d",
 };
 
 // Initialize Firebase only once

@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { AuthProvider, useAuth } from '@/lib/auth';
+import { useAuth } from '@/lib/auth';
 import AuthGuard from '@/components/auth/AuthGuard';
 import AppShell from '@/components/ui/AppShell';
 import { NavItem } from '@/types';
@@ -37,10 +37,8 @@ function SubLayoutContent({ children }: { children: React.ReactNode }) {
 
 export default function SubLayout({ children }: { children: React.ReactNode }) {
   return (
-    <AuthProvider>
-      <AuthGuard allowedRoles={['SUB']}>
-        <SubLayoutContent>{children}</SubLayoutContent>
-      </AuthGuard>
-    </AuthProvider>
+    <AuthGuard allowedRoles={['SUB']}>
+      <SubLayoutContent>{children}</SubLayoutContent>
+    </AuthGuard>
   );
 }
