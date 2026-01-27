@@ -1,16 +1,57 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../lib/firebase/config';
+import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '@/lib/firebase/config';
+import { UserRole } from '@/types';
+
+function getRedirectPath(role: UserRole): string {
+  switch (role) {
+    case 'OWNER':
+    case 'PM':
+      return '/dashboard';
+    case 'EMPLOYEE':
+    case 'CONTRACTOR':
+      return '/field';
+    case 'SUB':
+      return '/sub';
+    case 'CLIENT':
+      return '/client';
+    default:
+      return '/dashboard';
+  }
+}
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const router = useRouter();
+
+  // Check if already logged in
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          if (userDoc.exists()) {
+            const role = userDoc.data().role as UserRole;
+            router.replace(getRedirectPath(role));
+            return;
+          }
+        } catch (error) {
+          console.error('Error checking auth:', error);
+        }
+      }
+      setCheckingAuth(false);
+    });
+
+    return () => unsubscribe();
+  }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,16 +59,38 @@ export default function LoginPage() {
     setError('');
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      // AuthGuard in layouts will handle redirection based on role
-      router.push('/projects'); 
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+
+      // Fetch user profile to get role
+      const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
+      if (userDoc.exists()) {
+        const role = userDoc.data().role as UserRole;
+        router.push(getRedirectPath(role));
+      } else {
+        // User exists in Auth but not in Firestore - might be new user
+        router.push('/dashboard');
+      }
     } catch (err: any) {
       console.error("Login error:", err);
-      setError('Invalid email or password. Please check your credentials.');
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+        setError('Invalid email or password. Please check your credentials.');
+      } else if (err.code === 'auth/too-many-requests') {
+        setError('Too many failed attempts. Please try again later.');
+      } else {
+        setError('An error occurred. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
   };
+
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
