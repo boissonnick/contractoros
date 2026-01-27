@@ -30,12 +30,17 @@ function getRedirectPath(role: UserRole): string {
 }
 
 async function handlePostAuth(uid: string, router: ReturnType<typeof useRouter>) {
-  const userDoc = await getDoc(doc(db, 'users', uid));
-  if (userDoc.exists()) {
-    const role = userDoc.data().role as UserRole;
-    router.push(getRedirectPath(role));
-  } else {
-    router.push('/onboarding');
+  try {
+    const userDoc = await getDoc(doc(db, 'users', uid));
+    if (userDoc.exists()) {
+      const role = userDoc.data().role as UserRole;
+      router.push(getRedirectPath(role));
+    } else {
+      router.push('/onboarding');
+    }
+  } catch (error: any) {
+    console.error('handlePostAuth error:', error?.code, error?.message);
+    throw error;
   }
 }
 
@@ -90,13 +95,13 @@ export default function LoginPage() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       await handlePostAuth(userCredential.user.uid, router);
     } catch (err: any) {
-      console.error("Login error:", err);
+      console.error("Login error:", err?.code, err?.message, err);
       if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
         setError('Invalid email or password.');
       } else if (err.code === 'auth/too-many-requests') {
         setError('Too many failed attempts. Please try again later.');
       } else {
-        setError('An error occurred. Please try again.');
+        setError(`Login failed (${err.code || 'unknown'}): ${err.message || 'Please try again.'}`);
       }
     } finally {
       setLoading(false);
