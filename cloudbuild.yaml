@@ -4,9 +4,9 @@ steps:
     args:
       - 'build'
       - '-t'
-      - 'us-west1-docker.pkg.dev/$PROJECT_ID/contractoros/web:$COMMIT_SHA'
+      - 'us-west1-docker.pkg.dev/$PROJECT_ID/contractoros/contractoros-web:$COMMIT_SHA'
       - '-t'
-      - 'us-west1-docker.pkg.dev/$PROJECT_ID/contractoros/web:latest'
+      - 'us-west1-docker.pkg.dev/$PROJECT_ID/contractoros/contractoros-web:latest'
       - '-f'
       - 'apps/web/Dockerfile'
       - 'apps/web'
@@ -16,14 +16,14 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - 'us-west1-docker.pkg.dev/$PROJECT_ID/contractoros/web:$COMMIT_SHA'
+      - 'us-west1-docker.pkg.dev/$PROJECT_ID/contractoros/contractoros-web:$COMMIT_SHA'
     id: 'push-image-sha'
     waitFor: ['build-image']
 
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - 'us-west1-docker.pkg.dev/$PROJECT_ID/contractoros/web:latest'
+      - 'us-west1-docker.pkg.dev/$PROJECT_ID/contractoros/contractoros-web:latest'
     id: 'push-image-latest'
     waitFor: ['build-image']
 
@@ -33,9 +33,9 @@ steps:
     args:
       - 'run'
       - 'deploy'
-      - 'contractoros-web'
+      - 'contractoros-alpha'
       - '--image'
-      - 'us-west1-docker.pkg.dev/$PROJECT_ID/contractoros/web:$COMMIT_SHA'
+      - 'us-west1-docker.pkg.dev/$PROJECT_ID/contractoros/contractoros-web:$COMMIT_SHA'
       - '--region'
       - 'us-west1'
       - '--platform'
@@ -56,8 +56,8 @@ steps:
     waitFor: ['push-image-sha']
 
 images:
-  - 'us-west1-docker.pkg.dev/$PROJECT_ID/contractoros/web:$COMMIT_SHA'
-  - 'us-west1-docker.pkg.dev/$PROJECT_ID/contractoros/web:latest'
+  - 'us-west1-docker.pkg.dev/$PROJECT_ID/contractoros/contractoros-web:$COMMIT_SHA'
+  - 'us-west1-docker.pkg.dev/$PROJECT_ID/contractoros/contractoros-web:latest'
 
 options:
   logging: CLOUD_LOGGING_ONLY
