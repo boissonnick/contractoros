@@ -1,8 +1,17 @@
 {
   "name": "contractoros",
   "private": true,
+  "version": "1.0.0",
+  "description": "Contractor management web application",
   "scripts": {
-    "build": "cd apps/web && npm install && npm run build",
-    "start": "cd apps/web && npm run start"
+    "dev": "npm run dev --prefix apps/web",
+    "build": "npm run build --prefix apps/web",
+    "start": "npm run start --prefix apps/web",
+    "build:functions": "npm run build --prefix functions",
+    "deploy:functions": "firebase deploy --only functions",
+    "emulators": "firebase emulators:start"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
