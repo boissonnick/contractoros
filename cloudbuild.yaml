@@ -1,16 +1,31 @@
 steps:
-  # Build the Docker image
+  # Build the Docker image with NEXT_PUBLIC_* secrets injected as build args
   - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
     args:
-      - 'build'
-      - '-t'
-      - 'us-west1-docker.pkg.dev/$PROJECT_ID/contractoros/web:$COMMIT_SHA'
-      - '-t'
-      - 'us-west1-docker.pkg.dev/$PROJECT_ID/contractoros/web:latest'
-      - '-f'
-      - 'apps/web/Dockerfile'
-      - '.'
+      - '-c'
+      - |
+        docker build \
+          --provenance=false \
+          --sbom=false \
+          --build-arg NEXT_PUBLIC_FIREBASE_API_KEY=$$NEXT_PUBLIC_FIREBASE_API_KEY \
+          --build-arg NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=$$NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN \
+          --build-arg NEXT_PUBLIC_FIREBASE_PROJECT_ID=$$NEXT_PUBLIC_FIREBASE_PROJECT_ID \
+          --build-arg NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=$$NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET \
+          --build-arg NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=$$NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID \
+          --build-arg NEXT_PUBLIC_FIREBASE_APP_ID=$$NEXT_PUBLIC_FIREBASE_APP_ID \
+          -t us-west1-docker.pkg.dev/$PROJECT_ID/contractoros/web:$COMMIT_SHA \
+          -t us-west1-docker.pkg.dev/$PROJECT_ID/contractoros/web:latest \
+          -f apps/web/Dockerfile \
+          .
     id: 'build-image'
+    secretEnv:
+      - 'NEXT_PUBLIC_FIREBASE_API_KEY'
+      - 'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN'
+      - 'NEXT_PUBLIC_FIREBASE_PROJECT_ID'
+      - 'NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET'
+      - 'NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID'
+      - 'NEXT_PUBLIC_FIREBASE_APP_ID'
 
   # Push the Docker image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
@@ -21,7 +36,7 @@ steps:
     id: 'push-image'
     waitFor: ['build-image']
 
-  # Deploy to Cloud Run
+  # Deploy to Cloud Run with runtime secrets mounted from Secret Manager
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'gcloud'
     args:
@@ -46,8 +61,27 @@ steps:
       - '--max-instances'
       - '10'
       - '--startup-cpu-boost'
+      - '--set-secrets'
+      - 'GEMINI_API_KEY=GEMINI_API_KEY:latest,SESSION_SECRET=SESSION_SECRET:latest'
+      - '--set-env-vars'
+      - 'FIREBASE_DATABASE_ID=contractoros,NODE_ENV=production'
     id: 'deploy-cloud-run'
     waitFor: ['push-image']
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/contractoros-483812/secrets/NEXT_PUBLIC_FIREBASE_API_KEY/versions/latest
+      env: 'NEXT_PUBLIC_FIREBASE_API_KEY'
+    - versionName: projects/contractoros-483812/secrets/NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN/versions/latest
+      env: 'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN'
+    - versionName: projects/contractoros-483812/secrets/NEXT_PUBLIC_FIREBASE_PROJECT_ID/versions/latest
+      env: 'NEXT_PUBLIC_FIREBASE_PROJECT_ID'
+    - versionName: projects/contractoros-483812/secrets/NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET/versions/latest
+      env: 'NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET'
+    - versionName: projects/contractoros-483812/secrets/NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID/versions/latest
+      env: 'NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID'
+    - versionName: projects/contractoros-483812/secrets/NEXT_PUBLIC_FIREBASE_APP_ID/versions/latest
+      env: 'NEXT_PUBLIC_FIREBASE_APP_ID'
 
 options:
   logging: CLOUD_LOGGING_ONLY
