@@ -354,6 +354,32 @@ export interface Invoice {
 }
 
 // ============================================
+// Daily Log Types
+// ============================================
+
+export interface DailyLog {
+  id: string;
+  projectId: string;
+  orgId: string;
+  date: Date;
+  weather?: {
+    condition: 'sunny' | 'cloudy' | 'rainy' | 'stormy';
+    temperature?: number;
+  };
+  workersOnSite: number;
+  workPerformed: string;
+  materials?: string;
+  equipment?: string;
+  delays?: string;
+  safetyNotes?: string;
+  notes?: string;
+  photos?: string[];       // Photo IDs or URLs
+  createdBy: string;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+// ============================================
 // Navigation Types
 // ============================================
 
