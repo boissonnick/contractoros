@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { AuthProvider, useAuth } from '@/lib/auth';
+import { useAuth } from '@/lib/auth';
 import AuthGuard from '@/components/auth/AuthGuard';
 import AppShell from '@/components/ui/AppShell';
 import { NavItem } from '@/types';
@@ -41,10 +41,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <AuthProvider>
-      <AuthGuard allowedRoles={['OWNER', 'PM']}>
-        <DashboardLayoutContent>{children}</DashboardLayoutContent>
-      </AuthGuard>
-    </AuthProvider>
+    <AuthGuard allowedRoles={['OWNER', 'PM']}>
+      <DashboardLayoutContent>{children}</DashboardLayoutContent>
+    </AuthGuard>
   );
 }
