@@ -20,9 +20,15 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PORT=8080
+ENV HOSTNAME=0.0.0.0
 
 EXPOSE 8080
 
-COPY --from=builder /app ./
+# Copy only the standalone output, static assets, and public folder.
+# This produces a minimal image (~80-120 MB vs ~800+ MB with full node_modules).
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
 
-CMD ["npm","run","start"]
+# Use the standalone server directly — no need for node_modules or next CLI.
+CMD ["node", "server.js"]
