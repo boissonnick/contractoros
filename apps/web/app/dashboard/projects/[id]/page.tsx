@@ -5,30 +5,24 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
-import { doc, getDoc, collection, query, where, getDocs, addDoc, updateDoc, Timestamp } from 'firebase/firestore';
-import { Project, Task, TaskStatus, UserProfile } from '@/types';
-import { Button, Card, Badge, StatusBadge, Avatar, Input } from '@/components/ui';
-import { cn, formatCurrency, formatDate } from '@/lib/utils';
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { Project, Task, UserProfile, ProjectPhase, QuoteSection } from '@/types';
+import { Button, Card, StatusBadge, Avatar } from '@/components/ui';
+import { cn, formatCurrency } from '@/lib/utils';
+import PhaseProgressBar from '@/components/projects/PhaseProgressBar';
+import TaskBoard from '@/components/projects/TaskBoard';
+import QuoteSummaryCard from '@/components/projects/QuoteSummaryCard';
 import {
   ArrowLeftIcon,
-  PlusIcon,
   MapPinIcon,
-  CalendarIcon,
   CurrencyDollarIcon,
-  UserIcon,
   ClipboardDocumentListIcon,
   PhotoIcon,
   ChatBubbleLeftRightIcon,
   Cog6ToothIcon,
-  XMarkIcon,
+  DocumentTextIcon,
+  UserGroupIcon,
 } from '@heroicons/react/24/outline';
-
-const taskColumns: { id: TaskStatus; title: string; color: string }[] = [
-  { id: 'pending', title: 'To Do', color: 'bg-gray-100' },
-  { id: 'in_progress', title: 'In Progress', color: 'bg-blue-100' },
-  { id: 'review', title: 'Review', color: 'bg-yellow-100' },
-  { id: 'completed', title: 'Done', color: 'bg-green-100' },
-];
 
 export default function ProjectDetailPage() {
   const params = useParams();
@@ -38,11 +32,11 @@ export default function ProjectDetailPage() {
 
   const [project, setProject] = useState<Project | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [phases, setPhases] = useState<ProjectPhase[]>([]);
+  const [quoteSections, setQuoteSections] = useState<QuoteSection[]>([]);
   const [client, setClient] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showAddTask, setShowAddTask] = useState(false);
-  const [newTaskTitle, setNewTaskTitle] = useState('');
-  const [addingTask, setAddingTask] = useState(false);
+  const [selectedPhaseId, setSelectedPhaseId] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -72,6 +66,21 @@ export default function ProjectDetailPage() {
         const tasksSnap = await getDocs(tasksQuery);
         setTasks(tasksSnap.docs.map(d => ({ id: d.id, ...d.data() })) as Task[]);
 
+        // Fetch phases
+        const phasesSnap = await getDocs(collection(db, 'projects', projectId, 'phases'));
+        const phasesData = phasesSnap.docs
+          .map(d => ({ id: d.id, ...d.data() }) as ProjectPhase)
+          .sort((a, b) => a.order - b.order);
+        setPhases(phasesData);
+
+        // Auto-select active phase
+        const active = phasesData.find(p => p.status === 'active');
+        if (active) setSelectedPhaseId(active.id);
+
+        // Fetch quote sections
+        const quoteSnap = await getDocs(collection(db, 'projects', projectId, 'quoteSections'));
+        setQuoteSections(quoteSnap.docs.map(d => ({ id: d.id, ...d.data() }) as QuoteSection));
+
       } catch (error) {
         console.error('Error fetching project:', error);
       } finally {
@@ -81,45 +90,6 @@ export default function ProjectDetailPage() {
 
     fetchData();
   }, [projectId, router]);
-
-  const handleAddTask = async () => {
-    if (!newTaskTitle.trim() || !profile?.uid) return;
-
-    setAddingTask(true);
-    try {
-      const taskData: Partial<Task> = {
-        projectId,
-        title: newTaskTitle.trim(),
-        status: 'pending',
-        priority: 'medium',
-        assignedTo: [],
-        createdAt: Timestamp.now() as any,
-      };
-
-      const docRef = await addDoc(collection(db, 'tasks'), taskData);
-      setTasks(prev => [...prev, { id: docRef.id, ...taskData } as Task]);
-      setNewTaskTitle('');
-      setShowAddTask(false);
-    } catch (error) {
-      console.error('Error adding task:', error);
-    } finally {
-      setAddingTask(false);
-    }
-  };
-
-  const handleMoveTask = async (taskId: string, newStatus: TaskStatus) => {
-    try {
-      await updateDoc(doc(db, 'tasks', taskId), {
-        status: newStatus,
-        updatedAt: Timestamp.now(),
-      });
-      setTasks(prev => prev.map(t =>
-        t.id === taskId ? { ...t, status: newStatus } : t
-      ));
-    } catch (error) {
-      console.error('Error moving task:', error);
-    }
-  };
 
   if (loading) {
     return (
@@ -131,7 +101,9 @@ export default function ProjectDetailPage() {
 
   if (!project) return null;
 
-  const getTasksByStatus = (status: TaskStatus) => tasks.filter(t => t.status === status);
+  const isPreConstruction = project.status === 'lead' || project.status === 'bidding';
+  const isActive = project.status === 'active' || project.status === 'planning';
+  const completedTasks = tasks.filter(t => t.status === 'completed').length;
 
   return (
     <div className="space-y-6">
@@ -152,6 +124,9 @@ export default function ProjectDetailPage() {
           {project.description && (
             <p className="text-gray-500 mt-1">{project.description}</p>
           )}
+          {project.scope && (
+            <p className="text-sm text-gray-400 mt-1">Scope: {project.scope.replace(/_/g, ' ')}</p>
+          )}
         </div>
         <div className="flex gap-2">
           <Button variant="outline" icon={<Cog6ToothIcon className="h-4 w-4" />}>
@@ -159,6 +134,17 @@ export default function ProjectDetailPage() {
           </Button>
         </div>
       </div>
+
+      {/* Phase Progress Bar */}
+      {phases.length > 0 && (
+        <Card>
+          <PhaseProgressBar
+            phases={phases}
+            activePhaseId={selectedPhaseId || undefined}
+            onPhaseClick={(phase) => setSelectedPhaseId(phase.id)}
+          />
+        </Card>
+      )}
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -212,118 +198,83 @@ export default function ProjectDetailPage() {
             <div>
               <p className="text-xs text-gray-500">Tasks</p>
               <p className="text-sm font-medium text-gray-900">
-                {getTasksByStatus('completed').length} / {tasks.length}
+                {completedTasks} / {tasks.length}
               </p>
             </div>
           </div>
         </Card>
       </div>
 
-      {/* Task Board */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Tasks</h2>
-          <Button
-            variant="primary"
-            size="sm"
-            icon={<PlusIcon className="h-4 w-4" />}
-            onClick={() => setShowAddTask(true)}
-          >
-            Add Task
-          </Button>
-        </div>
+      {/* Pre-Construction View (Lead/Bidding) */}
+      {isPreConstruction && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <QuoteSummaryCard sections={quoteSections} quoteTotal={project.quoteTotal} />
 
-        {/* Add Task Modal */}
-        {showAddTask && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <Card className="w-full max-w-md">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">Add Task</h3>
-                <button onClick={() => setShowAddTask(false)} className="text-gray-400 hover:text-gray-600">
-                  <XMarkIcon className="h-5 w-5" />
-                </button>
+          <Card>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <UserGroupIcon className="h-5 w-5 text-blue-600" />
               </div>
-              <Input
-                label="Task Title"
-                placeholder="What needs to be done?"
-                value={newTaskTitle}
-                onChange={(e) => setNewTaskTitle(e.target.value)}
-                autoFocus
-                onKeyDown={(e) => e.key === 'Enter' && handleAddTask()}
-              />
-              <div className="flex justify-end gap-2 mt-4">
-                <Button variant="outline" onClick={() => setShowAddTask(false)}>Cancel</Button>
-                <Button variant="primary" onClick={handleAddTask} loading={addingTask}>
-                  Add Task
+              <h3 className="font-semibold text-gray-900">Client Preferences</h3>
+            </div>
+            <p className="text-sm text-gray-500 mb-4">
+              Collect client preferences before starting the project.
+            </p>
+            <Link href={`/dashboard/projects/${projectId}/preferences`}>
+              <Button variant="outline" size="sm">View / Edit Preferences</Button>
+            </Link>
+          </Card>
+
+          <Card className="lg:col-span-2">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">Actions</h3>
+            </div>
+            <div className="flex gap-3">
+              <Link href={`/dashboard/projects/${projectId}/quote`}>
+                <Button variant="primary" icon={<DocumentTextIcon className="h-4 w-4" />}>
+                  Build Quote
                 </Button>
-              </div>
-            </Card>
-          </div>
-        )}
-
-        {/* Kanban Board */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {taskColumns.map((column) => {
-            const columnTasks = getTasksByStatus(column.id);
-            return (
-              <div key={column.id} className={cn('rounded-xl p-4', column.color)}>
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-medium text-gray-700">{column.title}</h3>
-                  <span className="text-sm text-gray-500">{columnTasks.length}</span>
-                </div>
-                <div className="space-y-2 min-h-[200px]">
-                  {columnTasks.map((task) => (
-                    <div
-                      key={task.id}
-                      className="bg-white rounded-lg p-3 shadow-sm border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
-                    >
-                      <p className="text-sm font-medium text-gray-900 mb-2">{task.title}</p>
-                      <div className="flex items-center justify-between">
-                        <Badge variant={
-                          task.priority === 'urgent' ? 'danger' :
-                          task.priority === 'high' ? 'warning' :
-                          'default'
-                        } size="sm">
-                          {task.priority}
-                        </Badge>
-                        {/* Quick move buttons */}
-                        <div className="flex gap-1">
-                          {column.id !== 'pending' && (
-                            <button
-                              onClick={() => handleMoveTask(task.id, taskColumns[taskColumns.findIndex(c => c.id === column.id) - 1]?.id || 'pending')}
-                              className="p-1 text-gray-400 hover:text-gray-600"
-                              title="Move left"
-                            >
-                              ←
-                            </button>
-                          )}
-                          {column.id !== 'completed' && (
-                            <button
-                              onClick={() => handleMoveTask(task.id, taskColumns[taskColumns.findIndex(c => c.id === column.id) + 1]?.id || 'completed')}
-                              className="p-1 text-gray-400 hover:text-gray-600"
-                              title="Move right"
-                            >
-                              →
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  {columnTasks.length === 0 && (
-                    <div className="text-center py-8 text-sm text-gray-400">
-                      No tasks
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+              </Link>
+              <Link href={`/dashboard/projects/${projectId}/preferences`}>
+                <Button variant="outline" icon={<UserGroupIcon className="h-4 w-4" />}>
+                  Client Preferences
+                </Button>
+              </Link>
+            </div>
+          </Card>
         </div>
-      </div>
+      )}
+
+      {/* Active View — Task Board */}
+      {isActive && (
+        <TaskBoard
+          projectId={projectId}
+          tasks={tasks}
+          phases={phases}
+          selectedPhaseId={selectedPhaseId}
+          onTasksChange={setTasks}
+        />
+      )}
+
+      {/* Completed / On-Hold / Cancelled — still show task board, no phase filter */}
+      {!isPreConstruction && !isActive && (
+        <TaskBoard
+          projectId={projectId}
+          tasks={tasks}
+          phases={phases}
+          selectedPhaseId={null}
+          onTasksChange={setTasks}
+        />
+      )}
 
       {/* Quick Links */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Link href={`/dashboard/projects/${projectId}/quote`}>
+          <Card hover className="text-center">
+            <DocumentTextIcon className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+            <p className="text-sm font-medium text-gray-700">Quote</p>
+          </Card>
+        </Link>
         <Link href={`/dashboard/projects/${projectId}/photos`}>
           <Card hover className="text-center">
             <PhotoIcon className="h-8 w-8 text-gray-400 mx-auto mb-2" />
@@ -340,12 +291,6 @@ export default function ProjectDetailPage() {
           <Card hover className="text-center">
             <ChatBubbleLeftRightIcon className="h-8 w-8 text-gray-400 mx-auto mb-2" />
             <p className="text-sm font-medium text-gray-700">Messages</p>
-          </Card>
-        </Link>
-        <Link href={`/dashboard/projects/${projectId}/finances`}>
-          <Card hover className="text-center">
-            <CurrencyDollarIcon className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-            <p className="text-sm font-medium text-gray-700">Finances</p>
           </Card>
         </Link>
       </div>

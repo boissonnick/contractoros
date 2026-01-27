@@ -83,8 +83,88 @@ export interface Project {
   actualEndDate?: Date;
   budget?: number;
   currentSpend?: number;
+  scope?: string;           // References template scopeType
+  templateId?: string;      // PhaseTemplate used
+  quoteTotal?: number;
   createdAt: Date;
   updatedAt?: Date;
+}
+
+// ============================================
+// Phase Template Types (org-level, customizable)
+// ============================================
+
+export interface PhaseTemplatePhase {
+  name: string;
+  order: number;
+  defaultTasks?: string[];
+}
+
+export interface PhaseTemplate {
+  id: string;
+  orgId: string;
+  name: string;            // e.g. "Single Room Remodel"
+  scopeType: string;       // e.g. "single_room" — not a fixed union, owner can create new ones
+  phases: PhaseTemplatePhase[];
+  isDefault: boolean;      // true for system-seeded templates
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+// ============================================
+// Project Phase Types (per-project, copied from template)
+// ============================================
+
+export type PhaseStatus = 'upcoming' | 'active' | 'completed' | 'skipped';
+
+export interface ProjectPhase {
+  id: string;
+  projectId: string;
+  name: string;
+  order: number;
+  status: PhaseStatus;
+  startDate?: Date;
+  endDate?: Date;
+}
+
+// ============================================
+// Quote Types
+// ============================================
+
+export type QuoteSectionStatus = 'draft' | 'sent' | 'approved' | 'rejected';
+
+export interface QuoteSection {
+  id: string;
+  projectId: string;
+  phaseId?: string;
+  name: string;
+  description?: string;
+  laborCost: number;
+  materialCost: number;
+  order: number;
+  status: QuoteSectionStatus;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+// ============================================
+// Client Preferences Types
+// ============================================
+
+export interface FinishPreferences {
+  flooring?: string;
+  countertops?: string;
+  cabinetry?: string;
+  fixtures?: string;
+  paint?: string;
+}
+
+export interface ClientPreferences {
+  notes?: string;
+  finishes?: FinishPreferences;
+  inspirationImageUrls?: string[];
+  budgetRange?: string;
+  timelinePreference?: string;
 }
 
 // ============================================
@@ -104,6 +184,7 @@ export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 export interface Task {
   id: string;
   projectId: string;
+  phaseId?: string;         // Link task to a phase
   parentTaskId?: string;    // For subtasks
   title: string;
   description?: string;

@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
-import { Button, Input, Textarea, Select, Card, toast } from '@/components/ui';
+import { ensurePhaseTemplates } from '@/lib/firebase/seedTemplates';
+import { Button, Input, Textarea, Card, toast } from '@/components/ui';
 import { cn } from '@/lib/utils';
+import AddressAutocomplete from '@/components/ui/AddressAutocomplete';
+import { PhaseTemplate } from '@/types';
 import {
   BuildingOfficeIcon,
   MapPinIcon,
@@ -15,17 +18,30 @@ import {
   CheckCircleIcon,
   ArrowLeftIcon,
   ArrowRightIcon,
+  WrenchScrewdriverIcon,
+  HomeIcon,
+  HomeModernIcon,
+  BuildingStorefrontIcon,
+  PuzzlePieceIcon,
 } from '@heroicons/react/24/outline';
 
-type Step = 'basics' | 'address' | 'client' | 'budget' | 'review';
+type Step = 'basics' | 'scope' | 'address' | 'client' | 'budget' | 'review';
 
 const steps: { id: Step; title: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: 'basics', title: 'Project Info', icon: BuildingOfficeIcon },
+  { id: 'scope', title: 'Scope', icon: WrenchScrewdriverIcon },
   { id: 'address', title: 'Location', icon: MapPinIcon },
   { id: 'client', title: 'Client', icon: UserIcon },
   { id: 'budget', title: 'Budget & Dates', icon: CurrencyDollarIcon },
   { id: 'review', title: 'Review', icon: CheckCircleIcon },
 ];
+
+const SCOPE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  single_room: HomeIcon,
+  addition: BuildingStorefrontIcon,
+  full_renovation: HomeModernIcon,
+  new_construction: BuildingOfficeIcon,
+};
 
 interface ProjectForm {
   name: string;
@@ -44,9 +60,12 @@ interface ProjectForm {
 
 export default function NewProjectPage() {
   const router = useRouter();
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
   const [currentStep, setCurrentStep] = useState<Step>('basics');
   const [saving, setSaving] = useState(false);
+  const [templates, setTemplates] = useState<PhaseTemplate[]>([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+  const [loadingTemplates, setLoadingTemplates] = useState(false);
   const [form, setForm] = useState<ProjectForm>({
     name: '',
     description: '',
@@ -63,6 +82,21 @@ export default function NewProjectPage() {
   });
 
   const currentStepIndex = steps.findIndex(s => s.id === currentStep);
+  const selectedTemplate = templates.find(t => t.id === selectedTemplateId);
+
+  // Load templates when we reach the scope step
+  useEffect(() => {
+    if (currentStep === 'scope' && templates.length === 0 && profile?.orgId) {
+      setLoadingTemplates(true);
+      ensurePhaseTemplates(profile.orgId)
+        .then(setTemplates)
+        .catch((err) => {
+          console.error('Failed to load templates:', err);
+          toast.error('Failed to load project templates');
+        })
+        .finally(() => setLoadingTemplates(false));
+    }
+  }, [currentStep, templates.length, profile?.orgId]);
 
   const updateForm = (field: keyof ProjectForm, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -72,12 +106,14 @@ export default function NewProjectPage() {
     switch (currentStep) {
       case 'basics':
         return form.name.trim().length > 0;
+      case 'scope':
+        return selectedTemplateId !== null;
       case 'address':
         return form.street && form.city && form.state && form.zip;
       case 'client':
         return form.clientName && form.clientEmail;
       case 'budget':
-        return true; // Optional
+        return true;
       case 'review':
         return true;
       default:
@@ -100,11 +136,11 @@ export default function NewProjectPage() {
   };
 
   const handleSubmit = async () => {
-    if (!profile?.orgId) return;
+    if (!profile?.orgId || !user?.uid || !selectedTemplate) return;
 
     setSaving(true);
     try {
-      // Create client user first (simplified - in real app would check if exists)
+      // Create client user
       const clientRef = await addDoc(collection(db, 'users'), {
         email: form.clientEmail,
         displayName: form.clientName,
@@ -126,14 +162,29 @@ export default function NewProjectPage() {
           state: form.state,
           zip: form.zip,
         },
-        status: 'planning',
+        status: 'lead',
+        scope: selectedTemplate.scopeType,
+        templateId: selectedTemplate.id,
         clientId: clientRef.id,
-        pmId: profile.uid,
+        pmId: user.uid,
         budget: form.budget ? parseFloat(form.budget) : null,
         startDate: form.startDate ? Timestamp.fromDate(new Date(form.startDate)) : null,
         estimatedEndDate: form.estimatedEndDate ? Timestamp.fromDate(new Date(form.estimatedEndDate)) : null,
+        quoteTotal: null,
         createdAt: Timestamp.now(),
       });
+
+      // Create phase subcollection docs from template
+      const phasesRef = collection(db, 'projects', projectRef.id, 'phases');
+      for (const phase of selectedTemplate.phases) {
+        await addDoc(phasesRef, {
+          projectId: projectRef.id,
+          name: phase.name,
+          order: phase.order,
+          status: 'upcoming',
+          createdAt: Timestamp.now(),
+        });
+      }
 
       router.push(`/dashboard/projects/${projectRef.id}`);
     } catch (error) {
@@ -226,17 +277,65 @@ export default function NewProjectPage() {
           </div>
         )}
 
+        {currentStep === 'scope' && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Project Scope</h2>
+              <p className="text-sm text-gray-500 mb-6">What type of project is this? This determines the default phases.</p>
+            </div>
+            {loadingTemplates ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                {templates.map((tmpl) => {
+                  const Icon = SCOPE_ICONS[tmpl.scopeType] || PuzzlePieceIcon;
+                  const isSelected = selectedTemplateId === tmpl.id;
+                  return (
+                    <button
+                      key={tmpl.id}
+                      onClick={() => setSelectedTemplateId(tmpl.id)}
+                      className={cn(
+                        'p-4 rounded-lg border-2 text-left transition-all hover:shadow-md',
+                        isSelected
+                          ? 'border-blue-600 bg-blue-50 ring-1 ring-blue-600'
+                          : 'border-gray-200 hover:border-gray-300'
+                      )}
+                    >
+                      <Icon className={cn('h-8 w-8 mb-3', isSelected ? 'text-blue-600' : 'text-gray-400')} />
+                      <h3 className={cn('font-semibold text-sm', isSelected ? 'text-blue-900' : 'text-gray-900')}>
+                        {tmpl.name}
+                      </h3>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {tmpl.phases.length} phases: {tmpl.phases.map(p => p.name).join(' → ')}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
         {currentStep === 'address' && (
           <div className="space-y-6">
             <div>
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Project Location</h2>
               <p className="text-sm text-gray-500 mb-6">Where is this project located?</p>
             </div>
-            <Input
-              label="Street Address"
-              placeholder="123 Main St"
+            <AddressAutocomplete
               value={form.street}
-              onChange={(e) => updateForm('street', e.target.value)}
+              onChange={(val) => updateForm('street', val)}
+              onAddressSelect={(addr) => {
+                setForm(prev => ({
+                  ...prev,
+                  street: addr.street,
+                  city: addr.city,
+                  state: addr.state,
+                  zip: addr.zip,
+                }));
+              }}
               autoFocus
             />
             <div className="grid grid-cols-2 gap-4">
@@ -336,6 +435,16 @@ export default function NewProjectPage() {
                 <p className="font-semibold text-gray-900">{form.name}</p>
                 {form.description && <p className="text-sm text-gray-600 mt-1">{form.description}</p>}
               </div>
+
+              {selectedTemplate && (
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">Scope</h3>
+                  <p className="font-semibold text-gray-900">{selectedTemplate.name}</p>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {selectedTemplate.phases.map(p => p.name).join(' → ')}
+                  </p>
+                </div>
+              )}
 
               <div className="p-4 bg-gray-50 rounded-lg">
                 <h3 className="text-sm font-medium text-gray-500 mb-2">Location</h3>

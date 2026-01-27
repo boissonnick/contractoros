@@ -64,6 +64,25 @@ service cloud.firestore {
 
       // Only admins can create/update/delete projects
       allow create, update, delete: if isAdmin();
+
+      // Project phases subcollection
+      match /phases/{phaseId} {
+        allow read: if isAuthenticated();
+        allow create, update, delete: if isAdmin();
+      }
+
+      // Quote sections subcollection
+      match /quoteSections/{sectionId} {
+        allow read: if isAuthenticated();
+        allow create, update, delete: if isAdmin();
+      }
+
+      // Client preferences subcollection
+      match /clientPreferences/{docId} {
+        allow read: if isAuthenticated();
+        allow create, update: if isAuthenticated();
+        allow delete: if isAdmin();
+      }
     }
 
     // Organizations collection
@@ -76,6 +95,13 @@ service cloud.firestore {
 
       // Only admins can modify organizations
       allow update, delete: if isAdmin();
+
+      // Phase templates (org-level, customizable by owner)
+      match /phaseTemplates/{templateId} {
+        allow read: if isAuthenticated() && getUserProfile().orgId == orgId;
+        allow create: if isAuthenticated() && getUserProfile().orgId == orgId;
+        allow update, delete: if isAuthenticated() && getUserProfile().role == 'OWNER' && getUserProfile().orgId == orgId;
+      }
     }
 
     // Invites collection
