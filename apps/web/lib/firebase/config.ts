@@ -1,7 +1,7 @@
 "use client";
 
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { Auth, getAuth, initializeAuth, browserLocalPersistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
@@ -17,6 +17,19 @@ const firebaseConfig = {
 // Initialize Firebase only once
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
-export const auth = getAuth(app);
+// Use initializeAuth with explicit localStorage persistence to avoid
+// IndexedDB hangs that prevent onAuthStateChanged from ever firing.
+// getAuth() falls back to this if auth is already initialized.
+let auth: Auth;
+try {
+  auth = initializeAuth(app, {
+    persistence: browserLocalPersistence,
+  });
+} catch (e) {
+  // initializeAuth throws if already called — fall back to getAuth
+  auth = getAuth(app);
+}
+
+export { auth };
 export const db = getFirestore(app, "contractoros");
 export const storage = getStorage(app);
