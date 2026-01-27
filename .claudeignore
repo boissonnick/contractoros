@@ -1,0 +1,51 @@
+# Build artifacts
+.next/
+out/
+build/
+dist/
+functions/lib/
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Lock files
+package-lock.json
+apps/web/package-lock.json
+
+# Firebase
+.firebase/
+*-debug.log
+
+# Environment & secrets
+.env*
+*.pem
+*.key
+
+# IDE & OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Git internals
+.git/
+
+# Generated
+*.tsbuildinfo
+next-env.d.ts
+
+# Large docs (keep README.md and CLAUDE.md)
+ROADMAP.md
+DO_NOT_EDIT.md
+
+# Public assets (static, not code)
+apps/web/public/
+
+# Docker & deployment
+apps/web/Dockerfile
+apps/web/.dockerignore
+cloudbuild.yaml

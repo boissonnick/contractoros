@@ -65,3 +65,11 @@ next-env.d.ts
 
 # OS
 .DS_Store
+
+# Logs (catch-all)
+*.log
+
+# Temp & cache
+tmp/
+.cache/
+.turbo/
