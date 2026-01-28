@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
 import { collection, query, where, getDocs, doc, updateDoc, deleteDoc, Timestamp } from 'firebase/firestore';
-import { Button, Card, Avatar, Badge, EmptyState, toast } from '@/components/ui';
+import { Button, Card, Avatar, Badge, EmptyState, toast, useConfirmDialog } from '@/components/ui';
 import { cn, formatRelativeTime } from '@/lib/utils';
 import {
   UserPlusIcon,
@@ -46,6 +46,7 @@ export default function TeamPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'members' | 'invites'>('members');
+  const { confirm, DialogComponent } = useConfirmDialog();
 
   useEffect(() => {
     if (profile?.orgId) {
@@ -98,15 +99,23 @@ export default function TeamPage() {
     }
   };
 
-  const cancelInvite = async (inviteId: string) => {
-    if (!confirm('Are you sure you want to cancel this invitation?')) return;
+  const cancelInvite = async (inviteId: string, inviteName: string) => {
+    const confirmed = await confirm({
+      title: 'Cancel Invitation',
+      message: `Are you sure you want to cancel the invitation for ${inviteName}? They will no longer be able to join your team using this invite link.`,
+      confirmLabel: 'Cancel Invitation',
+      variant: 'danger',
+    });
+
+    if (!confirmed) return;
 
     try {
       await deleteDoc(doc(db, 'invites', inviteId));
       setInvites(invites.filter(i => i.id !== inviteId));
+      toast.success('Invitation cancelled');
     } catch (error) {
       console.error('Error canceling invite:', error);
-      toast.error('Failed to cancel invitation.');
+      toast.error('Failed to cancel invitation');
     }
   };
 
@@ -136,6 +145,7 @@ export default function TeamPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <DialogComponent />
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -307,7 +317,7 @@ export default function TeamPage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => cancelInvite(invite.id)}
+                        onClick={() => cancelInvite(invite.id, invite.name)}
                         className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         icon={<XMarkIcon className="h-4 w-4" />}
                       >

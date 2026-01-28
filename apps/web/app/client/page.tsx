@@ -252,7 +252,7 @@ export default function ClientDashboard() {
                       }`} />
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900">Invoice #{invoice.invoiceNumber}</p>
+                      <p className="font-medium text-gray-900">Invoice #{invoice.number}</p>
                       <p className="text-sm text-gray-500">
                         Due {new Date(invoice.dueDate).toLocaleDateString()}
                       </p>

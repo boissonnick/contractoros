@@ -9,13 +9,17 @@ import {
   BuildingOfficeIcon,
   BellIcon,
   PuzzlePieceIcon,
+  ReceiptPercentIcon,
+  ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline';
 
 const SETTINGS_TABS = [
   { key: '/dashboard/settings', label: 'Phase Templates', icon: Squares2X2Icon },
   { key: '/dashboard/settings/organization', label: 'Organization', icon: BuildingOfficeIcon },
-  { key: '/dashboard/settings/notifications', label: 'Notifications', icon: BellIcon, comingSoon: true },
-  { key: '/dashboard/settings/integrations', label: 'Integrations', icon: PuzzlePieceIcon, comingSoon: true },
+  { key: '/dashboard/settings/integrations', label: 'Integrations', icon: PuzzlePieceIcon },
+  { key: '/dashboard/settings/tax-rates', label: 'Tax Rates', icon: ReceiptPercentIcon },
+  { key: '/dashboard/settings/data-export', label: 'Data Export', icon: ArrowDownTrayIcon },
+  { key: '/dashboard/settings/notifications', label: 'Notifications', icon: BellIcon },
 ];
 
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {
@@ -37,21 +41,16 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
             return (
               <Link
                 key={tab.key}
-                href={tab.comingSoon ? '#' : tab.key}
+                href={tab.key}
                 className={cn(
                   'flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors',
                   isActive
                     ? 'border-blue-600 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-                  tab.comingSoon && 'opacity-50 cursor-not-allowed'
                 )}
-                onClick={tab.comingSoon ? (e) => e.preventDefault() : undefined}
               >
                 <Icon className="h-4 w-4" />
                 {tab.label}
-                {tab.comingSoon && (
-                  <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full">Soon</span>
-                )}
               </Link>
             );
           })}

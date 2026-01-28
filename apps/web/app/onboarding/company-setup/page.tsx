@@ -19,6 +19,7 @@ import {
   CloudArrowUpIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
+import { toast } from '@/components/ui/Toast';
 
 type Step = 'company' | 'branding' | 'logo' | 'complete';
 
@@ -80,7 +81,7 @@ export default function CompanySetupPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
-      alert('Logo must be under 5MB');
+      toast.error('File too large', 'Logo must be under 5MB');
       return;
     }
     setLogoFile(file);
@@ -165,7 +166,7 @@ export default function CompanySetupPage() {
       }, 2000);
     } catch (error) {
       console.error('Error completing company setup:', error);
-      alert('Something went wrong. Please try again.');
+      toast.error('Setup failed', 'Something went wrong. Please try again.');
     } finally {
       setSaving(false);
     }

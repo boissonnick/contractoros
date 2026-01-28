@@ -6,3 +6,7 @@ export { default as TaskAssignment } from './TaskAssignment';
 export { default as TaskAttachments } from './TaskAttachments';
 export { default as TaskComments } from './TaskComments';
 export { default as TaskActivityLog } from './TaskActivityLog';
+export { default as TaskChecklist } from './TaskChecklist';
+export { default as RecurringTaskConfig } from './RecurringTaskConfig';
+export { default as TaskTemplateSelector } from './TaskTemplateSelector';
+export { default as BulkTaskToolbar } from './BulkTaskToolbar';

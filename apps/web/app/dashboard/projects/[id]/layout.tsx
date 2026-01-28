@@ -17,6 +17,10 @@ import {
   Squares2X2Icon,
   RectangleStackIcon,
   DocumentDuplicateIcon,
+  NewspaperIcon,
+  ExclamationTriangleIcon,
+  DocumentCheckIcon,
+  CheckBadgeIcon,
 } from '@heroicons/react/24/outline';
 
 const TABS = [
@@ -25,7 +29,11 @@ const TABS = [
   { key: '/scope', label: 'Scope', icon: ClipboardDocumentListIcon },
   { key: '/subs', label: 'Subs', icon: UserGroupIcon },
   { key: '/change-orders', label: 'COs', icon: DocumentDuplicateIcon },
+  { key: '/rfis', label: 'RFIs', icon: ExclamationTriangleIcon },
+  { key: '/submittals', label: 'Submittals', icon: DocumentCheckIcon },
+  { key: '/punch-list', label: 'Punch', icon: CheckBadgeIcon },
   { key: '/quote', label: 'Quote', icon: DocumentTextIcon },
+  { key: '/activity', label: 'Activity', icon: NewspaperIcon },
   { key: '/preferences', label: 'Preferences', icon: UserGroupIcon },
   { key: '/logs', label: 'Logs', icon: ClipboardDocumentListIcon },
   { key: '/photos', label: 'Photos', icon: PhotoIcon },

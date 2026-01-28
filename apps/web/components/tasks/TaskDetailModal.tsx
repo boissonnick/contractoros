@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useCallback } from 'react';
-import { Task, TaskStatus, ProjectPhase } from '@/types';
+import { Task, TaskStatus, ProjectPhase, TaskChecklistItem } from '@/types';
 import { Button, Badge } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import {
@@ -10,16 +10,20 @@ import {
   ClockIcon,
   PaperClipIcon,
   ListBulletIcon,
+  CheckCircleIcon,
+  ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 import TaskForm from './TaskForm';
 import TaskComments from './TaskComments';
 import TaskActivityLog from './TaskActivityLog';
 import TaskAttachments from './TaskAttachments';
+import TaskChecklist from './TaskChecklist';
 
-type Tab = 'details' | 'comments' | 'activity' | 'attachments';
+type Tab = 'details' | 'checklist' | 'comments' | 'activity' | 'attachments';
 
 const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: 'details', label: 'Details', icon: ListBulletIcon },
+  { id: 'checklist', label: 'Checklist', icon: CheckCircleIcon },
   { id: 'comments', label: 'Comments', icon: ChatBubbleLeftIcon },
   { id: 'activity', label: 'Activity', icon: ClockIcon },
   { id: 'attachments', label: 'Files', icon: PaperClipIcon },
@@ -49,6 +53,7 @@ interface TaskDetailModalProps {
   phases?: ProjectPhase[];
   allTasks?: Task[];
   teamMembers?: { uid: string; displayName: string; photoURL?: string; role: string }[];
+  userId?: string;
   onClose: () => void;
   onUpdate: (taskId: string, updates: Partial<Task>) => Promise<void>;
   onDelete?: (taskId: string) => Promise<void>;
@@ -60,6 +65,7 @@ export default function TaskDetailModal({
   phases = [],
   allTasks = [],
   teamMembers = [],
+  userId,
   onClose,
   onUpdate,
   onDelete,
@@ -93,6 +99,10 @@ export default function TaskDetailModal({
     await onUpdate(task.id, { attachments });
   };
 
+  const handleChecklistChange = async (checklist: TaskChecklistItem[]) => {
+    await onUpdate(task.id, { checklist });
+  };
+
   const handleDelete = async () => {
     if (onDelete) {
       await onDelete(task.id);
@@ -101,6 +111,9 @@ export default function TaskDetailModal({
   };
 
   const phaseName = phases.find((p) => p.id === task.phaseId)?.name;
+  const checklistProgress = task.checklist?.length
+    ? Math.round((task.checklist.filter(item => item.isCompleted).length / task.checklist.length) * 100)
+    : null;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-50 p-4 pt-[10vh] overflow-y-auto">
@@ -108,7 +121,15 @@ export default function TaskDetailModal({
         {/* Header */}
         <div className="flex items-start justify-between p-4 border-b border-gray-100">
           <div className="flex-1 min-w-0">
-            <h2 className="text-lg font-semibold text-gray-900 truncate">{task.title}</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-gray-900 truncate">{task.title}</h2>
+              {task.isRecurring && (
+                <span className="text-xs text-purple-600 bg-purple-50 px-2 py-0.5 rounded flex items-center gap-1">
+                  <ArrowPathIcon className="h-3 w-3" />
+                  Recurring
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-2 mt-1">
               {phaseName && (
                 <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
@@ -118,6 +139,11 @@ export default function TaskDetailModal({
               <span className={cn('text-xs font-medium px-2 py-0.5 rounded', statusColors[task.status])}>
                 {statusLabels[task.status]}
               </span>
+              {checklistProgress !== null && (
+                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                  Checklist: {checklistProgress}%
+                </span>
+              )}
             </div>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 ml-4">
@@ -145,15 +171,16 @@ export default function TaskDetailModal({
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-gray-100">
+        <div className="flex border-b border-gray-100 overflow-x-auto">
           {tabs.map((tab) => {
             const Icon = tab.icon;
+            const showBadge = tab.id === 'checklist' && task.checklist && task.checklist.length > 0;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  'flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors',
+                  'flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap',
                   activeTab === tab.id
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -161,6 +188,11 @@ export default function TaskDetailModal({
               >
                 <Icon className="h-4 w-4" />
                 {tab.label}
+                {showBadge && (
+                  <span className="ml-1 text-xs bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded-full">
+                    {task.checklist!.filter(item => item.isCompleted).length}/{task.checklist!.length}
+                  </span>
+                )}
               </button>
             );
           })}
@@ -224,6 +256,40 @@ export default function TaskDetailModal({
                   </div>
                 </div>
 
+                {/* Hours comparison */}
+                {task.estimatedHours && task.actualHours && (
+                  <div>
+                    <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Hours Tracking</h4>
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-gray-600">Progress</span>
+                        <span className={cn(
+                          'text-sm font-medium',
+                          task.actualHours > task.estimatedHours ? 'text-red-600' : 'text-green-600'
+                        )}>
+                          {task.actualHours}h / {task.estimatedHours}h
+                        </span>
+                      </div>
+                      <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                          className={cn(
+                            'h-full rounded-full',
+                            task.actualHours > task.estimatedHours ? 'bg-red-500' : 'bg-green-500'
+                          )}
+                          style={{
+                            width: `${Math.min((task.actualHours / task.estimatedHours) * 100, 100)}%`,
+                          }}
+                        />
+                      </div>
+                      {task.actualHours > task.estimatedHours && (
+                        <p className="text-xs text-red-600 mt-1">
+                          {(task.actualHours - task.estimatedHours).toFixed(1)}h over estimate
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {/* Assignees */}
                 {task.assignedTo.length > 0 && (
                   <div>
@@ -263,6 +329,22 @@ export default function TaskDetailModal({
                   </div>
                 )}
 
+                {/* Recurring info */}
+                {task.isRecurring && task.recurrenceConfig && (
+                  <div>
+                    <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Recurrence</span>
+                    <div className="mt-1 p-2 bg-purple-50 rounded-lg">
+                      <p className="text-sm text-purple-700">
+                        Every {task.recurrenceConfig.interval > 1 ? task.recurrenceConfig.interval + ' ' : ''}
+                        {task.recurrenceConfig.frequency}
+                        {task.recurrenceConfig.endDate && (
+                          <> until {new Date(task.recurrenceConfig.endDate).toLocaleDateString()}</>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Edit button */}
                 <div className="pt-2">
                   <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
@@ -271,6 +353,15 @@ export default function TaskDetailModal({
                 </div>
               </div>
             )
+          )}
+
+          {activeTab === 'checklist' && (
+            <TaskChecklist
+              checklist={task.checklist || []}
+              onChange={handleChecklistChange}
+              editable={true}
+              userId={userId}
+            />
           )}
 
           {activeTab === 'comments' && (

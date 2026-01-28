@@ -9,11 +9,18 @@ export const metadata: Metadata = {
     template: '%s | ContractorOS',
   },
   description: 'Field-first contractor management platform',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'ContractorOS',
+  },
 };
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
+  themeColor: '#2563eb',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

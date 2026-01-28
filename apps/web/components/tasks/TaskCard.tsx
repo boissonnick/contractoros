@@ -10,6 +10,8 @@ import {
   LinkIcon,
   PaperClipIcon,
   UserCircleIcon,
+  ArrowPathIcon,
+  CheckCircleIcon,
 } from '@heroicons/react/24/outline';
 
 const priorityColors: Record<TaskPriority, string> = {
@@ -24,15 +26,18 @@ interface TaskCardProps {
   onClick?: (task: Task) => void;
   compact?: boolean;
   className?: string;
+  isSelected?: boolean;
 }
 
-export default function TaskCard({ task, onClick, compact = false, className }: TaskCardProps) {
+export default function TaskCard({ task, onClick, compact = false, className, isSelected }: TaskCardProps) {
   const hasDueDate = !!task.dueDate;
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed';
   const hasAssignees = task.assignedTo.length > 0;
   const hasDependencies = task.dependencies.length > 0;
   const hasAttachments = task.attachments.length > 0;
-  const subtaskCount = 0; // Will be populated when subtask queries are integrated
+  const hasChecklist = task.checklist && task.checklist.length > 0;
+  const checklistDone = task.checklist?.filter(i => i.isCompleted).length || 0;
+  const checklistTotal = task.checklist?.length || 0;
 
   return (
     <div
@@ -40,6 +45,7 @@ export default function TaskCard({ task, onClick, compact = false, className }: 
         'bg-white rounded-lg border border-gray-200 shadow-sm cursor-pointer',
         'hover:shadow-md hover:border-gray-300 transition-all duration-150',
         isOverdue && 'border-red-300 bg-red-50/30',
+        isSelected && 'ring-2 ring-blue-500 border-blue-400 bg-blue-50/30',
         className
       )}
       onClick={() => onClick?.(task)}
@@ -114,6 +120,20 @@ export default function TaskCard({ task, onClick, compact = false, className }: 
               <span className="inline-flex items-center gap-0.5 text-xs text-gray-400" title={`${task.attachments.length} attachments`}>
                 <PaperClipIcon className="h-3 w-3" />
                 {task.attachments.length}
+              </span>
+            )}
+            {hasChecklist && (
+              <span className={cn(
+                "inline-flex items-center gap-0.5 text-xs",
+                checklistDone === checklistTotal ? 'text-green-500' : 'text-gray-400'
+              )} title={`${checklistDone}/${checklistTotal} checklist items`}>
+                <CheckCircleIcon className="h-3 w-3" />
+                {checklistDone}/{checklistTotal}
+              </span>
+            )}
+            {task.isRecurring && (
+              <span className="inline-flex items-center text-xs text-purple-400" title="Recurring task">
+                <ArrowPathIcon className="h-3 w-3" />
               </span>
             )}
           </div>

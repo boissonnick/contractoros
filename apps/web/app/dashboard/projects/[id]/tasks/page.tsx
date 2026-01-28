@@ -7,7 +7,8 @@ import { collection, getDocs } from 'firebase/firestore';
 import { Task, TaskStatus, ProjectPhase } from '@/types';
 import { useTasks } from '@/lib/hooks/useTasks';
 import { Button } from '@/components/ui';
-import { PlusIcon, FunnelIcon } from '@heroicons/react/24/outline';
+import { toast } from '@/components/ui/Toast';
+import { PlusIcon, FunnelIcon, CheckIcon } from '@heroicons/react/24/outline';
 
 import TaskViewToggle, { TaskView } from '@/components/projects/tasks/TaskViewToggle';
 import TaskFilters, { TaskFilterState, emptyFilters } from '@/components/projects/tasks/TaskFilters';
@@ -18,13 +19,17 @@ import { GroupBy, SortBy } from '@/components/projects/tasks/list/TaskList';
 import TaskGantt from '@/components/projects/tasks/gantt/TaskGantt';
 import { TaskDetailModal } from '@/components/tasks';
 import TaskForm from '@/components/tasks/TaskForm';
+import BulkTaskToolbar from '@/components/tasks/BulkTaskToolbar';
 
 export default function ProjectTasksPage() {
   const params = useParams();
   const projectId = params.id as string;
 
   // Data
-  const { tasks, loading, addTask, updateTask, deleteTask, moveTask } = useTasks({ projectId });
+  const {
+    tasks, loading, addTask, updateTask, deleteTask, moveTask,
+    bulkUpdateStatus, bulkAssign, bulkDelete, bulkSetPriority,
+  } = useTasks({ projectId });
   const [phases, setPhases] = useState<ProjectPhase[]>([]);
   const [phasesLoading, setPhasesLoading] = useState(true);
 
@@ -39,6 +44,10 @@ export default function ProjectTasksPage() {
   const [groupBy, setGroupBy] = useState<GroupBy>('phase');
   const [sortBy, setSortBy] = useState<SortBy>('dueDate');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+
+  // Bulk selection state
+  const [selectedTaskIds, setSelectedTaskIds] = useState<Set<string>>(new Set());
+  const [isBulkMode, setIsBulkMode] = useState(false);
 
   // Fetch phases
   useEffect(() => {
@@ -87,8 +96,21 @@ export default function ProjectTasksPage() {
   );
 
   const handleTaskClick = useCallback((task: Task) => {
+    if (isBulkMode) {
+      // Toggle task selection in bulk mode
+      setSelectedTaskIds((prev) => {
+        const next = new Set(prev);
+        if (next.has(task.id)) {
+          next.delete(task.id);
+        } else {
+          next.add(task.id);
+        }
+        return next;
+      });
+      return;
+    }
     setSelectedTask(task);
-  }, []);
+  }, [isBulkMode]);
 
   const handleStatusChange = useCallback(
     (taskId: string, status: TaskStatus) => {
@@ -96,6 +118,48 @@ export default function ProjectTasksPage() {
     },
     [moveTask]
   );
+
+  const toggleBulkMode = useCallback(() => {
+    setIsBulkMode((prev) => {
+      if (prev) {
+        setSelectedTaskIds(new Set());
+      }
+      return !prev;
+    });
+  }, []);
+
+  const selectAllTasks = useCallback(() => {
+    setSelectedTaskIds(new Set(filteredTasks.map((t) => t.id)));
+  }, [filteredTasks]);
+
+  const handleBulkStatusChange = useCallback(async (status: TaskStatus) => {
+    const ids = Array.from(selectedTaskIds);
+    await bulkUpdateStatus(ids, status);
+    toast.success(`Updated ${ids.length} task(s) to "${status}"`);
+    setSelectedTaskIds(new Set());
+  }, [selectedTaskIds, bulkUpdateStatus]);
+
+  const handleBulkPriorityChange = useCallback(async (priority: Parameters<typeof bulkSetPriority>[1]) => {
+    const ids = Array.from(selectedTaskIds);
+    await bulkSetPriority(ids, priority);
+    toast.success(`Set priority to "${priority}" for ${ids.length} task(s)`);
+    setSelectedTaskIds(new Set());
+  }, [selectedTaskIds, bulkSetPriority]);
+
+  const handleBulkAssign = useCallback(async (assigneeIds: string[]) => {
+    const ids = Array.from(selectedTaskIds);
+    await bulkAssign(ids, assigneeIds);
+    toast.success(`Assigned ${ids.length} task(s)`);
+    setSelectedTaskIds(new Set());
+  }, [selectedTaskIds, bulkAssign]);
+
+  const handleBulkDelete = useCallback(async () => {
+    const ids = Array.from(selectedTaskIds);
+    await bulkDelete(ids);
+    toast.success(`Deleted ${ids.length} task(s)`);
+    setSelectedTaskIds(new Set());
+    setIsBulkMode(false);
+  }, [selectedTaskIds, bulkDelete]);
 
   if (loading || phasesLoading) {
     return (
@@ -138,6 +202,27 @@ export default function ProjectTasksPage() {
           <span className="text-sm text-gray-500">
             {filteredTasks.length} task{filteredTasks.length !== 1 ? 's' : ''}
           </span>
+
+          {/* Bulk mode toggle */}
+          <Button
+            variant={isBulkMode ? 'primary' : 'outline'}
+            size="sm"
+            icon={<CheckIcon className="h-4 w-4" />}
+            onClick={toggleBulkMode}
+          >
+            {isBulkMode ? 'Cancel Select' : 'Select'}
+          </Button>
+
+          {isBulkMode && filteredTasks.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={selectAllTasks}
+            >
+              Select All ({filteredTasks.length})
+            </Button>
+          )}
+
           <Button
             variant="primary"
             size="sm"
@@ -218,6 +303,19 @@ export default function ProjectTasksPage() {
           onDelete={deleteTask}
         />
       )}
+
+      {/* Bulk operations toolbar */}
+      <BulkTaskToolbar
+        selectedCount={selectedTaskIds.size}
+        onClearSelection={() => {
+          setSelectedTaskIds(new Set());
+          setIsBulkMode(false);
+        }}
+        onBulkStatusChange={handleBulkStatusChange}
+        onBulkPriorityChange={handleBulkPriorityChange}
+        onBulkAssign={handleBulkAssign}
+        onBulkDelete={handleBulkDelete}
+      />
     </div>
   );
 }

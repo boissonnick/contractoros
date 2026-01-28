@@ -15,7 +15,7 @@ import {
   writeBatch,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import { Task, TaskStatus, TaskPriority, TaskDependency, TaskAttachment } from '@/types';
+import { Task, TaskStatus, TaskPriority, TaskDependency, TaskAttachment, TaskChecklistItem, RecurrenceConfig } from '@/types';
 import { useAuth } from '@/lib/auth';
 
 // ---- Firestore ↔ Task converters ----
@@ -48,6 +48,15 @@ function fromFirestore(id: string, data: Record<string, unknown>): Task {
         uploadedAt: att.uploadedAt ? (att.uploadedAt as Timestamp).toDate() : new Date(),
       } as TaskAttachment;
     }),
+    // Sprint 5: Checklist
+    checklist: (data.checklist as TaskChecklistItem[]) || undefined,
+    // Sprint 5: Recurring
+    isRecurring: data.isRecurring as boolean | undefined,
+    recurrenceConfig: data.recurrenceConfig as RecurrenceConfig | undefined,
+    recurringParentId: data.recurringParentId as string | undefined,
+    recurrenceIndex: data.recurrenceIndex as number | undefined,
+    templateId: data.templateId as string | undefined,
+
     order: (data.order as number) ?? 0,
     createdBy: data.createdBy as string,
     createdAt: data.createdAt ? (data.createdAt as Timestamp).toDate() : new Date(),
@@ -75,6 +84,29 @@ function toFirestore(task: Partial<Task>): Record<string, unknown> {
     }));
   }
 
+  // Convert recurrenceConfig dates
+  if (task.recurrenceConfig) {
+    const rc = { ...task.recurrenceConfig };
+    if (rc.endDate) {
+      (rc as Record<string, unknown>).endDate = Timestamp.fromDate(new Date(rc.endDate));
+    }
+    if (rc.lastGeneratedAt) {
+      (rc as Record<string, unknown>).lastGeneratedAt = Timestamp.fromDate(new Date(rc.lastGeneratedAt));
+    }
+    data.recurrenceConfig = rc;
+  }
+
+  // Convert checklist item dates
+  if (task.checklist) {
+    data.checklist = task.checklist.map((item) => {
+      const mapped: Record<string, unknown> = { ...item };
+      if (item.completedAt) {
+        mapped.completedAt = Timestamp.fromDate(new Date(item.completedAt));
+      }
+      return mapped;
+    });
+  }
+
   // Firestore rejects undefined values — strip them
   Object.keys(data).forEach((k) => {
     if (data[k] === undefined) delete data[k];
@@ -100,6 +132,11 @@ export interface UseTasksReturn {
   deleteTask: (taskId: string) => Promise<void>;
   moveTask: (taskId: string, newStatus: TaskStatus) => Promise<void>;
   reorderTasks: (taskIds: string[], newOrder: number[]) => Promise<void>;
+  // Sprint 5: Bulk operations
+  bulkUpdateStatus: (taskIds: string[], status: TaskStatus) => Promise<void>;
+  bulkAssign: (taskIds: string[], assigneeIds: string[]) => Promise<void>;
+  bulkDelete: (taskIds: string[]) => Promise<void>;
+  bulkSetPriority: (taskIds: string[], priority: TaskPriority) => Promise<void>;
 }
 
 export interface NewTaskInput {
@@ -116,6 +153,11 @@ export interface NewTaskInput {
   duration?: number;
   estimatedHours?: number;
   dependencies?: TaskDependency[];
+  // Sprint 5 additions
+  checklist?: TaskChecklistItem[];
+  isRecurring?: boolean;
+  recurrenceConfig?: RecurrenceConfig;
+  templateId?: string;
 }
 
 export function useTasks({ projectId, phaseId, parentTaskId }: UseTasksOptions): UseTasksReturn {
@@ -199,6 +241,11 @@ export function useTasks({ projectId, phaseId, parentTaskId }: UseTasksOptions):
         estimatedHours: input.estimatedHours,
         dependencies: input.dependencies || [],
         attachments: [],
+        // Sprint 5
+        checklist: input.checklist,
+        isRecurring: input.isRecurring,
+        recurrenceConfig: input.recurrenceConfig,
+        templateId: input.templateId,
         order: maxOrder,
         createdBy: user?.uid || '',
         createdAt: new Date(),
@@ -256,5 +303,46 @@ export function useTasks({ projectId, phaseId, parentTaskId }: UseTasksOptions):
     await batch.commit();
   }, []);
 
-  return { tasks, loading, error, addTask, updateTask, deleteTask, moveTask, reorderTasks };
+  // Sprint 5: Bulk operations
+  const bulkUpdateStatus = useCallback(async (taskIds: string[], status: TaskStatus) => {
+    const batch = writeBatch(db);
+    taskIds.forEach((id) => {
+      const updates: Record<string, unknown> = { status, updatedAt: Timestamp.now() };
+      if (status === 'completed') {
+        updates.completedAt = Timestamp.now();
+      }
+      batch.update(doc(db, 'tasks', id), updates);
+    });
+    await batch.commit();
+  }, []);
+
+  const bulkAssign = useCallback(async (taskIds: string[], assigneeIds: string[]) => {
+    const batch = writeBatch(db);
+    taskIds.forEach((id) => {
+      batch.update(doc(db, 'tasks', id), { assignedTo: assigneeIds, updatedAt: Timestamp.now() });
+    });
+    await batch.commit();
+  }, []);
+
+  const bulkDelete = useCallback(async (taskIds: string[]) => {
+    const batch = writeBatch(db);
+    taskIds.forEach((id) => {
+      batch.delete(doc(db, 'tasks', id));
+    });
+    await batch.commit();
+  }, []);
+
+  const bulkSetPriority = useCallback(async (taskIds: string[], priority: TaskPriority) => {
+    const batch = writeBatch(db);
+    taskIds.forEach((id) => {
+      batch.update(doc(db, 'tasks', id), { priority, updatedAt: Timestamp.now() });
+    });
+    await batch.commit();
+  }, []);
+
+  return {
+    tasks, loading, error,
+    addTask, updateTask, deleteTask, moveTask, reorderTasks,
+    bulkUpdateStatus, bulkAssign, bulkDelete, bulkSetPriority,
+  };
 }
