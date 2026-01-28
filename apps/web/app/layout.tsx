@@ -10,6 +10,13 @@ export const metadata: Metadata = {
   },
   description: 'Field-first contractor management platform',
   manifest: '/manifest.json',
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: '16x16', type: 'image/x-icon' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+    apple: '/icons/icon-192x192.png',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
