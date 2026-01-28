@@ -36,7 +36,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             className={cn(
               'block w-full rounded-lg border bg-white px-3 py-2.5 text-gray-900 placeholder-gray-400',
-              'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+              'focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent',
               'disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed',
               'transition-colors duration-200',
               error
@@ -95,7 +95,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           id={textareaId}
           className={cn(
             'block w-full rounded-lg border bg-white px-3 py-2.5 text-gray-900 placeholder-gray-400',
-            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            'focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent',
             'disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed',
             'transition-colors duration-200 resize-none',
             error
@@ -146,7 +146,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           id={selectId}
           className={cn(
             'block w-full rounded-lg border bg-white px-3 py-2.5 text-gray-900',
-            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            'focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent',
             'disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed',
             'transition-colors duration-200 appearance-none',
             'bg-[url("data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3e%3c/svg%3e")] bg-[length:1.5em_1.5em] bg-[right_0.5rem_center] bg-no-repeat pr-10',

@@ -39,6 +39,9 @@ export { default as FirestoreError } from './FirestoreError';
 export { default as ConfirmDialog, useConfirmDialog } from './ConfirmDialog';
 export type { ConfirmDialogProps } from './ConfirmDialog';
 
+export { default as BaseModal, useModal, useModalDirtyState } from './BaseModal';
+export type { BaseModalProps } from './BaseModal';
+
 export { FormInput, FormTextarea, FormSelect, FormCheckbox } from './FormField';
 
 export { default as Pagination, CompactPagination } from './Pagination';

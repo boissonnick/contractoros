@@ -4,6 +4,7 @@ import React from 'react';
 import { useNotificationPreferences } from '@/lib/hooks/useNotifications';
 import { Card } from '@/components/ui';
 import { cn } from '@/lib/utils';
+import { toast } from '@/components/ui/Toast';
 import {
   EnvelopeIcon,
   DevicePhoneMobileIcon,
@@ -40,7 +41,14 @@ function Toggle({ label, description, checked, onChange }: ToggleProps) {
 }
 
 export default function NotificationSettingsPage() {
-  const { preferences, loading } = useNotificationPreferences();
+  const { preferences, loading, updatePreference } = useNotificationPreferences();
+
+  const handleToggle = async (category: 'email' | 'push', key: string, currentValue: boolean) => {
+    const success = await updatePreference(category, key, !currentValue);
+    if (!success) {
+      toast.error('Failed to update notification preference');
+    }
+  };
 
   if (loading) {
     return (
@@ -70,17 +78,17 @@ export default function NotificationSettingsPage() {
             label="Email Notifications"
             description="Master switch for all email notifications"
             checked={preferences.email.enabled}
-            onChange={() => {}}
+            onChange={() => handleToggle('email', 'enabled', preferences.email.enabled)}
           />
-          <Toggle label="Task Assigned" description="When a task is assigned to you" checked={preferences.email.taskAssigned} onChange={() => {}} />
-          <Toggle label="Task Due Soon" description="Reminder before a task is due" checked={preferences.email.taskDueSoon} onChange={() => {}} />
-          <Toggle label="Invoice Paid" description="When a client pays an invoice" checked={preferences.email.invoicePaid} onChange={() => {}} />
-          <Toggle label="Invoice Overdue" description="When an invoice becomes overdue" checked={preferences.email.invoiceOverdue} onChange={() => {}} />
-          <Toggle label="RFI Created" description="When a new RFI is submitted" checked={preferences.email.rfiCreated} onChange={() => {}} />
-          <Toggle label="Expense Approved/Rejected" description="When your expense report is reviewed" checked={preferences.email.expenseApproved} onChange={() => {}} />
-          <Toggle label="Messages" description="New messages in your channels" checked={preferences.email.messages} onChange={() => {}} />
-          <Toggle label="@Mentions" description="When someone mentions you" checked={preferences.email.mentions} onChange={() => {}} />
-          <Toggle label="Daily Digest" description="Summary of daily activity" checked={preferences.email.dailyDigest} onChange={() => {}} />
+          <Toggle label="Task Assigned" description="When a task is assigned to you" checked={preferences.email.taskAssigned} onChange={() => handleToggle('email', 'taskAssigned', preferences.email.taskAssigned)} />
+          <Toggle label="Task Due Soon" description="Reminder before a task is due" checked={preferences.email.taskDueSoon} onChange={() => handleToggle('email', 'taskDueSoon', preferences.email.taskDueSoon)} />
+          <Toggle label="Invoice Paid" description="When a client pays an invoice" checked={preferences.email.invoicePaid} onChange={() => handleToggle('email', 'invoicePaid', preferences.email.invoicePaid)} />
+          <Toggle label="Invoice Overdue" description="When an invoice becomes overdue" checked={preferences.email.invoiceOverdue} onChange={() => handleToggle('email', 'invoiceOverdue', preferences.email.invoiceOverdue)} />
+          <Toggle label="RFI Created" description="When a new RFI is submitted" checked={preferences.email.rfiCreated} onChange={() => handleToggle('email', 'rfiCreated', preferences.email.rfiCreated)} />
+          <Toggle label="Expense Approved/Rejected" description="When your expense report is reviewed" checked={preferences.email.expenseApproved} onChange={() => handleToggle('email', 'expenseApproved', preferences.email.expenseApproved)} />
+          <Toggle label="Messages" description="New messages in your channels" checked={preferences.email.messages} onChange={() => handleToggle('email', 'messages', preferences.email.messages)} />
+          <Toggle label="@Mentions" description="When someone mentions you" checked={preferences.email.mentions} onChange={() => handleToggle('email', 'mentions', preferences.email.mentions)} />
+          <Toggle label="Daily Digest" description="Summary of daily activity" checked={preferences.email.dailyDigest} onChange={() => handleToggle('email', 'dailyDigest', preferences.email.dailyDigest)} />
         </div>
       </Card>
 
@@ -95,13 +103,13 @@ export default function NotificationSettingsPage() {
             label="Push Notifications"
             description="Master switch for all push notifications"
             checked={preferences.push.enabled}
-            onChange={() => {}}
+            onChange={() => handleToggle('push', 'enabled', preferences.push.enabled)}
           />
-          <Toggle label="Task Assigned" checked={preferences.push.taskAssigned} onChange={() => {}} />
-          <Toggle label="Task Due Soon" checked={preferences.push.taskDueSoon} onChange={() => {}} />
-          <Toggle label="Invoice Paid" checked={preferences.push.invoicePaid} onChange={() => {}} />
-          <Toggle label="Messages" checked={preferences.push.messages} onChange={() => {}} />
-          <Toggle label="@Mentions" checked={preferences.push.mentions} onChange={() => {}} />
+          <Toggle label="Task Assigned" checked={preferences.push.taskAssigned} onChange={() => handleToggle('push', 'taskAssigned', preferences.push.taskAssigned)} />
+          <Toggle label="Task Due Soon" checked={preferences.push.taskDueSoon} onChange={() => handleToggle('push', 'taskDueSoon', preferences.push.taskDueSoon)} />
+          <Toggle label="Invoice Paid" checked={preferences.push.invoicePaid} onChange={() => handleToggle('push', 'invoicePaid', preferences.push.invoicePaid)} />
+          <Toggle label="Messages" checked={preferences.push.messages} onChange={() => handleToggle('push', 'messages', preferences.push.messages)} />
+          <Toggle label="@Mentions" checked={preferences.push.mentions} onChange={() => handleToggle('push', 'mentions', preferences.push.mentions)} />
         </div>
       </Card>
 

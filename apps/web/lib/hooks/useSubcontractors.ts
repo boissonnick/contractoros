@@ -16,6 +16,7 @@ import {
 import { db } from '@/lib/firebase/config';
 import { Subcontractor, SubcontractorDocument, SubcontractorMetrics } from '@/types';
 import { useAuth } from '@/lib/auth';
+import { toast } from '@/components/ui/Toast';
 
 function fromFirestore(id: string, data: Record<string, unknown>): Subcontractor {
   const docs = ((data.documents as unknown[]) || []).map((d: unknown) => {
@@ -106,27 +107,48 @@ export function useSubcontractors() {
 
   const addSub = useCallback(
     async (data: Omit<Subcontractor, 'id' | 'createdAt' | 'updatedAt' | 'metrics'>) => {
-      const now = new Date();
-      await addDoc(collection(db, 'subcontractors'), toFirestore({
-        ...data,
-        metrics: { projectsCompleted: 0, onTimeRate: 0, avgRating: 0, totalPaid: 0 },
-        createdAt: now,
-        updatedAt: now,
-      }));
+      try {
+        const now = new Date();
+        await addDoc(collection(db, 'subcontractors'), toFirestore({
+          ...data,
+          metrics: { projectsCompleted: 0, onTimeRate: 0, avgRating: 0, totalPaid: 0 },
+          createdAt: now,
+          updatedAt: now,
+        }));
+        toast.success('Subcontractor added');
+      } catch (err) {
+        console.error('Failed to add subcontractor:', err);
+        toast.error('Failed to add subcontractor');
+        throw err;
+      }
     },
     []
   );
 
   const updateSub = useCallback(
     async (subId: string, data: Partial<Subcontractor>) => {
-      await updateDoc(doc(db, 'subcontractors', subId), toFirestore({ ...data, updatedAt: new Date() }));
+      try {
+        await updateDoc(doc(db, 'subcontractors', subId), toFirestore({ ...data, updatedAt: new Date() }));
+        toast.success('Subcontractor updated');
+      } catch (err) {
+        console.error('Failed to update subcontractor:', err);
+        toast.error('Failed to update subcontractor');
+        throw err;
+      }
     },
     []
   );
 
   const deleteSub = useCallback(
     async (subId: string) => {
-      await deleteDoc(doc(db, 'subcontractors', subId));
+      try {
+        await deleteDoc(doc(db, 'subcontractors', subId));
+        toast.success('Subcontractor deleted');
+      } catch (err) {
+        console.error('Failed to delete subcontractor:', err);
+        toast.error('Failed to delete subcontractor');
+        throw err;
+      }
     },
     []
   );

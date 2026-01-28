@@ -22,6 +22,7 @@ import {
   ChangeOrderImpact,
 } from '@/types';
 import { useAuth } from '@/lib/auth';
+import { toast } from '@/components/ui/Toast';
 
 function fromFirestore(id: string, data: Record<string, unknown>): ChangeOrder {
   const approvals = ((data.approvals as unknown[]) || []).map((a: unknown) => {
@@ -168,7 +169,14 @@ export function useChangeOrders({ projectId }: UseChangeOrdersOptions) {
         updatedAt: now,
       };
 
-      await addDoc(collection(db, 'change_orders'), toFirestore(co));
+      try {
+        await addDoc(collection(db, 'change_orders'), toFirestore(co));
+        toast.success('Change order created');
+      } catch (err) {
+        console.error('Failed to create change order:', err);
+        toast.error('Failed to create change order');
+        throw err;
+      }
     },
     [projectId, user, profile, changeOrders.length]
   );
@@ -200,12 +208,19 @@ export function useChangeOrders({ projectId }: UseChangeOrdersOptions) {
         timestamp: new Date(),
       };
 
-      await updateDoc(doc(db, 'change_orders', coId), toFirestore({
-        status: 'pending_pm',
-        approvals,
-        history: [...co.history, historyEntry],
-        updatedAt: new Date(),
-      }));
+      try {
+        await updateDoc(doc(db, 'change_orders', coId), toFirestore({
+          status: 'pending_pm',
+          approvals,
+          history: [...co.history, historyEntry],
+          updatedAt: new Date(),
+        }));
+        toast.success('Change order submitted for approval');
+      } catch (err) {
+        console.error('Failed to submit change order:', err);
+        toast.error('Failed to submit change order');
+        throw err;
+      }
     },
     [user, profile, changeOrders]
   );
@@ -239,12 +254,19 @@ export function useChangeOrders({ projectId }: UseChangeOrdersOptions) {
         timestamp: new Date(),
       };
 
-      await updateDoc(doc(db, 'change_orders', coId), toFirestore({
-        status: newStatus,
-        approvals: updatedApprovals,
-        history: [...co.history, historyEntry],
-        updatedAt: new Date(),
-      }));
+      try {
+        await updateDoc(doc(db, 'change_orders', coId), toFirestore({
+          status: newStatus,
+          approvals: updatedApprovals,
+          history: [...co.history, historyEntry],
+          updatedAt: new Date(),
+        }));
+        toast.success('Change order approved');
+      } catch (err) {
+        console.error('Failed to approve change order:', err);
+        toast.error('Failed to approve change order');
+        throw err;
+      }
     },
     [user, profile, changeOrders]
   );
@@ -270,12 +292,19 @@ export function useChangeOrders({ projectId }: UseChangeOrdersOptions) {
         timestamp: new Date(),
       };
 
-      await updateDoc(doc(db, 'change_orders', coId), toFirestore({
-        status: 'rejected',
-        approvals: updatedApprovals,
-        history: [...co.history, historyEntry],
-        updatedAt: new Date(),
-      }));
+      try {
+        await updateDoc(doc(db, 'change_orders', coId), toFirestore({
+          status: 'rejected',
+          approvals: updatedApprovals,
+          history: [...co.history, historyEntry],
+          updatedAt: new Date(),
+        }));
+        toast.info('Change order rejected');
+      } catch (err) {
+        console.error('Failed to reject change order:', err);
+        toast.error('Failed to reject change order');
+        throw err;
+      }
     },
     [user, profile, changeOrders]
   );

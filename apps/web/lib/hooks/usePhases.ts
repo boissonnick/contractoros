@@ -15,6 +15,7 @@ import {
 import { db } from '@/lib/firebase/config';
 import { ProjectPhase, PhaseStatus, PhaseDocument, PhaseMilestone } from '@/types';
 import { useAuth } from '@/lib/auth';
+import { toast } from '@/components/ui/Toast';
 
 function fromFirestore(id: string, data: Record<string, unknown>): ProjectPhase {
   return {
@@ -119,35 +120,56 @@ export function usePhases({ projectId }: UsePhasesOptions) {
 
   const addPhase = useCallback(
     async (data: Omit<ProjectPhase, 'id' | 'createdAt' | 'updatedAt' | 'progressPercent' | 'tasksTotal' | 'tasksCompleted'>) => {
-      const now = new Date();
-      const phaseData: Partial<ProjectPhase> = {
-        ...data,
-        progressPercent: 0,
-        tasksTotal: 0,
-        tasksCompleted: 0,
-        createdAt: now,
-        updatedAt: now,
-      };
-      await addDoc(
-        collection(db, 'projects', projectId, 'phases'),
-        toFirestore(phaseData)
-      );
+      try {
+        const now = new Date();
+        const phaseData: Partial<ProjectPhase> = {
+          ...data,
+          progressPercent: 0,
+          tasksTotal: 0,
+          tasksCompleted: 0,
+          createdAt: now,
+          updatedAt: now,
+        };
+        await addDoc(
+          collection(db, 'projects', projectId, 'phases'),
+          toFirestore(phaseData)
+        );
+        toast.success('Phase created');
+      } catch (err) {
+        console.error('Failed to add phase:', err);
+        toast.error('Failed to create phase');
+        throw err;
+      }
     },
     [projectId]
   );
 
   const updatePhase = useCallback(
     async (phaseId: string, data: Partial<ProjectPhase>) => {
-      const ref = doc(db, 'projects', projectId, 'phases', phaseId);
-      await updateDoc(ref, toFirestore({ ...data, updatedAt: new Date() }));
+      try {
+        const ref = doc(db, 'projects', projectId, 'phases', phaseId);
+        await updateDoc(ref, toFirestore({ ...data, updatedAt: new Date() }));
+        // Don't toast for minor updates
+      } catch (err) {
+        console.error('Failed to update phase:', err);
+        toast.error('Failed to update phase');
+        throw err;
+      }
     },
     [projectId]
   );
 
   const deletePhase = useCallback(
     async (phaseId: string) => {
-      const ref = doc(db, 'projects', projectId, 'phases', phaseId);
-      await deleteDoc(ref);
+      try {
+        const ref = doc(db, 'projects', projectId, 'phases', phaseId);
+        await deleteDoc(ref);
+        toast.success('Phase deleted');
+      } catch (err) {
+        console.error('Failed to delete phase:', err);
+        toast.error('Failed to delete phase');
+        throw err;
+      }
     },
     [projectId]
   );

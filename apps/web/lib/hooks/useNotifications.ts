@@ -9,6 +9,7 @@ import {
   onSnapshot,
   updateDoc,
   doc,
+  setDoc,
   Timestamp,
   writeBatch,
   limit as firestoreLimit,
@@ -135,5 +136,47 @@ export function useNotificationPreferences() {
     return () => unsubscribe();
   }, [user?.uid, profile?.orgId]);
 
-  return { preferences, loading };
+  const updatePreference = useCallback(
+    async (
+      category: 'email' | 'push',
+      key: string,
+      value: boolean
+    ): Promise<boolean> => {
+      if (!user?.uid || !profile?.orgId || !preferences) return false;
+
+      try {
+        const updatedPreferences = {
+          ...preferences,
+          [category]: {
+            ...preferences[category],
+            [key]: value,
+          },
+        };
+
+        if (preferences.id) {
+          // Update existing document
+          await updateDoc(doc(db, 'notificationPreferences', preferences.id), {
+            [category]: updatedPreferences[category],
+          });
+        } else {
+          // Create new document
+          const newDocRef = doc(collection(db, 'notificationPreferences'));
+          await setDoc(newDocRef, {
+            userId: user.uid,
+            orgId: profile.orgId,
+            email: updatedPreferences.email,
+            push: updatedPreferences.push,
+          });
+        }
+
+        return true;
+      } catch (error) {
+        console.error('Failed to update notification preference:', error);
+        return false;
+      }
+    },
+    [user?.uid, profile?.orgId, preferences]
+  );
+
+  return { preferences, loading, updatePreference };
 }

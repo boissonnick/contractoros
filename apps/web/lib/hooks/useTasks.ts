@@ -17,6 +17,7 @@ import {
 import { db } from '@/lib/firebase/config';
 import { Task, TaskStatus, TaskPriority, TaskDependency, TaskAttachment, TaskChecklistItem, RecurrenceConfig } from '@/types';
 import { useAuth } from '@/lib/auth';
+import { toast } from '@/components/ui/Toast';
 
 // ---- Firestore ↔ Task converters ----
 
@@ -221,64 +222,85 @@ export function useTasks({ projectId, phaseId, parentTaskId }: UseTasksOptions):
     async (input: NewTaskInput): Promise<string> => {
       if (!profile?.orgId) throw new Error('No organization');
 
-      const maxOrder = tasks.length > 0 ? Math.max(...tasks.map((t) => t.order)) + 1 : 0;
+      try {
+        const maxOrder = tasks.length > 0 ? Math.max(...tasks.map((t) => t.order)) + 1 : 0;
 
-      const taskData = toFirestore({
-        orgId: profile.orgId,
-        projectId,
-        phaseId: input.phaseId,
-        parentTaskId: input.parentTaskId,
-        title: input.title,
-        description: input.description,
-        status: 'pending' as TaskStatus,
-        priority: input.priority || 'medium',
-        assignedTo: input.assignedTo || [],
-        assignedSubId: input.assignedSubId,
-        trade: input.trade,
-        startDate: input.startDate,
-        dueDate: input.dueDate,
-        duration: input.duration,
-        estimatedHours: input.estimatedHours,
-        dependencies: input.dependencies || [],
-        attachments: [],
-        // Sprint 5
-        checklist: input.checklist,
-        isRecurring: input.isRecurring,
-        recurrenceConfig: input.recurrenceConfig,
-        templateId: input.templateId,
-        order: maxOrder,
-        createdBy: user?.uid || '',
-        createdAt: new Date(),
-      });
-
-      const docRef = await addDoc(collection(db, 'tasks'), taskData);
-
-      // Log activity
-      if (profile && user) {
-        import('@/lib/activity').then(({ logActivity }) => {
-          logActivity({
-            orgId: profile.orgId,
-            type: 'task',
-            message: `Created task: ${taskData.title}`,
-            userId: user.uid,
-            userName: profile.displayName,
-            projectId,
-          });
+        const taskData = toFirestore({
+          orgId: profile.orgId,
+          projectId,
+          phaseId: input.phaseId,
+          parentTaskId: input.parentTaskId,
+          title: input.title,
+          description: input.description,
+          status: 'pending' as TaskStatus,
+          priority: input.priority || 'medium',
+          assignedTo: input.assignedTo || [],
+          assignedSubId: input.assignedSubId,
+          trade: input.trade,
+          startDate: input.startDate,
+          dueDate: input.dueDate,
+          duration: input.duration,
+          estimatedHours: input.estimatedHours,
+          dependencies: input.dependencies || [],
+          attachments: [],
+          // Sprint 5
+          checklist: input.checklist,
+          isRecurring: input.isRecurring,
+          recurrenceConfig: input.recurrenceConfig,
+          templateId: input.templateId,
+          order: maxOrder,
+          createdBy: user?.uid || '',
+          createdAt: new Date(),
         });
-      }
 
-      return docRef.id;
+        const docRef = await addDoc(collection(db, 'tasks'), taskData);
+
+        // Log activity
+        if (profile && user) {
+          import('@/lib/activity').then(({ logActivity }) => {
+            logActivity({
+              orgId: profile.orgId,
+              type: 'task',
+              message: `Created task: ${taskData.title}`,
+              userId: user.uid,
+              userName: profile.displayName,
+              projectId,
+            });
+          });
+        }
+
+        toast.success('Task created');
+        return docRef.id;
+      } catch (err) {
+        console.error('Failed to add task:', err);
+        toast.error('Failed to create task');
+        throw err;
+      }
     },
     [projectId, profile, user, tasks]
   );
 
   const updateTask = useCallback(async (taskId: string, updates: Partial<Task>) => {
-    const data = toFirestore(updates);
-    await updateDoc(doc(db, 'tasks', taskId), data);
+    try {
+      const data = toFirestore(updates);
+      await updateDoc(doc(db, 'tasks', taskId), data);
+      // Don't toast on every update (status changes are frequent)
+    } catch (err) {
+      console.error('Failed to update task:', err);
+      toast.error('Failed to update task');
+      throw err;
+    }
   }, []);
 
   const deleteTask = useCallback(async (taskId: string) => {
-    await deleteDoc(doc(db, 'tasks', taskId));
+    try {
+      await deleteDoc(doc(db, 'tasks', taskId));
+      toast.success('Task deleted');
+    } catch (err) {
+      console.error('Failed to delete task:', err);
+      toast.error('Failed to delete task');
+      throw err;
+    }
   }, []);
 
   const moveTask = useCallback(
@@ -305,39 +327,67 @@ export function useTasks({ projectId, phaseId, parentTaskId }: UseTasksOptions):
 
   // Sprint 5: Bulk operations
   const bulkUpdateStatus = useCallback(async (taskIds: string[], status: TaskStatus) => {
-    const batch = writeBatch(db);
-    taskIds.forEach((id) => {
-      const updates: Record<string, unknown> = { status, updatedAt: Timestamp.now() };
-      if (status === 'completed') {
-        updates.completedAt = Timestamp.now();
-      }
-      batch.update(doc(db, 'tasks', id), updates);
-    });
-    await batch.commit();
+    try {
+      const batch = writeBatch(db);
+      taskIds.forEach((id) => {
+        const updates: Record<string, unknown> = { status, updatedAt: Timestamp.now() };
+        if (status === 'completed') {
+          updates.completedAt = Timestamp.now();
+        }
+        batch.update(doc(db, 'tasks', id), updates);
+      });
+      await batch.commit();
+      toast.success(`Updated ${taskIds.length} task${taskIds.length > 1 ? 's' : ''}`);
+    } catch (err) {
+      console.error('Failed to bulk update status:', err);
+      toast.error('Failed to update tasks');
+      throw err;
+    }
   }, []);
 
   const bulkAssign = useCallback(async (taskIds: string[], assigneeIds: string[]) => {
-    const batch = writeBatch(db);
-    taskIds.forEach((id) => {
-      batch.update(doc(db, 'tasks', id), { assignedTo: assigneeIds, updatedAt: Timestamp.now() });
-    });
-    await batch.commit();
+    try {
+      const batch = writeBatch(db);
+      taskIds.forEach((id) => {
+        batch.update(doc(db, 'tasks', id), { assignedTo: assigneeIds, updatedAt: Timestamp.now() });
+      });
+      await batch.commit();
+      toast.success(`Assigned ${taskIds.length} task${taskIds.length > 1 ? 's' : ''}`);
+    } catch (err) {
+      console.error('Failed to bulk assign:', err);
+      toast.error('Failed to assign tasks');
+      throw err;
+    }
   }, []);
 
   const bulkDelete = useCallback(async (taskIds: string[]) => {
-    const batch = writeBatch(db);
-    taskIds.forEach((id) => {
-      batch.delete(doc(db, 'tasks', id));
-    });
-    await batch.commit();
+    try {
+      const batch = writeBatch(db);
+      taskIds.forEach((id) => {
+        batch.delete(doc(db, 'tasks', id));
+      });
+      await batch.commit();
+      toast.success(`Deleted ${taskIds.length} task${taskIds.length > 1 ? 's' : ''}`);
+    } catch (err) {
+      console.error('Failed to bulk delete:', err);
+      toast.error('Failed to delete tasks');
+      throw err;
+    }
   }, []);
 
   const bulkSetPriority = useCallback(async (taskIds: string[], priority: TaskPriority) => {
-    const batch = writeBatch(db);
-    taskIds.forEach((id) => {
-      batch.update(doc(db, 'tasks', id), { priority, updatedAt: Timestamp.now() });
-    });
-    await batch.commit();
+    try {
+      const batch = writeBatch(db);
+      taskIds.forEach((id) => {
+        batch.update(doc(db, 'tasks', id), { priority, updatedAt: Timestamp.now() });
+      });
+      await batch.commit();
+      toast.success(`Updated priority for ${taskIds.length} task${taskIds.length > 1 ? 's' : ''}`);
+    } catch (err) {
+      console.error('Failed to bulk set priority:', err);
+      toast.error('Failed to update task priorities');
+      throw err;
+    }
   }, []);
 
   return {
