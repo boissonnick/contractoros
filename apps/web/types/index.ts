@@ -616,16 +616,40 @@ export interface ProjectPhoto {
   id: string;
   projectId: string;
   taskId?: string;
+  phaseId?: string;
+  scopeItemId?: string;
+  folderId?: string;
   userId: string;
+  userName?: string;
   url: string;
   thumbnailUrl?: string;
   type: PhotoType;
   caption?: string;
+  tags?: string[];
+  approved?: boolean;
   location?: {
     lat: number;
     lng: number;
   };
   takenAt: Date;
+  createdAt: Date;
+}
+
+export interface PhotoFolder {
+  id: string;
+  projectId: string;
+  name: string;
+  parentId?: string;
+  order: number;
+  createdAt: Date;
+}
+
+export interface PhotoComment {
+  id: string;
+  photoId: string;
+  userId: string;
+  userName: string;
+  content: string;
   createdAt: Date;
 }
 

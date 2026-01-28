@@ -25,13 +25,16 @@ import {
   PuzzlePieceIcon,
 } from '@heroicons/react/24/outline';
 
-type Step = 'basics' | 'scope' | 'address' | 'client' | 'budget' | 'review';
+import { SparklesIcon } from '@heroicons/react/24/outline';
+
+type Step = 'basics' | 'scope' | 'address' | 'client' | 'preferences' | 'budget' | 'review';
 
 const steps: { id: Step; title: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: 'basics', title: 'Project Info', icon: BuildingOfficeIcon },
   { id: 'scope', title: 'Scope', icon: WrenchScrewdriverIcon },
   { id: 'address', title: 'Location', icon: MapPinIcon },
   { id: 'client', title: 'Client', icon: UserIcon },
+  { id: 'preferences', title: 'Preferences', icon: SparklesIcon },
   { id: 'budget', title: 'Budget & Dates', icon: CurrencyDollarIcon },
   { id: 'review', title: 'Review', icon: CheckCircleIcon },
 ];
@@ -80,6 +83,13 @@ export default function NewProjectPage() {
     startDate: '',
     estimatedEndDate: '',
   });
+  const [preferences, setPreferences] = useState({
+    finishSelections: '',
+    budgetRange: '',
+    timelinePreference: '',
+    specialRequests: '',
+    sendOnboardingLink: false,
+  });
 
   const currentStepIndex = steps.findIndex(s => s.id === currentStep);
   const selectedTemplate = templates.find(t => t.id === selectedTemplateId);
@@ -112,6 +122,8 @@ export default function NewProjectPage() {
         return form.street && form.city && form.state && form.zip;
       case 'client':
         return form.clientName && form.clientEmail;
+      case 'preferences':
+        return true;
       case 'budget':
         return true;
       case 'review':
@@ -182,6 +194,31 @@ export default function NewProjectPage() {
           name: phase.name,
           order: phase.order,
           status: 'upcoming',
+          createdAt: Timestamp.now(),
+        });
+      }
+
+      // Create client preferences doc if any preferences were set
+      if (preferences.finishSelections || preferences.budgetRange || preferences.timelinePreference || preferences.specialRequests) {
+        await addDoc(collection(db, 'projects', projectRef.id, 'clientPreferences'), {
+          projectId: projectRef.id,
+          finishSelections: preferences.finishSelections || null,
+          budgetRange: preferences.budgetRange || null,
+          timelinePreference: preferences.timelinePreference || null,
+          specialRequests: preferences.specialRequests || null,
+          inspirationImages: [],
+          createdAt: Timestamp.now(),
+          updatedAt: Timestamp.now(),
+        });
+      }
+
+      // Create onboarding token if requested
+      if (preferences.sendOnboardingLink && form.clientEmail) {
+        await addDoc(collection(db, 'clientOnboardingTokens'), {
+          projectId: projectRef.id,
+          clientEmail: form.clientEmail,
+          orgId: profile.orgId,
+          used: false,
           createdAt: Timestamp.now(),
         });
       }
@@ -391,6 +428,74 @@ export default function NewProjectPage() {
           </div>
         )}
 
+        {currentStep === 'preferences' && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Client Preferences</h2>
+              <p className="text-sm text-gray-500 mb-6">Capture the client&apos;s style and finish preferences (optional — can be filled later)</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Finish Selections</label>
+              <select
+                value={preferences.finishSelections}
+                onChange={(e) => setPreferences(p => ({ ...p, finishSelections: e.target.value }))}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+              >
+                <option value="">Not specified</option>
+                <option value="builder_grade">Builder Grade</option>
+                <option value="mid_range">Mid-Range</option>
+                <option value="high_end">High-End</option>
+                <option value="luxury">Luxury</option>
+                <option value="custom">Custom / Mixed</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Budget Range Expectation</label>
+              <select
+                value={preferences.budgetRange}
+                onChange={(e) => setPreferences(p => ({ ...p, budgetRange: e.target.value }))}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+              >
+                <option value="">Not specified</option>
+                <option value="under_25k">Under $25K</option>
+                <option value="25k_50k">$25K – $50K</option>
+                <option value="50k_100k">$50K – $100K</option>
+                <option value="100k_250k">$100K – $250K</option>
+                <option value="250k_plus">$250K+</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Timeline Preference</label>
+              <select
+                value={preferences.timelinePreference}
+                onChange={(e) => setPreferences(p => ({ ...p, timelinePreference: e.target.value }))}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+              >
+                <option value="">Not specified</option>
+                <option value="asap">ASAP</option>
+                <option value="flexible">Flexible</option>
+                <option value="specific_date">Specific target date</option>
+              </select>
+            </div>
+            <Textarea
+              label="Special Requests / Notes"
+              placeholder="Any specific materials, brands, or design preferences..."
+              value={preferences.specialRequests}
+              onChange={(e) => setPreferences(p => ({ ...p, specialRequests: e.target.value }))}
+              rows={3}
+            />
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={preferences.sendOnboardingLink}
+                onChange={(e) => setPreferences(p => ({ ...p, sendOnboardingLink: e.target.checked }))}
+                className="h-4 w-4 rounded border-gray-300 text-blue-600"
+              />
+              <span className="text-sm text-gray-700">Send preferences onboarding link to client after creation</span>
+            </label>
+          </div>
+        )}
+
         {currentStep === 'budget' && (
           <div className="space-y-6">
             <div>
@@ -458,6 +563,17 @@ export default function NewProjectPage() {
                 <p className="text-sm text-gray-600">{form.clientEmail}</p>
                 {form.clientPhone && <p className="text-sm text-gray-600">{form.clientPhone}</p>}
               </div>
+
+              {(preferences.finishSelections || preferences.budgetRange || preferences.timelinePreference || preferences.specialRequests) && (
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">Preferences</h3>
+                  {preferences.finishSelections && <p className="text-sm text-gray-600">Finish: {preferences.finishSelections.replace(/_/g, ' ')}</p>}
+                  {preferences.budgetRange && <p className="text-sm text-gray-600">Budget range: {preferences.budgetRange.replace(/_/g, ' ')}</p>}
+                  {preferences.timelinePreference && <p className="text-sm text-gray-600">Timeline: {preferences.timelinePreference.replace(/_/g, ' ')}</p>}
+                  {preferences.specialRequests && <p className="text-sm text-gray-600">Notes: {preferences.specialRequests}</p>}
+                  {preferences.sendOnboardingLink && <p className="text-xs text-blue-600 mt-1">Client onboarding link will be sent</p>}
+                </div>
+              )}
 
               {(form.budget || form.startDate || form.estimatedEndDate) && (
                 <div className="p-4 bg-gray-50 rounded-lg">
