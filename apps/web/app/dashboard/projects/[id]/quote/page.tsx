@@ -15,7 +15,10 @@ import {
   TrashIcon,
   ChevronDownIcon,
   ChevronRightIcon,
+  ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline';
+import { useScopes } from '@/lib/hooks/useScopes';
+import { useBids } from '@/lib/hooks/useBids';
 
 export default function QuoteBuilderPage() {
   const params = useParams();
@@ -28,6 +31,73 @@ export default function QuoteBuilderPage() {
   const [loading, setLoading] = useState(true);
   const [expandedPhases, setExpandedPhases] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
+  const [quoteStatus, setQuoteStatus] = useState<'draft' | 'sent' | 'approved' | 'rejected'>('draft');
+  const [showImport, setShowImport] = useState(false);
+
+  const { currentScope } = useScopes({ projectId });
+  const { bids } = useBids(projectId);
+  const acceptedBids = bids.filter(b => b.status === 'accepted');
+
+  const handleImportFromScope = async () => {
+    if (!currentScope) return;
+    for (const item of currentScope.items) {
+      const newSection: Omit<QuoteSection, 'id'> = {
+        projectId,
+        phaseId: item.phaseId,
+        name: item.title,
+        description: item.description || '',
+        laborCost: item.estimatedCost || 0,
+        materialCost: item.materials.reduce((s, m) => s + ((m.estimatedCost || 0) * (m.quantity || 1)), 0),
+        order: sections.length + 1,
+        status: 'draft',
+        createdAt: new Date(),
+      };
+      const docRef = await addDoc(collection(db, 'projects', projectId, 'quoteSections'), {
+        ...newSection,
+        createdAt: Timestamp.now(),
+      });
+      setSections(prev => [...prev, { id: docRef.id, ...newSection }]);
+    }
+    setShowImport(false);
+    toast.success(`Imported ${currentScope.items.length} scope items`);
+  };
+
+  const handleImportFromBids = async () => {
+    for (const bid of acceptedBids) {
+      const newSection: Omit<QuoteSection, 'id'> = {
+        projectId,
+        phaseId: bid.phaseIds?.[0],
+        name: `Bid: ${bid.description || 'Accepted bid'}`,
+        description: '',
+        laborCost: bid.laborCost || bid.amount,
+        materialCost: bid.materialCost || 0,
+        order: sections.length + 1,
+        status: 'draft',
+        createdAt: new Date(),
+      };
+      const docRef = await addDoc(collection(db, 'projects', projectId, 'quoteSections'), {
+        ...newSection,
+        createdAt: Timestamp.now(),
+      });
+      setSections(prev => [...prev, { id: docRef.id, ...newSection }]);
+    }
+    setShowImport(false);
+    toast.success(`Imported ${acceptedBids.length} accepted bids`);
+  };
+
+  const handleStatusChange = async (newStatus: 'draft' | 'sent' | 'approved' | 'rejected') => {
+    if (!project) return;
+    try {
+      await updateDoc(doc(db, 'projects', projectId), {
+        quoteStatus: newStatus,
+        updatedAt: Timestamp.now(),
+      });
+      setQuoteStatus(newStatus);
+      toast.success(`Quote marked as ${newStatus}`);
+    } catch {
+      toast.error('Failed to update quote status');
+    }
+  };
 
   useEffect(() => {
     async function fetchData() {
@@ -37,7 +107,9 @@ export default function QuoteBuilderPage() {
           router.push('/dashboard/projects');
           return;
         }
-        setProject({ id: projectDoc.id, ...projectDoc.data() } as Project);
+        const projData = projectDoc.data();
+        setProject({ id: projectDoc.id, ...projData } as Project);
+        if (projData?.quoteStatus) setQuoteStatus(projData.quoteStatus);
 
         const phasesSnap = await getDocs(collection(db, 'projects', projectId, 'phases'));
         const phasesData = phasesSnap.docs
@@ -223,8 +295,54 @@ export default function QuoteBuilderPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Quote Builder</h1>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Quote Builder</h1>
+          <div className="flex items-center gap-2 mt-1">
+            <span className={cn(
+              'text-xs px-2 py-0.5 rounded-full font-medium',
+              quoteStatus === 'draft' && 'bg-gray-100 text-gray-600',
+              quoteStatus === 'sent' && 'bg-blue-100 text-blue-700',
+              quoteStatus === 'approved' && 'bg-green-100 text-green-700',
+              quoteStatus === 'rejected' && 'bg-red-100 text-red-600',
+            )}>{quoteStatus}</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Button variant="secondary" size="sm" onClick={() => setShowImport(!showImport)} icon={<ArrowDownTrayIcon className="h-4 w-4" />}>
+              Import
+            </Button>
+            {showImport && (
+              <div className="absolute right-0 mt-1 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-10 py-1">
+                <button
+                  onClick={handleImportFromScope}
+                  disabled={!currentScope || currentScope.items.length === 0}
+                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 disabled:text-gray-300 disabled:hover:bg-transparent"
+                >
+                  From Scope ({currentScope?.items.length || 0} items)
+                </button>
+                <button
+                  onClick={handleImportFromBids}
+                  disabled={acceptedBids.length === 0}
+                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 disabled:text-gray-300 disabled:hover:bg-transparent"
+                >
+                  From Accepted Bids ({acceptedBids.length})
+                </button>
+              </div>
+            )}
+          </div>
+          <select
+            value={quoteStatus}
+            onChange={(e) => handleStatusChange(e.target.value as 'draft' | 'sent' | 'approved' | 'rejected')}
+            className="text-sm border border-gray-300 rounded-lg px-3 py-1.5"
+          >
+            <option value="draft">Draft</option>
+            <option value="sent">Sent</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
       </div>
 
       {/* Column Headers */}

@@ -14,15 +14,24 @@ functions/         → Firebase Cloud Functions Gen 2 (us-east1), handles email 
 - **Forms:** React Hook Form + Zod validation
 - **State:** Custom Firestore hooks (lib/hooks/), no global state library
 
+## Local Environment
+- **Node:** v20 via Homebrew (`brew link node@20` — keg-only, must be symlinked)
+- **npm:** v10.8.2
+- **Firebase CLI:** v15.4.0 (`firebase` in PATH via Homebrew)
+- **Docker:** Docker Desktop for Mac
+- **gcloud:** Google Cloud SDK (`gcloud` in PATH via Homebrew)
+- All tools in `/opt/homebrew/bin/`. Node@20 bin also at `/opt/homebrew/opt/node@20/bin/`.
+
 ## Commands
+All commands run from `apps/web/` unless noted:
 ```bash
 npm run dev              # Start Next.js dev server
 npm run build            # Production build (includes CSS verification + standalone copy)
 npm run start            # Start production server
-npm run build:functions  # Compile Cloud Functions
-npm run deploy:functions # Deploy functions to Firebase
+npm run build:functions  # Compile Cloud Functions (from repo root)
+npm run deploy:functions # Deploy functions to Firebase (from repo root)
 npm run emulators        # Start Firebase emulators (auth:9099, functions:5001, firestore:8080)
-npx tsc --noEmit         # Type check (run from apps/web/)
+npx tsc --noEmit         # Type check
 ```
 
 ## Portal Routes (app/)

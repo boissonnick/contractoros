@@ -3,59 +3,48 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { db } from '@/lib/firebase/config';
-import { collection, getDocs, query, where, orderBy, addDoc, updateDoc, doc, Timestamp } from 'firebase/firestore';
-import { ProjectPhase, Task, Bid, Subcontractor } from '@/types';
+import { collection, getDocs, addDoc, Timestamp } from 'firebase/firestore';
+import { ProjectPhase, ScopeItem } from '@/types';
 import { useSubcontractors } from '@/lib/hooks/useSubcontractors';
 import { useSubAssignments } from '@/lib/hooks/useSubAssignments';
 import { useTasks } from '@/lib/hooks/useTasks';
+import { useBids } from '@/lib/hooks/useBids';
+import { useScopes } from '@/lib/hooks/useScopes';
 import SubAssignmentManager from '@/components/subcontractors/SubAssignmentManager';
 import SubForm from '@/components/subcontractors/SubForm';
 import InlineCreateModal from '@/components/ui/InlineCreateModal';
 import BidList from '@/components/projects/bids/BidList';
 import BidComparison from '@/components/projects/bids/BidComparison';
+import BidSolicitationForm from '@/components/projects/bids/BidSolicitationForm';
+import BidSolicitationList from '@/components/projects/bids/BidSolicitationList';
 import { Button } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/lib/auth';
 
-type Tab = 'assignments' | 'bids' | 'compare';
+type Tab = 'assignments' | 'bids' | 'compare' | 'solicitations';
 
 export default function ProjectSubsPage() {
   const params = useParams();
   const projectId = params.id as string;
   const { profile } = useAuth();
   const [showCreateSub, setShowCreateSub] = useState(false);
+  const [showSolicitationForm, setShowSolicitationForm] = useState(false);
 
   const { subs } = useSubcontractors();
   const { assignments, createAssignment, updateAssignment } = useSubAssignments({ projectId });
   const { tasks } = useTasks({ projectId });
+  const { bids, solicitations, updateBidStatus, createSolicitation, closeSolicitation } = useBids(projectId);
+  const { currentScope } = useScopes({ projectId });
   const [phases, setPhases] = useState<ProjectPhase[]>([]);
-  const [bids, setBids] = useState<Bid[]>([]);
   const [tab, setTab] = useState<Tab>('assignments');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetch() {
       try {
-        const [phaseSnap, bidSnap] = await Promise.all([
-          getDocs(collection(db, 'projects', projectId, 'phases')),
-          getDocs(query(collection(db, 'bids'), where('projectId', '==', projectId), orderBy('createdAt', 'desc'))),
-        ]);
+        const phaseSnap = await getDocs(collection(db, 'projects', projectId, 'phases'));
         setPhases(phaseSnap.docs.map(d => ({ id: d.id, ...d.data() }) as ProjectPhase).sort((a, b) => a.order - b.order));
-        setBids(bidSnap.docs.map(d => {
-          const data = d.data();
-          return {
-            id: d.id,
-            ...data,
-            proposedStartDate: data.proposedStartDate ? (data.proposedStartDate as Timestamp).toDate() : undefined,
-            proposedEndDate: data.proposedEndDate ? (data.proposedEndDate as Timestamp).toDate() : undefined,
-            submittedAt: data.submittedAt ? (data.submittedAt as Timestamp).toDate() : undefined,
-            expiresAt: data.expiresAt ? (data.expiresAt as Timestamp).toDate() : undefined,
-            respondedAt: data.respondedAt ? (data.respondedAt as Timestamp).toDate() : undefined,
-            createdAt: data.createdAt ? (data.createdAt as Timestamp).toDate() : new Date(),
-            updatedAt: data.updatedAt ? (data.updatedAt as Timestamp).toDate() : undefined,
-          } as Bid;
-        }));
       } catch (err) {
         console.error('Error fetching subs data:', err);
       } finally {
@@ -64,11 +53,6 @@ export default function ProjectSubsPage() {
     }
     fetch();
   }, [projectId]);
-
-  const handleBidStatusChange = async (bidId: string, status: Bid['status']) => {
-    await updateDoc(doc(db, 'bids', bidId), { status, respondedAt: Timestamp.now(), updatedAt: Timestamp.now() });
-    setBids(prev => prev.map(b => b.id === bidId ? { ...b, status } : b));
-  };
 
   if (loading) {
     return (
@@ -81,22 +65,37 @@ export default function ProjectSubsPage() {
   const TABS: { id: Tab; label: string }[] = [
     { id: 'assignments', label: `Assignments (${assignments.length})` },
     { id: 'bids', label: `Bids (${bids.length})` },
+    { id: 'solicitations', label: `Solicitations (${solicitations.length})` },
     { id: 'compare', label: 'Compare' },
   ];
 
+  const scopeItems: ScopeItem[] = currentScope?.items || [];
+
   return (
     <div className="space-y-4">
-      {/* Header with Create Sub button */}
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div />
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowCreateSub(true)}
-          icon={<PlusIcon className="h-4 w-4" />}
-        >
-          Add Subcontractor
-        </Button>
+        <div className="flex items-center gap-2">
+          {tab === 'solicitations' && (
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setShowSolicitationForm(true)}
+              icon={<PlusIcon className="h-4 w-4" />}
+            >
+              Solicit Bids
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowCreateSub(true)}
+            icon={<PlusIcon className="h-4 w-4" />}
+          >
+            Add Subcontractor
+          </Button>
+        </div>
       </div>
 
       {/* Create Sub Modal */}
@@ -115,6 +114,21 @@ export default function ProjectSubsPage() {
             setShowCreateSub(false);
           }}
           onCancel={() => setShowCreateSub(false)}
+        />
+      </InlineCreateModal>
+
+      {/* Solicitation Form Modal */}
+      <InlineCreateModal open={showSolicitationForm} onClose={() => setShowSolicitationForm(false)} title="Solicit Bids">
+        <BidSolicitationForm
+          scopeItems={scopeItems}
+          phases={phases}
+          subs={subs}
+          projectId={projectId}
+          onSubmit={async (data) => {
+            await createSolicitation(data);
+            setShowSolicitationForm(false);
+          }}
+          onCancel={() => setShowSolicitationForm(false)}
         />
       </InlineCreateModal>
 
@@ -146,11 +160,19 @@ export default function ProjectSubsPage() {
       )}
 
       {tab === 'bids' && (
-        <BidList bids={bids} subs={subs} onStatusChange={handleBidStatusChange} />
+        <BidList bids={bids} subs={subs} onStatusChange={updateBidStatus} />
+      )}
+
+      {tab === 'solicitations' && (
+        <BidSolicitationList
+          solicitations={solicitations}
+          subs={subs}
+          onClose={closeSolicitation}
+        />
       )}
 
       {tab === 'compare' && (
-        <BidComparison bids={bids} subs={subs} onAccept={(bidId) => handleBidStatusChange(bidId, 'accepted')} />
+        <BidComparison bids={bids} subs={subs} onAccept={(bidId) => updateBidStatus(bidId, 'accepted')} />
       )}
     </div>
   );

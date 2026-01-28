@@ -271,6 +271,15 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // Bid solicitations collection
+    match /bidSolicitations/{solId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() &&
+        getUserProfile().role in ['OWNER', 'PM'];
+      allow update: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+
     // Default deny all other access
     match /{document=**} {
       allow read, write: if false;

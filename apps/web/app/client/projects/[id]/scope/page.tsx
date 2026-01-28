@@ -130,6 +130,9 @@ export default function ClientScopePage() {
               quoteSections={[]}
               onEditItem={() => {}}
               onRemoveItem={() => {}}
+              selectedIds={new Set()}
+              onToggleSelect={() => {}}
+              isDraft={false}
             />
           );
         })}
@@ -140,6 +143,9 @@ export default function ClientScopePage() {
             quoteSections={[]}
             onEditItem={() => {}}
             onRemoveItem={() => {}}
+            selectedIds={new Set()}
+            onToggleSelect={() => {}}
+            isDraft={false}
           />
         )}
       </div>

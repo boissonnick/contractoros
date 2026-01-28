@@ -1,10 +1,24 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Scope, ScopeItem, ProjectPhase, QuoteSection } from '@/types';
 import { Button } from '@/components/ui';
-import { PlusIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, PaperAirplaneIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  arrayMove,
+} from '@dnd-kit/sortable';
 import ScopeItemForm from './ScopeItemForm';
 import ScopePhaseGroup from './ScopePhaseGroup';
 import ScopeApprovalPanel from './ScopeApprovalPanel';
@@ -49,6 +63,12 @@ export default function ScopeBuilder({
   const [editingItem, setEditingItem] = useState<ScopeItem | null>(null);
   const [showAddItem, setShowAddItem] = useState(false);
   const [items, setItems] = useState<ScopeItem[]>(scope?.items || []);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor)
+  );
 
   // Group items by phase
   const groupedItems = useMemo(() => {
@@ -71,6 +91,8 @@ export default function ScopeBuilder({
 
   const totalCost = items.reduce((sum, item) => sum + (item.estimatedCost || 0), 0);
   const totalHours = items.reduce((sum, item) => sum + (item.estimatedHours || 0), 0);
+  const totalMaterialsCost = items.reduce((sum, item) =>
+    sum + item.materials.reduce((ms, m) => ms + ((m.estimatedCost || 0) * (m.quantity || 1)), 0), 0);
   const isDraft = !scope || scope.status === 'draft';
 
   const handleAddItem = (item: ScopeItem) => {
@@ -91,6 +113,48 @@ export default function ScopeBuilder({
     const updated = items.filter(i => i.id !== itemId);
     setItems(updated);
     onSaveItems(updated);
+    setSelectedIds(prev => { const next = new Set(prev); next.delete(itemId); return next; });
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedIds.size === 0) return;
+    const updated = items.filter(i => !selectedIds.has(i.id));
+    setItems(updated);
+    onSaveItems(updated);
+    setSelectedIds(new Set());
+  };
+
+  const toggleSelect = useCallback((itemId: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(itemId)) next.delete(itemId);
+      else next.add(itemId);
+      return next;
+    });
+  }, []);
+
+  const selectAll = () => {
+    if (selectedIds.size === items.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(items.map(i => i.id)));
+    }
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = items.findIndex(i => i.id === active.id);
+    const newIndex = items.findIndex(i => i.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const reordered = arrayMove(items, oldIndex, newIndex).map((item, idx) => ({
+      ...item,
+      order: idx,
+    }));
+    setItems(reordered);
+    onSaveItems(reordered);
   };
 
   if (!scope) {
@@ -114,9 +178,15 @@ export default function ScopeBuilder({
           </h3>
           <p className="text-sm text-gray-500">
             {items.length} items · {totalHours}h · {fmt(totalCost)}
+            {totalMaterialsCost > 0 && <span> · Materials: {fmt(totalMaterialsCost)}</span>}
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {isDraft && selectedIds.size > 0 && (
+            <Button variant="danger" size="sm" onClick={handleBulkDelete} icon={<TrashIcon className="h-4 w-4" />}>
+              Delete {selectedIds.size}
+            </Button>
+          )}
           {isDraft && (
             <>
               <Button variant="secondary" size="sm" onClick={() => setShowAddItem(true)} icon={<PlusIcon className="h-4 w-4" />}>
@@ -149,6 +219,24 @@ export default function ScopeBuilder({
       {/* Content */}
       {tab === 'items' && (
         <div className="space-y-3">
+          {/* Bulk actions bar */}
+          {isDraft && items.length > 0 && (
+            <div className="flex items-center gap-3 text-xs text-gray-500">
+              <label className="flex items-center gap-1.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={selectedIds.size === items.length && items.length > 0}
+                  onChange={selectAll}
+                  className="h-3.5 w-3.5 rounded border-gray-300 text-blue-600"
+                />
+                Select all
+              </label>
+              {selectedIds.size > 0 && (
+                <span>{selectedIds.size} selected</span>
+              )}
+            </div>
+          )}
+
           {/* Add/edit form */}
           {(showAddItem || editingItem) && (
             <div className="border border-blue-200 rounded-xl p-4 bg-blue-50/50">
@@ -165,30 +253,40 @@ export default function ScopeBuilder({
             </div>
           )}
 
-          {/* Phase groups */}
-          {Array.from(groupedItems.groups.entries()).map(([phaseId, phaseItems]) => {
-            const phase = phases.find(p => p.id === phaseId);
-            return (
-              <ScopePhaseGroup
-                key={phaseId}
-                phaseName={phase?.name || 'Unknown Phase'}
-                items={phaseItems}
-                quoteSections={quoteSections}
-                onEditItem={(item) => setEditingItem(item)}
-                onRemoveItem={handleRemoveItem}
-              />
-            );
-          })}
+          {/* Phase groups with drag-and-drop */}
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
+              {Array.from(groupedItems.groups.entries()).map(([phaseId, phaseItems]) => {
+                const phase = phases.find(p => p.id === phaseId);
+                return (
+                  <ScopePhaseGroup
+                    key={phaseId}
+                    phaseName={phase?.name || 'Unknown Phase'}
+                    items={phaseItems}
+                    quoteSections={quoteSections}
+                    onEditItem={(item) => setEditingItem(item)}
+                    onRemoveItem={handleRemoveItem}
+                    selectedIds={selectedIds}
+                    onToggleSelect={toggleSelect}
+                    isDraft={isDraft}
+                  />
+                );
+              })}
 
-          {groupedItems.ungrouped.length > 0 && (
-            <ScopePhaseGroup
-              phaseName="Unassigned"
-              items={groupedItems.ungrouped}
-              quoteSections={quoteSections}
-              onEditItem={(item) => setEditingItem(item)}
-              onRemoveItem={handleRemoveItem}
-            />
-          )}
+              {groupedItems.ungrouped.length > 0 && (
+                <ScopePhaseGroup
+                  phaseName="Unassigned"
+                  items={groupedItems.ungrouped}
+                  quoteSections={quoteSections}
+                  onEditItem={(item) => setEditingItem(item)}
+                  onRemoveItem={handleRemoveItem}
+                  selectedIds={selectedIds}
+                  onToggleSelect={toggleSelect}
+                  isDraft={isDraft}
+                />
+              )}
+            </SortableContext>
+          </DndContext>
 
           {items.length === 0 && !showAddItem && (
             <div className="border border-dashed border-gray-300 rounded-xl p-8 text-center">

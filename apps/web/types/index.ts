@@ -538,6 +538,29 @@ export interface Bid {
 }
 
 // ============================================
+// Bid Solicitation Types
+// ============================================
+
+export type BidSolicitationStatus = 'open' | 'closed' | 'cancelled';
+
+export interface BidSolicitation {
+  id: string;
+  projectId: string;
+  orgId: string;
+  title: string;
+  description?: string;
+  scopeItemIds: string[];
+  phaseIds: string[];
+  trade?: string;
+  invitedSubIds: string[];
+  deadline: Date;
+  status: BidSolicitationStatus;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+// ============================================
 // Expense Types
 // ============================================
 
