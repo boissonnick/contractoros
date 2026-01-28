@@ -124,7 +124,14 @@ export function useExpenses({ projectId, orgWide }: UseExpensesOptions = {}): Us
       },
       (err) => {
         console.error('Expenses listener error:', err);
-        setError(err.message);
+        if (err.message?.includes('requires an index')) {
+          setError('Database index required. Please deploy indexes with: firebase deploy --only firestore:indexes');
+        } else if (err.message?.includes('permission-denied')) {
+          setError('Permission denied. Please check Firestore security rules.');
+        } else {
+          setError(err.message || 'Failed to load expenses');
+        }
+        setExpenses([]);
         setLoading(false);
       }
     );

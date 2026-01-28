@@ -62,6 +62,7 @@ export default function PunchListPage() {
 
   const [punchItems, setPunchItems] = useState<PunchItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<PunchItemStatus | 'all'>('all');
   const [priorityFilter, setPriorityFilter] = useState<PunchItemPriority | 'all'>('all');
@@ -73,6 +74,7 @@ export default function PunchListPage() {
 
     try {
       setLoading(true);
+      setError(null);
       const q = query(
         collection(db, 'punchItems'),
         where('projectId', '==', projectId),
@@ -91,9 +93,18 @@ export default function PunchListPage() {
       })) as PunchItem[];
 
       setPunchItems(items);
-    } catch (error) {
-      console.error('Error loading punch items:', error);
-      toast.error('Failed to load punch items');
+    } catch (err: unknown) {
+      console.error('Error loading punch items:', err);
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      if (errorMessage.includes('requires an index')) {
+        setError('Database index required. Please deploy indexes.');
+      } else if (errorMessage.includes('permission-denied')) {
+        setError('Permission denied. Please check Firestore security rules.');
+      } else {
+        setError('Failed to load punch items. Please try again.');
+        toast.error('Failed to load punch items');
+      }
+      setPunchItems([]);
     } finally {
       setLoading(false);
     }
@@ -340,6 +351,13 @@ export default function PunchListPage() {
       {/* Punch Items List */}
       {loading ? (
         <SkeletonList count={5} />
+      ) : error ? (
+        <Card className="p-6 text-center">
+          <ExclamationTriangleIcon className="h-12 w-12 mx-auto text-amber-500 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Unable to Load Punch Items</h3>
+          <p className="text-sm text-gray-500 mb-4">{error}</p>
+          <Button variant="outline" onClick={loadPunchItems}>Try Again</Button>
+        </Card>
       ) : filteredItems.length === 0 ? (
         <EmptyState
           icon={<ClipboardDocumentListIcon className="h-full w-full" />}

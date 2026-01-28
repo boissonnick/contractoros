@@ -77,20 +77,40 @@ export function useBids(projectId: string) {
   const [bids, setBids] = useState<Bid[]>([]);
   const [solicitations, setSolicitations] = useState<BidSolicitation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!projectId) return;
+    if (!projectId) {
+      setLoading(false);
+      return;
+    }
+
+    setError(null);
 
     const bidQ = query(collection(db, 'bids'), where('projectId', '==', projectId), orderBy('createdAt', 'desc'));
     const unsub1 = onSnapshot(bidQ, (snap) => {
       setBids(snap.docs.map(d => bidFromFirestore(d.id, d.data())));
       setLoading(false);
-    }, (err) => { console.error('useBids error:', err); setLoading(false); });
+    }, (err) => {
+      console.error('useBids error:', err);
+      if (err.message?.includes('requires an index')) {
+        setError('Database index required. Please deploy indexes.');
+      } else if (err.message?.includes('permission-denied')) {
+        setError('Permission denied. Check Firestore rules.');
+      } else {
+        setError(err.message || 'Failed to load bids');
+      }
+      setBids([]);
+      setLoading(false);
+    });
 
     const solQ = query(collection(db, 'bidSolicitations'), where('projectId', '==', projectId), orderBy('createdAt', 'desc'));
     const unsub2 = onSnapshot(solQ, (snap) => {
       setSolicitations(snap.docs.map(d => solicitationFromFirestore(d.id, d.data())));
-    }, (err) => { console.error('useBidSolicitations error:', err); });
+    }, (err) => {
+      console.error('useBidSolicitations error:', err);
+      setSolicitations([]);
+    });
 
     return () => { unsub1(); unsub2(); };
   }, [projectId]);
@@ -119,5 +139,5 @@ export function useBids(projectId: string) {
     await updateDoc(doc(db, 'bids', bidId), update);
   }, [user]);
 
-  return { bids, solicitations, loading, createSolicitation, closeSolicitation, updateBidStatus };
+  return { bids, solicitations, loading, error, createSolicitation, closeSolicitation, updateBidStatus };
 }

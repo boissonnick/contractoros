@@ -109,11 +109,19 @@ export function useChangeOrders({ projectId }: UseChangeOrdersOptions) {
       q,
       (snap) => {
         setChangeOrders(snap.docs.map((d) => fromFirestore(d.id, d.data())));
+        setError(null);
         setLoading(false);
       },
       (err) => {
         console.error('useChangeOrders error:', err);
-        setError(err.message);
+        if (err.message?.includes('requires an index')) {
+          setError('Database index required. Please deploy indexes with: firebase deploy --only firestore:indexes');
+        } else if (err.message?.includes('permission-denied')) {
+          setError('Permission denied. Please check Firestore security rules.');
+        } else {
+          setError(err.message || 'Failed to load change orders');
+        }
+        setChangeOrders([]);
         setLoading(false);
       }
     );

@@ -51,7 +51,14 @@ export function useActivityLog(orgId: string | undefined, maxItems = 20) {
       }));
       setLoading(false);
     }, (err) => {
-      console.error('useActivityLog error:', err);
+      // Fail silently for missing index - activity log is not critical
+      // Index can be deployed with: firebase deploy --only firestore:indexes
+      if (err.message?.includes('requires an index')) {
+        console.warn('useActivityLog: Missing Firestore index for activityLog collection. Deploy indexes with: firebase deploy --only firestore:indexes');
+      } else {
+        console.error('useActivityLog error:', err);
+      }
+      setActivities([]);
       setLoading(false);
     });
 

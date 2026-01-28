@@ -56,6 +56,7 @@ export default function RFIsPage() {
 
   const [rfis, setRfis] = useState<RFI[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<RFIStatus | 'all'>('all');
   const [selectedRFI, setSelectedRFI] = useState<RFI | null>(null);
@@ -69,6 +70,7 @@ export default function RFIsPage() {
 
   const loadRFIs = async () => {
     setLoading(true);
+    setError(null);
     try {
       const rfisQuery = query(
         collection(db, 'rfis'),
@@ -88,9 +90,18 @@ export default function RFIsPage() {
         updatedAt: doc.data().updatedAt?.toDate(),
       })) as RFI[];
       setRfis(rfisData);
-    } catch (error) {
-      console.error('Error loading RFIs:', error);
-      toast.error('Failed to load RFIs');
+    } catch (err: unknown) {
+      console.error('Error loading RFIs:', err);
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      if (errorMessage.includes('requires an index')) {
+        setError('Database index required. Please deploy indexes.');
+      } else if (errorMessage.includes('permission-denied')) {
+        setError('Permission denied. Please check Firestore security rules.');
+      } else {
+        setError('Failed to load RFIs. Please try again.');
+        toast.error('Failed to load RFIs');
+      }
+      setRfis([]);
     } finally {
       setLoading(false);
     }
@@ -284,6 +295,13 @@ export default function RFIsPage() {
       {/* RFI List */}
       {loading ? (
         <SkeletonList count={5} />
+      ) : error ? (
+        <Card className="p-6 text-center">
+          <ExclamationTriangleIcon className="h-12 w-12 mx-auto text-amber-500 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Unable to Load RFIs</h3>
+          <p className="text-sm text-gray-500 mb-4">{error}</p>
+          <Button variant="outline" onClick={loadRFIs}>Try Again</Button>
+        </Card>
       ) : filteredRFIs.length === 0 ? (
         <EmptyState
           icon={<DocumentTextIcon className="h-full w-full" />}

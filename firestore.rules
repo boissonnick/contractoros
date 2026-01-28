@@ -320,6 +320,52 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // Expenses collection
+    match /expenses/{expenseId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // RFIs collection (Request for Information)
+    match /rfis/{rfiId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() &&
+        getUserProfile().role in ['OWNER', 'PM', 'EMPLOYEE'];
+      allow update: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+
+    // Punch items collection
+    match /punchItems/{itemId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() &&
+        getUserProfile().role in ['OWNER', 'PM', 'EMPLOYEE'];
+      allow update: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+
+    // Change orders collection (alternate name used by useChangeOrders hook)
+    match /change_orders/{orderId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() &&
+        getUserProfile().role in ['OWNER', 'PM'];
+      allow update: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+
+    // Estimates collection
+    match /estimates/{estimateId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() &&
+        getUserProfile().role in ['OWNER', 'PM'];
+      allow update: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+
     // Weekly timesheets collection
     match /weeklyTimesheets/{timesheetId} {
       allow read: if isAuthenticated();

@@ -181,9 +181,16 @@ export default function DashboardPage() {
       const usersSnap = await getDocs(usersQuery);
       setTeamCount(usersSnap.size);
 
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error fetching dashboard data:', error);
-      setFetchError('Failed to load dashboard data. The database may be unreachable.');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('requires an index')) {
+        setFetchError('Database index required. Please run: firebase deploy --only firestore:indexes');
+      } else if (errorMessage.includes('permission-denied')) {
+        setFetchError('Permission denied. Please check your Firestore security rules.');
+      } else {
+        setFetchError(`Failed to load dashboard data: ${errorMessage}`);
+      }
     } finally {
       setLoading(false);
     }
