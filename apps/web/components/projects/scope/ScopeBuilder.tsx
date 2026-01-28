@@ -24,6 +24,7 @@ import ScopePhaseGroup from './ScopePhaseGroup';
 import ScopeApprovalPanel from './ScopeApprovalPanel';
 import ScopeQuoteLink from './ScopeQuoteLink';
 import ScopeVersionHistory from './ScopeVersionHistory';
+import ScopeTemplateSelector from './ScopeTemplateSelector';
 
 type Tab = 'items' | 'approvals' | 'quotes' | 'versions';
 
@@ -64,6 +65,7 @@ export default function ScopeBuilder({
   const [showAddItem, setShowAddItem] = useState(false);
   const [items, setItems] = useState<ScopeItem[]>(scope?.items || []);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -141,6 +143,13 @@ export default function ScopeBuilder({
     }
   };
 
+  const handleTemplateSelect = (templateItems: ScopeItem[]) => {
+    const merged = [...items, ...templateItems.map((item, idx) => ({ ...item, order: items.length + idx }))];
+    setItems(merged);
+    onSaveItems(merged);
+    setShowTemplateSelector(false);
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -189,6 +198,9 @@ export default function ScopeBuilder({
           )}
           {isDraft && (
             <>
+              <Button variant="outline" size="sm" onClick={() => setShowTemplateSelector(true)}>
+                From Template
+              </Button>
               <Button variant="secondary" size="sm" onClick={() => setShowAddItem(true)} icon={<PlusIcon className="h-4 w-4" />}>
                 Add Item
               </Button>
@@ -315,6 +327,13 @@ export default function ScopeBuilder({
           scopes={allScopes}
           currentScopeId={scope.id}
           onSelect={onSelectVersion}
+        />
+      )}
+
+      {showTemplateSelector && (
+        <ScopeTemplateSelector
+          onSelect={handleTemplateSelect}
+          onClose={() => setShowTemplateSelector(false)}
         />
       )}
     </div>

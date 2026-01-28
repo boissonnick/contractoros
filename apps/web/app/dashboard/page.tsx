@@ -15,6 +15,7 @@ import {
   PlusIcon,
 } from '@heroicons/react/24/outline';
 import { FirestoreError } from '@/components/ui';
+import { useActivityLog } from '@/lib/hooks/useActivityLog';
 
 interface StatCardProps {
   title: string;
@@ -57,16 +58,9 @@ function StatCard({ title, value, icon: Icon, trend, trendUp, href, color }: Sta
   return href ? <Link href={href}>{content}</Link> : content;
 }
 
-interface ActivityItem {
-  id: string;
-  type: string;
-  message: string;
-  time: string;
-  user: string;
-}
-
 export default function DashboardPage() {
   const { profile } = useAuth();
+  const { activities } = useActivityLog(profile?.orgId);
   const [stats, setStats] = useState({
     activeProjects: 0,
     todayHours: 0,
@@ -74,7 +68,6 @@ export default function DashboardPage() {
     pendingInvoices: 0,
     teamMembers: 0,
   });
-  const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
@@ -120,12 +113,7 @@ export default function DashboardPage() {
           teamMembers: usersSnap.size,
         });
 
-        // For demo, show placeholder activity
-        setRecentActivity([
-          { id: '1', type: 'project', message: 'New project created: Kitchen Renovation', time: '2 hours ago', user: 'You' },
-          { id: '2', type: 'time', message: 'John clocked in at Downtown Loft', time: '3 hours ago', user: 'John Smith' },
-          { id: '3', type: 'issue', message: 'Issue reported: Material delay', time: '5 hours ago', user: 'Mike Johnson' },
-        ]);
+        // Activity is loaded via useActivityLog hook
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
         setFetchError('Failed to load dashboard data. The database may be unreachable.');
@@ -221,16 +209,16 @@ export default function DashboardPage() {
               View all
             </Link>
           </div>
-          {recentActivity.length > 0 ? (
+          {activities.length > 0 ? (
             <div className="space-y-4">
-              {recentActivity.map((activity) => (
+              {activities.map((activity) => (
                 <div key={activity.id} className="flex items-start gap-4 p-3 rounded-lg hover:bg-gray-50">
                   <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-medium text-sm">
-                    {activity.user.charAt(0)}
+                    {activity.userName.charAt(0)}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-gray-900">{activity.message}</p>
-                    <p className="text-xs text-gray-500 mt-1">{activity.user} · {activity.time}</p>
+                    <p className="text-xs text-gray-500 mt-1">{activity.userName} · {activity.timeAgo}</p>
                   </div>
                 </div>
               ))}

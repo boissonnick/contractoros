@@ -125,6 +125,17 @@ export function useScopes({ projectId }: UseScopesOptions) {
       };
 
       await addDoc(collection(db, 'scopes'), toFirestore(scopeData));
+
+      import('@/lib/activity').then(({ logActivity }) => {
+        logActivity({
+          orgId: profile.orgId,
+          type: 'scope',
+          message: `Created scope v${latestVersion + 1} with ${items.length} items`,
+          userId: user.uid,
+          userName: profile.displayName,
+          projectId,
+        });
+      });
     },
     [projectId, user, profile, scopes, currentScope]
   );

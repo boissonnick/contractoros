@@ -205,6 +205,21 @@ export function useTasks({ projectId, phaseId, parentTaskId }: UseTasksOptions):
       });
 
       const docRef = await addDoc(collection(db, 'tasks'), taskData);
+
+      // Log activity
+      if (profile && user) {
+        import('@/lib/activity').then(({ logActivity }) => {
+          logActivity({
+            orgId: profile.orgId,
+            type: 'task',
+            message: `Created task: ${taskData.title}`,
+            userId: user.uid,
+            userName: profile.displayName,
+            projectId,
+          });
+        });
+      }
+
       return docRef.id;
     },
     [projectId, profile, user, tasks]

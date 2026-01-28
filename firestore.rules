@@ -280,6 +280,21 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // SOW templates collection
+    match /sowTemplates/{templateId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() &&
+        getUserProfile().role in ['OWNER', 'PM'];
+      allow delete: if isAdmin();
+    }
+
+    // Activity log collection
+    match /activityLog/{logId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if isAdmin();
+    }
+
     // Default deny all other access
     match /{document=**} {
       allow read, write: if false;
