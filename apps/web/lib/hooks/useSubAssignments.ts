@@ -60,6 +60,10 @@ function toFirestore(a: Partial<SubAssignment>): Record<string, unknown> {
       paidAt: p.paidAt instanceof Date ? Timestamp.fromDate(p.paidAt) : p.paidAt,
     }));
   }
+  // Firestore rejects undefined values — strip them
+  Object.keys(data).forEach((k) => {
+    if (data[k] === undefined) delete data[k];
+  });
   return data;
 }
 

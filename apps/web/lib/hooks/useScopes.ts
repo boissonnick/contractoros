@@ -52,6 +52,10 @@ function toFirestore(scope: Partial<Scope>): Record<string, unknown> {
       decidedAt: a.decidedAt instanceof Date ? Timestamp.fromDate(a.decidedAt) : a.decidedAt,
     }));
   }
+  // Firestore rejects undefined values — strip them
+  Object.keys(data).forEach((k) => {
+    if (data[k] === undefined) delete data[k];
+  });
   return data;
 }
 

@@ -223,6 +223,54 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // Scopes collection (scope of work)
+    match /scopes/{scopeId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() &&
+        getUserProfile().role in ['OWNER', 'PM'];
+      allow update: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+
+    // Subcontractors collection
+    match /subcontractors/{subId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() &&
+        getUserProfile().role in ['OWNER', 'PM'];
+      allow update: if isAuthenticated() &&
+        getUserProfile().role in ['OWNER', 'PM'];
+      allow delete: if isAdmin();
+    }
+
+    // Sub assignments collection
+    match /sub_assignments/{assignmentId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() &&
+        getUserProfile().role in ['OWNER', 'PM'];
+      allow update: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+
+    // Client onboarding tokens collection
+    match /clientOnboardingTokens/{tokenId} {
+      // Anyone can read (public onboarding page validates tokens)
+      allow read: if true;
+      allow create: if isAuthenticated() &&
+        getUserProfile().role in ['OWNER', 'PM'];
+      // Allow update for marking token as used (public page does this)
+      allow update: if true;
+      allow delete: if isAdmin();
+    }
+
+    // Change orders collection
+    match /changeOrders/{orderId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() &&
+        getUserProfile().role in ['OWNER', 'PM'];
+      allow update: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+
     // Default deny all other access
     match /{document=**} {
       allow read, write: if false;

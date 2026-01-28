@@ -66,6 +66,10 @@ function toFirestore(sub: Partial<Subcontractor>): Record<string, unknown> {
       uploadedAt: d.uploadedAt instanceof Date ? Timestamp.fromDate(d.uploadedAt) : d.uploadedAt,
     }));
   }
+  // Firestore rejects undefined values — strip them
+  Object.keys(data).forEach((k) => {
+    if (data[k] === undefined) delete data[k];
+  });
   return data;
 }
 

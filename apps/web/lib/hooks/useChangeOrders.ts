@@ -79,6 +79,10 @@ function toFirestore(co: Partial<ChangeOrder>): Record<string, unknown> {
       timestamp: h.timestamp instanceof Date ? Timestamp.fromDate(h.timestamp) : h.timestamp,
     }));
   }
+  // Firestore rejects undefined values — strip them
+  Object.keys(data).forEach((k) => {
+    if (data[k] === undefined) delete data[k];
+  });
   return data;
 }
 

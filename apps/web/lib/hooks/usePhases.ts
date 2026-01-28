@@ -75,6 +75,10 @@ function toFirestore(phase: Partial<ProjectPhase>): Record<string, unknown> {
       completedAt: m.completedAt instanceof Date ? Timestamp.fromDate(m.completedAt) : m.completedAt,
     }));
   }
+  // Firestore rejects undefined values — strip them
+  Object.keys(data).forEach((k) => {
+    if (data[k] === undefined) delete data[k];
+  });
   return data;
 }
 
