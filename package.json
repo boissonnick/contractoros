@@ -13,5 +13,8 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "devDependencies": {
+    "firebase-admin": "^13.6.0"
   }
 }

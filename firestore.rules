@@ -8,7 +8,12 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Helper function to get user's profile
+    // Helper function to check if user profile exists
+    function userProfileExists() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    // Helper function to get user's profile (only call after checking userProfileExists)
     function getUserProfile() {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
     }
@@ -16,12 +21,13 @@ service cloud.firestore {
     // Helper function to check if user has admin role
     function isAdmin() {
       return isAuthenticated() &&
+             userProfileExists() &&
              getUserProfile().role in ['OWNER', 'PM'];
     }
 
     // Helper function to check if user belongs to the same org
     function isSameOrg(orgId) {
-      return isAuthenticated() && getUserProfile().orgId == orgId;
+      return isAuthenticated() && userProfileExists() && getUserProfile().orgId == orgId;
     }
 
     // Helper function to check if user owns the resource

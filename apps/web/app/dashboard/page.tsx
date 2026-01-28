@@ -89,11 +89,14 @@ const statusConfig: Record<string, { label: string; color: string }> = {
 };
 
 export default function DashboardPage() {
-  const { user, profile } = useAuth();
+  const { user, profile, loading: authLoading } = useAuth();
   const { activities } = useActivityLog(profile?.orgId);
 
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
+
+  // Check for missing profile or orgId
+  const profileIncomplete = !authLoading && user && (!profile || !profile.orgId);
   const [projects, setProjects] = useState<Project[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -273,10 +276,30 @@ export default function DashboardPage() {
       .slice(0, 5);
   }, [estimates]);
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="space-y-6">
         <SkeletonList count={3} />
+      </div>
+    );
+  }
+
+  // Show onboarding prompt if profile is incomplete
+  if (profileIncomplete) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Card className="p-8 text-center max-w-md">
+          <ExclamationTriangleIcon className="h-12 w-12 mx-auto text-amber-500 mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Complete Your Profile</h3>
+          <p className="text-gray-500 mb-4">
+            {!profile
+              ? "Your profile hasn't been set up yet. Please complete the onboarding process."
+              : "Your organization hasn't been configured. Please complete company setup."}
+          </p>
+          <Link href="/onboarding/company-setup">
+            <Button variant="primary">Complete Setup</Button>
+          </Link>
+        </Card>
       </div>
     );
   }
