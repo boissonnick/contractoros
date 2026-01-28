@@ -53,9 +53,9 @@ npx tsc --noEmit         # Type check
 - `lib/firebase/` — Firebase config, storage helpers, seed templates
 - `types/index.ts` — All TypeScript types (User, Org, Project, Phase, Task, Scope, ChangeOrder, etc.)
 
-## Do Not Modify
-- `apps/web/Dockerfile` — Frozen (see DO_NOT_EDIT.md). Multi-stage build tuned for Cloud Run.
-- `cloudbuild.yaml` — Production CI/CD pipeline.
+## Do Not Modify (without approval)
+- `apps/web/Dockerfile` — Multi-stage build tuned for Cloud Run. May add new ARG/ENV for secrets only.
+- `cloudbuild.yaml` — Production CI/CD pipeline. May update for secrets integration.
 - `firestore.rules` — Security rules. Changes need careful review.
 - `firestore.indexes.json` — Composite indexes. Only add, never remove.
 
@@ -65,11 +65,50 @@ npx tsc --noEmit         # Type check
 - **Standalone output:** next.config.js uses `output: 'standalone'` for Docker/Cloud Run
 - **No test framework configured:** Zero test coverage currently
 
+## Secrets Management
+All secrets stored in **GCP Secret Manager** (project: `contractoros-483812`).
+
+**Production (Cloud Build/Cloud Run):**
+- Secrets injected at build time via `cloudbuild.yaml` → `availableSecrets`
+- Cloud Build service account has `secretmanager.secretAccessor` role
+- Secrets are passed as Docker build args, inlined by Next.js at build time
+
+**Local Development:**
+- Copy `.env.example` to `.env.local` (gitignored)
+- Use `./docker-build-local.sh` to build with secrets from `.env.local`
+- Use `./docker-run-local.sh` to run the container
+
+**Current Secrets:**
+| Secret Name | Description |
+|-------------|-------------|
+| `NEXT_PUBLIC_FIREBASE_API_KEY` | Firebase Web API Key |
+| `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | Firebase Auth Domain |
+| `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | Firebase Project ID |
+| `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET` | Firebase Storage Bucket |
+| `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | Firebase Messaging Sender ID |
+| `NEXT_PUBLIC_FIREBASE_APP_ID` | Firebase App ID |
+| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Google Maps API Key |
+
+**Adding New Secrets:**
+```bash
+# Create secret in GCP
+echo -n "secret-value" | gcloud secrets create SECRET_NAME --data-file=- --project=contractoros-483812
+
+# Grant Cloud Build access
+gcloud secrets add-iam-policy-binding SECRET_NAME \
+  --member="serviceAccount:424251610296@cloudbuild.gserviceaccount.com" \
+  --role="roles/secretmanager.secretAccessor" \
+  --project=contractoros-483812
+
+# Update cloudbuild.yaml availableSecrets section
+# Update Dockerfile ARG/ENV if needed for NEXT_PUBLIC_* vars
+# Update docker-build-local.sh for local dev
+```
+
 ## Known Issues / Tech Debt
 - AuthProvider architecture needs refactoring
 - 20+ route pages still missing or incomplete
 - Silent error handling — no toast notifications on failures
-- Firebase config hardcoded in lib/firebase/config.ts (should use env vars)
 - No pagination — will break at scale
 - No tests at all — critical paths completely unguarded
 
