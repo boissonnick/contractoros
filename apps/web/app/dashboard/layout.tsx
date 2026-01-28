@@ -12,6 +12,7 @@ import {
   CalendarIcon,
   BanknotesIcon,
   ClipboardDocumentListIcon,
+  ClockIcon,
   Cog6ToothIcon,
 } from '@heroicons/react/24/outline';
 
@@ -20,6 +21,7 @@ const navItems: NavItem[] = [
   { label: 'Projects', href: '/dashboard/projects', icon: FolderIcon },
   { label: 'Team', href: '/dashboard/team', icon: UsersIcon },
   { label: 'Schedule', href: '/dashboard/schedule', icon: CalendarIcon },
+  { label: 'Timesheets', href: '/dashboard/timesheets', icon: ClockIcon },
   { label: 'Finances', href: '/dashboard/finances', icon: BanknotesIcon },
   { label: 'Reports', href: '/dashboard/reports', icon: ClipboardDocumentListIcon },
   { label: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon },

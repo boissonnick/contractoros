@@ -320,6 +320,29 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // Weekly timesheets collection
+    match /weeklyTimesheets/{timesheetId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Geofences collection
+    match /geofences/{geofenceId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Payroll config collection
+    match /payrollConfig/{configId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
     // Default deny all other access
     match /{document=**} {
       allow read, write: if false;

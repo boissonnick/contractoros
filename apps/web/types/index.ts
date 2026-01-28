@@ -428,7 +428,10 @@ export interface TimeEntry {
 }
 
 export interface WeeklyTimesheet {
+  id: string;
+  orgId: string;
   userId: string;
+  userName?: string;
   weekStart: Date;
   entries: TimeEntry[];
   totalHours: number;
@@ -437,6 +440,57 @@ export interface WeeklyTimesheet {
   submittedAt?: Date;
   approvedBy?: string;
   approvedAt?: Date;
+}
+
+export interface Geofence {
+  id: string;
+  projectId: string;
+  orgId: string;
+  name: string;
+  center: { lat: number; lng: number };
+  radiusMeters: number;
+  isActive: boolean;
+  createdAt: Date;
+}
+
+// ============================================
+// Payroll Types
+// ============================================
+
+export interface PayrollConfig {
+  id: string;
+  orgId: string;
+  payPeriod: 'weekly' | 'biweekly' | 'semimonthly' | 'monthly';
+  overtimeThresholdHours: number; // per week
+  overtimeMultiplier: number; // e.g. 1.5
+  defaultHourlyRate: number;
+  payDay: string; // e.g. "Friday" or "1st and 15th"
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+export interface PayrollEntry {
+  userId: string;
+  userName: string;
+  regularHours: number;
+  overtimeHours: number;
+  hourlyRate: number;
+  regularPay: number;
+  overtimePay: number;
+  totalPay: number;
+}
+
+export interface PayrollRun {
+  id: string;
+  orgId: string;
+  periodStart: Date;
+  periodEnd: Date;
+  entries: PayrollEntry[];
+  totalRegular: number;
+  totalOvertime: number;
+  totalPay: number;
+  status: 'preview' | 'finalized';
+  createdAt: Date;
 }
 
 // ============================================

@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
 import { collection, query, where, getDocs, addDoc, updateDoc, doc, Timestamp, orderBy, limit } from 'firebase/firestore';
-import { TimeEntry, Task, ScheduleAssignment } from '@/types';
+import { TimeEntry, Task, ScheduleAssignment, Project, Geofence } from '@/types';
+import { isWithinGeofence } from '@/lib/geofence';
 import {
   PlayIcon,
   StopIcon,
@@ -30,6 +31,10 @@ export default function FieldPage() {
   const [clockingIn, setClockingIn] = useState(false);
   const [elapsedTime, setElapsedTime] = useState('00:00:00');
   const [location, setLocation] = useState<GeolocationPosition | null>(null);
+  const [projects, setProjects] = useState<Pick<Project, 'id' | 'name'>[]>([]);
+  const [selectedProject, setSelectedProject] = useState('');
+  const [geofences, setGeofences] = useState<Geofence[]>([]);
+  const [geofenceWarning, setGeofenceWarning] = useState('');
 
   // Get current location
   useEffect(() => {
@@ -100,6 +105,23 @@ export default function FieldPage() {
       const tasksSnap = await getDocs(tasksQuery);
       setTodaysTasks(tasksSnap.docs.map(d => ({ id: d.id, ...d.data() })) as Task[]);
 
+      // Fetch projects for org
+      const projectsQuery = query(
+        collection(db, 'projects'),
+        where('orgId', '==', profile.orgId),
+        where('status', '==', 'active')
+      );
+      const projectsSnap = await getDocs(projectsQuery);
+      setProjects(projectsSnap.docs.map(d => ({ id: d.id, name: (d.data() as { name: string }).name })));
+
+      // Fetch geofences for org
+      const geofencesQuery = query(
+        collection(db, 'geofences'),
+        where('orgId', '==', profile.orgId)
+      );
+      const geofencesSnap = await getDocs(geofencesQuery);
+      setGeofences(geofencesSnap.docs.map(d => ({ id: d.id, ...d.data() })) as Geofence[]);
+
     } catch (error) {
       console.error('Error fetching field data:', error);
       setFetchError('Failed to load data. The database may be unreachable.');
@@ -116,10 +138,25 @@ export default function FieldPage() {
     if (!user?.uid || !profile?.orgId) return;
 
     setClockingIn(true);
+    setGeofenceWarning('');
+
+    // Geofence check
+    if (selectedProject && location && geofences.length > 0) {
+      const projectFences = geofences.filter(g => g.projectId === selectedProject && g.isActive);
+      if (projectFences.length > 0) {
+        const insideFence = projectFences.some(f =>
+          isWithinGeofence(location.coords.latitude, location.coords.longitude, f.center.lat, f.center.lng, f.radiusMeters)
+        );
+        if (!insideFence) {
+          setGeofenceWarning('You are outside the project geofence. Clock-in recorded with warning.');
+        }
+      }
+    }
+
     try {
       const entry: Partial<TimeEntry> = {
         userId: user.uid,
-        projectId: '', // Would be selected
+        projectId: selectedProject,
         clockIn: Timestamp.now() as any,
         status: 'active',
         createdAt: Timestamp.now() as any,
@@ -209,9 +246,30 @@ export default function FieldPage() {
           </div>
 
           {location && (
-            <div className="flex items-center justify-center gap-1 text-sm opacity-75 mb-6">
+            <div className="flex items-center justify-center gap-1 text-sm opacity-75 mb-4">
               <MapPinIcon className="h-4 w-4" />
               <span>Location tracked</span>
+            </div>
+          )}
+
+          {!activeEntry && projects.length > 0 && (
+            <div className="mb-4 max-w-xs mx-auto">
+              <select
+                value={selectedProject}
+                onChange={(e) => setSelectedProject(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg text-sm text-gray-900 bg-white/90 border-0 focus:ring-2 focus:ring-white"
+              >
+                <option value="">Select Project</option>
+                {projects.map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {geofenceWarning && (
+            <div className="mb-4 max-w-xs mx-auto bg-yellow-100 text-yellow-800 text-xs rounded-lg px-3 py-2">
+              {geofenceWarning}
             </div>
           )}
 
