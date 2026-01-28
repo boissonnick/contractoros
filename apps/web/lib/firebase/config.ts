@@ -22,19 +22,20 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Validate required environment variables
-const requiredEnvVars = [
-  'NEXT_PUBLIC_FIREBASE_API_KEY',
-  'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN',
-  'NEXT_PUBLIC_FIREBASE_PROJECT_ID',
-  'NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET',
-  'NEXT_PUBLIC_FIREBASE_APP_ID',
-] as const;
-
+// Validate required config values at runtime
+// Note: NEXT_PUBLIC_* vars are inlined at build time, so we check the config object directly
 if (typeof window !== 'undefined') {
-  for (const envVar of requiredEnvVars) {
-    if (!process.env[envVar]) {
-      console.error(`Missing required environment variable: ${envVar}`);
+  const configChecks = [
+    { key: 'apiKey', value: firebaseConfig.apiKey },
+    { key: 'authDomain', value: firebaseConfig.authDomain },
+    { key: 'projectId', value: firebaseConfig.projectId },
+    { key: 'storageBucket', value: firebaseConfig.storageBucket },
+    { key: 'appId', value: firebaseConfig.appId },
+  ];
+
+  for (const { key, value } of configChecks) {
+    if (!value) {
+      console.error(`Firebase config missing: ${key}. Rebuild with environment variables.`);
     }
   }
 }
