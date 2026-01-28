@@ -18,6 +18,7 @@ import TaskComments from './TaskComments';
 import TaskActivityLog from './TaskActivityLog';
 import TaskAttachments from './TaskAttachments';
 import TaskChecklist from './TaskChecklist';
+import { formatDate } from '@/lib/date-utils';
 
 type Tab = 'details' | 'checklist' | 'comments' | 'activity' | 'attachments';
 
@@ -182,7 +183,7 @@ export default function TaskDetailModal({
                 className={cn(
                   'flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap',
                   activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
+                    ? 'border-brand-primary text-brand-primary'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
                 )}
               >
@@ -227,6 +228,21 @@ export default function TaskDetailModal({
                 {/* Metadata grid */}
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div>
+                    <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Phase</span>
+                    <div className="mt-0.5">
+                      <select
+                        value={task.phaseId || ''}
+                        onChange={(e) => onUpdate(task.id, { phaseId: e.target.value || undefined })}
+                        className="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                      >
+                        <option value="">No phase</option>
+                        {phases.map((p) => (
+                          <option key={p.id} value={p.id}>{p.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div>
                     <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Priority</span>
                     <p className="text-gray-700 capitalize mt-0.5">{task.priority}</p>
                   </div>
@@ -237,13 +253,13 @@ export default function TaskDetailModal({
                   <div>
                     <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Start Date</span>
                     <p className="text-gray-700 mt-0.5">
-                      {task.startDate ? new Date(task.startDate).toLocaleDateString() : '—'}
+                      {task.startDate ? formatDate(task.startDate) : '—'}
                     </p>
                   </div>
                   <div>
                     <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Due Date</span>
                     <p className="text-gray-700 mt-0.5">
-                      {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '—'}
+                      {task.dueDate ? formatDate(task.dueDate) : '—'}
                     </p>
                   </div>
                   <div>
@@ -338,7 +354,7 @@ export default function TaskDetailModal({
                         Every {task.recurrenceConfig.interval > 1 ? task.recurrenceConfig.interval + ' ' : ''}
                         {task.recurrenceConfig.frequency}
                         {task.recurrenceConfig.endDate && (
-                          <> until {new Date(task.recurrenceConfig.endDate).toLocaleDateString()}</>
+                          <> until {formatDate(task.recurrenceConfig.endDate)}</>
                         )}
                       </p>
                     </div>
@@ -385,8 +401,8 @@ export default function TaskDetailModal({
         {/* Footer */}
         <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
           <div className="text-xs text-gray-400">
-            Created {new Date(task.createdAt).toLocaleDateString()}
-            {task.updatedAt && ` · Updated ${new Date(task.updatedAt).toLocaleDateString()}`}
+            Created {formatDate(task.createdAt)}
+            {task.updatedAt && ` · Updated ${formatDate(task.updatedAt)}`}
           </div>
           {onDelete && (
             confirmDelete ? (
