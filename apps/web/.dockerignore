@@ -21,3 +21,5 @@ Thumbs.db
 coverage
 .env.test.local
 .env.development.local
+.env.local
+.env
