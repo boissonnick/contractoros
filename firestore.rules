@@ -389,6 +389,42 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // Financials collection (project financial summaries)
+    match /financials/{financialId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() &&
+        getUserProfile().role in ['OWNER', 'PM'];
+      allow update: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+
+    // Integrations collection (third-party connections)
+    match /integrations/{integrationId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() &&
+        getUserProfile().role in ['OWNER', 'PM'];
+      allow update: if isAuthenticated() &&
+        getUserProfile().role in ['OWNER', 'PM'];
+      allow delete: if isAdmin();
+    }
+
+    // Submittals collection
+    match /submittals/{submittalId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() &&
+        getUserProfile().role in ['OWNER', 'PM', 'EMPLOYEE'];
+      allow update: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+
+    // Selections collection (client material selections)
+    match /selections/{selectionId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+
     // Default deny all other access
     match /{document=**} {
       allow read, write: if false;

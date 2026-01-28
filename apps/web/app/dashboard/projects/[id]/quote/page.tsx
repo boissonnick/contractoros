@@ -160,10 +160,22 @@ export default function QuoteBuilderPage() {
         createdAt: new Date(),
       };
 
-      const docRef = await addDoc(collection(db, 'projects', projectId, 'quoteSections'), {
-        ...newSection,
+      // Build Firestore data, only include phaseId if it exists
+      const firestoreData: Record<string, unknown> = {
+        projectId,
+        name: '',
+        description: '',
+        laborCost: 0,
+        materialCost: 0,
+        order: phaseSections.length + 1,
+        status: 'draft',
         createdAt: Timestamp.now(),
-      });
+      };
+      if (phaseId) {
+        firestoreData.phaseId = phaseId;
+      }
+
+      const docRef = await addDoc(collection(db, 'projects', projectId, 'quoteSections'), firestoreData);
 
       setSections(prev => [...prev, { id: docRef.id, ...newSection }]);
     } catch (error) {

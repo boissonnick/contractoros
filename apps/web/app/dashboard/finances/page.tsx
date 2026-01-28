@@ -13,7 +13,9 @@ import {
   CurrencyDollarIcon,
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
+  ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
+import { Button } from '@/components/ui';
 
 export default function FinancesPage() {
   const router = useRouter();
@@ -24,10 +26,12 @@ export default function FinancesPage() {
   const [estimates, setEstimates] = useState<Estimate[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadFinancials() {
       if (!profile?.orgId) return;
+      setError(null);
       try {
         const [invSnap, estSnap, projSnap] = await Promise.all([
           getDocs(query(collection(db, 'invoices'), where('orgId', '==', profile.orgId))),
@@ -37,8 +41,16 @@ export default function FinancesPage() {
         setInvoices(invSnap.docs.map(d => ({ id: d.id, ...d.data() })) as Invoice[]);
         setEstimates(estSnap.docs.map(d => ({ id: d.id, ...d.data() })) as Estimate[]);
         setProjects(projSnap.docs.map(d => ({ id: d.id, ...d.data() })) as Project[]);
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Error loading financials:', err);
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        if (errorMessage.includes('permission-denied')) {
+          setError('Permission denied. Please check Firestore security rules.');
+        } else if (errorMessage.includes('requires an index')) {
+          setError('Database index required. Please deploy Firestore indexes.');
+        } else {
+          setError('Failed to load financial data. Please try again.');
+        }
       } finally {
         setLoading(false);
       }
@@ -47,14 +59,14 @@ export default function FinancesPage() {
   }, [profile?.orgId]);
 
   const stats = useMemo(() => {
-    const totalRevenue = invoices.reduce((sum, inv) => sum + inv.amountPaid, 0);
-    const totalInvoiced = invoices.reduce((sum, inv) => sum + inv.total, 0);
+    const totalRevenue = invoices.reduce((sum, inv) => sum + (inv.amountPaid || 0), 0);
+    const totalInvoiced = invoices.reduce((sum, inv) => sum + (inv.total || 0), 0);
     const outstandingAmount = invoices
       .filter(inv => ['sent', 'viewed', 'partial', 'overdue'].includes(inv.status))
-      .reduce((sum, inv) => sum + inv.amountDue, 0);
+      .reduce((sum, inv) => sum + (inv.amountDue || 0), 0);
     const overdueAmount = invoices
       .filter(inv => inv.status === 'overdue')
-      .reduce((sum, inv) => sum + inv.amountDue, 0);
+      .reduce((sum, inv) => sum + (inv.amountDue || 0), 0);
 
     const totalExpenses = expenses
       .filter(e => e.status !== 'rejected')
@@ -65,10 +77,10 @@ export default function FinancesPage() {
 
     const estimatePipeline = estimates
       .filter(e => e.status === 'sent' || e.status === 'viewed')
-      .reduce((sum, e) => sum + e.total, 0);
+      .reduce((sum, e) => sum + (e.total || 0), 0);
     const wonDeals = estimates
       .filter(e => e.status === 'accepted')
-      .reduce((sum, e) => sum + e.total, 0);
+      .reduce((sum, e) => sum + (e.total || 0), 0);
 
     const totalBudget = projects.reduce((sum, p) => sum + (p.budget || 0), 0);
 
@@ -90,6 +102,19 @@ export default function FinancesPage() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <Card className="p-6 text-center">
+          <ExclamationTriangleIcon className="h-12 w-12 mx-auto text-amber-500 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Unable to Load Financial Data</h3>
+          <p className="text-sm text-gray-500 mb-4">{error}</p>
+          <Button variant="outline" onClick={() => window.location.reload()}>Try Again</Button>
+        </Card>
       </div>
     );
   }

@@ -506,7 +506,7 @@ export default function ProjectsPage() {
                   )}
                 </div>
 
-                <Link href={`/dashboard/projects/${project.id}`} className="block p-6">
+                <Link href={`/dashboard/projects/${project.id}`} prefetch={false} className="block p-6">
                   <div className="flex items-start justify-between mb-4">
                     <h3 className="font-semibold text-gray-900 line-clamp-1 pr-8">{project.name}</h3>
                   </div>
@@ -572,7 +572,7 @@ export default function ProjectsPage() {
                 key={project.id}
                 className="bg-white rounded-lg border hover:shadow-md transition-shadow relative group"
               >
-                <Link href={`/dashboard/projects/${project.id}`} className="block p-4">
+                <Link href={`/dashboard/projects/${project.id}`} prefetch={false} className="block p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4 flex-1 min-w-0">
                       <div className="min-w-0 flex-1">

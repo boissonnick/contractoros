@@ -70,7 +70,11 @@ export default function TeamPage() {
         ...doc.data(),
         uid: doc.id,
       })) as UserProfile[];
-      setMembers(membersData);
+      // Deduplicate by uid (in case of duplicate documents)
+      const uniqueMembers = Array.from(
+        new Map(membersData.map(m => [m.uid, m])).values()
+      );
+      setMembers(uniqueMembers);
 
       // Load pending invites
       const invitesQuery = query(

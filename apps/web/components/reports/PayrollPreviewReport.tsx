@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import { usePayrollConfig } from '@/lib/hooks/usePayrollConfig';
 import { calculatePayroll } from '@/lib/payroll';
-import { PayrollEntry } from '@/types';
+import { PayrollEntry, PayrollConfig } from '@/types';
 import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { cn } from '@/lib/utils';
@@ -18,16 +18,33 @@ function fmt(n: number): string {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(n);
 }
 
+// Default config if none exists
+const DEFAULT_CONFIG: PayrollConfig = {
+  id: 'default',
+  orgId: '',
+  payPeriod: 'biweekly',
+  overtimeThresholdHours: 40,
+  overtimeMultiplier: 1.5,
+  defaultHourlyRate: 25,
+  payDay: 'Friday',
+  createdAt: new Date(),
+};
+
 export default function PayrollPreviewReport({ startDate, endDate }: PayrollPreviewReportProps) {
   const { profile } = useAuth();
-  const { config } = usePayrollConfig();
+  const { config, loading: configLoading } = usePayrollConfig();
   const [entries, setEntries] = useState<PayrollEntry[]>([]);
   const [totals, setTotals] = useState({ totalRegular: 0, totalOvertime: 0, totalPay: 0 });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Use config if available, otherwise use defaults
+  const effectiveConfig = config || DEFAULT_CONFIG;
 
   useEffect(() => {
-    if (!profile?.orgId || !config) return;
+    if (!profile?.orgId || configLoading) return;
     setLoading(true);
+    setError(null);
 
     Promise.all([
       getDocs(query(collection(db, 'users'), where('orgId', '==', profile.orgId))),
@@ -52,14 +69,21 @@ export default function PayrollPreviewReport({ startDate, endDate }: PayrollPrev
           totalHours: hoursByUser.get(d.id) || 0,
         }));
 
-      const result = calculatePayroll(timeData, config);
+      const result = calculatePayroll(timeData, effectiveConfig);
       setEntries(result.entries);
       setTotals({ totalRegular: result.totalRegular, totalOvertime: result.totalOvertime, totalPay: result.totalPay });
       setLoading(false);
-    }).catch(() => setLoading(false));
-  }, [profile?.orgId, config, startDate, endDate]);
+    }).catch((err) => {
+      console.error('Error loading payroll data:', err);
+      setError(err.message?.includes('permission-denied')
+        ? 'Permission denied. Check Firestore security rules.'
+        : 'Failed to load payroll data.');
+      setLoading(false);
+    });
+  }, [profile?.orgId, effectiveConfig, configLoading, startDate, endDate]);
 
-  if (loading) return <div className="flex justify-center py-8"><div className="w-6 h-6 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" /></div>;
+  if (loading || configLoading) return <div className="flex justify-center py-8"><div className="w-6 h-6 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" /></div>;
+  if (error) return <p className="text-sm text-red-500 text-center py-8">{error}</p>;
   if (entries.length === 0) return <p className="text-sm text-gray-500 text-center py-8">No payroll data for this period.</p>;
 
   return (

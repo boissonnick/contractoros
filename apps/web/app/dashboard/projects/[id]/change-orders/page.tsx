@@ -7,8 +7,8 @@ import { collection, getDocs } from 'firebase/firestore';
 import { ChangeOrder, ProjectPhase, ScopeChange, ChangeOrderImpact } from '@/types';
 import { useChangeOrders } from '@/lib/hooks/useChangeOrders';
 import { useAuth } from '@/lib/auth';
-import { Button } from '@/components/ui';
-import { PlusIcon } from '@heroicons/react/24/outline';
+import { Button, Card } from '@/components/ui';
+import { PlusIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import ChangeOrderList from '@/components/projects/change-orders/ChangeOrderList';
 import ChangeOrderForm from '@/components/projects/change-orders/ChangeOrderForm';
 import ChangeOrderImpactAnalysis from '@/components/projects/change-orders/ChangeOrderImpactAnalysis';
@@ -23,7 +23,7 @@ export default function ProjectChangeOrdersPage() {
   const projectId = params.id as string;
   const { profile } = useAuth();
 
-  const { changeOrders, loading, createChangeOrder, submitForApproval, approveChangeOrder, rejectChangeOrder } = useChangeOrders({ projectId });
+  const { changeOrders, loading, error, createChangeOrder, submitForApproval, approveChangeOrder, rejectChangeOrder } = useChangeOrders({ projectId });
   const [phases, setPhases] = useState<ProjectPhase[]>([]);
   const [showCreate, setShowCreate] = useState(false);
   const [selectedCO, setSelectedCO] = useState<ChangeOrder | null>(null);
@@ -53,6 +53,17 @@ export default function ProjectChangeOrdersPage() {
       <div className="flex items-center justify-center h-64">
         <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="p-6 text-center">
+        <ExclamationTriangleIcon className="h-12 w-12 mx-auto text-amber-500 mb-4" />
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Unable to Load Change Orders</h3>
+        <p className="text-sm text-gray-500 mb-4">{error}</p>
+        <Button variant="outline" onClick={() => window.location.reload()}>Try Again</Button>
+      </Card>
     );
   }
 
