@@ -38,7 +38,48 @@ export interface UserProfile {
   onboardingStep?: string;
   createdAt: Date;
   updatedAt?: Date;
+  emergencyContact?: EmergencyContact;
+  certifications?: Certification[];
+  trades?: string[]; // multiple trades
+  taxClassification?: 'W2' | '1099';
+  address?: string;
 }
+
+export interface EmergencyContact {
+  name: string;
+  relationship: string;
+  phone: string;
+}
+
+export interface Certification {
+  name: string;
+  issuingBody?: string;
+  number?: string;
+  expiryDate?: string; // ISO date string
+  fileURL?: string;
+}
+
+export const CONSTRUCTION_TRADES = [
+  'General Contractor',
+  'Electrician',
+  'Plumber',
+  'HVAC',
+  'Carpenter',
+  'Mason',
+  'Roofer',
+  'Painter',
+  'Flooring',
+  'Drywall',
+  'Landscaper',
+  'Concrete',
+  'Welding',
+  'Insulation',
+  'Demolition',
+  'Excavation',
+  'Other',
+] as const;
+
+export type ConstructionTrade = typeof CONSTRUCTION_TRADES[number];
 
 export interface OrgBranding {
   logoURL?: string;
@@ -413,6 +454,16 @@ export interface Availability {
   createdAt: Date;
 }
 
+export interface AvailabilityDefault {
+  id: string;
+  userId: string;
+  orgId: string;
+  dayOfWeek: number; // 0=Sun, 1=Mon, ..., 6=Sat
+  isAvailable: boolean;
+  startTime: string; // "08:00"
+  endTime: string;   // "17:00"
+}
+
 export interface ScheduleAssignment {
   id: string;
   userId: string;
@@ -423,6 +474,10 @@ export interface ScheduleAssignment {
   endTime: string;
   status: 'scheduled' | 'confirmed' | 'completed' | 'no_show';
   createdAt: Date;
+  userName?: string;
+  projectName?: string;
+  notes?: string;
+  orgId?: string;
 }
 
 // ============================================

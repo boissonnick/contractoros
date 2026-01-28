@@ -223,6 +223,31 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // Schedule assignments collection
+    match /scheduleAssignments/{assignmentId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Availability defaults (weekly recurring)
+    match /availabilityDefaults/{defaultId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() &&
+        (request.resource.data.userId == request.auth.uid || isAdmin());
+      allow delete: if isAuthenticated() &&
+        (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    // Availability overrides (date-specific)
+    match /availability/{availId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() &&
+        (request.resource.data.userId == request.auth.uid || isAdmin());
+      allow delete: if isAuthenticated() &&
+        (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
     // Scopes collection (scope of work)
     match /scopes/{scopeId} {
       allow read: if isAuthenticated();
