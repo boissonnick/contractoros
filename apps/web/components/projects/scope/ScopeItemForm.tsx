@@ -3,17 +3,22 @@
 import React, { useState } from 'react';
 import { ScopeItem, ScopeMaterial, ProjectPhase, QuoteSection } from '@/types';
 import { Button, Input, Textarea } from '@/components/ui';
+import InlineCreateModal from '@/components/ui/InlineCreateModal';
+import PhaseForm from '@/components/projects/phases/PhaseForm';
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 interface ScopeItemFormProps {
   initialData?: ScopeItem;
   phases: ProjectPhase[];
   quoteSections: QuoteSection[];
+  projectId?: string;
   onSubmit: (item: ScopeItem) => void;
   onCancel: () => void;
+  onPhaseCreated?: (phase: ProjectPhase) => void;
 }
 
-export default function ScopeItemForm({ initialData, phases, quoteSections, onSubmit, onCancel }: ScopeItemFormProps) {
+export default function ScopeItemForm({ initialData, phases, quoteSections, projectId, onSubmit, onCancel, onPhaseCreated }: ScopeItemFormProps) {
+  const [showCreatePhase, setShowCreatePhase] = useState(false);
   const [title, setTitle] = useState(initialData?.title || '');
   const [description, setDescription] = useState(initialData?.description || '');
   const [specifications, setSpecifications] = useState(initialData?.specifications || '');
@@ -68,7 +73,18 @@ export default function ScopeItemForm({ initialData, phases, quoteSections, onSu
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Phase</label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="block text-sm font-medium text-gray-700">Phase</label>
+            {projectId && (
+              <button
+                type="button"
+                onClick={() => setShowCreatePhase(true)}
+                className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-0.5"
+              >
+                <PlusIcon className="h-3 w-3" /> Create
+              </button>
+            )}
+          </div>
           <select
             value={phaseId}
             onChange={(e) => setPhaseId(e.target.value)}
@@ -134,6 +150,22 @@ export default function ScopeItemForm({ initialData, phases, quoteSections, onSu
           {initialData ? 'Update Item' : 'Add Item'}
         </Button>
       </div>
+
+      {/* Create Phase Modal */}
+      {projectId && (
+        <InlineCreateModal open={showCreatePhase} onClose={() => setShowCreatePhase(false)} title="Create New Phase">
+          <PhaseForm
+            allPhases={phases}
+            projectId={projectId}
+            onSubmit={async (data) => {
+              const newPhase = { ...data, id: '', createdAt: new Date() } as ProjectPhase;
+              onPhaseCreated?.(newPhase);
+              setShowCreatePhase(false);
+            }}
+            onCancel={() => setShowCreatePhase(false)}
+          />
+        </InlineCreateModal>
+      )}
     </form>
   );
 }

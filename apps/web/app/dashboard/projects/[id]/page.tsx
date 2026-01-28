@@ -143,29 +143,56 @@ export default function ProjectDetailPage() {
 
   return (
     <div className="space-y-6">
-      {/* Status + Scope + Description */}
+      {/* Status + Scope */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
         <div className="relative" ref={statusRef}>
           <button
             onClick={() => nextStatuses.length > 0 && setStatusMenuOpen(!statusMenuOpen)}
             className={cn(
-              'flex items-center gap-1',
+              'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors border',
+              project.status === 'active' && 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100',
+              project.status === 'planning' && 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100',
+              project.status === 'bidding' && 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100',
+              project.status === 'lead' && 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100',
+              project.status === 'on_hold' && 'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100',
+              project.status === 'completed' && 'bg-emerald-50 text-emerald-700 border-emerald-200',
+              project.status === 'cancelled' && 'bg-red-50 text-red-700 border-red-200',
               nextStatuses.length > 0 && 'cursor-pointer'
             )}
           >
-            <StatusBadge status={project.status as any} />
+            <span className={cn(
+              'h-2 w-2 rounded-full',
+              project.status === 'active' && 'bg-green-500',
+              project.status === 'planning' && 'bg-blue-500',
+              project.status === 'bidding' && 'bg-purple-500',
+              project.status === 'lead' && 'bg-gray-400',
+              project.status === 'on_hold' && 'bg-yellow-500',
+              project.status === 'completed' && 'bg-emerald-500',
+              project.status === 'cancelled' && 'bg-red-500',
+            )} />
+            {STATUS_LABELS[project.status]}
             {nextStatuses.length > 0 && (
-              <ChevronDownIcon className="h-3.5 w-3.5 text-gray-400" />
+              <ChevronDownIcon className="h-4 w-4" />
             )}
           </button>
           {statusMenuOpen && (
-            <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-20 min-w-[160px]">
+            <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-20 min-w-[180px]">
               {nextStatuses.map((s) => (
                 <button
                   key={s}
                   onClick={() => handleStatusChange(s)}
-                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                 >
+                  <span className={cn(
+                    'h-2 w-2 rounded-full',
+                    s === 'active' && 'bg-green-500',
+                    s === 'planning' && 'bg-blue-500',
+                    s === 'bidding' && 'bg-purple-500',
+                    s === 'lead' && 'bg-gray-400',
+                    s === 'on_hold' && 'bg-yellow-500',
+                    s === 'completed' && 'bg-emerald-500',
+                    s === 'cancelled' && 'bg-red-500',
+                  )} />
                   {STATUS_LABELS[s]}
                 </button>
               ))}
@@ -176,9 +203,6 @@ export default function ProjectDetailPage() {
           <span className="text-sm text-gray-400">
             {project.scope.replace(/_/g, ' ')}
           </span>
-        )}
-        {project.description && (
-          <p className="text-sm text-gray-500">{project.description}</p>
         )}
       </div>
 

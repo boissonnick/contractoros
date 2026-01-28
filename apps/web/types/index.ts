@@ -215,12 +215,29 @@ export interface FinishPreferences {
   paint?: string;
 }
 
+export interface InspirationImage {
+  url: string;
+  uploadedAt: Date;
+}
+
 export interface ClientPreferences {
   notes?: string;
   finishes?: FinishPreferences;
-  inspirationImageUrls?: string[];
+  inspirationImageUrls?: string[];  // legacy: URL-pasted images
+  inspirationImages?: InspirationImage[]; // uploaded images with metadata
   budgetRange?: string;
   timelinePreference?: string;
+}
+
+export interface ClientOnboardingToken {
+  id: string;
+  token: string;
+  projectId: string;
+  clientId: string;
+  orgId: string;
+  createdAt: Date;
+  expiresAt: Date;
+  used: boolean;
 }
 
 // ============================================

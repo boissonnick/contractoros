@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, use } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
 import {
@@ -50,9 +50,9 @@ const weatherOptions = [
   { value: 'stormy', label: 'Stormy', temp: 'Severe weather' },
 ];
 
-export default function ProjectLogsPage({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = use(params);
-  const projectId = resolvedParams.id;
+export default function ProjectLogsPage() {
+  const params = useParams();
+  const projectId = params.id as string;
   const router = useRouter();
   const { user, profile } = useAuth();
 

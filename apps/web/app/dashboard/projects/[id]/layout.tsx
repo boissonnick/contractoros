@@ -41,6 +41,7 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
   const basePath = `/dashboard/projects/${projectId}`;
 
   const [projectName, setProjectName] = useState<string>('');
+  const [projectDescription, setProjectDescription] = useState<string>('');
 
   useEffect(() => {
     async function fetchName() {
@@ -48,6 +49,7 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
         const snap = await getDoc(doc(db, 'projects', projectId));
         if (snap.exists()) {
           setProjectName(snap.data().name || '');
+          setProjectDescription(snap.data().description || '');
         }
       } catch (e) {
         console.error('Error fetching project name:', e);
@@ -75,6 +77,9 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
           <h1 className="text-lg font-semibold text-gray-900 truncate">
             {projectName || 'Project'}
           </h1>
+          {projectDescription && (
+            <p className="text-sm text-gray-500 truncate">{projectDescription}</p>
+          )}
         </div>
       </div>
 

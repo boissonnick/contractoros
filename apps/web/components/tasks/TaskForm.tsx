@@ -3,9 +3,12 @@
 import React, { useState } from 'react';
 import { TaskPriority, TaskDependency, Task, ProjectPhase } from '@/types';
 import { Button, Input, Textarea, Select } from '@/components/ui';
+import InlineCreateModal from '@/components/ui/InlineCreateModal';
+import PhaseForm from '@/components/projects/phases/PhaseForm';
 import { NewTaskInput } from '@/lib/hooks/useTasks';
 import TaskDependencySelector from './TaskDependencySelector';
 import TaskAssignment from './TaskAssignment';
+import { PlusIcon } from '@heroicons/react/24/outline';
 
 const priorityOptions = [
   { value: 'low', label: 'Low' },
@@ -23,6 +26,7 @@ interface TaskFormProps {
   teamMembers?: { uid: string; displayName: string; photoURL?: string; role: string }[];
   onSubmit: (data: NewTaskInput) => Promise<void>;
   onCancel: () => void;
+  onPhaseCreated?: (phase: ProjectPhase) => void;
   loading?: boolean;
 }
 
@@ -34,8 +38,10 @@ export default function TaskForm({
   teamMembers = [],
   onSubmit,
   onCancel,
+  onPhaseCreated,
   loading = false,
 }: TaskFormProps) {
+  const [showCreatePhase, setShowCreatePhase] = useState(false);
   const [title, setTitle] = useState(task?.title || '');
   const [description, setDescription] = useState(task?.description || '');
   const [priority, setPriority] = useState<TaskPriority>(task?.priority || 'medium');
@@ -101,13 +107,28 @@ export default function TaskForm({
 
       {/* Phase + Priority row */}
       <div className="grid grid-cols-2 gap-3">
-        <Select
-          label="Phase"
-          value={phaseId}
-          onChange={(e) => setPhaseId(e.target.value)}
-          placeholder="No phase"
-          options={phases.map((p) => ({ value: p.id, label: p.name }))}
-        />
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <label className="block text-sm font-medium text-gray-700">Phase</label>
+            <button
+              type="button"
+              onClick={() => setShowCreatePhase(true)}
+              className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-0.5"
+            >
+              <PlusIcon className="h-3 w-3" /> Create Phase
+            </button>
+          </div>
+          <select
+            value={phaseId}
+            onChange={(e) => setPhaseId(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="">No phase</option>
+            {phases.map((p) => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
+          </select>
+        </div>
 
         <Select
           label="Priority"
@@ -116,6 +137,21 @@ export default function TaskForm({
           options={priorityOptions}
         />
       </div>
+
+      {/* Create Phase Modal */}
+      <InlineCreateModal open={showCreatePhase} onClose={() => setShowCreatePhase(false)} title="Create New Phase">
+        <PhaseForm
+          allPhases={phases}
+          projectId={projectId}
+          onSubmit={async (data) => {
+            // The parent will handle Firestore write; we just need to close and notify
+            const newPhase = { ...data, id: '', createdAt: new Date() } as ProjectPhase;
+            onPhaseCreated?.(newPhase);
+            setShowCreatePhase(false);
+          }}
+          onCancel={() => setShowCreatePhase(false)}
+        />
+      </InlineCreateModal>
 
       {/* Trade */}
       <Input

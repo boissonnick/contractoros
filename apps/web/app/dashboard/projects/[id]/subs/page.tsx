@@ -9,15 +9,22 @@ import { useSubcontractors } from '@/lib/hooks/useSubcontractors';
 import { useSubAssignments } from '@/lib/hooks/useSubAssignments';
 import { useTasks } from '@/lib/hooks/useTasks';
 import SubAssignmentManager from '@/components/subcontractors/SubAssignmentManager';
+import SubForm from '@/components/subcontractors/SubForm';
+import InlineCreateModal from '@/components/ui/InlineCreateModal';
 import BidList from '@/components/projects/bids/BidList';
 import BidComparison from '@/components/projects/bids/BidComparison';
+import { Button } from '@/components/ui';
 import { cn } from '@/lib/utils';
+import { PlusIcon } from '@heroicons/react/24/outline';
+import { useAuth } from '@/lib/auth';
 
 type Tab = 'assignments' | 'bids' | 'compare';
 
 export default function ProjectSubsPage() {
   const params = useParams();
   const projectId = params.id as string;
+  const { profile } = useAuth();
+  const [showCreateSub, setShowCreateSub] = useState(false);
 
   const { subs } = useSubcontractors();
   const { assignments, createAssignment, updateAssignment } = useSubAssignments({ projectId });
@@ -79,6 +86,38 @@ export default function ProjectSubsPage() {
 
   return (
     <div className="space-y-4">
+      {/* Header with Create Sub button */}
+      <div className="flex items-center justify-between">
+        <div />
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowCreateSub(true)}
+          icon={<PlusIcon className="h-4 w-4" />}
+        >
+          Add Subcontractor
+        </Button>
+      </div>
+
+      {/* Create Sub Modal */}
+      <InlineCreateModal open={showCreateSub} onClose={() => setShowCreateSub(false)} title="Add Subcontractor">
+        <SubForm
+          onSubmit={async (data) => {
+            if (!profile?.orgId) return;
+            await addDoc(collection(db, 'subcontractors'), {
+              ...data,
+              orgId: profile.orgId,
+              isActive: true,
+              metrics: { projectsCompleted: 0, onTimeRate: 100, avgRating: 0, totalPaid: 0 },
+              documents: [],
+              createdAt: Timestamp.now(),
+            });
+            setShowCreateSub(false);
+          }}
+          onCancel={() => setShowCreateSub(false)}
+        />
+      </InlineCreateModal>
+
       <div className="flex border-b border-gray-200">
         {TABS.map((t) => (
           <button
