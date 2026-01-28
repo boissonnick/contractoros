@@ -4,6 +4,7 @@ import React from 'react';
 import { RecurrenceConfig, RecurrenceFrequency } from '@/types';
 import { cn } from '@/lib/utils';
 import { Input, Select } from '@/components/ui';
+import { formatDate } from '@/lib/date-utils';
 import { ArrowPathIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
 
 interface RecurringTaskConfigProps {
@@ -116,7 +117,7 @@ export default function RecurringTaskConfig({
     }
 
     if (config.endDate) {
-      description += ` until ${new Date(config.endDate).toLocaleDateString()}`;
+      description += ` until ${formatDate(config.endDate)}`;
     } else if (config.maxOccurrences) {
       description += ` (${config.maxOccurrences} times)`;
     }

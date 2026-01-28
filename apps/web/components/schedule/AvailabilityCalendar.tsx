@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { formatDate } from '@/lib/date-utils';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
 interface AvailabilityCalendarProps {
@@ -39,7 +40,7 @@ export default function AvailabilityCalendar({ getAvailabilityForDate, onToggleD
       <div className="flex items-center justify-between mb-4">
         <button onClick={() => changeMonth(-1)} className="p-1 hover:bg-gray-100 rounded"><ChevronLeftIcon className="h-5 w-5 text-gray-600" /></button>
         <h3 className="text-sm font-semibold text-gray-900">
-          {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+          {formatDate(currentMonth, { month: 'long', year: 'numeric' })}
         </h3>
         <button onClick={() => changeMonth(1)} className="p-1 hover:bg-gray-100 rounded"><ChevronRightIcon className="h-5 w-5 text-gray-600" /></button>
       </div>

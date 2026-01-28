@@ -6,6 +6,7 @@ import { Button, Input } from '@/components/ui';
 import { PlusIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckCircleSolid } from '@heroicons/react/24/solid';
 import { cn } from '@/lib/utils';
+import { formatDate } from '@/lib/date-utils';
 
 interface SubPaymentTrackerProps {
   assignment: SubAssignment;
@@ -94,8 +95,8 @@ export default function SubPaymentTracker({ assignment, onUpdate }: SubPaymentTr
                 <p className={cn('text-sm', isPaid ? 'text-gray-400 line-through' : 'text-gray-900')}>{p.description}</p>
                 {p.dueDate && (
                   <p className={cn('text-xs', isOverdue ? 'text-red-500' : 'text-gray-500')}>
-                    Due {p.dueDate.toLocaleDateString()}
-                    {isPaid && p.paidAt && ` · Paid ${p.paidAt.toLocaleDateString()}`}
+                    Due {formatDate(p.dueDate)}
+                    {isPaid && p.paidAt && ` · Paid ${formatDate(p.paidAt)}`}
                   </p>
                 )}
               </div>

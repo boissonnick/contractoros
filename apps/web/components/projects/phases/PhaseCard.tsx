@@ -17,17 +17,14 @@ interface PhaseCardProps {
   onClick?: (phase: ProjectPhase) => void;
 }
 
+import { formatDate } from '@/lib/date-utils';
+
 const STATUS_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   upcoming: { bg: 'bg-gray-100', text: 'text-gray-600', label: 'Upcoming' },
   active: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Active' },
   completed: { bg: 'bg-green-100', text: 'text-green-700', label: 'Completed' },
   skipped: { bg: 'bg-gray-100', text: 'text-gray-400', label: 'Skipped' },
 };
-
-function formatDate(d?: Date): string {
-  if (!d) return '—';
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
 
 function formatCurrency(n?: number): string {
   if (n == null) return '—';
@@ -82,7 +79,7 @@ export default function PhaseCard({ phase, onClick }: PhaseCardProps) {
       <div className="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
         <span className="inline-flex items-center gap-1">
           <CalendarDaysIcon className="h-3.5 w-3.5" />
-          {formatDate(phase.startDate)} – {formatDate(phase.endDate)}
+          {formatDate(phase.startDate, { month: 'short', day: 'numeric' })} – {formatDate(phase.endDate, { month: 'short', day: 'numeric' })}
         </span>
 
         {phase.budgetAmount != null && (

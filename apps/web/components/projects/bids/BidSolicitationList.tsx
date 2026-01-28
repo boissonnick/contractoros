@@ -4,6 +4,7 @@ import React from 'react';
 import { BidSolicitation, Subcontractor } from '@/types';
 import { Button } from '@/components/ui';
 import { cn } from '@/lib/utils';
+import { formatDate } from '@/lib/date-utils';
 
 interface BidSolicitationListProps {
   solicitations: BidSolicitation[];
@@ -48,7 +49,7 @@ export default function BidSolicitationList({ solicitations, subs, onClose }: Bi
                 {sol.description && <p className="text-xs text-gray-500 mt-1">{sol.description}</p>}
                 <div className="flex flex-wrap gap-3 mt-2 text-xs text-gray-400">
                   {sol.trade && <span>Trade: {sol.trade}</span>}
-                  <span>Deadline: {sol.deadline.toLocaleDateString()}{isPastDeadline && isOpen && ' (past due)'}</span>
+                  <span>Deadline: {formatDate(sol.deadline)}{isPastDeadline && isOpen && ' (past due)'}</span>
                   <span>Invited: {invitedNames}</span>
                   <span>{sol.scopeItemIds.length} scope items</span>
                 </div>

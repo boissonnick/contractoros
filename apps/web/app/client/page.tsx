@@ -17,6 +17,7 @@ import {
   CurrencyDollarIcon,
 } from '@heroicons/react/24/outline';
 import { FirestoreError } from '@/components/ui';
+import { formatDate } from '@/lib/date-utils';
 
 export default function ClientDashboard() {
   const { user, profile } = useAuth();
@@ -254,7 +255,7 @@ export default function ClientDashboard() {
                     <div>
                       <p className="font-medium text-gray-900">Invoice #{invoice.number}</p>
                       <p className="text-sm text-gray-500">
-                        Due {new Date(invoice.dueDate).toLocaleDateString()}
+                        Due {formatDate(invoice.dueDate)}
                       </p>
                     </div>
                   </div>

@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { Task, TaskStatus, ProjectPhase, TaskChecklistItem } from '@/types';
-import { Button, Badge } from '@/components/ui';
+import { Button, Badge, toast } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import {
   XMarkIcon,
@@ -75,6 +75,20 @@ export default function TaskDetailModal({
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
+
+  // Handle close with unsaved changes confirmation
+  const handleClose = () => {
+    if (editing && isDirty) {
+      if (window.confirm('You have unsaved changes. Are you sure you want to close?')) {
+        setIsDirty(false);
+        setEditing(false);
+        onClose();
+      }
+    } else {
+      onClose();
+    }
+  };
 
   const handleStatusChange = async (newStatus: TaskStatus) => {
     await onUpdate(task.id, {
@@ -88,7 +102,11 @@ export default function TaskDetailModal({
       setSaving(true);
       try {
         await onUpdate(task.id, data as Partial<Task>);
+        setIsDirty(false);
         setEditing(false);
+        toast.success('Task updated');
+      } catch {
+        toast.error('Failed to update task');
       } finally {
         setSaving(false);
       }
@@ -101,7 +119,17 @@ export default function TaskDetailModal({
   };
 
   const handleChecklistChange = async (checklist: TaskChecklistItem[]) => {
-    await onUpdate(task.id, { checklist });
+    try {
+      await onUpdate(task.id, { checklist });
+      // Show subtle feedback for checklist completion
+      const completedCount = checklist.filter(item => item.isCompleted).length;
+      const totalCount = checklist.length;
+      if (totalCount > 0 && completedCount === totalCount) {
+        toast.success('Checklist complete!');
+      }
+    } catch {
+      toast.error('Failed to update checklist');
+    }
   };
 
   const handleDelete = async () => {
@@ -117,8 +145,8 @@ export default function TaskDetailModal({
     : null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-50 p-4 pt-[10vh] overflow-y-auto">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl">
+    <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-50 p-4 pt-[10vh] overflow-y-auto overscroll-contain">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col">
         {/* Header */}
         <div className="flex items-start justify-between p-4 border-b border-gray-100">
           <div className="flex-1 min-w-0">
@@ -147,7 +175,11 @@ export default function TaskDetailModal({
               )}
             </div>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 ml-4">
+          <button
+            onClick={handleClose}
+            className="flex-shrink-0 ml-4 p-2 -m-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            aria-label="Close modal"
+          >
             <XMarkIcon className="h-5 w-5" />
           </button>
         </div>
@@ -200,7 +232,7 @@ export default function TaskDetailModal({
         </div>
 
         {/* Tab content */}
-        <div className="p-4 max-h-[50vh] overflow-y-auto">
+        <div className="p-4 flex-1 overflow-y-auto min-h-0">
           {activeTab === 'details' && (
             editing ? (
               <TaskForm
@@ -212,7 +244,17 @@ export default function TaskDetailModal({
                 onSubmit={async (data) => {
                   await handleSave(data as Partial<Task>);
                 }}
-                onCancel={() => setEditing(false)}
+                onCancel={() => {
+                  if (isDirty) {
+                    if (window.confirm('You have unsaved changes. Discard them?')) {
+                      setIsDirty(false);
+                      setEditing(false);
+                    }
+                  } else {
+                    setEditing(false);
+                  }
+                }}
+                onDirtyChange={setIsDirty}
                 loading={saving}
               />
             ) : (

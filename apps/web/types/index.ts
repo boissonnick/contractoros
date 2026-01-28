@@ -1203,6 +1203,7 @@ export interface Scope {
   createdBy: string;
   createdAt: Date;
   updatedAt?: Date;
+  submittedAt?: Date | { toDate: () => Date };
 }
 
 export interface SowTemplate {

@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/auth';
 import { ProjectPhoto, ProjectPhase } from '@/types';
 import { Button, Input } from '@/components/ui';
 import { cn } from '@/lib/utils';
+import { formatDate } from '@/lib/date-utils';
 import {
   PhotoIcon,
   PlusIcon,
@@ -78,7 +79,7 @@ export default function ProjectPhotosPage() {
 
   // Group by date for timeline
   const photosByDate = filteredPhotos.reduce<Record<string, ProjectPhoto[]>>((acc, p) => {
-    const key = p.createdAt.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const key = formatDate(p.createdAt, { year: 'numeric', month: 'long', day: 'numeric' });
     (acc[key] = acc[key] || []).push(p);
     return acc;
   }, {});
@@ -270,7 +271,7 @@ export default function ProjectPhotosPage() {
               )}
               <div className="flex flex-wrap gap-3 text-xs text-gray-500">
                 <span>By: {selectedPhoto.userName || 'Unknown'}</span>
-                <span>{selectedPhoto.createdAt.toLocaleDateString()}</span>
+                <span>{formatDate(selectedPhoto.createdAt)}</span>
                 {selectedPhoto.phaseId && (
                   <span>Phase: {phases.find(p => p.id === selectedPhoto.phaseId)?.name || selectedPhoto.phaseId}</span>
                 )}

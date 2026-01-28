@@ -143,72 +143,91 @@ export default function ProjectDetailPage() {
 
   return (
     <div className="space-y-6">
-      {/* Status + Scope */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-        <div className="relative" ref={statusRef}>
-          <button
-            onClick={() => nextStatuses.length > 0 && setStatusMenuOpen(!statusMenuOpen)}
-            className={cn(
-              'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors border',
-              project.status === 'active' && 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100',
-              project.status === 'planning' && 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100',
-              project.status === 'bidding' && 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100',
-              project.status === 'lead' && 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100',
-              project.status === 'on_hold' && 'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100',
-              project.status === 'completed' && 'bg-emerald-50 text-emerald-700 border-emerald-200',
-              project.status === 'cancelled' && 'bg-red-50 text-red-700 border-red-200',
-              nextStatuses.length > 0 && 'cursor-pointer'
-            )}
-          >
-            <span className={cn(
-              'h-2 w-2 rounded-full',
-              project.status === 'active' && 'bg-green-500',
-              project.status === 'planning' && 'bg-blue-500',
-              project.status === 'bidding' && 'bg-purple-500',
-              project.status === 'lead' && 'bg-gray-400',
-              project.status === 'on_hold' && 'bg-yellow-500',
-              project.status === 'completed' && 'bg-emerald-500',
-              project.status === 'cancelled' && 'bg-red-500',
-            )} />
-            {STATUS_LABELS[project.status]}
-            {nextStatuses.length > 0 && (
-              <ChevronDownIcon className="h-4 w-4" />
-            )}
-          </button>
-          {statusMenuOpen && (
-            <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-20 min-w-[180px]">
-              {nextStatuses.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => handleStatusChange(s)}
-                  className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                >
-                  <span className={cn(
-                    'h-2 w-2 rounded-full',
-                    s === 'active' && 'bg-green-500',
-                    s === 'planning' && 'bg-blue-500',
-                    s === 'bidding' && 'bg-purple-500',
-                    s === 'lead' && 'bg-gray-400',
-                    s === 'on_hold' && 'bg-yellow-500',
-                    s === 'completed' && 'bg-emerald-500',
-                    s === 'cancelled' && 'bg-red-500',
-                  )} />
-                  {STATUS_LABELS[s]}
-                </button>
-              ))}
+      {/* Project Header Card - Status, Scope, Location */}
+      <Card>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Status Dropdown */}
+            <div className="relative" ref={statusRef}>
+              <button
+                onClick={() => nextStatuses.length > 0 && setStatusMenuOpen(!statusMenuOpen)}
+                className={cn(
+                  'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors border',
+                  project.status === 'active' && 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100',
+                  project.status === 'planning' && 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100',
+                  project.status === 'bidding' && 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100',
+                  project.status === 'lead' && 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100',
+                  project.status === 'on_hold' && 'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100',
+                  project.status === 'completed' && 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                  project.status === 'cancelled' && 'bg-red-50 text-red-700 border-red-200',
+                  nextStatuses.length > 0 && 'cursor-pointer'
+                )}
+              >
+                <span className={cn(
+                  'h-2 w-2 rounded-full',
+                  project.status === 'active' && 'bg-green-500',
+                  project.status === 'planning' && 'bg-blue-500',
+                  project.status === 'bidding' && 'bg-purple-500',
+                  project.status === 'lead' && 'bg-gray-400',
+                  project.status === 'on_hold' && 'bg-yellow-500',
+                  project.status === 'completed' && 'bg-emerald-500',
+                  project.status === 'cancelled' && 'bg-red-500',
+                )} />
+                {STATUS_LABELS[project.status]}
+                {nextStatuses.length > 0 && (
+                  <ChevronDownIcon className="h-4 w-4" />
+                )}
+              </button>
+              {statusMenuOpen && (
+                <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-20 min-w-[180px]">
+                  {nextStatuses.map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => handleStatusChange(s)}
+                      className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                    >
+                      <span className={cn(
+                        'h-2 w-2 rounded-full',
+                        s === 'active' && 'bg-green-500',
+                        s === 'planning' && 'bg-blue-500',
+                        s === 'bidding' && 'bg-purple-500',
+                        s === 'lead' && 'bg-gray-400',
+                        s === 'on_hold' && 'bg-yellow-500',
+                        s === 'completed' && 'bg-emerald-500',
+                        s === 'cancelled' && 'bg-red-500',
+                      )} />
+                      {STATUS_LABELS[s]}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
+
+            {/* Scope Badge */}
+            {project.scope && (
+              <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
+                {project.scope.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+              </span>
+            )}
+          </div>
+
+          {/* Location */}
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <MapPinIcon className="h-4 w-4 text-gray-400" />
+            <span>{project.address.city}, {project.address.state}</span>
+          </div>
         </div>
-        {project.scope && (
-          <span className="text-sm text-gray-400">
-            {project.scope.replace(/_/g, ' ')}
-          </span>
-        )}
-      </div>
+      </Card>
 
       {/* Phase Progress Bar */}
       {phases.length > 0 && (
         <Card>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-gray-900">Project Phases</h3>
+            <span className="text-xs text-gray-500">
+              {phases.filter(p => p.status === 'completed').length} of {phases.length} complete
+            </span>
+          </div>
           <PhaseProgressBar
             phases={phases}
             activePhaseId={selectedPhaseId || undefined}
@@ -220,58 +239,56 @@ export default function ProjectDetailPage() {
       )}
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card padding="sm">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <MapPinIcon className="h-5 w-5 text-blue-600" />
-            </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 items-stretch">
+        <Card padding="sm" className="h-full">
+          <div className="flex items-center gap-3 h-full">
+            <Avatar name={client?.displayName || 'No Client'} size="sm" />
             <div className="min-w-0">
-              <p className="text-xs text-gray-500">Location</p>
+              <p className="text-xs text-gray-500">Client</p>
               <p className="text-sm font-medium text-gray-900 truncate">
-                {project.address.city}, {project.address.state}
+                {client?.displayName || 'Not assigned'}
               </p>
             </div>
           </div>
         </Card>
 
-        {client && (
-          <Card padding="sm">
-            <div className="flex items-center gap-3">
-              <Avatar name={client.displayName} size="sm" />
-              <div className="min-w-0">
-                <p className="text-xs text-gray-500">Client</p>
-                <p className="text-sm font-medium text-gray-900 truncate">{client.displayName}</p>
-              </div>
+        <Card padding="sm" className="h-full">
+          <div className="flex items-center gap-3 h-full">
+            <div className="p-2 bg-green-100 rounded-lg flex-shrink-0">
+              <CurrencyDollarIcon className="h-5 w-5 text-green-600" />
             </div>
-          </Card>
-        )}
-
-        {project.budget && (
-          <Card padding="sm">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <CurrencyDollarIcon className="h-5 w-5 text-green-600" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Budget</p>
-                <p className="text-sm font-medium text-gray-900">
-                  {formatCurrency(project.budget)}
-                </p>
-              </div>
+            <div className="min-w-0">
+              <p className="text-xs text-gray-500">Budget</p>
+              <p className="text-sm font-medium text-gray-900">
+                {project.budget ? formatCurrency(project.budget) : 'Not set'}
+              </p>
             </div>
-          </Card>
-        )}
+          </div>
+        </Card>
 
-        <Card padding="sm">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
+        <Card padding="sm" className="h-full">
+          <div className="flex items-center gap-3 h-full">
+            <div className="p-2 bg-purple-100 rounded-lg flex-shrink-0">
               <ClipboardDocumentListIcon className="h-5 w-5 text-purple-600" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xs text-gray-500">Tasks</p>
               <p className="text-sm font-medium text-gray-900">
-                {completedTasks} / {tasks.length}
+                {completedTasks} / {tasks.length} complete
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        <Card padding="sm" className="h-full">
+          <div className="flex items-center gap-3 h-full">
+            <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
+              <DocumentTextIcon className="h-5 w-5 text-blue-600" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs text-gray-500">Quote</p>
+              <p className="text-sm font-medium text-gray-900">
+                {project.quoteTotal ? formatCurrency(project.quoteTotal) : 'Not set'}
               </p>
             </div>
           </div>

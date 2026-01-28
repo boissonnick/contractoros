@@ -3,6 +3,7 @@
 import React from 'react';
 import { Scope } from '@/types';
 import { cn } from '@/lib/utils';
+import { formatDate } from '@/lib/date-utils';
 import { DocumentTextIcon, CheckCircleIcon, ClockIcon, XCircleIcon } from '@heroicons/react/24/outline';
 
 interface ScopeVersionHistoryProps {
@@ -49,7 +50,7 @@ export default function ScopeVersionHistory({ scopes, currentScopeId, onSelect }
                   {isCurrent && <span className="text-xs text-blue-600 font-medium">Current</span>}
                 </div>
                 <p className="text-xs text-gray-500">
-                  {scope.createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  {formatDate(scope.createdAt, { month: 'short', day: 'numeric', year: 'numeric' })}
                   {' · '}{scope.items.length} items
                 </p>
               </div>

@@ -3,6 +3,7 @@
 import React from 'react';
 import { ChangeOrder } from '@/types';
 import { cn } from '@/lib/utils';
+import { formatDate } from '@/lib/date-utils';
 import { ArrowTrendingUpIcon, ArrowTrendingDownIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
 
 interface ChangeOrderCardProps {
@@ -62,7 +63,7 @@ export default function ChangeOrderCard({ co, onClick }: ChangeOrderCardProps) {
           {co.scopeChanges.length} change{co.scopeChanges.length !== 1 ? 's' : ''}
         </span>
         <span className="text-gray-400 ml-auto">
-          {co.createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+          {formatDate(co.createdAt, { month: 'short', day: 'numeric' })}
         </span>
       </div>
     </div>

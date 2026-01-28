@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { ScheduleAssignment } from '@/types';
 import { cn } from '@/lib/utils';
+import { formatDate } from '@/lib/date-utils';
 import { ChevronLeftIcon, ChevronRightIcon, PlusIcon } from '@heroicons/react/24/outline';
 
 interface ScheduleCalendarProps {
@@ -52,7 +53,7 @@ export default function ScheduleCalendar({ assignments, onAddAssignment, onClick
         <div className="flex items-center justify-between mb-4">
           <button onClick={() => navigate(-1)} className="p-1 hover:bg-gray-100 rounded"><ChevronLeftIcon className="h-5 w-5" /></button>
           <h3 className="text-sm font-semibold text-gray-900">
-            {weekDates[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} — {weekDates[6].toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            {formatDate(weekDates[0], { month: 'short', day: 'numeric' })} — {formatDate(weekDates[6], { month: 'short', day: 'numeric', year: 'numeric' })}
           </h3>
           <button onClick={() => navigate(1)} className="p-1 hover:bg-gray-100 rounded"><ChevronRightIcon className="h-5 w-5" /></button>
         </div>
@@ -107,7 +108,7 @@ export default function ScheduleCalendar({ assignments, onAddAssignment, onClick
     <div>
       <div className="flex items-center justify-between mb-4">
         <button onClick={() => navigate(-1)} className="p-1 hover:bg-gray-100 rounded"><ChevronLeftIcon className="h-5 w-5" /></button>
-        <h3 className="text-sm font-semibold text-gray-900">{refDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</h3>
+        <h3 className="text-sm font-semibold text-gray-900">{formatDate(refDate, { month: 'long', year: 'numeric' })}</h3>
         <button onClick={() => navigate(1)} className="p-1 hover:bg-gray-100 rounded"><ChevronRightIcon className="h-5 w-5" /></button>
       </div>
       <div className="grid grid-cols-7 gap-1">

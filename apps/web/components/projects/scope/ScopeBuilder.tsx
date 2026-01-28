@@ -2,8 +2,9 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import { Scope, ScopeItem, ProjectPhase, QuoteSection } from '@/types';
-import { Button } from '@/components/ui';
-import { PlusIcon, PaperAirplaneIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { Button, StatusBadge } from '@/components/ui';
+import type { StatusType } from '@/components/ui/Badge';
+import { PlusIcon, PaperAirplaneIcon, TrashIcon, ArrowPathIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
 import {
   DndContext,
@@ -42,6 +43,7 @@ interface ScopeBuilderProps {
   quoteSections: QuoteSection[];
   onSaveItems: (items: ScopeItem[]) => Promise<void>;
   onSubmitForApproval: () => Promise<void>;
+  onRecallSubmission?: () => Promise<void>;
   onCreateNewVersion: (items: ScopeItem[], notes?: string) => Promise<void>;
   onSelectVersion: (scope: Scope) => void;
 }
@@ -57,6 +59,7 @@ export default function ScopeBuilder({
   quoteSections,
   onSaveItems,
   onSubmitForApproval,
+  onRecallSubmission,
   onCreateNewVersion,
   onSelectVersion,
 }: ScopeBuilderProps) {
@@ -96,6 +99,8 @@ export default function ScopeBuilder({
   const totalMaterialsCost = items.reduce((sum, item) =>
     sum + item.materials.reduce((ms, m) => ms + ((m.estimatedCost || 0) * (m.quantity || 1)), 0), 0);
   const isDraft = !scope || scope.status === 'draft';
+  const isPendingApproval = scope?.status === 'pending_approval';
+  const isApproved = scope?.status === 'approved';
 
   const handleAddItem = (item: ScopeItem) => {
     const updated = [...items, { ...item, order: items.length }];
@@ -180,36 +185,83 @@ export default function ScopeBuilder({
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">
-            Scope of Work — v{scope.version}
-          </h3>
-          <p className="text-sm text-gray-500">
-            {items.length} items · {totalHours}h · {fmt(totalCost)}
-            {totalMaterialsCost > 0 && <span> · Materials: {fmt(totalMaterialsCost)}</span>}
-          </p>
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <h3 className="text-lg font-semibold text-gray-900">
+              Scope of Work — v{scope.version}
+            </h3>
+            <StatusBadge status={scope.status as StatusType} size="sm" />
+          </div>
+          <div className="flex items-center gap-2">
+            {isDraft && selectedIds.size > 0 && (
+              <Button variant="danger" size="sm" onClick={handleBulkDelete} icon={<TrashIcon className="h-4 w-4" />}>
+                Delete {selectedIds.size}
+              </Button>
+            )}
+            {isDraft && (
+              <>
+                <Button variant="outline" size="sm" onClick={() => setShowTemplateSelector(true)}>
+                  From Template
+                </Button>
+                <Button variant="secondary" size="sm" onClick={() => setShowAddItem(true)} icon={<PlusIcon className="h-4 w-4" />}>
+                  Add Item
+                </Button>
+                <Button variant="primary" size="sm" onClick={onSubmitForApproval} icon={<PaperAirplaneIcon className="h-4 w-4" />}>
+                  Submit for Approval
+                </Button>
+              </>
+            )}
+            {isPendingApproval && onRecallSubmission && (
+              <Button variant="outline" size="sm" onClick={onRecallSubmission} icon={<ArrowPathIcon className="h-4 w-4" />}>
+                Recall Submission
+              </Button>
+            )}
+            {isApproved && (
+              <Button variant="outline" size="sm" onClick={() => onCreateNewVersion(items, 'New version from approved scope')}>
+                Create New Version
+              </Button>
+            )}
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          {isDraft && selectedIds.size > 0 && (
-            <Button variant="danger" size="sm" onClick={handleBulkDelete} icon={<TrashIcon className="h-4 w-4" />}>
-              Delete {selectedIds.size}
-            </Button>
-          )}
-          {isDraft && (
-            <>
-              <Button variant="outline" size="sm" onClick={() => setShowTemplateSelector(true)}>
-                From Template
+        <p className="text-sm text-gray-500">
+          {items.length} items · {totalHours}h · {fmt(totalCost)}
+          {totalMaterialsCost > 0 && <span> · Materials: {fmt(totalMaterialsCost)}</span>}
+        </p>
+
+        {/* Status banner for non-draft states */}
+        {isPendingApproval && (
+          <div className="flex items-center gap-3 px-4 py-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <ClockIcon className="h-5 w-5 text-yellow-600 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-yellow-800">Awaiting Client Approval</p>
+              <p className="text-xs text-yellow-600 mt-0.5">
+                This scope has been submitted and is waiting for the client to review and approve.
+                {scope.submittedAt && (
+                  <span> Submitted {new Date(typeof scope.submittedAt === 'object' && 'toDate' in scope.submittedAt ? scope.submittedAt.toDate() : scope.submittedAt as Date).toLocaleDateString()}.</span>
+                )}
+              </p>
+            </div>
+            {onRecallSubmission && (
+              <Button variant="secondary" size="sm" onClick={onRecallSubmission} className="!bg-yellow-100 !text-yellow-800 hover:!bg-yellow-200">
+                Recall
               </Button>
-              <Button variant="secondary" size="sm" onClick={() => setShowAddItem(true)} icon={<PlusIcon className="h-4 w-4" />}>
-                Add Item
-              </Button>
-              <Button variant="primary" size="sm" onClick={onSubmitForApproval} icon={<PaperAirplaneIcon className="h-4 w-4" />}>
-                Submit for Approval
-              </Button>
-            </>
-          )}
-        </div>
+            )}
+          </div>
+        )}
+        {isApproved && (
+          <div className="flex items-center gap-3 px-4 py-3 bg-green-50 border border-green-200 rounded-lg">
+            <svg className="h-5 w-5 text-green-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-green-800">Scope Approved</p>
+              <p className="text-xs text-green-600 mt-0.5">
+                This scope has been approved by the client. You can now proceed with the project or create a new version if changes are needed.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Tabs */}
@@ -319,6 +371,7 @@ export default function ScopeBuilder({
         <ScopeApprovalPanel
           scope={scope}
           onSubmitForApproval={isDraft ? onSubmitForApproval : undefined}
+          onRecallSubmission={isPendingApproval ? onRecallSubmission : undefined}
         />
       )}
 

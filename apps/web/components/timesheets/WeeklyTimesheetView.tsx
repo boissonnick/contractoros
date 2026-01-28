@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { TimeEntry } from '@/types';
 import { Button } from '@/components/ui';
 import { cn } from '@/lib/utils';
+import { formatDate } from '@/lib/date-utils';
 
 interface WeeklyTimesheetViewProps {
   entries: TimeEntry[];
@@ -57,7 +58,7 @@ export default function WeeklyTimesheetView({ entries, weekStart, onSubmit, onCh
       <div className="flex items-center justify-between">
         <button onClick={() => onChangeWeek(-1)} className="text-sm text-blue-600 hover:text-blue-700">&larr; Prev</button>
         <h3 className="text-sm font-semibold text-gray-900">
-          Week of {weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+          Week of {formatDate(weekStart, { month: 'short', day: 'numeric', year: 'numeric' })}
         </h3>
         <button onClick={() => onChangeWeek(1)} className="text-sm text-blue-600 hover:text-blue-700">Next &rarr;</button>
       </div>

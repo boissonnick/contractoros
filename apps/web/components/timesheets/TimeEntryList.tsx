@@ -3,6 +3,7 @@
 import React from 'react';
 import { TimeEntry } from '@/types';
 import { cn } from '@/lib/utils';
+import { formatDate } from '@/lib/date-utils';
 import { ClockIcon, MapPinIcon } from '@heroicons/react/24/outline';
 
 interface TimeEntryListProps {
@@ -27,7 +28,7 @@ export default function TimeEntryList({ entries }: TimeEntryListProps) {
   // Group by date
   const grouped = new Map<string, TimeEntry[]>();
   for (const entry of entries) {
-    const key = entry.clockIn.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    const key = formatDate(entry.clockIn, { weekday: 'short', month: 'short', day: 'numeric' });
     if (!grouped.has(key)) grouped.set(key, []);
     grouped.get(key)!.push(entry);
   }

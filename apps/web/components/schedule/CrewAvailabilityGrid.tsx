@@ -5,6 +5,7 @@ import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore
 import { db } from '@/lib/firebase/config';
 import { UserProfile, AvailabilityDefault, Availability } from '@/types';
 import { cn } from '@/lib/utils';
+import { formatDate } from '@/lib/date-utils';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
 interface CrewAvailabilityGridProps {
@@ -68,7 +69,7 @@ export default function CrewAvailabilityGrid({ teamMembers, orgId }: CrewAvailab
       <div className="flex items-center justify-between mb-4">
         <button onClick={() => { const n = new Date(refDate); n.setDate(n.getDate() - 7); setRefDate(n); }} className="p-1 hover:bg-gray-100 rounded"><ChevronLeftIcon className="h-5 w-5" /></button>
         <h3 className="text-sm font-semibold text-gray-900">
-          Week of {weekDates[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+          Week of {formatDate(weekDates[0], { month: 'short', day: 'numeric' })}
         </h3>
         <button onClick={() => { const n = new Date(refDate); n.setDate(n.getDate() + 7); setRefDate(n); }} className="p-1 hover:bg-gray-100 rounded"><ChevronRightIcon className="h-5 w-5" /></button>
       </div>

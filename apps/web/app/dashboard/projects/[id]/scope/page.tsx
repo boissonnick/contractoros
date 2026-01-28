@@ -12,7 +12,7 @@ export default function ProjectScopePage() {
   const params = useParams();
   const projectId = params.id as string;
 
-  const { scopes, currentScope, loading, createScope, updateScope, submitForApproval } = useScopes({ projectId });
+  const { scopes, currentScope, loading, createScope, updateScope, submitForApproval, recallSubmission } = useScopes({ projectId });
   const [phases, setPhases] = useState<ProjectPhase[]>([]);
   const [quoteSections, setQuoteSections] = useState<QuoteSection[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
@@ -59,6 +59,12 @@ export default function ProjectScopePage() {
     }
   }, [activeScope, submitForApproval]);
 
+  const handleRecallSubmission = useCallback(async () => {
+    if (activeScope) {
+      await recallSubmission(activeScope.id);
+    }
+  }, [activeScope, recallSubmission]);
+
   const handleCreateNewVersion = useCallback(
     async (items: ScopeItem[], notes?: string) => {
       await createScope(items, notes);
@@ -87,6 +93,7 @@ export default function ProjectScopePage() {
         quoteSections={quoteSections}
         onSaveItems={handleSaveItems}
         onSubmitForApproval={handleSubmitForApproval}
+        onRecallSubmission={handleRecallSubmission}
         onCreateNewVersion={handleCreateNewVersion}
         onSelectVersion={handleSelectVersion}
       />

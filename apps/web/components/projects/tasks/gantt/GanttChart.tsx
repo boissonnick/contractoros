@@ -103,6 +103,15 @@ export default function GanttChart({ tasks, viewMode, onTaskClick, onDateChange 
         .gantt .bar-wrapper .bar-label {
           font-size: 12px;
           font-weight: 500;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          white-space: nowrap;
+        }
+        .gantt .bar-wrapper {
+          cursor: pointer;
+        }
+        .gantt .bar-wrapper:hover .bar-label {
+          fill: #1f2937;
         }
         .gantt .bar-wrapper .bar {
           transition: fill 0.15s;

@@ -3,6 +3,7 @@
 import React from 'react';
 import { ChangeOrder } from '@/types';
 import { cn } from '@/lib/utils';
+import { formatDateTime } from '@/lib/date-utils';
 
 interface ChangeOrderTimelineProps {
   co: ChangeOrder;
@@ -25,7 +26,7 @@ export default function ChangeOrderTimeline({ co }: ChangeOrderTimelineProps) {
                 </p>
                 {entry.details && <p className="text-xs text-gray-500 mt-0.5">{entry.details}</p>}
                 <p className="text-xs text-gray-400 mt-0.5">
-                  {entry.timestamp.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                  {formatDateTime(entry.timestamp)}
                 </p>
               </div>
             </div>

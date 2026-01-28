@@ -148,9 +148,9 @@ export default function BaseModal({
                       <button
                         type="button"
                         onClick={onClose}
-                        className="ml-4 flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+                        className="ml-4 flex-shrink-0 p-2 -m-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
+                        aria-label="Close modal"
                       >
-                        <span className="sr-only">Close</span>
                         <XMarkIcon className="h-5 w-5" />
                       </button>
                     )}

@@ -105,6 +105,18 @@ gcloud secrets add-iam-policy-binding SECRET_NAME \
 # Update docker-build-local.sh for local dev
 ```
 
+## Google Maps API Key Configuration
+The Google Maps API key requires referrer restrictions in GCP Console. If you see `RefererNotAllowedMapError`:
+
+1. Go to **GCP Console** → **APIs & Services** → **Credentials**
+2. Click on the **Google Maps API Key**
+3. Under **Application restrictions**, select **HTTP referrers (websites)**
+4. Add allowed referrers:
+   - `http://localhost:3000/*` (local Docker)
+   - `http://localhost:3001/*` (local dev server)
+   - `https://contractoros-*.run.app/*` (Cloud Run)
+   - `https://*.contractoros.com/*` (production domain)
+
 ## Known Issues / Tech Debt
 - AuthProvider architecture needs refactoring
 - 20+ route pages still missing or incomplete

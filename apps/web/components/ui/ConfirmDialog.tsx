@@ -114,7 +114,8 @@ export default function ConfirmDialog({
                   <button
                     type="button"
                     onClick={onClose}
-                    className="flex-shrink-0 text-gray-400 hover:text-gray-500 transition-colors"
+                    className="flex-shrink-0 p-2 -m-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                    aria-label="Close dialog"
                   >
                     <XMarkIcon className="h-5 w-5" />
                   </button>

@@ -7,6 +7,7 @@ import { CheckCircleIcon } from '@heroicons/react/24/solid';
 import { db } from '@/lib/firebase/config';
 import { doc, updateDoc, Timestamp } from 'firebase/firestore';
 import { toast } from '@/components/ui';
+import { formatDate } from '@/lib/date-utils';
 
 interface PhaseProgressBarProps {
   phases: ProjectPhase[];
@@ -150,8 +151,8 @@ export default function PhaseProgressBar({
                   {/* Date range */}
                   {phase.startDate && (
                     <span className="text-[10px] text-gray-400 leading-none">
-                      {phase.startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                      {phase.endDate && ` – ${phase.endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
+                      {formatDate(phase.startDate, { month: 'short', day: 'numeric' })}
+                      {phase.endDate && ` – ${formatDate(phase.endDate, { month: 'short', day: 'numeric' })}`}
                     </span>
                   )}
                   {/* Team count */}

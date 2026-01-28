@@ -16,6 +16,7 @@ import {
   ArrowRightIcon,
 } from '@heroicons/react/24/outline';
 import { FirestoreError } from '@/components/ui';
+import { formatDate } from '@/lib/date-utils';
 
 const bidStatusConfig: Record<BidStatus, { label: string; color: string; icon: React.ComponentType<{ className?: string }> }> = {
   draft: { label: 'Draft', color: 'bg-gray-100 text-gray-700', icon: DocumentTextIcon },
@@ -226,7 +227,7 @@ export default function SubDashboard() {
                   </div>
                   <div>
                     <p className="font-medium text-gray-900">
-                      {new Date(assignment.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                      {formatDate(assignment.date, { weekday: 'short', month: 'short', day: 'numeric' })}
                     </p>
                     <p className="text-sm text-gray-500">
                       {assignment.startTime} - {assignment.endTime}

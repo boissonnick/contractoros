@@ -20,6 +20,7 @@ import {
   ClipboardDocumentCheckIcon,
 } from '@heroicons/react/24/outline';
 import { FirestoreError } from '@/components/ui';
+import { formatDate } from '@/lib/date-utils';
 
 export default function FieldPage() {
   const { user, profile } = useAuth();
@@ -227,7 +228,7 @@ export default function FieldPage() {
           {greeting}, {profile?.displayName?.split(' ')[0]}
         </h1>
         <p className="text-gray-500 mt-1">
-          {now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+          {formatDate(now, { weekday: 'long', month: 'long', day: 'numeric' })}
         </p>
       </div>
 

@@ -1,8 +1,8 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ScopeItem, QuoteSection } from '@/types';
-import { LinkIcon } from '@heroicons/react/24/outline';
+import { LinkIcon, QuestionMarkCircleIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 
 interface ScopeQuoteLinkProps {
   items: ScopeItem[];
@@ -14,6 +14,7 @@ function fmt(n: number): string {
 }
 
 export default function ScopeQuoteLink({ items, quoteSections }: ScopeQuoteLinkProps) {
+  const [showHelp, setShowHelp] = useState(false);
   const linked = items.filter(item => item.quoteSectionId);
   const unlinked = items.filter(item => !item.quoteSectionId);
 
@@ -27,7 +28,47 @@ export default function ScopeQuoteLink({ items, quoteSections }: ScopeQuoteLinkP
 
   return (
     <div className="space-y-4">
-      <h4 className="text-sm font-semibold text-gray-900">SOW ↔ Quote Links</h4>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <h4 className="text-sm font-semibold text-gray-900">SOW ↔ Quote Links</h4>
+          <button
+            onClick={() => setShowHelp(!showHelp)}
+            className="p-1 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
+            aria-label="Help"
+          >
+            <QuestionMarkCircleIcon className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="flex items-center gap-1 text-xs text-gray-500">
+          <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded">SOW</span>
+          <ArrowRightIcon className="h-3 w-3" />
+          <span className="px-2 py-0.5 bg-green-50 text-green-700 rounded">Quote</span>
+        </div>
+      </div>
+
+      {/* Help tooltip */}
+      {showHelp && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
+          <p className="font-medium text-blue-900 mb-2">Understanding SOW & Quote Relationship</p>
+          <ul className="space-y-1.5 text-blue-800">
+            <li className="flex items-start gap-2">
+              <span className="font-bold">SOW (Scope of Work):</span>
+              <span>Defines what work will be done, materials needed, and estimated costs.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="font-bold">Quote:</span>
+              <span>The price you present to the client, often with markup applied.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="font-bold">Linking:</span>
+              <span>Connect SOW items to quote sections to track cost vs. quoted price.</span>
+            </li>
+          </ul>
+          <p className="mt-2 text-xs text-blue-600">
+            Tip: Once a SOW is approved, you can generate a quote automatically from it.
+          </p>
+        </div>
+      )}
 
       {/* Summary table */}
       <div className="border border-gray-200 rounded-lg overflow-hidden">

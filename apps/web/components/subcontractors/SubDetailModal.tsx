@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import SubForm from './SubForm';
 import SubDocuments from './SubDocuments';
 import SubPerformanceMetrics from './SubPerformanceMetrics';
+import { formatDate } from '@/lib/date-utils';
 
 type Tab = 'details' | 'documents' | 'performance';
 
@@ -35,7 +36,7 @@ export default function SubDetailModal({ sub, onClose, onUpdate, onDelete }: Sub
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overscroll-contain">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
@@ -69,7 +70,7 @@ export default function SubDetailModal({ sub, onClose, onUpdate, onDelete }: Sub
                 onClick={() => setTab(t.id)}
                 className={cn(
                   'px-3 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors',
-                  tab === t.id ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+                  tab === t.id ? 'border-brand-primary text-brand-primary' : 'border-transparent text-gray-500 hover:text-gray-700'
                 )}
               >
                 {t.label}
@@ -95,7 +96,7 @@ export default function SubDetailModal({ sub, onClose, onUpdate, onDelete }: Sub
                     <div><p className="text-xs text-gray-500">Phone</p><p className="text-sm text-gray-900">{sub.phone || '—'}</p></div>
                     <div><p className="text-xs text-gray-500">Trade</p><p className="text-sm text-gray-900">{sub.trade}</p></div>
                     <div><p className="text-xs text-gray-500">License</p><p className="text-sm text-gray-900">{sub.licenseNumber || '—'}</p></div>
-                    <div><p className="text-xs text-gray-500">Insurance Expiry</p><p className="text-sm text-gray-900">{sub.insuranceExpiry ? sub.insuranceExpiry.toLocaleDateString() : '—'}</p></div>
+                    <div><p className="text-xs text-gray-500">Insurance Expiry</p><p className="text-sm text-gray-900">{sub.insuranceExpiry ? formatDate(sub.insuranceExpiry) : '—'}</p></div>
                     <div><p className="text-xs text-gray-500">Status</p><p className="text-sm text-gray-900">{sub.isActive ? 'Active' : 'Inactive'}</p></div>
                   </div>
                   {sub.address && (

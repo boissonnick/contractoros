@@ -4,6 +4,7 @@ import React from 'react';
 import { WeeklyTimesheet } from '@/types';
 import { Button } from '@/components/ui';
 import { cn } from '@/lib/utils';
+import { formatDate } from '@/lib/date-utils';
 import { CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 interface TimesheetApprovalListProps {
@@ -31,7 +32,7 @@ export default function TimesheetApprovalList({ timesheets, onApprove, onReject 
           <div>
             <p className="text-sm font-medium text-gray-900">{ts.userName || 'Unknown'}</p>
             <p className="text-xs text-gray-500">
-              Week of {ts.weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} &middot; {ts.totalHours.toFixed(1)}h
+              Week of {formatDate(ts.weekStart, { month: 'short', day: 'numeric' })} &middot; {ts.totalHours.toFixed(1)}h
               {ts.overtimeHours > 0 && <span className="text-orange-600"> ({ts.overtimeHours.toFixed(1)}h OT)</span>}
             </p>
           </div>

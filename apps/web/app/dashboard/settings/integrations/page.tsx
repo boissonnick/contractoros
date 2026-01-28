@@ -299,7 +299,7 @@ export default function IntegrationsPage() {
                 onClick={() => handleSyncSettingChange('autoSyncInvoices', !connection.syncSettings.autoSyncInvoices)}
                 className={cn(
                   'relative w-11 h-6 rounded-full transition-colors',
-                  connection.syncSettings.autoSyncInvoices ? 'bg-blue-600' : 'bg-gray-300'
+                  connection.syncSettings.autoSyncInvoices ? 'bg-brand-primary' : 'bg-gray-300'
                 )}
               >
                 <span className={cn(
@@ -318,7 +318,7 @@ export default function IntegrationsPage() {
                 onClick={() => handleSyncSettingChange('autoSyncExpenses', !connection.syncSettings.autoSyncExpenses)}
                 className={cn(
                   'relative w-11 h-6 rounded-full transition-colors',
-                  connection.syncSettings.autoSyncExpenses ? 'bg-blue-600' : 'bg-gray-300'
+                  connection.syncSettings.autoSyncExpenses ? 'bg-brand-primary' : 'bg-gray-300'
                 )}
               >
                 <span className={cn(
@@ -337,7 +337,7 @@ export default function IntegrationsPage() {
                 onClick={() => handleSyncSettingChange('autoSyncPayments', !connection.syncSettings.autoSyncPayments)}
                 className={cn(
                   'relative w-11 h-6 rounded-full transition-colors',
-                  connection.syncSettings.autoSyncPayments ? 'bg-blue-600' : 'bg-gray-300'
+                  connection.syncSettings.autoSyncPayments ? 'bg-brand-primary' : 'bg-gray-300'
                 )}
               >
                 <span className={cn(

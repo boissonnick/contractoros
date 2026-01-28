@@ -8,6 +8,7 @@ import { useAuth } from '@/lib/auth';
 import { useSubAssignments } from '@/lib/hooks/useSubAssignments';
 import { ProjectPhase, Task, SubAssignment } from '@/types';
 import { cn } from '@/lib/utils';
+import { formatDate } from '@/lib/date-utils';
 
 function fmt(n: number): string {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
@@ -146,7 +147,7 @@ export default function SubProjectPage() {
               </div>
               {t.dueDate && (
                 <p className="text-xs text-gray-500 mt-1">
-                  Due {t.dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  Due {formatDate(t.dueDate, { month: 'short', day: 'numeric' })}
                 </p>
               )}
             </div>

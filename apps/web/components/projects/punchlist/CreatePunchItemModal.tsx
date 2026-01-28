@@ -118,7 +118,8 @@ export default function CreatePunchItemModal({
                   </Dialog.Title>
                   <button
                     onClick={handleClose}
-                    className="text-gray-400 hover:text-gray-500"
+                    className="p-2 -m-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                    aria-label="Close"
                   >
                     <XMarkIcon className="h-5 w-5" />
                   </button>

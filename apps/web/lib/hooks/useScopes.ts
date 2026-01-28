@@ -151,6 +151,18 @@ export function useScopes({ projectId }: UseScopesOptions) {
     async (scopeId: string) => {
       await updateDoc(doc(db, 'scopes', scopeId), {
         status: 'pending_approval',
+        submittedAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      });
+    },
+    []
+  );
+
+  const recallSubmission = useCallback(
+    async (scopeId: string) => {
+      await updateDoc(doc(db, 'scopes', scopeId), {
+        status: 'draft',
+        submittedAt: null,
         updatedAt: Timestamp.now(),
       });
     },
@@ -228,6 +240,7 @@ export function useScopes({ projectId }: UseScopesOptions) {
     createScope,
     updateScope,
     submitForApproval,
+    recallSubmission,
     approveScope,
     rejectScope,
   };

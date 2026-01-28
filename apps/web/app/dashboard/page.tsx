@@ -54,13 +54,16 @@ function StatCard({ title, value, icon: Icon, trend, trendUp, href, color, subti
   };
 
   const content = (
-    <div className={`bg-white rounded-xl border ${href ? 'hover:shadow-md transition-shadow cursor-pointer' : ''} p-5`}>
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-500">{title}</p>
+    <div className={cn(
+      'bg-white rounded-xl border p-5 h-full flex flex-col justify-between',
+      href && 'hover:shadow-md transition-shadow cursor-pointer'
+    )}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-gray-500 truncate">{title}</p>
           <p className="mt-1 text-2xl font-bold text-gray-900">{value}</p>
           {subtitle && (
-            <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>
+            <p className="text-xs text-gray-400 mt-0.5 truncate">{subtitle}</p>
           )}
           {trend && (
             <p className={`mt-1 text-sm ${trendUp ? 'text-green-600' : 'text-red-600'}`}>
@@ -68,14 +71,14 @@ function StatCard({ title, value, icon: Icon, trend, trendUp, href, color, subti
             </p>
           )}
         </div>
-        <div className={`p-3 rounded-xl ${colorClasses[color]}`}>
+        <div className={`p-3 rounded-xl flex-shrink-0 ${colorClasses[color]}`}>
           <Icon className="h-6 w-6" />
         </div>
       </div>
     </div>
   );
 
-  return href ? <Link href={href}>{content}</Link> : content;
+  return href ? <Link href={href} className="h-full">{content}</Link> : content;
 }
 
 const statusConfig: Record<string, { label: string; color: string }> = {
@@ -339,7 +342,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 items-stretch">
         <StatCard
           title="Active Projects"
           value={stats.activeProjects}

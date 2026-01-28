@@ -8,6 +8,7 @@ import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
 import { cn } from '@/lib/utils';
+import { formatDate } from '@/lib/date-utils';
 
 interface SubDocumentsProps {
   sub: Subcontractor;
@@ -119,7 +120,7 @@ export default function SubDocuments({ sub, onUpdate }: SubDocumentsProps) {
                 {doc.expiresAt && (
                   <p className={cn('text-xs mt-0.5', expired ? 'text-red-500' : 'text-gray-500')}>
                     {expired && <ExclamationTriangleIcon className="inline h-3 w-3 mr-0.5" />}
-                    Expires {doc.expiresAt.toLocaleDateString()}
+                    Expires {formatDate(doc.expiresAt)}
                   </p>
                 )}
               </div>

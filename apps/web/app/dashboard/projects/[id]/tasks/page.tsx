@@ -3,9 +3,10 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { db } from '@/lib/firebase/config';
-import { collection, getDocs } from 'firebase/firestore';
-import { Task, TaskStatus, ProjectPhase } from '@/types';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { Task, TaskStatus, ProjectPhase, UserProfile } from '@/types';
 import { useTasks } from '@/lib/hooks/useTasks';
+import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui';
 import { toast } from '@/components/ui/Toast';
 import { PlusIcon, FunnelIcon, CheckIcon } from '@heroicons/react/24/outline';
@@ -24,6 +25,7 @@ import BulkTaskToolbar from '@/components/tasks/BulkTaskToolbar';
 export default function ProjectTasksPage() {
   const params = useParams();
   const projectId = params.id as string;
+  const { user, profile } = useAuth();
 
   // Data
   const {
@@ -32,6 +34,8 @@ export default function ProjectTasksPage() {
   } = useTasks({ projectId });
   const [phases, setPhases] = useState<ProjectPhase[]>([]);
   const [phasesLoading, setPhasesLoading] = useState(true);
+  const [teamMembers, setTeamMembers] = useState<{ uid: string; displayName: string; photoURL?: string; role: string }[]>([]);
+  const [teamLoading, setTeamLoading] = useState(true);
 
   // UI state
   const [view, setView] = useState<TaskView>('kanban');
@@ -66,6 +70,39 @@ export default function ProjectTasksPage() {
     }
     fetchPhases();
   }, [projectId]);
+
+  // Fetch team members for the organization
+  useEffect(() => {
+    async function fetchTeamMembers() {
+      if (!profile?.orgId) {
+        setTeamLoading(false);
+        return;
+      }
+      try {
+        const q = query(
+          collection(db, 'users'),
+          where('orgId', '==', profile.orgId),
+          where('isActive', '==', true)
+        );
+        const snap = await getDocs(q);
+        const members = snap.docs.map((d) => {
+          const data = d.data() as UserProfile;
+          return {
+            uid: data.uid || d.id,
+            displayName: data.displayName || data.email || 'Unknown',
+            photoURL: data.photoURL,
+            role: data.role,
+          };
+        });
+        setTeamMembers(members);
+      } catch (err) {
+        console.error('Error fetching team members:', err);
+      } finally {
+        setTeamLoading(false);
+      }
+    }
+    fetchTeamMembers();
+  }, [profile?.orgId]);
 
   // Filter tasks
   const filteredTasks = useMemo(() => {
@@ -161,7 +198,7 @@ export default function ProjectTasksPage() {
     setIsBulkMode(false);
   }, [selectedTaskIds, bulkDelete]);
 
-  if (loading || phasesLoading) {
+  if (loading || phasesLoading || teamLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
@@ -284,6 +321,7 @@ export default function ProjectTasksPage() {
               projectId={projectId}
               phases={phases}
               allTasks={tasks}
+              teamMembers={teamMembers}
               onSubmit={handleAddTask}
               onCancel={() => setShowAddTask(false)}
             />
@@ -298,6 +336,8 @@ export default function ProjectTasksPage() {
           projectId={projectId}
           phases={phases}
           allTasks={tasks}
+          teamMembers={teamMembers}
+          userId={user?.uid}
           onClose={() => setSelectedTask(null)}
           onUpdate={updateTask}
           onDelete={deleteTask}

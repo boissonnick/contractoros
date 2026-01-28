@@ -23,9 +23,9 @@ import {
   HomeModernIcon,
   BuildingStorefrontIcon,
   PuzzlePieceIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/outline';
-
-import { SparklesIcon } from '@heroicons/react/24/outline';
+import { formatDate } from '@/lib/date-utils';
 
 type Step = 'basics' | 'scope' | 'address' | 'client' | 'preferences' | 'budget' | 'review';
 
@@ -579,8 +579,8 @@ export default function NewProjectPage() {
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <h3 className="text-sm font-medium text-gray-500 mb-2">Budget & Timeline</h3>
                   {form.budget && <p className="text-gray-900">Budget: ${parseFloat(form.budget).toLocaleString()}</p>}
-                  {form.startDate && <p className="text-sm text-gray-600">Start: {new Date(form.startDate).toLocaleDateString()}</p>}
-                  {form.estimatedEndDate && <p className="text-sm text-gray-600">Target End: {new Date(form.estimatedEndDate).toLocaleDateString()}</p>}
+                  {form.startDate && <p className="text-sm text-gray-600">Start: {formatDate(new Date(form.startDate))}</p>}
+                  {form.estimatedEndDate && <p className="text-sm text-gray-600">Target End: {formatDate(new Date(form.estimatedEndDate))}</p>}
                 </div>
               )}
             </div>

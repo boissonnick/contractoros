@@ -42,10 +42,21 @@ export type { ConfirmDialogProps } from './ConfirmDialog';
 export { default as BaseModal, useModal, useModalDirtyState } from './BaseModal';
 export type { BaseModalProps } from './BaseModal';
 
-export { FormInput, FormTextarea, FormSelect, FormCheckbox } from './FormField';
+export { FormInput, FormTextarea, FormSelect, FormCheckbox, FormSection, FormError, FormFieldWrapper } from './FormField';
 
 export { default as Pagination, CompactPagination } from './Pagination';
 export type { PaginationProps } from './Pagination';
+
+export {
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableHeader,
+  TableCell,
+  TableEmpty,
+  TableLoading,
+} from './Table';
 
 export {
   default as Skeleton,

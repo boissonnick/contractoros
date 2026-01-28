@@ -5,6 +5,7 @@ import { ProjectPhase, PhaseMilestone } from '@/types';
 import { Button, Input } from '@/components/ui';
 import { PlusIcon, TrashIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckCircleSolid } from '@heroicons/react/24/solid';
+import { formatDate } from '@/lib/date-utils';
 
 interface PhaseMilestonesProps {
   phase: ProjectPhase;
@@ -67,7 +68,7 @@ export default function PhaseMilestones({ phase, onUpdate }: PhaseMilestonesProp
                 {ms.title}
               </p>
               <p className="text-xs text-gray-500">
-                {ms.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                {formatDate(ms.date, { month: 'short', day: 'numeric', year: 'numeric' })}
               </p>
             </div>
             <button onClick={() => removeMilestone(ms.id)} className="p-1 text-gray-400 hover:text-red-500">

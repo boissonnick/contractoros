@@ -11,6 +11,7 @@ import {
   UserCircleIcon,
   CheckCircleIcon,
 } from '@heroicons/react/24/outline';
+import { formatDate } from '@/lib/date-utils';
 
 const statusColors: Record<TaskStatus, string> = {
   pending: 'bg-gray-100 text-gray-600',
@@ -102,7 +103,7 @@ export default function TaskListRow({ task, onClick, onStatusChange }: TaskListR
           isOverdue ? 'text-red-600 font-medium' : 'text-gray-500'
         )}>
           <CalendarIcon className="h-3 w-3" />
-          {new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+          {formatDate(task.dueDate, { month: 'short', day: 'numeric' })}
         </span>
       )}
 

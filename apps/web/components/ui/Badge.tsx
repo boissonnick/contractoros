@@ -63,7 +63,8 @@ export default function Badge({
 export type StatusType =
   | 'active' | 'inactive' | 'pending' | 'completed' | 'cancelled'
   | 'draft' | 'submitted' | 'approved' | 'rejected'
-  | 'open' | 'closed' | 'in_progress' | 'on_hold';
+  | 'open' | 'closed' | 'in_progress' | 'on_hold'
+  | 'pending_approval' | 'superseded' | 'sent' | 'viewed' | 'partial' | 'overdue' | 'paid';
 
 const statusConfig: Record<StatusType, { label: string; variant: BadgeProps['variant'] }> = {
   active: { label: 'Active', variant: 'success' },
@@ -79,6 +80,13 @@ const statusConfig: Record<StatusType, { label: string; variant: BadgeProps['var
   closed: { label: 'Closed', variant: 'default' },
   in_progress: { label: 'In Progress', variant: 'info' },
   on_hold: { label: 'On Hold', variant: 'warning' },
+  pending_approval: { label: 'Pending Approval', variant: 'warning' },
+  superseded: { label: 'Superseded', variant: 'default' },
+  sent: { label: 'Sent', variant: 'primary' },
+  viewed: { label: 'Viewed', variant: 'info' },
+  partial: { label: 'Partial', variant: 'warning' },
+  overdue: { label: 'Overdue', variant: 'danger' },
+  paid: { label: 'Paid', variant: 'success' },
 };
 
 export function StatusBadge({

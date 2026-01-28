@@ -59,7 +59,7 @@ export function FormInput<T extends FieldValues>({
             'focus:outline-none focus:ring-2 focus:ring-offset-0',
             error
               ? 'border-red-300 focus:border-red-500 focus:ring-red-500 pr-10'
-              : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500',
+              : 'border-gray-300 focus:border-brand-primary focus:ring-brand-primary',
             disabled && 'bg-gray-50 text-gray-500 cursor-not-allowed'
           )}
         />
@@ -118,7 +118,7 @@ export function FormTextarea<T extends FieldValues>({
           'focus:outline-none focus:ring-2 focus:ring-offset-0',
           error
             ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
-            : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500',
+            : 'border-gray-300 focus:border-brand-primary focus:ring-brand-primary',
           disabled && 'bg-gray-50 text-gray-500 cursor-not-allowed'
         )}
       />
@@ -169,7 +169,7 @@ export function FormSelect<T extends FieldValues>({
           'focus:outline-none focus:ring-2 focus:ring-offset-0',
           error
             ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
-            : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500',
+            : 'border-gray-300 focus:border-brand-primary focus:ring-brand-primary',
           disabled && 'bg-gray-50 text-gray-500 cursor-not-allowed'
         )}
       >
@@ -217,7 +217,7 @@ export function FormCheckbox<T extends FieldValues>({
           disabled={disabled}
           {...register(name)}
           className={cn(
-            'h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500',
+            'h-4 w-4 rounded border-gray-300 text-brand-primary focus:ring-brand-primary',
             disabled && 'bg-gray-100 cursor-not-allowed'
           )}
         />
@@ -235,6 +235,110 @@ export function FormCheckbox<T extends FieldValues>({
           <p className="mt-1 text-red-600">{error.message}</p>
         )}
       </div>
+    </div>
+  );
+}
+
+/**
+ * FormSection - Groups related form fields with a title and optional description
+ */
+interface FormSectionProps {
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+  className?: string;
+}
+
+export function FormSection({ title, description, children, className }: FormSectionProps) {
+  return (
+    <div className={cn('space-y-4', className)}>
+      <div>
+        <h3 className="text-base font-semibold text-gray-900">{title}</h3>
+        {description && (
+          <p className="mt-1 text-sm text-gray-500">{description}</p>
+        )}
+      </div>
+      <div className="space-y-4">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * FormError - Displays a summary of form errors at the top of a form
+ */
+interface FormErrorProps {
+  errors: Record<string, { message?: string } | undefined>;
+  className?: string;
+}
+
+export function FormError({ errors, className }: FormErrorProps) {
+  const errorMessages = Object.entries(errors)
+    .filter(([, error]) => error?.message)
+    .map(([field, error]) => ({
+      field,
+      message: error!.message!,
+    }));
+
+  if (errorMessages.length === 0) return null;
+
+  return (
+    <div className={cn('rounded-lg bg-red-50 border border-red-200 p-4', className)}>
+      <div className="flex items-start">
+        <ExclamationCircleIcon className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+        <div className="ml-3">
+          <h3 className="text-sm font-medium text-red-800">
+            {errorMessages.length === 1
+              ? 'There was an error with your submission'
+              : `There were ${errorMessages.length} errors with your submission`}
+          </h3>
+          <ul className="mt-2 text-sm text-red-700 list-disc list-inside space-y-1">
+            {errorMessages.map(({ field, message }) => (
+              <li key={field}>{message}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * FormFieldWrapper - A generic wrapper for custom form controls
+ */
+interface FormFieldWrapperProps {
+  label?: string;
+  error?: FieldError;
+  hint?: string;
+  required?: boolean;
+  children: React.ReactNode;
+  className?: string;
+}
+
+export function FormFieldWrapper({
+  label,
+  error,
+  hint,
+  required,
+  children,
+  className,
+}: FormFieldWrapperProps) {
+  return (
+    <div className={className}>
+      {label && (
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          {label}
+          {required && <span className="text-red-500 ml-1">*</span>}
+        </label>
+      )}
+      {children}
+      {error && (
+        <p className="mt-1 text-sm text-red-600">{error.message}</p>
+      )}
+      {hint && !error && (
+        <p className="mt-1 text-sm text-gray-500">{hint}</p>
+      )}
     </div>
   );
 }

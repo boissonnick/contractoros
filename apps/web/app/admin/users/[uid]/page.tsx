@@ -9,6 +9,7 @@ import { Card, Button, toast } from '@/components/ui';
 import { ArrowLeftIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { UserRole } from '@/types';
+import { formatDate } from '@/lib/date-utils';
 
 interface UserDetail {
   uid: string;
@@ -153,7 +154,7 @@ export default function AdminUserDetailPage() {
           {user.createdAt && (
             <div>
               <dt className="text-gray-500">Created</dt>
-              <dd className="text-gray-900">{user.createdAt.toDate().toLocaleDateString()}</dd>
+              <dd className="text-gray-900">{formatDate(user.createdAt?.toDate())}</dd>
             </div>
           )}
         </dl>

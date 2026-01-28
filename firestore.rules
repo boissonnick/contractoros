@@ -90,11 +90,26 @@ service cloud.firestore {
         allow delete: if isAdmin();
       }
 
-      // Project activity subcollection
+      // Project activity subcollection (singular - legacy)
       match /activity/{activityId} {
         allow read: if isAuthenticated();
         allow create: if isAuthenticated();
         allow update, delete: if false;
+      }
+
+      // Project activities subcollection (plural - used by activity page)
+      match /activities/{activityId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated();
+        allow update, delete: if false;
+      }
+
+      // Project notes subcollection
+      match /notes/{noteId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated();
+        // Users can update/delete their own notes
+        allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
       }
     }
 
@@ -476,6 +491,14 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated();
       allow update: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+
+    // Tax rates collection (top-level, org-scoped)
+    match /taxRates/{taxRateId} {
+      allow read: if isAuthenticated() && userProfileExists() && resource.data.orgId == getUserProfile().orgId;
+      allow create: if isAuthenticated() && userProfileExists() && request.resource.data.orgId == getUserProfile().orgId;
+      allow update: if isAuthenticated() && userProfileExists() && resource.data.orgId == getUserProfile().orgId;
       allow delete: if isAdmin();
     }
 

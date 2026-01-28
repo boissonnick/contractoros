@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { TaskPriority, TaskDependency, Task, ProjectPhase, RecurrenceConfig, TaskChecklistItem } from '@/types';
 import { Button, Input, Textarea, Select } from '@/components/ui';
 import InlineCreateModal from '@/components/ui/InlineCreateModal';
@@ -31,6 +31,7 @@ interface TaskFormProps {
   onSubmit: (data: NewTaskInput) => Promise<void>;
   onCancel: () => void;
   onPhaseCreated?: (phase: ProjectPhase) => void;
+  onDirtyChange?: (dirty: boolean) => void;
   loading?: boolean;
 }
 
@@ -43,6 +44,7 @@ export default function TaskForm({
   onSubmit,
   onCancel,
   onPhaseCreated,
+  onDirtyChange,
   loading = false,
 }: TaskFormProps) {
   const [showCreatePhase, setShowCreatePhase] = useState(false);
@@ -70,6 +72,27 @@ export default function TaskForm({
   const [checklist, setChecklist] = useState<TaskChecklistItem[]>(task?.checklist || []);
   const [isRecurring, setIsRecurring] = useState(task?.isRecurring || false);
   const [recurrenceConfig, setRecurrenceConfig] = useState<RecurrenceConfig | undefined>(task?.recurrenceConfig);
+
+  // Track dirty state for unsaved changes warning
+  const initialValuesRef = useRef({
+    title: task?.title || '',
+    description: task?.description || '',
+    priority: task?.priority || 'medium',
+    phaseId: task?.phaseId || '',
+    trade: task?.trade || '',
+  });
+
+  useEffect(() => {
+    if (!onDirtyChange) return;
+    const initial = initialValuesRef.current;
+    const isDirty =
+      title !== initial.title ||
+      description !== initial.description ||
+      priority !== initial.priority ||
+      phaseId !== initial.phaseId ||
+      trade !== initial.trade;
+    onDirtyChange(isDirty);
+  }, [title, description, priority, phaseId, trade, onDirtyChange]);
 
   const handleTemplateSelect = (template: DefaultTaskTemplate) => {
     setTitle(template.defaultTitle);

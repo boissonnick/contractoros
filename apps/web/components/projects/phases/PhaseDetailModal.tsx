@@ -10,6 +10,7 @@ import PhaseTeamAssignment from './PhaseTeamAssignment';
 import PhaseDocuments from './PhaseDocuments';
 import PhaseMilestones from './PhaseMilestones';
 import PhaseForm from './PhaseForm';
+import { formatDate } from '@/lib/date-utils';
 
 type Tab = 'details' | 'budget' | 'team' | 'docs' | 'milestones';
 
@@ -36,11 +37,6 @@ const STATUS_LABELS: Record<string, string> = {
   completed: 'Completed',
   skipped: 'Skipped',
 };
-
-function formatDate(d?: Date): string {
-  if (!d) return '—';
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-}
 
 export default function PhaseDetailModal({ phase, projectId, allPhases, onClose, onUpdate, onDelete }: PhaseDetailModalProps) {
   const [tab, setTab] = useState<Tab>('details');
