@@ -1,7 +1,13 @@
 "use client";
 
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { Auth, getAuth, initializeAuth, browserLocalPersistence } from "firebase/auth";
+import {
+  Auth,
+  getAuth,
+  initializeAuth,
+  browserLocalPersistence,
+  browserPopupRedirectResolver,
+} from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
@@ -17,13 +23,15 @@ const firebaseConfig = {
 // Initialize Firebase only once
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
-// Use initializeAuth with explicit localStorage persistence to avoid
-// IndexedDB hangs that prevent onAuthStateChanged from ever firing.
-// getAuth() falls back to this if auth is already initialized.
+// Use initializeAuth with explicit persistence and popupRedirectResolver.
+// browserLocalPersistence avoids IndexedDB hangs that prevent onAuthStateChanged.
+// browserPopupRedirectResolver is required for signInWithPopup in Firebase v11
+// when using initializeAuth (otherwise popup auth methods get auth/argument-error).
 let auth: Auth;
 try {
   auth = initializeAuth(app, {
     persistence: browserLocalPersistence,
+    popupRedirectResolver: browserPopupRedirectResolver,
   });
 } catch (e) {
   // initializeAuth throws if already called — fall back to getAuth

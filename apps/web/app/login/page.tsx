@@ -344,14 +344,10 @@ export default function LoginPage() {
           {/* Info */}
           <div className="mt-6 pt-6 border-t border-gray-200 text-center">
             <p className="text-sm text-gray-600">
-              New here? Sign in with Google to create your company.
-            </p>
-            <p className="text-sm text-gray-400 mt-1">
-              Team members need an{' '}
+              Don&apos;t have an account?{' '}
               <a href="/register" className="font-medium text-blue-600 hover:text-blue-700">
-                invite link
-              </a>{' '}
-              from their company owner.
+                Create one
+              </a>
             </p>
           </div>
         </div>

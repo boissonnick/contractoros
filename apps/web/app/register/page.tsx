@@ -14,7 +14,6 @@ import {
   UserIcon,
   CheckCircleIcon,
   ExclamationCircleIcon,
-  BuildingOfficeIcon,
 } from '@heroicons/react/24/outline';
 
 function RegisterContent() {
@@ -51,7 +50,7 @@ function RegisterContent() {
           router.replace('/dashboard');
           return;
         } else {
-          router.replace('/onboarding');
+          router.replace('/onboarding/company-setup');
           return;
         }
       }
@@ -98,33 +97,44 @@ function RegisterContent() {
     setError('');
   };
 
-  const completeInviteRegistration = async (uid: string, email: string, displayName: string) => {
-    if (!inviteData) return;
-
-    await setDoc(doc(db, 'users', uid), {
-      uid,
-      email,
-      displayName,
-      role: inviteData.role,
-      orgId: inviteData.orgId,
-      isActive: true,
-      onboardingCompleted: false,
-      createdAt: Timestamp.now(),
-    });
-
-    await updateDoc(doc(db, 'invites', inviteData.id), {
-      status: 'accepted',
-      acceptedAt: Timestamp.now(),
-      acceptedBy: uid,
-    });
-
-    // Route to role-specific onboarding
-    router.push('/onboarding');
+  // Create user doc as OWNER (open signup) or invited role
+  const createUserDoc = async (uid: string, email: string, displayName: string) => {
+    if (inviteData) {
+      // Invited user — use invite role & org
+      await setDoc(doc(db, 'users', uid), {
+        uid,
+        email,
+        displayName,
+        role: inviteData.role,
+        orgId: inviteData.orgId,
+        isActive: true,
+        onboardingCompleted: false,
+        createdAt: Timestamp.now(),
+      });
+      await updateDoc(doc(db, 'invites', inviteData.id), {
+        status: 'accepted',
+        acceptedAt: Timestamp.now(),
+        acceptedBy: uid,
+      });
+      router.push('/onboarding');
+    } else {
+      // Open signup — create as OWNER, route to company setup
+      await setDoc(doc(db, 'users', uid), {
+        uid,
+        email,
+        displayName,
+        role: 'OWNER',
+        orgId: '',
+        isActive: true,
+        onboardingCompleted: false,
+        createdAt: Timestamp.now(),
+      });
+      router.push('/onboarding/company-setup');
+    }
   };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inviteData) return; // Should not happen, but guard
     setError('');
 
     if (!formData.name.trim()) { setError('Name is required'); return; }
@@ -136,7 +146,7 @@ function RegisterContent() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       await updateProfile(userCredential.user, { displayName: formData.name });
-      await completeInviteRegistration(userCredential.user.uid, formData.email, formData.name);
+      await createUserDoc(userCredential.user.uid, formData.email, formData.name);
     } catch (err: any) {
       console.error('Registration error:', err);
       if (err.code === 'auth/email-already-in-use') {
@@ -154,15 +164,23 @@ function RegisterContent() {
   };
 
   const handleGoogleSignup = async () => {
-    if (!inviteData) return;
     setSocialLoading(true);
     setError('');
     try {
       const userCredential = await signInWithGoogle();
-      await completeInviteRegistration(
-        userCredential.user.uid,
-        userCredential.user.email || inviteData.email,
-        userCredential.user.displayName || inviteData.name,
+      const uid = userCredential.user.uid;
+
+      // Check if user already exists
+      const existingDoc = await getDoc(doc(db, 'users', uid));
+      if (existingDoc.exists()) {
+        router.push('/dashboard');
+        return;
+      }
+
+      await createUserDoc(
+        uid,
+        userCredential.user.email || formData.email,
+        userCredential.user.displayName || formData.name,
       );
     } catch (err: any) {
       if (err.code !== 'auth/popup-closed-by-user') {
@@ -220,76 +238,30 @@ function RegisterContent() {
     );
   }
 
-  // No invite token — show "invite only" message
-  if (!inviteData) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center p-4">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white">ContractorOS</h1>
-            <p className="text-blue-200 mt-2">Invitation Required</p>
-          </div>
-
-          <Card>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <UserIcon className="h-8 w-8 text-blue-600" />
-              </div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">Registration is invite-only</h2>
-              <p className="text-gray-500 mb-6">
-                Team members, contractors, and clients must be invited by a company owner to join.
-              </p>
-
-              <div className="border-t border-gray-200 pt-6">
-                <div className="flex items-center gap-3 mb-3">
-                  <BuildingOfficeIcon className="h-5 w-5 text-gray-400 flex-shrink-0" />
-                  <p className="text-sm text-gray-600 text-left">
-                    <strong>Starting a new company?</strong> Create your organization with Google Sign-In.
-                  </p>
-                </div>
-                <Link href="/login">
-                  <Button variant="primary" className="w-full">
-                    Go to Sign In
-                  </Button>
-                </Link>
-              </div>
-            </div>
-
-            <div className="mt-6 pt-6 border-t border-gray-200 text-center">
-              <p className="text-sm text-gray-600">
-                Already have an account?{' '}
-                <Link href="/login" className="text-blue-600 font-medium hover:text-blue-700">
-                  Sign in
-                </Link>
-              </p>
-            </div>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
-  // Has invite — show registration form with multiple auth methods
-  const isClientInvite = inviteData.role === 'CLIENT';
+  const isInvited = !!inviteData;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-white">ContractorOS</h1>
-          <p className="text-blue-200 mt-2">Complete your registration</p>
+          <p className="text-blue-200 mt-2">
+            {isInvited ? 'Complete your registration' : 'Create your account'}
+          </p>
         </div>
 
         {/* Invite Banner */}
-        <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6 flex items-start gap-3">
-          <CheckCircleIcon className="h-6 w-6 text-green-600 flex-shrink-0" />
-          <div>
-            <p className="font-medium text-green-800">You've been invited!</p>
-            <p className="text-sm text-green-700 mt-1">
-              Join as a <span className="font-medium">{inviteData.role}</span> and start collaborating.
-            </p>
+        {isInvited && (
+          <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6 flex items-start gap-3">
+            <CheckCircleIcon className="h-6 w-6 text-green-600 flex-shrink-0" />
+            <div>
+              <p className="font-medium text-green-800">You&apos;ve been invited!</p>
+              <p className="text-sm text-green-700 mt-1">
+                Join as a <span className="font-medium">{inviteData!.role}</span> and start collaborating.
+              </p>
+            </div>
           </div>
-        </div>
+        )}
 
         <Card>
           {/* Google SSO */}
@@ -311,19 +283,6 @@ function RegisterContent() {
               )}
               Continue with Google
             </button>
-
-            {/* Phone sign-in — for clients */}
-            {isClientInvite && (
-              <button
-                onClick={() => router.push(`/auth/phone?invite=${inviteToken}`)}
-                className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
-              >
-                <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
-                </svg>
-                Continue with Phone Number
-              </button>
-            )}
           </div>
 
           {/* Divider */}
@@ -374,7 +333,7 @@ function RegisterContent() {
               value={formData.email}
               onChange={(e) => updateField('email', e.target.value)}
               icon={<EnvelopeIcon className="h-5 w-5" />}
-              disabled={!!inviteData}
+              disabled={isInvited}
             />
 
             {authMode === 'password' && (
