@@ -59,7 +59,7 @@ service cloud.firestore {
       // Other users can read projects they are assigned to
       allow read: if isAuthenticated() && (
         isAdmin() ||
-        (resource.data.orgId == getUserProfile().orgId && (
+        (userProfileExists() && resource.data.orgId == getUserProfile().orgId && (
           request.auth.uid == resource.data.clientId ||
           request.auth.uid == resource.data.pmId ||
           (resource.data.clientIds != null && request.auth.uid in resource.data.clientIds) ||
@@ -89,12 +89,19 @@ service cloud.firestore {
         allow create, update: if isAuthenticated();
         allow delete: if isAdmin();
       }
+
+      // Project activity subcollection
+      match /activity/{activityId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated();
+        allow update, delete: if false;
+      }
     }
 
     // Organizations collection
     match /organizations/{orgId} {
       // Users can read their own organization
-      allow read: if isAuthenticated() && getUserProfile().orgId == orgId;
+      allow read: if isAuthenticated() && userProfileExists() && getUserProfile().orgId == orgId;
 
       // Authenticated users can create an org (onboarding for OWNER role)
       allow create: if isAuthenticated();
@@ -104,9 +111,24 @@ service cloud.firestore {
 
       // Phase templates (org-level, customizable by owner)
       match /phaseTemplates/{templateId} {
-        allow read: if isAuthenticated() && getUserProfile().orgId == orgId;
-        allow create: if isAuthenticated() && getUserProfile().orgId == orgId;
-        allow update, delete: if isAuthenticated() && getUserProfile().role == 'OWNER' && getUserProfile().orgId == orgId;
+        allow read: if isAuthenticated() && userProfileExists() && getUserProfile().orgId == orgId;
+        allow create: if isAuthenticated() && userProfileExists() && getUserProfile().orgId == orgId;
+        allow update, delete: if isAuthenticated() && userProfileExists() && getUserProfile().role == 'OWNER' && getUserProfile().orgId == orgId;
+      }
+
+      // Integrations subcollection (org-level third-party connections)
+      match /integrations/{integrationId} {
+        allow read, write: if isAuthenticated() && userProfileExists() && getUserProfile().orgId == orgId;
+      }
+
+      // Tax rates subcollection (org-level)
+      match /taxRates/{taxRateId} {
+        allow read, write: if isAuthenticated() && userProfileExists() && getUserProfile().orgId == orgId;
+      }
+
+      // Notification settings subcollection (org-level)
+      match /notificationSettings/{settingId} {
+        allow read, write: if isAuthenticated() && userProfileExists() && getUserProfile().orgId == orgId;
       }
     }
 
@@ -126,6 +148,7 @@ service cloud.firestore {
 
       // Admins and employees can create tasks
       allow create: if isAuthenticated() &&
+        userProfileExists() &&
         getUserProfile().role in ['OWNER', 'PM', 'EMPLOYEE'];
 
       // Admins can update/delete; assignees can update status/hours
@@ -258,6 +281,7 @@ service cloud.firestore {
     match /scopes/{scopeId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() &&
+        userProfileExists() &&
         getUserProfile().role in ['OWNER', 'PM'];
       allow update: if isAuthenticated();
       allow delete: if isAdmin();
@@ -267,8 +291,10 @@ service cloud.firestore {
     match /subcontractors/{subId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() &&
+        userProfileExists() &&
         getUserProfile().role in ['OWNER', 'PM'];
       allow update: if isAuthenticated() &&
+        userProfileExists() &&
         getUserProfile().role in ['OWNER', 'PM'];
       allow delete: if isAdmin();
     }
@@ -277,6 +303,7 @@ service cloud.firestore {
     match /sub_assignments/{assignmentId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() &&
+        userProfileExists() &&
         getUserProfile().role in ['OWNER', 'PM'];
       allow update: if isAuthenticated();
       allow delete: if isAdmin();
@@ -287,6 +314,7 @@ service cloud.firestore {
       // Anyone can read (public onboarding page validates tokens)
       allow read: if true;
       allow create: if isAuthenticated() &&
+        userProfileExists() &&
         getUserProfile().role in ['OWNER', 'PM'];
       // Allow update for marking token as used (public page does this)
       allow update: if true;
@@ -297,6 +325,7 @@ service cloud.firestore {
     match /changeOrders/{orderId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() &&
+        userProfileExists() &&
         getUserProfile().role in ['OWNER', 'PM'];
       allow update: if isAuthenticated();
       allow delete: if isAdmin();
@@ -306,6 +335,7 @@ service cloud.firestore {
     match /bidSolicitations/{solId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() &&
+        userProfileExists() &&
         getUserProfile().role in ['OWNER', 'PM'];
       allow update: if isAuthenticated();
       allow delete: if isAdmin();
@@ -315,6 +345,7 @@ service cloud.firestore {
     match /sowTemplates/{templateId} {
       allow read: if isAuthenticated();
       allow create, update: if isAuthenticated() &&
+        userProfileExists() &&
         getUserProfile().role in ['OWNER', 'PM'];
       allow delete: if isAdmin();
     }
@@ -324,6 +355,15 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated();
       allow update, delete: if isAdmin();
+    }
+
+    // Activity collection (org-level activity feed)
+    match /activity/{activityId} {
+      allow read: if isAuthenticated() && userProfileExists() &&
+        resource.data.organizationId == getUserProfile().orgId;
+      allow create: if isAuthenticated() && userProfileExists() &&
+        request.resource.data.organizationId == getUserProfile().orgId;
+      allow update, delete: if false;
     }
 
     // Expenses collection
@@ -340,6 +380,7 @@ service cloud.firestore {
     match /rfis/{rfiId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() &&
+        userProfileExists() &&
         getUserProfile().role in ['OWNER', 'PM', 'EMPLOYEE'];
       allow update: if isAuthenticated();
       allow delete: if isAdmin();
@@ -349,6 +390,7 @@ service cloud.firestore {
     match /punchItems/{itemId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() &&
+        userProfileExists() &&
         getUserProfile().role in ['OWNER', 'PM', 'EMPLOYEE'];
       allow update: if isAuthenticated();
       allow delete: if isAdmin();
@@ -358,6 +400,7 @@ service cloud.firestore {
     match /change_orders/{orderId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() &&
+        userProfileExists() &&
         getUserProfile().role in ['OWNER', 'PM'];
       allow update: if isAuthenticated();
       allow delete: if isAdmin();
@@ -367,6 +410,7 @@ service cloud.firestore {
     match /estimates/{estimateId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() &&
+        userProfileExists() &&
         getUserProfile().role in ['OWNER', 'PM'];
       allow update: if isAuthenticated();
       allow delete: if isAdmin();
@@ -399,6 +443,7 @@ service cloud.firestore {
     match /financials/{financialId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() &&
+        userProfileExists() &&
         getUserProfile().role in ['OWNER', 'PM'];
       allow update: if isAuthenticated();
       allow delete: if isAdmin();
@@ -408,8 +453,10 @@ service cloud.firestore {
     match /integrations/{integrationId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() &&
+        userProfileExists() &&
         getUserProfile().role in ['OWNER', 'PM'];
       allow update: if isAuthenticated() &&
+        userProfileExists() &&
         getUserProfile().role in ['OWNER', 'PM'];
       allow delete: if isAdmin();
     }
@@ -418,6 +465,7 @@ service cloud.firestore {
     match /submittals/{submittalId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() &&
+        userProfileExists() &&
         getUserProfile().role in ['OWNER', 'PM', 'EMPLOYEE'];
       allow update: if isAuthenticated();
       allow delete: if isAdmin();
@@ -428,6 +476,36 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated();
       allow update: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+
+    // Notification preferences collection (user-level preferences)
+    match /notificationPreferences/{prefId} {
+      // Users can read their own notification preferences
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+
+      // Users can create their own notification preferences
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+
+      // Users can update their own notification preferences
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+
+      // Users can delete their own notification preferences (or admins)
+      allow delete: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    // Notifications collection (app notifications for users)
+    match /notifications/{notificationId} {
+      // Users can read their own notifications
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+
+      // System can create notifications (Cloud Functions), or admins
+      allow create: if isAuthenticated();
+
+      // Users can mark their own notifications as read
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+
+      // Admins can delete notifications
       allow delete: if isAdmin();
     }
 
