@@ -115,11 +115,35 @@ service cloud.firestore {
 
     // Tasks collection
     match /tasks/{taskId} {
-      // Authenticated users can read tasks assigned to them or in their org
+      // Org members can read tasks; assigned subs can read their tasks
       allow read: if isAuthenticated();
 
-      // Admins can create/update/delete tasks
-      allow create, update, delete: if isAdmin();
+      // Admins and employees can create tasks
+      allow create: if isAuthenticated() &&
+        getUserProfile().role in ['OWNER', 'PM', 'EMPLOYEE'];
+
+      // Admins can update/delete; assignees can update status/hours
+      allow update: if isAuthenticated() && (
+        isAdmin() ||
+        request.auth.uid in resource.data.assignedTo
+      );
+
+      allow delete: if isAdmin();
+
+      // Task comments subcollection
+      match /comments/{commentId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated();
+        allow update, delete: if isAuthenticated() &&
+          resource.data.userId == request.auth.uid;
+      }
+
+      // Task activity subcollection (read-only; written by Cloud Functions or client on mutations)
+      match /activity/{activityId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated();
+        allow update, delete: if false;
+      }
     }
 
     // Time entries collection

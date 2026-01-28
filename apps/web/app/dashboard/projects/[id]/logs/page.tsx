@@ -17,9 +17,7 @@ import {
 } from 'firebase/firestore';
 import { Button, Card, Input, Avatar, Badge, toast } from '@/components/ui';
 import { cn, formatDate } from '@/lib/utils';
-import Link from 'next/link';
 import {
-  ArrowLeftIcon,
   PlusIcon,
   SunIcon,
   CloudIcon,
@@ -169,33 +167,20 @@ export default function ProjectLogsPage({ params }: { params: Promise<{ id: stri
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div>
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center gap-4">
-            <Link
-              href={`/dashboard/projects/${projectId}`}
-              className="p-2 hover:bg-gray-100 rounded-lg"
-            >
-              <ArrowLeftIcon className="h-5 w-5 text-gray-600" />
-            </Link>
-            <div className="flex-1">
-              <h1 className="text-xl font-semibold text-gray-900">Daily Logs</h1>
-              <p className="text-sm text-gray-500">{project?.name}</p>
-            </div>
-            <Button
-              variant="primary"
-              onClick={() => setShowNewLog(true)}
-              icon={<PlusIcon className="h-5 w-5" />}
-            >
-              New Log
-            </Button>
-          </div>
-        </div>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Daily Logs</h1>
+        <Button
+          variant="primary"
+          onClick={() => setShowNewLog(true)}
+          icon={<PlusIcon className="h-5 w-5" />}
+        >
+          New Log
+        </Button>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-4xl mx-auto">
         {/* New Log Form */}
         {showNewLog && (
           <Card className="mb-6">
@@ -459,3 +444,4 @@ export default function ProjectLogsPage({ params }: { params: Promise<{ id: stri
     </div>
   );
 }
+

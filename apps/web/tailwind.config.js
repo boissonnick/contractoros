@@ -9,7 +9,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Brand colors
+        // Brand colors (static palette)
         brand: {
           50: '#eff6ff',
           100: '#dbeafe',
@@ -23,6 +23,10 @@ module.exports = {
           900: '#1e3a8a',
           950: '#172554',
         },
+        // Dynamic org branding via CSS variables
+        'brand-primary': 'var(--color-primary, #2563eb)',
+        'brand-secondary': 'var(--color-secondary, #64748b)',
+        'brand-accent': 'var(--color-accent, #f59e0b)',
       },
       fontFamily: {
         sans: [

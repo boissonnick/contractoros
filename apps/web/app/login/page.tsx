@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase/config';
 import { signInWithGoogle, sendMagicLink } from '@/lib/auth-providers';
 import { UserRole } from '@/types';
@@ -134,7 +134,29 @@ export default function LoginPage() {
 
     try {
       const userCredential = await signInWithGoogle();
-      await handlePostAuth(userCredential.user.uid, router);
+      const uid = userCredential.user.uid;
+
+      // Check if user profile exists
+      const userDoc = await getDoc(doc(db, 'users', uid));
+      if (userDoc.exists()) {
+        // Existing user — route based on role
+        const role = userDoc.data().role as UserRole;
+        router.push(getRedirectPath(role));
+      } else {
+        // New user via Google SSO — create as OWNER, route to company setup
+        await setDoc(doc(db, 'users', uid), {
+          uid,
+          email: userCredential.user.email,
+          displayName: userCredential.user.displayName || '',
+          photoURL: userCredential.user.photoURL || null,
+          role: 'OWNER',
+          orgId: '',
+          isActive: true,
+          onboardingCompleted: false,
+          createdAt: Timestamp.now(),
+        });
+        router.push('/onboarding/company-setup');
+      }
     } catch (err: any) {
       console.error("Google login error:", err);
       if (err.code === 'auth/popup-closed-by-user') {
@@ -319,13 +341,17 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Register Link */}
+          {/* Info */}
           <div className="mt-6 pt-6 border-t border-gray-200 text-center">
             <p className="text-sm text-gray-600">
-              Don&apos;t have an account?{' '}
+              New here? Sign in with Google to create your company.
+            </p>
+            <p className="text-sm text-gray-400 mt-1">
+              Team members need an{' '}
               <a href="/register" className="font-medium text-blue-600 hover:text-blue-700">
-                Create one
-              </a>
+                invite link
+              </a>{' '}
+              from their company owner.
             </p>
           </div>
         </div>

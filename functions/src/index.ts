@@ -2,6 +2,7 @@ import { onRequest } from "firebase-functions/v2/https";
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { auth } from "firebase-functions/v1";
 import * as admin from "firebase-admin";
+import { handleInviteCreated } from "./email/sendInviteEmail";
 
 // Initialize Firebase Admin SDK
 admin.initializeApp();
@@ -204,5 +205,30 @@ export const onUserCreated = onDocumentCreated(
 
     // Additional processing can be added here
     // e.g., send welcome email, initialize user preferences, etc.
+  }
+);
+
+/**
+ * Send invite email when a new invite document is created
+ * Triggered on invites/{inviteId} creation
+ */
+export const onInviteCreated = onDocumentCreated(
+  { document: "invites/{inviteId}", region: REGION },
+  async (event) => {
+    const snapshot = event.data;
+    if (!snapshot) {
+      console.log("No data associated with invite event");
+      return;
+    }
+
+    const data = snapshot.data();
+    await handleInviteCreated(event.params.inviteId, {
+      email: data.email,
+      name: data.name,
+      role: data.role,
+      orgId: data.orgId,
+      invitedBy: data.invitedBy,
+      status: data.status,
+    });
   }
 );

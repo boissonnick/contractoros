@@ -12,19 +12,39 @@ export type UserRole =
   | 'SUB'        // Subcontractor
   | 'CLIENT';    // Homeowner/client
 
+export type EmployeeType = 'site_manager' | 'hourly' | 'salaried';
+
+export interface UserPermissions {
+  projectIds: string[];           // Projects user has access to
+  canCreateProjects?: boolean;
+  canManageTeam?: boolean;
+  canViewFinances?: boolean;
+}
+
 export interface UserProfile {
   uid: string;
   email: string;
   displayName: string;
   phone?: string;
   role: UserRole;
+  employeeType?: EmployeeType;    // For EMPLOYEE role
   orgId: string;
   photoURL?: string;
-  trade?: string;           // For SUBs: electrician, plumber, etc.
-  hourlyRate?: number;      // For billing/payroll
+  trade?: string;                 // For SUBs: electrician, plumber, etc.
+  hourlyRate?: number;            // For billing/payroll
+  permissions?: UserPermissions;
   isActive: boolean;
+  onboardingCompleted: boolean;
+  onboardingStep?: string;
   createdAt: Date;
   updatedAt?: Date;
+}
+
+export interface OrgBranding {
+  logoURL?: string;
+  primaryColor: string;     // hex e.g. "#2563eb"
+  secondaryColor: string;   // hex
+  accentColor: string;      // hex
 }
 
 export interface Organization {
@@ -35,8 +55,11 @@ export interface Organization {
   phone?: string;
   email?: string;
   logoURL?: string;
+  branding: OrgBranding;
   settings: OrgSettings;
+  onboardingCompleted: boolean;
   createdAt: Date;
+  updatedAt?: Date;
 }
 
 export interface OrgSettings {
@@ -86,6 +109,7 @@ export interface Project {
   scope?: string;           // References template scopeType
   templateId?: string;      // PhaseTemplate used
   quoteTotal?: number;
+  isDemoData?: boolean;
   createdAt: Date;
   updatedAt?: Date;
 }
@@ -117,14 +141,46 @@ export interface PhaseTemplate {
 
 export type PhaseStatus = 'upcoming' | 'active' | 'completed' | 'skipped';
 
+export interface PhaseMilestone {
+  id: string;
+  title: string;
+  date: Date;
+  completed: boolean;
+  completedAt?: Date;
+}
+
+export interface PhaseDocument {
+  id: string;
+  name: string;
+  url: string;
+  type: string;
+  size: number;
+  uploadedBy: string;
+  uploadedAt: Date;
+}
+
 export interface ProjectPhase {
   id: string;
   projectId: string;
   name: string;
+  description?: string;
   order: number;
   status: PhaseStatus;
   startDate?: Date;
   endDate?: Date;
+  estimatedDuration?: number; // days
+  budgetAmount?: number;
+  actualCost?: number;
+  assignedTeamMembers: string[]; // user UIDs
+  assignedSubcontractors: string[]; // sub IDs
+  progressPercent: number;
+  tasksTotal: number;
+  tasksCompleted: number;
+  dependencies: string[]; // phase IDs
+  documents: PhaseDocument[];
+  milestones: PhaseMilestone[];
+  createdAt: Date;
+  updatedAt?: Date;
 }
 
 // ============================================
@@ -181,24 +237,110 @@ export type TaskStatus =
 
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 
+export type DependencyType =
+  | 'finish-to-start'
+  | 'start-to-start'
+  | 'finish-to-finish'
+  | 'start-to-finish';
+
+export interface TaskDependency {
+  taskId: string;
+  type: DependencyType;
+  lag: number; // days (positive = delay, negative = lead)
+}
+
+export interface TaskAttachment {
+  id: string;
+  name: string;
+  url: string;
+  type: string;           // MIME type
+  size: number;           // bytes
+  uploadedBy: string;
+  uploadedAt: Date;
+}
+
 export interface Task {
   id: string;
+  orgId: string;
   projectId: string;
-  phaseId?: string;         // Link task to a phase
-  parentTaskId?: string;    // For subtasks
+  phaseId?: string;            // Link task to a phase
+  parentTaskId?: string;       // For subtasks
+
+  // Basic info
   title: string;
   description?: string;
   status: TaskStatus;
   priority: TaskPriority;
-  assignedTo: string[];     // User UIDs
-  trade?: string;           // Required trade
+
+  // Assignment
+  assignedTo: string[];        // User UIDs
+  assignedSubId?: string;      // Subcontractor ID
+  trade?: string;              // Required trade
+
+  // Scheduling
+  startDate?: Date;
+  dueDate?: Date;
+  duration?: number;           // days
   estimatedHours?: number;
   actualHours?: number;
-  dueDate?: Date;
   completedAt?: Date;
-  dependencies?: string[];  // Task IDs
+
+  // Dependencies
+  dependencies: TaskDependency[];
+
+  // Attachments
+  attachments: TaskAttachment[];
+
+  // Display
+  order: number;               // Sort order within phase/column
+
+  // Metadata
+  createdBy: string;
   createdAt: Date;
   updatedAt?: Date;
+}
+
+// ============================================
+// Task Comment Types (subcollection: tasks/{id}/comments)
+// ============================================
+
+export interface TaskComment {
+  id: string;
+  taskId: string;
+  userId: string;
+  userName: string;
+  userAvatar?: string;
+  content: string;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+// ============================================
+// Task Activity Types (subcollection: tasks/{id}/activity)
+// ============================================
+
+export type TaskActivityAction =
+  | 'created'
+  | 'updated'
+  | 'status_changed'
+  | 'assigned'
+  | 'unassigned'
+  | 'commented'
+  | 'attachment_added'
+  | 'attachment_removed'
+  | 'dependency_added'
+  | 'dependency_removed'
+  | 'completed';
+
+export interface TaskActivity {
+  id: string;
+  taskId: string;
+  userId: string;
+  userName: string;
+  action: TaskActivityAction;
+  changes?: Record<string, { from: unknown; to: unknown }>;
+  metadata?: Record<string, unknown>; // extra context (e.g. comment text, file name)
+  createdAt: Date;
 }
 
 // ============================================
@@ -267,6 +409,81 @@ export interface ScheduleAssignment {
 }
 
 // ============================================
+// Subcontractor Types
+// ============================================
+
+export interface SubcontractorDocument {
+  id: string;
+  type: 'license' | 'insurance' | 'w9' | 'contract' | 'other';
+  name: string;
+  url: string;
+  expiresAt?: Date;
+  uploadedAt: Date;
+}
+
+export interface SubcontractorMetrics {
+  projectsCompleted: number;
+  onTimeRate: number; // 0-100
+  avgRating: number; // 0-5
+  totalPaid: number;
+}
+
+export interface Subcontractor {
+  id: string;
+  orgId: string;
+  userId?: string; // linked UserProfile if they have an account
+  companyName: string;
+  contactName: string;
+  email: string;
+  phone?: string;
+  trade: string;
+  licenseNumber?: string;
+  insuranceExpiry?: Date;
+  address?: string;
+  notes?: string;
+  metrics: SubcontractorMetrics;
+  documents: SubcontractorDocument[];
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+// ============================================
+// Sub Assignment Types
+// ============================================
+
+export type SubAssignmentStatus = 'pending' | 'accepted' | 'in_progress' | 'completed' | 'cancelled';
+
+export interface SubPaymentScheduleItem {
+  id: string;
+  description: string;
+  amount: number;
+  dueDate?: Date;
+  paidAt?: Date;
+  status: 'pending' | 'paid' | 'overdue';
+}
+
+export interface SubAssignment {
+  id: string;
+  subId: string;
+  projectId: string;
+  type: 'phase' | 'task';
+  phaseId?: string;
+  taskId?: string;
+  bidId?: string;
+  status: SubAssignmentStatus;
+  agreedAmount: number;
+  paidAmount: number;
+  paymentSchedule: SubPaymentScheduleItem[];
+  rating?: number; // 0-5
+  ratingComment?: string;
+  startDate?: Date;
+  endDate?: Date;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+// ============================================
 // Bid Types (for Subcontractors)
 // ============================================
 
@@ -281,14 +498,18 @@ export type BidStatus =
 export interface Bid {
   id: string;
   projectId: string;
-  taskId?: string;          // Can bid on specific tasks
-  subId: string;            // Subcontractor user ID
+  phaseIds?: string[];        // Can bid on phases
+  taskId?: string;            // Can bid on specific tasks
+  quoteSectionIds?: string[]; // Linked quote sections
+  subId: string;              // Subcontractor ID
   amount: number;
   laborCost?: number;
   materialCost?: number;
-  timeline?: string;        // "2 weeks"
+  proposedStartDate?: Date;
+  proposedEndDate?: Date;
+  timeline?: string;          // "2 weeks"
   description?: string;
-  attachments?: string[];   // URLs
+  attachments?: string[];     // URLs
   status: BidStatus;
   submittedAt?: Date;
   expiresAt?: Date;
@@ -517,4 +738,133 @@ export interface ActivityItem {
   projectId?: string;
   projectName?: string;
   timestamp: Date;
+}
+
+// ============================================
+// Scope of Work (SOW) Types
+// ============================================
+
+export type ScopeStatus = 'draft' | 'pending_approval' | 'approved' | 'superseded';
+
+export interface ScopeMaterial {
+  name: string;
+  quantity?: number;
+  unit?: string;
+  estimatedCost?: number;
+}
+
+export interface ScopeItem {
+  id: string;
+  phaseId?: string;
+  title: string;
+  description?: string;
+  specifications?: string;
+  materials: ScopeMaterial[];
+  laborDescription?: string;
+  estimatedHours?: number;
+  estimatedCost?: number;
+  quoteSectionId?: string; // link to QuoteSection
+  order: number;
+}
+
+export interface ScopeApproval {
+  clientId: string;
+  clientName: string;
+  status: 'pending' | 'approved' | 'rejected';
+  comments?: string;
+  decidedAt?: Date;
+}
+
+export interface Scope {
+  id: string;
+  projectId: string;
+  orgId: string;
+  version: number;
+  status: ScopeStatus;
+  items: ScopeItem[];
+  approvals: ScopeApproval[];
+  previousVersionId?: string;
+  notes?: string;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+export interface SowTemplate {
+  id: string;
+  orgId: string;
+  name: string;
+  description?: string;
+  items: Omit<ScopeItem, 'id'>[];
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+// ============================================
+// Change Order Types
+// ============================================
+
+export type ChangeOrderStatus =
+  | 'draft'
+  | 'pending_pm'
+  | 'pending_owner'
+  | 'pending_client'
+  | 'approved'
+  | 'rejected';
+
+export type ScopeChangeType = 'add' | 'remove' | 'modify';
+
+export interface ScopeChange {
+  id: string;
+  type: ScopeChangeType;
+  phaseId?: string;
+  originalDescription?: string;
+  proposedDescription: string;
+  costImpact: number; // positive = increase, negative = decrease
+}
+
+export interface ChangeOrderImpact {
+  costChange: number;
+  scheduleChange: number; // days
+  affectedPhaseIds: string[];
+  affectedTaskIds: string[];
+}
+
+export interface ChangeOrderApproval {
+  role: 'pm' | 'owner' | 'client';
+  userId: string;
+  userName: string;
+  status: 'pending' | 'approved' | 'rejected';
+  comments?: string;
+  decidedAt?: Date;
+}
+
+export interface ChangeOrderHistoryEntry {
+  id: string;
+  action: string;
+  userId: string;
+  userName: string;
+  details?: string;
+  timestamp: Date;
+}
+
+export interface ChangeOrder {
+  id: string;
+  projectId: string;
+  orgId: string;
+  number: string; // CO-001, CO-002, etc.
+  title: string;
+  description: string;
+  reason: string;
+  scopeChanges: ScopeChange[];
+  impact: ChangeOrderImpact;
+  photos: string[]; // URLs
+  documents: string[]; // URLs
+  status: ChangeOrderStatus;
+  approvals: ChangeOrderApproval[];
+  history: ChangeOrderHistoryEntry[];
+  newScopeVersionId?: string; // created after approval
+  createdBy: string;
+  createdAt: Date;
+  updatedAt?: Date;
 }
