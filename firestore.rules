@@ -1296,6 +1296,23 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ==========================================
+    // Organization-Scoped Clients Collection (CRM)
+    // ==========================================
+    match /organizations/{orgId}/clients/{clientId} {
+      // Org members can read clients
+      allow read: if isSameOrg(orgId);
+
+      // Admins can create clients
+      allow create: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can update clients
+      allow update: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Only admins can delete clients
+      allow delete: if isAdmin();
+    }
+
     // Default deny all other access
     match /{document=**} {
       allow read, write: if false;
