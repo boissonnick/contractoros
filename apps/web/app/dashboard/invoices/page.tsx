@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
@@ -10,6 +10,11 @@ import {
   where,
   orderBy,
   getDocs,
+  limit,
+  startAfter,
+  QueryDocumentSnapshot,
+  DocumentData,
+  getCountFromServer,
 } from 'firebase/firestore';
 import { Button, Card, Badge, EmptyState } from '@/components/ui';
 import { toast } from '@/components/ui/Toast';
@@ -28,8 +33,14 @@ import {
   BanknotesIcon,
   ReceiptPercentIcon,
   ArrowPathIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from '@heroicons/react/24/outline';
 import { format, differenceInDays } from 'date-fns';
+
+// Pagination settings
+const PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
+type PageSize = typeof PAGE_SIZE_OPTIONS[number];
 
 const statusConfig: Record<InvoiceStatus, { label: string; color: string; icon: React.ReactNode }> = {
   draft: { label: 'Draft', color: 'bg-gray-100 text-gray-700', icon: <DocumentTextIcon className="h-4 w-4" /> },
@@ -59,53 +70,135 @@ export default function InvoicesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | 'all'>('all');
 
-  const loadInvoices = async () => {
+  // Pagination state
+  const [pageSize, setPageSize] = useState<PageSize>(25);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
+  const [firstDoc, setFirstDoc] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
+  const [pageHistory, setPageHistory] = useState<QueryDocumentSnapshot<DocumentData>[]>([]);
+
+  const totalPages = Math.ceil(totalCount / pageSize);
+
+  const parseInvoiceDoc = (doc: QueryDocumentSnapshot<DocumentData>): Invoice => {
+    const data = doc.data();
+    const now = new Date();
+    let status = data.status as InvoiceStatus;
+
+    // Check for overdue
+    if (['sent', 'viewed', 'partial'].includes(status)) {
+      const dueDate = data.dueDate?.toDate();
+      if (dueDate && dueDate < now) {
+        status = 'overdue';
+      }
+    }
+
+    return {
+      id: doc.id,
+      ...data,
+      status,
+      createdAt: data.createdAt?.toDate(),
+      updatedAt: data.updatedAt?.toDate(),
+      dueDate: data.dueDate?.toDate(),
+      sentAt: data.sentAt?.toDate(),
+      paidAt: data.paidAt?.toDate(),
+    } as Invoice;
+  };
+
+  const loadInvoices = useCallback(async (direction: 'first' | 'next' | 'prev' = 'first') => {
     if (!profile?.orgId) return;
 
     try {
       setLoading(true);
-      const q = query(
+
+      // Get total count
+      const countQuery = query(
+        collection(db, 'invoices'),
+        where('orgId', '==', profile.orgId)
+      );
+      const countSnapshot = await getCountFromServer(countQuery);
+      setTotalCount(countSnapshot.data().count);
+
+      // Build paginated query
+      let q = query(
         collection(db, 'invoices'),
         where('orgId', '==', profile.orgId),
-        orderBy('createdAt', 'desc')
+        orderBy('createdAt', 'desc'),
+        limit(pageSize)
       );
 
+      if (direction === 'next' && lastDoc) {
+        q = query(
+          collection(db, 'invoices'),
+          where('orgId', '==', profile.orgId),
+          orderBy('createdAt', 'desc'),
+          startAfter(lastDoc),
+          limit(pageSize)
+        );
+      } else if (direction === 'prev' && pageHistory.length >= 2) {
+        // Go back to previous page start
+        const prevPageStart = pageHistory[pageHistory.length - 2];
+        q = query(
+          collection(db, 'invoices'),
+          where('orgId', '==', profile.orgId),
+          orderBy('createdAt', 'desc'),
+          startAfter(prevPageStart),
+          limit(pageSize)
+        );
+      }
+
       const snapshot = await getDocs(q);
-      const items = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate(),
-        updatedAt: doc.data().updatedAt?.toDate(),
-        dueDate: doc.data().dueDate?.toDate(),
-        sentAt: doc.data().sentAt?.toDate(),
-        paidAt: doc.data().paidAt?.toDate(),
-      })) as Invoice[];
+      const items = snapshot.docs.map(parseInvoiceDoc);
 
-      // Check for overdue invoices
-      const now = new Date();
-      const updatedItems = items.map((inv) => {
-        if (inv.status === 'sent' || inv.status === 'viewed' || inv.status === 'partial') {
-          if (inv.dueDate && new Date(inv.dueDate) < now) {
-            return { ...inv, status: 'overdue' as InvoiceStatus };
-          }
+      setInvoices(items);
+
+      // Update pagination cursors
+      if (snapshot.docs.length > 0) {
+        setFirstDoc(snapshot.docs[0]);
+        setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
+
+        if (direction === 'next') {
+          setPageHistory(prev => [...prev, firstDoc!]);
+        } else if (direction === 'prev') {
+          setPageHistory(prev => prev.slice(0, -1));
+        } else {
+          setPageHistory([]);
         }
-        return inv;
-      });
-
-      setInvoices(updatedItems);
+      }
     } catch (error) {
       console.error('Error loading invoices:', error);
       toast.error('Failed to load invoices');
     } finally {
       setLoading(false);
     }
-  };
+  }, [profile?.orgId, pageSize, lastDoc, firstDoc, pageHistory]);
 
   useEffect(() => {
     if (profile?.orgId) {
-      loadInvoices();
+      setCurrentPage(1);
+      loadInvoices('first');
     }
-  }, [profile?.orgId]);
+  }, [profile?.orgId, pageSize]);
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(prev => prev + 1);
+      loadInvoices('next');
+    }
+  };
+
+  const goToPrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prev => prev - 1);
+      loadInvoices('prev');
+    }
+  };
+
+  const handlePageSizeChange = (newSize: PageSize) => {
+    setPageSize(newSize);
+    setCurrentPage(1);
+    setPageHistory([]);
+  };
 
   const filteredInvoices = useMemo(() => {
     return invoices.filter((invoice) => {
@@ -325,6 +418,60 @@ export default function InvoicesPage() {
               </Card>
             );
           })}
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {!loading && totalCount > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-gray-200">
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <span>Show</span>
+            <select
+              value={pageSize}
+              onChange={(e) => handlePageSizeChange(Number(e.target.value) as PageSize)}
+              className="px-2 py-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              {PAGE_SIZE_OPTIONS.map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </select>
+            <span>per page</span>
+          </div>
+
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <span>
+              Showing {Math.min((currentPage - 1) * pageSize + 1, totalCount)}-
+              {Math.min(currentPage * pageSize, totalCount)} of {totalCount} invoices
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={goToPrevPage}
+              disabled={currentPage === 1}
+              className="flex items-center gap-1"
+            >
+              <ChevronLeftIcon className="h-4 w-4" />
+              Previous
+            </Button>
+            <span className="px-3 py-1 text-sm text-gray-700">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={goToNextPage}
+              disabled={currentPage >= totalPages}
+              className="flex items-center gap-1"
+            >
+              Next
+              <ChevronRightIcon className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       )}
     </div>

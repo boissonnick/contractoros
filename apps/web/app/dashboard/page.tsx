@@ -403,7 +403,7 @@ export default function DashboardPage() {
               </Link>
             </div>
             {activeProjectsList.length > 0 ? (
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-gray-100 max-h-[400px] overflow-y-auto">
                 {activeProjectsList.map((project) => (
                   <Link
                     key={project.id}
@@ -420,7 +420,7 @@ export default function DashboardPage() {
                       <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
                         <span className="flex items-center gap-1">
                           <MapPinIcon className="h-3.5 w-3.5" />
-                          {project.address.city}
+                          {project.address?.city || 'No location'}
                         </span>
                         {project.budget && (
                           <span className="flex items-center gap-1">
@@ -451,13 +451,13 @@ export default function DashboardPage() {
                 ))}
               </div>
             ) : (
-              <div className="p-8 text-center text-gray-500">
-                <FolderIcon className="h-8 w-8 mx-auto text-gray-300 mb-2" />
-                <p>No active projects</p>
-                <Link href="/dashboard/projects/new" className="text-sm text-blue-600 hover:underline">
-                  Create your first project
-                </Link>
-              </div>
+              <EmptyState
+                icon={<FolderIcon className="h-full w-full" />}
+                title="No active projects"
+                description="Start your first project to see it here."
+                action={{ label: 'Create Project', href: '/dashboard/projects/new' }}
+                className="py-8"
+              />
             )}
           </Card>
         </div>
@@ -471,7 +471,7 @@ export default function DashboardPage() {
                 <ExclamationCircleIcon className="h-5 w-5 text-red-600" />
                 <h2 className="font-semibold text-red-800">Overdue Tasks ({stats.overdueTasks})</h2>
               </div>
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-gray-100 max-h-[250px] overflow-y-auto">
                 {overdueTasksList.map((task) => (
                   <Link
                     key={task.id}
@@ -492,12 +492,12 @@ export default function DashboardPage() {
           <Card className="p-0">
             <div className="flex items-center justify-between p-4 border-b border-gray-100">
               <h2 className="font-semibold text-gray-900">Pending Estimates</h2>
-              <Link href="/dashboard/estimates" className="text-sm text-blue-600 hover:text-blue-700">
-                View all
+              <Link href="/dashboard/estimates" className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                View all <ArrowRightIcon className="h-3 w-3" />
               </Link>
             </div>
             {pendingEstimatesList.length > 0 ? (
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-gray-100 max-h-[250px] overflow-y-auto">
                 {pendingEstimatesList.map((estimate) => (
                   <Link
                     key={estimate.id}
@@ -517,9 +517,14 @@ export default function DashboardPage() {
                 ))}
               </div>
             ) : (
-              <div className="p-6 text-center text-gray-500">
-                <p className="text-sm">No pending estimates</p>
-              </div>
+              <EmptyState
+                icon={<DocumentTextIcon className="h-full w-full" />}
+                title="No pending estimates"
+                description="Create an estimate to start winning new work."
+                action={{ label: 'New Estimate', href: '/dashboard/estimates/new' }}
+                className="py-6"
+                size="sm"
+              />
             )}
           </Card>
 
@@ -563,16 +568,16 @@ export default function DashboardPage() {
       <Card className="p-0">
         <div className="flex items-center justify-between p-4 border-b border-gray-100">
           <h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2>
-          <Link href="/dashboard/activity" className="text-sm text-blue-600 hover:text-blue-700">
-            View all
+          <Link href="/dashboard/activity" className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
+            View all <ArrowRightIcon className="h-3 w-3" />
           </Link>
         </div>
         {activities.length > 0 ? (
-          <div className="divide-y divide-gray-100">
-            {activities.slice(0, 5).map((activity) => (
+          <div className="divide-y divide-gray-100 max-h-[300px] overflow-y-auto">
+            {activities.slice(0, 10).map((activity) => (
               <div key={activity.id} className="flex items-start gap-4 p-4">
                 <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-medium text-sm flex-shrink-0">
-                  {activity.userName.charAt(0)}
+                  {activity.userName?.charAt(0) || '?'}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-gray-900">{activity.message}</p>
@@ -582,10 +587,13 @@ export default function DashboardPage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-8 text-gray-500">
-            <p>No recent activity</p>
-            <p className="text-sm mt-1">Activity will appear here as your team works</p>
-          </div>
+          <EmptyState
+            icon={<ClockIcon className="h-full w-full" />}
+            title="No recent activity"
+            description="Activity will appear here as your team works on projects."
+            className="py-8"
+            size="sm"
+          />
         )}
       </Card>
 
