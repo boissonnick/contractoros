@@ -42,8 +42,7 @@ export function useInvitations() {
     }
 
     const q = query(
-      collection(db, 'invitations'),
-      where('orgId', '==', orgId),
+      collection(db, `organizations/${orgId}/invitations`),
       orderBy('createdAt', 'desc')
     );
 
@@ -81,8 +80,7 @@ export function useInvitations() {
 
       // Check if invitation already exists for this email
       const existingQ = query(
-        collection(db, 'invitations'),
-        where('orgId', '==', orgId),
+        collection(db, `organizations/${orgId}/invitations`),
         where('email', '==', email.toLowerCase()),
         where('status', '==', 'pending')
       );
@@ -122,7 +120,7 @@ export function useInvitations() {
           message: message || undefined,
         };
 
-        const docRef = await addDoc(collection(db, 'invitations'), invitationData);
+        const docRef = await addDoc(collection(db, `organizations/${orgId}/invitations`), invitationData);
 
         // In a real app, you would trigger an email here via Cloud Functions
         // For now, we'll just show a success message with the link
@@ -155,7 +153,7 @@ export function useInvitations() {
       }
 
       try {
-        await updateDoc(doc(db, 'invitations', invitationId), {
+        await updateDoc(doc(db, `organizations/${profile.orgId}/invitations`, invitationId), {
           status: 'revoked' as InvitationStatus,
           revokedAt: Timestamp.now(),
           revokedBy: profile.uid,
@@ -187,8 +185,12 @@ export function useInvitations() {
   // Delete an invitation permanently
   const deleteInvitation = useCallback(
     async (invitationId: string): Promise<boolean> => {
+      if (!orgId) {
+        toast.error('Organization not found');
+        return false;
+      }
       try {
-        await deleteDoc(doc(db, 'invitations', invitationId));
+        await deleteDoc(doc(db, `organizations/${orgId}/invitations`, invitationId));
         toast.success('Invitation deleted');
         return true;
       } catch (err) {
@@ -197,7 +199,7 @@ export function useInvitations() {
         return false;
       }
     },
-    []
+    [orgId]
   );
 
   // Get pending invitations only

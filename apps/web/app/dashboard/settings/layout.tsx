@@ -117,12 +117,26 @@ function NavDropdown({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const Icon = section.icon;
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  React.useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isOpen]);
 
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        onBlur={() => setTimeout(() => setIsOpen(false), 150)}
         className={cn(
           'flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors',
           isActive
@@ -142,6 +156,7 @@ function NavDropdown({
             <Link
               key={child.key}
               href={child.href}
+              onClick={() => setIsOpen(false)}
               className={cn(
                 'block px-4 py-2 text-sm transition-colors',
                 pathname === child.href

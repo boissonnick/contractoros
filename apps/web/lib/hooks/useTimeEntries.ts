@@ -229,38 +229,38 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
     }
 
     const now = new Date();
-    const entryData: Omit<TimeEntry, 'id'> = {
+
+    // Build entry data, only including defined values (Firestore doesn't allow undefined)
+    const entryData: Record<string, unknown> = {
       orgId,
       userId: currentUserId,
       userName: currentUserName,
       userRole: currentUserRole,
-      projectId: clockInOptions?.projectId,
-      projectName: clockInOptions?.projectName,
-      taskId: clockInOptions?.taskId,
-      taskName: clockInOptions?.taskName,
       type: 'clock',
       status: 'active',
-      clockIn: now,
+      clockIn: Timestamp.fromDate(now),
       breaks: [],
-      notes: clockInOptions?.notes,
-      clockInLocation: clockInOptions?.location,
-      hourlyRate: profile?.hourlyRate,
-      createdAt: now,
-      updatedAt: now,
+      createdAt: Timestamp.fromDate(now),
+      updatedAt: Timestamp.fromDate(now),
     };
+
+    // Only add optional fields if they have values
+    if (clockInOptions?.projectId) entryData.projectId = clockInOptions.projectId;
+    if (clockInOptions?.projectName) entryData.projectName = clockInOptions.projectName;
+    if (clockInOptions?.taskId) entryData.taskId = clockInOptions.taskId;
+    if (clockInOptions?.taskName) entryData.taskName = clockInOptions.taskName;
+    if (clockInOptions?.notes) entryData.notes = clockInOptions.notes;
+    if (profile?.hourlyRate) entryData.hourlyRate = profile.hourlyRate;
+    if (clockInOptions?.location) {
+      entryData.clockInLocation = {
+        ...clockInOptions.location,
+        timestamp: Timestamp.fromDate(clockInOptions.location.timestamp),
+      };
+    }
 
     const docRef = await addDoc(
       collection(db, `organizations/${orgId}/timeEntries`),
-      {
-        ...entryData,
-        clockIn: Timestamp.fromDate(now),
-        createdAt: Timestamp.fromDate(now),
-        updatedAt: Timestamp.fromDate(now),
-        clockInLocation: clockInOptions?.location ? {
-          ...clockInOptions.location,
-          timestamp: Timestamp.fromDate(clockInOptions.location.timestamp),
-        } : undefined,
-      }
+      entryData
     );
 
     return docRef.id;
