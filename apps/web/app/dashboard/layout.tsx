@@ -4,7 +4,7 @@ import React, { useMemo } from 'react';
 import { useAuth } from '@/lib/auth';
 import AuthGuard from '@/components/auth/AuthGuard';
 import AppShell from '@/components/ui/AppShell';
-import { NavItem, RolePermissions } from '@/types';
+import { NavItem, RolePermissions, ImpersonationRole } from '@/types';
 import { useImpersonation } from '@/lib/contexts/ImpersonationContext';
 import { ImpersonationBanner } from '@/components/impersonation';
 import DevToolsWidget from '@/components/ui/DevToolsWidget';
@@ -20,10 +20,12 @@ import {
   Cog6ToothIcon,
   DocumentTextIcon,
   UserGroupIcon,
+  PhotoIcon,
+  DocumentIcon,
 } from '@heroicons/react/24/outline';
 
-// Full nav items - will be filtered based on permissions
-const allNavItems: (NavItem & { requiredPermission?: keyof RolePermissions })[] = [
+// Full nav items for staff - will be filtered based on permissions
+const staffNavItems: (NavItem & { requiredPermission?: keyof RolePermissions })[] = [
   { label: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { label: 'Projects', href: '/dashboard/projects', icon: FolderIcon },
   { label: 'Clients', href: '/dashboard/clients', icon: UserGroupIcon, requiredPermission: 'canViewClients' },
@@ -37,19 +39,33 @@ const allNavItems: (NavItem & { requiredPermission?: keyof RolePermissions })[] 
   { label: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon, requiredPermission: 'canViewSettings' },
 ];
 
+// Simplified nav for CLIENT view - only what clients should see
+const clientNavItems: NavItem[] = [
+  { label: 'My Projects', href: '/dashboard', icon: FolderIcon },
+  { label: 'Photos', href: '/dashboard/photos', icon: PhotoIcon },
+  { label: 'Messages', href: '/dashboard/messaging', icon: ChatBubbleLeftRightIcon },
+  { label: 'Documents', href: '/dashboard/documents', icon: DocumentIcon },
+];
+
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const { profile, signOut } = useAuth();
-  const { permissions } = useImpersonation();
+  const { permissions, currentRole } = useImpersonation();
 
-  // Filter nav items based on current permissions
+  // Get nav items based on current role
   const filteredNavItems = useMemo(() => {
-    return allNavItems.filter((item) => {
+    // Client view gets simplified navigation
+    if (currentRole === 'client') {
+      return clientNavItems;
+    }
+
+    // Staff roles get filtered based on permissions
+    return staffNavItems.filter((item) => {
       // Always show items without permission requirements
       if (!item.requiredPermission) return true;
       // Check if user has the required permission
       return permissions[item.requiredPermission];
     });
-  }, [permissions]);
+  }, [permissions, currentRole]);
 
   return (
     <div className="flex flex-col min-h-screen">
