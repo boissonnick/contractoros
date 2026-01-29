@@ -63,7 +63,7 @@ export default function TimeEntryList({ entries }: TimeEntryListProps) {
                   </div>
                   <div className="text-right">
                     {entry.totalMinutes && <span className="text-sm font-semibold text-gray-900">{formatDuration(entry.totalMinutes)}</span>}
-                    {entry.location && (
+                    {entry.clockInLocation && (
                       <div className="flex items-center gap-0.5 text-[10px] text-gray-400 mt-0.5">
                         <MapPinIcon className="h-3 w-3" /> GPS
                       </div>

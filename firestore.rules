@@ -1161,6 +1161,141 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ==========================================
+    // Organization-Scoped Time Entries Collection
+    // ==========================================
+    match /organizations/{orgId}/timeEntries/{entryId} {
+      // Org members can read time entries (managers see all, employees see their own)
+      allow read: if isSameOrg(orgId);
+
+      // Org members can create time entries (clock in)
+      allow create: if isSameOrg(orgId);
+
+      // Users can update their own entries (clock out, add notes)
+      // Admins can update any entry (approval/rejection)
+      allow update: if isSameOrg(orgId) && (
+        resource.data.userId == request.auth.uid ||
+        getUserProfile().role in ['OWNER', 'PM']
+      );
+
+      // Admins can delete time entries
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // Organization-Scoped Timesheet Periods Collection
+    // ==========================================
+    match /organizations/{orgId}/timesheetPeriods/{periodId} {
+      // Org members can read timesheet periods
+      allow read: if isSameOrg(orgId);
+
+      // Users can create their own timesheet periods
+      allow create: if isSameOrg(orgId) && request.resource.data.userId == request.auth.uid;
+
+      // Users can update their own pending timesheets, admins can update any
+      allow update: if isSameOrg(orgId) && (
+        (resource.data.userId == request.auth.uid && resource.data.status in ['draft', 'rejected']) ||
+        getUserProfile().role in ['OWNER', 'PM']
+      );
+
+      // Admins can delete timesheet periods
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // Organization-Scoped Time Tracking Settings Collection
+    // ==========================================
+    match /organizations/{orgId}/timeTrackingSettings/{settingId} {
+      // Org members can read time tracking settings
+      allow read: if isSameOrg(orgId);
+
+      // Admins can create/update settings
+      allow create: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+      allow update: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Only admins can delete settings
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // Organization-Scoped User Invitations Collection
+    // ==========================================
+    match /organizations/{orgId}/invitations/{invitationId} {
+      // Org members can read invitations
+      allow read: if isSameOrg(orgId);
+
+      // Admins can create invitations
+      allow create: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can update invitations (revoke, resend)
+      allow update: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can delete invitations
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // Organization-Scoped Daily Logs Collection
+    // ==========================================
+    match /organizations/{orgId}/dailyLogs/{logId} {
+      // Org members can read daily logs
+      // Private logs are filtered in application code
+      allow read: if isSameOrg(orgId);
+
+      // Org members can create daily logs
+      allow create: if isSameOrg(orgId);
+
+      // Users can update their own logs, admins can update any
+      allow update: if isSameOrg(orgId) && (
+        resource.data.userId == request.auth.uid ||
+        getUserProfile().role in ['OWNER', 'PM']
+      );
+
+      // Admins can delete daily logs
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // Organization-Scoped Expenses Collection
+    // ==========================================
+    match /organizations/{orgId}/expenses/{expenseId} {
+      // Org members can read expenses
+      // Non-managers only see their own via query filtering
+      allow read: if isSameOrg(orgId);
+
+      // Org members can create expenses
+      allow create: if isSameOrg(orgId);
+
+      // Users can update their own pending expenses, admins can update any
+      allow update: if isSameOrg(orgId) && (
+        (resource.data.userId == request.auth.uid && resource.data.status == 'pending') ||
+        getUserProfile().role in ['OWNER', 'PM']
+      );
+
+      // Users can delete their own pending expenses, admins can delete any
+      allow delete: if isSameOrg(orgId) && (
+        (resource.data.userId == request.auth.uid && resource.data.status == 'pending') ||
+        isAdmin()
+      );
+    }
+
+    // ==========================================
+    // Organization-Scoped Quote PDF Templates Collection
+    // ==========================================
+    match /organizations/{orgId}/quoteTemplates/{templateId} {
+      // Org members can read quote templates
+      allow read: if isSameOrg(orgId);
+
+      // Admins can create quote templates
+      allow create: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can update quote templates
+      allow update: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Only owners can delete quote templates
+      allow delete: if isAdmin();
+    }
+
     // Default deny all other access
     match /{document=**} {
       allow read, write: if false;

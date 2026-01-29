@@ -261,7 +261,7 @@ export function calculateBudgetSummary(
   const totalSpent = calculateTotalSpent(expenses);
   const approvedSpent = calculateTotalSpent(expenses, { includeApprovedOnly: true });
   const pendingSpent = expenses
-    .filter(e => e.status === 'submitted')
+    .filter(e => e.status === 'pending')
     .reduce((sum, e) => sum + e.amount, 0);
 
   const remaining = totalBudget - totalSpent;

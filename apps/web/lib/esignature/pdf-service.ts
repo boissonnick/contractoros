@@ -6,7 +6,7 @@
 import { pdf } from '@react-pdf/renderer';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/lib/firebase/config';
-import { Estimate, Organization } from '@/types';
+import { Estimate, Organization, QuotePdfTemplate } from '@/types';
 import EstimatePdf from './pdf-templates/estimate-pdf';
 import { SignatureDocumentType } from './types';
 
@@ -23,13 +23,15 @@ export interface PdfGenerationResult {
 export async function generateEstimatePdfBlob(
   estimate: Estimate,
   organization: Organization,
-  includeSignatureFields = true
+  includeSignatureFields = true,
+  template?: QuotePdfTemplate
 ): Promise<Blob> {
   // Create the PDF document element
   const pdfDocument = EstimatePdf({
     estimate,
     organization,
     includeSignatureFields,
+    template,
   });
 
   const blob = await pdf(pdfDocument).toBlob();
@@ -42,11 +44,12 @@ export async function generateEstimatePdfBlob(
 export async function generateAndUploadEstimatePdf(
   estimate: Estimate,
   organization: Organization,
-  includeSignatureFields = true
+  includeSignatureFields = true,
+  template?: QuotePdfTemplate
 ): Promise<PdfGenerationResult> {
   try {
     // Generate the PDF blob
-    const blob = await generateEstimatePdfBlob(estimate, organization, includeSignatureFields);
+    const blob = await generateEstimatePdfBlob(estimate, organization, includeSignatureFields, template);
 
     // Create a unique filename
     const timestamp = Date.now();

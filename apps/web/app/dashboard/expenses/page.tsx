@@ -1,310 +1,338 @@
-"use client";
+'use client';
 
-import React, { useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/auth';
-import { useExpenses } from '@/lib/hooks/useExpenses';
-import { Button, Card, Badge, EmptyState } from '@/components/ui';
-import { toast } from '@/components/ui/Toast';
-import { SkeletonList } from '@/components/ui/Skeleton';
-import { cn } from '@/lib/utils';
-import { Expense, ExpenseStatus, ExpenseCategory } from '@/types';
+import { useState, useMemo } from 'react';
 import {
-  PlusIcon,
-  MagnifyingGlassIcon,
-  FunnelIcon,
-  ReceiptPercentIcon,
-  ClockIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  CurrencyDollarIcon,
-  DocumentTextIcon,
   BanknotesIcon,
-  ArrowPathIcon,
+  PlusIcon,
+  FunnelIcon,
+  CalendarIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from '@heroicons/react/24/outline';
-import { format } from 'date-fns';
-
-const statusConfig: Record<ExpenseStatus, { label: string; color: string; icon: React.ReactNode }> = {
-  draft: { label: 'Draft', color: 'bg-gray-100 text-gray-700', icon: <DocumentTextIcon className="h-4 w-4" /> },
-  submitted: { label: 'Submitted', color: 'bg-blue-100 text-blue-700', icon: <ClockIcon className="h-4 w-4" /> },
-  approved: { label: 'Approved', color: 'bg-green-100 text-green-700', icon: <CheckCircleIcon className="h-4 w-4" /> },
-  rejected: { label: 'Rejected', color: 'bg-red-100 text-red-700', icon: <XCircleIcon className="h-4 w-4" /> },
-  reimbursed: { label: 'Reimbursed', color: 'bg-purple-100 text-purple-700', icon: <BanknotesIcon className="h-4 w-4" /> },
-};
-
-const categoryLabels: Record<ExpenseCategory, string> = {
-  materials: 'Materials',
-  tools: 'Tools',
-  equipment_rental: 'Equipment Rental',
-  permits: 'Permits',
-  travel: 'Travel',
-  meals: 'Meals',
-  other: 'Other',
-};
+import Button from '@/components/ui/Button';
+import Card from '@/components/ui/Card';
+import EmptyState from '@/components/ui/EmptyState';
+import Skeleton from '@/components/ui/Skeleton';
+import { ExpenseCard, ExpenseFormModal } from '@/components/expenses';
+import { useExpenses } from '@/lib/hooks/useExpenses';
+import { useProjects } from '@/lib/hooks/useQueryHooks';
+import { useAuth } from '@/lib/auth';
+import { Expense, ExpenseCategory, ExpenseStatus, EXPENSE_CATEGORIES, EXPENSE_STATUSES, Project } from '@/types';
+import { formatCurrency } from '@/lib/date-utils';
 
 export default function ExpensesPage() {
-  const router = useRouter();
   const { profile } = useAuth();
-  const { expenses, loading, submitExpense, approveExpense, rejectExpense, markReimbursed, deleteExpense } = useExpenses({ orgWide: true });
+  const { data: projects = [] } = useProjects();
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+  const [filterProjectId, setFilterProjectId] = useState<string>('');
+  const [filterCategory, setFilterCategory] = useState<ExpenseCategory | ''>('');
+  const [filterStatus, setFilterStatus] = useState<ExpenseStatus | ''>('');
+  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<ExpenseStatus | 'all'>('all');
-  const [categoryFilter, setCategoryFilter] = useState<ExpenseCategory | 'all'>('all');
+  // Calculate date range for current month
+  const dateRange = useMemo(() => {
+    const start = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+    const end = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
+    return {
+      startDate: start.toISOString().split('T')[0],
+      endDate: end.toISOString().split('T')[0],
+    };
+  }, [currentMonth]);
 
-  const filteredExpenses = useMemo(() => {
-    return expenses.filter((expense) => {
-      const matchesSearch =
-        expense.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        expense.vendor?.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesStatus = statusFilter === 'all' || expense.status === statusFilter;
-      const matchesCategory = categoryFilter === 'all' || expense.category === categoryFilter;
-      return matchesSearch && matchesStatus && matchesCategory;
-    });
-  }, [expenses, searchQuery, statusFilter, categoryFilter]);
+  // Fetch expenses
+  const {
+    expenses,
+    loading,
+    error,
+    createExpense,
+    updateExpense,
+    deleteExpense,
+    approveExpense,
+    rejectExpense,
+    markReimbursed,
+    getSummary,
+  } = useExpenses({
+    projectId: filterProjectId || undefined,
+    category: filterCategory || undefined,
+    status: filterStatus || undefined,
+    startDate: dateRange.startDate,
+    endDate: dateRange.endDate,
+  });
 
-  const stats = useMemo(() => {
-    const total = expenses.reduce((sum, e) => sum + e.amount, 0);
-    const pending = expenses.filter(e => e.status === 'submitted').reduce((sum, e) => sum + e.amount, 0);
-    const approved = expenses.filter(e => e.status === 'approved' || e.status === 'reimbursed').reduce((sum, e) => sum + e.amount, 0);
-    const thisMonth = expenses.filter(e => {
-      const d = new Date(e.date);
-      const now = new Date();
-      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-    }).reduce((sum, e) => sum + e.amount, 0);
+  // Get summary for current period
+  const summary = useMemo(() => {
+    return getSummary(dateRange.startDate, dateRange.endDate, filterProjectId || undefined);
+  }, [getSummary, dateRange.startDate, dateRange.endDate, filterProjectId]);
 
-    return { total, pending, approved, thisMonth };
-  }, [expenses]);
+  // Navigate months
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    const newDate = new Date(currentMonth);
+    newDate.setMonth(newDate.getMonth() + (direction === 'prev' ? -1 : 1));
+    setCurrentMonth(newDate);
+  };
 
-  const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
+  // Go to current month
+  const goToCurrentMonth = () => {
+    setCurrentMonth(new Date());
+  };
 
-  const handleAction = async (expense: Expense, action: 'submit' | 'approve' | 'reject' | 'reimburse' | 'delete') => {
-    try {
-      switch (action) {
-        case 'submit':
-          await submitExpense(expense.id);
-          toast.success('Expense submitted for approval');
-          break;
-        case 'approve':
-          await approveExpense(expense.id);
-          toast.success('Expense approved');
-          break;
-        case 'reject':
-          await rejectExpense(expense.id);
-          toast.success('Expense rejected');
-          break;
-        case 'reimburse':
-          await markReimbursed(expense.id);
-          toast.success('Expense marked as reimbursed');
-          break;
-        case 'delete':
-          if (!confirm('Delete this expense?')) return;
-          await deleteExpense(expense.id);
-          toast.success('Expense deleted');
-          break;
-      }
-    } catch {
-      toast.error(`Failed to ${action} expense`);
+  // Handle create
+  const handleCreate = async (expenseData: Omit<Expense, 'id' | 'orgId' | 'userId' | 'userName' | 'createdAt' | 'updatedAt'>) => {
+    await createExpense(expenseData);
+    setShowAddModal(false);
+  };
+
+  // Handle edit
+  const handleEdit = (expense: Expense) => {
+    setEditingExpense(expense);
+    setShowAddModal(true);
+  };
+
+  // Handle update
+  const handleUpdate = async (expenseData: Omit<Expense, 'id' | 'orgId' | 'userId' | 'userName' | 'createdAt' | 'updatedAt'>) => {
+    if (editingExpense) {
+      await updateExpense(editingExpense.id, expenseData);
+      setEditingExpense(null);
+      setShowAddModal(false);
     }
   };
 
+  // Handle delete
+  const handleDelete = async (expenseId: string) => {
+    if (confirm('Are you sure you want to delete this expense?')) {
+      await deleteExpense(expenseId);
+    }
+  };
+
+  // Handle approve
+  const handleApprove = async (expenseId: string) => {
+    await approveExpense(expenseId);
+  };
+
+  // Handle reject
+  const handleReject = async (expenseId: string) => {
+    await rejectExpense(expenseId, 'Rejected by manager');
+  };
+
+  // Handle mark reimbursed
+  const handleMarkReimbursed = async (expenseId: string) => {
+    await markReimbursed(expenseId);
+  };
+
+  const isManager = profile?.role === 'OWNER' || profile?.role === 'PM';
+
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Expenses</h1>
-          <p className="text-gray-500 mt-1">Track project expenses, receipts, and reimbursements</p>
+          <p className="text-sm text-gray-500 mt-1">
+            Track and manage project expenses and reimbursements
+          </p>
         </div>
-        <Button variant="primary" onClick={() => router.push('/dashboard/expenses/new')}>
-          <PlusIcon className="h-4 w-4 mr-2" />
-          New Expense
+        <Button onClick={() => setShowAddModal(true)}>
+          <PlusIcon className="h-5 w-5 mr-2" />
+          Add Expense
         </Button>
       </div>
 
-      {/* Stats */}
+      {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-gray-100 rounded-lg">
-              <CurrencyDollarIcon className="h-5 w-5 text-gray-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.total)}</p>
-              <p className="text-xs text-gray-500">Total Expenses</p>
-            </div>
+          <div className="text-sm text-gray-500">Total Expenses</div>
+          <div className="text-2xl font-bold text-gray-900 mt-1">
+            {formatCurrency(summary.totalExpenses)}
+          </div>
+          <div className="text-xs text-gray-400 mt-1">
+            {summary.count} expense{summary.count !== 1 ? 's' : ''}
           </div>
         </Card>
         <Card className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <ClockIcon className="h-5 w-5 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.pending)}</p>
-              <p className="text-xs text-gray-500">Pending Approval</p>
-            </div>
+          <div className="text-sm text-gray-500">Pending Approval</div>
+          <div className="text-2xl font-bold text-yellow-600 mt-1">
+            {formatCurrency(summary.totalPending)}
           </div>
         </Card>
         <Card className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <CheckCircleIcon className="h-5 w-5 text-green-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.approved)}</p>
-              <p className="text-xs text-gray-500">Approved</p>
-            </div>
+          <div className="text-sm text-gray-500">Reimbursable</div>
+          <div className="text-2xl font-bold text-green-600 mt-1">
+            {formatCurrency(summary.totalReimbursable)}
           </div>
         </Card>
         <Card className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <ReceiptPercentIcon className="h-5 w-5 text-purple-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.thisMonth)}</p>
-              <p className="text-xs text-gray-500">This Month</p>
-            </div>
+          <div className="text-sm text-gray-500">Reimbursed</div>
+          <div className="text-2xl font-bold text-blue-600 mt-1">
+            {formatCurrency(summary.totalReimbursed)}
           </div>
         </Card>
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search expenses..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
-        <div className="flex items-center gap-2">
+      <Card className="p-4">
+        <div className="flex flex-wrap items-center gap-4">
           <FunnelIcon className="h-5 w-5 text-gray-400" />
+
+          {/* Project Filter */}
           <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as ExpenseStatus | 'all')}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            value={filterProjectId}
+            onChange={(e) => setFilterProjectId(e.target.value)}
+            className="rounded-md border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500"
           >
-            <option value="all">All Status</option>
-            <option value="draft">Draft</option>
-            <option value="submitted">Submitted</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-            <option value="reimbursed">Reimbursed</option>
+            <option value="">All Projects</option>
+            {(projects as Project[])
+              .filter((p: Project) => p.status === 'active')
+              .map((project: Project) => (
+                <option key={project.id} value={project.id}>
+                  {project.name}
+                </option>
+              ))}
           </select>
+
+          {/* Category Filter */}
           <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value as ExpenseCategory | 'all')}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value as ExpenseCategory | '')}
+            className="rounded-md border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500"
           >
-            <option value="all">All Categories</option>
-            {Object.entries(categoryLabels).map(([val, label]) => (
-              <option key={val} value={val}>{label}</option>
+            <option value="">All Categories</option>
+            {EXPENSE_CATEGORIES.map((cat) => (
+              <option key={cat.value} value={cat.value}>
+                {cat.label}
+              </option>
             ))}
           </select>
+
+          {/* Status Filter */}
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value as ExpenseStatus | '')}
+            className="rounded-md border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500"
+          >
+            <option value="">All Statuses</option>
+            {EXPENSE_STATUSES.map((status) => (
+              <option key={status.value} value={status.value}>
+                {status.label}
+              </option>
+            ))}
+          </select>
+
+          {/* Month Navigation */}
+          <div className="flex items-center gap-2 ml-auto">
+            <Button variant="ghost" size="sm" onClick={() => navigateMonth('prev')}>
+              <ChevronLeftIcon className="h-5 w-5" />
+            </Button>
+            <div className="flex items-center gap-2">
+              <CalendarIcon className="h-5 w-5 text-gray-400" />
+              <span className="text-sm font-medium min-w-[140px] text-center">
+                {currentMonth.toLocaleDateString('en-US', {
+                  month: 'long',
+                  year: 'numeric',
+                })}
+              </span>
+            </div>
+            <Button variant="ghost" size="sm" onClick={() => navigateMonth('next')}>
+              <ChevronRightIcon className="h-5 w-5" />
+            </Button>
+            <Button variant="outline" size="sm" onClick={goToCurrentMonth}>
+              This Month
+            </Button>
+          </div>
         </div>
-      </div>
+      </Card>
 
       {/* Expense List */}
       {loading ? (
-        <SkeletonList count={5} />
-      ) : filteredExpenses.length === 0 ? (
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-32" />
+          ))}
+        </div>
+      ) : expenses.length === 0 && !filterProjectId && !filterCategory && !filterStatus ? (
         <EmptyState
-          icon={<ReceiptPercentIcon className="h-full w-full" />}
-          title={expenses.length === 0 ? 'No expenses yet' : 'No matching expenses'}
-          description={expenses.length === 0
-            ? 'Start tracking project expenses and receipts.'
-            : 'Try adjusting your search or filter criteria.'
-          }
-          action={expenses.length === 0 ? {
-            label: 'New Expense',
-            onClick: () => router.push('/dashboard/expenses/new'),
-          } : undefined}
+          icon={<BanknotesIcon className="h-12 w-12" />}
+          title="No expenses yet"
+          description="Start tracking your project expenses and receipts."
+          action={{
+            label: 'Add First Expense',
+            onClick: () => setShowAddModal(true),
+          }}
+        />
+      ) : expenses.length === 0 ? (
+        <EmptyState
+          icon={<BanknotesIcon className="h-12 w-12" />}
+          title="No expenses found"
+          description="No expenses match your current filters."
         />
       ) : (
-        <div className="space-y-3">
-          {filteredExpenses.map((expense) => (
-            <Card
+        <div className="space-y-4">
+          {expenses.map((expense) => (
+            <ExpenseCard
               key={expense.id}
-              className="p-4 hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Badge className={statusConfig[expense.status].color}>
-                      {statusConfig[expense.status].icon}
-                      <span className="ml-1">{statusConfig[expense.status].label}</span>
-                    </Badge>
-                    <Badge className="bg-gray-100 text-gray-600">
-                      {categoryLabels[expense.category]}
-                    </Badge>
-                  </div>
-                  <h3 className="font-medium text-gray-900">{expense.description}</h3>
-                  <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
-                    {expense.vendor && <span>{expense.vendor}</span>}
-                    <span>{format(new Date(expense.date), 'MMM d, yyyy')}</span>
-                    {expense.receiptURL && (
-                      <span className="text-blue-600">Receipt attached</span>
-                    )}
-                  </div>
-                </div>
-                <div className="text-right ml-4">
-                  <p className="text-lg font-semibold text-gray-900">
-                    {formatCurrency(expense.amount)}
-                  </p>
-                  {/* Actions */}
-                  <div className="flex items-center gap-1 mt-2 justify-end">
-                    {expense.status === 'draft' && (
-                      <>
-                        <button
-                          onClick={() => handleAction(expense, 'submit')}
-                          className="text-xs px-2 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100"
-                        >
-                          Submit
-                        </button>
-                        <button
-                          onClick={() => handleAction(expense, 'delete')}
-                          className="text-xs px-2 py-1 text-red-600 rounded hover:bg-red-50"
-                        >
-                          Delete
-                        </button>
-                      </>
-                    )}
-                    {expense.status === 'submitted' && (profile?.role === 'OWNER' || profile?.role === 'PM') && (
-                      <>
-                        <button
-                          onClick={() => handleAction(expense, 'approve')}
-                          className="text-xs px-2 py-1 bg-green-50 text-green-600 rounded hover:bg-green-100"
-                        >
-                          Approve
-                        </button>
-                        <button
-                          onClick={() => handleAction(expense, 'reject')}
-                          className="text-xs px-2 py-1 text-red-600 rounded hover:bg-red-50"
-                        >
-                          Reject
-                        </button>
-                      </>
-                    )}
-                    {expense.status === 'approved' && (
-                      <button
-                        onClick={() => handleAction(expense, 'reimburse')}
-                        className="text-xs px-2 py-1 bg-purple-50 text-purple-600 rounded hover:bg-purple-100"
-                      >
-                        Mark Reimbursed
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </Card>
+              expense={expense}
+              showProject={!filterProjectId}
+              showUser={isManager}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onApprove={handleApprove}
+              onReject={handleReject}
+              onMarkReimbursed={handleMarkReimbursed}
+              canEdit={expense.userId === profile?.uid || isManager}
+              canDelete={expense.userId === profile?.uid || isManager}
+              canApprove={isManager}
+            />
           ))}
         </div>
       )}
+
+      {/* Category Breakdown (if expenses exist) */}
+      {expenses.length > 0 && (
+        <Card className="p-4">
+          <h3 className="text-sm font-medium text-gray-700 mb-3">Expenses by Category</h3>
+          <div className="space-y-2">
+            {EXPENSE_CATEGORIES
+              .filter(cat => summary.byCategory[cat.value] > 0)
+              .sort((a, b) => (summary.byCategory[b.value] || 0) - (summary.byCategory[a.value] || 0))
+              .map(cat => {
+                const amount = summary.byCategory[cat.value] || 0;
+                const percentage = summary.totalExpenses > 0
+                  ? (amount / summary.totalExpenses) * 100
+                  : 0;
+                return (
+                  <div key={cat.value} className="flex items-center gap-3">
+                    <div className="w-24 text-sm text-gray-600">{cat.label}</div>
+                    <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          width: `${percentage}%`,
+                          backgroundColor: cat.color,
+                        }}
+                      />
+                    </div>
+                    <div className="w-24 text-sm text-gray-900 text-right">
+                      {formatCurrency(amount)}
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+        </Card>
+      )}
+
+      {/* Add/Edit Modal */}
+      <ExpenseFormModal
+        open={showAddModal}
+        onClose={() => {
+          setShowAddModal(false);
+          setEditingExpense(null);
+        }}
+        onSubmit={editingExpense ? handleUpdate : handleCreate}
+        expense={editingExpense || undefined}
+        defaultProjectId={filterProjectId}
+        mode={editingExpense ? 'edit' : 'create'}
+      />
     </div>
   );
 }

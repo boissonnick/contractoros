@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import {
@@ -12,206 +12,420 @@ import {
   deleteDoc,
   doc,
   Timestamp,
+  QueryConstraint,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import { Expense, ExpenseStatus, ExpenseCategory } from '@/types';
 import { useAuth } from '@/lib/auth';
+import {
+  Expense,
+  ExpenseCategory,
+  ExpenseStatus,
+  ExpenseSummary,
+  ExpenseReceipt,
+} from '@/types';
 
-function fromFirestore(id: string, data: Record<string, unknown>): Expense {
-  return {
-    id,
-    orgId: data.orgId as string,
-    userId: data.userId as string,
-    projectId: data.projectId as string,
-    category: data.category as ExpenseCategory,
-    amount: data.amount as number,
-    description: data.description as string,
-    vendor: data.vendor as string | undefined,
-    receiptURL: data.receiptURL as string | undefined,
-    date: data.date ? (data.date as Timestamp).toDate() : new Date(),
-    status: data.status as ExpenseStatus,
-    submittedAt: data.submittedAt ? (data.submittedAt as Timestamp).toDate() : undefined,
-    approvedBy: data.approvedBy as string | undefined,
-    approvedAt: data.approvedAt ? (data.approvedAt as Timestamp).toDate() : undefined,
-    reimbursedAt: data.reimbursedAt ? (data.reimbursedAt as Timestamp).toDate() : undefined,
-    notes: data.notes as string | undefined,
-    createdAt: data.createdAt ? (data.createdAt as Timestamp).toDate() : new Date(),
-    updatedAt: data.updatedAt ? (data.updatedAt as Timestamp).toDate() : undefined,
-  };
+interface UseExpensesOptions {
+  projectId?: string;
+  userId?: string;
+  category?: ExpenseCategory;
+  status?: ExpenseStatus;
+  startDate?: string; // ISO date
+  endDate?: string; // ISO date
+  reimbursableOnly?: boolean;
+  billableOnly?: boolean;
 }
 
-function toFirestore(expense: Partial<Expense>): Record<string, unknown> {
-  const data: Record<string, unknown> = { ...expense };
-  delete data.id;
-
-  if (expense.date) data.date = Timestamp.fromDate(new Date(expense.date));
-  if (expense.submittedAt) data.submittedAt = Timestamp.fromDate(new Date(expense.submittedAt));
-  if (expense.approvedAt) data.approvedAt = Timestamp.fromDate(new Date(expense.approvedAt));
-  if (expense.reimbursedAt) data.reimbursedAt = Timestamp.fromDate(new Date(expense.reimbursedAt));
-  if (expense.createdAt) data.createdAt = Timestamp.fromDate(new Date(expense.createdAt));
-  data.updatedAt = Timestamp.now();
-
-  Object.keys(data).forEach((k) => {
-    if (data[k] === undefined) delete data[k];
-  });
-
-  return data;
-}
-
-export interface NewExpenseInput {
-  projectId: string;
-  category: ExpenseCategory;
-  amount: number;
-  description: string;
-  vendor?: string;
-  receiptURL?: string;
-  date: Date;
-  notes?: string;
-}
-
-export interface UseExpensesOptions {
-  projectId?: string;   // Filter by project
-  orgWide?: boolean;     // Fetch all org expenses
-}
-
-export interface UseExpensesReturn {
+interface UseExpensesReturn {
   expenses: Expense[];
   loading: boolean;
   error: string | null;
-  addExpense: (input: NewExpenseInput) => Promise<string>;
-  updateExpense: (id: string, updates: Partial<Expense>) => Promise<void>;
-  deleteExpense: (id: string) => Promise<void>;
-  submitExpense: (id: string) => Promise<void>;
-  approveExpense: (id: string) => Promise<void>;
-  rejectExpense: (id: string) => Promise<void>;
-  markReimbursed: (id: string) => Promise<void>;
+
+  // CRUD operations
+  createExpense: (expense: Omit<Expense, 'id' | 'orgId' | 'userId' | 'userName' | 'createdAt' | 'updatedAt'>) => Promise<string>;
+  updateExpense: (expenseId: string, updates: Partial<Expense>) => Promise<void>;
+  deleteExpense: (expenseId: string) => Promise<void>;
+
+  // Receipt operations
+  addReceipt: (expenseId: string, receipt: Omit<ExpenseReceipt, 'id' | 'uploadedAt'>) => Promise<void>;
+  removeReceipt: (expenseId: string, receiptId: string) => Promise<void>;
+
+  // Approval operations
+  approveExpense: (expenseId: string) => Promise<void>;
+  rejectExpense: (expenseId: string, reason: string) => Promise<void>;
+  markReimbursed: (expenseId: string, method?: string) => Promise<void>;
+
+  // Summaries
+  getSummary: (startDate: string, endDate: string, projectId?: string) => ExpenseSummary;
+
+  // Refresh
+  refresh: () => void;
 }
 
-export function useExpenses({ projectId, orgWide }: UseExpensesOptions = {}): UseExpensesReturn {
+// Helper to convert Firestore timestamps
+function convertTimestamps(data: Record<string, unknown>): Record<string, unknown> {
+  const converted = { ...data };
+  const dateFields = ['createdAt', 'updatedAt', 'approvedAt', 'reimbursedAt'];
+
+  for (const field of dateFields) {
+    if (converted[field] instanceof Timestamp) {
+      converted[field] = (converted[field] as Timestamp).toDate();
+    }
+  }
+
+  // Convert receipt timestamps
+  if (Array.isArray(converted.receipts)) {
+    converted.receipts = (converted.receipts as ExpenseReceipt[]).map(r => ({
+      ...r,
+      uploadedAt: r.uploadedAt instanceof Timestamp
+        ? (r.uploadedAt as unknown as Timestamp).toDate()
+        : r.uploadedAt,
+    }));
+  }
+
+  return converted;
+}
+
+export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn {
   const { user, profile } = useAuth();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
+  const orgId = profile?.orgId;
+  const currentUserId = profile?.uid;
+  const currentUserName = profile?.displayName || user?.email || 'Unknown';
+  const isManager = profile?.role === 'OWNER' || profile?.role === 'PM';
+
+  // Fetch expenses with real-time updates
   useEffect(() => {
-    if (!profile?.orgId) {
-      setExpenses([]);
+    if (!orgId) {
       setLoading(false);
       return;
     }
 
-    const constraints = [
-      where('orgId', '==', profile.orgId),
-      orderBy('date', 'desc'),
-    ];
+    const constraints: QueryConstraint[] = [];
 
-    if (projectId && !orgWide) {
-      constraints.unshift(where('projectId', '==', projectId));
+    // Filter by project
+    if (options.projectId) {
+      constraints.push(where('projectId', '==', options.projectId));
     }
 
-    const q = query(collection(db, 'expenses'), ...constraints);
+    // Filter by user (non-managers only see their own by default)
+    if (options.userId) {
+      constraints.push(where('userId', '==', options.userId));
+    } else if (!isManager) {
+      constraints.push(where('userId', '==', currentUserId));
+    }
+
+    // Filter by category
+    if (options.category) {
+      constraints.push(where('category', '==', options.category));
+    }
+
+    // Filter by status
+    if (options.status) {
+      constraints.push(where('status', '==', options.status));
+    }
+
+    // Filter by reimbursable
+    if (options.reimbursableOnly) {
+      constraints.push(where('reimbursable', '==', true));
+    }
+
+    // Filter by billable
+    if (options.billableOnly) {
+      constraints.push(where('billable', '==', true));
+    }
+
+    // Date range filters
+    if (options.startDate) {
+      constraints.push(where('date', '>=', options.startDate));
+    }
+    if (options.endDate) {
+      constraints.push(where('date', '<=', options.endDate));
+    }
+
+    // Order by date descending
+    constraints.push(orderBy('date', 'desc'));
+    constraints.push(orderBy('createdAt', 'desc'));
+
+    const q = query(
+      collection(db, `organizations/${orgId}/expenses`),
+      ...constraints
+    );
 
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
-        const result: Expense[] = [];
-        snapshot.forEach((docSnap) => {
-          result.push(fromFirestore(docSnap.id, docSnap.data()));
-        });
-        setExpenses(result);
+        const expensesData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...convertTimestamps(doc.data()),
+        })) as Expense[];
+
+        setExpenses(expensesData);
         setLoading(false);
         setError(null);
       },
       (err) => {
-        console.error('Expenses listener error:', err);
-        if (err.message?.includes('requires an index')) {
-          setError('Database index required. Please deploy indexes with: firebase deploy --only firestore:indexes');
-        } else if (err.message?.includes('permission-denied')) {
-          setError('Permission denied. Please check Firestore security rules.');
-        } else {
-          setError(err.message || 'Failed to load expenses');
-        }
-        setExpenses([]);
+        console.error('Error fetching expenses:', err);
+        setError(err.message);
         setLoading(false);
       }
     );
 
     return () => unsubscribe();
-  }, [profile?.orgId, projectId, orgWide]);
+  }, [orgId, currentUserId, isManager, options.projectId, options.userId, options.category, options.status, options.startDate, options.endDate, options.reimbursableOnly, options.billableOnly, refreshTrigger]);
 
-  const addExpense = useCallback(
-    async (input: NewExpenseInput): Promise<string> => {
-      if (!profile?.orgId || !user) throw new Error('No organization');
+  // Create expense
+  const createExpense = useCallback(async (
+    expenseData: Omit<Expense, 'id' | 'orgId' | 'userId' | 'userName' | 'createdAt' | 'updatedAt'>
+  ): Promise<string> => {
+    if (!orgId || !currentUserId) {
+      throw new Error('Not authenticated');
+    }
 
-      const expenseData = toFirestore({
-        userId: user.uid,
-        orgId: profile.orgId,
-        projectId: input.projectId,
-        category: input.category,
-        amount: input.amount,
-        description: input.description,
-        vendor: input.vendor,
-        receiptURL: input.receiptURL,
-        date: input.date,
-        status: 'draft' as ExpenseStatus,
-        notes: input.notes,
-        createdAt: new Date(),
-      });
+    const now = new Date();
+    const docRef = await addDoc(
+      collection(db, `organizations/${orgId}/expenses`),
+      {
+        ...expenseData,
+        orgId,
+        userId: currentUserId,
+        userName: currentUserName,
+        receipts: expenseData.receipts?.map(r => ({
+          ...r,
+          uploadedAt: Timestamp.fromDate(new Date(r.uploadedAt)),
+        })) || [],
+        createdAt: Timestamp.fromDate(now),
+        updatedAt: Timestamp.fromDate(now),
+      }
+    );
 
-      const docRef = await addDoc(collection(db, 'expenses'), expenseData);
-      return docRef.id;
-    },
-    [profile, user]
-  );
+    return docRef.id;
+  }, [orgId, currentUserId, currentUserName]);
 
-  const updateExpense = useCallback(async (id: string, updates: Partial<Expense>) => {
-    const data = toFirestore(updates);
-    await updateDoc(doc(db, 'expenses', id), data);
-  }, []);
+  // Update expense
+  const updateExpense = useCallback(async (expenseId: string, updates: Partial<Expense>): Promise<void> => {
+    if (!orgId) throw new Error('Not authenticated');
 
-  const deleteExpense = useCallback(async (id: string) => {
-    await deleteDoc(doc(db, 'expenses', id));
-  }, []);
+    const now = new Date();
+    const updateData: Record<string, unknown> = {
+      ...updates,
+      updatedAt: Timestamp.fromDate(now),
+    };
 
-  const submitExpense = useCallback(async (id: string) => {
-    await updateDoc(doc(db, 'expenses', id), {
-      status: 'submitted',
-      submittedAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
+    // Convert dates
+    if (updates.approvedAt) {
+      updateData.approvedAt = Timestamp.fromDate(updates.approvedAt);
+    }
+    if (updates.reimbursedAt) {
+      updateData.reimbursedAt = Timestamp.fromDate(updates.reimbursedAt);
+    }
+
+    // Convert receipts
+    if (updates.receipts) {
+      updateData.receipts = updates.receipts.map(r => ({
+        ...r,
+        uploadedAt: Timestamp.fromDate(new Date(r.uploadedAt)),
+      }));
+    }
+
+    await updateDoc(doc(db, `organizations/${orgId}/expenses/${expenseId}`), updateData);
+  }, [orgId]);
+
+  // Delete expense
+  const deleteExpense = useCallback(async (expenseId: string): Promise<void> => {
+    if (!orgId) throw new Error('Not authenticated');
+    await deleteDoc(doc(db, `organizations/${orgId}/expenses/${expenseId}`));
+  }, [orgId]);
+
+  // Add receipt to expense
+  const addReceipt = useCallback(async (
+    expenseId: string,
+    receipt: Omit<ExpenseReceipt, 'id' | 'uploadedAt'>
+  ): Promise<void> => {
+    if (!orgId) throw new Error('Not authenticated');
+
+    const expense = expenses.find(e => e.id === expenseId);
+    if (!expense) throw new Error('Expense not found');
+
+    const newReceipt: ExpenseReceipt = {
+      ...receipt,
+      id: `receipt_${Date.now()}`,
+      uploadedAt: new Date(),
+    };
+
+    await updateExpense(expenseId, {
+      receipts: [...expense.receipts, newReceipt],
     });
-  }, []);
+  }, [orgId, expenses, updateExpense]);
 
-  const approveExpense = useCallback(async (id: string) => {
-    if (!user) return;
-    await updateDoc(doc(db, 'expenses', id), {
+  // Remove receipt from expense
+  const removeReceipt = useCallback(async (expenseId: string, receiptId: string): Promise<void> => {
+    if (!orgId) throw new Error('Not authenticated');
+
+    const expense = expenses.find(e => e.id === expenseId);
+    if (!expense) throw new Error('Expense not found');
+
+    await updateExpense(expenseId, {
+      receipts: expense.receipts.filter(r => r.id !== receiptId),
+    });
+  }, [orgId, expenses, updateExpense]);
+
+  // Approve expense
+  const approveExpense = useCallback(async (expenseId: string): Promise<void> => {
+    if (!orgId || !currentUserId) throw new Error('Not authenticated');
+    if (!isManager) throw new Error('Only managers can approve expenses');
+
+    await updateExpense(expenseId, {
       status: 'approved',
-      approvedBy: user.uid,
-      approvedAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
+      approvedBy: currentUserId,
+      approvedAt: new Date(),
     });
-  }, [user]);
+  }, [orgId, currentUserId, isManager, updateExpense]);
 
-  const rejectExpense = useCallback(async (id: string) => {
-    if (!user) return;
-    await updateDoc(doc(db, 'expenses', id), {
+  // Reject expense
+  const rejectExpense = useCallback(async (expenseId: string, reason: string): Promise<void> => {
+    if (!orgId || !currentUserId) throw new Error('Not authenticated');
+    if (!isManager) throw new Error('Only managers can reject expenses');
+
+    await updateExpense(expenseId, {
       status: 'rejected',
-      approvedBy: user.uid,
-      approvedAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
+      approvedBy: currentUserId,
+      rejectionReason: reason,
     });
-  }, [user]);
+  }, [orgId, currentUserId, isManager, updateExpense]);
 
-  const markReimbursed = useCallback(async (id: string) => {
-    await updateDoc(doc(db, 'expenses', id), {
+  // Mark as reimbursed
+  const markReimbursed = useCallback(async (expenseId: string, method?: string): Promise<void> => {
+    if (!orgId) throw new Error('Not authenticated');
+    if (!isManager) throw new Error('Only managers can mark as reimbursed');
+
+    await updateExpense(expenseId, {
       status: 'reimbursed',
-      reimbursedAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
+      reimbursedAt: new Date(),
+      reimbursementMethod: method,
     });
+  }, [orgId, isManager, updateExpense]);
+
+  // Get summary
+  const getSummary = useCallback((startDate: string, endDate: string, projectId?: string): ExpenseSummary => {
+    const filteredExpenses = expenses.filter(exp => {
+      if (exp.date < startDate || exp.date > endDate) return false;
+      if (projectId && exp.projectId !== projectId) return false;
+      return true;
+    });
+
+    // Calculate totals
+    const totalExpenses = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
+    const totalReimbursable = filteredExpenses
+      .filter(e => e.reimbursable)
+      .reduce((sum, e) => sum + e.amount, 0);
+    const totalBillable = filteredExpenses
+      .filter(e => e.billable)
+      .reduce((sum, e) => sum + e.amount, 0);
+    const totalPending = filteredExpenses
+      .filter(e => e.status === 'pending')
+      .reduce((sum, e) => sum + e.amount, 0);
+    const totalApproved = filteredExpenses
+      .filter(e => e.status === 'approved')
+      .reduce((sum, e) => sum + e.amount, 0);
+    const totalReimbursed = filteredExpenses
+      .filter(e => e.status === 'reimbursed')
+      .reduce((sum, e) => sum + e.amount, 0);
+
+    // Group by category
+    const byCategory = {} as Record<ExpenseCategory, number>;
+    for (const exp of filteredExpenses) {
+      byCategory[exp.category] = (byCategory[exp.category] || 0) + exp.amount;
+    }
+
+    // Group by project
+    const projectMap = new Map<string, { projectId: string; projectName: string; amount: number }>();
+    for (const exp of filteredExpenses) {
+      if (exp.projectId) {
+        const existing = projectMap.get(exp.projectId);
+        if (existing) {
+          existing.amount += exp.amount;
+        } else {
+          projectMap.set(exp.projectId, {
+            projectId: exp.projectId,
+            projectName: exp.projectName || 'Unknown',
+            amount: exp.amount,
+          });
+        }
+      }
+    }
+    const byProject = Array.from(projectMap.values()).sort((a, b) => b.amount - a.amount);
+
+    // Group by user
+    const userMap = new Map<string, { userId: string; userName: string; amount: number }>();
+    for (const exp of filteredExpenses) {
+      const existing = userMap.get(exp.userId);
+      if (existing) {
+        existing.amount += exp.amount;
+      } else {
+        userMap.set(exp.userId, {
+          userId: exp.userId,
+          userName: exp.userName,
+          amount: exp.amount,
+        });
+      }
+    }
+    const byUser = Array.from(userMap.values()).sort((a, b) => b.amount - a.amount);
+
+    return {
+      period: 'custom',
+      startDate,
+      endDate,
+      totalExpenses,
+      totalReimbursable,
+      totalBillable,
+      totalPending,
+      totalApproved,
+      totalReimbursed,
+      byCategory,
+      byProject,
+      byUser,
+      count: filteredExpenses.length,
+    };
+  }, [expenses]);
+
+  // Refresh function
+  const refresh = useCallback(() => {
+    setRefreshTrigger(prev => prev + 1);
   }, []);
 
   return {
-    expenses, loading, error,
-    addExpense, updateExpense, deleteExpense,
-    submitExpense, approveExpense, rejectExpense, markReimbursed,
+    expenses,
+    loading,
+    error,
+    createExpense,
+    updateExpense,
+    deleteExpense,
+    addReceipt,
+    removeReceipt,
+    approveExpense,
+    rejectExpense,
+    markReimbursed,
+    getSummary,
+    refresh,
   };
+}
+
+// Hook for project-specific expenses
+export function useProjectExpenses(projectId: string, options: Omit<UseExpensesOptions, 'projectId'> = {}) {
+  return useExpenses({ ...options, projectId });
+}
+
+// Hook for current user's expenses
+export function useMyExpenses(options: Omit<UseExpensesOptions, 'userId'> = {}) {
+  const { profile } = useAuth();
+  return useExpenses({ ...options, userId: profile?.uid });
+}
+
+// Hook for pending expenses (for managers)
+export function usePendingExpenses() {
+  return useExpenses({ status: 'pending' });
 }

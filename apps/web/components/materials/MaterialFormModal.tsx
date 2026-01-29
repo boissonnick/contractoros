@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import BaseModal from '@/components/ui/BaseModal';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import CategorySelect from './CategorySelect';
 import {
   MaterialItem,
   MaterialCategory,
@@ -24,6 +25,7 @@ const materialSchema = z.object({
   sku: z.string().optional(),
   barcode: z.string().optional(),
   category: z.string().min(1, 'Category is required'),
+  customCategory: z.string().optional(),
   unit: z.string().min(1, 'Unit is required'),
   quantityOnHand: z.number().min(0, 'Must be 0 or greater'),
   quantityReserved: z.number().min(0, 'Must be 0 or greater'),
@@ -63,6 +65,7 @@ export default function MaterialFormModal({
     reset,
     watch,
     setValue,
+    control,
     formState: { errors },
   } = useForm<MaterialFormData>({
     resolver: zodResolver(materialSchema),
@@ -71,7 +74,8 @@ export default function MaterialFormModal({
       description: '',
       sku: '',
       barcode: '',
-      category: 'general',
+      category: '',
+      customCategory: '',
       unit: 'each',
       quantityOnHand: 0,
       quantityReserved: 0,
@@ -95,6 +99,7 @@ export default function MaterialFormModal({
         sku: material.sku || '',
         barcode: material.barcode || '',
         category: material.category,
+        customCategory: (material as MaterialItem & { customCategory?: string }).customCategory || '',
         unit: material.unit,
         quantityOnHand: material.quantityOnHand,
         quantityReserved: material.quantityReserved,
@@ -114,7 +119,8 @@ export default function MaterialFormModal({
         description: '',
         sku: '',
         barcode: '',
-        category: 'general',
+        category: '',
+        customCategory: '',
         unit: 'each',
         quantityOnHand: 0,
         quantityReserved: 0,
@@ -226,24 +232,19 @@ export default function MaterialFormModal({
               placeholder="e.g., 012345678901"
             />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Category <span className="text-red-500">*</span>
-              </label>
-              <select
-                {...register('category')}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-brand-primary focus:outline-none focus:ring-1 focus:ring-brand-primary"
-              >
-                {MATERIAL_CATEGORIES.map((cat) => (
-                  <option key={cat.value} value={cat.value}>
-                    {cat.label}
-                  </option>
-                ))}
-              </select>
-              {errors.category && (
-                <p className="mt-1 text-sm text-red-600">{errors.category.message}</p>
+            <Controller
+              name="category"
+              control={control}
+              render={({ field }) => (
+                <CategorySelect
+                  value={field.value}
+                  onChange={(value) => field.onChange(value)}
+                  customCategory={watch('customCategory')}
+                  onCustomCategoryChange={(value) => setValue('customCategory', value)}
+                  error={errors.category?.message}
+                />
               )}
-            </div>
+            />
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">

@@ -34,7 +34,7 @@
 ┌─────────────────────────────────────────────────────────────────┐
 │                     EXTERNAL SERVICES                            │
 ├─────────────────────────────────────────────────────────────────┤
-│  ├── Resend - Transactional emails                              │
+│  ├── Mailgun - Transactional emails                             │
 │  ├── Google Maps - Address autocomplete, maps                   │
 │  ├── Stripe (planned) - Payment processing                      │
 │  └── Twilio (planned) - SMS messaging                           │

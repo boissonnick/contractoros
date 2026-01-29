@@ -35,9 +35,17 @@ const categoryLabels: Record<ExpenseCategory, string> = {
   materials: 'Materials',
   tools: 'Tools',
   equipment_rental: 'Equipment Rental',
+  fuel: 'Fuel',
+  vehicle: 'Vehicle',
+  subcontractor: 'Subcontractor',
   permits: 'Permits',
+  labor: 'Labor',
+  office: 'Office',
   travel: 'Travel',
   meals: 'Meals',
+  insurance: 'Insurance',
+  utilities: 'Utilities',
+  marketing: 'Marketing',
   other: 'Other',
 };
 
@@ -361,8 +369,9 @@ export default function ProjectFinancesPage() {
                   <Badge className={cn(
                     'text-xs mt-0.5',
                     expense.status === 'approved' ? 'bg-green-100 text-green-700' :
-                    expense.status === 'submitted' ? 'bg-blue-100 text-blue-700' :
+                    expense.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
                     expense.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                    expense.status === 'reimbursed' ? 'bg-blue-100 text-blue-700' :
                     'bg-gray-100 text-gray-600'
                   )}>
                     {expense.status}

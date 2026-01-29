@@ -1,6 +1,7 @@
 /**
  * Estimate PDF Template
  * Generates a PDF document for estimates using @react-pdf/renderer
+ * Supports customizable templates for branded PDF generation
  */
 
 import React from 'react';
@@ -13,10 +14,10 @@ import {
   Image,
   Font,
 } from '@react-pdf/renderer';
-import { Estimate, Organization } from '@/types';
+import { Estimate, Organization, QuotePdfTemplate, createDefaultQuotePdfTemplate } from '@/types';
 import { format } from 'date-fns';
 
-// Register default fonts
+// Register fonts
 Font.register({
   family: 'Inter',
   fonts: [
@@ -26,230 +27,319 @@ Font.register({
   ],
 });
 
-const styles = StyleSheet.create({
-  page: {
-    padding: 40,
-    fontFamily: 'Inter',
-    fontSize: 10,
-    color: '#1f2937',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 30,
-    borderBottomWidth: 2,
-    borderBottomColor: '#2563eb',
-    paddingBottom: 20,
-  },
-  logo: {
-    width: 120,
-    height: 40,
-    objectFit: 'contain',
-  },
-  companyInfo: {
-    alignItems: 'flex-end',
-  },
-  companyName: {
-    fontSize: 18,
-    fontWeight: 700,
-    color: '#1f2937',
-  },
-  companyDetail: {
-    fontSize: 9,
-    color: '#6b7280',
-    marginTop: 2,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 700,
-    color: '#1f2937',
-    marginBottom: 5,
-  },
-  subtitle: {
-    fontSize: 12,
-    color: '#6b7280',
-    marginBottom: 20,
-  },
-  row: {
-    flexDirection: 'row',
-    marginBottom: 20,
-  },
-  col: {
-    flex: 1,
-  },
-  sectionTitle: {
-    fontSize: 11,
-    fontWeight: 600,
-    color: '#2563eb',
-    marginBottom: 8,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  infoLabel: {
-    fontSize: 9,
-    color: '#6b7280',
-    marginBottom: 2,
-  },
-  infoValue: {
-    fontSize: 10,
-    color: '#1f2937',
-    marginBottom: 6,
-  },
-  table: {
-    marginTop: 20,
-    marginBottom: 20,
-  },
-  tableHeader: {
-    flexDirection: 'row',
-    backgroundColor: '#f3f4f6',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-  },
-  tableHeaderCell: {
-    fontSize: 9,
-    fontWeight: 600,
-    color: '#374151',
-    textTransform: 'uppercase',
-  },
-  tableRow: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-  },
-  tableRowAlt: {
-    backgroundColor: '#fafafa',
-  },
-  tableCell: {
-    fontSize: 9,
-    color: '#1f2937',
-  },
-  tableCellDesc: {
-    flex: 3,
-  },
-  tableCellQty: {
-    flex: 1,
-    textAlign: 'center',
-  },
-  tableCellUnit: {
-    flex: 1,
-    textAlign: 'center',
-  },
-  tableCellPrice: {
-    flex: 1,
-    textAlign: 'right',
-  },
-  tableCellTotal: {
-    flex: 1,
-    textAlign: 'right',
-  },
-  totalsSection: {
-    marginTop: 20,
-    marginLeft: 'auto',
-    width: 250,
-  },
-  totalRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 5,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
-  },
-  totalLabel: {
-    fontSize: 10,
-    color: '#6b7280',
-  },
-  totalValue: {
-    fontSize: 10,
-    color: '#1f2937',
-  },
-  grandTotalRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-    borderTopWidth: 2,
-    borderTopColor: '#2563eb',
-    marginTop: 5,
-  },
-  grandTotalLabel: {
-    fontSize: 14,
-    fontWeight: 700,
-    color: '#1f2937',
-  },
-  grandTotalValue: {
-    fontSize: 14,
-    fontWeight: 700,
-    color: '#2563eb',
-  },
-  section: {
-    marginTop: 30,
-  },
-  paragraph: {
-    fontSize: 10,
-    color: '#4b5563',
-    lineHeight: 1.5,
-    marginBottom: 10,
-  },
-  signatureSection: {
-    marginTop: 40,
-    paddingTop: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
-  },
-  signatureBox: {
-    marginTop: 15,
-    flexDirection: 'row',
-  },
-  signatureField: {
-    flex: 1,
-    marginRight: 30,
-  },
-  signatureLine: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#1f2937',
-    marginBottom: 5,
-    height: 40,
-  },
-  signatureLabel: {
-    fontSize: 9,
-    color: '#6b7280',
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 30,
-    left: 40,
-    right: 40,
-    textAlign: 'center',
-    fontSize: 8,
-    color: '#9ca3af',
-    borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
-    paddingTop: 10,
-  },
-  badge: {
-    fontSize: 8,
-    backgroundColor: '#fef3c7',
-    color: '#92400e',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 4,
-    alignSelf: 'flex-start',
-  },
-  validUntil: {
-    fontSize: 10,
-    color: '#dc2626',
-    fontWeight: 600,
-    marginTop: 10,
-  },
+Font.register({
+  family: 'Roboto',
+  fonts: [
+    { src: 'https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Mu4mxP.woff2', fontWeight: 400 },
+    { src: 'https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmEU9fBBc9.woff2', fontWeight: 600 },
+    { src: 'https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmWUlfBBc9.woff2', fontWeight: 700 },
+  ],
 });
+
+Font.register({
+  family: 'Open Sans',
+  fonts: [
+    { src: 'https://fonts.gstatic.com/s/opensans/v36/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0B4gaVI.woff2', fontWeight: 400 },
+    { src: 'https://fonts.gstatic.com/s/opensans/v36/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsg-1x4gaVI.woff2', fontWeight: 600 },
+    { src: 'https://fonts.gstatic.com/s/opensans/v36/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsgH1x4gaVI.woff2', fontWeight: 700 },
+  ],
+});
+
+Font.register({
+  family: 'Lato',
+  fonts: [
+    { src: 'https://fonts.gstatic.com/s/lato/v24/S6uyw4BMUTPHjx4wWw.woff2', fontWeight: 400 },
+    { src: 'https://fonts.gstatic.com/s/lato/v24/S6u9w4BMUTPHh6UVSwiPHA.woff2', fontWeight: 600 },
+    { src: 'https://fonts.gstatic.com/s/lato/v24/S6u9w4BMUTPHh6UVSwaPHA.woff2', fontWeight: 700 },
+  ],
+});
+
+Font.register({
+  family: 'Poppins',
+  fonts: [
+    { src: 'https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJfecg.woff2', fontWeight: 400 },
+    { src: 'https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLEj6Z1xlFQ.woff2', fontWeight: 600 },
+    { src: 'https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLCz7Z1xlFQ.woff2', fontWeight: 700 },
+  ],
+});
+
+// Font mapping
+const fontMap: Record<string, string> = {
+  inter: 'Inter',
+  roboto: 'Roboto',
+  'open-sans': 'Open Sans',
+  lato: 'Lato',
+  poppins: 'Poppins',
+};
+
+// Create dynamic styles based on template
+const createStyles = (template: QuotePdfTemplate) => {
+  const fontFamily = fontMap[template.font] || 'Inter';
+
+  return StyleSheet.create({
+    page: {
+      padding: 40,
+      fontFamily,
+      fontSize: 10,
+      color: template.textColor,
+      backgroundColor: template.backgroundColor,
+    },
+    // Header styles based on headerStyle
+    header: {
+      flexDirection: template.headerStyle === 'logo-right' ? 'row-reverse' : 'row',
+      justifyContent: template.headerStyle === 'centered' ? 'center' : 'space-between',
+      alignItems: template.headerStyle === 'centered' ? 'center' : 'flex-start',
+      marginBottom: 30,
+      borderBottomWidth: template.layout === 'minimal' ? 0 : 2,
+      borderBottomColor: template.primaryColor,
+      paddingBottom: 20,
+    },
+    headerCentered: {
+      flexDirection: 'column',
+      alignItems: 'center',
+      marginBottom: 30,
+      borderBottomWidth: template.layout === 'minimal' ? 0 : 2,
+      borderBottomColor: template.primaryColor,
+      paddingBottom: 20,
+    },
+    headerBanner: {
+      backgroundColor: template.primaryColor,
+      padding: 20,
+      marginHorizontal: -40,
+      marginTop: -40,
+      marginBottom: 30,
+    },
+    logo: {
+      width: template.header.logoSize === 'small' ? 80 : template.header.logoSize === 'large' ? 160 : 120,
+      height: template.header.logoSize === 'small' ? 27 : template.header.logoSize === 'large' ? 54 : 40,
+      objectFit: 'contain',
+    },
+    companyInfo: {
+      alignItems: template.headerStyle === 'logo-right' ? 'flex-start' : 'flex-end',
+    },
+    companyInfoCentered: {
+      alignItems: 'center',
+      marginTop: 10,
+    },
+    companyName: {
+      fontSize: 18,
+      fontWeight: 700,
+      color: template.textColor,
+    },
+    companyNameBanner: {
+      fontSize: 20,
+      fontWeight: 700,
+      color: '#ffffff',
+    },
+    companyDetail: {
+      fontSize: 9,
+      color: '#6b7280',
+      marginTop: 2,
+    },
+    companyDetailBanner: {
+      fontSize: 9,
+      color: 'rgba(255,255,255,0.9)',
+      marginTop: 2,
+    },
+    tagline: {
+      fontSize: 10,
+      fontStyle: 'italic',
+      color: '#6b7280',
+      marginTop: 5,
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: 700,
+      color: template.textColor,
+      marginBottom: 5,
+    },
+    subtitle: {
+      fontSize: 12,
+      color: '#6b7280',
+      marginBottom: 20,
+    },
+    row: {
+      flexDirection: 'row',
+      marginBottom: 20,
+    },
+    col: {
+      flex: 1,
+    },
+    sectionTitle: {
+      fontSize: 11,
+      fontWeight: 600,
+      color: template.primaryColor,
+      marginBottom: 8,
+      textTransform: template.layout === 'professional' ? 'uppercase' : 'none',
+      letterSpacing: template.layout === 'professional' ? 0.5 : 0,
+    },
+    infoLabel: {
+      fontSize: 9,
+      color: '#6b7280',
+      marginBottom: 2,
+    },
+    infoValue: {
+      fontSize: 10,
+      color: template.textColor,
+      marginBottom: 6,
+    },
+    table: {
+      marginTop: 20,
+      marginBottom: 20,
+    },
+    tableHeader: {
+      flexDirection: 'row',
+      backgroundColor: template.tableHeaderBg,
+      borderBottomWidth: 1,
+      borderBottomColor: '#e5e7eb',
+      paddingVertical: 8,
+      paddingHorizontal: 10,
+    },
+    tableHeaderCell: {
+      fontSize: 9,
+      fontWeight: 600,
+      color: '#374151',
+      textTransform: 'uppercase',
+    },
+    tableRow: {
+      flexDirection: 'row',
+      borderBottomWidth: 1,
+      borderBottomColor: '#f3f4f6',
+      paddingVertical: 10,
+      paddingHorizontal: 10,
+    },
+    tableRowAlt: {
+      backgroundColor: template.tableAltRowBg,
+    },
+    tableCell: {
+      fontSize: 9,
+      color: template.textColor,
+    },
+    tableCellDesc: {
+      flex: 3,
+    },
+    tableCellQty: {
+      flex: 1,
+      textAlign: 'center',
+    },
+    tableCellUnit: {
+      flex: 1,
+      textAlign: 'center',
+    },
+    tableCellPrice: {
+      flex: 1,
+      textAlign: 'right',
+    },
+    tableCellTotal: {
+      flex: 1,
+      textAlign: 'right',
+    },
+    totalsSection: {
+      marginTop: 20,
+      marginLeft: 'auto',
+      width: 250,
+    },
+    totalRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      paddingVertical: 5,
+      borderBottomWidth: 1,
+      borderBottomColor: '#f3f4f6',
+    },
+    totalLabel: {
+      fontSize: 10,
+      color: '#6b7280',
+    },
+    totalValue: {
+      fontSize: 10,
+      color: template.textColor,
+    },
+    grandTotalRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      paddingVertical: 10,
+      borderTopWidth: 2,
+      borderTopColor: template.primaryColor,
+      marginTop: 5,
+    },
+    grandTotalLabel: {
+      fontSize: 14,
+      fontWeight: 700,
+      color: template.textColor,
+    },
+    grandTotalValue: {
+      fontSize: 14,
+      fontWeight: 700,
+      color: template.primaryColor,
+    },
+    section: {
+      marginTop: 30,
+    },
+    paragraph: {
+      fontSize: 10,
+      color: '#4b5563',
+      lineHeight: 1.5,
+      marginBottom: 10,
+    },
+    signatureSection: {
+      marginTop: 40,
+      paddingTop: 20,
+      borderTopWidth: 1,
+      borderTopColor: '#e5e7eb',
+    },
+    signatureBox: {
+      marginTop: 15,
+      flexDirection: 'row',
+    },
+    signatureField: {
+      flex: 1,
+      marginRight: 30,
+    },
+    signatureLine: {
+      borderBottomWidth: 1,
+      borderBottomColor: template.textColor,
+      marginBottom: 5,
+      height: 40,
+    },
+    signatureLabel: {
+      fontSize: 9,
+      color: '#6b7280',
+    },
+    footer: {
+      position: 'absolute',
+      bottom: 30,
+      left: 40,
+      right: 40,
+      textAlign: 'center',
+      fontSize: 8,
+      color: '#9ca3af',
+      borderTopWidth: template.layout === 'minimal' ? 0 : 1,
+      borderTopColor: '#e5e7eb',
+      paddingTop: 10,
+    },
+    badge: {
+      fontSize: 8,
+      backgroundColor: '#fef3c7',
+      color: '#92400e',
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 4,
+      alignSelf: 'flex-start',
+    },
+    validUntil: {
+      fontSize: 10,
+      color: '#dc2626',
+      fontWeight: 600,
+      marginTop: 10,
+    },
+  });
+};
 
 interface EstimatePdfProps {
   estimate: Estimate;
   organization: Organization;
   includeSignatureFields?: boolean;
+  template?: QuotePdfTemplate;
 }
 
 function formatCurrency(amount: number): string {
@@ -265,38 +355,145 @@ function formatDate(date: Date | string | undefined): string {
   return format(d, 'MMMM d, yyyy');
 }
 
-export default function EstimatePdf({
-  estimate,
+// Header component for different styles
+function PdfHeader({
   organization,
-  includeSignatureFields = true,
-}: EstimatePdfProps) {
-  return (
-    <Document>
-      <Page size="LETTER" style={styles.page}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View>
-            {organization.logoURL ? (
-              <Image src={organization.logoURL} style={styles.logo} />
-            ) : (
-              <Text style={styles.companyName}>{organization.name}</Text>
+  template,
+  styles,
+}: {
+  organization: Organization;
+  template: QuotePdfTemplate;
+  styles: ReturnType<typeof createStyles>;
+}) {
+  const { header } = template;
+
+  // Full-width banner style
+  if (template.headerStyle === 'full-width-banner') {
+    return (
+      <View style={styles.headerBanner}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          {header.showLogo && organization.logoURL ? (
+            <Image src={organization.logoURL} style={styles.logo} />
+          ) : (
+            header.showCompanyName && (
+              <Text style={styles.companyNameBanner}>{organization.name}</Text>
+            )
+          )}
+          <View style={{ alignItems: 'flex-end' }}>
+            {header.showLogo && organization.logoURL && header.showCompanyName && (
+              <Text style={styles.companyNameBanner}>{organization.name}</Text>
+            )}
+            {header.showAddress && organization.address && (
+              <Text style={styles.companyDetailBanner}>{organization.address}</Text>
+            )}
+            {header.showPhone && organization.phone && (
+              <Text style={styles.companyDetailBanner}>{organization.phone}</Text>
+            )}
+            {header.showEmail && organization.email && (
+              <Text style={styles.companyDetailBanner}>{organization.email}</Text>
             )}
           </View>
-          <View style={styles.companyInfo}>
-            {organization.logoURL && (
-              <Text style={styles.companyName}>{organization.name}</Text>
-            )}
-            {organization.address && (
-              <Text style={styles.companyDetail}>{organization.address}</Text>
-            )}
-            {organization.phone && (
+        </View>
+        {header.customTagline && (
+          <Text style={[styles.tagline, { color: 'rgba(255,255,255,0.8)', marginTop: 8 }]}>
+            {header.customTagline}
+          </Text>
+        )}
+      </View>
+    );
+  }
+
+  // Centered style
+  if (template.headerStyle === 'centered') {
+    return (
+      <View style={styles.headerCentered}>
+        {header.showLogo && organization.logoURL && (
+          <Image src={organization.logoURL} style={styles.logo} />
+        )}
+        <View style={styles.companyInfoCentered}>
+          {header.showCompanyName && (
+            <Text style={styles.companyName}>{organization.name}</Text>
+          )}
+          {header.customTagline && (
+            <Text style={styles.tagline}>{header.customTagline}</Text>
+          )}
+          {header.showAddress && organization.address && (
+            <Text style={styles.companyDetail}>{organization.address}</Text>
+          )}
+          <View style={{ flexDirection: 'row', gap: 10, marginTop: 2 }}>
+            {header.showPhone && organization.phone && (
               <Text style={styles.companyDetail}>{organization.phone}</Text>
             )}
-            {organization.email && (
+            {header.showEmail && organization.email && (
               <Text style={styles.companyDetail}>{organization.email}</Text>
             )}
           </View>
         </View>
+      </View>
+    );
+  }
+
+  // Default: logo-left or logo-right
+  return (
+    <View style={styles.header}>
+      <View>
+        {header.showLogo && organization.logoURL ? (
+          <Image src={organization.logoURL} style={styles.logo} />
+        ) : (
+          header.showCompanyName && (
+            <Text style={styles.companyName}>{organization.name}</Text>
+          )
+        )}
+      </View>
+      <View style={styles.companyInfo}>
+        {header.showLogo && organization.logoURL && header.showCompanyName && (
+          <Text style={styles.companyName}>{organization.name}</Text>
+        )}
+        {header.customTagline && (
+          <Text style={styles.tagline}>{header.customTagline}</Text>
+        )}
+        {header.showAddress && organization.address && (
+          <Text style={styles.companyDetail}>{organization.address}</Text>
+        )}
+        {header.showPhone && organization.phone && (
+          <Text style={styles.companyDetail}>{organization.phone}</Text>
+        )}
+        {header.showEmail && organization.email && (
+          <Text style={styles.companyDetail}>{organization.email}</Text>
+        )}
+      </View>
+    </View>
+  );
+}
+
+export default function EstimatePdf({
+  estimate,
+  organization,
+  includeSignatureFields = true,
+  template,
+}: EstimatePdfProps) {
+  // Use provided template or create default
+  const effectiveTemplate = template || (createDefaultQuotePdfTemplate(organization.id) as QuotePdfTemplate);
+  const styles = createStyles(effectiveTemplate);
+  const { tableSettings, sections } = effectiveTemplate;
+
+  // Determine which content to show
+  const scopeOfWork = estimate.scopeOfWork || effectiveTemplate.defaultContent.scopeOfWork;
+  const exclusions = estimate.exclusions || effectiveTemplate.defaultContent.exclusions;
+  const paymentTerms = estimate.paymentTerms || effectiveTemplate.defaultContent.paymentTerms;
+  const termsAndConditions = estimate.termsAndConditions || effectiveTemplate.defaultContent.termsAndConditions;
+  const acceptanceText = effectiveTemplate.defaultContent.acceptanceText ||
+    `By signing below, I accept this estimate and authorize ${organization.name} to proceed with the work as described above.`;
+
+  return (
+    <Document>
+      <Page size="LETTER" style={styles.page}>
+        {/* Header */}
+        <PdfHeader
+          organization={organization}
+          template={effectiveTemplate}
+          styles={styles}
+        />
 
         {/* Title */}
         <Text style={styles.title}>ESTIMATE</Text>
@@ -339,10 +536,14 @@ export default function EstimatePdf({
             <Text style={styles.sectionTitle}>Estimate Details</Text>
             <Text style={styles.infoLabel}>Date</Text>
             <Text style={styles.infoValue}>{formatDate(estimate.createdAt)}</Text>
-            <Text style={styles.infoLabel}>Valid Until</Text>
-            <Text style={[styles.infoValue, { color: '#dc2626' }]}>
-              {formatDate(estimate.validUntil)}
-            </Text>
+            {sections.showValidUntil && (
+              <>
+                <Text style={styles.infoLabel}>Valid Until</Text>
+                <Text style={[styles.infoValue, { color: '#dc2626' }]}>
+                  {formatDate(estimate.validUntil)}
+                </Text>
+              </>
+            )}
             {estimate.revisionNumber > 1 && (
               <>
                 <Text style={styles.infoLabel}>Revision</Text>
@@ -356,9 +557,15 @@ export default function EstimatePdf({
         <View style={styles.table}>
           <View style={styles.tableHeader}>
             <Text style={[styles.tableHeaderCell, styles.tableCellDesc]}>Description</Text>
-            <Text style={[styles.tableHeaderCell, styles.tableCellQty]}>Qty</Text>
-            <Text style={[styles.tableHeaderCell, styles.tableCellUnit]}>Unit</Text>
-            <Text style={[styles.tableHeaderCell, styles.tableCellPrice]}>Price</Text>
+            {tableSettings.showQuantity && (
+              <Text style={[styles.tableHeaderCell, styles.tableCellQty]}>Qty</Text>
+            )}
+            {tableSettings.showUnit && (
+              <Text style={[styles.tableHeaderCell, styles.tableCellUnit]}>Unit</Text>
+            )}
+            {tableSettings.showUnitPrice && (
+              <Text style={[styles.tableHeaderCell, styles.tableCellPrice]}>Price</Text>
+            )}
             <Text style={[styles.tableHeaderCell, styles.tableCellTotal]}>Total</Text>
           </View>
           {estimate.lineItems.map((item, index) => (
@@ -368,20 +575,26 @@ export default function EstimatePdf({
             >
               <View style={styles.tableCellDesc}>
                 <Text style={[styles.tableCell, { fontWeight: 600 }]}>{item.name}</Text>
-                {item.description && (
+                {tableSettings.showDescription && item.description && (
                   <Text style={[styles.tableCell, { color: '#6b7280', marginTop: 2 }]}>
                     {item.description}
                   </Text>
                 )}
-                {item.isOptional && (
+                {tableSettings.showOptionalBadge && item.isOptional && (
                   <Text style={[styles.badge, { marginTop: 4 }]}>Optional</Text>
                 )}
               </View>
-              <Text style={[styles.tableCell, styles.tableCellQty]}>{item.quantity}</Text>
-              <Text style={[styles.tableCell, styles.tableCellUnit]}>{item.unit}</Text>
-              <Text style={[styles.tableCell, styles.tableCellPrice]}>
-                {formatCurrency(item.unitCost)}
-              </Text>
+              {tableSettings.showQuantity && (
+                <Text style={[styles.tableCell, styles.tableCellQty]}>{item.quantity}</Text>
+              )}
+              {tableSettings.showUnit && (
+                <Text style={[styles.tableCell, styles.tableCellUnit]}>{item.unit}</Text>
+              )}
+              {tableSettings.showUnitPrice && (
+                <Text style={[styles.tableCell, styles.tableCellPrice]}>
+                  {formatCurrency(item.unitCost)}
+                </Text>
+              )}
               <Text style={[styles.tableCell, styles.tableCellTotal]}>
                 {formatCurrency(item.totalCost)}
               </Text>
@@ -421,7 +634,7 @@ export default function EstimatePdf({
             <Text style={styles.grandTotalLabel}>Total</Text>
             <Text style={styles.grandTotalValue}>{formatCurrency(estimate.total)}</Text>
           </View>
-          {estimate.depositRequired && estimate.depositRequired > 0 && (
+          {sections.showDepositInfo && estimate.depositRequired && estimate.depositRequired > 0 && (
             <View style={[styles.totalRow, { borderBottomWidth: 0, marginTop: 5 }]}>
               <Text style={[styles.totalLabel, { fontWeight: 600 }]}>
                 Deposit Required ({estimate.depositPercent || 0}%)
@@ -434,45 +647,42 @@ export default function EstimatePdf({
         </View>
 
         {/* Scope of Work */}
-        {estimate.scopeOfWork && (
+        {sections.showScopeOfWork && scopeOfWork && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Scope of Work</Text>
-            <Text style={styles.paragraph}>{estimate.scopeOfWork}</Text>
+            <Text style={styles.paragraph}>{scopeOfWork}</Text>
           </View>
         )}
 
         {/* Exclusions */}
-        {estimate.exclusions && (
+        {sections.showExclusions && exclusions && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Exclusions</Text>
-            <Text style={styles.paragraph}>{estimate.exclusions}</Text>
+            <Text style={styles.paragraph}>{exclusions}</Text>
           </View>
         )}
 
         {/* Payment Terms */}
-        {estimate.paymentTerms && (
+        {sections.showPaymentTerms && paymentTerms && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Payment Terms</Text>
-            <Text style={styles.paragraph}>{estimate.paymentTerms}</Text>
+            <Text style={styles.paragraph}>{paymentTerms}</Text>
           </View>
         )}
 
         {/* Terms and Conditions */}
-        {estimate.termsAndConditions && (
+        {sections.showTermsAndConditions && termsAndConditions && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Terms and Conditions</Text>
-            <Text style={styles.paragraph}>{estimate.termsAndConditions}</Text>
+            <Text style={styles.paragraph}>{termsAndConditions}</Text>
           </View>
         )}
 
         {/* Signature Section */}
-        {includeSignatureFields && (
+        {sections.showSignatureBlock && includeSignatureFields && (
           <View style={styles.signatureSection}>
             <Text style={styles.sectionTitle}>Acceptance</Text>
-            <Text style={styles.paragraph}>
-              By signing below, I accept this estimate and authorize {organization.name} to proceed
-              with the work as described above.
-            </Text>
+            <Text style={styles.paragraph}>{acceptanceText}</Text>
             <View style={styles.signatureBox}>
               <View style={styles.signatureField}>
                 <View style={styles.signatureLine} />
@@ -492,12 +702,19 @@ export default function EstimatePdf({
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text>
-            {organization.name} | Estimate #{estimate.number} | Page 1 of 1
-          </Text>
-          <Text style={{ marginTop: 3 }}>
-            This estimate is valid until {formatDate(estimate.validUntil)}
-          </Text>
+          {effectiveTemplate.footer.showEstimateNumber && (
+            <Text>
+              {organization.name} | Estimate #{estimate.number} | Page 1 of 1
+            </Text>
+          )}
+          {effectiveTemplate.footer.showValidUntil && sections.showValidUntil && (
+            <Text style={{ marginTop: 3 }}>
+              This estimate is valid until {formatDate(estimate.validUntil)}
+            </Text>
+          )}
+          {effectiveTemplate.footer.customText && (
+            <Text style={{ marginTop: 3 }}>{effectiveTemplate.footer.customText}</Text>
+          )}
         </View>
       </Page>
     </Document>

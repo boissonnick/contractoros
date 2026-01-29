@@ -20,7 +20,7 @@ import { Button } from '@/components/ui';
 export default function FinancesPage() {
   const router = useRouter();
   const { profile } = useAuth();
-  const { expenses, loading: expensesLoading } = useExpenses({ orgWide: true });
+  const { expenses, loading: expensesLoading } = useExpenses({});
 
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [estimates, setEstimates] = useState<Estimate[]>([]);
@@ -72,7 +72,7 @@ export default function FinancesPage() {
       .filter(e => e.status !== 'rejected')
       .reduce((sum, e) => sum + e.amount, 0);
     const pendingExpenses = expenses
-      .filter(e => e.status === 'submitted')
+      .filter(e => e.status === 'pending')
       .reduce((sum, e) => sum + e.amount, 0);
 
     const estimatePipeline = estimates

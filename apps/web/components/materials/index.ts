@@ -7,6 +7,7 @@ export { default as PurchaseOrderCard } from './PurchaseOrderCard';
 export { default as PurchaseOrderFormModal } from './PurchaseOrderFormModal';
 export { default as SupplierFormModal } from './SupplierFormModal';
 export { default as LowStockAlertCard } from './LowStockAlertCard';
+export { default as CategorySelect, getSuggestedCategories } from './CategorySelect';
 
 export type { MaterialItemCardProps } from './MaterialItemCard';
 export type { MaterialFormModalProps } from './MaterialFormModal';

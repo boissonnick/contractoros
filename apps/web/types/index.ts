@@ -113,6 +113,30 @@ export interface OrgSettings {
 }
 
 // ============================================
+// User Invitation Types
+// ============================================
+
+export type InvitationStatus = 'pending' | 'accepted' | 'expired' | 'revoked';
+
+export interface UserInvitation {
+  id: string;
+  orgId: string;
+  email: string;
+  role: UserRole;
+  status: InvitationStatus;
+  invitedBy: string;        // userId of inviter
+  invitedByName: string;    // Display name of inviter
+  token: string;            // Unique token for invitation link
+  expiresAt: Date;
+  createdAt: Date;
+  acceptedAt?: Date;
+  acceptedBy?: string;      // userId of acceptor (if different from invite email)
+  revokedAt?: Date;
+  revokedBy?: string;
+  message?: string;         // Optional personal message
+}
+
+// ============================================
 // Project Types
 // ============================================
 
@@ -545,30 +569,8 @@ export interface TaskActivity {
 }
 
 // ============================================
-// Time Tracking Types
+// Time Tracking Types (Legacy - preserved for backwards compatibility)
 // ============================================
-
-export interface TimeEntry {
-  id: string;
-  userId: string;
-  projectId: string;
-  taskId?: string;
-  clockIn: Date;
-  clockOut?: Date;
-  breakMinutes?: number;
-  totalMinutes?: number;
-  location?: {
-    lat: number;
-    lng: number;
-    accuracy: number;
-  };
-  notes?: string;
-  status: 'active' | 'completed' | 'edited' | 'disputed';
-  approvedBy?: string;
-  approvedAt?: Date;
-  createdAt: Date;
-  updatedAt?: Date;
-}
 
 export interface WeeklyTimesheet {
   id: string;
@@ -584,6 +586,9 @@ export interface WeeklyTimesheet {
   approvedBy?: string;
   approvedAt?: Date;
 }
+
+// Full TimeEntry and related types are defined in the
+// "Time Tracking Types (FEAT-S13)" section at the end of this file.
 
 export interface Geofence {
   id: string;
@@ -820,38 +825,130 @@ export type ExpenseCategory =
   | 'materials'
   | 'tools'
   | 'equipment_rental'
+  | 'fuel'
+  | 'vehicle'
+  | 'subcontractor'
   | 'permits'
+  | 'labor'
+  | 'office'
   | 'travel'
   | 'meals'
+  | 'insurance'
+  | 'utilities'
+  | 'marketing'
   | 'other';
 
-export type ExpenseStatus =
-  | 'draft'
-  | 'submitted'
-  | 'approved'
-  | 'rejected'
-  | 'reimbursed';
+export type ExpenseStatus = 'pending' | 'approved' | 'rejected' | 'reimbursed';
+
+export type ExpensePaymentMethod = 'cash' | 'credit_card' | 'debit_card' | 'check' | 'company_card' | 'other';
+
+export interface ExpenseReceipt {
+  id: string;
+  url: string;
+  thumbnailUrl?: string;
+  fileName: string;
+  fileSize: number; // bytes
+  mimeType: string;
+  uploadedAt: Date;
+}
 
 export interface Expense {
   id: string;
   orgId: string;
   userId: string;
-  projectId: string;
-  category: ExpenseCategory;
-  amount: number;
+  userName: string;
+
+  // Expense details
   description: string;
-  vendor?: string;
-  receiptURL?: string;
-  date: Date;
+  amount: number;
+  category: ExpenseCategory;
+  date: string; // ISO date string (YYYY-MM-DD)
+
+  // Optional associations
+  projectId?: string;
+  projectName?: string;
+  vendorName?: string;
+  vendorId?: string;
+
+  // Payment info
+  paymentMethod?: ExpensePaymentMethod;
+  reimbursable: boolean;
+  billable: boolean; // Can be billed to client
+
+  // Receipts/documentation
+  receipts: ExpenseReceipt[];
+  notes?: string;
+
+  // Tax
+  taxAmount?: number;
+  taxDeductible?: boolean;
+
+  // Approval workflow
   status: ExpenseStatus;
-  submittedAt?: Date;
   approvedBy?: string;
   approvedAt?: Date;
+  rejectionReason?: string;
   reimbursedAt?: Date;
-  notes?: string;
+  reimbursementMethod?: string;
+
+  // Tags for filtering
+  tags?: string[];
+
+  // Metadata
   createdAt: Date;
   updatedAt?: Date;
 }
+
+export interface ExpenseSummary {
+  period: 'day' | 'week' | 'month' | 'year' | 'custom';
+  startDate: string;
+  endDate: string;
+  totalExpenses: number;
+  totalReimbursable: number;
+  totalBillable: number;
+  totalPending: number;
+  totalApproved: number;
+  totalReimbursed: number;
+  byCategory: Record<ExpenseCategory, number>;
+  byProject: { projectId: string; projectName: string; amount: number }[];
+  byUser: { userId: string; userName: string; amount: number }[];
+  count: number;
+}
+
+// Category constants with display info
+export const EXPENSE_CATEGORIES: { value: ExpenseCategory; label: string; icon: string; color: string }[] = [
+  { value: 'materials', label: 'Materials', icon: 'cube', color: '#10b981' },
+  { value: 'tools', label: 'Tools', icon: 'wrench', color: '#6366f1' },
+  { value: 'equipment_rental', label: 'Equipment Rental', icon: 'truck', color: '#8b5cf6' },
+  { value: 'fuel', label: 'Fuel', icon: 'fire', color: '#f59e0b' },
+  { value: 'vehicle', label: 'Vehicle', icon: 'truck', color: '#3b82f6' },
+  { value: 'subcontractor', label: 'Subcontractor', icon: 'users', color: '#ec4899' },
+  { value: 'permits', label: 'Permits', icon: 'document', color: '#0891b2' },
+  { value: 'labor', label: 'Labor', icon: 'user', color: '#14b8a6' },
+  { value: 'office', label: 'Office', icon: 'building', color: '#64748b' },
+  { value: 'travel', label: 'Travel', icon: 'airplane', color: '#a855f7' },
+  { value: 'meals', label: 'Meals', icon: 'cake', color: '#f97316' },
+  { value: 'insurance', label: 'Insurance', icon: 'shield', color: '#84cc16' },
+  { value: 'utilities', label: 'Utilities', icon: 'bolt', color: '#eab308' },
+  { value: 'marketing', label: 'Marketing', icon: 'megaphone', color: '#e11d48' },
+  { value: 'other', label: 'Other', icon: 'ellipsis', color: '#6b7280' },
+];
+
+export const EXPENSE_STATUSES: { value: ExpenseStatus; label: string; color: string }[] = [
+  { value: 'pending', label: 'Pending', color: '#f59e0b' },
+  { value: 'approved', label: 'Approved', color: '#10b981' },
+  { value: 'rejected', label: 'Rejected', color: '#ef4444' },
+  { value: 'reimbursed', label: 'Reimbursed', color: '#3b82f6' },
+];
+
+export const EXPENSE_PAYMENT_METHODS: { value: ExpensePaymentMethod; label: string }[] = [
+  { value: 'cash', label: 'Cash' },
+  { value: 'credit_card', label: 'Credit Card' },
+  { value: 'debit_card', label: 'Debit Card' },
+  { value: 'check', label: 'Check' },
+  { value: 'company_card', label: 'Company Card' },
+  { value: 'other', label: 'Other' },
+];
 
 // ============================================
 // Purchase Order Types (Sprint 10)
@@ -3256,6 +3353,189 @@ export const LINE_ITEM_UNITS: { value: LineItemUnit; label: string; abbr: string
 ];
 
 // ============================================
+// Quote/Estimate PDF Template Types
+// ============================================
+
+/**
+ * PDF layout style preset
+ */
+export type QuotePdfLayout = 'modern' | 'classic' | 'minimal' | 'professional';
+
+/**
+ * Font family for PDF generation
+ */
+export type QuotePdfFont = 'inter' | 'roboto' | 'open-sans' | 'lato' | 'poppins';
+
+/**
+ * Header layout style
+ */
+export type QuotePdfHeaderStyle = 'logo-left' | 'logo-right' | 'centered' | 'full-width-banner';
+
+/**
+ * Quote/Estimate PDF Template
+ * Controls the visual styling and layout of generated PDF quotes/estimates
+ */
+export interface QuotePdfTemplate {
+  id: string;
+  orgId: string;
+
+  // Basic info
+  name: string;
+  description?: string;
+  isDefault: boolean;
+  isActive: boolean;
+
+  // Layout settings
+  layout: QuotePdfLayout;
+  font: QuotePdfFont;
+  headerStyle: QuotePdfHeaderStyle;
+
+  // Colors (hex format)
+  primaryColor: string;      // Main accent color
+  secondaryColor: string;    // Secondary accent
+  textColor: string;         // Body text
+  backgroundColor: string;   // Page background
+  tableHeaderBg: string;     // Table header background
+  tableAltRowBg: string;     // Alternating row color
+
+  // Header customization
+  header: {
+    showLogo: boolean;
+    logoSize: 'small' | 'medium' | 'large';
+    showCompanyName: boolean;
+    showAddress: boolean;
+    showPhone: boolean;
+    showEmail: boolean;
+    showWebsite: boolean;
+    customTagline?: string;
+  };
+
+  // Footer customization
+  footer: {
+    showPageNumbers: boolean;
+    showValidUntil: boolean;
+    showEstimateNumber: boolean;
+    customText?: string;
+    termsUrl?: string;
+  };
+
+  // Table styling
+  tableSettings: {
+    showQuantity: boolean;
+    showUnit: boolean;
+    showUnitPrice: boolean;
+    showDescription: boolean;
+    showOptionalBadge: boolean;
+    groupBySection: boolean;
+  };
+
+  // Content sections to include
+  sections: {
+    showScopeOfWork: boolean;
+    showExclusions: boolean;
+    showPaymentTerms: boolean;
+    showTermsAndConditions: boolean;
+    showSignatureBlock: boolean;
+    showDepositInfo: boolean;
+    showValidUntil: boolean;
+  };
+
+  // Default content (can be overridden per estimate)
+  defaultContent: {
+    scopeOfWork?: string;
+    exclusions?: string;
+    paymentTerms?: string;
+    termsAndConditions?: string;
+    acceptanceText?: string;
+  };
+
+  // Metadata
+  usageCount: number;
+  lastUsedAt?: Date;
+  createdAt: Date;
+  updatedAt?: Date;
+  createdBy: string;
+}
+
+/**
+ * Preset template configurations
+ */
+export const QUOTE_PDF_LAYOUTS: { value: QuotePdfLayout; label: string; description: string }[] = [
+  { value: 'modern', label: 'Modern', description: 'Clean design with accent colors and clean lines' },
+  { value: 'classic', label: 'Classic', description: 'Traditional layout with formal typography' },
+  { value: 'minimal', label: 'Minimal', description: 'Simple, content-focused with subtle styling' },
+  { value: 'professional', label: 'Professional', description: 'Corporate style with structured sections' },
+];
+
+export const QUOTE_PDF_FONTS: { value: QuotePdfFont; label: string }[] = [
+  { value: 'inter', label: 'Inter' },
+  { value: 'roboto', label: 'Roboto' },
+  { value: 'open-sans', label: 'Open Sans' },
+  { value: 'lato', label: 'Lato' },
+  { value: 'poppins', label: 'Poppins' },
+];
+
+export const QUOTE_PDF_HEADER_STYLES: { value: QuotePdfHeaderStyle; label: string }[] = [
+  { value: 'logo-left', label: 'Logo on Left' },
+  { value: 'logo-right', label: 'Logo on Right' },
+  { value: 'centered', label: 'Centered' },
+  { value: 'full-width-banner', label: 'Full Width Banner' },
+];
+
+/**
+ * Default template settings factory
+ */
+export const createDefaultQuotePdfTemplate = (orgId: string): Omit<QuotePdfTemplate, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'> => ({
+  orgId,
+  name: 'Default Template',
+  description: 'Standard estimate template',
+  isDefault: true,
+  isActive: true,
+  layout: 'modern',
+  font: 'inter',
+  headerStyle: 'logo-left',
+  primaryColor: '#2563eb',
+  secondaryColor: '#1e40af',
+  textColor: '#1f2937',
+  backgroundColor: '#ffffff',
+  tableHeaderBg: '#f3f4f6',
+  tableAltRowBg: '#fafafa',
+  header: {
+    showLogo: true,
+    logoSize: 'medium',
+    showCompanyName: true,
+    showAddress: true,
+    showPhone: true,
+    showEmail: true,
+    showWebsite: false,
+  },
+  footer: {
+    showPageNumbers: true,
+    showValidUntil: true,
+    showEstimateNumber: true,
+  },
+  tableSettings: {
+    showQuantity: true,
+    showUnit: true,
+    showUnitPrice: true,
+    showDescription: true,
+    showOptionalBadge: true,
+    groupBySection: false,
+  },
+  sections: {
+    showScopeOfWork: true,
+    showExclusions: true,
+    showPaymentTerms: true,
+    showTermsAndConditions: true,
+    showSignatureBlock: true,
+    showDepositInfo: true,
+    showValidUntil: true,
+  },
+  defaultContent: {},
+  usageCount: 0,
+});
+
+// ============================================
 // Schedule Types
 // ============================================
 
@@ -3623,33 +3903,95 @@ export const TIME_OFF_TYPES: { value: TimeOffRequest['type']; label: string }[] 
 // ============================================
 
 /**
- * Material category
+ * Material category trade groups for better organization
  */
-export type MaterialCategory =
-  | 'lumber'
-  | 'hardware'
+export type MaterialCategoryGroup =
+  | 'structural'
   | 'electrical'
   | 'plumbing'
   | 'hvac'
+  | 'exterior'
+  | 'interior'
+  | 'finishes'
+  | 'site_work'
+  | 'equipment_tools'
+  | 'general';
+
+/**
+ * Material category
+ */
+export type MaterialCategory =
+  // Structural
+  | 'lumber'
+  | 'framing'
+  | 'concrete'
+  | 'masonry'
+  | 'steel'
+  // Electrical
+  | 'electrical'
+  | 'wiring'
+  | 'lighting'
+  | 'electrical_panels'
+  | 'switches_outlets'
+  // Plumbing
+  | 'plumbing'
+  | 'pipes_fittings'
+  | 'fixtures'
+  | 'water_heaters'
+  | 'drainage'
+  // HVAC
+  | 'hvac'
+  | 'ductwork'
+  | 'hvac_equipment'
+  | 'ventilation'
+  // Exterior
   | 'roofing'
-  | 'insulation'
+  | 'siding'
+  | 'gutters'
+  | 'windows'
+  | 'doors'
+  | 'garage_doors'
+  | 'decking'
+  | 'fencing'
+  // Interior
   | 'drywall'
+  | 'insulation'
+  | 'cabinets'
+  | 'countertops'
+  | 'trim_molding'
+  | 'stairs_railings'
+  // Finishes
   | 'paint'
   | 'flooring'
   | 'tile'
-  | 'concrete'
-  | 'masonry'
-  | 'windows_doors'
-  | 'cabinets'
-  | 'countertops'
-  | 'fixtures'
+  | 'carpet'
   | 'appliances'
+  | 'hardware'
+  // Site Work
   | 'landscaping'
-  | 'safety'
+  | 'irrigation'
+  | 'pavers'
+  | 'grading'
+  // Equipment & Tools
   | 'tools'
   | 'equipment'
   | 'rental'
+  | 'safety'
+  // General
+  | 'fasteners'
+  | 'adhesives_sealants'
+  | 'custom'
   | 'other';
+
+/**
+ * Material category info with grouping
+ */
+export interface MaterialCategoryInfo {
+  value: MaterialCategory;
+  label: string;
+  group: MaterialCategoryGroup;
+  description?: string;
+}
 
 /**
  * Material status in inventory
@@ -4124,34 +4466,126 @@ export interface LowStockAlert {
 }
 
 /**
- * Constants for materials
+ * Category group labels
  */
-export const MATERIAL_CATEGORIES: { value: MaterialCategory; label: string }[] = [
-  { value: 'lumber', label: 'Lumber' },
-  { value: 'hardware', label: 'Hardware' },
+export const MATERIAL_CATEGORY_GROUPS: { value: MaterialCategoryGroup; label: string }[] = [
+  { value: 'structural', label: 'Structural' },
   { value: 'electrical', label: 'Electrical' },
   { value: 'plumbing', label: 'Plumbing' },
   { value: 'hvac', label: 'HVAC' },
-  { value: 'roofing', label: 'Roofing' },
-  { value: 'insulation', label: 'Insulation' },
-  { value: 'drywall', label: 'Drywall' },
-  { value: 'paint', label: 'Paint' },
-  { value: 'flooring', label: 'Flooring' },
-  { value: 'tile', label: 'Tile' },
-  { value: 'concrete', label: 'Concrete' },
-  { value: 'masonry', label: 'Masonry' },
-  { value: 'windows_doors', label: 'Windows & Doors' },
-  { value: 'cabinets', label: 'Cabinets' },
-  { value: 'countertops', label: 'Countertops' },
-  { value: 'fixtures', label: 'Fixtures' },
-  { value: 'appliances', label: 'Appliances' },
-  { value: 'landscaping', label: 'Landscaping' },
-  { value: 'safety', label: 'Safety Equipment' },
-  { value: 'tools', label: 'Tools' },
-  { value: 'equipment', label: 'Equipment' },
-  { value: 'rental', label: 'Rental Equipment' },
-  { value: 'other', label: 'Other' },
+  { value: 'exterior', label: 'Exterior' },
+  { value: 'interior', label: 'Interior' },
+  { value: 'finishes', label: 'Finishes' },
+  { value: 'site_work', label: 'Site Work' },
+  { value: 'equipment_tools', label: 'Equipment & Tools' },
+  { value: 'general', label: 'General' },
 ];
+
+/**
+ * Constants for materials with trade-based grouping
+ */
+export const MATERIAL_CATEGORIES: MaterialCategoryInfo[] = [
+  // Structural
+  { value: 'lumber', label: 'Lumber', group: 'structural', description: '2x4s, plywood, OSB, treated lumber' },
+  { value: 'framing', label: 'Framing', group: 'structural', description: 'Studs, joists, headers, trusses' },
+  { value: 'concrete', label: 'Concrete', group: 'structural', description: 'Ready-mix, bags, rebar, forms' },
+  { value: 'masonry', label: 'Masonry', group: 'structural', description: 'Blocks, bricks, mortar, stone' },
+  { value: 'steel', label: 'Steel', group: 'structural', description: 'Beams, columns, metal framing' },
+
+  // Electrical
+  { value: 'electrical', label: 'Electrical (General)', group: 'electrical', description: 'General electrical supplies' },
+  { value: 'wiring', label: 'Wiring & Cable', group: 'electrical', description: 'Romex, conduit, wire' },
+  { value: 'lighting', label: 'Lighting', group: 'electrical', description: 'Fixtures, bulbs, LED' },
+  { value: 'electrical_panels', label: 'Panels & Breakers', group: 'electrical', description: 'Load centers, breakers, disconnects' },
+  { value: 'switches_outlets', label: 'Switches & Outlets', group: 'electrical', description: 'Receptacles, switches, covers' },
+
+  // Plumbing
+  { value: 'plumbing', label: 'Plumbing (General)', group: 'plumbing', description: 'General plumbing supplies' },
+  { value: 'pipes_fittings', label: 'Pipes & Fittings', group: 'plumbing', description: 'PVC, copper, PEX, fittings' },
+  { value: 'fixtures', label: 'Fixtures', group: 'plumbing', description: 'Sinks, faucets, toilets, tubs' },
+  { value: 'water_heaters', label: 'Water Heaters', group: 'plumbing', description: 'Tank, tankless, parts' },
+  { value: 'drainage', label: 'Drainage', group: 'plumbing', description: 'Drains, P-traps, vents' },
+
+  // HVAC
+  { value: 'hvac', label: 'HVAC (General)', group: 'hvac', description: 'General HVAC supplies' },
+  { value: 'ductwork', label: 'Ductwork', group: 'hvac', description: 'Ducts, boots, registers, grilles' },
+  { value: 'hvac_equipment', label: 'HVAC Equipment', group: 'hvac', description: 'Units, compressors, handlers' },
+  { value: 'ventilation', label: 'Ventilation', group: 'hvac', description: 'Exhaust fans, range hoods, HRV' },
+
+  // Exterior
+  { value: 'roofing', label: 'Roofing', group: 'exterior', description: 'Shingles, underlayment, flashing' },
+  { value: 'siding', label: 'Siding', group: 'exterior', description: 'Vinyl, fiber cement, wood' },
+  { value: 'gutters', label: 'Gutters', group: 'exterior', description: 'Gutters, downspouts, guards' },
+  { value: 'windows', label: 'Windows', group: 'exterior', description: 'Windows, skylights, glass' },
+  { value: 'doors', label: 'Doors', group: 'exterior', description: 'Entry, storm, patio doors' },
+  { value: 'garage_doors', label: 'Garage Doors', group: 'exterior', description: 'Doors, openers, hardware' },
+  { value: 'decking', label: 'Decking', group: 'exterior', description: 'Deck boards, railings, posts' },
+  { value: 'fencing', label: 'Fencing', group: 'exterior', description: 'Fence panels, posts, gates' },
+
+  // Interior
+  { value: 'drywall', label: 'Drywall', group: 'interior', description: 'Sheets, tape, mud, corner bead' },
+  { value: 'insulation', label: 'Insulation', group: 'interior', description: 'Batts, blown-in, foam' },
+  { value: 'cabinets', label: 'Cabinets', group: 'interior', description: 'Kitchen, bath, storage' },
+  { value: 'countertops', label: 'Countertops', group: 'interior', description: 'Granite, quartz, laminate' },
+  { value: 'trim_molding', label: 'Trim & Molding', group: 'interior', description: 'Baseboards, crown, casing' },
+  { value: 'stairs_railings', label: 'Stairs & Railings', group: 'interior', description: 'Treads, risers, balusters' },
+
+  // Finishes
+  { value: 'paint', label: 'Paint', group: 'finishes', description: 'Interior, exterior, primers' },
+  { value: 'flooring', label: 'Flooring', group: 'finishes', description: 'Hardwood, LVP, laminate' },
+  { value: 'tile', label: 'Tile', group: 'finishes', description: 'Ceramic, porcelain, stone' },
+  { value: 'carpet', label: 'Carpet', group: 'finishes', description: 'Carpet, padding, transitions' },
+  { value: 'appliances', label: 'Appliances', group: 'finishes', description: 'Kitchen, laundry appliances' },
+  { value: 'hardware', label: 'Hardware', group: 'finishes', description: 'Knobs, pulls, hinges, locks' },
+
+  // Site Work
+  { value: 'landscaping', label: 'Landscaping', group: 'site_work', description: 'Plants, mulch, soil, sod' },
+  { value: 'irrigation', label: 'Irrigation', group: 'site_work', description: 'Sprinklers, drip, controllers' },
+  { value: 'pavers', label: 'Pavers & Hardscape', group: 'site_work', description: 'Pavers, retaining walls' },
+  { value: 'grading', label: 'Grading & Drainage', group: 'site_work', description: 'French drains, fill, gravel' },
+
+  // Equipment & Tools
+  { value: 'tools', label: 'Tools', group: 'equipment_tools', description: 'Hand tools, power tools' },
+  { value: 'equipment', label: 'Equipment', group: 'equipment_tools', description: 'Heavy equipment, machinery' },
+  { value: 'rental', label: 'Rental Equipment', group: 'equipment_tools', description: 'Rented tools & equipment' },
+  { value: 'safety', label: 'Safety Equipment', group: 'equipment_tools', description: 'PPE, barriers, signage' },
+
+  // General
+  { value: 'fasteners', label: 'Fasteners', group: 'general', description: 'Nails, screws, bolts, anchors' },
+  { value: 'adhesives_sealants', label: 'Adhesives & Sealants', group: 'general', description: 'Caulk, glue, foam, tape' },
+  { value: 'custom', label: 'Custom Category', group: 'general', description: 'User-defined category' },
+  { value: 'other', label: 'Other', group: 'general', description: 'Miscellaneous items' },
+];
+
+/**
+ * Get categories organized by group
+ */
+export function getMaterialCategoriesByGroup(): Record<MaterialCategoryGroup, MaterialCategoryInfo[]> {
+  const grouped: Record<MaterialCategoryGroup, MaterialCategoryInfo[]> = {
+    structural: [],
+    electrical: [],
+    plumbing: [],
+    hvac: [],
+    exterior: [],
+    interior: [],
+    finishes: [],
+    site_work: [],
+    equipment_tools: [],
+    general: [],
+  };
+
+  MATERIAL_CATEGORIES.forEach((cat) => {
+    grouped[cat.group].push(cat);
+  });
+
+  return grouped;
+}
+
+/**
+ * Legacy flat category list for backward compatibility
+ */
+export const MATERIAL_CATEGORIES_FLAT: { value: MaterialCategory; label: string }[] =
+  MATERIAL_CATEGORIES.map(({ value, label }) => ({ value, label }));
 
 export const MATERIAL_STATUSES: { value: MaterialStatus; label: string; color: string }[] = [
   { value: 'in_stock', label: 'In Stock', color: '#10b981' },
@@ -4179,3 +4613,330 @@ export const MATERIAL_PURCHASE_ORDER_STATUSES: { value: MaterialPurchaseOrderSta
   { value: 'received', label: 'Received', color: '#10b981' },
   { value: 'cancelled', label: 'Cancelled', color: '#ef4444' },
 ];
+
+// ============================================
+// Time Tracking Types (FEAT-S13)
+// ============================================
+
+export type TimeEntryStatus = 'active' | 'paused' | 'completed' | 'pending_approval' | 'approved' | 'rejected';
+
+export type TimeEntryType = 'clock' | 'manual' | 'imported';
+
+export type BreakType = 'lunch' | 'short' | 'other';
+
+export interface TimeEntryBreak {
+  id: string;
+  type: BreakType;
+  startTime: Date;
+  endTime?: Date;
+  duration?: number; // minutes
+  isPaid: boolean;
+}
+
+export interface TimeEntryLocation {
+  lat: number;
+  lng: number;
+  accuracy?: number;
+  address?: string;
+  timestamp: Date;
+}
+
+export interface TimeEntry {
+  id: string;
+  orgId: string;
+  userId: string;
+  userName: string;
+  userRole: UserRole;
+  projectId?: string;
+  projectName?: string;
+  taskId?: string;
+  taskName?: string;
+  type: TimeEntryType;
+  status: TimeEntryStatus;
+
+  // Time data
+  clockIn: Date;
+  clockOut?: Date;
+  totalMinutes?: number;        // Calculated: clockOut - clockIn - unpaid breaks
+  billableMinutes?: number;     // Subset that's billable
+
+  // Breaks
+  breaks: TimeEntryBreak[];
+  totalBreakMinutes?: number;
+
+  // Location tracking
+  clockInLocation?: TimeEntryLocation;
+  clockOutLocation?: TimeEntryLocation;
+  locationHistory?: TimeEntryLocation[]; // For continuous tracking
+
+  // Rates
+  hourlyRate?: number;
+  overtimeRate?: number;        // Usually 1.5x
+  isOvertime?: boolean;
+
+  // Notes & metadata
+  notes?: string;
+  tags?: string[];
+
+  // Approval workflow
+  submittedAt?: Date;
+  approvedBy?: string;
+  approvedByName?: string;
+  approvedAt?: Date;
+  rejectedBy?: string;
+  rejectedByName?: string;
+  rejectedAt?: Date;
+  rejectionReason?: string;
+
+  // Audit
+  createdAt: Date;
+  updatedAt?: Date;
+  editedBy?: string;
+  editHistory?: TimeEntryEdit[];
+}
+
+export interface TimeEntryEdit {
+  editedAt: Date;
+  editedBy: string;
+  editedByName: string;
+  field: string;
+  oldValue: string;
+  newValue: string;
+  reason?: string;
+}
+
+export interface TimesheetPeriod {
+  id: string;
+  orgId: string;
+  userId: string;
+  userName: string;
+  startDate: Date;
+  endDate: Date;
+  status: 'draft' | 'submitted' | 'approved' | 'rejected';
+  totalHours: number;
+  regularHours: number;
+  overtimeHours: number;
+  totalBreakHours: number;
+  entries: string[]; // TimeEntry IDs
+  submittedAt?: Date;
+  approvedBy?: string;
+  approvedAt?: Date;
+  rejectedBy?: string;
+  rejectedAt?: Date;
+  rejectionReason?: string;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+export interface TimeTrackingSettings {
+  orgId: string;
+  requireGeoLocation: boolean;
+  geoFenceRadius?: number;      // meters
+  projectGeoFences?: {
+    projectId: string;
+    lat: number;
+    lng: number;
+    radius: number;
+  }[];
+  autoClockOutAfter?: number;   // minutes of inactivity
+  requireProjectSelection: boolean;
+  requireTaskSelection: boolean;
+  allowManualEntry: boolean;
+  requireApproval: boolean;
+  approvers?: string[];         // User IDs who can approve
+  overtimeThreshold: number;    // hours per day (default 8)
+  weeklyOvertimeThreshold: number; // hours per week (default 40)
+  paidBreakMinutes: number;     // Default paid break per day
+  workWeekStart: 'sunday' | 'monday';
+  roundingInterval?: 0 | 5 | 6 | 15; // Round to nearest X minutes (0 = no rounding)
+  roundingRule?: 'nearest' | 'up' | 'down';
+}
+
+export interface DailyTimeSummary {
+  date: string; // ISO date
+  userId: string;
+  userName: string;
+  totalHours: number;
+  regularHours: number;
+  overtimeHours: number;
+  breakHours: number;
+  entries: TimeEntry[];
+  projectBreakdown: {
+    projectId: string;
+    projectName: string;
+    hours: number;
+  }[];
+}
+
+export interface WeeklyTimeSummary {
+  userId: string;
+  userName: string;
+  weekStart: Date;
+  weekEnd: Date;
+  totalHours: number;
+  regularHours: number;
+  overtimeHours: number;
+  breakHours: number;
+  dailySummaries: DailyTimeSummary[];
+  projectBreakdown: {
+    projectId: string;
+    projectName: string;
+    hours: number;
+  }[];
+}
+
+// Time entry status constants
+export const TIME_ENTRY_STATUSES: { value: TimeEntryStatus; label: string; color: string }[] = [
+  { value: 'active', label: 'Clocked In', color: '#10b981' },
+  { value: 'paused', label: 'On Break', color: '#f59e0b' },
+  { value: 'completed', label: 'Completed', color: '#6b7280' },
+  { value: 'pending_approval', label: 'Pending Approval', color: '#3b82f6' },
+  { value: 'approved', label: 'Approved', color: '#10b981' },
+  { value: 'rejected', label: 'Rejected', color: '#ef4444' },
+];
+
+export const BREAK_TYPES: { value: BreakType; label: string; defaultMinutes: number; isPaid: boolean }[] = [
+  { value: 'lunch', label: 'Lunch Break', defaultMinutes: 30, isPaid: false },
+  { value: 'short', label: 'Short Break', defaultMinutes: 15, isPaid: true },
+  { value: 'other', label: 'Other', defaultMinutes: 15, isPaid: false },
+];
+
+// ============================================
+// Daily Log / Journal Types (FEAT-S17)
+// ============================================
+
+export type DailyLogCategory =
+  | 'general'
+  | 'progress'
+  | 'issue'
+  | 'safety'
+  | 'weather'
+  | 'delivery'
+  | 'inspection'
+  | 'client_interaction'
+  | 'subcontractor'
+  | 'equipment';
+
+// Note: WeatherCondition is defined above in the Schedule section
+
+export interface DailyLogPhoto {
+  id: string;
+  url: string;
+  thumbnailUrl?: string;
+  caption?: string;
+  uploadedAt: Date;
+}
+
+export interface DailyLogEntry {
+  id: string;
+  orgId: string;
+  projectId: string;
+  projectName: string;
+  userId: string;
+  userName: string;
+  date: string; // ISO date string (YYYY-MM-DD)
+
+  // Content
+  category: DailyLogCategory;
+  title: string;
+  description: string;
+
+  // Media
+  photos: DailyLogPhoto[];
+
+  // Weather (optional)
+  weather?: {
+    condition: WeatherCondition;
+    temperatureHigh?: number;
+    temperatureLow?: number;
+    precipitation?: number; // percentage
+    notes?: string;
+  };
+
+  // Work details
+  crewCount?: number;
+  crewMembers?: string[]; // User IDs
+  hoursWorked?: number;
+  workPerformed?: string[];
+
+  // Safety
+  safetyIncidents?: number;
+  safetyNotes?: string;
+
+  // Visitors/Inspections
+  visitors?: {
+    name: string;
+    company?: string;
+    purpose: string;
+    arrivalTime?: string;
+    departureTime?: string;
+  }[];
+
+  // Deliveries
+  deliveries?: {
+    supplier: string;
+    items: string;
+    quantity?: string;
+    receivedBy?: string;
+    time?: string;
+  }[];
+
+  // Issues/Delays
+  issues?: {
+    description: string;
+    impact: 'low' | 'medium' | 'high';
+    resolved: boolean;
+    resolution?: string;
+  }[];
+
+  // Tags for filtering
+  tags?: string[];
+
+  // Flags
+  isPrivate?: boolean; // Only visible to PMs/Owners
+  requiresFollowUp?: boolean;
+  followUpDate?: Date;
+
+  // Metadata
+  createdAt: Date;
+  updatedAt?: Date;
+  editedBy?: string;
+}
+
+export interface DailyLogSummary {
+  date: string;
+  projectId: string;
+  projectName: string;
+  totalEntries: number;
+  categories: Record<DailyLogCategory, number>;
+  crewCount: number;
+  hoursWorked: number;
+  issueCount: number;
+  photoCount: number;
+  weather?: {
+    condition: WeatherCondition;
+    temperatureHigh?: number;
+    temperatureLow?: number;
+  };
+}
+
+// Category constants with display info
+export const DAILY_LOG_CATEGORIES: { value: DailyLogCategory; label: string; icon: string; color: string }[] = [
+  { value: 'general', label: 'General', icon: 'clipboard', color: '#6b7280' },
+  { value: 'progress', label: 'Progress', icon: 'trending-up', color: '#10b981' },
+  { value: 'issue', label: 'Issue', icon: 'exclamation-triangle', color: '#ef4444' },
+  { value: 'safety', label: 'Safety', icon: 'shield-check', color: '#f59e0b' },
+  { value: 'weather', label: 'Weather', icon: 'cloud', color: '#3b82f6' },
+  { value: 'delivery', label: 'Delivery', icon: 'truck', color: '#8b5cf6' },
+  { value: 'inspection', label: 'Inspection', icon: 'clipboard-check', color: '#0891b2' },
+  { value: 'client_interaction', label: 'Client', icon: 'user', color: '#ec4899' },
+  { value: 'subcontractor', label: 'Subcontractor', icon: 'users', color: '#6366f1' },
+  { value: 'equipment', label: 'Equipment', icon: 'wrench', color: '#84cc16' },
+];
+
+// Note: WEATHER_CONDITIONS is defined above in the Schedule section
+// Daily logs reuse that same constant for consistency
+
+// Note: Expense types (ExpenseCategory, ExpenseStatus, PaymentMethod, Expense, ExpenseSummary, ExpenseReceipt)
+// and constants (EXPENSE_CATEGORIES, EXPENSE_STATUSES, PAYMENT_METHODS) are defined earlier in the file
+// in the "Expense Types" section

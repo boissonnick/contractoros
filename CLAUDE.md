@@ -179,6 +179,8 @@ All secrets stored in **GCP Secret Manager** (project: `contractoros-483812`).
 | `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | Firebase Messaging Sender ID |
 | `NEXT_PUBLIC_FIREBASE_APP_ID` | Firebase App ID |
 | `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Google Maps API Key |
+| `MAILGUN_API_KEY` | Mailgun API Key (for Cloud Functions) |
+| `MAILGUN_DOMAIN` | Mailgun sending domain |
 
 **Adding New Secrets:**
 ```bash

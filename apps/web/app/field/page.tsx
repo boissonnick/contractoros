@@ -164,10 +164,11 @@ export default function FieldPage() {
       };
 
       if (location) {
-        entry.location = {
+        entry.clockInLocation = {
           lat: location.coords.latitude,
           lng: location.coords.longitude,
           accuracy: location.coords.accuracy,
+          timestamp: new Date(),
         };
       }
 

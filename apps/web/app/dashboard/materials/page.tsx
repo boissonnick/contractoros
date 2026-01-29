@@ -47,6 +47,8 @@ import {
   MaterialPurchaseOrder,
   MaterialPurchaseOrderStatus,
   MATERIAL_CATEGORIES,
+  MATERIAL_CATEGORY_GROUPS,
+  getMaterialCategoriesByGroup,
   MATERIAL_STATUSES,
   EQUIPMENT_STATUSES,
   MATERIAL_PURCHASE_ORDER_STATUSES,
@@ -441,15 +443,31 @@ export default function MaterialsPage() {
               className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-primary focus:border-transparent"
             >
               <option value="">All Categories</option>
-              {MATERIAL_CATEGORIES.filter((c) =>
-                activeTab === 'equipment'
-                  ? ['tools', 'equipment', 'rental', 'safety', 'other'].includes(c.value)
-                  : true
-              ).map((cat) => (
-                <option key={cat.value} value={cat.value}>
-                  {cat.label}
-                </option>
-              ))}
+              {activeTab === 'equipment' ? (
+                // Equipment only shows relevant categories
+                MATERIAL_CATEGORIES
+                  .filter((c) => c.group === 'equipment_tools' || c.value === 'other')
+                  .map((cat) => (
+                    <option key={cat.value} value={cat.value}>
+                      {cat.label}
+                    </option>
+                  ))
+              ) : (
+                // Materials show grouped categories
+                MATERIAL_CATEGORY_GROUPS.map((group) => {
+                  const groupCategories = MATERIAL_CATEGORIES.filter((c) => c.group === group.value);
+                  if (groupCategories.length === 0) return null;
+                  return (
+                    <optgroup key={group.value} label={`── ${group.label} ──`}>
+                      {groupCategories.map((cat) => (
+                        <option key={cat.value} value={cat.value}>
+                          {cat.label}
+                        </option>
+                      ))}
+                    </optgroup>
+                  );
+                })
+              )}
             </select>
 
             <select
