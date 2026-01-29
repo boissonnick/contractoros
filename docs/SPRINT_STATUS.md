@@ -10,10 +10,10 @@
 
 | Metric | Value |
 |--------|-------|
-| **Current Sprint** | Sprint 8 - Phase 4 Features |
-| **Sprint Status** | IN PROGRESS |
-| **Completed This Sprint** | FEAT-S13 (Time Tracking), FEAT-S17 (Daily Log/Journal), FEAT-S16 (Expense Tracking Enhanced), FEAT-S14 (Quote Templates), Settings Navigation Refactoring |
-| **Next Up** | FEAT-S11 (Communication Hub), FEAT-S25 (Reporting Dashboards), FEAT-S18 (Client Feedback) |
+| **Current Sprint** | Sprint 9 - Data Architecture & Payroll |
+| **Sprint Status** | IN PROGRESS (9A Complete) |
+| **Completed This Sprint** | Sprint 9A: Client data architecture fix, demo team members persist to Firestore, payroll types added, enhanced daily logs |
+| **Next Up** | Sprint 9B (Full Payroll Module), Sprint 9C (CSV Import System) |
 | **Blockers** | None |
 | **TypeScript Status** | Passing |
 | **Firestore Rules** | Deployed (all features + timeEntries + dailyLogs + expenses + quoteTemplates) |
@@ -746,9 +746,22 @@ apps/web/lib/weather-service.ts
 
 ### For Next Session
 1. **TypeScript is passing** - run `npx tsc --noEmit` to verify
-2. **Four features completed this sprint:** Photo Docs, Payments, SMS, Estimate Builder
-3. **Choose next feature** from options above
-4. **Check MASTER_ROADMAP.md** for full feature specifications
+2. **Sprint 9A completed:** Client data architecture, demo team members, payroll types, enhanced daily logs
+3. **See `docs/SPRINT_9_PLAN.md`** for Sprint 9B-9D roadmap
+4. **ALWAYS deploy Firebase before Docker build** - see workflow below
+
+### Build & Deploy Workflow (CRITICAL)
+```bash
+# From apps/web/ directory - run these in order:
+cd apps/web && npx tsc --noEmit && \
+firebase deploy --only firestore --project contractoros-483812 && \
+./docker-build-local.sh && \
+docker stop contractoros-web 2>/dev/null; \
+docker rm contractoros-web 2>/dev/null; \
+docker run -d -p 3000:8080 --name contractoros-web contractoros-web && \
+docker ps
+```
+**Why:** Firebase indexes take 30s-2min to build. Deploy them BEFORE Docker build so they're ready when app starts.
 
 ### Known Issues
 - No test coverage

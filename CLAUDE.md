@@ -25,11 +25,11 @@ cat docs/DEPLOYMENT_CHECKLIST.md   # Firebase rules/deploy requirements
 
 Field-first construction project management platform. Multi-portal app serving general contractors (dashboard), subcontractors, clients, and field workers. Built on Next.js 14 + Firebase.
 
-**Current State (2026-01-28):**
-- Sprint 4 (Client Management) COMPLETED
-- E-Signature system COMPLETED
-- Documentation strategy COMPLETED
-- Next: Sprint 5 - Photo Docs OR Payment Processing OR SMS/Text
+**Current State (2026-01-29):**
+- Sprint 9A (Bug Fixes & Data Architecture) COMPLETED
+- Client data now org-scoped, demo team members persist to Firestore
+- Payroll types added to UserProfile
+- Next: Sprint 9B (Full Payroll Module) OR Sprint 9C (CSV Import)
 
 ---
 
@@ -134,6 +134,66 @@ Always confirm:
 3. ✅ New container started (`docker run ...`)
 4. ✅ Container running (`docker ps` shows STATUS "Up")
 5. ✅ Version badge in app footer shows expected git commit hash
+
+---
+
+## Complete Local Build & Deploy Workflow
+
+**CRITICAL:** Follow this workflow for EVERY release. Firebase indexes must be deployed alongside code changes to avoid "requires an index" errors.
+
+### Full Release Checklist
+
+```bash
+# From project root:
+
+# 1. TypeScript check (catch errors before build)
+cd apps/web && npx tsc --noEmit
+
+# 2. Deploy Firebase rules & indexes FIRST (before Docker build)
+#    This ensures indexes are building while you build Docker
+firebase deploy --only firestore --project contractoros-483812
+
+# 3. Build Docker image (from apps/web/)
+./docker-build-local.sh
+
+# 4. Stop and remove old container
+docker stop contractoros-web 2>/dev/null
+docker rm contractoros-web 2>/dev/null
+
+# 5. Start new container
+docker run -d -p 3000:8080 --name contractoros-web contractoros-web
+
+# 6. Verify deployment
+docker ps  # Should show "Up" status
+# Check http://localhost:3000 - version badge should match commit
+```
+
+### Why Firebase Deploy Must Come First
+
+Firebase composite indexes take time to build (30 seconds to several minutes). By deploying Firestore rules/indexes BEFORE building Docker:
+- Indexes start building immediately
+- Docker build runs in parallel
+- By the time Docker is ready, indexes are usually done
+- No need to "build twice" or wait for index errors
+
+### Quick Reference Commands
+
+```bash
+# Deploy everything (rules + indexes)
+firebase deploy --only firestore --project contractoros-483812
+
+# Check index build status
+firebase firestore:indexes --project contractoros-483812
+
+# Full rebuild (copy-paste ready)
+cd apps/web && npx tsc --noEmit && \
+firebase deploy --only firestore --project contractoros-483812 && \
+./docker-build-local.sh && \
+docker stop contractoros-web 2>/dev/null; \
+docker rm contractoros-web 2>/dev/null; \
+docker run -d -p 3000:8080 --name contractoros-web contractoros-web && \
+docker ps
+```
 
 ---
 
