@@ -980,6 +980,50 @@ service cloud.firestore {
     }
 
     // ==========================================
+    // Accounting Integration Collections
+    // ==========================================
+
+    // Accounting connections collection (QuickBooks, Xero)
+    match /accountingConnections/{connectionId} {
+      // Org members can read accounting connections in their org
+      allow read: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId;
+
+      // Admins can create accounting connections
+      allow create: if isAuthenticated() && userProfileExists() &&
+        request.resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can update accounting connections (sync settings, disconnect)
+      allow update: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can delete accounting connections
+      allow delete: if isAdmin();
+    }
+
+    // Account mapping rules collection (chart of accounts mapping)
+    match /accountMappingRules/{ruleId} {
+      // Org members can read mapping rules in their org
+      allow read: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId;
+
+      // Admins can create mapping rules
+      allow create: if isAuthenticated() && userProfileExists() &&
+        request.resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can update mapping rules
+      allow update: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can delete mapping rules
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
     // Material & Equipment Tracking Collections
     // ==========================================
 
