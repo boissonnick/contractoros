@@ -12,7 +12,7 @@ import {
   useSensors,
   closestCorners,
 } from '@dnd-kit/core';
-import { Task, TaskStatus } from '@/types';
+import { Task, TaskStatus, ProjectPhase } from '@/types';
 import KanbanColumn, { ColumnConfig } from './KanbanColumn';
 import TaskCard from '@/components/tasks/TaskCard';
 
@@ -25,11 +25,12 @@ const columns: ColumnConfig[] = [
 
 interface TaskKanbanProps {
   tasks: Task[];
+  phases?: ProjectPhase[];
   onTaskClick: (task: Task) => void;
   onMoveTask: (taskId: string, newStatus: TaskStatus) => Promise<void>;
 }
 
-export default function TaskKanban({ tasks, onTaskClick, onMoveTask }: TaskKanbanProps) {
+export default function TaskKanban({ tasks, phases = [], onTaskClick, onMoveTask }: TaskKanbanProps) {
   const [activeTask, setActiveTask] = useState<Task | null>(null);
 
   const sensors = useSensors(
@@ -106,6 +107,7 @@ export default function TaskKanban({ tasks, onTaskClick, onMoveTask }: TaskKanba
             key={column.id}
             column={column}
             tasks={tasksByStatus[column.id] || []}
+            phases={phases}
             onTaskClick={onTaskClick}
           />
         ))}
@@ -115,7 +117,10 @@ export default function TaskKanban({ tasks, onTaskClick, onMoveTask }: TaskKanba
       <DragOverlay>
         {activeTask ? (
           <div className="rotate-2 scale-105">
-            <TaskCard task={activeTask} />
+            <TaskCard
+              task={activeTask}
+              phaseName={phases.find(p => p.id === activeTask.phaseId)?.name}
+            />
           </div>
         ) : null}
       </DragOverlay>

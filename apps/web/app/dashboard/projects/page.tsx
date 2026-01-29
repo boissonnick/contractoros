@@ -185,12 +185,13 @@ export default function ProjectsPage() {
 
     try {
       // Create new project with copied data
+      // Status resets to 'planning' per BUG-011 requirements
       const newProjectData = {
         orgId: profile.orgId,
         name: `${project.name} (Copy)`,
         description: project.description || '',
         address: project.address,
-        status: 'lead' as ProjectStatus,
+        status: 'planning' as ProjectStatus,
         scope: project.scope,
         templateId: project.templateId,
         clientId: project.clientId,
@@ -199,21 +200,57 @@ export default function ProjectsPage() {
         tags: project.tags,
         category: project.category,
         sourceProjectId: project.id,
+        isArchived: false, // New copy is never archived
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       };
 
       const newProjectRef = await addDoc(collection(db, 'projects'), newProjectData);
 
+      // Build a map of old phase IDs to new phase IDs for task copying
+      const phaseIdMap: Record<string, string> = {};
+
       // Copy phases if they exist
       const phasesSnap = await getDocs(collection(db, 'projects', project.id, 'phases'));
       for (const phaseDoc of phasesSnap.docs) {
         const phaseData = phaseDoc.data();
-        await addDoc(collection(db, 'projects', newProjectRef.id, 'phases'), {
+        const newPhaseRef = await addDoc(collection(db, 'projects', newProjectRef.id, 'phases'), {
           ...phaseData,
           projectId: newProjectRef.id,
           status: 'upcoming',
           createdAt: Timestamp.now(),
+        });
+        phaseIdMap[phaseDoc.id] = newPhaseRef.id;
+      }
+
+      // Copy tasks for this project
+      const tasksSnap = await getDocs(
+        query(collection(db, 'tasks'), where('projectId', '==', project.id))
+      );
+
+      for (const taskDoc of tasksSnap.docs) {
+        const taskData = taskDoc.data();
+        // Map old phase ID to new phase ID
+        const newPhaseId = taskData.phaseId ? phaseIdMap[taskData.phaseId] : undefined;
+
+        await addDoc(collection(db, 'tasks'), {
+          ...taskData,
+          projectId: newProjectRef.id,
+          phaseId: newPhaseId,
+          // Reset task status to pending
+          status: 'pending',
+          // Clear completion data
+          completedAt: null,
+          actualHours: null,
+          // Clear assignments (optional - user can reassign)
+          assignedTo: [],
+          assignedSubId: null,
+          // Clear dependencies (would need to map to new task IDs - complex)
+          dependencies: [],
+          // Clear attachments (files are project-specific)
+          attachments: [],
+          createdAt: Timestamp.now(),
+          updatedAt: Timestamp.now(),
         });
       }
 

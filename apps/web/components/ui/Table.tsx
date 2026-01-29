@@ -9,8 +9,14 @@ import { cn } from '@/lib/utils';
  * Features:
  * - Horizontal scroll on overflow
  * - Optional sticky first column
- * - Responsive design (converts to cards on mobile via wrapper)
+ * - Responsive design with column priority on mobile
  * - Consistent styling
+ *
+ * Column Priority:
+ * Use the `priority` prop on TableHeader/TableCell to control mobile visibility:
+ * - 'high': Always visible (default)
+ * - 'medium': Hidden on small screens (<640px)
+ * - 'low': Hidden on medium and small screens (<768px)
  */
 
 interface TableProps {
@@ -87,6 +93,9 @@ export function TableRow({ children, className, onClick, hover = true }: TableRo
   );
 }
 
+/** Column priority for responsive visibility */
+type ColumnPriority = 'high' | 'medium' | 'low';
+
 interface TableHeaderProps {
   children: React.ReactNode;
   className?: string;
@@ -98,6 +107,8 @@ interface TableHeaderProps {
   sortDirection?: 'asc' | 'desc' | null;
   /** Click handler for sorting */
   onSort?: () => void;
+  /** Column priority for mobile visibility: 'high' (always), 'medium' (hidden <640px), 'low' (hidden <768px) */
+  priority?: ColumnPriority;
 }
 
 export function TableHeader({
@@ -107,12 +118,19 @@ export function TableHeader({
   sortable,
   sortDirection,
   onSort,
+  priority = 'high',
 }: TableHeaderProps) {
   const alignClass = {
     left: 'text-left',
     center: 'text-center',
     right: 'text-right',
   }[align];
+
+  const priorityClass = {
+    high: '',
+    medium: 'hidden sm:table-cell',
+    low: 'hidden md:table-cell',
+  }[priority];
 
   return (
     <th
@@ -121,6 +139,7 @@ export function TableHeader({
         'px-3 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider',
         alignClass,
         sortable && 'cursor-pointer select-none hover:text-gray-700',
+        priorityClass,
         className
       )}
       onClick={sortable ? onSort : undefined}
@@ -144,6 +163,8 @@ interface TableCellProps {
   align?: 'left' | 'center' | 'right';
   /** Truncate long text with ellipsis */
   truncate?: boolean;
+  /** Column priority for mobile visibility: 'high' (always), 'medium' (hidden <640px), 'low' (hidden <768px) */
+  priority?: ColumnPriority;
 }
 
 export function TableCell({
@@ -151,6 +172,7 @@ export function TableCell({
   className,
   align = 'left',
   truncate,
+  priority = 'high',
 }: TableCellProps) {
   const alignClass = {
     left: 'text-left',
@@ -158,12 +180,19 @@ export function TableCell({
     right: 'text-right',
   }[align];
 
+  const priorityClass = {
+    high: '',
+    medium: 'hidden sm:table-cell',
+    low: 'hidden md:table-cell',
+  }[priority];
+
   return (
     <td
       className={cn(
         'px-3 py-3 text-sm text-gray-900 whitespace-nowrap',
         alignClass,
         truncate && 'max-w-[200px] truncate',
+        priorityClass,
         className
       )}
     >
@@ -215,5 +244,95 @@ export function TableLoading({ colSpan, rows = 5 }: TableLoadingProps) {
     </>
   );
 }
+
+/**
+ * ResponsiveTableWrapper - Wrapper that shows table on desktop and cards on mobile
+ *
+ * Usage:
+ * <ResponsiveTableWrapper
+ *   mobileCards={items.map(item => (
+ *     <MobileCard key={item.id} item={item} />
+ *   ))}
+ * >
+ *   <Table>...</Table>
+ * </ResponsiveTableWrapper>
+ */
+interface ResponsiveTableWrapperProps {
+  children: React.ReactNode;
+  /** Cards to render on mobile instead of table */
+  mobileCards?: React.ReactNode;
+  /** Breakpoint to switch (default: 'sm' = 640px) */
+  breakpoint?: 'sm' | 'md' | 'lg';
+}
+
+export function ResponsiveTableWrapper({
+  children,
+  mobileCards,
+  breakpoint = 'sm',
+}: ResponsiveTableWrapperProps) {
+  const breakpointClass = {
+    sm: { hide: 'hidden sm:block', show: 'sm:hidden' },
+    md: { hide: 'hidden md:block', show: 'md:hidden' },
+    lg: { hide: 'hidden lg:block', show: 'lg:hidden' },
+  }[breakpoint];
+
+  if (!mobileCards) {
+    return <>{children}</>;
+  }
+
+  return (
+    <>
+      {/* Table view for larger screens */}
+      <div className={breakpointClass.hide}>{children}</div>
+      {/* Card view for mobile */}
+      <div className={cn(breakpointClass.show, 'space-y-3')}>{mobileCards}</div>
+    </>
+  );
+}
+
+/**
+ * MobileTableCard - Card layout for table rows on mobile
+ */
+interface MobileTableCardProps {
+  children: React.ReactNode;
+  className?: string;
+  onClick?: () => void;
+}
+
+export function MobileTableCard({ children, className, onClick }: MobileTableCardProps) {
+  return (
+    <div
+      className={cn(
+        'bg-white rounded-lg border border-gray-200 p-4 shadow-sm',
+        onClick && 'cursor-pointer hover:border-brand-primary hover:shadow-md transition-all',
+        className
+      )}
+      onClick={onClick}
+    >
+      {children}
+    </div>
+  );
+}
+
+/**
+ * MobileTableRow - Row within a mobile card (label + value)
+ */
+interface MobileTableRowProps {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+}
+
+export function MobileTableRow({ label, children, className }: MobileTableRowProps) {
+  return (
+    <div className={cn('flex justify-between items-center py-1.5', className)}>
+      <span className="text-sm text-gray-500">{label}</span>
+      <span className="text-sm text-gray-900 font-medium">{children}</span>
+    </div>
+  );
+}
+
+// Export types
+export type { ColumnPriority };
 
 export default Table;

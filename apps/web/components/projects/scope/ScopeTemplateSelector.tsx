@@ -29,10 +29,29 @@ const PHASE_KEYWORDS: Record<string, string[]> = {
   'Final': ['final', 'inspection', 'fixture', 'appliance', 'punch'],
 };
 
-function matchPhase(itemTitle: string, phases: { id: string; name: string }[]): string {
+/**
+ * Match a template item to a project phase
+ * Priority: 1) phaseName from template item, 2) title keywords, 3) keyword patterns
+ */
+function matchPhase(
+  itemTitle: string,
+  phases: { id: string; name: string }[],
+  itemPhaseName?: string
+): string {
+  // Priority 1: If template item specifies a phaseName, try to match it
+  if (itemPhaseName) {
+    const phaseNameLower = itemPhaseName.toLowerCase();
+    const directMatch = phases.find(p =>
+      p.name.toLowerCase() === phaseNameLower ||
+      p.name.toLowerCase().includes(phaseNameLower) ||
+      phaseNameLower.includes(p.name.toLowerCase())
+    );
+    if (directMatch) return directMatch.id;
+  }
+
   const title = itemTitle.toLowerCase();
 
-  // Try to match against phase names directly first
+  // Priority 2: Try to match against phase names directly
   for (const phase of phases) {
     const phaseLower = phase.name.toLowerCase();
     if (title.includes(phaseLower) || phaseLower.includes(title.split(' ')[0])) {
@@ -40,7 +59,7 @@ function matchPhase(itemTitle: string, phases: { id: string; name: string }[]): 
     }
   }
 
-  // Try keyword matching
+  // Priority 3: Try keyword matching
   for (const [phaseName, keywords] of Object.entries(PHASE_KEYWORDS)) {
     for (const keyword of keywords) {
       if (title.includes(keyword)) {
@@ -75,11 +94,17 @@ export default function ScopeTemplateSelector({ onSelect, onClose, phases = [] }
   // Preview items with phase assignments
   const previewItems = useMemo(() => {
     if (!selected) return [];
-    return selected.items.map((item, idx) => ({
-      ...item,
-      id: `tmpl_${Date.now()}_${idx}`,
-      phaseId: autoAssignPhases && phases.length > 0 ? matchPhase(item.title, phases) : '',
-    }));
+    return selected.items.map((item, idx) => {
+      // Support both old templates (no phaseName) and new templates (with phaseName)
+      const itemWithPhaseName = item as typeof item & { phaseName?: string };
+      return {
+        ...item,
+        id: `tmpl_${Date.now()}_${idx}`,
+        phaseId: autoAssignPhases && phases.length > 0
+          ? matchPhase(item.title, phases, itemWithPhaseName.phaseName)
+          : '',
+      };
+    });
   }, [selected, autoAssignPhases, phases]);
 
   const handleApply = () => {

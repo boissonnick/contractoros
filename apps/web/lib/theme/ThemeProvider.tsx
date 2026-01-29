@@ -12,6 +12,58 @@ const DEFAULT_BRANDING: OrgBranding = {
   accentColor: '#f59e0b',
 };
 
+/**
+ * Convert hex color to RGB values
+ */
+function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
+    : null;
+}
+
+/**
+ * Convert RGB to hex
+ */
+function rgbToHex(r: number, g: number, b: number): string {
+  return '#' + [r, g, b].map(x => {
+    const hex = Math.max(0, Math.min(255, Math.round(x))).toString(16);
+    return hex.length === 1 ? '0' + hex : hex;
+  }).join('');
+}
+
+/**
+ * Generate a lighter tint of a color (for backgrounds)
+ */
+function getLightVariant(hex: string): string {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return '#eff6ff';
+  // Mix with white at 90% ratio for very light tint
+  return rgbToHex(
+    rgb.r + (255 - rgb.r) * 0.9,
+    rgb.g + (255 - rgb.g) * 0.9,
+    rgb.b + (255 - rgb.b) * 0.9
+  );
+}
+
+/**
+ * Generate a darker shade of a color (for hover states)
+ */
+function getDarkVariant(hex: string): string {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return '#1d4ed8';
+  // Darken by 15%
+  return rgbToHex(
+    rgb.r * 0.85,
+    rgb.g * 0.85,
+    rgb.b * 0.85
+  );
+}
+
 interface ThemeContextType {
   branding: OrgBranding;
   logoURL: string | null;
@@ -27,9 +79,19 @@ export const useTheme = () => useContext(ThemeContext);
 function applyBrandCSS(branding: OrgBranding) {
   if (typeof document === 'undefined') return;
   const root = document.documentElement;
+
+  // Primary color and variants
   root.style.setProperty('--color-primary', branding.primaryColor);
+  root.style.setProperty('--color-primary-light', getLightVariant(branding.primaryColor));
+  root.style.setProperty('--color-primary-dark', getDarkVariant(branding.primaryColor));
+
+  // Secondary color and variants
   root.style.setProperty('--color-secondary', branding.secondaryColor);
+  root.style.setProperty('--color-secondary-light', getLightVariant(branding.secondaryColor));
+
+  // Accent color and variants
   root.style.setProperty('--color-accent', branding.accentColor);
+  root.style.setProperty('--color-accent-light', getLightVariant(branding.accentColor));
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {

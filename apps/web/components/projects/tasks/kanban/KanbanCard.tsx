@@ -10,9 +10,10 @@ import { cn } from '@/lib/utils';
 interface KanbanCardProps {
   task: Task;
   onClick: (task: Task) => void;
+  phaseName?: string;
 }
 
-export default function KanbanCard({ task, onClick }: KanbanCardProps) {
+export default function KanbanCard({ task, onClick, phaseName }: KanbanCardProps) {
   const {
     attributes,
     listeners,
@@ -40,7 +41,7 @@ export default function KanbanCard({ task, onClick }: KanbanCardProps) {
         isDragging && 'opacity-50 z-50'
       )}
     >
-      <TaskCard task={task} onClick={onClick} />
+      <TaskCard task={task} onClick={onClick} phaseName={phaseName} />
     </div>
   );
 }

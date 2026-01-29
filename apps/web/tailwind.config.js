@@ -25,8 +25,12 @@ module.exports = {
         },
         // Dynamic org branding via CSS variables
         'brand-primary': 'var(--color-primary, #2563eb)',
+        'brand-primary-light': 'var(--color-primary-light, #eff6ff)',
+        'brand-primary-dark': 'var(--color-primary-dark, #1d4ed8)',
         'brand-secondary': 'var(--color-secondary, #64748b)',
+        'brand-secondary-light': 'var(--color-secondary-light, #f1f5f9)',
         'brand-accent': 'var(--color-accent, #f59e0b)',
+        'brand-accent-light': 'var(--color-accent-light, #fef3c7)',
       },
       fontFamily: {
         sans: [

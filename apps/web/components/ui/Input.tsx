@@ -35,7 +35,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             className={cn(
+              // Base styles with mobile-first touch target (44px min height)
               'block w-full rounded-lg border bg-white px-3 py-2.5 text-gray-900 placeholder-gray-400',
+              'min-h-[44px] text-base sm:text-sm',
               'focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent',
               'disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed',
               'transition-colors duration-200',
@@ -94,7 +96,9 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           ref={ref}
           id={textareaId}
           className={cn(
+            // Base styles with mobile-first text size
             'block w-full rounded-lg border bg-white px-3 py-2.5 text-gray-900 placeholder-gray-400',
+            'text-base sm:text-sm',
             'focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent',
             'disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed',
             'transition-colors duration-200 resize-none',
@@ -145,7 +149,9 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           ref={ref}
           id={selectId}
           className={cn(
+            // Base styles with mobile-first touch target (44px min height)
             'block w-full rounded-lg border bg-white px-3 py-2.5 text-gray-900',
+            'min-h-[44px] text-base sm:text-sm',
             'focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent',
             'disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed',
             'transition-colors duration-200 appearance-none',

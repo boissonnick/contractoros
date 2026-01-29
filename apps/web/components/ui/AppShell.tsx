@@ -39,7 +39,7 @@ export default function AppShell({
                 href={item.href}
                 className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                   isActive
-                    ? 'bg-brand-50 text-brand-primary'
+                    ? 'bg-brand-primary-light text-brand-primary'
                     : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                 }`}
               >
@@ -52,7 +52,7 @@ export default function AppShell({
 
         <div className="p-4 border-t border-gray-200">
           <div className="flex items-center mb-4">
-            <div className="h-8 w-8 rounded-full bg-brand-50 flex items-center justify-center text-brand-primary font-bold">
+            <div className="h-8 w-8 rounded-full bg-brand-primary-light flex items-center justify-center text-brand-primary font-bold">
               {userDisplayName ? userDisplayName.charAt(0) : 'U'}
             </div>
             <div className="ml-3">
@@ -69,12 +69,13 @@ export default function AppShell({
       </aside>
 
       {/* Mobile/Tablet Header */}
-      <div className="md:hidden bg-white border-b border-gray-200 p-4 flex items-center justify-between sticky top-0 z-30">
+      <div className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
         <span className="font-bold text-lg text-brand-primary">ContractorOS</span>
+        {/* Touch target min 44x44px for accessibility */}
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="p-2 -m-2 text-gray-500 hover:text-gray-700"
-          aria-label="Menu"
+          className="min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+          aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
         >
           {mobileMenuOpen ? (
             <XMarkIcon className="h-6 w-6" />
@@ -88,10 +89,10 @@ export default function AppShell({
       {mobileMenuOpen && (
         <div className="md:hidden fixed inset-0 z-20 bg-black/50" onClick={() => setMobileMenuOpen(false)}>
           <div
-            className="absolute top-16 right-0 w-64 bg-white shadow-lg rounded-bl-lg max-h-[80vh] overflow-y-auto"
+            className="absolute top-14 right-0 left-0 sm:left-auto sm:w-72 bg-white shadow-lg sm:rounded-bl-lg max-h-[80vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <nav className="p-4 space-y-1">
+            <nav className="p-3 space-y-0.5">
               {navItems.map((item) => {
                 const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
                 return (
@@ -99,10 +100,10 @@ export default function AppShell({
                     key={item.href}
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-md transition-colors ${
+                    className={`flex items-center px-3 py-3 min-h-[44px] text-base font-medium rounded-lg transition-colors ${
                       isActive
-                        ? 'bg-brand-50 text-brand-primary'
-                        : 'text-gray-700 hover:bg-gray-50'
+                        ? 'bg-brand-primary-light text-brand-primary'
+                        : 'text-gray-700 hover:bg-gray-50 active:bg-gray-100'
                     }`}
                   >
                     <item.icon className={`mr-3 h-5 w-5 ${isActive ? 'text-brand-primary' : 'text-gray-400'}`} />
@@ -111,9 +112,9 @@ export default function AppShell({
                 );
               })}
             </nav>
-            <div className="p-4 border-t border-gray-200">
-              <div className="flex items-center mb-3">
-                <div className="h-8 w-8 rounded-full bg-brand-50 flex items-center justify-center text-brand-primary font-bold">
+            <div className="p-3 border-t border-gray-200">
+              <div className="flex items-center mb-3 px-3">
+                <div className="h-10 w-10 rounded-full bg-brand-primary-light flex items-center justify-center text-brand-primary font-bold">
                   {userDisplayName ? userDisplayName.charAt(0) : 'U'}
                 </div>
                 <span className="ml-3 text-sm font-medium text-gray-700 truncate">
@@ -122,7 +123,7 @@ export default function AppShell({
               </div>
               <button
                 onClick={() => { setMobileMenuOpen(false); onSignOut(); }}
-                className="w-full px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+                className="w-full min-h-[44px] px-4 py-3 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 active:bg-gray-100"
               >
                 Sign Out
               </button>

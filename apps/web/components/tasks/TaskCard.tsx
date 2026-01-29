@@ -12,6 +12,7 @@ import {
   UserCircleIcon,
   ArrowPathIcon,
   CheckCircleIcon,
+  RectangleStackIcon,
 } from '@heroicons/react/24/outline';
 import { formatDate } from '@/lib/date-utils';
 
@@ -28,9 +29,11 @@ interface TaskCardProps {
   compact?: boolean;
   className?: string;
   isSelected?: boolean;
+  /** Phase name to display - pass from parent that has phases data */
+  phaseName?: string;
 }
 
-export default function TaskCard({ task, onClick, compact = false, className, isSelected }: TaskCardProps) {
+export default function TaskCard({ task, onClick, compact = false, className, isSelected, phaseName }: TaskCardProps) {
   const hasDueDate = !!task.dueDate;
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed';
   const hasAssignees = task.assignedTo.length > 0;
@@ -80,6 +83,14 @@ export default function TaskCard({ task, onClick, compact = false, className, is
           )}>
             {task.priority}
           </span>
+
+          {/* Phase */}
+          {phaseName && (
+            <span className="inline-flex items-center gap-1 text-xs text-brand-primary bg-brand-primary-light px-1.5 py-0.5 rounded font-medium">
+              <RectangleStackIcon className="h-3 w-3" />
+              {phaseName}
+            </span>
+          )}
 
           {/* Trade */}
           {task.trade && (

@@ -39,8 +39,8 @@ export { default as FirestoreError } from './FirestoreError';
 export { default as ConfirmDialog, useConfirmDialog } from './ConfirmDialog';
 export type { ConfirmDialogProps } from './ConfirmDialog';
 
-export { default as BaseModal, useModal, useModalDirtyState } from './BaseModal';
-export type { BaseModalProps } from './BaseModal';
+export { default as BaseModal, useModal, useModalDirtyState, BaseModalWithDirtyState } from './BaseModal';
+export type { BaseModalProps, BaseModalWithDirtyStateProps, UseModalDirtyStateOptions } from './BaseModal';
 
 export { FormInput, FormTextarea, FormSelect, FormCheckbox, FormSection, FormError, FormFieldWrapper } from './FormField';
 
@@ -56,7 +56,11 @@ export {
   TableCell,
   TableEmpty,
   TableLoading,
+  ResponsiveTableWrapper,
+  MobileTableCard,
+  MobileTableRow,
 } from './Table';
+export type { ColumnPriority } from './Table';
 
 export {
   default as Skeleton,

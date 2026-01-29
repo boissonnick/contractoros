@@ -1005,6 +1005,7 @@ export interface ProjectPhoto {
   phaseId?: string;
   scopeItemId?: string;
   folderId?: string;
+  albumId?: string;
   userId: string;
   userName?: string;
   url: string;
@@ -1016,8 +1017,78 @@ export interface ProjectPhoto {
   location?: {
     lat: number;
     lng: number;
+    address?: string;
   };
+  // Before/after pairing
+  pairedPhotoId?: string;
+  pairType?: 'before' | 'after';
+  // Annotations
+  annotations?: PhotoAnnotation[];
+  // Metadata
+  metadata?: {
+    width?: number;
+    height?: number;
+    fileSize?: number;
+    mimeType?: string;
+    deviceModel?: string;
+    originalFilename?: string;
+  };
+  // Sharing
+  isPublic?: boolean;
+  shareToken?: string;
+  // Offline sync
+  syncStatus?: 'pending' | 'synced' | 'failed';
+  localPath?: string;
   takenAt: Date;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+export interface PhotoAnnotation {
+  id: string;
+  type: 'arrow' | 'circle' | 'rectangle' | 'text' | 'freehand';
+  color: string;
+  // Position as percentage (0-100) for responsive scaling
+  x: number;
+  y: number;
+  width?: number;
+  height?: number;
+  text?: string;
+  points?: { x: number; y: number }[]; // For freehand
+  createdBy: string;
+  createdAt: Date;
+}
+
+export interface PhotoAlbum {
+  id: string;
+  projectId: string;
+  orgId: string;
+  name: string;
+  description?: string;
+  coverPhotoId?: string;
+  coverPhotoUrl?: string;
+  phaseId?: string;
+  photoCount: number;
+  // Sharing
+  isPublic: boolean;
+  shareToken?: string;
+  shareExpiresAt?: Date;
+  // Client access
+  clientAccessEnabled: boolean;
+  clientAccessEmails?: string[];
+  createdBy: string;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+export interface BeforeAfterPair {
+  id: string;
+  projectId: string;
+  beforePhotoId: string;
+  afterPhotoId: string;
+  title?: string;
+  description?: string;
+  location?: string;
   createdAt: Date;
 }
 
@@ -1159,7 +1230,7 @@ export interface ActivityItem {
 // Scope of Work (SOW) Types
 // ============================================
 
-export type ScopeStatus = 'draft' | 'pending_approval' | 'approved' | 'superseded';
+export type ScopeStatus = 'draft' | 'pending_approval' | 'approved' | 'rejected' | 'superseded';
 
 export interface ScopeMaterial {
   name: string;
@@ -2389,3 +2460,1722 @@ export interface ServiceTicket {
   createdAt: Date;
   updatedAt?: Date;
 }
+
+// ============================================
+// Client Management Types (FEAT-L4)
+// ============================================
+
+export type ClientStatus = 'active' | 'past' | 'potential' | 'inactive';
+
+export type ClientSource =
+  | 'referral'
+  | 'google'
+  | 'social_media'
+  | 'yard_sign'
+  | 'vehicle_wrap'
+  | 'website'
+  | 'repeat'
+  | 'other';
+
+export type ClientCommunicationPreference = 'email' | 'phone' | 'text' | 'any';
+
+export interface ClientContact {
+  id: string;
+  type: 'primary' | 'secondary' | 'emergency';
+  name: string;
+  email?: string;
+  phone?: string;
+  relationship?: string; // e.g., "Spouse", "Property Manager", "Assistant"
+}
+
+export interface ClientAddress {
+  id: string;
+  type: 'billing' | 'property' | 'mailing';
+  label?: string;
+  street: string;
+  city: string;
+  state: string;
+  zip: string;
+  isDefault?: boolean;
+}
+
+export interface ClientNote {
+  id: string;
+  content: string;
+  createdBy: string;
+  createdByName: string;
+  createdAt: Date;
+  isPinned?: boolean;
+}
+
+export interface ClientFinancials {
+  lifetimeValue: number;
+  totalProjects: number;
+  completedProjects: number;
+  activeProjects: number;
+  outstandingBalance: number;
+  lastPaymentDate?: Date;
+  lastPaymentAmount?: number;
+  averageProjectValue: number;
+}
+
+export interface Client {
+  id: string;
+  orgId: string;
+  userId?: string;              // Linked UserProfile if they have an account
+
+  // Basic info
+  firstName: string;
+  lastName: string;
+  displayName: string;          // Computed: firstName + lastName or company name
+  companyName?: string;         // For commercial clients
+  isCommercial: boolean;
+
+  // Contact info
+  email: string;
+  phone?: string;
+  preferredCommunication: ClientCommunicationPreference;
+  contacts: ClientContact[];    // Additional contacts
+  addresses: ClientAddress[];   // Multiple addresses
+
+  // Status & tracking
+  status: ClientStatus;
+  source: ClientSource;
+  sourceDetails?: string;       // e.g., "Referred by John Smith"
+  referredBy?: string;          // Client ID if referred by another client
+
+  // Preferences
+  preferences?: ClientPreferences;
+  notes: ClientNote[];
+  tags?: string[];
+
+  // Financials (computed/cached)
+  financials: ClientFinancials;
+
+  // Project references
+  projectIds: string[];
+
+  // Dates
+  firstContactDate?: Date;
+  lastContactDate?: Date;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+export interface ClientCommunicationLog {
+  id: string;
+  clientId: string;
+  orgId: string;
+  type: 'email' | 'phone' | 'text' | 'meeting' | 'site_visit' | 'note';
+  subject?: string;
+  content: string;
+  direction: 'inbound' | 'outbound';
+  createdBy: string;
+  createdByName: string;
+  createdAt: Date;
+  projectId?: string;           // If related to a specific project
+}
+
+// ============================================
+// Payment Processing Types (Stripe)
+// ============================================
+
+export type PaymentMethod = 'card' | 'ach';
+export type PaymentStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'refunded' | 'partially_refunded' | 'cancelled';
+export type SplitPaymentType = 'deposit' | 'milestone' | 'final';
+
+export interface StripePayment {
+  id: string;
+  orgId: string;
+  invoiceId: string;
+  projectId: string;
+  clientId: string;
+
+  // Payment Details
+  amount: number; // in cents
+  currency: 'USD';
+  paymentMethod: PaymentMethod;
+
+  // Stripe Integration
+  stripePaymentIntentId: string;
+  stripeCustomerId?: string;
+  stripeChargeId?: string;
+
+  // Status
+  status: PaymentStatus;
+  failureReason?: string;
+  failureCode?: string;
+
+  // Metadata
+  description: string;
+  reference?: string; // e.g., invoice number
+
+  // Dates
+  createdAt: Date;
+  processedAt?: Date;
+  completedAt?: Date;
+  refundedAt?: Date;
+
+  // Refund Info
+  refundId?: string;
+  refundAmount?: number; // in cents
+  refundReason?: string;
+
+  // Split Payment
+  isSplitPayment?: boolean;
+  splitType?: SplitPaymentType;
+  parentPaymentId?: string;
+
+  // Receipt
+  receiptUrl?: string;
+  receiptSentAt?: Date;
+
+  // Audit
+  createdBy?: string;
+  metadata?: Record<string, string>;
+}
+
+export interface SavedPaymentMethod {
+  id: string;
+  orgId: string;
+  clientId: string;
+
+  // Stripe Integration
+  stripePaymentMethodId: string;
+  stripeCustomerId: string;
+
+  type: PaymentMethod;
+
+  // Card details (masked for display)
+  last4?: string;
+  brand?: string; // visa, mastercard, amex, discover
+  expMonth?: number;
+  expYear?: number;
+
+  // ACH details (masked for display)
+  accountLast4?: string;
+  bankName?: string;
+  accountType?: 'checking' | 'savings';
+
+  // Settings
+  isDefault: boolean;
+  nickname?: string;
+
+  // Dates
+  createdAt: Date;
+  updatedAt?: Date;
+  deletedAt?: Date;
+}
+
+export interface PaymentLink {
+  id: string;
+  orgId: string;
+  invoiceId: string;
+  projectId: string;
+  clientId: string;
+
+  // Link Details
+  token: string; // unique token for magic link
+  amount: number; // in cents
+  currency: 'USD';
+
+  // Status
+  status: 'active' | 'used' | 'expired' | 'cancelled';
+  paymentId?: string; // set when payment is completed
+
+  // Expiration
+  expiresAt: Date;
+
+  // Dates
+  createdAt: Date;
+  usedAt?: Date;
+}
+
+export interface PaymentReminder {
+  id: string;
+  orgId: string;
+  invoiceId: string;
+  clientId: string;
+
+  // Reminder Details
+  type: 'email' | 'sms';
+  scheduledAt: Date;
+  sentAt?: Date;
+
+  // Status
+  status: 'scheduled' | 'sent' | 'failed' | 'cancelled';
+  failureReason?: string;
+
+  // Content
+  subject?: string;
+  message?: string;
+
+  // Tracking
+  reminderNumber: number; // 1st, 2nd, 3rd reminder
+  isEscalation: boolean;
+}
+
+export interface PaymentSchedule {
+  id: string;
+  orgId: string;
+  projectId: string;
+  invoiceId?: string;
+
+  // Schedule Details
+  name: string;
+  description?: string;
+  totalAmount: number; // in cents
+
+  // Milestones
+  milestones: PaymentMilestone[];
+
+  // Status
+  status: 'draft' | 'active' | 'completed' | 'cancelled';
+
+  // Dates
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+export interface PaymentMilestone {
+  id: string;
+  name: string;
+  description?: string;
+  amount: number; // in cents
+  percentage?: number; // percentage of total (0-100)
+  dueDate?: Date;
+  status: 'pending' | 'due' | 'paid' | 'overdue';
+  paymentId?: string;
+  paidAt?: Date;
+}
+
+export interface StripeConnectAccount {
+  id: string;
+  orgId: string;
+  stripeAccountId: string;
+  status: 'pending' | 'active' | 'restricted' | 'disabled';
+  chargesEnabled: boolean;
+  payoutsEnabled: boolean;
+  detailsSubmitted: boolean;
+  requirements?: {
+    currentlyDue: string[];
+    eventuallyDue: string[];
+    pastDue: string[];
+  };
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+// ============================================
+// SMS/Text Workflows Types (Twilio)
+// ============================================
+
+export type SmsStatus = 'queued' | 'sent' | 'delivered' | 'failed' | 'undelivered';
+export type SmsDirection = 'outbound' | 'inbound';
+export type SmsTemplateType =
+  | 'payment_reminder'
+  | 'payment_received'
+  | 'schedule_update'
+  | 'project_update'
+  | 'invoice_sent'
+  | 'document_ready'
+  | 'task_assigned'
+  | 'custom';
+
+export interface SmsMessage {
+  id: string;
+  orgId: string;
+
+  // Message Details
+  to: string; // E.164 format (+1XXXXXXXXXX)
+  from: string; // Twilio phone number
+  body: string;
+  direction: SmsDirection;
+
+  // Twilio Integration
+  twilioMessageSid?: string;
+  twilioAccountSid?: string;
+
+  // Status
+  status: SmsStatus;
+  errorCode?: string;
+  errorMessage?: string;
+
+  // Pricing
+  price?: string;
+  priceUnit?: string;
+
+  // Context
+  recipientId?: string; // User, client, or subcontractor ID
+  recipientType?: 'user' | 'client' | 'subcontractor';
+  recipientName?: string;
+
+  // Related entities
+  projectId?: string;
+  invoiceId?: string;
+  taskId?: string;
+
+  // Template info
+  templateId?: string;
+  templateType?: SmsTemplateType;
+  templateVariables?: Record<string, string>;
+
+  // Dates
+  createdAt: Date;
+  sentAt?: Date;
+  deliveredAt?: Date;
+  updatedAt?: Date;
+
+  // Metadata
+  createdBy?: string;
+  metadata?: Record<string, string>;
+}
+
+export interface SmsTemplate {
+  id: string;
+  orgId: string;
+
+  // Template Details
+  name: string;
+  description?: string;
+  type: SmsTemplateType;
+  body: string; // Template body with {{variable}} placeholders
+
+  // Variables
+  variables: SmsTemplateVariable[];
+
+  // Settings
+  isActive: boolean;
+  isDefault: boolean;
+
+  // Dates
+  createdAt: Date;
+  updatedAt?: Date;
+  createdBy: string;
+}
+
+export interface SmsTemplateVariable {
+  name: string;
+  description: string;
+  required: boolean;
+  defaultValue?: string;
+}
+
+export interface SmsConversation {
+  id: string;
+  orgId: string;
+
+  // Participant
+  phoneNumber: string; // E.164 format
+  participantId?: string;
+  participantType?: 'user' | 'client' | 'subcontractor';
+  participantName?: string;
+
+  // Conversation state
+  lastMessageAt: Date;
+  lastMessagePreview: string;
+  lastMessageDirection: SmsDirection;
+  unreadCount: number;
+
+  // Context
+  projectId?: string;
+
+  // Dates
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+export interface SmsBroadcast {
+  id: string;
+  orgId: string;
+
+  // Broadcast Details
+  name: string;
+  message: string;
+
+  // Recipients
+  recipients: SmsBroadcastRecipient[];
+  totalRecipients: number;
+
+  // Status
+  status: 'draft' | 'scheduled' | 'sending' | 'completed' | 'cancelled';
+  scheduledAt?: Date;
+  startedAt?: Date;
+  completedAt?: Date;
+
+  // Statistics
+  sentCount: number;
+  deliveredCount: number;
+  failedCount: number;
+
+  // Related entities
+  projectId?: string;
+
+  // Dates
+  createdAt: Date;
+  updatedAt?: Date;
+  createdBy: string;
+}
+
+export interface SmsBroadcastRecipient {
+  phoneNumber: string;
+  name?: string;
+  recipientId?: string;
+  recipientType?: 'user' | 'client' | 'subcontractor';
+  status: SmsStatus;
+  messageSid?: string;
+  sentAt?: Date;
+  deliveredAt?: Date;
+  errorCode?: string;
+  errorMessage?: string;
+}
+
+export interface TwilioPhoneNumber {
+  id: string;
+  orgId: string;
+
+  // Phone number details
+  phoneNumber: string; // E.164 format
+  friendlyName?: string;
+
+  // Twilio details
+  twilioPhoneNumberSid: string;
+
+  // Capabilities
+  smsEnabled: boolean;
+  voiceEnabled: boolean;
+  mmsEnabled: boolean;
+
+  // Settings
+  isDefault: boolean;
+  isActive: boolean;
+
+  // Dates
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+export interface SmsAutomation {
+  id: string;
+  orgId: string;
+
+  // Automation Details
+  name: string;
+  description?: string;
+
+  // Trigger
+  trigger: SmsAutomationTrigger;
+
+  // Action
+  templateId: string;
+
+  // Settings
+  isActive: boolean;
+  delay?: number; // Delay in minutes before sending
+
+  // Filters
+  filters?: {
+    projectStatus?: string[];
+    clientTags?: string[];
+    invoiceStatus?: string[];
+  };
+
+  // Statistics
+  sentCount: number;
+  lastTriggeredAt?: Date;
+
+  // Dates
+  createdAt: Date;
+  updatedAt?: Date;
+  createdBy: string;
+}
+
+export type SmsAutomationTrigger =
+  | 'invoice_created'
+  | 'invoice_overdue'
+  | 'payment_received'
+  | 'project_started'
+  | 'project_completed'
+  | 'schedule_changed'
+  | 'task_assigned'
+  | 'document_uploaded';
+
+// =============================================================================
+// ESTIMATE LINE ITEM LIBRARY
+// =============================================================================
+
+/**
+ * Trade categories for line items
+ */
+export type LineItemTrade =
+  | 'general'
+  | 'demolition'
+  | 'framing'
+  | 'roofing'
+  | 'siding'
+  | 'windows_doors'
+  | 'plumbing'
+  | 'electrical'
+  | 'hvac'
+  | 'insulation'
+  | 'drywall'
+  | 'painting'
+  | 'flooring'
+  | 'cabinets'
+  | 'countertops'
+  | 'tile'
+  | 'fixtures'
+  | 'landscaping'
+  | 'concrete'
+  | 'masonry'
+  | 'custom';
+
+/**
+ * Unit types for line items
+ */
+export type LineItemUnit =
+  | 'each'
+  | 'sqft'
+  | 'lnft'
+  | 'sqyd'
+  | 'cuft'
+  | 'cuyd'
+  | 'hour'
+  | 'day'
+  | 'week'
+  | 'lump'
+  | 'gallon'
+  | 'pound'
+  | 'ton'
+  | 'bundle'
+  | 'box'
+  | 'roll'
+  | 'sheet'
+  | 'pallet';
+
+/**
+ * A saved line item in the library
+ */
+export interface LineItem {
+  id: string;
+  orgId: string;
+
+  // Basic info
+  name: string;
+  description?: string;
+  trade: LineItemTrade;
+  category?: string; // Custom sub-category within trade
+
+  // Pricing
+  unit: LineItemUnit;
+  materialCost: number; // Per unit
+  laborCost: number; // Per unit
+  unitPrice: number; // Total per unit (material + labor + markup)
+  defaultMarkup: number; // Percentage (e.g., 20 for 20%)
+
+  // Tracking
+  sku?: string; // Internal SKU or part number
+  supplier?: string;
+  supplierSku?: string;
+
+  // Metadata
+  tags?: string[];
+  isActive: boolean;
+  isFavorite: boolean;
+  usageCount: number;
+  lastUsedAt?: Date;
+
+  // Dates
+  createdAt: Date;
+  updatedAt?: Date;
+  createdBy: string;
+}
+
+/**
+ * A line item as used on the quick estimate builder
+ * This is separate from the existing EstimateLineItem which has different fields
+ */
+export interface BuilderLineItem {
+  id: string;
+  lineItemId?: string; // Reference to library item if from library
+
+  // Basic info
+  name: string;
+  description?: string;
+  trade?: LineItemTrade;
+
+  // Quantity and pricing
+  quantity: number;
+  unit: LineItemUnit;
+  materialCost: number; // Per unit
+  laborCost: number; // Per unit
+  unitPrice: number; // Total per unit
+  subtotal: number; // quantity * unitPrice
+
+  // Markup (can be adjusted per line)
+  markupPercent: number;
+  markupAmount: number;
+
+  // Tax
+  taxable: boolean;
+  taxAmount?: number;
+
+  // Total
+  total: number; // subtotal + markup + tax
+
+  // Phase/section grouping
+  phaseId?: string;
+  sectionId?: string;
+  sortOrder: number;
+
+  // Optional
+  notes?: string;
+}
+
+/**
+ * Estimate template for quick creation
+ */
+export interface EstimateTemplate {
+  id: string;
+  orgId: string;
+
+  // Basic info
+  name: string;
+  description?: string;
+  trade?: LineItemTrade;
+  projectType?: string; // e.g., 'Kitchen Remodel', 'Bathroom Addition'
+
+  // Line items
+  lineItems: BuilderTemplateItem[];
+
+  // Settings
+  defaultMarkup: number;
+  includeTax: boolean;
+  defaultTaxRate?: number;
+  terms?: string;
+  notes?: string;
+
+  // Metadata
+  isActive: boolean;
+  usageCount: number;
+  lastUsedAt?: Date;
+
+  // Dates
+  createdAt: Date;
+  updatedAt?: Date;
+  createdBy: string;
+}
+
+/**
+ * A line item within an estimate template (for the builder)
+ */
+export interface BuilderTemplateItem {
+  lineItemId?: string; // Reference to library item
+  name: string;
+  description?: string;
+  trade?: LineItemTrade;
+  unit: LineItemUnit;
+  materialCost: number;
+  laborCost: number;
+  unitPrice: number;
+  defaultQuantity: number;
+  markupPercent: number;
+  taxable: boolean;
+  phaseId?: string;
+  sortOrder: number;
+}
+
+/**
+ * Price history entry for tracking changes
+ */
+export interface LineItemPriceHistory {
+  id: string;
+  lineItemId: string;
+  orgId: string;
+
+  // Pricing at this point
+  materialCost: number;
+  laborCost: number;
+  unitPrice: number;
+
+  // Context
+  reason?: string; // e.g., 'Supplier price increase', 'Market adjustment'
+
+  // Dates
+  effectiveDate: Date;
+  createdAt: Date;
+  createdBy: string;
+}
+
+/**
+ * Helper functions for line item calculations
+ */
+export const LINE_ITEM_TRADES: { value: LineItemTrade; label: string }[] = [
+  { value: 'general', label: 'General' },
+  { value: 'demolition', label: 'Demolition' },
+  { value: 'framing', label: 'Framing' },
+  { value: 'roofing', label: 'Roofing' },
+  { value: 'siding', label: 'Siding' },
+  { value: 'windows_doors', label: 'Windows & Doors' },
+  { value: 'plumbing', label: 'Plumbing' },
+  { value: 'electrical', label: 'Electrical' },
+  { value: 'hvac', label: 'HVAC' },
+  { value: 'insulation', label: 'Insulation' },
+  { value: 'drywall', label: 'Drywall' },
+  { value: 'painting', label: 'Painting' },
+  { value: 'flooring', label: 'Flooring' },
+  { value: 'cabinets', label: 'Cabinets' },
+  { value: 'countertops', label: 'Countertops' },
+  { value: 'tile', label: 'Tile' },
+  { value: 'fixtures', label: 'Fixtures' },
+  { value: 'landscaping', label: 'Landscaping' },
+  { value: 'concrete', label: 'Concrete' },
+  { value: 'masonry', label: 'Masonry' },
+  { value: 'custom', label: 'Custom' },
+];
+
+export const LINE_ITEM_UNITS: { value: LineItemUnit; label: string; abbr: string }[] = [
+  { value: 'each', label: 'Each', abbr: 'ea' },
+  { value: 'sqft', label: 'Square Foot', abbr: 'sq ft' },
+  { value: 'lnft', label: 'Linear Foot', abbr: 'ln ft' },
+  { value: 'sqyd', label: 'Square Yard', abbr: 'sq yd' },
+  { value: 'cuft', label: 'Cubic Foot', abbr: 'cu ft' },
+  { value: 'cuyd', label: 'Cubic Yard', abbr: 'cu yd' },
+  { value: 'hour', label: 'Hour', abbr: 'hr' },
+  { value: 'day', label: 'Day', abbr: 'day' },
+  { value: 'week', label: 'Week', abbr: 'wk' },
+  { value: 'lump', label: 'Lump Sum', abbr: 'LS' },
+  { value: 'gallon', label: 'Gallon', abbr: 'gal' },
+  { value: 'pound', label: 'Pound', abbr: 'lb' },
+  { value: 'ton', label: 'Ton', abbr: 'ton' },
+  { value: 'bundle', label: 'Bundle', abbr: 'bdl' },
+  { value: 'box', label: 'Box', abbr: 'box' },
+  { value: 'roll', label: 'Roll', abbr: 'roll' },
+  { value: 'sheet', label: 'Sheet', abbr: 'sht' },
+  { value: 'pallet', label: 'Pallet', abbr: 'plt' },
+];
+
+// ============================================
+// Schedule Types
+// ============================================
+
+/**
+ * Schedule event status
+ */
+export type ScheduleEventStatus =
+  | 'scheduled'     // Confirmed on schedule
+  | 'tentative'     // Pending confirmation
+  | 'in_progress'   // Currently happening
+  | 'completed'     // Finished
+  | 'cancelled'     // Cancelled
+  | 'postponed';    // Moved to future date
+
+/**
+ * Schedule event type
+ */
+export type ScheduleEventType =
+  | 'job'           // Project work
+  | 'inspection'    // Building/permit inspection
+  | 'meeting'       // Client/team meeting
+  | 'delivery'      // Material delivery
+  | 'milestone'     // Project milestone
+  | 'time_off'      // Crew time off
+  | 'training'      // Safety/skills training
+  | 'other';
+
+/**
+ * Recurrence pattern for events
+ */
+export type RecurrencePattern =
+  | 'none'
+  | 'daily'
+  | 'weekly'
+  | 'biweekly'
+  | 'monthly';
+
+/**
+ * Weather condition type
+ */
+export type WeatherCondition =
+  | 'clear'
+  | 'partly_cloudy'
+  | 'cloudy'
+  | 'rain'
+  | 'heavy_rain'
+  | 'snow'
+  | 'storm'
+  | 'extreme_heat'
+  | 'extreme_cold'
+  | 'wind';
+
+/**
+ * Weather impact level
+ */
+export type WeatherImpact = 'none' | 'low' | 'moderate' | 'high' | 'severe';
+
+/**
+ * Schedule event - main scheduling unit
+ */
+export interface ScheduleEvent {
+  id: string;
+  orgId: string;
+
+  // Event info
+  title: string;
+  description?: string;
+  type: ScheduleEventType;
+  status: ScheduleEventStatus;
+  color?: string; // Custom color for calendar
+
+  // Timing
+  startDate: Date;
+  endDate: Date;
+  allDay: boolean;
+  estimatedHours?: number;
+
+  // Recurrence
+  recurrence: RecurrencePattern;
+  recurrenceEndDate?: Date;
+  parentEventId?: string; // For recurring event instances
+
+  // Location
+  location?: string;
+  address?: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
+
+  // Relationships
+  projectId?: string;
+  projectName?: string;
+  phaseId?: string;
+  phaseName?: string;
+  taskIds?: string[];
+  clientId?: string;
+  clientName?: string;
+
+  // Crew assignment
+  assignedUserIds: string[];
+  assignedUsers?: {
+    id: string;
+    name: string;
+    role?: string;
+  }[];
+  crewSize?: number;
+  leadUserId?: string; // Crew lead for this job
+
+  // Weather considerations
+  weatherSensitive: boolean;
+  weatherConditions?: WeatherCondition[];
+  weatherImpact?: WeatherImpact;
+  weatherNotes?: string;
+
+  // Conflict tracking
+  hasConflicts?: boolean;
+  conflictEventIds?: string[];
+
+  // Notifications
+  notifyAssignees: boolean;
+  notifyClient: boolean;
+  reminderMinutes?: number[]; // e.g., [1440, 60] = 24 hours and 1 hour before
+
+  // Notes
+  internalNotes?: string;
+  clientVisibleNotes?: string;
+
+  // Metadata
+  createdAt: Date;
+  createdBy: string;
+  updatedAt?: Date;
+  updatedBy?: string;
+}
+
+/**
+ * Crew availability for scheduling
+ */
+export interface CrewAvailability {
+  id: string;
+  orgId: string;
+  userId: string;
+  userName: string;
+
+  // Availability period
+  date: Date;
+  startTime?: string; // HH:mm format, null = all day
+  endTime?: string;
+  allDay: boolean;
+
+  // Status
+  status: 'available' | 'unavailable' | 'limited';
+  reason?: 'time_off' | 'sick' | 'training' | 'other_job' | 'personal' | 'other';
+  notes?: string;
+
+  // Recurring availability (e.g., always off Sundays)
+  isRecurring: boolean;
+  recurrencePattern?: RecurrencePattern;
+  recurrenceEndDate?: Date;
+
+  // Metadata
+  createdAt: Date;
+  createdBy: string;
+}
+
+/**
+ * Time off request
+ */
+export interface TimeOffRequest {
+  id: string;
+  orgId: string;
+  userId: string;
+  userName: string;
+
+  // Request details
+  type: 'vacation' | 'sick' | 'personal' | 'bereavement' | 'jury_duty' | 'other';
+  startDate: Date;
+  endDate: Date;
+  halfDay?: 'morning' | 'afternoon';
+  reason?: string;
+
+  // Approval workflow
+  status: 'pending' | 'approved' | 'denied' | 'cancelled';
+  approvedBy?: string;
+  approvedAt?: Date;
+  denialReason?: string;
+
+  // Metadata
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+/**
+ * Weather forecast data
+ */
+export interface WeatherForecast {
+  id: string;
+  orgId: string;
+
+  // Location
+  location: string;
+  coordinates: {
+    lat: number;
+    lng: number;
+  };
+
+  // Forecast
+  date: Date;
+  condition: WeatherCondition;
+  tempHigh: number;
+  tempLow: number;
+  precipitation: number; // percentage
+  humidity: number;
+  windSpeed: number;
+  windDirection?: string;
+  uvIndex?: number;
+
+  // Impact assessment
+  impact: WeatherImpact;
+  impactNotes?: string;
+  affectedTrades?: string[]; // e.g., ['roofing', 'concrete', 'painting']
+
+  // Source
+  source: string; // e.g., 'openweathermap', 'weatherapi'
+  fetchedAt: Date;
+}
+
+/**
+ * Schedule conflict
+ */
+export interface ScheduleConflict {
+  id: string;
+  orgId: string;
+
+  // Conflict type
+  type: 'crew_overlap' | 'equipment_overlap' | 'location_overlap' | 'weather' | 'resource_shortage';
+  severity: 'warning' | 'error';
+
+  // Conflicting events
+  eventIds: string[];
+  eventTitles: string[];
+
+  // Affected resources
+  affectedUserIds?: string[];
+  affectedUserNames?: string[];
+  affectedEquipmentIds?: string[];
+
+  // Description
+  description: string;
+  suggestedResolution?: string;
+
+  // Resolution
+  resolved: boolean;
+  resolvedAt?: Date;
+  resolvedBy?: string;
+  resolution?: string;
+
+  // Metadata
+  detectedAt: Date;
+}
+
+/**
+ * Schedule view preferences
+ */
+export interface ScheduleViewPreferences {
+  userId: string;
+  defaultView: 'day' | 'week' | 'month' | 'timeline';
+  showWeekends: boolean;
+  startOfWeek: 0 | 1 | 6; // 0 = Sunday, 1 = Monday, 6 = Saturday
+  workingHoursStart: string; // HH:mm
+  workingHoursEnd: string;
+  showWeather: boolean;
+  showConflicts: boolean;
+  colorBy: 'type' | 'project' | 'status' | 'assignee';
+  hiddenEventTypes?: ScheduleEventType[];
+  hiddenUserIds?: string[];
+}
+
+/**
+ * Schedule statistics
+ */
+export interface ScheduleStats {
+  orgId: string;
+  period: {
+    start: Date;
+    end: Date;
+  };
+
+  // Counts
+  totalEvents: number;
+  completedEvents: number;
+  cancelledEvents: number;
+  postponedEvents: number;
+
+  // Hours
+  scheduledHours: number;
+  completedHours: number;
+  averageEventDuration: number;
+
+  // Crew utilization
+  crewUtilization: {
+    userId: string;
+    userName: string;
+    scheduledHours: number;
+    availableHours: number;
+    utilizationPercent: number;
+  }[];
+
+  // Weather impact
+  weatherDelayedEvents: number;
+  weatherDelayedHours: number;
+
+  // Conflicts
+  totalConflicts: number;
+  resolvedConflicts: number;
+}
+
+/**
+ * Constants for schedule
+ */
+export const SCHEDULE_EVENT_TYPES: { value: ScheduleEventType; label: string; color: string }[] = [
+  { value: 'job', label: 'Job/Work', color: '#2563eb' },
+  { value: 'inspection', label: 'Inspection', color: '#7c3aed' },
+  { value: 'meeting', label: 'Meeting', color: '#0891b2' },
+  { value: 'delivery', label: 'Delivery', color: '#059669' },
+  { value: 'milestone', label: 'Milestone', color: '#d97706' },
+  { value: 'time_off', label: 'Time Off', color: '#6b7280' },
+  { value: 'training', label: 'Training', color: '#db2777' },
+  { value: 'other', label: 'Other', color: '#71717a' },
+];
+
+export const SCHEDULE_EVENT_STATUSES: { value: ScheduleEventStatus; label: string; color: string }[] = [
+  { value: 'scheduled', label: 'Scheduled', color: '#2563eb' },
+  { value: 'tentative', label: 'Tentative', color: '#f59e0b' },
+  { value: 'in_progress', label: 'In Progress', color: '#8b5cf6' },
+  { value: 'completed', label: 'Completed', color: '#10b981' },
+  { value: 'cancelled', label: 'Cancelled', color: '#ef4444' },
+  { value: 'postponed', label: 'Postponed', color: '#6b7280' },
+];
+
+export const WEATHER_CONDITIONS: { value: WeatherCondition; label: string; icon: string }[] = [
+  { value: 'clear', label: 'Clear', icon: '☀️' },
+  { value: 'partly_cloudy', label: 'Partly Cloudy', icon: '⛅' },
+  { value: 'cloudy', label: 'Cloudy', icon: '☁️' },
+  { value: 'rain', label: 'Rain', icon: '🌧️' },
+  { value: 'heavy_rain', label: 'Heavy Rain', icon: '⛈️' },
+  { value: 'snow', label: 'Snow', icon: '❄️' },
+  { value: 'storm', label: 'Storm', icon: '🌩️' },
+  { value: 'extreme_heat', label: 'Extreme Heat', icon: '🔥' },
+  { value: 'extreme_cold', label: 'Extreme Cold', icon: '🥶' },
+  { value: 'wind', label: 'High Wind', icon: '💨' },
+];
+
+export const TIME_OFF_TYPES: { value: TimeOffRequest['type']; label: string }[] = [
+  { value: 'vacation', label: 'Vacation' },
+  { value: 'sick', label: 'Sick Leave' },
+  { value: 'personal', label: 'Personal' },
+  { value: 'bereavement', label: 'Bereavement' },
+  { value: 'jury_duty', label: 'Jury Duty' },
+  { value: 'other', label: 'Other' },
+];
+
+// ============================================
+// Material & Equipment Tracking Types
+// ============================================
+
+/**
+ * Material category
+ */
+export type MaterialCategory =
+  | 'lumber'
+  | 'hardware'
+  | 'electrical'
+  | 'plumbing'
+  | 'hvac'
+  | 'roofing'
+  | 'insulation'
+  | 'drywall'
+  | 'paint'
+  | 'flooring'
+  | 'tile'
+  | 'concrete'
+  | 'masonry'
+  | 'windows_doors'
+  | 'cabinets'
+  | 'countertops'
+  | 'fixtures'
+  | 'appliances'
+  | 'landscaping'
+  | 'safety'
+  | 'tools'
+  | 'equipment'
+  | 'rental'
+  | 'other';
+
+/**
+ * Material status in inventory
+ */
+export type MaterialStatus =
+  | 'in_stock'      // Available in warehouse/storage
+  | 'low_stock'     // Below reorder threshold
+  | 'out_of_stock'  // None available
+  | 'on_order'      // Ordered, awaiting delivery
+  | 'on_site'       // Delivered to job site
+  | 'consumed'      // Used up
+  | 'returned';     // Returned to supplier
+
+/**
+ * Equipment checkout status
+ */
+export type EquipmentCheckoutStatus =
+  | 'available'     // Ready for checkout
+  | 'checked_out'   // Currently in use
+  | 'maintenance'   // Being repaired
+  | 'retired';      // No longer in service
+
+/**
+ * Material purchase order status (for material tracking module)
+ * Note: Different from the general PurchaseOrderStatus used elsewhere
+ */
+export type MaterialPurchaseOrderStatus =
+  | 'draft'         // Being prepared
+  | 'pending'       // Awaiting approval
+  | 'approved'      // Approved, not yet sent
+  | 'ordered'       // Sent to supplier
+  | 'partial'       // Partially received
+  | 'received'      // Fully received
+  | 'cancelled';    // Cancelled
+
+/**
+ * Material item in inventory
+ */
+export interface MaterialItem {
+  id: string;
+  orgId: string;
+
+  // Basic info
+  name: string;
+  description?: string;
+  sku?: string; // Stock keeping unit
+  barcode?: string;
+  category: MaterialCategory;
+  unit: LineItemUnit;
+
+  // Inventory
+  quantityOnHand: number;
+  quantityReserved: number; // Reserved for projects
+  quantityAvailable: number; // onHand - reserved
+  reorderPoint: number; // Alert when below this
+  reorderQuantity: number; // How much to reorder
+
+  // Pricing
+  unitCost: number;
+  lastPurchasePrice?: number;
+  averageCost?: number; // Weighted average
+  markupPercent?: number;
+  sellPrice?: number;
+
+  // Storage
+  defaultLocation?: string; // e.g., 'Warehouse A', 'Shelf B-3'
+  locations?: {
+    locationId: string;
+    locationName: string;
+    quantity: number;
+  }[];
+
+  // Supplier info
+  preferredSupplierId?: string;
+  preferredSupplierName?: string;
+  supplierSku?: string;
+  leadTimeDays?: number;
+
+  // Images
+  imageUrl?: string;
+  imageUrls?: string[];
+
+  // Tracking
+  status: MaterialStatus;
+  isActive: boolean;
+
+  // Metadata
+  createdAt: Date;
+  createdBy: string;
+  updatedAt?: Date;
+  updatedBy?: string;
+}
+
+/**
+ * Equipment/Tool item
+ */
+export interface EquipmentItem {
+  id: string;
+  orgId: string;
+
+  // Basic info
+  name: string;
+  description?: string;
+  serialNumber?: string;
+  assetTag?: string;
+  category: MaterialCategory;
+  make?: string;
+  model?: string;
+  year?: number;
+
+  // Value
+  purchasePrice?: number;
+  purchaseDate?: Date;
+  currentValue?: number;
+  depreciationRate?: number;
+
+  // Rental info (if rental equipment)
+  isRental: boolean;
+  rentalSupplierId?: string;
+  rentalSupplierName?: string;
+  rentalRate?: number;
+  rentalPeriod?: 'hour' | 'day' | 'week' | 'month';
+  rentalStartDate?: Date;
+  rentalEndDate?: Date;
+
+  // Status
+  status: EquipmentCheckoutStatus;
+  condition: 'excellent' | 'good' | 'fair' | 'poor';
+
+  // Current location
+  currentLocationId?: string;
+  currentLocationName?: string;
+  currentProjectId?: string;
+  currentProjectName?: string;
+
+  // Checkout info
+  checkedOutTo?: string; // userId
+  checkedOutToName?: string;
+  checkedOutAt?: Date;
+  expectedReturnDate?: Date;
+
+  // Maintenance
+  lastMaintenanceDate?: Date;
+  nextMaintenanceDate?: Date;
+  maintenanceNotes?: string;
+
+  // Images & docs
+  imageUrl?: string;
+  imageUrls?: string[];
+  documentUrls?: string[];
+
+  // Metadata
+  isActive: boolean;
+  createdAt: Date;
+  createdBy: string;
+  updatedAt?: Date;
+  updatedBy?: string;
+}
+
+/**
+ * Equipment checkout record
+ */
+export interface EquipmentCheckout {
+  id: string;
+  orgId: string;
+
+  // Equipment
+  equipmentId: string;
+  equipmentName: string;
+  equipmentSerialNumber?: string;
+
+  // Checkout details
+  checkedOutBy: string;
+  checkedOutByName: string;
+  checkedOutAt: Date;
+  expectedReturnDate?: Date;
+
+  // Return details
+  returnedAt?: Date;
+  returnedBy?: string;
+  returnCondition?: 'excellent' | 'good' | 'fair' | 'poor' | 'damaged';
+  returnNotes?: string;
+
+  // Location
+  projectId?: string;
+  projectName?: string;
+  location?: string;
+
+  // Notes
+  checkoutNotes?: string;
+
+  // Status
+  status: 'active' | 'returned' | 'overdue';
+
+  // Metadata
+  createdAt: Date;
+  createdBy: string;
+}
+
+/**
+ * Supplier/Vendor
+ */
+export interface Supplier {
+  id: string;
+  orgId: string;
+
+  // Basic info
+  name: string;
+  contactName?: string;
+  email?: string;
+  phone?: string;
+  website?: string;
+
+  // Address
+  address?: {
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+    country?: string;
+  };
+
+  // Account info
+  accountNumber?: string;
+  paymentTerms?: string; // e.g., 'Net 30', 'COD'
+  creditLimit?: number;
+
+  // Categories they supply
+  categories?: MaterialCategory[];
+
+  // Rating
+  rating?: number; // 1-5
+  notes?: string;
+
+  // Status
+  isPreferred: boolean;
+  isActive: boolean;
+
+  // Metadata
+  createdAt: Date;
+  createdBy: string;
+  updatedAt?: Date;
+}
+
+/**
+ * Material purchase order (for material tracking module)
+ * Note: Different from the general PurchaseOrder used elsewhere
+ */
+export interface MaterialPurchaseOrder {
+  id: string;
+  orgId: string;
+
+  // Order info
+  orderNumber: string;
+  status: MaterialPurchaseOrderStatus;
+
+  // Supplier
+  supplierId: string;
+  supplierName: string;
+  supplierContact?: string;
+  supplierEmail?: string;
+
+  // Project (optional)
+  projectId?: string;
+  projectName?: string;
+
+  // Shipping
+  shipToAddress?: {
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+  };
+  shipToLocation?: string; // e.g., 'Job Site', 'Warehouse'
+
+  // Line items
+  lineItems: MaterialPurchaseOrderLineItem[];
+
+  // Totals
+  subtotal: number;
+  taxRate?: number;
+  taxAmount?: number;
+  shippingCost?: number;
+  total: number;
+
+  // Dates
+  orderDate: Date;
+  expectedDeliveryDate?: Date;
+  actualDeliveryDate?: Date;
+
+  // Approval
+  approvedBy?: string;
+  approvedAt?: Date;
+
+  // Notes
+  notes?: string;
+  internalNotes?: string;
+
+  // Attachments (receipts, invoices)
+  attachments?: {
+    name: string;
+    url: string;
+    type: 'receipt' | 'invoice' | 'packing_slip' | 'other';
+    uploadedAt: Date;
+  }[];
+
+  // Metadata
+  createdAt: Date;
+  createdBy: string;
+  updatedAt?: Date;
+  updatedBy?: string;
+}
+
+/**
+ * Material purchase order line item
+ */
+export interface MaterialPurchaseOrderLineItem {
+  id: string;
+  materialId?: string;
+  name: string;
+  description?: string;
+  sku?: string;
+  unit: LineItemUnit;
+  quantityOrdered: number;
+  quantityReceived: number;
+  unitCost: number;
+  totalCost: number;
+}
+
+/**
+ * Material allocation to a project
+ */
+export interface MaterialAllocation {
+  id: string;
+  orgId: string;
+
+  // Material
+  materialId: string;
+  materialName: string;
+
+  // Project
+  projectId: string;
+  projectName: string;
+  phaseId?: string;
+  phaseName?: string;
+  taskId?: string;
+
+  // Quantities
+  quantityAllocated: number;
+  quantityUsed: number;
+  quantityRemaining: number;
+  unit: LineItemUnit;
+
+  // Cost tracking
+  unitCost: number;
+  totalCost: number;
+
+  // Status
+  status: 'allocated' | 'partial_used' | 'fully_used' | 'returned';
+
+  // Notes
+  notes?: string;
+
+  // Metadata
+  allocatedAt: Date;
+  allocatedBy: string;
+  updatedAt?: Date;
+}
+
+/**
+ * Material movement/transaction record
+ */
+export interface MaterialTransaction {
+  id: string;
+  orgId: string;
+
+  // Material
+  materialId: string;
+  materialName: string;
+
+  // Transaction type
+  type:
+    | 'purchase'      // Received from supplier
+    | 'return'        // Returned to supplier
+    | 'transfer_in'   // Transferred in from another location
+    | 'transfer_out'  // Transferred out to another location
+    | 'allocate'      // Allocated to project
+    | 'deallocate'    // Removed from project
+    | 'consume'       // Used/consumed
+    | 'adjust'        // Manual adjustment
+    | 'waste'         // Damaged/wasted
+    | 'count';        // Inventory count adjustment
+
+  // Quantities
+  quantity: number;
+  unit: LineItemUnit;
+  previousQuantity: number;
+  newQuantity: number;
+
+  // Cost
+  unitCost?: number;
+  totalCost?: number;
+
+  // References
+  purchaseOrderId?: string;
+  projectId?: string;
+  projectName?: string;
+  locationFrom?: string;
+  locationTo?: string;
+
+  // Notes
+  reason?: string;
+  notes?: string;
+  receiptUrl?: string;
+
+  // Metadata
+  transactionDate: Date;
+  createdBy: string;
+  createdByName: string;
+}
+
+/**
+ * Storage location
+ */
+export interface StorageLocation {
+  id: string;
+  orgId: string;
+
+  name: string;
+  type: 'warehouse' | 'job_site' | 'vehicle' | 'storage_unit' | 'other';
+  address?: string;
+  projectId?: string; // If job site
+  projectName?: string;
+
+  // Contact for location
+  contactName?: string;
+  contactPhone?: string;
+
+  isActive: boolean;
+  createdAt: Date;
+  createdBy: string;
+}
+
+/**
+ * Low stock alert
+ */
+export interface LowStockAlert {
+  id: string;
+  orgId: string;
+
+  materialId: string;
+  materialName: string;
+  category: MaterialCategory;
+
+  currentQuantity: number;
+  reorderPoint: number;
+  reorderQuantity: number;
+  unit: LineItemUnit;
+
+  // Supplier
+  preferredSupplierId?: string;
+  preferredSupplierName?: string;
+
+  // Status
+  status: 'active' | 'acknowledged' | 'ordered' | 'resolved';
+  acknowledgedBy?: string;
+  acknowledgedAt?: Date;
+  purchaseOrderId?: string;
+
+  createdAt: Date;
+  resolvedAt?: Date;
+}
+
+/**
+ * Constants for materials
+ */
+export const MATERIAL_CATEGORIES: { value: MaterialCategory; label: string }[] = [
+  { value: 'lumber', label: 'Lumber' },
+  { value: 'hardware', label: 'Hardware' },
+  { value: 'electrical', label: 'Electrical' },
+  { value: 'plumbing', label: 'Plumbing' },
+  { value: 'hvac', label: 'HVAC' },
+  { value: 'roofing', label: 'Roofing' },
+  { value: 'insulation', label: 'Insulation' },
+  { value: 'drywall', label: 'Drywall' },
+  { value: 'paint', label: 'Paint' },
+  { value: 'flooring', label: 'Flooring' },
+  { value: 'tile', label: 'Tile' },
+  { value: 'concrete', label: 'Concrete' },
+  { value: 'masonry', label: 'Masonry' },
+  { value: 'windows_doors', label: 'Windows & Doors' },
+  { value: 'cabinets', label: 'Cabinets' },
+  { value: 'countertops', label: 'Countertops' },
+  { value: 'fixtures', label: 'Fixtures' },
+  { value: 'appliances', label: 'Appliances' },
+  { value: 'landscaping', label: 'Landscaping' },
+  { value: 'safety', label: 'Safety Equipment' },
+  { value: 'tools', label: 'Tools' },
+  { value: 'equipment', label: 'Equipment' },
+  { value: 'rental', label: 'Rental Equipment' },
+  { value: 'other', label: 'Other' },
+];
+
+export const MATERIAL_STATUSES: { value: MaterialStatus; label: string; color: string }[] = [
+  { value: 'in_stock', label: 'In Stock', color: '#10b981' },
+  { value: 'low_stock', label: 'Low Stock', color: '#f59e0b' },
+  { value: 'out_of_stock', label: 'Out of Stock', color: '#ef4444' },
+  { value: 'on_order', label: 'On Order', color: '#3b82f6' },
+  { value: 'on_site', label: 'On Site', color: '#8b5cf6' },
+  { value: 'consumed', label: 'Consumed', color: '#6b7280' },
+  { value: 'returned', label: 'Returned', color: '#71717a' },
+];
+
+export const EQUIPMENT_STATUSES: { value: EquipmentCheckoutStatus; label: string; color: string }[] = [
+  { value: 'available', label: 'Available', color: '#10b981' },
+  { value: 'checked_out', label: 'Checked Out', color: '#f59e0b' },
+  { value: 'maintenance', label: 'Maintenance', color: '#ef4444' },
+  { value: 'retired', label: 'Retired', color: '#6b7280' },
+];
+
+export const MATERIAL_PURCHASE_ORDER_STATUSES: { value: MaterialPurchaseOrderStatus; label: string; color: string }[] = [
+  { value: 'draft', label: 'Draft', color: '#6b7280' },
+  { value: 'pending', label: 'Pending Approval', color: '#f59e0b' },
+  { value: 'approved', label: 'Approved', color: '#3b82f6' },
+  { value: 'ordered', label: 'Ordered', color: '#8b5cf6' },
+  { value: 'partial', label: 'Partially Received', color: '#0891b2' },
+  { value: 'received', label: 'Received', color: '#10b981' },
+  { value: 'cancelled', label: 'Cancelled', color: '#ef4444' },
+];

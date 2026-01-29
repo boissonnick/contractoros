@@ -142,14 +142,18 @@ export default function TaskList({
 
             {/* Task rows */}
             {!isCollapsed &&
-              group.tasks.map((task) => (
-                <TaskListRow
-                  key={task.id}
-                  task={task}
-                  onClick={onTaskClick}
-                  onStatusChange={onStatusChange}
-                />
-              ))}
+              group.tasks.map((task) => {
+                const taskPhase = phases.find((p) => p.id === task.phaseId);
+                return (
+                  <TaskListRow
+                    key={task.id}
+                    task={task}
+                    onClick={onTaskClick}
+                    onStatusChange={onStatusChange}
+                    phaseName={taskPhase?.name}
+                  />
+                );
+              })}
           </div>
         );
       })}

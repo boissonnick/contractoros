@@ -20,7 +20,7 @@ export default function Badge({
 }: BadgeProps) {
   const variants = {
     default: 'bg-gray-100 text-gray-700',
-    primary: 'bg-brand-50 text-brand-primary',
+    primary: 'bg-brand-primary-light text-brand-primary',
     success: 'bg-green-100 text-green-700',
     warning: 'bg-yellow-100 text-yellow-700',
     danger: 'bg-red-100 text-red-700',

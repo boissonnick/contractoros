@@ -16,6 +16,15 @@
     --muted-foreground: #6b7280;
     --border: #e5e7eb;
     --ring: #2563eb;
+
+    /* Dynamic brand colors (overridden by ThemeProvider) */
+    --color-primary: #2563eb;
+    --color-primary-light: #eff6ff;
+    --color-primary-dark: #1d4ed8;
+    --color-secondary: #64748b;
+    --color-secondary-light: #f1f5f9;
+    --color-accent: #f59e0b;
+    --color-accent-light: #fef3c7;
   }
 
   * {
@@ -37,7 +46,7 @@
   }
 
   *:focus-visible {
-    @apply ring-2 ring-blue-500 ring-offset-2;
+    @apply ring-2 ring-brand-primary ring-offset-2;
   }
 
   /* Better touch targets on mobile */
@@ -83,7 +92,7 @@
 
   /* Input focus ring */
   .input-ring {
-    @apply focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 focus:border-transparent;
+    @apply focus:ring-2 focus:ring-brand-primary focus:ring-offset-0 focus:border-transparent;
   }
 
   /* Button press effect */
@@ -98,7 +107,7 @@
 
   /* Gradient text */
   .text-gradient {
-    @apply bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-brand-primary to-brand-primary-light bg-clip-text text-transparent;
   }
 }
 
@@ -133,5 +142,63 @@
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
+  }
+
+  /* Mobile-first touch targets - ensures minimum 44x44px */
+  .touch-target {
+    @apply min-w-[44px] min-h-[44px] flex items-center justify-center;
+  }
+
+  /* Prevent horizontal overflow on mobile */
+  .mobile-safe-width {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  /* Mobile stack - converts flex row to column on mobile */
+  .mobile-stack {
+    @apply flex flex-col sm:flex-row;
+  }
+
+  /* Mobile full width - items are full width on mobile, auto on desktop */
+  .mobile-full {
+    @apply w-full sm:w-auto;
+  }
+
+  /* Hide on mobile, show on tablet+ */
+  .hide-mobile {
+    @apply hidden sm:block;
+  }
+
+  /* Show on mobile, hide on tablet+ */
+  .show-mobile {
+    @apply block sm:hidden;
+  }
+
+  /* Safe horizontal padding that prevents edge-to-edge content on mobile */
+  .px-safe {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Responsive gap that adjusts for mobile */
+  .gap-responsive {
+    @apply gap-3 sm:gap-4 lg:gap-6;
+  }
+
+  /* Responsive text sizes */
+  .text-responsive-sm {
+    @apply text-xs sm:text-sm;
+  }
+  .text-responsive-base {
+    @apply text-sm sm:text-base;
+  }
+  .text-responsive-lg {
+    @apply text-base sm:text-lg lg:text-xl;
+  }
+  .text-responsive-xl {
+    @apply text-lg sm:text-xl lg:text-2xl;
+  }
+  .text-responsive-2xl {
+    @apply text-xl sm:text-2xl lg:text-3xl;
   }
 }

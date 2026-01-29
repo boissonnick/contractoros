@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Scope } from '@/types';
 import { Button, Textarea, StatusBadge } from '@/components/ui';
 import type { StatusType } from '@/components/ui/Badge';
-import { CheckCircleIcon, XCircleIcon, ClockIcon, ArrowPathIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, XCircleIcon, ClockIcon, ArrowPathIcon, PaperAirplaneIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/date-utils';
 
@@ -17,9 +17,11 @@ interface ScopeApprovalPanelProps {
   onRecallSubmission?: () => void;
   onApprove?: (comments?: string) => void;
   onReject?: (comments?: string) => void;
+  /** Called when user wants to revise a rejected scope */
+  onReviseScope?: () => void;
 }
 
-export default function ScopeApprovalPanel({ scope, clientId, clientName, onSubmitForApproval, onRecallSubmission, onApprove, onReject }: ScopeApprovalPanelProps) {
+export default function ScopeApprovalPanel({ scope, clientId, clientName, onSubmitForApproval, onRecallSubmission, onApprove, onReject, onReviseScope }: ScopeApprovalPanelProps) {
   const [comments, setComments] = useState('');
 
   const myApproval = clientId ? scope.approvals.find(a => a.clientId === clientId) : null;
@@ -45,6 +47,7 @@ export default function ScopeApprovalPanel({ scope, clientId, clientName, onSubm
         scope.status === 'approved' && 'bg-green-50 text-green-700 border border-green-200',
         scope.status === 'pending_approval' && 'bg-yellow-50 text-yellow-700 border border-yellow-200',
         scope.status === 'draft' && 'bg-gray-50 text-gray-600 border border-gray-200',
+        scope.status === 'rejected' && 'bg-red-50 text-red-700 border border-red-200',
         scope.status === 'superseded' && 'bg-gray-50 text-gray-400 border border-gray-200',
       )}>
         {scope.status === 'draft' && (
@@ -78,6 +81,23 @@ export default function ScopeApprovalPanel({ scope, clientId, clientName, onSubm
             </div>
           </>
         )}
+        {scope.status === 'rejected' && (
+          <>
+            <ExclamationTriangleIcon className="h-5 w-5 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="font-medium">Rejected</p>
+              <p className="text-xs mt-0.5 opacity-75">
+                This scope was rejected by the client. Review their feedback and create a revised version.
+              </p>
+              {/* Show rejection comments if available */}
+              {scope.approvals.filter(a => a.status === 'rejected' && a.comments).map((a, i) => (
+                <div key={i} className="mt-2 p-2 bg-red-100 rounded text-xs">
+                  <span className="font-medium">{a.clientName}:</span> {a.comments}
+                </div>
+              ))}
+            </div>
+          </>
+        )}
         {scope.status === 'superseded' && (
           <>
             <ArrowPathIcon className="h-5 w-5 flex-shrink-0 mt-0.5" />
@@ -99,6 +119,11 @@ export default function ScopeApprovalPanel({ scope, clientId, clientName, onSubm
         {scope.status === 'pending_approval' && onRecallSubmission && (
           <Button variant="outline" size="sm" onClick={onRecallSubmission} icon={<ArrowPathIcon className="h-4 w-4" />}>
             Recall Submission
+          </Button>
+        )}
+        {scope.status === 'rejected' && onReviseScope && (
+          <Button variant="primary" size="sm" onClick={onReviseScope} icon={<ArrowPathIcon className="h-4 w-4" />}>
+            Create Revised Version
           </Button>
         )}
       </div>

@@ -11,10 +11,16 @@ import {
   PuzzlePieceIcon,
   ReceiptPercentIcon,
   ArrowDownTrayIcon,
+  DocumentTextIcon,
+  ChatBubbleLeftRightIcon,
+  QueueListIcon,
 } from '@heroicons/react/24/outline';
 
 const SETTINGS_TABS = [
   { key: '/dashboard/settings', label: 'Phase Templates', icon: Squares2X2Icon },
+  { key: '/dashboard/settings/sow-templates', label: 'SOW Templates', icon: DocumentTextIcon },
+  { key: '/dashboard/settings/line-items', label: 'Line Items', icon: QueueListIcon },
+  { key: '/dashboard/settings/sms-templates', label: 'SMS Templates', icon: ChatBubbleLeftRightIcon },
   { key: '/dashboard/settings/organization', label: 'Organization', icon: BuildingOfficeIcon },
   { key: '/dashboard/settings/integrations', label: 'Integrations', icon: PuzzlePieceIcon },
   { key: '/dashboard/settings/tax-rates', label: 'Tax Rates', icon: ReceiptPercentIcon },

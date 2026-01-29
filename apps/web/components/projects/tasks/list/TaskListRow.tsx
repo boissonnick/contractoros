@@ -10,6 +10,7 @@ import {
   PaperClipIcon,
   UserCircleIcon,
   CheckCircleIcon,
+  RectangleStackIcon,
 } from '@heroicons/react/24/outline';
 import { formatDate } from '@/lib/date-utils';
 
@@ -42,9 +43,11 @@ interface TaskListRowProps {
   task: Task;
   onClick: (task: Task) => void;
   onStatusChange: (taskId: string, status: TaskStatus) => void;
+  /** Phase name to display */
+  phaseName?: string;
 }
 
-export default function TaskListRow({ task, onClick, onStatusChange }: TaskListRowProps) {
+export default function TaskListRow({ task, onClick, onStatusChange, phaseName }: TaskListRowProps) {
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed';
   const isDone = task.status === 'completed';
 
@@ -85,6 +88,14 @@ export default function TaskListRow({ task, onClick, onStatusChange }: TaskListR
       {task.trade && (
         <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded flex-shrink-0">
           {task.trade}
+        </span>
+      )}
+
+      {/* Phase */}
+      {phaseName && (
+        <span className="inline-flex items-center gap-1 text-xs text-brand-primary bg-brand-primary-light px-1.5 py-0.5 rounded font-medium flex-shrink-0">
+          <RectangleStackIcon className="h-3 w-3" />
+          {phaseName}
         </span>
       )}
 

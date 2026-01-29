@@ -2,18 +2,21 @@
 
 import React, { useState } from 'react';
 import { ScopeItem, QuoteSection } from '@/types';
-import { LinkIcon, QuestionMarkCircleIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
+import { LinkIcon, QuestionMarkCircleIcon, ArrowRightIcon, DocumentDuplicateIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import { Button } from '@/components/ui';
 
 interface ScopeQuoteLinkProps {
   items: ScopeItem[];
   quoteSections: QuoteSection[];
+  scopeStatus?: 'draft' | 'pending_approval' | 'approved' | 'rejected' | 'superseded';
+  onGenerateQuote?: () => void;
 }
 
 function fmt(n: number): string {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
 }
 
-export default function ScopeQuoteLink({ items, quoteSections }: ScopeQuoteLinkProps) {
+export default function ScopeQuoteLink({ items, quoteSections, scopeStatus, onGenerateQuote }: ScopeQuoteLinkProps) {
   const [showHelp, setShowHelp] = useState(false);
   const linked = items.filter(item => item.quoteSectionId);
   const unlinked = items.filter(item => !item.quoteSectionId);
@@ -50,23 +53,46 @@ export default function ScopeQuoteLink({ items, quoteSections }: ScopeQuoteLinkP
       {showHelp && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
           <p className="font-medium text-blue-900 mb-2">Understanding SOW & Quote Relationship</p>
-          <ul className="space-y-1.5 text-blue-800">
+          <ul className="space-y-2 text-blue-800">
             <li className="flex items-start gap-2">
-              <span className="font-bold">SOW (Scope of Work):</span>
-              <span>Defines what work will be done, materials needed, and estimated costs.</span>
+              <span className="flex-shrink-0 w-24 font-bold">SOW:</span>
+              <span>The <strong>Scope of Work</strong> defines exactly what work will be performed, materials needed, and your estimated costs. This is your internal document for planning.</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="font-bold">Quote:</span>
-              <span>The price you present to the client, often with markup applied.</span>
+              <span className="flex-shrink-0 w-24 font-bold">Quote:</span>
+              <span>The <strong>Quote</strong> is the price you present to the client. It&apos;s typically based on the SOW with your markup applied. This is the client-facing document.</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="font-bold">Linking:</span>
-              <span>Connect SOW items to quote sections to track cost vs. quoted price.</span>
+              <span className="flex-shrink-0 w-24 font-bold">Linking:</span>
+              <span>Connect SOW items to quote sections to track your true costs against quoted prices. This helps you understand profit margins per line item.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="flex-shrink-0 w-24 font-bold">Workflow:</span>
+              <span>Create SOW → Get client approval → Generate Quote → Send Quote for signature</span>
             </li>
           </ul>
-          <p className="mt-2 text-xs text-blue-600">
-            Tip: Once a SOW is approved, you can generate a quote automatically from it.
-          </p>
+          <div className="mt-3 pt-3 border-t border-blue-200 flex items-center gap-2">
+            <InformationCircleIcon className="h-4 w-4 text-blue-500" />
+            <p className="text-xs text-blue-600">
+              Once a SOW is approved, you can automatically generate a quote with your standard markup applied.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Generate Quote button for approved SOW */}
+      {scopeStatus === 'approved' && onGenerateQuote && quoteSections.length === 0 && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <DocumentDuplicateIcon className="h-5 w-5 text-green-600" />
+            <div>
+              <p className="text-sm font-medium text-green-900">SOW Approved - Ready to Quote</p>
+              <p className="text-xs text-green-700">Generate a quote from this approved scope of work.</p>
+            </div>
+          </div>
+          <Button variant="primary" size="sm" onClick={onGenerateQuote} icon={<ArrowRightIcon className="h-4 w-4" />}>
+            Generate Quote
+          </Button>
         </div>
       )}
 

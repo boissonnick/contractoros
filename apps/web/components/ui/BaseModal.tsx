@@ -209,16 +209,20 @@ export function useModal(defaultOpen = false) {
 /**
  * Hook for managing modal dirty state (unsaved changes)
  *
+ * Features:
+ * - Track unsaved changes
+ * - Confirm before closing with unsaved changes
+ * - Optional custom confirmation message
+ * - Works with React Hook Form via onDirtyChange callback
+ * - Prevents accidental data loss
+ *
  * @example
  * ```tsx
  * function EditModal({ onClose }) {
- *   const { isDirty, setDirty, confirmClose } = useModalDirtyState();
- *
- *   const handleClose = () => {
- *     if (confirmClose()) {
- *       onClose();
- *     }
- *   };
+ *   const { isDirty, setDirty, confirmClose, handleClose } = useModalDirtyState({
+ *     onClose,
+ *     message: 'Discard changes to this task?',
+ *   });
  *
  *   return (
  *     <BaseModal onClose={handleClose} preventOutsideClose={isDirty}>
@@ -227,24 +231,142 @@ export function useModal(defaultOpen = false) {
  *   );
  * }
  * ```
+ *
+ * @example With React Hook Form
+ * ```tsx
+ * function EditModal({ onClose }) {
+ *   const { isDirty, handleClose, getFormProps } = useModalDirtyState({ onClose });
+ *   const form = useForm();
+ *
+ *   // Pass form.formState.isDirty to track changes
+ *   React.useEffect(() => {
+ *     getFormProps().onDirtyChange(form.formState.isDirty);
+ *   }, [form.formState.isDirty]);
+ *
+ *   return (
+ *     <BaseModal onClose={handleClose} preventOutsideClose={isDirty}>
+ *       <form {...form}>...</form>
+ *     </BaseModal>
+ *   );
+ * }
+ * ```
  */
-export function useModalDirtyState() {
-  const [isDirty, setIsDirty] = React.useState(false);
+export interface UseModalDirtyStateOptions {
+  /** Callback when modal should close (after confirmation if dirty) */
+  onClose?: () => void;
+  /** Custom confirmation message */
+  message?: string;
+  /** Initial dirty state */
+  initialDirty?: boolean;
+}
+
+export function useModalDirtyState(options: UseModalDirtyStateOptions = {}) {
+  const {
+    onClose,
+    message = 'You have unsaved changes. Are you sure you want to close?',
+    initialDirty = false,
+  } = options;
+
+  const [isDirty, setIsDirty] = React.useState(initialDirty);
 
   const setDirty = React.useCallback((dirty: boolean = true) => {
     setIsDirty(dirty);
   }, []);
 
-  const confirmClose = React.useCallback(() => {
+  const confirmClose = React.useCallback((): boolean => {
     if (isDirty) {
-      return window.confirm('You have unsaved changes. Are you sure you want to close?');
+      return window.confirm(message);
     }
     return true;
-  }, [isDirty]);
+  }, [isDirty, message]);
+
+  const handleClose = React.useCallback(() => {
+    if (confirmClose()) {
+      setIsDirty(false);
+      onClose?.();
+    }
+  }, [confirmClose, onClose]);
 
   const reset = React.useCallback(() => {
     setIsDirty(false);
   }, []);
 
-  return { isDirty, setDirty, confirmClose, reset };
+  // Helper for React Hook Form integration
+  const getFormProps = React.useCallback(() => ({
+    onDirtyChange: setDirty,
+  }), [setDirty]);
+
+  // Helper to wrap form submit - resets dirty state on successful submit
+  const wrapSubmit = React.useCallback(
+    <T extends (...args: unknown[]) => Promise<void>>(submitFn: T): T => {
+      return (async (...args: unknown[]) => {
+        await submitFn(...args);
+        setIsDirty(false);
+      }) as T;
+    },
+    []
+  );
+
+  return {
+    isDirty,
+    setDirty,
+    confirmClose,
+    handleClose,
+    reset,
+    getFormProps,
+    wrapSubmit,
+  };
+}
+
+/**
+ * BaseModalWithDirtyState - A modal that automatically tracks dirty state
+ *
+ * Use this when you want built-in unsaved changes protection.
+ * The modal will prompt users before closing if there are unsaved changes.
+ *
+ * @example
+ * ```tsx
+ * <BaseModalWithDirtyState
+ *   open={isOpen}
+ *   onClose={handleClose}
+ *   title="Edit Task"
+ *   isDirty={formState.isDirty}
+ *   confirmMessage="Discard changes to this task?"
+ * >
+ *   <TaskForm />
+ * </BaseModalWithDirtyState>
+ * ```
+ */
+export interface BaseModalWithDirtyStateProps extends Omit<BaseModalProps, 'preventOutsideClose'> {
+  /** Whether the form has unsaved changes */
+  isDirty?: boolean;
+  /** Custom confirmation message when closing with unsaved changes */
+  confirmMessage?: string;
+}
+
+export function BaseModalWithDirtyState({
+  open,
+  onClose,
+  isDirty = false,
+  confirmMessage = 'You have unsaved changes. Are you sure you want to close?',
+  ...props
+}: BaseModalWithDirtyStateProps) {
+  const handleClose = React.useCallback(() => {
+    if (isDirty) {
+      if (window.confirm(confirmMessage)) {
+        onClose();
+      }
+    } else {
+      onClose();
+    }
+  }, [isDirty, confirmMessage, onClose]);
+
+  return (
+    <BaseModal
+      open={open}
+      onClose={handleClose}
+      preventOutsideClose={isDirty}
+      {...props}
+    />
+  );
 }

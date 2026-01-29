@@ -532,6 +532,582 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // Clients collection (CRM)
+    match /clients/{clientId} {
+      // Org members can read clients in their org
+      allow read: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId;
+
+      // Admins can create clients
+      allow create: if isAuthenticated() && userProfileExists() &&
+        request.resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can update clients
+      allow update: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      // Only admins can delete clients
+      allow delete: if isAdmin();
+    }
+
+    // Communication logs collection (client communication tracking)
+    match /communicationLogs/{logId} {
+      // Org members can read logs in their org
+      allow read: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId;
+
+      // Authenticated org members can create logs
+      allow create: if isAuthenticated() && userProfileExists() &&
+        request.resource.data.orgId == getUserProfile().orgId;
+
+      // Creator or admins can update logs
+      allow update: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId &&
+        (resource.data.createdBy == request.auth.uid || getUserProfile().role in ['OWNER', 'PM']);
+
+      // Only admins can delete logs
+      allow delete: if isAdmin();
+    }
+
+    // Signature requests collection (e-signature)
+    match /signatureRequests/{requestId} {
+      // Org members can read signature requests in their org
+      // Public access via magic link token handled separately
+      allow read: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId;
+
+      // Admins can create signature requests
+      allow create: if isAuthenticated() && userProfileExists() &&
+        request.resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can update signature requests (status changes, etc.)
+      allow update: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      // Never delete signature requests (audit trail)
+      allow delete: if false;
+    }
+
+    // Public signature access (magic link signing)
+    // This allows unauthenticated users to read/update via magic link token
+    // Token validation happens in application code
+    match /signatureRequests/{requestId} {
+      // Allow read for magic link access (token validated in app)
+      allow read: if true;
+
+      // Allow limited updates for signing (signature data, status)
+      allow update: if request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['signers', 'status', 'auditTrail', 'updatedAt']);
+    }
+
+    // Photo albums collection
+    match /photoAlbums/{albumId} {
+      // Org members can read albums in their org
+      allow read: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId;
+
+      // Public albums can be read via share token (token validated in app)
+      allow read: if resource.data.isPublic == true;
+
+      // Admins can create albums
+      allow create: if isAuthenticated() && userProfileExists() &&
+        request.resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can update albums
+      allow update: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      // Only admins can delete albums
+      allow delete: if isAdmin();
+    }
+
+    // Before/after photo pairs collection
+    match /beforeAfterPairs/{pairId} {
+      // Authenticated users can read pairs
+      allow read: if isAuthenticated();
+
+      // Admins and employees can create pairs
+      allow create: if isAuthenticated() &&
+        userProfileExists() &&
+        getUserProfile().role in ['OWNER', 'PM', 'EMPLOYEE'];
+
+      // Admins can update/delete pairs
+      allow update, delete: if isAdmin();
+    }
+
+    // Stripe payments collection
+    match /stripePayments/{paymentId} {
+      // Org members can read payments in their org
+      allow read: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId;
+
+      // Only server/Cloud Functions should create payments
+      // Client-side creates via API routes
+      allow create: if false;
+
+      // Admins can update payment notes/metadata
+      allow update: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      // Payments should never be deleted (audit trail)
+      allow delete: if false;
+    }
+
+    // Payment links collection
+    match /paymentLinks/{linkId} {
+      // Org members can read payment links in their org
+      allow read: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId;
+
+      // Public read access for payment link validation via token
+      // Token-based validation happens in application code
+      allow read: if true;
+
+      // Admins can create payment links
+      allow create: if isAuthenticated() && userProfileExists() &&
+        request.resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      // Allow updates for marking link as used (status changes)
+      allow update: if request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['status', 'usedAt', 'paymentId', 'updatedAt']);
+
+      // Never delete payment links (audit trail)
+      allow delete: if false;
+    }
+
+    // Saved payment methods collection
+    match /savedPaymentMethods/{methodId} {
+      // Org members can read saved methods in their org
+      allow read: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId;
+
+      // Only server/Cloud Functions should create saved methods
+      allow create: if false;
+
+      // Admins can update (set default, soft delete)
+      allow update: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      // Soft delete only - never hard delete
+      allow delete: if false;
+    }
+
+    // SMS messages collection
+    match /smsMessages/{messageId} {
+      // Org members can read messages in their org
+      allow read: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId;
+
+      // Only server/Cloud Functions should create messages (via API routes)
+      allow create: if false;
+
+      // Admins can update message metadata
+      allow update: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      // Never delete messages (audit trail)
+      allow delete: if false;
+    }
+
+    // SMS conversations collection
+    match /smsConversations/{conversationId} {
+      // Org members can read conversations in their org
+      allow read: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId;
+
+      // Server creates conversations automatically
+      allow create: if false;
+
+      // Allow updates for marking as read
+      allow update: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId;
+
+      // Never delete conversations
+      allow delete: if false;
+    }
+
+    // SMS templates collection
+    match /smsTemplates/{templateId} {
+      // Org members can read templates in their org
+      allow read: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId;
+
+      // Admins can create templates
+      allow create: if isAuthenticated() && userProfileExists() &&
+        request.resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can update templates
+      allow update: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can delete templates
+      allow delete: if isAdmin();
+    }
+
+    // SMS broadcasts collection (bulk messages)
+    match /smsBroadcasts/{broadcastId} {
+      // Org members can read broadcasts in their org
+      allow read: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId;
+
+      // Admins can create broadcasts
+      allow create: if isAuthenticated() && userProfileExists() &&
+        request.resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      // Server updates broadcast status
+      allow update: if false;
+
+      // Never delete broadcasts
+      allow delete: if false;
+    }
+
+    // SMS opt-outs collection (compliance)
+    match /smsOptOuts/{optOutId} {
+      // Org members can read opt-outs in their org
+      allow read: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId;
+
+      // Server manages opt-outs via webhooks
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // Twilio phone numbers collection
+    match /twilioPhoneNumbers/{numberId} {
+      // Org members can read phone numbers in their org
+      allow read: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId;
+
+      // Admins can manage phone numbers
+      allow create: if isAuthenticated() && userProfileExists() &&
+        request.resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      allow update: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      allow delete: if isAdmin();
+    }
+
+    // Line items library collection
+    match /lineItems/{itemId} {
+      // Org members can read line items in their org
+      allow read: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId;
+
+      // Admins can create line items
+      allow create: if isAuthenticated() && userProfileExists() &&
+        request.resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can update line items
+      allow update: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can delete line items
+      allow delete: if isAdmin();
+    }
+
+    // Line item price history collection
+    match /lineItemPriceHistory/{historyId} {
+      // Org members can read price history in their org
+      allow read: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId;
+
+      // Admins can create price history entries
+      allow create: if isAuthenticated() && userProfileExists() &&
+        request.resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      // Price history should not be modified or deleted
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // Estimate templates collection
+    match /estimateTemplates/{templateId} {
+      // Org members can read estimate templates in their org
+      allow read: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId;
+
+      // Admins can create estimate templates
+      allow create: if isAuthenticated() && userProfileExists() &&
+        request.resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can update estimate templates
+      allow update: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can delete estimate templates
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // Schedule Events Collection
+    // ==========================================
+    match /scheduleEvents/{eventId} {
+      // Org members can read schedule events
+      allow read: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId;
+
+      // Admins can create schedule events
+      allow create: if isAuthenticated() && userProfileExists() &&
+        request.resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can update schedule events
+      allow update: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can delete schedule events
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // Crew Availability Collection
+    // ==========================================
+    match /crewAvailability/{availId} {
+      // Org members can read availability
+      allow read: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId;
+
+      // Users can set their own availability, admins can set for anyone
+      allow create: if isAuthenticated() && userProfileExists() &&
+        request.resource.data.orgId == getUserProfile().orgId &&
+        (request.resource.data.userId == request.auth.uid || getUserProfile().role in ['OWNER', 'PM']);
+
+      // Users can update their own availability, admins can update anyone's
+      allow update: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId &&
+        (resource.data.userId == request.auth.uid || getUserProfile().role in ['OWNER', 'PM']);
+
+      // Admins can delete availability records
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // Time Off Requests Collection
+    // ==========================================
+    match /timeOffRequests/{requestId} {
+      // Org members can read time off requests
+      allow read: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId;
+
+      // Users can create their own time off requests
+      allow create: if isAuthenticated() && userProfileExists() &&
+        request.resource.data.orgId == getUserProfile().orgId;
+
+      // Users can update their own pending requests, admins can update any
+      allow update: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId &&
+        ((resource.data.userId == request.auth.uid && resource.data.status == 'pending') ||
+         getUserProfile().role in ['OWNER', 'PM']);
+
+      // Admins can delete time off requests
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // Schedule Conflicts Collection
+    // ==========================================
+    match /scheduleConflicts/{conflictId} {
+      // Org members can read conflicts
+      allow read: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId;
+
+      // System creates conflicts automatically (admin-only for manual creation)
+      allow create: if isAdmin();
+
+      // Admins can update conflicts (mark resolved)
+      allow update: if isAdmin();
+
+      // Admins can delete conflicts
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // Weather Forecasts Collection
+    // ==========================================
+    match /weatherForecasts/{forecastId} {
+      // Org members can read weather data
+      allow read: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId;
+
+      // Admins can create weather forecasts
+      allow create: if isAdmin();
+
+      // Admins can update weather forecasts
+      allow update: if isAdmin();
+
+      // Admins can delete weather forecasts
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // Schedule Preferences Collection
+    // ==========================================
+    match /schedulePreferences/{userId} {
+      // Users can read their own preferences
+      allow read: if isOwner(userId);
+
+      // Users can create their own preferences
+      allow create: if isOwner(userId);
+
+      // Users can update their own preferences
+      allow update: if isOwner(userId);
+
+      // Users can delete their own preferences
+      allow delete: if isOwner(userId);
+    }
+
+    // ==========================================
+    // Material & Equipment Tracking Collections
+    // ==========================================
+
+    // Organization-scoped materials, equipment, suppliers, etc.
+    match /organizations/{orgId}/materials/{materialId} {
+      // Org members can read materials
+      allow read: if isSameOrg(orgId);
+
+      // Admins can create materials
+      allow create: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can update materials
+      allow update: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can delete materials
+      allow delete: if isAdmin();
+    }
+
+    match /organizations/{orgId}/equipment/{equipmentId} {
+      // Org members can read equipment
+      allow read: if isSameOrg(orgId);
+
+      // Admins can create equipment
+      allow create: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can update equipment (including checkout/return)
+      allow update: if isSameOrg(orgId);
+
+      // Admins can delete equipment
+      allow delete: if isAdmin();
+    }
+
+    match /organizations/{orgId}/equipmentCheckouts/{checkoutId} {
+      // Org members can read checkout records
+      allow read: if isSameOrg(orgId);
+
+      // Org members can create checkout records (checking out equipment)
+      allow create: if isSameOrg(orgId);
+
+      // Org members can update checkout records (returning equipment)
+      allow update: if isSameOrg(orgId);
+
+      // Admins can delete checkout records
+      allow delete: if isAdmin();
+    }
+
+    match /organizations/{orgId}/suppliers/{supplierId} {
+      // Org members can read suppliers
+      allow read: if isSameOrg(orgId);
+
+      // Admins can create suppliers
+      allow create: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can update suppliers
+      allow update: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can delete suppliers
+      allow delete: if isAdmin();
+    }
+
+    match /organizations/{orgId}/purchaseOrders/{orderId} {
+      // Org members can read purchase orders
+      allow read: if isSameOrg(orgId);
+
+      // Admins can create purchase orders
+      allow create: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can update purchase orders
+      allow update: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can delete purchase orders
+      allow delete: if isAdmin();
+    }
+
+    match /organizations/{orgId}/materialAllocations/{allocationId} {
+      // Org members can read allocations
+      allow read: if isSameOrg(orgId);
+
+      // Admins can create allocations
+      allow create: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Org members can update allocations (marking materials as used)
+      allow update: if isSameOrg(orgId);
+
+      // Admins can delete allocations
+      allow delete: if isAdmin();
+    }
+
+    match /organizations/{orgId}/materialTransactions/{transactionId} {
+      // Org members can read transactions
+      allow read: if isSameOrg(orgId);
+
+      // Org members can create transactions (inventory adjustments)
+      allow create: if isSameOrg(orgId);
+
+      // Transactions should not be modified (audit trail)
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    match /organizations/{orgId}/storageLocations/{locationId} {
+      // Org members can read storage locations
+      allow read: if isSameOrg(orgId);
+
+      // Admins can create storage locations
+      allow create: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can update storage locations
+      allow update: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can delete storage locations
+      allow delete: if isAdmin();
+    }
+
+    match /organizations/{orgId}/lowStockAlerts/{alertId} {
+      // Org members can read alerts
+      allow read: if isSameOrg(orgId);
+
+      // System creates alerts (admins for manual)
+      allow create: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Org members can update alerts (acknowledge)
+      allow update: if isSameOrg(orgId);
+
+      // Admins can delete alerts
+      allow delete: if isAdmin();
+    }
+
     // Default deny all other access
     match /{document=**} {
       allow read, write: if false;

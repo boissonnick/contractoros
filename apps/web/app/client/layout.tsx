@@ -11,12 +11,14 @@ import {
   PhotoIcon,
   ChatBubbleLeftRightIcon,
   DocumentTextIcon,
+  CreditCardIcon,
 } from '@heroicons/react/24/outline';
 
 const navItems: NavItem[] = [
   { label: 'Home', href: '/client', icon: HomeIcon },
   { label: 'Projects', href: '/client/projects', icon: FolderIcon },
   { label: 'Photos', href: '/client/photos', icon: PhotoIcon },
+  { label: 'Invoices', href: '/client/invoices', icon: CreditCardIcon },
   { label: 'Messages', href: '/client/messages', icon: ChatBubbleLeftRightIcon },
   { label: 'Documents', href: '/client/documents', icon: DocumentTextIcon },
 ];

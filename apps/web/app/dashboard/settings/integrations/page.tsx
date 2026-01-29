@@ -75,12 +75,9 @@ export default function IntegrationsPage() {
     setShowConnectModal(true);
   };
 
-  const handleConfirmConnect = async () => {
+  const handleConfirmConnect = async (companyName: string) => {
     if (!connectingProvider) return;
     try {
-      const companyName = connectingProvider === 'quickbooks'
-        ? 'My QuickBooks Company'
-        : 'My Xero Organization';
       await connectProvider(connectingProvider, companyName);
       toast.success(`Connected to ${connectingProvider === 'quickbooks' ? 'QuickBooks' : 'Xero'} successfully`);
       setShowConnectModal(false);
@@ -502,35 +499,176 @@ export default function IntegrationsPage() {
 
       {/* Connect Modal */}
       {showConnectModal && connectingProvider && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Connect {connectingProvider === 'quickbooks' ? 'QuickBooks Online' : 'Xero'}
-            </h3>
-            <p className="text-sm text-gray-500 mb-4">
-              In production, this would redirect you to {connectingProvider === 'quickbooks' ? "Intuit's" : "Xero's"} OAuth login.
-              For now, clicking Connect will simulate the connection.
-            </p>
+        <OAuthConnectModal
+          provider={connectingProvider}
+          onConfirm={(companyName) => handleConfirmConnect(companyName)}
+          onCancel={() => { setShowConnectModal(false); setConnectingProvider(null); }}
+        />
+      )}
+    </div>
+  );
+}
 
-            <div className="p-4 bg-blue-50 rounded-lg mb-4">
-              <p className="text-sm text-blue-700">
-                {connectingProvider === 'quickbooks'
-                  ? 'QuickBooks Online integration enables two-way sync of invoices, expenses, and payments. Your chart of accounts will be imported automatically.'
-                  : 'Xero integration enables syncing invoices and expenses. Chart of accounts will be imported for mapping.'}
-              </p>
+// OAuth Connect Modal with simulated flow
+function OAuthConnectModal({
+  provider,
+  onConfirm,
+  onCancel,
+}: {
+  provider: AccountingProvider;
+  onConfirm: (companyName: string) => void;
+  onCancel: () => void;
+}) {
+  const [step, setStep] = useState<'intro' | 'authorizing' | 'success'>('intro');
+  const [companyName, setCompanyName] = useState('');
+
+  const isQuickBooks = provider === 'quickbooks';
+  const providerName = isQuickBooks ? 'QuickBooks Online' : 'Xero';
+  const providerColor = isQuickBooks ? 'green' : 'blue';
+
+  const handleAuthorize = () => {
+    if (!companyName.trim()) {
+      toast.error('Please enter your company name');
+      return;
+    }
+    setStep('authorizing');
+    // Simulate OAuth redirect and callback
+    setTimeout(() => {
+      setStep('success');
+    }, 1500);
+  };
+
+  const handleComplete = () => {
+    onConfirm(companyName);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+        {/* Header */}
+        <div className={cn(
+          'px-6 py-4 text-white',
+          providerColor === 'green' ? 'bg-green-600' : 'bg-blue-600'
+        )}>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center text-lg font-bold">
+              {isQuickBooks ? 'QB' : 'Xe'}
             </div>
-
-            <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => { setShowConnectModal(false); setConnectingProvider(null); }}>
-                Cancel
-              </Button>
-              <Button variant="primary" onClick={handleConfirmConnect}>
-                Connect
-              </Button>
+            <div>
+              <h3 className="font-semibold">Connect to {providerName}</h3>
+              <p className="text-sm opacity-90">
+                {step === 'intro' && 'Configure your connection'}
+                {step === 'authorizing' && 'Authorizing...'}
+                {step === 'success' && 'Connection successful!'}
+              </p>
             </div>
           </div>
         </div>
-      )}
+
+        {/* Content */}
+        <div className="p-6">
+          {step === 'intro' && (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Company Name in {providerName}
+                </label>
+                <input
+                  type="text"
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  placeholder={isQuickBooks ? 'My Construction Company' : 'My Organization'}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Enter the company name as it appears in your {providerName} account
+                </p>
+              </div>
+
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <h4 className="text-sm font-medium text-gray-900 mb-2">What you&apos;re authorizing:</h4>
+                <ul className="text-sm text-gray-600 space-y-1">
+                  <li className="flex items-center gap-2">
+                    <CheckCircleIcon className="h-4 w-4 text-green-500" />
+                    Read and create invoices
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircleIcon className="h-4 w-4 text-green-500" />
+                    Read and create expenses
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircleIcon className="h-4 w-4 text-green-500" />
+                    Read chart of accounts
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircleIcon className="h-4 w-4 text-green-500" />
+                    Read and create payments
+                  </li>
+                </ul>
+              </div>
+
+              <p className="text-xs text-gray-500">
+                In production, clicking &quot;Authorize&quot; would redirect you to {providerName}&apos;s secure login page.
+                For this demo, we&apos;ll simulate the OAuth flow.
+              </p>
+            </div>
+          )}
+
+          {step === 'authorizing' && (
+            <div className="text-center py-8">
+              <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+              <p className="text-sm text-gray-600">Connecting to {providerName}...</p>
+              <p className="text-xs text-gray-400 mt-1">Completing OAuth authorization</p>
+            </div>
+          )}
+
+          {step === 'success' && (
+            <div className="text-center py-4">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircleIcon className="h-10 w-10 text-green-600" />
+              </div>
+              <h4 className="text-lg font-semibold text-gray-900 mb-1">Connected!</h4>
+              <p className="text-sm text-gray-600 mb-4">
+                {companyName} is now connected to ContractorOS
+              </p>
+              <div className="p-3 bg-blue-50 rounded-lg text-left">
+                <p className="text-sm text-blue-700">
+                  <strong>Next steps:</strong> Configure sync settings and map your chart of accounts to ensure data syncs correctly.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-4 bg-gray-50 border-t flex justify-end gap-3">
+          {step === 'intro' && (
+            <>
+              <Button variant="outline" onClick={onCancel}>Cancel</Button>
+              <Button
+                variant="primary"
+                onClick={handleAuthorize}
+                className={cn(
+                  providerColor === 'green' ? 'bg-green-600 hover:bg-green-700' : ''
+                )}
+              >
+                <LinkIcon className="h-4 w-4 mr-1" />
+                Authorize {providerName}
+              </Button>
+            </>
+          )}
+          {step === 'authorizing' && (
+            <Button variant="outline" disabled>
+              Connecting...
+            </Button>
+          )}
+          {step === 'success' && (
+            <Button variant="primary" onClick={handleComplete}>
+              Continue to Settings
+            </Button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

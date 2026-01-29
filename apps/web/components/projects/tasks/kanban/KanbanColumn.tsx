@@ -6,7 +6,7 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { Task, TaskStatus } from '@/types';
+import { Task, TaskStatus, ProjectPhase } from '@/types';
 import { cn } from '@/lib/utils';
 import KanbanCard from './KanbanCard';
 
@@ -20,10 +20,11 @@ export interface ColumnConfig {
 interface KanbanColumnProps {
   column: ColumnConfig;
   tasks: Task[];
+  phases?: ProjectPhase[];
   onTaskClick: (task: Task) => void;
 }
 
-export default function KanbanColumn({ column, tasks, onTaskClick }: KanbanColumnProps) {
+export default function KanbanColumn({ column, tasks, phases = [], onTaskClick }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: column.id,
     data: { type: 'column', status: column.id },
@@ -55,7 +56,12 @@ export default function KanbanColumn({ column, tasks, onTaskClick }: KanbanColum
           strategy={verticalListSortingStrategy}
         >
           {tasks.map((task) => (
-            <KanbanCard key={task.id} task={task} onClick={onTaskClick} />
+            <KanbanCard
+              key={task.id}
+              task={task}
+              onClick={onTaskClick}
+              phaseName={phases.find(p => p.id === task.phaseId)?.name}
+            />
           ))}
         </SortableContext>
 

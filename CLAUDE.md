@@ -1,20 +1,74 @@
 # ContractorOS — Project Intelligence
 
+> **For AI Assistants:** This is your primary context file. Read this first, then check `docs/SPRINT_STATUS.md` for current work.
+
+## Quick Start for New Sessions
+
+```bash
+# 1. Check current status
+cat docs/SPRINT_STATUS.md
+
+# 2. Verify TypeScript
+cd apps/web && npx tsc --noEmit
+
+# 3. Review relevant docs
+cat docs/DEVELOPMENT_GUIDE.md      # How to build features
+cat docs/ARCHITECTURE.md           # Technical patterns
+cat docs/COMPONENT_PATTERNS.md     # UI component usage
+cat docs/MASTER_ROADMAP.md         # Full backlog
+cat docs/DEPLOYMENT_CHECKLIST.md   # Firebase rules/deploy requirements
+```
+
+---
+
 ## What This Is
+
 Field-first construction project management platform. Multi-portal app serving general contractors (dashboard), subcontractors, clients, and field workers. Built on Next.js 14 + Firebase.
 
+**Current State (2026-01-28):**
+- Sprint 4 (Client Management) COMPLETED
+- E-Signature system COMPLETED
+- Documentation strategy COMPLETED
+- Next: Sprint 5 - Photo Docs OR Payment Processing OR SMS/Text
+
+---
+
+## Documentation Index
+
+| Document | Purpose | Location |
+|----------|---------|----------|
+| **SPRINT_STATUS.md** | Current progress, next tasks | `docs/` |
+| **DEVELOPMENT_GUIDE.md** | How to build features, patterns | `docs/` |
+| **ARCHITECTURE.md** | Technical deep-dive | `docs/` |
+| **COMPONENT_PATTERNS.md** | UI component library | `docs/` |
+| **DEPLOYMENT_CHECKLIST.md** | Firebase rules, deploy requirements | `docs/` |
+| **TESTING_STRATEGY.md** | Testing requirements, common mistakes | `docs/` |
+| **FEATURE_TEMPLATE.md** | New feature checklist | `docs/` |
+| **MASTER_ROADMAP.md** | Complete backlog, priorities | `docs/` |
+| **HELP_DOCUMENTATION_PLAN.md** | User docs & help system plan | `docs/` |
+| **CHANGELOG.md** | Version history, all changes | Root |
+
+---
+
 ## Architecture
+
 ```
 apps/web/          → Next.js 14 App Router frontend (deployed to Cloud Run us-west1)
 functions/         → Firebase Cloud Functions Gen 2 (us-east1), handles email + user creation
 ```
-- **Auth:** Firebase Authentication (email/password)
+
+- **Auth:** Firebase Authentication (email/password, magic links for clients)
 - **Database:** Firestore (NoSQL)
-- **Styling:** Tailwind CSS
+- **Styling:** Tailwind CSS with CSS variables for brand colors
 - **Forms:** React Hook Form + Zod validation
 - **State:** Custom Firestore hooks (lib/hooks/), no global state library
+- **PDF Generation:** @react-pdf/renderer
+- **Icons:** Heroicons (outline variant)
+
+---
 
 ## Local Environment
+
 - **Node:** v20 via Homebrew (`brew link node@20` — keg-only, must be symlinked)
 - **npm:** v10.8.2
 - **Firebase CLI:** v15.4.0 (`firebase` in PATH via Homebrew)
@@ -22,61 +76,98 @@ functions/         → Firebase Cloud Functions Gen 2 (us-east1), handles email 
 - **gcloud:** Google Cloud SDK (`gcloud` in PATH via Homebrew)
 - All tools in `/opt/homebrew/bin/`. Node@20 bin also at `/opt/homebrew/opt/node@20/bin/`.
 
+---
+
 ## Commands
+
 All commands run from `apps/web/` unless noted:
 ```bash
 npm run dev              # Start Next.js dev server
-npm run build            # Production build (includes CSS verification + standalone copy)
+npm run build            # Production build
 npm run start            # Start production server
-npm run build:functions  # Compile Cloud Functions (from repo root)
-npm run deploy:functions # Deploy functions to Firebase (from repo root)
-npm run emulators        # Start Firebase emulators (auth:9099, functions:5001, firestore:8080)
-npx tsc --noEmit         # Type check
+npx tsc --noEmit         # Type check (RUN THIS OFTEN)
+npm run emulators        # Start Firebase emulators
 ```
 
+---
+
 ## Portal Routes (app/)
+
 | Route prefix | Portal | Users |
 |---|---|---|
 | `/dashboard/` | PM/Owner dashboard | General contractors, project managers |
+| `/dashboard/clients/` | Client CRM | NEW - Client management |
+| `/dashboard/signatures/` | E-Signature tracking | NEW - Signature requests |
+| `/dashboard/estimates/` | Estimates | NEW - With e-signature |
 | `/client/` | Client portal | Homeowners, property owners |
 | `/sub/` | Subcontractor portal | Subcontractors |
 | `/field/` | Field worker portal | Employees on-site |
-| `/admin/` | Admin portal | Platform admins |
-| `/onboarding/` | Onboarding flows | All new users |
+| `/sign/[token]/` | Public signing | NEW - Magic link signing |
+
+---
 
 ## Module Map
-- `components/projects/` — Project-level UI: phases, scope, change orders, bids, tasks (kanban/gantt/list)
-- `components/subcontractors/` — Sub management: forms, ratings, payments, documents
-- `components/tasks/` — Task detail: comments, attachments, assignments, activity log
-- `components/ui/` — Shared primitives: Button, Card, Input, Toast, AppShell, etc.
-- `lib/hooks/` — Firestore data hooks: useTasks, usePhases, useScopes, useChangeOrders, useSubcontractors, etc.
-- `lib/firebase/` — Firebase config, storage helpers, seed templates
-- `types/index.ts` — All TypeScript types (User, Org, Project, Phase, Task, Scope, ChangeOrder, etc.)
+
+### Core Modules
+- `components/ui/` — Shared primitives: Button, Card, Badge, Toast, EmptyState, Skeleton
+- `lib/hooks/` — Firestore data hooks with real-time subscriptions
+- `lib/firebase/` — Firebase config, storage helpers
+- `types/index.ts` — All TypeScript types (central location)
+
+### Feature Modules
+- `components/projects/` — Project UI: phases, scope, tasks (kanban/gantt/list)
+- `components/clients/` — **NEW** Client CRM: AddClientModal, EditClientModal, etc.
+- `components/esignature/` — **NEW** E-signature: SignaturePad, SendForSignatureModal
+- `components/tasks/` — Task detail: comments, attachments, assignments
+- `components/subcontractors/` — Sub management
+
+### Service Modules
+- `lib/esignature/` — **NEW** PDF generation, signature service
+- `lib/hooks/useClients.ts` — **NEW** Client CRUD operations
+- `lib/hooks/useSignatureRequests.ts` — **NEW** Signature tracking
+
+---
+
+## Recently Added Types (types/index.ts)
+
+### Client Module
+```typescript
+ClientStatus = 'active' | 'past' | 'potential' | 'inactive'
+ClientSource = 'referral' | 'google' | 'social_media' | 'yard_sign' | 'vehicle_wrap' | 'website' | 'repeat' | 'other'
+Client, ClientFinancials, ClientAddress, ClientNote, ClientCommunicationLog
+```
+
+### E-Signature Module
+```typescript
+SignatureRequestStatus = 'draft' | 'pending' | 'viewed' | 'signed' | 'declined' | 'expired' | 'cancelled'
+SignatureRequest, SignerInfo, SignatureAuditEntry
+```
+
+---
 
 ## Do Not Modify (without approval)
-- `apps/web/Dockerfile` — Multi-stage build tuned for Cloud Run. May add new ARG/ENV for secrets only.
-- `cloudbuild.yaml` — Production CI/CD pipeline. May update for secrets integration.
-- `firestore.rules` — Security rules. Changes need careful review.
-- `firestore.indexes.json` — Composite indexes. Only add, never remove.
+
+- `apps/web/Dockerfile` — Multi-stage build tuned for Cloud Run
+- `cloudbuild.yaml` — Production CI/CD pipeline
+- `firestore.rules` — Security rules (changes need careful review)
+- `firestore.indexes.json` — Composite indexes (only add, never remove)
+
+---
 
 ## Key Technical Decisions
-- **App Router (not Pages Router):** All routes use Next.js 14 app/ directory with layouts
-- **Client-side Firestore:** Direct Firestore reads from React hooks, no API layer between frontend and DB
-- **Standalone output:** next.config.js uses `output: 'standalone'` for Docker/Cloud Run
-- **No test framework configured:** Zero test coverage currently
+
+- **App Router (not Pages Router):** All routes use Next.js 14 app/ directory
+- **Client-side Firestore:** Direct Firestore reads from React hooks, no API layer
+- **Standalone output:** next.config.js uses `output: 'standalone'` for Docker
+- **No test framework:** Zero test coverage (known tech debt)
+- **Real-time subscriptions:** Use `onSnapshot` for live updates
+- **Magic links:** For client portal and e-signature access
+
+---
 
 ## Secrets Management
+
 All secrets stored in **GCP Secret Manager** (project: `contractoros-483812`).
-
-**Production (Cloud Build/Cloud Run):**
-- Secrets injected at build time via `cloudbuild.yaml` → `availableSecrets`
-- Cloud Build service account has `secretmanager.secretAccessor` role
-- Secrets are passed as Docker build args, inlined by Next.js at build time
-
-**Local Development:**
-- Copy `.env.example` to `.env.local` (gitignored)
-- Use `./docker-build-local.sh` to build with secrets from `.env.local`
-- Use `./docker-run-local.sh` to run the container
 
 **Current Secrets:**
 | Secret Name | Description |
@@ -99,37 +190,29 @@ gcloud secrets add-iam-policy-binding SECRET_NAME \
   --member="serviceAccount:424251610296@cloudbuild.gserviceaccount.com" \
   --role="roles/secretmanager.secretAccessor" \
   --project=contractoros-483812
-
-# Update cloudbuild.yaml availableSecrets section
-# Update Dockerfile ARG/ENV if needed for NEXT_PUBLIC_* vars
-# Update docker-build-local.sh for local dev
 ```
 
-## Google Maps API Key Configuration
-The Google Maps API key requires referrer restrictions in GCP Console. If you see `RefererNotAllowedMapError`:
-
-1. Go to **GCP Console** → **APIs & Services** → **Credentials**
-2. Click on the **Google Maps API Key**
-3. Under **Application restrictions**, select **HTTP referrers (websites)**
-4. Add allowed referrers:
-   - `http://localhost:3000/*` (local Docker)
-   - `http://localhost:3001/*` (local dev server)
-   - `https://contractoros-*.run.app/*` (Cloud Run)
-   - `https://*.contractoros.com/*` (production domain)
+---
 
 ## Known Issues / Tech Debt
-- AuthProvider architecture needs refactoring
-- 20+ route pages still missing or incomplete
-- Silent error handling — no toast notifications on failures
-- No pagination — will break at scale
-- No tests at all — critical paths completely unguarded
 
-## Critical Paths Needing Tests (Step 5 flag)
-1. `lib/auth.tsx` — AuthProvider, login/logout/register flows
-2. `lib/hooks/useTasks.ts` — Task CRUD against Firestore
-3. `lib/hooks/usePhases.ts` — Phase lifecycle management
-4. `lib/hooks/useChangeOrders.ts` — Change order creation and approval
-5. `lib/hooks/useScopes.ts` — Scope versioning and approval
-6. `lib/invitations/` — Invite send/accept flow
-7. `functions/src/index.ts` — Cloud Functions (user creation, health check)
-8. `components/projects/scope/ScopeBuilder.tsx` — Complex multi-step scope building UI
+- No pagination — will break at scale
+- No tests — critical paths unguarded
+- AuthProvider architecture needs refactoring
+- Silent error handling in some places
+
+---
+
+## Workflow for Building New Features
+
+1. **Check MASTER_ROADMAP.md** for feature spec
+2. **Check existing patterns** in similar modules (e.g., clients for CRM patterns)
+3. **Create in order:**
+   - Types in `types/index.ts`
+   - Hook in `lib/hooks/use{Module}.ts`
+   - Pages in `app/dashboard/{module}/`
+   - Components in `components/{module}/`
+4. **Run TypeScript check:** `npx tsc --noEmit`
+5. **Update SPRINT_STATUS.md** with progress
+
+See `docs/DEVELOPMENT_GUIDE.md` for detailed patterns and examples.

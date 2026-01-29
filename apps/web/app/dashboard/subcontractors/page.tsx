@@ -1,17 +1,17 @@
 "use client";
 
 import React, { useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { Subcontractor } from '@/types';
 import { useSubcontractors } from '@/lib/hooks/useSubcontractors';
 import { Button } from '@/components/ui';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import SubList from '@/components/subcontractors/SubList';
-import SubDetailModal from '@/components/subcontractors/SubDetailModal';
 import SubForm from '@/components/subcontractors/SubForm';
 
 export default function SubcontractorsPage() {
-  const { subs, loading, addSub, updateSub, deleteSub } = useSubcontractors();
-  const [selectedSub, setSelectedSub] = useState<Subcontractor | null>(null);
+  const router = useRouter();
+  const { subs, loading, addSub } = useSubcontractors();
   const [showAdd, setShowAdd] = useState(false);
 
   const handleAdd = useCallback(
@@ -21,6 +21,10 @@ export default function SubcontractorsPage() {
     },
     [addSub]
   );
+
+  const handleSubClick = (sub: Subcontractor) => {
+    router.push(`/dashboard/subcontractors/${sub.id}`);
+  };
 
   if (loading) {
     return (
@@ -42,7 +46,7 @@ export default function SubcontractorsPage() {
         </Button>
       </div>
 
-      <SubList subs={subs} onSubClick={setSelectedSub} />
+      <SubList subs={subs} onSubClick={handleSubClick} />
 
       {showAdd && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -51,15 +55,6 @@ export default function SubcontractorsPage() {
             <SubForm onSubmit={handleAdd} onCancel={() => setShowAdd(false)} />
           </div>
         </div>
-      )}
-
-      {selectedSub && (
-        <SubDetailModal
-          sub={selectedSub}
-          onClose={() => setSelectedSub(null)}
-          onUpdate={async (id, data) => { await updateSub(id, data); setSelectedSub(prev => prev ? { ...prev, ...data } as Subcontractor : null); }}
-          onDelete={deleteSub}
-        />
       )}
     </div>
   );

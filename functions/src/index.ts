@@ -1,8 +1,14 @@
 import { onRequest } from "firebase-functions/v2/https";
-import { onDocumentCreated } from "firebase-functions/v2/firestore";
+import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/firestore";
 import { auth } from "firebase-functions/v1";
 import * as admin from "firebase-admin";
 import { handleInviteCreated } from "./email/sendInviteEmail";
+import {
+  sendSignatureRequestEmails,
+  sendSignatureCompletedEmail,
+  sendSignatureDeclinedEmail,
+  sendSignedDocumentCopy,
+} from "./email/sendSignatureEmails";
 
 // Initialize Firebase Admin SDK
 admin.initializeApp();
@@ -230,5 +236,65 @@ export const onInviteCreated = onDocumentCreated(
       invitedBy: data.invitedBy,
       status: data.status,
     });
+  }
+);
+
+// ============================================
+// E-Signature Cloud Functions
+// ============================================
+
+// Firestore document data type for signature requests
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type FirestoreSignatureRequest = any;
+
+/**
+ * Send signature request emails when status changes to "pending"
+ * Triggered on signatureRequests/{requestId} update
+ */
+export const onSignatureRequestUpdated = onDocumentUpdated(
+  { document: "signatureRequests/{requestId}", region: REGION },
+  async (event) => {
+    const beforeData = event.data?.before.data() as FirestoreSignatureRequest;
+    const afterData = event.data?.after.data() as FirestoreSignatureRequest;
+
+    if (!beforeData || !afterData) {
+      console.log("No data for signature request update");
+      return;
+    }
+
+    const requestId = event.params.requestId;
+
+    // Check if status changed from draft to pending (send initial emails)
+    if (beforeData.status === "draft" && afterData.status === "pending") {
+      console.log(`Signature request ${requestId} changed to pending, sending emails`);
+      await sendSignatureRequestEmails(requestId, { ...afterData, id: requestId });
+      return;
+    }
+
+    // Check for signer status changes
+    const signers = afterData.signers || [];
+    for (let i = 0; i < signers.length; i++) {
+      const beforeSigner = beforeData.signers?.[i];
+      const afterSigner = signers[i];
+
+      if (!beforeSigner || !afterSigner) continue;
+
+      // Signer just signed
+      if (beforeSigner.status !== "signed" && afterSigner.status === "signed") {
+        console.log(`Signer ${afterSigner.name} signed request ${requestId}`);
+
+        // Notify the sender
+        await sendSignatureCompletedEmail(requestId, { ...afterData, id: requestId }, i);
+
+        // Send copy to signer
+        await sendSignedDocumentCopy(requestId, { ...afterData, id: requestId }, i);
+      }
+
+      // Signer declined
+      if (beforeSigner.status !== "declined" && afterSigner.status === "declined") {
+        console.log(`Signer ${afterSigner.name} declined request ${requestId}`);
+        await sendSignatureDeclinedEmail(requestId, { ...afterData, id: requestId }, i);
+      }
+    }
   }
 );
