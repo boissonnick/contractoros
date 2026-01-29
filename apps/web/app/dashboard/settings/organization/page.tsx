@@ -15,7 +15,8 @@ import {
   SparklesIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
-import { seedDemoData, SeedProgress } from '@/scripts/seeders/demoData';
+import { seedDemoData, resetDemoData, checkDemoDataExists, SeedProgress } from '@/scripts/seeders/demoData';
+import { TrashIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 
 export default function OrganizationSettingsPage() {
   const { profile } = useAuth();
@@ -25,6 +26,9 @@ export default function OrganizationSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [generatingDemo, setGeneratingDemo] = useState(false);
+  const [resettingDemo, setResettingDemo] = useState(false);
+  const [demoDataExists, setDemoDataExists] = useState<boolean | null>(null);
+  const [checkingDemoData, setCheckingDemoData] = useState(false);
   const [demoResult, setDemoResult] = useState<{ success: boolean; message: string } | null>(null);
   const [demoProgress, setDemoProgress] = useState<SeedProgress[]>([]);
 
@@ -64,6 +68,23 @@ export default function OrganizationSettingsPage() {
       setLoading(false);
     }
     load();
+  }, [profile?.orgId]);
+
+  // Check if demo data already exists
+  useEffect(() => {
+    if (!profile?.orgId) return;
+    async function checkDemo() {
+      setCheckingDemoData(true);
+      try {
+        const exists = await checkDemoDataExists(profile!.orgId);
+        setDemoDataExists(exists);
+      } catch (error) {
+        console.error('Error checking demo data:', error);
+      } finally {
+        setCheckingDemoData(false);
+      }
+    }
+    checkDemo();
   }, [profile?.orgId]);
 
   const handleLogoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -288,7 +309,25 @@ export default function OrganizationSettingsPage() {
               <SparklesIcon className="h-6 w-6 text-purple-600" />
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900">Generate Demo Data</h3>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-lg font-semibold text-gray-900">Demo Data</h3>
+                {/* Status indicator */}
+                {checkingDemoData ? (
+                  <span className="text-xs text-gray-500 flex items-center gap-1">
+                    <div className="h-3 w-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                    Checking...
+                  </span>
+                ) : demoDataExists === true ? (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    <CheckIcon className="h-3 w-3" />
+                    Demo data active
+                  </span>
+                ) : demoDataExists === false ? (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                    No demo data
+                  </span>
+                ) : null}
+              </div>
               <p className="text-sm text-gray-600 mt-1 mb-4">
                 Populate your organization with comprehensive demo data for testing and demos.
                 This will create 8 projects, clients, time entries, expenses, daily logs, and more.
@@ -303,9 +342,11 @@ export default function OrganizationSettingsPage() {
               </div>
 
               {/* Progress indicator */}
-              {generatingDemo && demoProgress.length > 0 && (
+              {(generatingDemo || resettingDemo) && demoProgress.length > 0 && (
                 <div className="p-3 bg-white border border-gray-200 rounded-lg mb-4 space-y-2">
-                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Progress</p>
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+                    {resettingDemo ? 'Cleanup Progress' : 'Generation Progress'}
+                  </p>
                   {demoProgress.map((p, idx) => (
                     <div key={idx} className="flex items-center gap-2 text-sm">
                       {p.status === 'completed' ? (
@@ -336,61 +377,198 @@ export default function OrganizationSettingsPage() {
                 </div>
               )}
 
-              <Button
-                variant="secondary"
-                onClick={async () => {
-                  if (!profile?.orgId) {
-                    toast.error('Organization not found');
-                    return;
-                  }
+              <div className="flex items-center gap-3">
+                {/* Generate Button - only shown if demo data doesn't exist */}
+                {!demoDataExists && (
+                  <Button
+                    variant="secondary"
+                    onClick={async () => {
+                      if (!profile?.orgId) {
+                        toast.error('Organization not found');
+                        return;
+                      }
 
-                  const confirmed = window.confirm(
-                    'Are you sure you want to generate demo data? This will add sample projects, clients, expenses, and other data to your organization.'
-                  );
-                  if (!confirmed) return;
+                      const confirmed = window.confirm(
+                        'Are you sure you want to generate demo data? This will add sample projects, clients, expenses, and other data to your organization.'
+                      );
+                      if (!confirmed) return;
 
-                  setGeneratingDemo(true);
-                  setDemoResult(null);
-                  setDemoProgress([]);
+                      setGeneratingDemo(true);
+                      setDemoResult(null);
+                      setDemoProgress([]);
 
-                  try {
-                    const result = await seedDemoData(profile.orgId, (progress) => {
-                      setDemoProgress(prev => {
-                        // Find if this step already exists
-                        const existingIdx = prev.findIndex(p => p.step === progress.step);
-                        if (existingIdx >= 0) {
-                          // Update existing step
-                          const updated = [...prev];
-                          updated[existingIdx] = progress;
-                          return updated;
-                        } else {
-                          // Add new step
-                          return [...prev, progress];
-                        }
-                      });
-                    });
-                    setDemoResult({
-                      success: true,
-                      message: `✅ Created ${result.projects} projects, ${result.clients} clients, ${result.timeEntries} time entries, ${result.expenses} expenses, ${result.logs} daily logs, and ${result.changeOrders} change orders.`,
-                    });
-                    toast.success('Demo data generated successfully!');
-                  } catch (error) {
-                    console.error('Error generating demo data:', error);
-                    setDemoResult({
-                      success: false,
-                      message: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-                    });
-                    toast.error('Failed to generate demo data');
-                  } finally {
-                    setGeneratingDemo(false);
-                  }
-                }}
-                loading={generatingDemo}
-                disabled={generatingDemo}
-                icon={<SparklesIcon className="h-4 w-4" />}
-              >
-                {generatingDemo ? 'Generating Demo Data...' : 'Generate Demo Data'}
-              </Button>
+                      try {
+                        const result = await seedDemoData(profile.orgId, (progress) => {
+                          setDemoProgress(prev => {
+                            const existingIdx = prev.findIndex(p => p.step === progress.step);
+                            if (existingIdx >= 0) {
+                              const updated = [...prev];
+                              updated[existingIdx] = progress;
+                              return updated;
+                            } else {
+                              return [...prev, progress];
+                            }
+                          });
+                        });
+                        setDemoDataExists(true);
+                        setDemoResult({
+                          success: true,
+                          message: `✅ Created ${result.projects} projects, ${result.clients} clients, ${result.timeEntries} time entries, ${result.expenses} expenses, ${result.logs} daily logs, and ${result.changeOrders} change orders.`,
+                        });
+                        toast.success('Demo data generated successfully!');
+                      } catch (error) {
+                        console.error('Error generating demo data:', error);
+                        setDemoResult({
+                          success: false,
+                          message: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                        });
+                        toast.error('Failed to generate demo data');
+                      } finally {
+                        setGeneratingDemo(false);
+                      }
+                    }}
+                    loading={generatingDemo}
+                    disabled={generatingDemo || resettingDemo}
+                    icon={<SparklesIcon className="h-4 w-4" />}
+                  >
+                    {generatingDemo ? 'Generating...' : 'Generate Demo Data'}
+                  </Button>
+                )}
+
+                {/* Reset Button - only shown if demo data exists */}
+                {demoDataExists && (
+                  <Button
+                    variant="danger"
+                    onClick={async () => {
+                      if (!profile?.orgId) {
+                        toast.error('Organization not found');
+                        return;
+                      }
+
+                      const confirmed = window.confirm(
+                        'Are you sure you want to remove all demo data? This will delete all demo projects, clients, time entries, expenses, and other demo data. Your real data will NOT be affected.'
+                      );
+                      if (!confirmed) return;
+
+                      setResettingDemo(true);
+                      setDemoResult(null);
+                      setDemoProgress([]);
+
+                      try {
+                        const result = await resetDemoData(profile.orgId, (progress) => {
+                          setDemoProgress(prev => {
+                            const existingIdx = prev.findIndex(p => p.step === progress.step);
+                            if (existingIdx >= 0) {
+                              const updated = [...prev];
+                              updated[existingIdx] = progress;
+                              return updated;
+                            } else {
+                              return [...prev, progress];
+                            }
+                          });
+                        });
+                        setDemoDataExists(false);
+                        setDemoResult({
+                          success: true,
+                          message: `🗑️ Removed ${result.deletedCounts.projects} projects, ${result.deletedCounts.clients} clients, ${result.deletedCounts.timeEntries} time entries, ${result.deletedCounts.expenses} expenses, ${result.deletedCounts.dailyLogs} daily logs, and ${result.deletedCounts.changeOrders} change orders.`,
+                        });
+                        toast.success('Demo data removed successfully!');
+                      } catch (error) {
+                        console.error('Error resetting demo data:', error);
+                        setDemoResult({
+                          success: false,
+                          message: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                        });
+                        toast.error('Failed to remove demo data');
+                      } finally {
+                        setResettingDemo(false);
+                      }
+                    }}
+                    loading={resettingDemo}
+                    disabled={generatingDemo || resettingDemo}
+                    icon={<TrashIcon className="h-4 w-4" />}
+                  >
+                    {resettingDemo ? 'Removing...' : 'Reset Demo Data'}
+                  </Button>
+                )}
+
+                {/* Regenerate Button - only shown if demo data exists */}
+                {demoDataExists && (
+                  <Button
+                    variant="secondary"
+                    onClick={async () => {
+                      if (!profile?.orgId) {
+                        toast.error('Organization not found');
+                        return;
+                      }
+
+                      const confirmed = window.confirm(
+                        'This will remove all existing demo data and generate fresh demo data. Continue?'
+                      );
+                      if (!confirmed) return;
+
+                      // First reset
+                      setResettingDemo(true);
+                      setDemoResult(null);
+                      setDemoProgress([]);
+
+                      try {
+                        await resetDemoData(profile.orgId, (progress) => {
+                          setDemoProgress(prev => {
+                            const existingIdx = prev.findIndex(p => p.step === progress.step);
+                            if (existingIdx >= 0) {
+                              const updated = [...prev];
+                              updated[existingIdx] = progress;
+                              return updated;
+                            } else {
+                              return [...prev, progress];
+                            }
+                          });
+                        });
+
+                        // Then generate
+                        setResettingDemo(false);
+                        setGeneratingDemo(true);
+                        setDemoProgress([]);
+
+                        const result = await seedDemoData(profile.orgId, (progress) => {
+                          setDemoProgress(prev => {
+                            const existingIdx = prev.findIndex(p => p.step === progress.step);
+                            if (existingIdx >= 0) {
+                              const updated = [...prev];
+                              updated[existingIdx] = progress;
+                              return updated;
+                            } else {
+                              return [...prev, progress];
+                            }
+                          });
+                        });
+
+                        setDemoDataExists(true);
+                        setDemoResult({
+                          success: true,
+                          message: `🔄 Regenerated! Created ${result.projects} projects, ${result.clients} clients, ${result.timeEntries} time entries, ${result.expenses} expenses, ${result.logs} daily logs, and ${result.changeOrders} change orders.`,
+                        });
+                        toast.success('Demo data regenerated successfully!');
+                      } catch (error) {
+                        console.error('Error regenerating demo data:', error);
+                        setDemoResult({
+                          success: false,
+                          message: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                        });
+                        toast.error('Failed to regenerate demo data');
+                      } finally {
+                        setResettingDemo(false);
+                        setGeneratingDemo(false);
+                      }
+                    }}
+                    disabled={generatingDemo || resettingDemo}
+                    icon={<ArrowPathIcon className="h-4 w-4" />}
+                  >
+                    Regenerate
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </div>

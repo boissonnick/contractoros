@@ -16,10 +16,18 @@ import {
   doc,
   setDoc,
   addDoc,
+  getDoc,
+  getDocs,
+  deleteDoc,
+  query,
+  where,
   Timestamp,
   writeBatch,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+
+// Prefix for all demo data IDs - used to identify demo data for cleanup
+export const DEMO_DATA_PREFIX = 'demo_';
 
 // ============================================================================
 // DEMO USERS
@@ -623,11 +631,192 @@ export interface SeedProgress {
 export type ProgressCallback = (progress: SeedProgress) => void;
 
 // ============================================================================
+// CHECK IF DEMO DATA EXISTS
+// ============================================================================
+export async function checkDemoDataExists(orgId: string): Promise<boolean> {
+  // Check if any demo project exists
+  const firstDemoProjectId = DEMO_PROJECTS[0].id;
+  const projectDoc = await getDoc(doc(db, 'projects', firstDemoProjectId));
+  return projectDoc.exists();
+}
+
+// ============================================================================
+// RESET (DELETE) DEMO DATA
+// ============================================================================
+export async function resetDemoData(orgId: string, onProgress?: ProgressCallback): Promise<{
+  success: boolean;
+  deletedCounts: {
+    clients: number;
+    projects: number;
+    tasks: number;
+    dailyLogs: number;
+    timeEntries: number;
+    expenses: number;
+    changeOrders: number;
+  };
+}> {
+  console.log('🗑️ Starting demo data cleanup...');
+  console.log(`   Organization ID: ${orgId}`);
+
+  const progress = (step: string, status: 'pending' | 'in_progress' | 'completed', count?: number, total?: number) => {
+    console.log(`   ${status === 'completed' ? '✅' : status === 'in_progress' ? '⏳' : '⏸️'} ${step}${count !== undefined ? ` (${count}${total ? `/${total}` : ''})` : ''}`);
+    onProgress?.({ step, status, count, total });
+  };
+
+  const deletedCounts = {
+    clients: 0,
+    projects: 0,
+    tasks: 0,
+    dailyLogs: 0,
+    timeEntries: 0,
+    expenses: 0,
+    changeOrders: 0,
+  };
+
+  try {
+    // 1. Delete demo clients (by known IDs)
+    progress('Deleting demo clients', 'in_progress', 0, DEMO_CLIENTS.length);
+    for (let i = 0; i < DEMO_CLIENTS.length; i++) {
+      const clientRef = doc(db, `organizations/${orgId}/clients`, DEMO_CLIENTS[i].id);
+      const clientDoc = await getDoc(clientRef);
+      if (clientDoc.exists()) {
+        await deleteDoc(clientRef);
+        deletedCounts.clients++;
+      }
+      progress('Deleting demo clients', 'in_progress', i + 1, DEMO_CLIENTS.length);
+    }
+    progress('Deleting demo clients', 'completed', deletedCounts.clients);
+
+    // 2. Delete demo projects and their phases (by known IDs)
+    progress('Deleting demo projects', 'in_progress', 0, DEMO_PROJECTS.length);
+    for (let i = 0; i < DEMO_PROJECTS.length; i++) {
+      const projectId = DEMO_PROJECTS[i].id;
+      const projectRef = doc(db, 'projects', projectId);
+      const projectDoc = await getDoc(projectRef);
+
+      if (projectDoc.exists()) {
+        // Delete phases subcollection first
+        const phasesSnap = await getDocs(collection(db, `projects/${projectId}/phases`));
+        for (const phaseDoc of phasesSnap.docs) {
+          await deleteDoc(phaseDoc.ref);
+        }
+
+        // Delete project
+        await deleteDoc(projectRef);
+        deletedCounts.projects++;
+      }
+      progress('Deleting demo projects', 'in_progress', i + 1, DEMO_PROJECTS.length);
+    }
+    progress('Deleting demo projects', 'completed', deletedCounts.projects);
+
+    // 3. Delete tasks for demo projects
+    progress('Deleting demo tasks', 'in_progress', 0);
+    for (const project of DEMO_PROJECTS) {
+      const tasksQuery = query(
+        collection(db, 'tasks'),
+        where('projectId', '==', project.id)
+      );
+      const tasksSnap = await getDocs(tasksQuery);
+      for (const taskDoc of tasksSnap.docs) {
+        await deleteDoc(taskDoc.ref);
+        deletedCounts.tasks++;
+      }
+    }
+    progress('Deleting demo tasks', 'completed', deletedCounts.tasks);
+
+    // 4. Delete daily logs for demo projects
+    progress('Deleting demo daily logs', 'in_progress', 0);
+    for (const project of DEMO_PROJECTS) {
+      const logsQuery = query(
+        collection(db, `organizations/${orgId}/dailyLogs`),
+        where('projectId', '==', project.id)
+      );
+      const logsSnap = await getDocs(logsQuery);
+      for (const logDoc of logsSnap.docs) {
+        await deleteDoc(logDoc.ref);
+        deletedCounts.dailyLogs++;
+      }
+    }
+    progress('Deleting demo daily logs', 'completed', deletedCounts.dailyLogs);
+
+    // 5. Delete time entries for demo projects
+    progress('Deleting demo time entries', 'in_progress', 0);
+    for (const project of DEMO_PROJECTS) {
+      const entriesQuery = query(
+        collection(db, `organizations/${orgId}/timeEntries`),
+        where('projectId', '==', project.id)
+      );
+      const entriesSnap = await getDocs(entriesQuery);
+      for (const entryDoc of entriesSnap.docs) {
+        await deleteDoc(entryDoc.ref);
+        deletedCounts.timeEntries++;
+      }
+    }
+    progress('Deleting demo time entries', 'completed', deletedCounts.timeEntries);
+
+    // 6. Delete expenses for demo projects
+    progress('Deleting demo expenses', 'in_progress', 0);
+    for (const project of DEMO_PROJECTS) {
+      const expensesQuery = query(
+        collection(db, `organizations/${orgId}/expenses`),
+        where('projectId', '==', project.id)
+      );
+      const expensesSnap = await getDocs(expensesQuery);
+      for (const expenseDoc of expensesSnap.docs) {
+        await deleteDoc(expenseDoc.ref);
+        deletedCounts.expenses++;
+      }
+    }
+    progress('Deleting demo expenses', 'completed', deletedCounts.expenses);
+
+    // 7. Delete change orders for demo projects
+    progress('Deleting demo change orders', 'in_progress', 0);
+    for (const project of DEMO_PROJECTS) {
+      const cosQuery = query(
+        collection(db, 'change_orders'),
+        where('projectId', '==', project.id)
+      );
+      const cosSnap = await getDocs(cosQuery);
+      for (const coDoc of cosSnap.docs) {
+        await deleteDoc(coDoc.ref);
+        deletedCounts.changeOrders++;
+      }
+    }
+    progress('Deleting demo change orders', 'completed', deletedCounts.changeOrders);
+
+    progress('Cleanup complete', 'completed');
+
+    console.log('');
+    console.log('✨ Demo data cleanup complete!');
+    console.log('');
+    console.log('Deleted:');
+    console.log(`   • ${deletedCounts.clients} clients`);
+    console.log(`   • ${deletedCounts.projects} projects`);
+    console.log(`   • ${deletedCounts.tasks} tasks`);
+    console.log(`   • ${deletedCounts.dailyLogs} daily logs`);
+    console.log(`   • ${deletedCounts.timeEntries} time entries`);
+    console.log(`   • ${deletedCounts.expenses} expenses`);
+    console.log(`   • ${deletedCounts.changeOrders} change orders`);
+
+    return { success: true, deletedCounts };
+  } catch (error) {
+    console.error('❌ Error cleaning up demo data:', error);
+    throw error;
+  }
+}
+
+// ============================================================================
 // MAIN SEEDER FUNCTION
 // ============================================================================
 export async function seedDemoData(orgId: string, onProgress?: ProgressCallback) {
   console.log('🌱 Starting demo data generation...');
   console.log(`   Organization ID: ${orgId}`);
+
+  // Check if demo data already exists
+  const alreadyExists = await checkDemoDataExists(orgId);
+  if (alreadyExists) {
+    throw new Error('Demo data already exists. Please reset the demo data first before generating new data.');
+  }
 
   const progress = (step: string, status: 'pending' | 'in_progress' | 'completed', count?: number, total?: number) => {
     console.log(`   ${status === 'completed' ? '✅' : status === 'in_progress' ? '⏳' : '⏸️'} ${step}${count !== undefined ? ` (${count}${total ? `/${total}` : ''})` : ''}`);

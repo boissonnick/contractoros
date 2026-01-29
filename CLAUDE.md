@@ -91,28 +91,49 @@ npm run emulators        # Start Firebase emulators
 
 ---
 
-## Docker Management
+## Docker Management (Local Development)
 
-When building and running Docker containers locally:
+**CRITICAL:** Always use the local build script for Docker builds. Never use `docker build` directly — it will fail due to missing Firebase environment variables.
+
+### Local Docker Build & Run
 
 ```bash
-# Build with local env vars (from apps/web/)
+# From apps/web/ directory:
+
+# 1. Build using local script (reads .env.local for Firebase keys)
 ./docker-build-local.sh
 
-# ALWAYS stop old container, remove it, then start new one
+# 2. ALWAYS stop and remove old container first
 docker stop contractoros-web 2>/dev/null
 docker rm contractoros-web 2>/dev/null
+
+# 3. Start new container
 docker run -d -p 3000:8080 --name contractoros-web contractoros-web
 
-# Verify the new container is running with correct version
+# 4. Verify running with correct version
 docker ps
 ```
 
-**Important:** Always confirm:
-1. Old container is stopped (`docker stop`)
-2. Old container is removed (`docker rm`)
-3. New container is started and running (`docker run` + `docker ps`)
-4. Version badge in app shows expected build hash
+### Why Direct `docker build` Fails
+
+The Dockerfile requires Firebase environment variables as build args (NEXT_PUBLIC_FIREBASE_*). These are:
+- **Production:** Injected by Cloud Build from GCP Secret Manager
+- **Local:** Read from `.env.local` by `docker-build-local.sh`
+
+Running `docker build .` directly results in:
+```
+FirebaseError: Firebase: Error (auth/invalid-api-key)
+Error occurred prerendering page "/_not-found"
+```
+
+### Container Lifecycle Checklist
+
+Always confirm:
+1. ✅ Old container stopped (`docker stop contractoros-web`)
+2. ✅ Old container removed (`docker rm contractoros-web`)
+3. ✅ New container started (`docker run ...`)
+4. ✅ Container running (`docker ps` shows STATUS "Up")
+5. ✅ Version badge in app footer shows expected git commit hash
 
 ---
 
@@ -217,6 +238,33 @@ gcloud secrets add-iam-policy-binding SECRET_NAME \
   --member="serviceAccount:424251610296@cloudbuild.gserviceaccount.com" \
   --role="roles/secretmanager.secretAccessor" \
   --project=contractoros-483812
+```
+
+---
+
+## Firestore Rules & Permissions
+
+When adding new collections or subcollections, ensure corresponding rules exist in `firestore.rules`.
+
+### Common Permission Error Pattern
+
+If you see `Error: Missing or insufficient permissions`:
+1. Check that the collection path has a matching rule in `firestore.rules`
+2. Organization-scoped collections use pattern: `organizations/{orgId}/collectionName/{docId}`
+3. These require `isSameOrg(orgId)` helper for access control
+
+### Deploying Rules
+
+```bash
+firebase deploy --only firestore:rules --project contractoros-483812
+```
+
+### Rule Helpers
+
+```javascript
+isSameOrg(orgId)  // User belongs to same org
+isAdmin()         // User is OWNER or PM
+isOwner(userId)   // User owns the resource
 ```
 
 ---
