@@ -41,18 +41,23 @@ export const DEMO_USERS = {
     phone: '336-555-0100',
     specialty: 'General Contractor',
     isActive: true,
+    employeeType: 'salaried' as const,
+    hourlyRate: 75,
+    salary: 120000,
+    paySchedule: 'bi-weekly' as const,
+    taxClassification: 'W2' as const,
   },
   employees: [
-    { uid: 'demo_emp_001', displayName: 'Mike Rodriguez', email: 'mike@demo.com', role: 'PM' as const, specialty: 'Lead Carpenter', phone: '336-555-0101', isActive: true },
-    { uid: 'demo_emp_002', displayName: 'Sarah Chen', email: 'sarah@demo.com', role: 'PM' as const, specialty: 'Electrician', phone: '336-555-0102', isActive: true },
-    { uid: 'demo_emp_003', displayName: 'James Wilson', email: 'james@demo.com', role: 'PM' as const, specialty: 'Foreman', phone: '336-555-0103', isActive: true },
-    { uid: 'demo_emp_004', displayName: 'Lisa Martinez', email: 'lisa@demo.com', role: 'PM' as const, specialty: 'Project Coordinator', phone: '336-555-0104', isActive: true },
-    { uid: 'demo_emp_005', displayName: 'David Brown', email: 'david@demo.com', role: 'PM' as const, specialty: 'Painter', phone: '336-555-0105', isActive: true },
+    { uid: 'demo_emp_001', displayName: 'Mike Rodriguez', email: 'mike@demo.com', role: 'EMPLOYEE' as const, specialty: 'Lead Carpenter', phone: '336-555-0101', isActive: true, employeeType: 'hourly' as const, hourlyRate: 35, trade: 'Carpentry', paySchedule: 'weekly' as const, taxClassification: 'W2' as const, ptoBalance: 40, sickLeaveBalance: 24 },
+    { uid: 'demo_emp_002', displayName: 'Sarah Chen', email: 'sarah@demo.com', role: 'EMPLOYEE' as const, specialty: 'Electrician', phone: '336-555-0102', isActive: true, employeeType: 'hourly' as const, hourlyRate: 42, trade: 'Electrical', paySchedule: 'weekly' as const, taxClassification: 'W2' as const, ptoBalance: 56, sickLeaveBalance: 24 },
+    { uid: 'demo_emp_003', displayName: 'James Wilson', email: 'james@demo.com', role: 'PM' as const, specialty: 'Foreman', phone: '336-555-0103', isActive: true, employeeType: 'salaried' as const, hourlyRate: 45, salary: 75000, paySchedule: 'bi-weekly' as const, taxClassification: 'W2' as const, ptoBalance: 80, sickLeaveBalance: 40 },
+    { uid: 'demo_emp_004', displayName: 'Lisa Martinez', email: 'lisa@demo.com', role: 'PM' as const, specialty: 'Project Coordinator', phone: '336-555-0104', isActive: true, employeeType: 'salaried' as const, hourlyRate: 38, salary: 65000, paySchedule: 'bi-weekly' as const, taxClassification: 'W2' as const, ptoBalance: 72, sickLeaveBalance: 40 },
+    { uid: 'demo_emp_005', displayName: 'David Brown', email: 'david@demo.com', role: 'EMPLOYEE' as const, specialty: 'Painter', phone: '336-555-0105', isActive: true, employeeType: 'hourly' as const, hourlyRate: 28, trade: 'Painting', paySchedule: 'weekly' as const, taxClassification: 'W2' as const, ptoBalance: 32, sickLeaveBalance: 24 },
   ],
   contractors: [
-    { uid: 'demo_sub_001', displayName: 'Tony Plumbing LLC', email: 'tony@plumbing.com', role: 'PM' as const, specialty: 'Plumbing', phone: '336-555-0201', isActive: true },
-    { uid: 'demo_sub_002', displayName: 'Elite HVAC Services', email: 'contact@elitehvac.com', role: 'PM' as const, specialty: 'HVAC', phone: '336-555-0202', isActive: true },
-    { uid: 'demo_sub_003', displayName: 'Rodriguez Tile Co', email: 'info@rodtile.com', role: 'PM' as const, specialty: 'Tile & Flooring', phone: '336-555-0203', isActive: true },
+    { uid: 'demo_sub_001', displayName: 'Tony Plumbing LLC', email: 'tony@plumbing.com', role: 'SUB' as const, specialty: 'Plumbing', phone: '336-555-0201', isActive: true, trade: 'Plumbing', taxClassification: '1099' as const, companyName: 'Tony Plumbing LLC' },
+    { uid: 'demo_sub_002', displayName: 'Elite HVAC Services', email: 'contact@elitehvac.com', role: 'SUB' as const, specialty: 'HVAC', phone: '336-555-0202', isActive: true, trade: 'HVAC', taxClassification: '1099' as const, companyName: 'Elite HVAC Services' },
+    { uid: 'demo_sub_003', displayName: 'Rodriguez Tile Co', email: 'info@rodtile.com', role: 'SUB' as const, specialty: 'Tile & Flooring', phone: '336-555-0203', isActive: true, trade: 'Tile & Flooring', taxClassification: '1099' as const, companyName: 'Rodriguez Tile & Flooring' },
   ],
 };
 
@@ -338,19 +343,36 @@ const generateTasks = (projectId: string, projectName: string) => {
 };
 
 // ============================================================================
-// DEMO DAILY LOGS
+// DEMO DAILY LOGS - Enhanced with comprehensive detail
 // ============================================================================
-const generateDailyLogs = (projectId: string) => {
-  const weatherOptions = ['Clear', 'Partly Cloudy', 'Cloudy', 'Light Rain', 'Heavy Rain'];
-  const logs: Array<{
-    date: string;
-    notes: string;
-    weather: string;
-    userId: string;
-    userName: string;
-    hoursWorked: number;
-    workersOnSite: number;
-  }> = [];
+interface EnhancedDailyLog {
+  date: string;
+  notes: string;
+  weather: string;
+  weatherTemperature?: number;
+  weatherNotes?: string;
+  userId: string;
+  userName: string;
+  hoursWorked: number;
+  workersOnSite: number;
+  category: 'general' | 'progress' | 'issue' | 'safety' | 'weather' | 'delivery' | 'inspection' | 'client_interaction' | 'subcontractor' | 'equipment';
+  workPerformed?: string[];       // Bullet list of work done
+  crewMembers?: string[];         // Names of crew on site
+  materialsDelivered?: string[];  // List of deliveries
+  visitorsOnSite?: string[];      // Inspector, client visits, etc.
+  safetyNotes?: string;           // Safety observations
+  issueDescription?: string;      // If there's an issue
+  issueImpact?: 'low' | 'medium' | 'high';
+  followUpRequired?: boolean;
+  followUpDate?: string;
+  tags?: string[];
+  isPrivate?: boolean;
+}
+
+const generateDailyLogs = (projectId: string): EnhancedDailyLog[] => {
+  const weatherOptions = ['Clear', 'Partly Cloudy', 'Cloudy', 'Light Rain', 'Heavy Rain', 'Overcast', 'Sunny'];
+  const categories: EnhancedDailyLog['category'][] = ['progress', 'delivery', 'inspection', 'safety', 'issue', 'client_interaction', 'subcontractor'];
+  const logs: EnhancedDailyLog[] = [];
 
   // Generate logs for the past 30 days
   const today = new Date();
@@ -361,54 +383,297 @@ const generateDailyLogs = (projectId: string) => {
     // Skip weekends
     if (date.getDay() === 0 || date.getDay() === 6) continue;
 
-    const logNotes: Record<string, string[]> = {
+    // Rich log data per project
+    const projectLogData: Record<string, Array<Partial<EnhancedDailyLog>>> = {
       'demo_proj_001': [
-        'Installed upper cabinets, adjusted for plumbing clearance',
-        'Completed countertop installation, sink plumbing connected',
-        'Backsplash tile work in progress, 60% complete',
-        'Cabinet hardware installation began',
-        'Finished painting ceiling and trim',
-        'Electrical fixtures installed',
+        {
+          category: 'progress',
+          notes: 'Kitchen renovation progressing well. Upper cabinet installation completed.',
+          workPerformed: [
+            'Installed all 8 upper cabinets',
+            'Leveled and shimmed cabinets for plumbing clearance',
+            'Secured cabinets to wall studs with 3" screws',
+            'Applied caulking at wall joints',
+          ],
+          crewMembers: ['Mike Rodriguez', 'David Brown'],
+          safetyNotes: 'All team members wearing safety glasses during installation.',
+          tags: ['cabinets', 'installation'],
+        },
+        {
+          category: 'delivery',
+          notes: 'Major materials delivery received and staged.',
+          workPerformed: [
+            'Unloaded delivery truck',
+            'Staged countertops in garage',
+            'Inspected all materials for damage',
+            'Signed off on delivery manifest',
+          ],
+          materialsDelivered: [
+            'Quartz countertops (3 pieces)',
+            'Undermount sink',
+            'Faucet and drain assembly',
+            'Cabinet hardware (48 pieces)',
+          ],
+          crewMembers: ['Mike Rodriguez', 'James Wilson'],
+          tags: ['delivery', 'countertops', 'materials'],
+        },
+        {
+          category: 'inspection',
+          notes: 'Electrical rough-in inspection passed.',
+          workPerformed: [
+            'Met with inspector at 9am',
+            'Walked through all electrical work',
+            'Received green tag approval',
+            'Updated permit board',
+          ],
+          visitorsOnSite: ['Building Inspector - Tom Harris', 'Homeowner - Sarah Johnson'],
+          crewMembers: ['Sarah Chen'],
+          tags: ['inspection', 'electrical', 'permit'],
+        },
+        {
+          category: 'client_interaction',
+          notes: 'Client walkthrough to review progress and select final finishes.',
+          workPerformed: [
+            'Walked client through completed framing',
+            'Reviewed backsplash tile options',
+            'Discussed lighting fixture placement',
+            'Got approval on cabinet hardware selection',
+          ],
+          visitorsOnSite: ['Sarah Johnson (Client)', 'Lisa Martinez (PM)'],
+          crewMembers: ['Lisa Martinez'],
+          tags: ['client', 'selections', 'walkthrough'],
+        },
+        {
+          category: 'progress',
+          notes: 'Countertop installation and plumbing connection.',
+          workPerformed: [
+            'Set quartz countertops with level verified',
+            'Applied adhesive and secured to cabinets',
+            'Cut sink opening with template',
+            'Connected sink plumbing and tested for leaks',
+            'Installed garbage disposal',
+          ],
+          crewMembers: ['Mike Rodriguez', 'Tony Plumbing LLC'],
+          safetyNotes: 'Proper lifting techniques used for heavy countertop slabs. Two-person lift.',
+          tags: ['countertops', 'plumbing', 'installation'],
+        },
+        {
+          category: 'safety',
+          notes: 'Weekly safety review conducted.',
+          workPerformed: [
+            'Conducted toolbox talk on ladder safety',
+            'Inspected all extension cords',
+            'Verified fire extinguisher accessible',
+            'Reviewed emergency exit routes with crew',
+          ],
+          crewMembers: ['James Wilson', 'Mike Rodriguez', 'David Brown'],
+          safetyNotes: 'No incidents reported. All PPE in good condition.',
+          tags: ['safety', 'training'],
+        },
       ],
       'demo_proj_002': [
-        'HVAC ductwork installation continues in Zone A',
-        'Electrical conduit run to server room completed',
-        'Framing for conference rooms 80% complete',
-        'Fire safety inspection passed',
-        'Plumbing rough-in for restrooms started',
+        {
+          category: 'progress',
+          notes: 'Commercial buildout - HVAC work continues.',
+          workPerformed: [
+            'Installed main trunk ductwork in Zone A',
+            'Connected 6 supply registers',
+            'Began work on Zone B return air',
+            'Coordinated with electrical for chase locations',
+          ],
+          crewMembers: ['Elite HVAC Services', 'Sarah Chen'],
+          tags: ['hvac', 'mechanical', 'commercial'],
+        },
+        {
+          category: 'issue',
+          notes: 'Discovered conflict between HVAC duct routing and fire sprinkler head.',
+          issueDescription: 'HVAC main trunk conflicts with existing sprinkler head location in conference room B. Need to relocate either duct or sprinkler.',
+          issueImpact: 'medium',
+          workPerformed: [
+            'Identified conflict during duct installation',
+            'Documented with photos',
+            'Called fire protection contractor',
+            'Scheduled coordination meeting for tomorrow',
+          ],
+          followUpRequired: true,
+          followUpDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+          crewMembers: ['Elite HVAC Services', 'James Wilson'],
+          tags: ['issue', 'hvac', 'coordination', 'sprinkler'],
+        },
+        {
+          category: 'inspection',
+          notes: 'Fire marshal inspection for rough-in work.',
+          workPerformed: [
+            'Met fire marshal at 10:30am',
+            'Reviewed fire stopping and rated assemblies',
+            'Minor correction needed on one penetration seal',
+            'Re-inspection scheduled for next week',
+          ],
+          visitorsOnSite: ['Fire Marshal - Deputy Chief Roberts', 'TechCorp Facilities - John Miller'],
+          crewMembers: ['James Wilson'],
+          tags: ['inspection', 'fire', 'safety'],
+        },
+        {
+          category: 'subcontractor',
+          notes: 'Multiple trades on site coordinating work.',
+          workPerformed: [
+            'HVAC continuing ductwork installation',
+            'Electricians pulling wire in server room',
+            'Plumbers setting rough-in for restrooms',
+            'Drywall crew measuring for material order',
+          ],
+          crewMembers: ['Elite HVAC Services', 'Sarah Chen', 'Tony Plumbing LLC', 'Mike Rodriguez'],
+          safetyNotes: 'Held morning coordination meeting to discuss work zones and avoid conflicts.',
+          tags: ['coordination', 'multi-trade'],
+        },
       ],
       'demo_proj_003': [
-        'Started demo of existing bathroom fixtures',
-        'Removed old vanity and toilet',
-        'Tile removal in progress',
+        {
+          category: 'progress',
+          notes: 'Bathroom demo continues.',
+          workPerformed: [
+            'Removed old vanity and sink',
+            'Disconnected and removed toilet',
+            'Demolished tile surround',
+            'Hauled debris to dumpster',
+          ],
+          crewMembers: ['Mike Rodriguez', 'David Brown'],
+          safetyNotes: 'Dust control measures in place - plastic sheeting on all openings.',
+          tags: ['demo', 'bathroom'],
+        },
+        {
+          category: 'issue',
+          notes: 'Found water damage behind shower wall.',
+          issueDescription: 'Discovered significant water damage and mold behind tile surround. Approximately 6 sq ft of drywall and subfloor affected. Will need remediation before proceeding.',
+          issueImpact: 'high',
+          workPerformed: [
+            'Documented damage with photos and measurements',
+            'Called mold remediation specialist',
+            'Notified client immediately',
+            'Obtained preliminary estimate for additional work',
+          ],
+          followUpRequired: true,
+          followUpDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+          visitorsOnSite: ['Michael Chen (Client)'],
+          crewMembers: ['Mike Rodriguez', 'James Wilson'],
+          tags: ['issue', 'water-damage', 'mold', 'change-order'],
+        },
       ],
       'demo_proj_004': [
-        'Final punch list items being addressed',
-        'Unit 12 walkthrough scheduled',
-        'Touch up painting in common areas',
-        'All appliances verified working',
+        {
+          category: 'progress',
+          notes: 'Final punch list items in progress.',
+          workPerformed: [
+            'Touched up paint in Unit 8 living room',
+            'Adjusted cabinet doors in Unit 12 kitchen',
+            'Fixed loose door handle in Unit 5',
+            'Cleaned all window tracks in Units 1-4',
+          ],
+          crewMembers: ['David Brown', 'Lisa Martinez'],
+          tags: ['punch-list', 'final'],
+        },
+        {
+          category: 'client_interaction',
+          notes: 'Final walkthrough with property manager.',
+          workPerformed: [
+            'Conducted final walkthrough all 12 units',
+            'Created punch list with property manager',
+            '18 minor items identified',
+            'Scheduled completion for end of week',
+          ],
+          visitorsOnSite: ['Property Manager - Margaret Lee', 'Building Owner Rep'],
+          crewMembers: ['Lisa Martinez', 'James Wilson'],
+          tags: ['walkthrough', 'punch-list', 'client'],
+        },
+        {
+          category: 'inspection',
+          notes: 'Certificate of Occupancy inspection.',
+          workPerformed: [
+            'Met with building inspector at 8am',
+            'Toured all 12 units',
+            'Reviewed all life safety systems',
+            'Received conditional approval - 2 minor items',
+          ],
+          visitorsOnSite: ['Building Inspector - Frank Torres'],
+          crewMembers: ['James Wilson'],
+          tags: ['inspection', 'CO', 'final'],
+        },
       ],
       'demo_proj_006': [
-        'Deck framing 60% complete',
-        'Support posts set and level verified',
-        'Ledger board installation complete',
-        'Joist hangers installed',
+        {
+          category: 'progress',
+          notes: 'Deck framing substantial progress.',
+          workPerformed: [
+            'Set remaining 4x4 support posts',
+            'Verified all posts plumb and level',
+            'Installed ledger board with lag bolts',
+            'Applied flashing tape at ledger',
+            'Began installing joist hangers',
+          ],
+          crewMembers: ['James Wilson', 'Mike Rodriguez'],
+          safetyNotes: 'Fall protection setup for elevated work areas.',
+          tags: ['deck', 'framing', 'structural'],
+        },
+        {
+          category: 'delivery',
+          notes: 'Composite decking materials delivered.',
+          workPerformed: [
+            'Received Trex composite decking delivery',
+            'Inspected all boards for damage',
+            'Staged materials in backyard',
+            'Covered with tarp for weather protection',
+          ],
+          materialsDelivered: [
+            'Trex Select Pebble Grey (200 ln ft)',
+            'Hidden fastener clips (400 pc)',
+            'Start/stop clips (50 pc)',
+            'Stainless steel screws (3 boxes)',
+          ],
+          crewMembers: ['James Wilson'],
+          tags: ['delivery', 'decking', 'materials'],
+        },
       ],
     };
 
-    const projectNotes = logNotes[projectId] || ['General work progress'];
-    const noteIndex = i % projectNotes.length;
+    const projectLogs = projectLogData[projectId] || [
+      {
+        category: 'progress' as const,
+        notes: 'General work progress',
+        workPerformed: ['Continued standard project work'],
+        crewMembers: ['Crew'],
+      },
+    ];
+
+    const logIndex = i % projectLogs.length;
+    const logTemplate = projectLogs[logIndex];
     const users = [DEMO_USERS.employees[0], DEMO_USERS.employees[2], DEMO_USERS.employees[3]];
     const user = users[i % users.length];
 
+    const temperature = 45 + Math.floor(Math.random() * 40); // 45-85°F
+    const weather = weatherOptions[Math.floor(Math.random() * weatherOptions.length)];
+
     logs.push({
       date: date.toISOString().split('T')[0],
-      notes: projectNotes[noteIndex],
-      weather: weatherOptions[Math.floor(Math.random() * weatherOptions.length)],
+      notes: logTemplate.notes || 'General work progress',
+      weather,
+      weatherTemperature: temperature,
+      weatherNotes: weather === 'Heavy Rain' ? 'Rain delay - crew sent home at 2pm' : undefined,
       userId: user.uid,
       userName: user.displayName,
       hoursWorked: 6 + Math.floor(Math.random() * 4),
       workersOnSite: 2 + Math.floor(Math.random() * 5),
+      category: logTemplate.category || 'progress',
+      workPerformed: logTemplate.workPerformed,
+      crewMembers: logTemplate.crewMembers,
+      materialsDelivered: logTemplate.materialsDelivered,
+      visitorsOnSite: logTemplate.visitorsOnSite,
+      safetyNotes: logTemplate.safetyNotes,
+      issueDescription: logTemplate.issueDescription,
+      issueImpact: logTemplate.issueImpact,
+      followUpRequired: logTemplate.followUpRequired,
+      followUpDate: logTemplate.followUpDate,
+      tags: logTemplate.tags,
+      isPrivate: false,
     });
   }
 
@@ -646,6 +911,7 @@ export async function checkDemoDataExists(orgId: string): Promise<boolean> {
 export async function resetDemoData(orgId: string, onProgress?: ProgressCallback): Promise<{
   success: boolean;
   deletedCounts: {
+    teamMembers: number;
     clients: number;
     projects: number;
     tasks: number;
@@ -664,6 +930,7 @@ export async function resetDemoData(orgId: string, onProgress?: ProgressCallback
   };
 
   const deletedCounts = {
+    teamMembers: 0,
     clients: 0,
     projects: 0,
     tasks: 0,
@@ -674,6 +941,20 @@ export async function resetDemoData(orgId: string, onProgress?: ProgressCallback
   };
 
   try {
+    // 0. Delete demo team members (by known IDs)
+    const allDemoUsers = [...DEMO_USERS.employees, ...DEMO_USERS.contractors];
+    progress('Deleting demo team members', 'in_progress', 0, allDemoUsers.length);
+    for (let i = 0; i < allDemoUsers.length; i++) {
+      const userRef = doc(db, 'users', allDemoUsers[i].uid);
+      const userDoc = await getDoc(userRef);
+      if (userDoc.exists()) {
+        await deleteDoc(userRef);
+        deletedCounts.teamMembers++;
+      }
+      progress('Deleting demo team members', 'in_progress', i + 1, allDemoUsers.length);
+    }
+    progress('Deleting demo team members', 'completed', deletedCounts.teamMembers);
+
     // 1. Delete demo clients (by known IDs)
     progress('Deleting demo clients', 'in_progress', 0, DEMO_CLIENTS.length);
     for (let i = 0; i < DEMO_CLIENTS.length; i++) {
@@ -790,6 +1071,7 @@ export async function resetDemoData(orgId: string, onProgress?: ProgressCallback
     console.log('✨ Demo data cleanup complete!');
     console.log('');
     console.log('Deleted:');
+    console.log(`   • ${deletedCounts.teamMembers} team members`);
     console.log(`   • ${deletedCounts.clients} clients`);
     console.log(`   • ${deletedCounts.projects} projects`);
     console.log(`   • ${deletedCounts.tasks} tasks`);
@@ -824,6 +1106,22 @@ export async function seedDemoData(orgId: string, onProgress?: ProgressCallback)
   };
 
   try {
+    // 0. Create Team Members (employees and subcontractors)
+    const allUsers = [...DEMO_USERS.employees, ...DEMO_USERS.contractors];
+    const totalUsers = allUsers.length;
+    progress('Creating team members', 'in_progress', 0, totalUsers);
+    for (let i = 0; i < allUsers.length; i++) {
+      const user = allUsers[i];
+      await setDoc(doc(db, 'users', user.uid), {
+        ...user,
+        orgId,
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      });
+      progress('Creating team members', 'in_progress', i + 1, totalUsers);
+    }
+    progress('Creating team members', 'completed', totalUsers);
+
     // 1. Create Clients
     progress('Creating clients', 'in_progress', 0, DEMO_CLIENTS.length);
     for (let i = 0; i < DEMO_CLIENTS.length; i++) {
@@ -960,6 +1258,7 @@ export async function seedDemoData(orgId: string, onProgress?: ProgressCallback)
     console.log('✨ Demo data generation complete!');
     console.log('');
     console.log('Summary:');
+    console.log(`   • ${totalUsers} team members`);
     console.log(`   • ${DEMO_CLIENTS.length} clients`);
     console.log(`   • ${DEMO_PROJECTS.length} projects`);
     console.log(`   • ${totalLogs} daily logs`);
@@ -969,6 +1268,7 @@ export async function seedDemoData(orgId: string, onProgress?: ProgressCallback)
 
     return {
       success: true,
+      teamMembers: totalUsers,
       clients: DEMO_CLIENTS.length,
       projects: DEMO_PROJECTS.length,
       logs: totalLogs,

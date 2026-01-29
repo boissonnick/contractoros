@@ -112,7 +112,7 @@ export function AddClientModal({ orgId, isOpen, onClose, onSuccess }: AddClientM
         preferredCommunication: 'email',
         tags: data.tags || [],
         isCommercial: !!data.companyName,
-      });
+      }, orgId);
 
       toast.success('Client created successfully');
       reset();

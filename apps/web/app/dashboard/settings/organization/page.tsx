@@ -413,7 +413,7 @@ export default function OrganizationSettingsPage() {
                         setDemoDataExists(true);
                         setDemoResult({
                           success: true,
-                          message: `✅ Created ${result.projects} projects, ${result.clients} clients, ${result.timeEntries} time entries, ${result.expenses} expenses, ${result.logs} daily logs, and ${result.changeOrders} change orders.`,
+                          message: `✅ Created ${result.teamMembers} team members, ${result.projects} projects, ${result.clients} clients, ${result.timeEntries} time entries, ${result.expenses} expenses, ${result.logs} daily logs, and ${result.changeOrders} change orders.`,
                         });
                         toast.success('Demo data generated successfully!');
                       } catch (error) {
@@ -470,7 +470,7 @@ export default function OrganizationSettingsPage() {
                         setDemoDataExists(false);
                         setDemoResult({
                           success: true,
-                          message: `🗑️ Removed ${result.deletedCounts.projects} projects, ${result.deletedCounts.clients} clients, ${result.deletedCounts.timeEntries} time entries, ${result.deletedCounts.expenses} expenses, ${result.deletedCounts.dailyLogs} daily logs, and ${result.deletedCounts.changeOrders} change orders.`,
+                          message: `🗑️ Removed ${result.deletedCounts.teamMembers} team members, ${result.deletedCounts.projects} projects, ${result.deletedCounts.clients} clients, ${result.deletedCounts.timeEntries} time entries, ${result.deletedCounts.expenses} expenses, ${result.deletedCounts.dailyLogs} daily logs, and ${result.deletedCounts.changeOrders} change orders.`,
                         });
                         toast.success('Demo data removed successfully!');
                       } catch (error) {
@@ -547,7 +547,7 @@ export default function OrganizationSettingsPage() {
                         setDemoDataExists(true);
                         setDemoResult({
                           success: true,
-                          message: `🔄 Regenerated! Created ${result.projects} projects, ${result.clients} clients, ${result.timeEntries} time entries, ${result.expenses} expenses, ${result.logs} daily logs, and ${result.changeOrders} change orders.`,
+                          message: `🔄 Regenerated! Created ${result.teamMembers} team members, ${result.projects} projects, ${result.clients} clients, ${result.timeEntries} time entries, ${result.expenses} expenses, ${result.logs} daily logs, and ${result.changeOrders} change orders.`,
                         });
                         toast.success('Demo data regenerated successfully!');
                       } catch (error) {

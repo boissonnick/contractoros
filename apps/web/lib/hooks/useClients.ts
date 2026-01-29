@@ -33,7 +33,9 @@ import {
   Invoice,
 } from '@/types';
 
-const CLIENTS_COLLECTION = 'clients';
+// Clients are stored in organization subcollection for proper security isolation
+// Path: organizations/{orgId}/clients/{clientId}
+const getClientsCollectionPath = (orgId: string) => `organizations/${orgId}/clients`;
 const COMMUNICATION_LOG_COLLECTION = 'clientCommunicationLogs';
 
 // ============================================
@@ -71,8 +73,7 @@ export function useClients({ orgId, status, search }: UseClientsOptions): UseCli
     setError(null);
 
     let q = query(
-      collection(db, CLIENTS_COLLECTION),
-      where('orgId', '==', orgId),
+      collection(db, getClientsCollectionPath(orgId)),
       orderBy('displayName', 'asc')
     );
 
@@ -153,7 +154,7 @@ export function useClient(clientId: string | undefined, orgId: string): UseClien
     setError(null);
 
     const unsubscribe = onSnapshot(
-      doc(db, CLIENTS_COLLECTION, clientId),
+      doc(db, getClientsCollectionPath(orgId), clientId),
       (snapshot) => {
         if (!snapshot.exists()) {
           setClient(null);
@@ -184,24 +185,24 @@ export function useClient(clientId: string | undefined, orgId: string): UseClien
 
   const updateClient = useCallback(
     async (updates: Partial<Client>) => {
-      if (!clientId) throw new Error('Client ID required');
+      if (!clientId || !orgId) throw new Error('Client ID and Org ID required');
 
-      await updateDoc(doc(db, CLIENTS_COLLECTION, clientId), {
+      await updateDoc(doc(db, getClientsCollectionPath(orgId), clientId), {
         ...updates,
         updatedAt: Timestamp.now(),
       });
     },
-    [clientId]
+    [clientId, orgId]
   );
 
   const deleteClient = useCallback(async () => {
-    if (!clientId) throw new Error('Client ID required');
-    await deleteDoc(doc(db, CLIENTS_COLLECTION, clientId));
-  }, [clientId]);
+    if (!clientId || !orgId) throw new Error('Client ID and Org ID required');
+    await deleteDoc(doc(db, getClientsCollectionPath(orgId), clientId));
+  }, [clientId, orgId]);
 
   const addNote = useCallback(
     async (note: Omit<ClientNote, 'id' | 'createdAt'>) => {
-      if (!clientId || !client) throw new Error('Client required');
+      if (!clientId || !client || !orgId) throw new Error('Client and Org required');
 
       const newNote: ClientNote = {
         ...note,
@@ -209,24 +210,24 @@ export function useClient(clientId: string | undefined, orgId: string): UseClien
         createdAt: new Date(),
       };
 
-      await updateDoc(doc(db, CLIENTS_COLLECTION, clientId), {
+      await updateDoc(doc(db, getClientsCollectionPath(orgId), clientId), {
         notes: [...(client.notes || []), newNote],
         updatedAt: Timestamp.now(),
       });
     },
-    [clientId, client]
+    [clientId, client, orgId]
   );
 
   const deleteNote = useCallback(
     async (noteId: string) => {
-      if (!clientId || !client) throw new Error('Client required');
+      if (!clientId || !client || !orgId) throw new Error('Client and Org required');
 
-      await updateDoc(doc(db, CLIENTS_COLLECTION, clientId), {
+      await updateDoc(doc(db, getClientsCollectionPath(orgId), clientId), {
         notes: (client.notes || []).filter((n) => n.id !== noteId),
         updatedAt: Timestamp.now(),
       });
     },
-    [clientId, client]
+    [clientId, client, orgId]
   );
 
   return {
@@ -375,10 +376,14 @@ export function useClientStats(orgId: string) {
 // ============================================
 
 export async function createClient(
-  clientData: Omit<Client, 'id' | 'createdAt' | 'updatedAt' | 'financials' | 'projectIds' | 'notes'>
+  clientData: Omit<Client, 'id' | 'createdAt' | 'updatedAt' | 'financials' | 'projectIds' | 'notes'>,
+  orgId: string
 ): Promise<string> {
+  if (!orgId) throw new Error('Organization ID required');
+
   const client: Omit<Client, 'id'> = {
     ...clientData,
+    orgId,
     displayName: clientData.companyName || `${clientData.firstName} ${clientData.lastName}`.trim(),
     notes: [],
     projectIds: [],
@@ -393,7 +398,7 @@ export async function createClient(
     createdAt: new Date(),
   };
 
-  const docRef = await addDoc(collection(db, CLIENTS_COLLECTION), {
+  const docRef = await addDoc(collection(db, getClientsCollectionPath(orgId)), {
     ...client,
     createdAt: Timestamp.now(),
   });
@@ -405,6 +410,8 @@ export async function updateClientFinancials(
   clientId: string,
   orgId: string
 ): Promise<void> {
+  if (!orgId) throw new Error('Organization ID required');
+
   // Fetch all projects for this client
   const projectsQuery = query(
     collection(db, 'projects'),
@@ -452,7 +459,7 @@ export async function updateClientFinancials(
     averageProjectValue: totalProjects > 0 ? lifetimeValue / totalProjects : 0,
   };
 
-  await updateDoc(doc(db, CLIENTS_COLLECTION, clientId), {
+  await updateDoc(doc(db, getClientsCollectionPath(orgId), clientId), {
     financials,
     projectIds: projectsSnap.docs.map((d) => d.id),
     updatedAt: Timestamp.now(),

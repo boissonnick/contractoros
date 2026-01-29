@@ -21,6 +21,23 @@ export interface UserPermissions {
   canViewFinances?: boolean;
 }
 
+export type PaySchedule = 'weekly' | 'bi-weekly' | 'semi-monthly' | 'monthly';
+export type PayMethod = 'direct_deposit' | 'check' | 'cash';
+
+export interface BankInfo {
+  routingNumber?: string;      // Masked in UI
+  accountLast4?: string;       // Last 4 digits only
+  accountType?: 'checking' | 'savings';
+  bankName?: string;
+}
+
+export interface W4Info {
+  filingStatus?: 'single' | 'married_filing_jointly' | 'married_filing_separately' | 'head_of_household';
+  allowances?: number;
+  additionalWithholding?: number;
+  isExempt?: boolean;
+}
+
 export interface UserProfile {
   uid: string;
   email: string;
@@ -44,6 +61,28 @@ export interface UserProfile {
   taxClassification?: 'W2' | '1099';
   address?: string;
   bio?: string;                   // User bio/description
+
+  // Payroll fields
+  salary?: number;               // Annual salary (for salaried employees)
+  overtimeRate?: number;         // Multiplier (e.g., 1.5 for time-and-a-half), defaults to 1.5
+  doubleTimeRate?: number;       // Multiplier for double-time, defaults to 2.0
+  paySchedule?: PaySchedule;     // How often employee is paid
+  payMethod?: PayMethod;         // How employee receives payment
+  bankInfo?: BankInfo;           // For direct deposit (masked/partial data only)
+  w4Info?: W4Info;               // Tax withholding configuration
+
+  // Time-off balances (in hours)
+  ptoBalance?: number;           // Paid time off balance
+  sickLeaveBalance?: number;     // Sick leave balance
+  ptoAccrualRate?: number;       // Hours accrued per pay period
+  sickAccrualRate?: number;      // Hours accrued per pay period
+
+  // Company info (for subs/contractors)
+  companyName?: string;
+  ein?: string;                  // Employer Identification Number (masked)
+
+  // Specialty for display
+  specialty?: string;            // Job title or specialty
 }
 
 export interface EmergencyContact {
