@@ -15,7 +15,7 @@ import {
   SparklesIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
-import { seedDemoData } from '@/scripts/seeders/demoData';
+import { seedDemoData, SeedProgress } from '@/scripts/seeders/demoData';
 
 export default function OrganizationSettingsPage() {
   const { profile } = useAuth();
@@ -26,6 +26,7 @@ export default function OrganizationSettingsPage() {
   const [saving, setSaving] = useState(false);
   const [generatingDemo, setGeneratingDemo] = useState(false);
   const [demoResult, setDemoResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [demoProgress, setDemoProgress] = useState<SeedProgress[]>([]);
 
   // Form state
   const [name, setName] = useState('');
@@ -301,6 +302,32 @@ export default function OrganizationSettingsPage() {
                 </p>
               </div>
 
+              {/* Progress indicator */}
+              {generatingDemo && demoProgress.length > 0 && (
+                <div className="p-3 bg-white border border-gray-200 rounded-lg mb-4 space-y-2">
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Progress</p>
+                  {demoProgress.map((p, idx) => (
+                    <div key={idx} className="flex items-center gap-2 text-sm">
+                      {p.status === 'completed' ? (
+                        <CheckIcon className="h-4 w-4 text-green-600 flex-shrink-0" />
+                      ) : p.status === 'in_progress' ? (
+                        <div className="h-4 w-4 border-2 border-purple-600 border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                      ) : (
+                        <div className="h-4 w-4 rounded-full border-2 border-gray-300 flex-shrink-0" />
+                      )}
+                      <span className={p.status === 'completed' ? 'text-green-700' : p.status === 'in_progress' ? 'text-purple-700 font-medium' : 'text-gray-500'}>
+                        {p.step}
+                        {p.count !== undefined && (
+                          <span className="text-gray-500 font-normal ml-1">
+                            ({p.count}{p.total ? `/${p.total}` : ''})
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {demoResult && (
                 <div className={`p-3 rounded-lg mb-4 ${demoResult.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
                   <p className={`text-sm ${demoResult.success ? 'text-green-800' : 'text-red-800'}`}>
@@ -324,8 +351,24 @@ export default function OrganizationSettingsPage() {
 
                   setGeneratingDemo(true);
                   setDemoResult(null);
+                  setDemoProgress([]);
+
                   try {
-                    const result = await seedDemoData(profile.orgId);
+                    const result = await seedDemoData(profile.orgId, (progress) => {
+                      setDemoProgress(prev => {
+                        // Find if this step already exists
+                        const existingIdx = prev.findIndex(p => p.step === progress.step);
+                        if (existingIdx >= 0) {
+                          // Update existing step
+                          const updated = [...prev];
+                          updated[existingIdx] = progress;
+                          return updated;
+                        } else {
+                          // Add new step
+                          return [...prev, progress];
+                        }
+                      });
+                    });
                     setDemoResult({
                       success: true,
                       message: `✅ Created ${result.projects} projects, ${result.clients} clients, ${result.timeEntries} time entries, ${result.expenses} expenses, ${result.logs} daily logs, and ${result.changeOrders} change orders.`,

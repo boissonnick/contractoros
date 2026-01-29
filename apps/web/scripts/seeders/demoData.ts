@@ -611,28 +611,48 @@ const generateChangeOrders = (projectId: string) => {
 };
 
 // ============================================================================
+// PROGRESS CALLBACK TYPE
+// ============================================================================
+export interface SeedProgress {
+  step: string;
+  status: 'pending' | 'in_progress' | 'completed';
+  count?: number;
+  total?: number;
+}
+
+export type ProgressCallback = (progress: SeedProgress) => void;
+
+// ============================================================================
 // MAIN SEEDER FUNCTION
 // ============================================================================
-export async function seedDemoData(orgId: string) {
+export async function seedDemoData(orgId: string, onProgress?: ProgressCallback) {
   console.log('🌱 Starting demo data generation...');
   console.log(`   Organization ID: ${orgId}`);
 
+  const progress = (step: string, status: 'pending' | 'in_progress' | 'completed', count?: number, total?: number) => {
+    console.log(`   ${status === 'completed' ? '✅' : status === 'in_progress' ? '⏳' : '⏸️'} ${step}${count !== undefined ? ` (${count}${total ? `/${total}` : ''})` : ''}`);
+    onProgress?.({ step, status, count, total });
+  };
+
   try {
     // 1. Create Clients
-    console.log('📋 Creating clients...');
-    for (const client of DEMO_CLIENTS) {
+    progress('Creating clients', 'in_progress', 0, DEMO_CLIENTS.length);
+    for (let i = 0; i < DEMO_CLIENTS.length; i++) {
+      const client = DEMO_CLIENTS[i];
       await setDoc(doc(db, `organizations/${orgId}/clients`, client.id), {
         ...client,
         orgId,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       });
+      progress('Creating clients', 'in_progress', i + 1, DEMO_CLIENTS.length);
     }
-    console.log(`   ✅ Created ${DEMO_CLIENTS.length} clients`);
+    progress('Creating clients', 'completed', DEMO_CLIENTS.length);
 
     // 2. Create Projects
-    console.log('📁 Creating projects...');
-    for (const project of DEMO_PROJECTS) {
+    progress('Creating projects', 'in_progress', 0, DEMO_PROJECTS.length);
+    for (let i = 0; i < DEMO_PROJECTS.length; i++) {
+      const project = DEMO_PROJECTS[i];
       const { phases, ...projectData } = project;
 
       await setDoc(doc(db, 'projects', project.id), {
@@ -662,13 +682,15 @@ export async function seedDemoData(orgId: string) {
           updatedAt: Timestamp.now(),
         });
       }
+      progress('Creating projects', 'in_progress', i + 1, DEMO_PROJECTS.length);
     }
-    console.log(`   ✅ Created ${DEMO_PROJECTS.length} projects with phases and tasks`);
+    progress('Creating projects', 'completed', DEMO_PROJECTS.length);
 
     // 3. Create Daily Logs
-    console.log('📝 Creating daily logs...');
+    progress('Creating daily logs', 'in_progress', 0);
     let totalLogs = 0;
-    for (const project of DEMO_PROJECTS.filter(p => p.status !== 'lead')) {
+    const activeProjects = DEMO_PROJECTS.filter(p => p.status !== 'lead');
+    for (const project of activeProjects) {
       const logs = generateDailyLogs(project.id);
       for (const log of logs) {
         await addDoc(collection(db, `organizations/${orgId}/dailyLogs`), {
@@ -680,11 +702,12 @@ export async function seedDemoData(orgId: string) {
         });
         totalLogs++;
       }
+      progress('Creating daily logs', 'in_progress', totalLogs);
     }
-    console.log(`   ✅ Created ${totalLogs} daily logs`);
+    progress('Creating daily logs', 'completed', totalLogs);
 
     // 4. Create Time Entries
-    console.log('⏱️ Creating time entries...');
+    progress('Creating time entries', 'in_progress', 0);
     let totalEntries = 0;
     for (const project of DEMO_PROJECTS.filter(p => p.status === 'active')) {
       const entries = generateTimeEntries(project.id);
@@ -698,11 +721,12 @@ export async function seedDemoData(orgId: string) {
         });
         totalEntries++;
       }
+      progress('Creating time entries', 'in_progress', totalEntries);
     }
-    console.log(`   ✅ Created ${totalEntries} time entries`);
+    progress('Creating time entries', 'completed', totalEntries);
 
     // 5. Create Expenses
-    console.log('💰 Creating expenses...');
+    progress('Creating expenses', 'in_progress', 0);
     let totalExpenses = 0;
     for (const project of DEMO_PROJECTS.filter(p => p.status !== 'lead')) {
       const expenses = generateExpenses(project.id, project.name);
@@ -718,11 +742,12 @@ export async function seedDemoData(orgId: string) {
         });
         totalExpenses++;
       }
+      progress('Creating expenses', 'in_progress', totalExpenses);
     }
-    console.log(`   ✅ Created ${totalExpenses} expenses`);
+    progress('Creating expenses', 'completed', totalExpenses);
 
     // 6. Create Change Orders
-    console.log('📑 Creating change orders...');
+    progress('Creating change orders', 'in_progress', 0);
     let totalCOs = 0;
     for (const project of DEMO_PROJECTS.filter(p => p.status !== 'lead')) {
       const changeOrders = generateChangeOrders(project.id);
@@ -735,8 +760,12 @@ export async function seedDemoData(orgId: string) {
         });
         totalCOs++;
       }
+      progress('Creating change orders', 'in_progress', totalCOs);
     }
-    console.log(`   ✅ Created ${totalCOs} change orders`);
+    progress('Creating change orders', 'completed', totalCOs);
+
+    // Final completion callback
+    progress('Complete', 'completed');
 
     console.log('');
     console.log('✨ Demo data generation complete!');
