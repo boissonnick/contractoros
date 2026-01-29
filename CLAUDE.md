@@ -91,6 +91,31 @@ npm run emulators        # Start Firebase emulators
 
 ---
 
+## Docker Management
+
+When building and running Docker containers locally:
+
+```bash
+# Build with local env vars (from apps/web/)
+./docker-build-local.sh
+
+# ALWAYS stop old container, remove it, then start new one
+docker stop contractoros-web 2>/dev/null
+docker rm contractoros-web 2>/dev/null
+docker run -d -p 3000:8080 --name contractoros-web contractoros-web
+
+# Verify the new container is running with correct version
+docker ps
+```
+
+**Important:** Always confirm:
+1. Old container is stopped (`docker stop`)
+2. Old container is removed (`docker rm`)
+3. New container is started and running (`docker run` + `docker ps`)
+4. Version badge in app shows expected build hash
+
+---
+
 ## Portal Routes (app/)
 
 | Route prefix | Portal | Users |
