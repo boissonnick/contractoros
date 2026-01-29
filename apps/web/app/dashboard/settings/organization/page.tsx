@@ -12,7 +12,10 @@ import {
   CloudArrowUpIcon,
   XMarkIcon,
   CheckIcon,
+  SparklesIcon,
+  ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
+import { seedDemoData } from '@/scripts/seeders/demoData';
 
 export default function OrganizationSettingsPage() {
   const { profile } = useAuth();
@@ -21,6 +24,8 @@ export default function OrganizationSettingsPage() {
   const [org, setOrg] = useState<Partial<Organization> | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [generatingDemo, setGeneratingDemo] = useState(false);
+  const [demoResult, setDemoResult] = useState<{ success: boolean; message: string } | null>(null);
 
   // Form state
   const [name, setName] = useState('');
@@ -272,6 +277,80 @@ export default function OrganizationSettingsPage() {
         <Button variant="primary" onClick={handleSave} loading={saving} disabled={!name.trim()} icon={<CheckIcon className="h-4 w-4" />}>
           Save Changes
         </Button>
+      </div>
+
+      {/* Demo Data Section */}
+      <div className="mt-8 pt-8 border-t border-gray-200">
+        <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-xl p-6">
+          <div className="flex items-start gap-4">
+            <div className="p-3 bg-purple-100 rounded-lg">
+              <SparklesIcon className="h-6 w-6 text-purple-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-gray-900">Generate Demo Data</h3>
+              <p className="text-sm text-gray-600 mt-1 mb-4">
+                Populate your organization with comprehensive demo data for testing and demos.
+                This will create 8 projects, clients, time entries, expenses, daily logs, and more.
+              </p>
+
+              <div className="flex items-center gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg mb-4">
+                <ExclamationTriangleIcon className="h-5 w-5 text-yellow-600 flex-shrink-0" />
+                <p className="text-sm text-yellow-800">
+                  <strong>Warning:</strong> This will add demo data to your organization.
+                  Use only for testing purposes.
+                </p>
+              </div>
+
+              {demoResult && (
+                <div className={`p-3 rounded-lg mb-4 ${demoResult.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+                  <p className={`text-sm ${demoResult.success ? 'text-green-800' : 'text-red-800'}`}>
+                    {demoResult.message}
+                  </p>
+                </div>
+              )}
+
+              <Button
+                variant="secondary"
+                onClick={async () => {
+                  if (!profile?.orgId) {
+                    toast.error('Organization not found');
+                    return;
+                  }
+
+                  const confirmed = window.confirm(
+                    'Are you sure you want to generate demo data? This will add sample projects, clients, expenses, and other data to your organization.'
+                  );
+                  if (!confirmed) return;
+
+                  setGeneratingDemo(true);
+                  setDemoResult(null);
+                  try {
+                    const result = await seedDemoData(profile.orgId);
+                    setDemoResult({
+                      success: true,
+                      message: `✅ Created ${result.projects} projects, ${result.clients} clients, ${result.timeEntries} time entries, ${result.expenses} expenses, ${result.logs} daily logs, and ${result.changeOrders} change orders.`,
+                    });
+                    toast.success('Demo data generated successfully!');
+                  } catch (error) {
+                    console.error('Error generating demo data:', error);
+                    setDemoResult({
+                      success: false,
+                      message: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                    });
+                    toast.error('Failed to generate demo data');
+                  } finally {
+                    setGeneratingDemo(false);
+                  }
+                }}
+                loading={generatingDemo}
+                disabled={generatingDemo}
+                icon={<SparklesIcon className="h-4 w-4" />}
+              >
+                {generatingDemo ? 'Generating Demo Data...' : 'Generate Demo Data'}
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

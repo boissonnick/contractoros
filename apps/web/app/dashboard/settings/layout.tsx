@@ -184,8 +184,8 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
       </div>
 
       {/* Grouped tab bar - reduced from 13 items to 6 */}
-      <div className="border-b border-gray-200 -mx-6 px-6">
-        <nav className="flex gap-1 overflow-x-auto" aria-label="Settings tabs">
+      <div className="border-b border-gray-200 -mx-6 px-6 overflow-visible">
+        <nav className="flex gap-1 overflow-visible" aria-label="Settings tabs">
           {SETTINGS_NAV.map((section) => {
             const isActive = isPathInSection(pathname, section);
             const Icon = section.icon;
