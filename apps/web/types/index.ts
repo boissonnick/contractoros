@@ -113,6 +113,433 @@ export interface OrgSettings {
 }
 
 // ============================================
+// Impersonation & Permissions Types
+// ============================================
+
+// Impersonation role types for testing/demos
+export type ImpersonationRole =
+  | 'owner'           // Full admin access
+  | 'project_manager' // Project-level admin
+  | 'finance'         // Finance/billing access
+  | 'employee'        // W-2 staff member
+  | 'contractor'      // 1099 subcontractor
+  | 'client'          // Customer viewing their project
+  | 'assistant';      // Limited administrative access
+
+export interface ImpersonationContext {
+  isImpersonating: boolean;
+  actualUserId: string;
+  actualUserRole: UserRole;
+  impersonatedRole: ImpersonationRole;
+  impersonatedUserId?: string; // Optional: impersonate specific user
+  startedAt: Date;
+}
+
+// Granular permission flags
+export interface RolePermissions {
+  // Projects
+  canViewAllProjects: boolean;
+  canViewAssignedProjects: boolean;
+  canCreateProjects: boolean;
+  canEditProjects: boolean;
+  canDeleteProjects: boolean;
+
+  // Finances
+  canViewAllFinances: boolean;
+  canViewAssignedFinances: boolean;
+  canManageExpenses: boolean;
+  canManageInvoices: boolean;
+  canApproveBudgets: boolean;
+
+  // Team
+  canViewTeam: boolean;
+  canInviteUsers: boolean;
+  canEditUsers: boolean;
+  canRemoveUsers: boolean;
+  canChangeRoles: boolean;
+
+  // Time Tracking
+  canClockInOut: boolean;
+  canViewOwnTime: boolean;
+  canViewTeamTime: boolean;
+  canEditOwnTime: boolean;
+  canEditTeamTime: boolean;
+  canApproveTimesheets: boolean;
+
+  // Tasks
+  canViewAssignedTasks: boolean;
+  canViewAllTasks: boolean;
+  canCreateTasks: boolean;
+  canEditTasks: boolean;
+  canDeleteTasks: boolean;
+  canAssignTasks: boolean;
+
+  // Clients
+  canViewClients: boolean;
+  canCreateClients: boolean;
+  canEditClients: boolean;
+  canDeleteClients: boolean;
+
+  // Documents (RFIs, Submittals, COs)
+  canViewDocuments: boolean;
+  canCreateDocuments: boolean;
+  canEditDocuments: boolean;
+  canApproveDocuments: boolean;
+
+  // Reports
+  canViewProjectReports: boolean;
+  canViewCompanyReports: boolean;
+  canExportReports: boolean;
+
+  // Settings
+  canViewSettings: boolean;
+  canEditOrganization: boolean;
+  canManageTemplates: boolean;
+  canManageIntegrations: boolean;
+  canManageRoles: boolean;
+
+  // Special
+  canImpersonate: boolean; // God mode
+}
+
+// Permission matrix by role
+export const ROLE_PERMISSIONS: Record<ImpersonationRole, RolePermissions> = {
+  owner: {
+    canViewAllProjects: true,
+    canViewAssignedProjects: true,
+    canCreateProjects: true,
+    canEditProjects: true,
+    canDeleteProjects: true,
+    canViewAllFinances: true,
+    canViewAssignedFinances: true,
+    canManageExpenses: true,
+    canManageInvoices: true,
+    canApproveBudgets: true,
+    canViewTeam: true,
+    canInviteUsers: true,
+    canEditUsers: true,
+    canRemoveUsers: true,
+    canChangeRoles: true,
+    canClockInOut: false, // Owners don't clock in
+    canViewOwnTime: true,
+    canViewTeamTime: true,
+    canEditOwnTime: true,
+    canEditTeamTime: true,
+    canApproveTimesheets: true,
+    canViewAssignedTasks: true,
+    canViewAllTasks: true,
+    canCreateTasks: true,
+    canEditTasks: true,
+    canDeleteTasks: true,
+    canAssignTasks: true,
+    canViewClients: true,
+    canCreateClients: true,
+    canEditClients: true,
+    canDeleteClients: true,
+    canViewDocuments: true,
+    canCreateDocuments: true,
+    canEditDocuments: true,
+    canApproveDocuments: true,
+    canViewProjectReports: true,
+    canViewCompanyReports: true,
+    canExportReports: true,
+    canViewSettings: true,
+    canEditOrganization: true,
+    canManageTemplates: true,
+    canManageIntegrations: true,
+    canManageRoles: true,
+    canImpersonate: true,
+  },
+  project_manager: {
+    canViewAllProjects: true,
+    canViewAssignedProjects: true,
+    canCreateProjects: true,
+    canEditProjects: true,
+    canDeleteProjects: false,
+    canViewAllFinances: true,
+    canViewAssignedFinances: true,
+    canManageExpenses: true,
+    canManageInvoices: true,
+    canApproveBudgets: false,
+    canViewTeam: true,
+    canInviteUsers: true,
+    canEditUsers: false,
+    canRemoveUsers: false,
+    canChangeRoles: false,
+    canClockInOut: false,
+    canViewOwnTime: true,
+    canViewTeamTime: true,
+    canEditOwnTime: true,
+    canEditTeamTime: true,
+    canApproveTimesheets: true,
+    canViewAssignedTasks: true,
+    canViewAllTasks: true,
+    canCreateTasks: true,
+    canEditTasks: true,
+    canDeleteTasks: true,
+    canAssignTasks: true,
+    canViewClients: true,
+    canCreateClients: true,
+    canEditClients: true,
+    canDeleteClients: false,
+    canViewDocuments: true,
+    canCreateDocuments: true,
+    canEditDocuments: true,
+    canApproveDocuments: true,
+    canViewProjectReports: true,
+    canViewCompanyReports: true,
+    canExportReports: true,
+    canViewSettings: true,
+    canEditOrganization: false,
+    canManageTemplates: true,
+    canManageIntegrations: false,
+    canManageRoles: false,
+    canImpersonate: false,
+  },
+  finance: {
+    canViewAllProjects: true,
+    canViewAssignedProjects: true,
+    canCreateProjects: false,
+    canEditProjects: false,
+    canDeleteProjects: false,
+    canViewAllFinances: true,
+    canViewAssignedFinances: true,
+    canManageExpenses: true,
+    canManageInvoices: true,
+    canApproveBudgets: true,
+    canViewTeam: true,
+    canInviteUsers: false,
+    canEditUsers: false,
+    canRemoveUsers: false,
+    canChangeRoles: false,
+    canClockInOut: false,
+    canViewOwnTime: true,
+    canViewTeamTime: true,
+    canEditOwnTime: false,
+    canEditTeamTime: false,
+    canApproveTimesheets: false,
+    canViewAssignedTasks: false,
+    canViewAllTasks: false,
+    canCreateTasks: false,
+    canEditTasks: false,
+    canDeleteTasks: false,
+    canAssignTasks: false,
+    canViewClients: true,
+    canCreateClients: false,
+    canEditClients: true,
+    canDeleteClients: false,
+    canViewDocuments: true,
+    canCreateDocuments: false,
+    canEditDocuments: false,
+    canApproveDocuments: false,
+    canViewProjectReports: true,
+    canViewCompanyReports: true,
+    canExportReports: true,
+    canViewSettings: true,
+    canEditOrganization: false,
+    canManageTemplates: false,
+    canManageIntegrations: false,
+    canManageRoles: false,
+    canImpersonate: false,
+  },
+  employee: {
+    canViewAllProjects: false,
+    canViewAssignedProjects: true,
+    canCreateProjects: false,
+    canEditProjects: false,
+    canDeleteProjects: false,
+    canViewAllFinances: false,
+    canViewAssignedFinances: false,
+    canManageExpenses: true, // Their own expenses
+    canManageInvoices: false,
+    canApproveBudgets: false,
+    canViewTeam: true,
+    canInviteUsers: false,
+    canEditUsers: false,
+    canRemoveUsers: false,
+    canChangeRoles: false,
+    canClockInOut: true, // Key feature for employees
+    canViewOwnTime: true,
+    canViewTeamTime: false,
+    canEditOwnTime: true,
+    canEditTeamTime: false,
+    canApproveTimesheets: false,
+    canViewAssignedTasks: true,
+    canViewAllTasks: false,
+    canCreateTasks: false,
+    canEditTasks: true, // Their tasks only
+    canDeleteTasks: false,
+    canAssignTasks: false,
+    canViewClients: false,
+    canCreateClients: false,
+    canEditClients: false,
+    canDeleteClients: false,
+    canViewDocuments: true,
+    canCreateDocuments: true,
+    canEditDocuments: false,
+    canApproveDocuments: false,
+    canViewProjectReports: false,
+    canViewCompanyReports: false,
+    canExportReports: false,
+    canViewSettings: false,
+    canEditOrganization: false,
+    canManageTemplates: false,
+    canManageIntegrations: false,
+    canManageRoles: false,
+    canImpersonate: false,
+  },
+  contractor: {
+    canViewAllProjects: false,
+    canViewAssignedProjects: true, // Only assigned projects
+    canCreateProjects: false,
+    canEditProjects: false,
+    canDeleteProjects: false,
+    canViewAllFinances: false,
+    canViewAssignedFinances: false, // Only their invoices
+    canManageExpenses: false,
+    canManageInvoices: false,
+    canApproveBudgets: false,
+    canViewTeam: false,
+    canInviteUsers: false,
+    canEditUsers: false,
+    canRemoveUsers: false,
+    canChangeRoles: false,
+    canClockInOut: false, // They're 1099
+    canViewOwnTime: true,
+    canViewTeamTime: false,
+    canEditOwnTime: true,
+    canEditTeamTime: false,
+    canApproveTimesheets: false,
+    canViewAssignedTasks: true,
+    canViewAllTasks: false,
+    canCreateTasks: false,
+    canEditTasks: true,
+    canDeleteTasks: false,
+    canAssignTasks: false,
+    canViewClients: false,
+    canCreateClients: false,
+    canEditClients: false,
+    canDeleteClients: false,
+    canViewDocuments: true,
+    canCreateDocuments: true,
+    canEditDocuments: false,
+    canApproveDocuments: false,
+    canViewProjectReports: false,
+    canViewCompanyReports: false,
+    canExportReports: false,
+    canViewSettings: false,
+    canEditOrganization: false,
+    canManageTemplates: false,
+    canManageIntegrations: false,
+    canManageRoles: false,
+    canImpersonate: false,
+  },
+  client: {
+    canViewAllProjects: false,
+    canViewAssignedProjects: true, // Their projects only
+    canCreateProjects: false,
+    canEditProjects: false,
+    canDeleteProjects: false,
+    canViewAllFinances: false,
+    canViewAssignedFinances: true, // Their project finances
+    canManageExpenses: false,
+    canManageInvoices: false,
+    canApproveBudgets: false,
+    canViewTeam: false,
+    canInviteUsers: false,
+    canEditUsers: false,
+    canRemoveUsers: false,
+    canChangeRoles: false,
+    canClockInOut: false,
+    canViewOwnTime: false,
+    canViewTeamTime: false,
+    canEditOwnTime: false,
+    canEditTeamTime: false,
+    canApproveTimesheets: false,
+    canViewAssignedTasks: false,
+    canViewAllTasks: false,
+    canCreateTasks: false,
+    canEditTasks: false,
+    canDeleteTasks: false,
+    canAssignTasks: false,
+    canViewClients: false,
+    canCreateClients: false,
+    canEditClients: false,
+    canDeleteClients: false,
+    canViewDocuments: true, // View their project docs
+    canCreateDocuments: false,
+    canEditDocuments: false,
+    canApproveDocuments: true, // Approve change orders
+    canViewProjectReports: true, // Their project only
+    canViewCompanyReports: false,
+    canExportReports: false,
+    canViewSettings: false,
+    canEditOrganization: false,
+    canManageTemplates: false,
+    canManageIntegrations: false,
+    canManageRoles: false,
+    canImpersonate: false,
+  },
+  assistant: {
+    canViewAllProjects: true,
+    canViewAssignedProjects: true,
+    canCreateProjects: false,
+    canEditProjects: true,
+    canDeleteProjects: false,
+    canViewAllFinances: false,
+    canViewAssignedFinances: false,
+    canManageExpenses: false,
+    canManageInvoices: false,
+    canApproveBudgets: false,
+    canViewTeam: true,
+    canInviteUsers: false,
+    canEditUsers: false,
+    canRemoveUsers: false,
+    canChangeRoles: false,
+    canClockInOut: true,
+    canViewOwnTime: true,
+    canViewTeamTime: false,
+    canEditOwnTime: true,
+    canEditTeamTime: false,
+    canApproveTimesheets: false,
+    canViewAssignedTasks: true,
+    canViewAllTasks: true,
+    canCreateTasks: true,
+    canEditTasks: true,
+    canDeleteTasks: false,
+    canAssignTasks: true,
+    canViewClients: true,
+    canCreateClients: true,
+    canEditClients: true,
+    canDeleteClients: false,
+    canViewDocuments: true,
+    canCreateDocuments: true,
+    canEditDocuments: true,
+    canApproveDocuments: false,
+    canViewProjectReports: true,
+    canViewCompanyReports: false,
+    canExportReports: false,
+    canViewSettings: true,
+    canEditOrganization: false,
+    canManageTemplates: true,
+    canManageIntegrations: false,
+    canManageRoles: false,
+    canImpersonate: false,
+  },
+};
+
+// Role display info
+export const IMPERSONATION_ROLE_INFO: Record<ImpersonationRole, { label: string; icon: string; description: string }> = {
+  owner: { label: 'Owner/Admin', icon: '👑', description: 'Full system access' },
+  project_manager: { label: 'Project Manager', icon: '📋', description: 'Project-level admin' },
+  finance: { label: 'Finance Manager', icon: '💰', description: 'Billing & accounting' },
+  employee: { label: 'Employee', icon: '👷', description: 'W-2 staff member' },
+  contractor: { label: 'Contractor', icon: '🔧', description: '1099 subcontractor' },
+  client: { label: 'Client', icon: '👤', description: 'Customer portal' },
+  assistant: { label: 'Assistant', icon: '📎', description: 'Limited admin access' },
+};
+
+// ============================================
 // User Invitation Types
 // ============================================
 

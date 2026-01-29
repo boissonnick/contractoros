@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/lib/auth';
 import { ThemeProvider } from '@/lib/theme/ThemeProvider';
 import { ToastProvider, Toaster } from '@/components/ui/Toast';
+import { ImpersonationProvider } from '@/lib/contexts/ImpersonationContext';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
 // Create a client with sensible defaults for construction app
@@ -25,9 +26,11 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       <QueryClientProvider client={queryClient}>
         <ToastProvider>
           <AuthProvider>
-            <ThemeProvider>
-              {children}
-            </ThemeProvider>
+            <ImpersonationProvider>
+              <ThemeProvider>
+                {children}
+              </ThemeProvider>
+            </ImpersonationProvider>
           </AuthProvider>
           <Toaster />
         </ToastProvider>
