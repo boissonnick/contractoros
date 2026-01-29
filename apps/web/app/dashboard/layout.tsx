@@ -6,7 +6,8 @@ import AuthGuard from '@/components/auth/AuthGuard';
 import AppShell from '@/components/ui/AppShell';
 import { NavItem, RolePermissions } from '@/types';
 import { useImpersonation } from '@/lib/contexts/ImpersonationContext';
-import { ImpersonationBanner, ImpersonationSelector } from '@/components/impersonation';
+import { ImpersonationBanner } from '@/components/impersonation';
+import DevToolsWidget from '@/components/ui/DevToolsWidget';
 import {
   HomeIcon,
   FolderIcon,
@@ -66,10 +67,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         </AppShell>
       </div>
 
-      {/* Impersonation Selector - Fixed bottom right */}
-      <div className="fixed bottom-4 right-4 z-50 hidden md:block">
-        <ImpersonationSelector />
-      </div>
+      {/* Dev Tools Widget - Impersonation + Version indicator */}
+      <DevToolsWidget />
     </div>
   );
 }

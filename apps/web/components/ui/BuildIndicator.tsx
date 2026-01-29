@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 // These are set at build time
 const BUILD_VERSION = process.env.NEXT_PUBLIC_BUILD_VERSION || 'dev';
@@ -8,6 +9,12 @@ const BUILD_TIME = process.env.NEXT_PUBLIC_BUILD_TIME || new Date().toISOString(
 
 export default function BuildIndicator() {
   const [expanded, setExpanded] = useState(false);
+  const pathname = usePathname();
+
+  // Don't render on dashboard routes - DevToolsWidget handles it there
+  if (pathname?.startsWith('/dashboard')) {
+    return null;
+  }
 
   return (
     <div
