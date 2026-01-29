@@ -7,7 +7,7 @@ import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
 import { doc, getDoc, updateDoc, collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
 import { Project, Task, UserProfile, ProjectPhase, QuoteSection, ProjectStatus } from '@/types';
-import { Button, Card, StatusBadge, Avatar, toast } from '@/components/ui';
+import { Button, Card, StatusBadge, Avatar, toast, ConfirmDialog } from '@/components/ui';
 import { cn, formatCurrency } from '@/lib/utils';
 import PhaseProgressBar from '@/components/projects/PhaseProgressBar';
 import QuoteSummaryCard from '@/components/projects/QuoteSummaryCard';
@@ -18,6 +18,7 @@ import {
   DocumentTextIcon,
   UserGroupIcon,
   ChevronDownIcon,
+  ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 
 const STATUS_TRANSITIONS: Record<ProjectStatus, ProjectStatus[]> = {
@@ -26,8 +27,8 @@ const STATUS_TRANSITIONS: Record<ProjectStatus, ProjectStatus[]> = {
   planning: ['active', 'on_hold', 'cancelled'],
   active: ['on_hold', 'completed', 'cancelled'],
   on_hold: ['active', 'cancelled'],
-  completed: [],
-  cancelled: [],
+  completed: ['active'], // Allow reactivating completed projects
+  cancelled: ['planning', 'lead'], // Allow restoring cancelled projects
 };
 
 const STATUS_LABELS: Record<ProjectStatus, string> = {
@@ -54,6 +55,13 @@ export default function ProjectDetailPage() {
   const [loading, setLoading] = useState(true);
   const [selectedPhaseId, setSelectedPhaseId] = useState<string | null>(null);
   const [statusMenuOpen, setStatusMenuOpen] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    status: ProjectStatus | null;
+    title: string;
+    message: string;
+    variant: 'danger' | 'warning' | 'info';
+  }>({ open: false, status: null, title: '', message: '', variant: 'warning' });
   const statusRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -111,20 +119,71 @@ export default function ProjectDetailPage() {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  const handleStatusChange = async (newStatus: ProjectStatus) => {
+  const initiateStatusChange = (newStatus: ProjectStatus) => {
     if (!project) return;
     setStatusMenuOpen(false);
+
+    // Check if this requires confirmation
+    if (newStatus === 'cancelled') {
+      setConfirmDialog({
+        open: true,
+        status: newStatus,
+        title: 'Cancel Project',
+        message: 'Are you sure you want to cancel this project? This action can be undone by restoring the project later.',
+        variant: 'danger',
+      });
+    } else if (project.status === 'cancelled') {
+      // Restoring from cancelled
+      setConfirmDialog({
+        open: true,
+        status: newStatus,
+        title: 'Restore Project',
+        message: `Are you sure you want to restore this project to "${STATUS_LABELS[newStatus]}" status? The project will be reactivated.`,
+        variant: 'info',
+      });
+    } else if (project.status === 'completed' && newStatus === 'active') {
+      // Reactivating completed project
+      setConfirmDialog({
+        open: true,
+        status: newStatus,
+        title: 'Reactivate Project',
+        message: 'Are you sure you want to reactivate this completed project? It will be set back to active status.',
+        variant: 'warning',
+      });
+    } else {
+      // Regular status change, no confirmation needed
+      executeStatusChange(newStatus);
+    }
+  };
+
+  const executeStatusChange = async (newStatus: ProjectStatus) => {
+    if (!project) return;
     try {
       await updateDoc(doc(db, 'projects', projectId), {
         status: newStatus,
         updatedAt: Timestamp.now(),
       });
       setProject(prev => prev ? { ...prev, status: newStatus } : null);
-      toast.success(`Status updated to ${STATUS_LABELS[newStatus]}`);
+
+      // Customize success message based on action
+      if (project.status === 'cancelled') {
+        toast.success(`Project restored to ${STATUS_LABELS[newStatus]}`);
+      } else if (newStatus === 'cancelled') {
+        toast.success('Project cancelled');
+      } else {
+        toast.success(`Status updated to ${STATUS_LABELS[newStatus]}`);
+      }
     } catch (error) {
       console.error('Error updating status:', error);
       toast.error('Failed to update status');
     }
+  };
+
+  const handleConfirmStatusChange = () => {
+    if (confirmDialog.status) {
+      executeStatusChange(confirmDialog.status);
+    }
+    setConfirmDialog(prev => ({ ...prev, open: false }));
   };
 
   if (loading) {
@@ -183,20 +242,31 @@ export default function ProjectDetailPage() {
                   {nextStatuses.map((s) => (
                     <button
                       key={s}
-                      onClick={() => handleStatusChange(s)}
-                      className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                      onClick={() => initiateStatusChange(s)}
+                      className={cn(
+                        "w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 flex items-center gap-2",
+                        s === 'cancelled' ? 'text-red-600' : 'text-gray-700',
+                        // Highlight restore options when cancelled
+                        project.status === 'cancelled' && 'text-green-600 font-medium'
+                      )}
                     >
-                      <span className={cn(
-                        'h-2 w-2 rounded-full',
-                        s === 'active' && 'bg-green-500',
-                        s === 'planning' && 'bg-blue-500',
-                        s === 'bidding' && 'bg-purple-500',
-                        s === 'lead' && 'bg-gray-400',
-                        s === 'on_hold' && 'bg-yellow-500',
-                        s === 'completed' && 'bg-emerald-500',
-                        s === 'cancelled' && 'bg-red-500',
-                      )} />
-                      {STATUS_LABELS[s]}
+                      {project.status === 'cancelled' ? (
+                        <ArrowPathIcon className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <span className={cn(
+                          'h-2 w-2 rounded-full',
+                          s === 'active' && 'bg-green-500',
+                          s === 'planning' && 'bg-blue-500',
+                          s === 'bidding' && 'bg-purple-500',
+                          s === 'lead' && 'bg-gray-400',
+                          s === 'on_hold' && 'bg-yellow-500',
+                          s === 'completed' && 'bg-emerald-500',
+                          s === 'cancelled' && 'bg-red-500',
+                        )} />
+                      )}
+                      {project.status === 'cancelled'
+                        ? `Restore to ${STATUS_LABELS[s]}`
+                        : STATUS_LABELS[s]}
                     </button>
                   ))}
                 </div>
@@ -344,6 +414,23 @@ export default function ProjectDetailPage() {
           )}
         </Card>
       )}
+
+      {/* Status Change Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={confirmDialog.open}
+        onClose={() => setConfirmDialog(prev => ({ ...prev, open: false }))}
+        onConfirm={handleConfirmStatusChange}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        confirmLabel={
+          confirmDialog.status === 'cancelled'
+            ? 'Cancel Project'
+            : project?.status === 'cancelled'
+            ? 'Restore Project'
+            : 'Confirm'
+        }
+        variant={confirmDialog.variant}
+      />
     </div>
   );
 }
