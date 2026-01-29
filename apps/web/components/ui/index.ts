@@ -73,3 +73,5 @@ export {
   SkeletonDashboard,
   SkeletonList,
 } from './Skeleton';
+
+export { default as BuildIndicator } from './BuildIndicator';
