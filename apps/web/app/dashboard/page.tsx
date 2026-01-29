@@ -12,6 +12,12 @@ import { SkeletonList } from '@/components/ui/Skeleton';
 import { cn, formatCurrency } from '@/lib/utils';
 import { useActivityLog } from '@/lib/hooks/useActivityLog';
 import {
+  calculateBudgetPercentage,
+  getBudgetStatus,
+  getBudgetBarColor,
+  BUDGET_HELP_TEXT,
+} from '@/lib/budget-utils';
+import {
   FolderIcon,
   ClockIcon,
   ExclamationTriangleIcon,
@@ -430,23 +436,24 @@ export default function DashboardPage() {
                         )}
                       </div>
                     </div>
-                    {project.budget && project.currentSpend !== undefined && (
-                      <div className="text-right ml-4">
-                        <div className="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
-                          <div
-                            className={cn(
-                              'h-full rounded-full',
-                              (project.currentSpend / project.budget) > 0.9 ? 'bg-red-500' :
-                                (project.currentSpend / project.budget) > 0.75 ? 'bg-yellow-500' : 'bg-green-500'
-                            )}
-                            style={{ width: `${Math.min((project.currentSpend / project.budget) * 100, 100)}%` }}
-                          />
+                    {project.budget && project.currentSpend !== undefined && (() => {
+                      const percentUsed = calculateBudgetPercentage(project.currentSpend, project.budget);
+                      const status = getBudgetStatus(percentUsed);
+                      const barColor = getBudgetBarColor(status);
+                      return (
+                        <div className="text-right ml-4" title={BUDGET_HELP_TEXT.percentUsed}>
+                          <div className="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
+                            <div
+                              className={cn('h-full rounded-full', barColor)}
+                              style={{ width: `${Math.min(percentUsed, 100)}%` }}
+                            />
+                          </div>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {Math.round(percentUsed)}% used
+                          </p>
                         </div>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {Math.round((project.currentSpend / project.budget) * 100)}% used
-                        </p>
-                      </div>
-                    )}
+                      );
+                    })()}
                   </Link>
                 ))}
               </div>

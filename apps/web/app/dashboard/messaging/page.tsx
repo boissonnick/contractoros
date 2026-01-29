@@ -14,7 +14,15 @@ import {
   XMarkIcon,
   PhoneIcon,
   UserIcon,
+  ClockIcon,
+  DocumentTextIcon,
+  CalendarDaysIcon,
+  CurrencyDollarIcon,
+  QuestionMarkCircleIcon,
+  InformationCircleIcon,
+  Cog6ToothIcon,
 } from '@heroicons/react/24/outline';
+import Link from 'next/link';
 import {
   collection,
   query,
@@ -299,8 +307,134 @@ export default function MessagingPage() {
               />
             </div>
           </div>
+        ) : conversations.length === 0 ? (
+          /* First-time onboarding */
+          <div className="flex-1 overflow-y-auto p-6">
+            <div className="max-w-2xl mx-auto space-y-6">
+              {/* Welcome banner */}
+              <Card className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-blue-600 rounded-xl text-white">
+                    <ChatBubbleLeftRightIcon className="h-8 w-8" />
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-xl font-bold text-gray-900 mb-2">
+                      Welcome to SMS Messaging
+                    </h2>
+                    <p className="text-gray-600 mb-4">
+                      Send text messages directly to clients, subcontractors, and crew members.
+                      Keep all your project communication in one place.
+                    </p>
+                    <div className="flex gap-3">
+                      <Button onClick={handleNewMessage}>
+                        <PlusIcon className="h-4 w-4 mr-2" />
+                        Send First Message
+                      </Button>
+                      <Link href="/dashboard/settings/sms-templates">
+                        <Button variant="secondary">
+                          <Cog6ToothIcon className="h-4 w-4 mr-2" />
+                          Configure Templates
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Use cases */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <InformationCircleIcon className="h-5 w-5 text-blue-600" />
+                  Common Use Cases
+                </h3>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Card className="p-4 hover:shadow-md transition-shadow">
+                    <div className="flex gap-3">
+                      <div className="p-2 bg-green-100 rounded-lg">
+                        <ClockIcon className="h-5 w-5 text-green-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900">Appointment Reminders</h4>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Send automated reminders before scheduled site visits, inspections, or meetings.
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+
+                  <Card className="p-4 hover:shadow-md transition-shadow">
+                    <div className="flex gap-3">
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <CalendarDaysIcon className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900">Schedule Updates</h4>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Notify clients and crew of schedule changes, delays, or completion dates.
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+
+                  <Card className="p-4 hover:shadow-md transition-shadow">
+                    <div className="flex gap-3">
+                      <div className="p-2 bg-yellow-100 rounded-lg">
+                        <CurrencyDollarIcon className="h-5 w-5 text-yellow-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900">Payment Reminders</h4>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Send friendly payment reminders with invoice links for quick collection.
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+
+                  <Card className="p-4 hover:shadow-md transition-shadow">
+                    <div className="flex gap-3">
+                      <div className="p-2 bg-purple-100 rounded-lg">
+                        <DocumentTextIcon className="h-5 w-5 text-purple-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900">Project Updates</h4>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Share progress updates, milestone completions, and important announcements.
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+              </div>
+
+              {/* Quick tips */}
+              <Card className="p-4 bg-gray-50 border-gray-200">
+                <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                  <QuestionMarkCircleIcon className="h-5 w-5 text-gray-600" />
+                  Quick Tips
+                </h4>
+                <ul className="space-y-2 text-sm text-gray-600">
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-600 font-bold">•</span>
+                    Use templates for consistent messaging and faster sending
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-600 font-bold">•</span>
+                    Messages are linked to contacts and projects for easy tracking
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-600 font-bold">•</span>
+                    Replies are automatically threaded into conversations
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-600 font-bold">•</span>
+                    Configure Twilio in Settings → Integrations for production use
+                  </li>
+                </ul>
+              </Card>
+            </div>
+          </div>
         ) : (
-          /* Empty state */
+          /* Empty state - has conversations but none selected */
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
               <ChatBubbleLeftRightIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />

@@ -236,7 +236,7 @@ export default function SchedulePage() {
   const allConflicts = events.flatMap((event) => checkConflicts(event));
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col h-full min-h-[calc(100vh-200px)] space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -281,7 +281,7 @@ export default function SchedulePage() {
 
       {/* Calendar Tab */}
       {tab === 'calendar' && (
-        <div className="space-y-4">
+        <div className="flex-1 flex flex-col space-y-4 min-h-0">
           {/* Conflict alerts */}
           {allConflicts.length > 0 && (
             <ConflictAlert
@@ -348,15 +348,15 @@ export default function SchedulePage() {
             </div>
           </Card>
 
-          {/* Calendar grid */}
-          <Card className="overflow-hidden">
+          {/* Calendar grid - flex-1 to fill available space */}
+          <Card className="flex-1 overflow-hidden flex flex-col min-h-[500px]">
             {eventsLoading ? (
-              <div className="flex items-center justify-center h-96">
+              <div className="flex items-center justify-center flex-1">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
               </div>
             ) : view === 'week' ? (
-              /* Week view */
-              <div className="grid grid-cols-7 divide-x divide-gray-200">
+              /* Week view - uses flex-1 to expand */
+              <div className="grid grid-cols-7 divide-x divide-gray-200 flex-1">
                 {weekDates.map((date, idx) => {
                   const isToday = date.toDateString() === new Date().toDateString();
                   const dayEvents = getEventsForDate(date);
@@ -365,7 +365,7 @@ export default function SchedulePage() {
                     <div
                       key={idx}
                       className={cn(
-                        'min-h-[400px]',
+                        'flex flex-col',
                         isToday && 'bg-blue-50/30'
                       )}
                     >
@@ -388,8 +388,8 @@ export default function SchedulePage() {
                         </div>
                       </div>
 
-                      {/* Events */}
-                      <div className="p-1 space-y-1">
+                      {/* Events - flex-1 to fill remaining space */}
+                      <div className="flex-1 p-1 space-y-1 overflow-y-auto">
                         {dayEvents.slice(0, 5).map((event) => (
                           <EventCard
                             key={event.id}
@@ -451,8 +451,8 @@ export default function SchedulePage() {
                 )}
               </div>
             ) : (
-              /* Month view */
-              <div>
+              /* Month view - flex-1 to expand */
+              <div className="flex flex-col flex-1">
                 {/* Day headers */}
                 <div className="grid grid-cols-7 border-b border-gray-200">
                   {DAYS_OF_WEEK.map((day) => (
@@ -487,9 +487,9 @@ export default function SchedulePage() {
                   }
 
                   return (
-                    <div>
+                    <div className="flex-1 flex flex-col">
                       {weeks.map((week, weekIdx) => (
-                        <div key={weekIdx} className="grid grid-cols-7 border-b border-gray-200 last:border-b-0">
+                        <div key={weekIdx} className="grid grid-cols-7 border-b border-gray-200 last:border-b-0 flex-1">
                           {week.map((date, dayIdx) => {
                             if (!date) {
                               return (

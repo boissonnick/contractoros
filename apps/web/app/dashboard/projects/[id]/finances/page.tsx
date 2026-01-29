@@ -19,8 +19,17 @@ import {
   DocumentTextIcon,
   BanknotesIcon,
   PlusIcon,
+  InformationCircleIcon,
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
+import {
+  calculateProjectFinancials,
+  formatBudgetCurrency,
+  formatPercentage,
+  getBudgetStatusColor,
+  getBudgetBarColor,
+  BUDGET_HELP_TEXT,
+} from '@/lib/budget-utils';
 
 const categoryLabels: Record<ExpenseCategory, string> = {
   materials: 'Materials',
@@ -73,58 +82,50 @@ export default function ProjectFinancesPage() {
     loadData();
   }, [projectId, profile?.orgId]);
 
-  // Financial summary
-  const summary = useMemo(() => {
-    const budget = project?.budget || 0;
-    const contractValue = project?.quoteTotal || 0;
-
-    // Expenses
-    const totalExpenses = expenses
-      .filter(e => e.status !== 'rejected')
-      .reduce((sum, e) => sum + e.amount, 0);
-    const approvedExpenses = expenses
-      .filter(e => e.status === 'approved' || e.status === 'reimbursed')
-      .reduce((sum, e) => sum + e.amount, 0);
-
-    // Revenue
-    const totalInvoiced = invoices.reduce((sum, inv) => sum + inv.total, 0);
-    const totalPaid = invoices.reduce((sum, inv) => sum + inv.amountPaid, 0);
-    const totalOutstanding = invoices
-      .filter(inv => ['sent', 'viewed', 'partial', 'overdue'].includes(inv.status))
-      .reduce((sum, inv) => sum + inv.amountDue, 0);
-
-    // Budget tracking
-    const budgetUsed = budget > 0 ? (totalExpenses / budget) * 100 : 0;
-    const budgetRemaining = budget - totalExpenses;
-
-    // Profit
-    const grossProfit = totalPaid - approvedExpenses;
-    const profitMargin = totalPaid > 0 ? (grossProfit / totalPaid) * 100 : 0;
-
-    // Category breakdown
-    const byCategory: Record<string, number> = {};
-    expenses.filter(e => e.status !== 'rejected').forEach(e => {
-      byCategory[e.category] = (byCategory[e.category] || 0) + e.amount;
-    });
-
-    return {
-      budget,
-      contractValue,
-      totalExpenses,
-      approvedExpenses,
-      totalInvoiced,
-      totalPaid,
-      totalOutstanding,
-      budgetUsed,
-      budgetRemaining,
-      grossProfit,
-      profitMargin,
-      byCategory,
-    };
+  // Financial summary - using centralized utility for consistent calculations
+  const financials = useMemo(() => {
+    if (!project) return null;
+    return calculateProjectFinancials(project, expenses, invoices);
   }, [project, expenses, invoices]);
 
-  const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
+  // Legacy summary format for backward compatibility with existing UI
+  const summary = useMemo(() => {
+    if (!financials) {
+      return {
+        budget: 0,
+        contractValue: 0,
+        totalExpenses: 0,
+        approvedExpenses: 0,
+        totalInvoiced: 0,
+        totalPaid: 0,
+        totalOutstanding: 0,
+        budgetUsed: 0,
+        budgetRemaining: 0,
+        budgetStatus: 'healthy' as const,
+        grossProfit: 0,
+        profitMargin: 0,
+        byCategory: {} as Record<string, number>,
+      };
+    }
+
+    return {
+      budget: financials.budget.totalBudget,
+      contractValue: financials.revenue.contractValue,
+      totalExpenses: financials.budget.totalSpent,
+      approvedExpenses: financials.budget.approvedSpent,
+      totalInvoiced: financials.revenue.totalInvoiced,
+      totalPaid: financials.revenue.totalPaid,
+      totalOutstanding: financials.revenue.totalOutstanding,
+      budgetUsed: financials.budget.percentUsed,
+      budgetRemaining: financials.budget.remaining,
+      budgetStatus: financials.budget.budgetStatus,
+      grossProfit: financials.profit.grossProfit,
+      profitMargin: financials.profit.profitMargin,
+      byCategory: financials.budget.byCategory,
+    };
+  }, [financials]);
+
+  const formatCurrency = (amount: number) => formatBudgetCurrency(amount);
 
   if (loading || expensesLoading) {
     return (
@@ -221,9 +222,7 @@ export default function ProjectFinancesPage() {
             <div
               className={cn(
                 'h-full rounded-full transition-all',
-                summary.budgetUsed > 100 ? 'bg-red-500' :
-                summary.budgetUsed > 90 ? 'bg-orange-500' :
-                summary.budgetUsed > 75 ? 'bg-yellow-500' : 'bg-green-500'
+                getBudgetBarColor(summary.budgetStatus)
               )}
               style={{ width: `${Math.min(summary.budgetUsed, 100)}%` }}
             />

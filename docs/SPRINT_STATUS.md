@@ -368,8 +368,8 @@ See `docs/MASTER_ROADMAP.md` for complete list.
 
 > **Date:** January 29, 2026
 > **Total Items:** 17 issues (57 story points)
-> **Completed:** 10 items (27 SP)
-> **Remaining:** 7 items (30 SP)
+> **Completed:** 14 items (40 SP)
+> **Remaining:** 3 items (17 SP)
 
 ### Priority 0: Blockers (Immediate)
 | ID | Issue | SP | Status |
@@ -384,7 +384,7 @@ See `docs/MASTER_ROADMAP.md` for complete list.
 | ID | Issue | SP | Status |
 |----|-------|-----|--------|
 | AUDIT-006 | Client Module Missing | 3 | ✅ Done (Sprint 4) |
-| AUDIT-007 | Budget Calculation Issues | 5 | **PENDING** |
+| AUDIT-007 | Budget Calculation Issues | 5 | ✅ Done |
 | AUDIT-008 | Dashboard Empty States | 3 | ✅ Done |
 | AUDIT-009 | Dashboard Data Overflow | 3 | ✅ Done |
 | AUDIT-010 | Invoice List Performance | 2 | ✅ Done
@@ -392,28 +392,32 @@ See `docs/MASTER_ROADMAP.md` for complete list.
 ### Priority 2: UX & Settings
 | ID | Issue | SP | Status |
 |----|-------|-----|--------|
-| AUDIT-011 | Project Tabs Order | 2 | **PENDING** |
-| AUDIT-012 | Calendar Vertical Space | 3 | **PENDING** |
-| AUDIT-013 | SMS Use Case Clarity | 3 | **PENDING** |
+| AUDIT-011 | Project Tabs Order | 2 | ✅ Done |
+| AUDIT-012 | Calendar Vertical Space | 3 | ✅ Done |
+| AUDIT-013 | SMS Use Case Clarity | 3 | ✅ Done |
 | AUDIT-014 | Material Categories | 2 | **PENDING** |
 | AUDIT-015 | Line Item Search | 5 | **PENDING** |
 | AUDIT-016 | Owner/Admin Controls | 5 | **PENDING** |
 | AUDIT-017 | Template Management | 3 | **PENDING** |
 | AUDIT-018 | Integration OAuth | 5 | Partial (UI done) |
 
-### Recommended Next Sprint: Remaining Critical Issues
-**Sprint 6 - January 2026 Audit Fixes (P1 Critical + P2)**
-1. AUDIT-007: Budget Calculation Issues (5 SP) - P1
-2. AUDIT-011: Project Tabs Order (2 SP) - P2
-3. AUDIT-012: Calendar Vertical Space (3 SP) - P2
-4. AUDIT-013: SMS Use Case Clarity (3 SP) - P2
-**Total: 13 SP**
+### Recommended Next Sprint: Remaining Audit Items
+**Sprint 7 - Final Audit Fixes (P2)**
+1. AUDIT-014: Material Categories (2 SP) - P2
+2. AUDIT-015: Line Item Search (5 SP) - P2
+3. AUDIT-016: Owner/Admin Controls (5 SP) - P2
+4. AUDIT-017: Template Management (3 SP) - P2
+**Total: 15 SP**
 
-**All P0 Blockers Completed:**
+**All P0 and P1 Blockers Completed:**
 - AUDIT-001: Photos Firebase Permissions ✅
 - AUDIT-002: Schedule Firebase Permissions ✅
 - AUDIT-003: SMS Firebase Permissions ✅
 - AUDIT-005: Cannot Uncancel Projects ✅
+- AUDIT-007: Budget Calculation Issues ✅
+- AUDIT-011: Project Tabs Order ✅
+- AUDIT-012: Calendar Vertical Space ✅
+- AUDIT-013: SMS Use Case Clarity ✅
 
 ---
 

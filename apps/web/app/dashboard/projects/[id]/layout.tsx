@@ -23,22 +23,33 @@ import {
   CheckBadgeIcon,
 } from '@heroicons/react/24/outline';
 
+// Tabs ordered by typical project workflow:
+// 1. Overview - Project summary and status
+// 2. Scope - Define what work needs to be done
+// 3. Quote - Pricing based on scope
+// 4. Finances - Budget tracking and payments
+// 5. Tasks - Execution of scope items
+// 6. Subs - Subcontractor management
+// 7. COs/RFIs/Submittals/Punch - Construction management docs
+// 8. Photos - Visual documentation
+// 9. Activity/Logs/Messages - Communication and history
+// 10. Preferences - Client selections (less frequent)
 const TABS = [
   { key: '', label: 'Overview', icon: Squares2X2Icon },
-  { key: '/tasks', label: 'Tasks', icon: RectangleStackIcon },
   { key: '/scope', label: 'Scope', icon: ClipboardDocumentListIcon },
+  { key: '/quote', label: 'Quote', icon: DocumentTextIcon },
+  { key: '/finances', label: 'Finances', icon: CurrencyDollarIcon },
+  { key: '/tasks', label: 'Tasks', icon: RectangleStackIcon },
   { key: '/subs', label: 'Subs', icon: UserGroupIcon },
   { key: '/change-orders', label: 'COs', icon: DocumentDuplicateIcon },
   { key: '/rfis', label: 'RFIs', icon: ExclamationTriangleIcon },
   { key: '/submittals', label: 'Submittals', icon: DocumentCheckIcon },
   { key: '/punch-list', label: 'Punch', icon: CheckBadgeIcon },
-  { key: '/quote', label: 'Quote', icon: DocumentTextIcon },
-  { key: '/activity', label: 'Activity', icon: NewspaperIcon },
-  { key: '/preferences', label: 'Preferences', icon: UserGroupIcon },
-  { key: '/logs', label: 'Logs', icon: ClipboardDocumentListIcon },
   { key: '/photos', label: 'Photos', icon: PhotoIcon },
-  { key: '/finances', label: 'Finances', icon: CurrencyDollarIcon },
+  { key: '/activity', label: 'Activity', icon: NewspaperIcon },
+  { key: '/logs', label: 'Logs', icon: ClipboardDocumentListIcon },
   { key: '/messages', label: 'Messages', icon: ChatBubbleLeftRightIcon },
+  { key: '/preferences', label: 'Preferences', icon: UserGroupIcon },
 ];
 
 export default function ProjectLayout({ children }: { children: React.ReactNode }) {
