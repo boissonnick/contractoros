@@ -1,9 +1,9 @@
 # ContractorOS Master Development Roadmap
 
-> **Version:** 2.0
-> **Generated:** 2026-01-28
+> **Version:** 2.1
+> **Generated:** 2026-01-29
 > **Branch:** `feature/bug-fixes-1.28`
-> **Sources:** `1.28.bugfixes.pdf`, `ContractorOS - Product Development Roadmap & Sprint Plan.pdf`
+> **Sources:** `1.28.bugfixes.pdf`, `ContractorOS - Product Development Roadmap & Sprint Plan.pdf`, January 2026 Platform Audit
 
 ---
 
@@ -11,9 +11,10 @@
 
 This is the **single source of truth** for all ContractorOS development work. It combines:
 1. **Bug Fixes** - Issues from the 1.28 walkthrough (32+ items)
-2. **Product Roadmap** - New features from the competitive analysis (45+ items)
-3. **Refactoring** - Technical debt and architectural improvements
-4. **Sprint Planning** - Organized implementation phases
+2. **January 2026 Audit** - Critical issues from platform audit (17 items, 57 SP)
+3. **Product Roadmap** - New features from the competitive analysis (45+ items)
+4. **Refactoring** - Technical debt and architectural improvements
+5. **Sprint Planning** - Organized implementation phases
 
 New sessions should read this document to understand all pending work.
 
@@ -24,15 +25,16 @@ New sessions should read this document to understand all pending work.
 1. [Vision & Strategy](#vision--strategy)
 2. [Priority System](#priority-system)
 3. [Work Categories](#work-categories)
-4. [Phase 0: Foundation & Technical Debt](#phase-0-foundation--technical-debt)
-5. [Phase 1: Bug Fixes & Core Stability](#phase-1-bug-fixes--core-stability)
-6. [Phase 2: Differentiating Features](#phase-2-differentiating-features)
-7. [Phase 3: Transaction & Operations](#phase-3-transaction--operations)
-8. [Phase 4: Efficiency & Scale](#phase-4-efficiency--scale)
-9. [Phase 5: Advanced Features](#phase-5-advanced-features)
-10. [Complete Work Item Index](#complete-work-item-index)
-11. [File Change Tracking](#file-change-tracking)
-12. [Testing Strategy](#testing-strategy)
+4. [Bug Fixes & Critical Improvements (January 2026 Audit)](#bug-fixes--critical-improvements-january-2026-audit)
+5. [Phase 0: Foundation & Technical Debt](#phase-0-foundation--technical-debt)
+6. [Phase 1: Bug Fixes & Core Stability](#phase-1-bug-fixes--core-stability)
+7. [Phase 2: Differentiating Features](#phase-2-differentiating-features)
+8. [Phase 3: Transaction & Operations](#phase-3-transaction--operations)
+9. [Phase 4: Efficiency & Scale](#phase-4-efficiency--scale)
+10. [Phase 5: Advanced Features](#phase-5-advanced-features)
+11. [Complete Work Item Index](#complete-work-item-index)
+12. [File Change Tracking](#file-change-tracking)
+13. [Testing Strategy](#testing-strategy)
 
 ---
 
@@ -91,6 +93,369 @@ Technical debt and architectural improvements.
 
 ### Category D: Technical Debt (Source: CLAUDE.md)
 Known issues from development documentation.
+
+### Category E: January 2026 Audit Findings
+Critical issues discovered during platform audit (January 29, 2026).
+
+---
+
+## Bug Fixes & Critical Improvements (January 2026 Audit)
+
+> **Source:** Platform audit conducted January 29, 2026
+> **Total Items:** 17 issues
+> **Total Story Points:** 57
+> **Status:** Triaged and integrated into roadmap
+
+### Priority 1: Blockers (13 SP)
+
+#### AUDIT-001: Firebase Permissions - Photos Module
+**Priority:** P0-BLOCKER | **Size:** S (3 SP)
+**Issue:** Project photos page throws Firebase permission errors
+**Root Cause:** Missing Firestore rules for `projectPhotos` collection
+
+**Acceptance Criteria:**
+- [ ] Add Firestore rules for `organizations/{orgId}/projects/{projectId}/photos`
+- [ ] Rules allow read/write for authenticated org members
+- [ ] Test photo upload and retrieval functions
+
+**Files:**
+```
+firestore.rules
+```
+
+---
+
+#### AUDIT-002: Firebase Permissions - Schedule Module
+**Priority:** P0-BLOCKER | **Size:** S (3 SP)
+**Issue:** Schedule page throws Firebase permission errors
+**Root Cause:** Missing Firestore rules for `scheduleEvents` and `crewAvailability` collections
+
+**Acceptance Criteria:**
+- [ ] Add Firestore rules for schedule-related collections
+- [ ] Rules allow CRUD operations for authenticated org members
+- [ ] Test event creation and availability updates
+
+**Files:**
+```
+firestore.rules
+```
+
+---
+
+#### AUDIT-003: Firebase Permissions - SMS Module
+**Priority:** P0-BLOCKER | **Size:** S (3 SP)
+**Issue:** Messaging page throws Firebase permission errors
+**Root Cause:** Missing Firestore rules for `smsConversations` and `smsMessages` collections
+
+**Acceptance Criteria:**
+- [ ] Add Firestore rules for SMS collections
+- [ ] Rules allow read/write for authenticated org members
+- [ ] Test message sending and conversation retrieval
+
+**Files:**
+```
+firestore.rules
+```
+
+---
+
+#### AUDIT-004: Integrations Page Infinite Loading
+**Priority:** P0-BLOCKER | **Size:** S (2 SP)
+**Status:** ✅ RESOLVED (January 29, 2026)
+**Resolution:** Added Firestore rules for `accountingConnections` and `accountMappingRules`. Redesigned page with proper SVG logos and "Coming Soon" status for all integrations.
+
+---
+
+#### AUDIT-005: Cannot Uncancel Projects
+**Priority:** P0-BLOCKER | **Size:** S (2 SP)
+**Issue:** Once a project is cancelled, there's no way to restore it to active status
+**Root Cause:** Missing status transition logic in project management
+
+**Acceptance Criteria:**
+- [ ] Add "Restore Project" option for cancelled projects
+- [ ] Implement status transition from 'cancelled' to 'planning' or 'active'
+- [ ] Add confirmation dialog for restore action
+- [ ] Log status change in project activity
+
+**Files:**
+```
+apps/web/components/projects/ProjectStatusDropdown.tsx
+apps/web/lib/hooks/useProjects.ts
+```
+
+---
+
+### Priority 2: Critical (16 SP)
+
+#### AUDIT-006: Client Module Missing from Sidebar
+**Priority:** P1-CRITICAL | **Size:** S (3 SP)
+**Status:** ✅ RESOLVED (Sprint 4)
+**Resolution:** Full Client Management module implemented with list view, detail pages, communication logs, notes, and financials tracking.
+
+---
+
+#### AUDIT-007: Budget Calculation Inconsistencies
+**Priority:** P1-CRITICAL | **Size:** M (5 SP)
+**Issue:** Project budget vs actual costs show inconsistent values across different views
+**Root Cause:** Multiple calculation methods used across components
+
+**Acceptance Criteria:**
+- [ ] Centralize budget calculation logic in a single utility
+- [ ] Ensure consistent values in dashboard, project detail, and reports
+- [ ] Add unit tests for budget calculations
+- [ ] Display calculation methodology in UI tooltips
+
+**Files:**
+```
+apps/web/lib/budget-calculations.ts (create)
+apps/web/components/projects/ProjectBudgetCard.tsx
+apps/web/components/dashboard/ProjectsOverview.tsx
+```
+
+---
+
+#### AUDIT-008: Dashboard Layout - Empty States
+**Priority:** P1-CRITICAL | **Size:** S (3 SP)
+**Issue:** Dashboard shows poor layout when data is missing or empty
+**Root Cause:** Missing empty state components and conditional rendering
+
+**Acceptance Criteria:**
+- [ ] Add meaningful empty states for all dashboard widgets
+- [ ] Use existing EmptyState component consistently
+- [ ] Add "Get Started" actions for new users
+- [ ] Handle loading states gracefully
+
+**Files:**
+```
+apps/web/app/dashboard/page.tsx
+apps/web/components/dashboard/*.tsx
+```
+
+---
+
+#### AUDIT-009: Dashboard Layout - Data Overflow
+**Priority:** P1-CRITICAL | **Size:** S (3 SP)
+**Issue:** Dashboard cards overflow when displaying large amounts of data
+**Root Cause:** Missing max-height and scroll containers
+
+**Acceptance Criteria:**
+- [ ] Add max-height with scroll for list cards
+- [ ] Implement "View All" links for truncated lists
+- [ ] Ensure consistent card heights in grid layout
+- [ ] Test with large datasets (50+ items)
+
+**Files:**
+```
+apps/web/components/dashboard/RecentProjectsCard.tsx
+apps/web/components/dashboard/UpcomingTasksCard.tsx
+apps/web/components/dashboard/RecentActivityCard.tsx
+```
+
+---
+
+#### AUDIT-010: Invoice List Performance
+**Priority:** P1-CRITICAL | **Size:** S (2 SP)
+**Issue:** Invoice list page slow with many records
+**Root Cause:** No pagination, all records loaded at once
+
+**Acceptance Criteria:**
+- [ ] Implement cursor-based pagination
+- [ ] Add page size selector (10, 25, 50)
+- [ ] Show loading skeleton during fetch
+- [ ] Maintain filter state across pages
+
+**Files:**
+```
+apps/web/app/dashboard/invoices/page.tsx
+apps/web/lib/hooks/useInvoices.ts
+```
+
+---
+
+### Priority 3: UX Issues (15 SP)
+
+#### AUDIT-011: Project Tabs Order Non-Intuitive
+**Priority:** P2-UX | **Size:** S (2 SP)
+**Issue:** Project detail tabs not in logical workflow order
+**Current:** Overview, Scope, Tasks, Schedule, Budget, Photos, Documents
+**Suggested:** Overview, Scope, Budget, Tasks, Schedule, Photos, Documents
+
+**Acceptance Criteria:**
+- [ ] Reorder tabs to match typical project workflow
+- [ ] Ensure URL routes still work correctly
+- [ ] Update any navigation that references tab order
+
+**Files:**
+```
+apps/web/app/dashboard/projects/[id]/page.tsx
+```
+
+---
+
+#### AUDIT-012: Calendar View Vertical Space
+**Priority:** P2-UX | **Size:** S (3 SP)
+**Issue:** Schedule calendar doesn't utilize available vertical space effectively
+**Root Cause:** Fixed height instead of flex-grow
+
+**Acceptance Criteria:**
+- [ ] Calendar should expand to fill available viewport height
+- [ ] Minimum height of 500px
+- [ ] Proper resize behavior on window resize
+- [ ] Mobile-friendly height adjustments
+
+**Files:**
+```
+apps/web/components/schedule/ScheduleCalendar.tsx
+apps/web/app/dashboard/schedule/page.tsx
+```
+
+---
+
+#### AUDIT-013: SMS Module - Use Case Ambiguity
+**Priority:** P2-UX | **Size:** S (3 SP)
+**Issue:** Unclear when/how to use SMS features, no onboarding
+**Root Cause:** Missing guidance and setup wizard
+
+**Acceptance Criteria:**
+- [ ] Add SMS setup wizard on first access
+- [ ] Include Twilio account connection flow
+- [ ] Show example use cases and templates
+- [ ] Add help tooltips throughout messaging UI
+
+**Files:**
+```
+apps/web/app/dashboard/messaging/page.tsx
+apps/web/components/sms/SmsSetupWizard.tsx (create)
+```
+
+---
+
+#### AUDIT-014: Material Tracking - Category Confusion
+**Priority:** P2-UX | **Size:** S (2 SP)
+**Issue:** Material categories don't match contractor mental models
+**Root Cause:** Generic categories instead of trade-specific
+
+**Acceptance Criteria:**
+- [ ] Review and update material categories based on trades
+- [ ] Allow custom category creation
+- [ ] Add category suggestions based on project type
+- [ ] Migrate existing materials to new categories
+
+**Files:**
+```
+apps/web/types/index.ts (MaterialCategory type)
+apps/web/components/materials/MaterialFormModal.tsx
+```
+
+---
+
+#### AUDIT-015: Estimate Builder - Line Item Search
+**Priority:** P2-UX | **Size:** M (5 SP)
+**Issue:** Hard to find line items in large libraries
+**Root Cause:** Basic search, no filtering or categorization in picker
+
+**Acceptance Criteria:**
+- [ ] Add category filter to line item picker
+- [ ] Implement fuzzy search
+- [ ] Add "Recently Used" and "Favorites" sections
+- [ ] Show pricing history on hover
+
+**Files:**
+```
+apps/web/components/estimates/LineItemPicker.tsx
+apps/web/lib/hooks/useLineItems.ts
+```
+
+---
+
+### Priority 4: Settings & Configuration (13 SP)
+
+#### AUDIT-016: Missing Owner/Admin Controls
+**Priority:** P2-SETTINGS | **Size:** M (5 SP)
+**Issue:** Organization owners cannot manage team roles or billing
+**Root Cause:** Role management UI not implemented
+
+**Acceptance Criteria:**
+- [ ] Add team role management to settings
+- [ ] Implement role assignment (owner, admin, member)
+- [ ] Add billing management section
+- [ ] Show subscription status and limits
+
+**Files:**
+```
+apps/web/app/dashboard/settings/team/page.tsx
+apps/web/app/dashboard/settings/billing/page.tsx (create)
+apps/web/lib/hooks/useTeamRoles.ts (create)
+```
+
+---
+
+#### AUDIT-017: Template Management Scattered
+**Priority:** P2-SETTINGS | **Size:** S (3 SP)
+**Issue:** Different template types managed in different places
+**Root Cause:** Templates added organically without unified location
+
+**Acceptance Criteria:**
+- [ ] Create unified Templates settings section
+- [ ] Include: SOW templates, SMS templates, Email templates, Estimate templates
+- [ ] Consistent template CRUD interface
+- [ ] Template preview capability
+
+**Files:**
+```
+apps/web/app/dashboard/settings/templates/page.tsx (create)
+apps/web/components/settings/TemplateManager.tsx (create)
+```
+
+---
+
+#### AUDIT-018: Integration Stubs Need Completion
+**Priority:** P2-SETTINGS | **Size:** M (5 SP)
+**Status:** ✅ PARTIALLY RESOLVED (January 29, 2026)
+**Resolution:** Integrations page redesigned with proper logos and "Coming Soon" status. Actual OAuth integration still needed for each provider.
+
+**Remaining Work:**
+- [ ] QuickBooks OAuth flow
+- [ ] Xero OAuth flow
+- [ ] Stripe Connect onboarding
+- [ ] Gusto OAuth flow
+- [ ] ADP OAuth flow
+
+**Files:**
+```
+apps/web/lib/integrations/quickbooks.ts (create)
+apps/web/lib/integrations/xero.ts (create)
+apps/web/lib/integrations/stripe-connect.ts (create)
+```
+
+---
+
+### January 2026 Audit Summary Table
+
+| ID | Issue | Priority | Size | Status |
+|----|-------|----------|------|--------|
+| AUDIT-001 | Photos Firebase Permissions | P0 | 3 SP | Pending |
+| AUDIT-002 | Schedule Firebase Permissions | P0 | 3 SP | Pending |
+| AUDIT-003 | SMS Firebase Permissions | P0 | 3 SP | Pending |
+| AUDIT-004 | Integrations Page Loading | P0 | 2 SP | ✅ Done |
+| AUDIT-005 | Cannot Uncancel Projects | P0 | 2 SP | Pending |
+| AUDIT-006 | Client Module Missing | P1 | 3 SP | ✅ Done |
+| AUDIT-007 | Budget Calculation Issues | P1 | 5 SP | Pending |
+| AUDIT-008 | Dashboard Empty States | P1 | 3 SP | Pending |
+| AUDIT-009 | Dashboard Data Overflow | P1 | 3 SP | Pending |
+| AUDIT-010 | Invoice List Performance | P1 | 2 SP | Pending |
+| AUDIT-011 | Project Tabs Order | P2 | 2 SP | Pending |
+| AUDIT-012 | Calendar Vertical Space | P2 | 3 SP | Pending |
+| AUDIT-013 | SMS Use Case Clarity | P2 | 3 SP | Pending |
+| AUDIT-014 | Material Categories | P2 | 2 SP | Pending |
+| AUDIT-015 | Line Item Search | P2 | 5 SP | Pending |
+| AUDIT-016 | Owner/Admin Controls | P2 | 5 SP | Pending |
+| AUDIT-017 | Template Management | P2 | 3 SP | Pending |
+| AUDIT-018 | Integration OAuth | P2 | 5 SP | Partial |
+
+**Total Story Points:** 57
+**Completed:** 8 SP (3 items)
+**Remaining:** 49 SP (15 items)
 
 ---
 
@@ -1153,6 +1518,29 @@ apps/web/components/payments/
 ---
 
 ## Complete Work Item Index
+
+### January 2026 Audit Items
+
+| ID | Title | Priority | Size | Status |
+|----|-------|----------|------|--------|
+| AUDIT-001 | Photos Firebase Permissions | P0 | S | Pending |
+| AUDIT-002 | Schedule Firebase Permissions | P0 | S | Pending |
+| AUDIT-003 | SMS Firebase Permissions | P0 | S | Pending |
+| AUDIT-004 | Integrations Page Loading | P0 | S | Done |
+| AUDIT-005 | Cannot Uncancel Projects | P0 | S | Pending |
+| AUDIT-006 | Client Module Missing | P1 | S | Done |
+| AUDIT-007 | Budget Calculation Issues | P1 | M | Pending |
+| AUDIT-008 | Dashboard Empty States | P1 | S | Pending |
+| AUDIT-009 | Dashboard Data Overflow | P1 | S | Pending |
+| AUDIT-010 | Invoice List Performance | P1 | S | Pending |
+| AUDIT-011 | Project Tabs Order | P2 | S | Pending |
+| AUDIT-012 | Calendar Vertical Space | P2 | S | Pending |
+| AUDIT-013 | SMS Use Case Clarity | P2 | S | Pending |
+| AUDIT-014 | Material Categories | P2 | S | Pending |
+| AUDIT-015 | Line Item Search | P2 | M | Pending |
+| AUDIT-016 | Owner/Admin Controls | P2 | M | Pending |
+| AUDIT-017 | Template Management | P2 | S | Pending |
+| AUDIT-018 | Integration OAuth | P2 | M | Partial |
 
 ### Bug Fixes (from 1.28.bugfixes.pdf)
 

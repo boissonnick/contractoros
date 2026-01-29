@@ -364,6 +364,53 @@ See `docs/MASTER_ROADMAP.md` for complete list.
 
 ---
 
+## January 2026 Audit Findings
+
+> **Date:** January 29, 2026
+> **Total Items:** 17 issues (57 story points)
+> **Completed:** 3 items (8 SP)
+> **Remaining:** 15 items (49 SP)
+
+### Priority 0: Blockers (Immediate)
+| ID | Issue | SP | Status |
+|----|-------|-----|--------|
+| AUDIT-001 | Photos Firebase Permissions | 3 | **PENDING** |
+| AUDIT-002 | Schedule Firebase Permissions | 3 | **PENDING** |
+| AUDIT-003 | SMS Firebase Permissions | 3 | **PENDING** |
+| AUDIT-004 | Integrations Page Loading | 2 | ✅ Done |
+| AUDIT-005 | Cannot Uncancel Projects | 2 | **PENDING** |
+
+### Priority 1: Critical
+| ID | Issue | SP | Status |
+|----|-------|-----|--------|
+| AUDIT-006 | Client Module Missing | 3 | ✅ Done (Sprint 4) |
+| AUDIT-007 | Budget Calculation Issues | 5 | **PENDING** |
+| AUDIT-008 | Dashboard Empty States | 3 | **PENDING** |
+| AUDIT-009 | Dashboard Data Overflow | 3 | **PENDING** |
+| AUDIT-010 | Invoice List Performance | 2 | **PENDING** |
+
+### Priority 2: UX & Settings
+| ID | Issue | SP | Status |
+|----|-------|-----|--------|
+| AUDIT-011 | Project Tabs Order | 2 | **PENDING** |
+| AUDIT-012 | Calendar Vertical Space | 3 | **PENDING** |
+| AUDIT-013 | SMS Use Case Clarity | 3 | **PENDING** |
+| AUDIT-014 | Material Categories | 2 | **PENDING** |
+| AUDIT-015 | Line Item Search | 5 | **PENDING** |
+| AUDIT-016 | Owner/Admin Controls | 5 | **PENDING** |
+| AUDIT-017 | Template Management | 3 | **PENDING** |
+| AUDIT-018 | Integration OAuth | 5 | Partial (UI done) |
+
+### Recommended Next Sprint: Audit Blockers
+**Sprint 6 - January 2026 Audit Fixes (P0 Blockers)**
+1. AUDIT-001: Photos Firebase Permissions (3 SP)
+2. AUDIT-002: Schedule Firebase Permissions (3 SP)
+3. AUDIT-003: SMS Firebase Permissions (3 SP)
+4. AUDIT-005: Cannot Uncancel Projects (2 SP)
+**Total: 11 SP**
+
+---
+
 ## Next Features (Choose One)
 
 ### Option A: FEAT-L3 - Mobile-First Client Portal
