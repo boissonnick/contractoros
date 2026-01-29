@@ -610,6 +610,9 @@ export interface Project {
   tags?: string[];          // User-defined tags
   category?: ProjectCategory;
   sourceProjectId?: string; // If cloned, reference to original project
+  // Display fields (may be denormalized from related entities)
+  clientName?: string;      // Denormalized from Client
+  currentPhase?: string;    // Current active phase name
   createdAt: Date;
   updatedAt?: Date;
 }

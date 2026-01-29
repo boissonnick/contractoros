@@ -27,7 +27,9 @@ export default function AppShell({
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 h-screen sticky top-0">
         <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-          <span className="font-bold text-xl text-brand-primary">ContractorOS</span>
+          <Link href="/dashboard" className="font-bold text-xl text-brand-primary hover:opacity-80 transition-opacity">
+            ContractorOS
+          </Link>
         </div>
 
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
@@ -70,7 +72,9 @@ export default function AppShell({
 
       {/* Mobile/Tablet Header */}
       <div className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
-        <span className="font-bold text-lg text-brand-primary">ContractorOS</span>
+        <Link href="/dashboard" className="font-bold text-lg text-brand-primary hover:opacity-80 transition-opacity">
+          ContractorOS
+        </Link>
         {/* Touch target min 44x44px for accessibility */}
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

@@ -49,42 +49,56 @@ interface StatCardProps {
 }
 
 function StatCard({ title, value, icon: Icon, trend, trendUp, href, color, subtitle }: StatCardProps) {
-  const colorClasses = {
-    blue: 'bg-blue-50 text-blue-600 border-blue-200',
-    green: 'bg-green-50 text-green-600 border-green-200',
-    yellow: 'bg-yellow-50 text-yellow-600 border-yellow-200',
-    red: 'bg-red-50 text-red-600 border-red-200',
-    purple: 'bg-purple-50 text-purple-600 border-purple-200',
-    orange: 'bg-orange-50 text-orange-600 border-orange-200',
-    gray: 'bg-gray-50 text-gray-600 border-gray-200',
+  const iconColorClasses = {
+    blue: 'text-blue-600',
+    green: 'text-green-600',
+    yellow: 'text-amber-500',
+    red: 'text-red-500',
+    purple: 'text-purple-600',
+    orange: 'text-orange-500',
+    gray: 'text-gray-500',
+  };
+
+  const bgColorClasses = {
+    blue: 'bg-blue-50',
+    green: 'bg-green-50',
+    yellow: 'bg-amber-50',
+    red: 'bg-red-50',
+    purple: 'bg-purple-50',
+    orange: 'bg-orange-50',
+    gray: 'bg-gray-100',
   };
 
   const content = (
     <div className={cn(
-      'bg-white rounded-xl border p-5 h-full min-h-[120px] flex flex-col justify-between',
-      href && 'hover:shadow-md transition-shadow cursor-pointer'
+      'bg-white rounded-xl border border-gray-200 p-4 h-full min-h-[130px] flex flex-col',
+      href && 'hover:shadow-md hover:border-gray-300 transition-all cursor-pointer group'
     )}>
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start justify-between gap-2 mb-auto">
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-gray-500 leading-tight">{title}</p>
-          <p className="mt-1 text-2xl font-bold text-gray-900">{value}</p>
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{title}</p>
+          <p className="mt-2 text-3xl font-bold text-gray-900 tabular-nums">{value}</p>
+        </div>
+        <div className={cn('p-2.5 rounded-lg flex-shrink-0', bgColorClasses[color])}>
+          <Icon className={cn('h-5 w-5', iconColorClasses[color])} />
+        </div>
+      </div>
+      {(subtitle || trend) && (
+        <div className="mt-3 pt-2 border-t border-gray-100">
           {subtitle && (
-            <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>
+            <p className="text-xs text-gray-500">{subtitle}</p>
           )}
           {trend && (
-            <p className={`mt-1 text-sm ${trendUp ? 'text-green-600' : 'text-red-600'}`}>
+            <p className={`text-xs font-medium ${trendUp ? 'text-green-600' : 'text-red-600'}`}>
               {trendUp ? '↑' : '↓'} {trend}
             </p>
           )}
         </div>
-        <div className={`p-3 rounded-xl flex-shrink-0 ${colorClasses[color]}`}>
-          <Icon className="h-6 w-6" />
-        </div>
-      </div>
+      )}
     </div>
   );
 
-  return href ? <Link href={href} className="h-full">{content}</Link> : content;
+  return href ? <Link href={href} className="h-full block">{content}</Link> : content;
 }
 
 const statusConfig: Record<string, { label: string; color: string }> = {
@@ -409,53 +423,74 @@ export default function DashboardPage() {
               </Link>
             </div>
             {activeProjectsList.length > 0 ? (
-              <div className="divide-y divide-gray-100 max-h-[400px] overflow-y-auto">
-                {activeProjectsList.map((project) => (
-                  <Link
-                    key={project.id}
-                    href={`/dashboard/projects/${project.id}`}
-                    className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-medium text-gray-900 truncate">{project.name}</h3>
-                        <Badge className={statusConfig[project.status].color}>
-                          {statusConfig[project.status].label}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <MapPinIcon className="h-3.5 w-3.5" />
-                          {project.address?.city || 'No location'}
-                        </span>
-                        {project.budget && (
-                          <span className="flex items-center gap-1">
-                            <CurrencyDollarIcon className="h-3.5 w-3.5" />
-                            {formatCurrency(project.budget)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    {project.budget && project.currentSpend !== undefined && (() => {
-                      const percentUsed = calculateBudgetPercentage(project.currentSpend, project.budget);
-                      const status = getBudgetStatus(percentUsed);
-                      const barColor = getBudgetBarColor(status);
-                      return (
-                        <div className="text-right ml-4" title={BUDGET_HELP_TEXT.percentUsed}>
-                          <div className="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
-                            <div
-                              className={cn('h-full rounded-full', barColor)}
-                              style={{ width: `${Math.min(percentUsed, 100)}%` }}
-                            />
+              <div className="divide-y divide-gray-100 max-h-[450px] overflow-y-auto">
+                {activeProjectsList.map((project) => {
+                  const percentUsed = project.budget && project.currentSpend !== undefined
+                    ? calculateBudgetPercentage(project.currentSpend, project.budget)
+                    : 0;
+                  const budgetStatus = getBudgetStatus(percentUsed);
+                  const barColor = getBudgetBarColor(budgetStatus);
+
+                  return (
+                    <Link
+                      key={project.id}
+                      href={`/dashboard/projects/${project.id}`}
+                      className="block p-4 hover:bg-gray-50 transition-colors group"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors">
+                              {project.name}
+                            </h3>
                           </div>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {Math.round(percentUsed)}% used
-                          </p>
+                          <div className="flex items-center flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500">
+                            {project.clientName && (
+                              <span className="flex items-center gap-1">
+                                <UserGroupIcon className="h-3.5 w-3.5 text-gray-400" />
+                                {project.clientName}
+                              </span>
+                            )}
+                            <span className="flex items-center gap-1">
+                              <MapPinIcon className="h-3.5 w-3.5 text-gray-400" />
+                              {project.address?.city || 'No location'}
+                            </span>
+                            {project.currentPhase && (
+                              <span className="flex items-center gap-1">
+                                <ClipboardDocumentCheckIcon className="h-3.5 w-3.5 text-gray-400" />
+                                {project.currentPhase}
+                              </span>
+                            )}
+                          </div>
                         </div>
-                      );
-                    })()}
-                  </Link>
-                ))}
+                        <div className="flex-shrink-0 text-right">
+                          {project.budget ? (
+                            <>
+                              <p className="text-sm font-semibold text-gray-900">{formatCurrency(project.budget)}</p>
+                              {project.currentSpend !== undefined && (
+                                <div className="mt-1">
+                                  <div className="w-20 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                    <div
+                                      className={cn('h-full rounded-full', barColor)}
+                                      style={{ width: `${Math.min(percentUsed, 100)}%` }}
+                                    />
+                                  </div>
+                                  <p className="text-xs text-gray-400 mt-0.5">
+                                    {Math.round(percentUsed)}% spent
+                                  </p>
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <Badge className={statusConfig[project.status].color}>
+                              {statusConfig[project.status].label}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             ) : (
               <EmptyState
@@ -573,22 +608,22 @@ export default function DashboardPage() {
 
       {/* Recent Activity */}
       <Card className="p-0">
-        <div className="flex items-center justify-between p-4 border-b border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2>
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+          <h2 className="text-base font-semibold text-gray-900">Recent Activity</h2>
           <Link href="/dashboard/activity" className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
             View all <ArrowRightIcon className="h-3 w-3" />
           </Link>
         </div>
         {activities.length > 0 ? (
-          <div className="divide-y divide-gray-100 max-h-[300px] overflow-y-auto">
-            {activities.slice(0, 10).map((activity) => (
-              <div key={activity.id} className="flex items-start gap-4 p-4">
-                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-medium text-sm flex-shrink-0">
-                  {activity.userName?.charAt(0) || '?'}
+          <div className="divide-y divide-gray-50 max-h-[350px] overflow-y-auto">
+            {activities.slice(0, 15).map((activity) => (
+              <div key={activity.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-medium text-xs flex-shrink-0">
+                  {activity.userName?.charAt(0).toUpperCase() || '?'}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-900">{activity.message}</p>
-                  <p className="text-xs text-gray-500 mt-1">{activity.userName} · {activity.timeAgo}</p>
+                  <p className="text-sm text-gray-800 truncate">{activity.message}</p>
+                  <p className="text-xs text-gray-400">{activity.userName} · {activity.timeAgo}</p>
                 </div>
               </div>
             ))}
@@ -596,9 +631,9 @@ export default function DashboardPage() {
         ) : (
           <EmptyState
             icon={<ClockIcon className="h-full w-full" />}
-            title="No recent activity"
-            description="Activity will appear here as your team works on projects."
-            className="py-8"
+            title="No activity yet"
+            description="Activity will appear as you work on projects"
+            className="py-6"
             size="sm"
           />
         )}
