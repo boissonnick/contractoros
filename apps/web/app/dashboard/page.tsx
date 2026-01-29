@@ -61,15 +61,15 @@ function StatCard({ title, value, icon: Icon, trend, trendUp, href, color, subti
 
   const content = (
     <div className={cn(
-      'bg-white rounded-xl border p-5 h-full flex flex-col justify-between',
+      'bg-white rounded-xl border p-5 h-full min-h-[120px] flex flex-col justify-between',
       href && 'hover:shadow-md transition-shadow cursor-pointer'
     )}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-gray-500 truncate">{title}</p>
+          <p className="text-sm font-medium text-gray-500 leading-tight">{title}</p>
           <p className="mt-1 text-2xl font-bold text-gray-900">{value}</p>
           {subtitle && (
-            <p className="text-xs text-gray-400 mt-0.5 truncate">{subtitle}</p>
+            <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>
           )}
           {trend && (
             <p className={`mt-1 text-sm ${trendUp ? 'text-green-600' : 'text-red-600'}`}>

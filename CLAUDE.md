@@ -242,9 +242,11 @@ gcloud secrets add-iam-policy-binding SECRET_NAME \
 
 ---
 
-## Firestore Rules & Permissions
+## Firestore Rules, Indexes & Permissions
 
-When adding new collections or subcollections, ensure corresponding rules exist in `firestore.rules`.
+When adding new collections or subcollections, ensure:
+1. Corresponding rules exist in `firestore.rules`
+2. Required composite indexes are added to `firestore.indexes.json`
 
 ### Common Permission Error Pattern
 
@@ -253,11 +255,34 @@ If you see `Error: Missing or insufficient permissions`:
 2. Organization-scoped collections use pattern: `organizations/{orgId}/collectionName/{docId}`
 3. These require `isSameOrg(orgId)` helper for access control
 
-### Deploying Rules
+### Index Error Pattern
+
+If you see `requires an index` error:
+1. The error message includes a link to create the index in Firebase Console
+2. Better: Add the index to `firestore.indexes.json` and deploy
+
+### Deploying Rules & Indexes
+
+**IMPORTANT:** Always deploy BOTH rules and indexes when making Firestore changes.
 
 ```bash
+# Deploy rules only
 firebase deploy --only firestore:rules --project contractoros-483812
+
+# Deploy indexes only
+firebase deploy --only firestore:indexes --project contractoros-483812
+
+# Deploy both (recommended)
+firebase deploy --only firestore --project contractoros-483812
 ```
+
+### Build & Deploy Checklist
+
+When making changes that affect Firestore queries:
+1. ✅ Add/update rules in `firestore.rules`
+2. ✅ Add required composite indexes to `firestore.indexes.json`
+3. ✅ Deploy: `firebase deploy --only firestore --project contractoros-483812`
+4. ✅ Wait for indexes to build (check Firebase Console)
 
 ### Rule Helpers
 
