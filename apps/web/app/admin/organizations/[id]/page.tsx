@@ -1,5 +1,8 @@
 "use client";
 
+// Force dynamic rendering - skip static generation
+export const dynamic = 'force-dynamic';
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { db } from '@/lib/firebase/config';

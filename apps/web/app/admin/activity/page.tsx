@@ -1,5 +1,8 @@
 "use client";
 
+// Force dynamic rendering - skip static generation
+export const dynamic = 'force-dynamic';
+
 import React from 'react';
 import { Card } from '@/components/ui';
 import { ClockIcon } from '@heroicons/react/24/outline';

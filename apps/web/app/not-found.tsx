@@ -1,7 +1,12 @@
+'use client';
+
 import Link from 'next/link';
-import { HomeIcon, ArrowLeftIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { useRouter } from 'next/navigation';
+import { HomeIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 
 export default function NotFound() {
+  const router = useRouter();
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="max-w-lg w-full text-center">
@@ -15,7 +20,7 @@ export default function NotFound() {
         </h1>
 
         <p className="text-gray-500 mb-8 max-w-md mx-auto">
-          Sorry, we couldn't find the page you're looking for. It might have been moved, deleted, or never existed.
+          Sorry, we couldn&apos;t find the page you&apos;re looking for. It might have been moved, deleted, or never existed.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -27,7 +32,7 @@ export default function NotFound() {
             Go Home
           </Link>
           <button
-            onClick={() => typeof window !== 'undefined' && window.history.back()}
+            onClick={() => router.back()}
             className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
           >
             <ArrowLeftIcon className="h-4 w-4" />

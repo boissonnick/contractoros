@@ -1,5 +1,8 @@
 "use client";
 
+// Force dynamic rendering - skip static generation for admin section
+export const dynamic = 'force-dynamic';
+
 import React from 'react';
 import AdminGuard from '@/components/admin/AdminGuard';
 import AppShell from '@/components/ui/AppShell';

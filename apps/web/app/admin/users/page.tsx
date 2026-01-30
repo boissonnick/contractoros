@@ -1,5 +1,8 @@
 "use client";
 
+// Force dynamic rendering - skip static generation
+export const dynamic = 'force-dynamic';
+
 import React, { useEffect, useState } from 'react';
 import { db } from '@/lib/firebase/config';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
