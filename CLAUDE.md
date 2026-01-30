@@ -11,13 +11,89 @@ cat docs/SPRINT_STATUS.md
 # 2. Verify TypeScript
 cd apps/web && npx tsc --noEmit
 
-# 3. Review relevant docs
+# 3. Review relevant docs (only what's needed for current sprint)
 cat docs/DEVELOPMENT_GUIDE.md      # How to build features
 cat docs/ARCHITECTURE.md           # Technical patterns
-cat docs/COMPONENT_PATTERNS.md     # UI component usage
-cat docs/MASTER_ROADMAP.md         # Full backlog
-cat docs/DEPLOYMENT_CHECKLIST.md   # Firebase rules/deploy requirements
 ```
+
+---
+
+## Token Optimization & Sprint Scoping
+
+> **CRITICAL:** The `types/index.ts` file is ~6,000 lines (139KB). Reading the entire file wastes significant context. Follow these guidelines to minimize token usage.
+
+### DO NOT Read Full Types File
+
+Instead of reading `types/index.ts`, use targeted approaches:
+
+```bash
+# Find specific type definitions
+grep -n "export interface PayrollRun" apps/web/types/index.ts
+grep -n "export type ExpenseStatus" apps/web/types/index.ts
+
+# Find section boundaries (types are organized by section)
+grep -n "^// [A-Z]" apps/web/types/index.ts | head -30
+
+# Read only relevant section (example: lines 1074-1115 for payroll)
+# Use Read tool with offset/limit parameters
+```
+
+### Types File Section Map
+
+| Lines | Section | Use For |
+|-------|---------|---------|
+| 1-153 | User & Organization | Auth, profiles, org settings |
+| 154-580 | Permissions & Roles | RBAC, invitations |
+| 581-669 | Projects | Project CRUD |
+| 670-750 | Activity & Phases | Project phases, templates |
+| 751-855 | Quotes & Preferences | Client preferences |
+| 856-1040 | Tasks & Scope | Task management |
+| 1041-1115 | Time Tracking & Payroll | Time entries, payroll |
+| 1116-1230 | Scheduling | Calendar, availability |
+| 1231-1390 | Subcontractors & Bids | Sub management |
+| 1391-1560 | Expenses & Materials | Expense tracking, POs |
+| 1560-1710 | Photos & Issues | Documentation |
+| 1710-1800 | Invoices & Daily Logs | Billing, logs |
+| 1800-2100 | SOW & Change Orders | Scope documents |
+| 2100-2350 | Estimates & Proposals | Estimating |
+| 2350-2630 | Accounting Integration | QuickBooks, Xero |
+| 2630-2740 | Selections & Warranty | Client experience |
+| 2740-3000 | Messaging & Safety | SMS, compliance |
+| 3000+ | Equipment & Tools | Tool tracking |
+
+### Sprint Scoping Checklist
+
+Before starting a sprint, identify and document:
+
+1. **Primary types needed** - List 3-5 specific interfaces
+2. **Existing hooks to reference** - Which `lib/hooks/` files are similar
+3. **UI components to reuse** - Check `components/ui/` first
+4. **Firestore collections** - List new collections needed
+
+Example sprint scope doc:
+```markdown
+## Sprint 9B: Payroll Module Scope
+
+**Types needed:**
+- PayrollRun (lines 1102-1115)
+- TimeEntry (already defined in time tracking section)
+- UserProfile.payroll fields (lines 66-86)
+
+**Reference hooks:**
+- useTimeEntries.ts (similar CRUD pattern)
+- useExpenses.ts (similar approval workflow)
+
+**New Firestore collections:**
+- organizations/{orgId}/payrollRuns/{runId}
+```
+
+### Incremental Reading Strategy
+
+When you need types, read incrementally:
+
+1. **First:** Grep for the specific type name
+2. **Then:** Read only 50-100 lines around that section
+3. **Never:** Read the full 6000-line file unless absolutely necessary
 
 ---
 
@@ -47,6 +123,7 @@ Field-first construction project management platform. Multi-portal app serving g
 | **MASTER_ROADMAP.md** | Complete backlog, priorities | `docs/` |
 | **HELP_DOCUMENTATION_PLAN.md** | User docs & help system plan | `docs/` |
 | **CHANGELOG.md** | Version history, all changes | Root |
+| **TYPE_INDEX.md** | Types file section map (read this, not index.ts) | `apps/web/types/` |
 
 ---
 
@@ -360,6 +437,157 @@ isOwner(userId)   // User owns the resource
 - No tests — critical paths unguarded
 - AuthProvider architecture needs refactoring
 - Silent error handling in some places
+
+---
+
+## Pre-Flight Checks (Run Before Every Build)
+
+> **Purpose:** Catch common errors before wasting time on Docker builds or deployments.
+
+### Quick Validation Script
+
+```bash
+# Run this BEFORE any build or deploy
+cd apps/web && \
+echo "1. TypeScript check..." && npx tsc --noEmit && \
+echo "2. Checking for common import errors..." && \
+grep -r "from '@/types/index'" --include="*.tsx" --include="*.ts" . | head -5 && \
+echo "✅ Pre-flight checks passed"
+```
+
+### Common Errors & Fixes
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `Cannot find module '@/types'` | Wrong import path | Use `from '@/types'` not `from '@/types/index'` |
+| `Property X does not exist on type Y` | Type mismatch | Check exact interface in types file |
+| `FirebaseError: Missing permissions` | Firestore rules | Add rule to `firestore.rules`, deploy |
+| `requires an index` | Composite query | Add index to `firestore.indexes.json`, deploy |
+| `Module not found: Can't resolve` | Missing export | Check component's `index.ts` exports |
+| `'X' is declared but never used` | TypeScript strict | Remove unused imports/variables |
+
+### Type Definition Gotchas
+
+1. **Timestamp vs Date**: Firestore stores `Timestamp`, convert with `.toDate()` when reading
+2. **Optional fields**: Use `field?: Type` for nullable Firestore fields
+3. **Omit pattern**: Use `Omit<Type, 'id' | 'createdAt'>` for create operations
+4. **Union types**: Check all union values are handled in switch statements
+
+### Firestore Rules Checklist
+
+Before adding a new collection:
+- [ ] Add read/write rules to `firestore.rules`
+- [ ] Use `isSameOrg(orgId)` for org-scoped collections
+- [ ] Add composite indexes if query has multiple `where` clauses + `orderBy`
+- [ ] Deploy rules: `firebase deploy --only firestore --project contractoros-483812`
+- [ ] Wait for index build (30s-2min)
+
+### Hook Pattern Checklist
+
+When creating a new `useX.ts` hook:
+- [ ] **Use shared utilities** (see below) instead of copy-paste
+- [ ] Import from `firebase/firestore`, not `firebase`
+- [ ] Use `onSnapshot` for real-time, `getDocs` for one-time reads
+- [ ] Always check `if (!orgId) return` early
+- [ ] Return `{ items, loading, error }` consistently
+- [ ] Export label constants (e.g., `STATUS_LABELS`)
+
+---
+
+## Shared Utilities (Use These!)
+
+> **Purpose:** Reduce code duplication and speed up feature development.
+> **See:** `docs/REFACTORING_ROADMAP.md` for full details.
+
+### Timestamp Converter
+**File:** `lib/firebase/timestamp-converter.ts`
+
+```typescript
+import { convertTimestamps, DATE_FIELDS } from '@/lib/firebase/timestamp-converter';
+
+// In your hook's converter function:
+const client = convertTimestamps(doc.data(), DATE_FIELDS.client);
+// Converts Firestore Timestamps to JS Dates for: createdAt, updatedAt, lastContactDate
+```
+
+### Generic Collection Hook
+**File:** `lib/hooks/useFirestoreCollection.ts`
+
+```typescript
+import { useFirestoreCollection } from '@/lib/hooks/useFirestoreCollection';
+
+const { items, loading, error } = useFirestoreCollection<Client>({
+  path: `organizations/${orgId}/clients`,
+  constraints: [where('status', '==', 'active'), orderBy('name')],
+  converter: (id, data) => ({ id, ...convertTimestamps(data, DATE_FIELDS.client) } as Client),
+  enabled: !!orgId,
+});
+```
+
+### Generic CRUD Hook
+**File:** `lib/hooks/useFirestoreCrud.ts`
+
+```typescript
+import { useFirestoreCrud } from '@/lib/hooks/useFirestoreCrud';
+
+const { create, update, remove, batchCreate } = useFirestoreCrud<Client>(
+  `organizations/${orgId}/clients`,
+  { entityName: 'Client' }
+);
+
+// Create with auto-timestamps and toast
+const id = await create({ name: 'Acme Corp', status: 'active' });
+
+// Update with auto-timestamps
+await update(clientId, { status: 'inactive' });
+
+// Batch operations
+await batchCreate([client1, client2, client3]);
+```
+
+### UI Components
+**File:** `components/ui/`
+
+```typescript
+// Page header with title, description, actions, breadcrumbs
+import { PageHeader } from '@/components/ui';
+<PageHeader
+  title="Clients"
+  description="Manage your client relationships"
+  actions={<Button>Add Client</Button>}
+/>
+
+// Stats grid with icons and trends
+import { StatsGrid } from '@/components/ui';
+<StatsGrid stats={[
+  { label: 'Total', value: 42, icon: UsersIcon },
+  { label: 'Active', value: 35, icon: CheckCircleIcon, change: { value: 5, trend: 'up' } },
+]} />
+
+// Search and filter bar
+import { FilterBar, useFilterBar } from '@/components/ui';
+const { search, filters, setSearch, setFilter } = useFilterBar({ initialFilters: { status: '' } });
+<FilterBar
+  searchPlaceholder="Search clients..."
+  onSearch={setSearch}
+  filters={[{ key: 'status', label: 'Status', options: statusOptions }]}
+  filterValues={filters}
+  onFilterChange={setFilter}
+/>
+
+// Form modal with standard layout
+import { FormModal, useFormModal } from '@/components/ui';
+const { isOpen, open, close, loading, handleSubmit } = useFormModal();
+<FormModal
+  isOpen={isOpen}
+  onClose={close}
+  title="Add Client"
+  loading={loading}
+  onSubmit={() => handleSubmit(async () => { await create(formData); })}
+>
+  {/* Form fields */}
+</FormModal>
+```
 
 ---
 

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { RouteGuard } from '@/components/auth';
 import { cn } from '@/lib/utils';
 import {
   BuildingOfficeIcon,
@@ -14,6 +15,7 @@ import {
   ArchiveBoxIcon,
   Cog6ToothIcon,
   ChevronDownIcon,
+  ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 
 // Grouped navigation structure - reduced from 13 to 6 primary items
@@ -52,7 +54,10 @@ const SETTINGS_NAV: NavSection[] = [
     key: 'team',
     label: 'Team',
     icon: UserGroupIcon,
-    href: '/dashboard/settings/team',
+    children: [
+      { key: 'members', label: 'Members', href: '/dashboard/settings/team' },
+      { key: 'roles', label: 'Roles & Permissions', href: '/dashboard/settings/roles' },
+    ],
   },
   {
     key: 'integrations',
@@ -67,6 +72,7 @@ const SETTINGS_NAV: NavSection[] = [
     children: [
       { key: 'billing', label: 'Billing', href: '/dashboard/settings/billing' },
       { key: 'data-export', label: 'Data Export', href: '/dashboard/settings/data-export' },
+      { key: 'data-import', label: 'Data Import', href: '/dashboard/settings/import' },
       { key: 'notifications', label: 'Notifications', href: '/dashboard/settings/notifications' },
     ],
   },
@@ -88,6 +94,12 @@ const RESOURCES_PATHS = [
   '/dashboard/settings/quote-templates',
 ];
 
+// Paths that should highlight the Team section
+const TEAM_PATHS = [
+  '/dashboard/settings/team',
+  '/dashboard/settings/roles',
+];
+
 // Paths that should highlight the Account section
 const ACCOUNT_PATHS = [
   '/dashboard/settings/billing',
@@ -99,6 +111,7 @@ function isPathInSection(pathname: string, section: NavSection): boolean {
   if (section.href && pathname === section.href) return true;
   if (section.key === 'templates' && TEMPLATE_PATHS.includes(pathname)) return true;
   if (section.key === 'resources' && RESOURCES_PATHS.includes(pathname)) return true;
+  if (section.key === 'team' && TEAM_PATHS.includes(pathname)) return true;
   if (section.key === 'account' && ACCOUNT_PATHS.includes(pathname)) return true;
   if (section.children) {
     return section.children.some((child) => pathname === child.href);
@@ -177,6 +190,7 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
   const pathname = usePathname();
 
   return (
+    <RouteGuard permissions={['canViewSettings']}>
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
@@ -224,5 +238,6 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
 
       {children}
     </div>
+    </RouteGuard>
   );
 }

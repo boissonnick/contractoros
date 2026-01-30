@@ -84,9 +84,9 @@ export default function FieldPage() {
     setLoading(true);
 
     try {
-      // Check for active time entry
+      // Check for active time entry (org-scoped collection)
       const activeQuery = query(
-        collection(db, 'timeEntries'),
+        collection(db, `organizations/${profile.orgId}/timeEntries`),
         where('userId', '==', user.uid),
         where('status', '==', 'active')
       );
@@ -172,7 +172,7 @@ export default function FieldPage() {
         };
       }
 
-      const docRef = await addDoc(collection(db, 'timeEntries'), entry);
+      const docRef = await addDoc(collection(db, `organizations/${profile.orgId}/timeEntries`), entry);
       setActiveEntry({ id: docRef.id, ...entry } as TimeEntry);
     } catch (error) {
       console.error('Error clocking in:', error);
@@ -192,7 +192,7 @@ export default function FieldPage() {
         : new Date((activeEntry.clockIn as any).seconds * 1000);
       const totalMinutes = Math.floor((clockOut.toDate().getTime() - clockIn.getTime()) / 60000);
 
-      await updateDoc(doc(db, 'timeEntries', activeEntry.id), {
+      await updateDoc(doc(db, `organizations/${profile!.orgId}/timeEntries`, activeEntry.id), {
         clockOut,
         totalMinutes,
         status: 'completed',

@@ -15,6 +15,7 @@ import {
   CurrencyDollarIcon,
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
+import { AddLeadModal } from '@/components/leads';
 
 const STATUS_CONFIG: Record<LeadStatus, { label: string; color: string }> = {
   new: { label: 'New', color: 'bg-blue-100 text-blue-700' },
@@ -28,6 +29,7 @@ const STATUS_CONFIG: Record<LeadStatus, { label: string; color: string }> = {
 export default function LeadsPage() {
   const { leads, loading, updateLead, deleteLead } = useLeads();
   const [statusFilter, setStatusFilter] = useState<LeadStatus | 'all'>('all');
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const filtered = useMemo(() => {
     if (statusFilter === 'all') return leads;
@@ -75,7 +77,7 @@ export default function LeadsPage() {
           <h1 className="text-2xl font-bold text-gray-900">Lead Pipeline</h1>
           <p className="text-gray-500 mt-1">Track and convert potential customers</p>
         </div>
-        <Button variant="primary" size="sm">
+        <Button variant="primary" size="sm" onClick={() => setIsAddModalOpen(true)}>
           <PlusIcon className="h-4 w-4 mr-1" />
           Add Lead
         </Button>
@@ -184,6 +186,12 @@ export default function LeadsPage() {
           ))}
         </div>
       )}
+
+      {/* Add Lead Modal */}
+      <AddLeadModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+      />
     </div>
   );
 }

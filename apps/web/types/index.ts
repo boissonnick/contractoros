@@ -792,9 +792,14 @@ export interface ProjectPhase {
   dependencies: string[]; // phase IDs
   documents: PhaseDocument[];
   milestones: PhaseMilestone[];
+  // Weather risk (Sprint 13)
+  trades?: string[];         // Trade types for weather risk assessment (roofing, concrete, etc.)
   createdAt: Date;
   updatedAt?: Date;
 }
+
+// Alias for shorter reference in weather risk
+export type Phase = ProjectPhase;
 
 // ============================================
 // Quote Types
@@ -1071,7 +1076,8 @@ export interface Geofence {
 }
 
 // ============================================
-// Payroll Types
+// Legacy Payroll Types (for simple payroll preview)
+// Full Payroll Module types defined at end of file
 // ============================================
 
 export interface PayrollConfig {
@@ -1086,7 +1092,8 @@ export interface PayrollConfig {
   updatedAt?: Date;
 }
 
-export interface PayrollEntry {
+// Legacy simple payroll entry - used by PayrollPreviewReport
+export interface LegacyPayrollEntry {
   userId: string;
   userName: string;
   regularHours: number;
@@ -1097,12 +1104,13 @@ export interface PayrollEntry {
   totalPay: number;
 }
 
-export interface PayrollRun {
+// Legacy simple payroll run - used by lib/payroll.ts
+export interface LegacyPayrollRun {
   id: string;
   orgId: string;
   periodStart: Date;
   periodEnd: Date;
-  entries: PayrollEntry[];
+  entries: LegacyPayrollEntry[];
   totalRegular: number;
   totalOvertime: number;
   totalPay: number;
@@ -2695,14 +2703,20 @@ export type WarrantyStatus = 'active' | 'expiring_soon' | 'expired' | 'claimed';
 export interface WarrantyItem {
   id: string;
   orgId: string;
-  projectId: string;
+  projectId?: string;
+  projectName?: string;
   itemName: string;
+  category?: string;
   manufacturer?: string;
   warrantyProvider?: string;
+  warrantyNumber?: string;
   startDate: Date;
   endDate: Date;
   coverageDescription?: string;
   documentURL?: string;
+  contactPhone?: string;
+  contactEmail?: string;
+  notes?: string;
   status: WarrantyStatus;
   claimHistory: WarrantyClaim[];
   createdBy: string;
@@ -2714,8 +2728,49 @@ export interface WarrantyClaim {
   id: string;
   date: Date;
   description: string;
+  referenceNumber?: string;
   resolution?: string;
   resolvedAt?: Date;
+}
+
+// Permit Tracking Types
+export type PermitStatus = 'draft' | 'submitted' | 'under_review' | 'approved' | 'denied' | 'expired' | 'closed';
+export type PermitType = 'building' | 'electrical' | 'plumbing' | 'mechanical' | 'demolition' | 'grading' | 'fence' | 'sign' | 'other';
+
+export interface Permit {
+  id: string;
+  orgId: string;
+  projectId?: string;
+  projectName?: string;
+  permitType: PermitType;
+  permitNumber?: string;
+  jurisdiction: string;
+  description: string;
+  status: PermitStatus;
+  submittedDate?: Date;
+  approvedDate?: Date;
+  expirationDate?: Date;
+  fees?: number;
+  feePaidDate?: Date;
+  inspections: PermitInspection[];
+  notes?: string;
+  documentURL?: string;
+  contactName?: string;
+  contactPhone?: string;
+  contactEmail?: string;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+export interface PermitInspection {
+  id: string;
+  type: string;
+  scheduledDate?: Date;
+  completedDate?: Date;
+  result?: 'passed' | 'failed' | 'partial';
+  inspector?: string;
+  notes?: string;
 }
 
 export interface ClientSurvey {
@@ -5271,6 +5326,211 @@ export const BREAK_TYPES: { value: BreakType; label: string; defaultMinutes: num
 ];
 
 // ============================================
+// Team Location Tracking Types (Sprint 13)
+// ============================================
+
+export interface TeamMemberLocation {
+  id: string;
+  orgId: string;
+  userId: string;
+  userName: string;
+  userRole: UserRole;
+  // Current location
+  lat: number;
+  lng: number;
+  accuracy?: number;
+  heading?: number;           // Direction in degrees
+  speed?: number;             // Speed in m/s
+  altitude?: number;
+  address?: string;           // Reverse geocoded
+  // Context
+  projectId?: string;
+  projectName?: string;
+  status: 'active' | 'idle' | 'offline';
+  isClockingIn: boolean;      // Currently clocked in
+  // Vehicle info
+  vehicleId?: string;
+  vehicleName?: string;
+  // Timestamps
+  lastUpdated: Date;
+  createdAt: Date;
+}
+
+export interface VehicleLocation {
+  id: string;
+  orgId: string;
+  // Vehicle details
+  vehicleId: string;
+  name: string;
+  type: 'truck' | 'van' | 'car' | 'trailer' | 'equipment' | 'other';
+  licensePlate?: string;
+  make?: string;
+  model?: string;
+  year?: number;
+  // Current location
+  lat: number;
+  lng: number;
+  heading?: number;
+  speed?: number;
+  // Assignment
+  assignedToUserId?: string;
+  assignedToUserName?: string;
+  projectId?: string;
+  projectName?: string;
+  // Status
+  status: 'moving' | 'parked' | 'offline';
+  engineOn?: boolean;
+  fuelLevel?: number;         // 0-100%
+  odometer?: number;          // Miles
+  // Timestamps
+  lastUpdated: Date;
+  createdAt: Date;
+}
+
+export interface Vehicle {
+  id: string;
+  orgId: string;
+  name: string;
+  type: 'truck' | 'van' | 'car' | 'trailer' | 'equipment' | 'other';
+  licensePlate?: string;
+  make?: string;
+  model?: string;
+  year?: number;
+  vin?: string;
+  color?: string;
+  // Assignment
+  assignedToUserId?: string;
+  assignedToUserName?: string;
+  // Tracking
+  hasGpsTracker: boolean;
+  trackerDeviceId?: string;
+  // Maintenance
+  lastServiceDate?: Date;
+  nextServiceDue?: Date;
+  odometerReading?: number;
+  // Status
+  status: 'active' | 'maintenance' | 'inactive';
+  notes?: string;
+  // Timestamps
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+export interface LocationHistoryEntry {
+  lat: number;
+  lng: number;
+  timestamp: Date;
+  accuracy?: number;
+  speed?: number;
+  heading?: number;
+  source: 'user' | 'vehicle';
+  sourceId: string;           // userId or vehicleId
+}
+
+export const VEHICLE_TYPES: { value: Vehicle['type']; label: string; icon: string }[] = [
+  { value: 'truck', label: 'Truck', icon: '🚚' },
+  { value: 'van', label: 'Van', icon: '🚐' },
+  { value: 'car', label: 'Car', icon: '🚗' },
+  { value: 'trailer', label: 'Trailer', icon: '🚛' },
+  { value: 'equipment', label: 'Equipment', icon: '🚜' },
+  { value: 'other', label: 'Other', icon: '🚙' },
+];
+
+// ============================================
+// Weather Risk Assessment Types (Sprint 13)
+// ============================================
+
+export type WeatherRiskLevel = 'none' | 'low' | 'moderate' | 'high' | 'severe';
+
+export interface WeatherRiskAssessment {
+  projectId: string;
+  projectName: string;
+  phaseId?: string;
+  phaseName?: string;
+  // Weather data
+  forecastDate: Date;
+  condition: WeatherCondition;
+  temperature: number;        // Fahrenheit
+  precipitation: number;      // Probability %
+  windSpeed: number;          // mph
+  humidity: number;           // %
+  // Risk assessment
+  overallRisk: WeatherRiskLevel;
+  riskFactors: WeatherRiskFactor[];
+  affectedTrades: string[];
+  recommendedActions: string[];
+  // Impact
+  estimatedDelayHours?: number;
+  shouldPauseWork: boolean;
+}
+
+export interface WeatherRiskFactor {
+  type: 'temperature' | 'precipitation' | 'wind' | 'humidity' | 'storm' | 'snow' | 'heat' | 'cold';
+  severity: WeatherRiskLevel;
+  description: string;
+  threshold?: string;         // e.g., "Wind > 25 mph"
+}
+
+export interface ProjectWeatherForecast {
+  projectId: string;
+  projectName: string;
+  projectAddress?: string;
+  lat?: number;
+  lng?: number;
+  // 5-day forecast
+  forecasts: DailyWeatherForecast[];
+  // Risk summary
+  highRiskDays: number;
+  nextRiskyDay?: Date;
+  // Timestamps
+  fetchedAt: Date;
+}
+
+export interface DailyWeatherForecast {
+  date: Date;
+  condition: WeatherCondition;
+  highTemp: number;
+  lowTemp: number;
+  precipitation: number;
+  windSpeed: number;
+  windDirection?: string;
+  humidity: number;
+  sunrise?: string;
+  sunset?: string;
+  uvIndex?: number;
+  riskLevel: WeatherRiskLevel;
+  riskFactors: WeatherRiskFactor[];
+}
+
+export const WEATHER_RISK_LEVELS: { value: WeatherRiskLevel; label: string; color: string }[] = [
+  { value: 'none', label: 'Clear', color: '#10b981' },
+  { value: 'low', label: 'Low Risk', color: '#22c55e' },
+  { value: 'moderate', label: 'Moderate Risk', color: '#f59e0b' },
+  { value: 'high', label: 'High Risk', color: '#ef4444' },
+  { value: 'severe', label: 'Severe Risk', color: '#7c2d12' },
+];
+
+// Trade-specific weather thresholds
+export const TRADE_WEATHER_THRESHOLDS: Record<string, {
+  minTemp?: number;
+  maxTemp?: number;
+  maxWind?: number;
+  maxPrecipitation?: number;
+  description: string;
+}> = {
+  roofing: { maxWind: 25, maxPrecipitation: 20, description: 'High winds and rain affect roofing safety' },
+  concrete: { minTemp: 40, maxTemp: 90, maxPrecipitation: 30, description: 'Temperature affects curing; rain damages fresh concrete' },
+  painting: { minTemp: 50, maxTemp: 85, maxPrecipitation: 10, description: 'Paint requires specific temp range and dry conditions' },
+  landscaping: { maxPrecipitation: 50, description: 'Heavy rain makes ground unworkable' },
+  framing: { maxWind: 30, maxPrecipitation: 40, description: 'High winds dangerous for framing work' },
+  electrical: { maxPrecipitation: 30, description: 'Rain creates electrical hazards' },
+  plumbing: { minTemp: 32, description: 'Frozen pipes risk below freezing' },
+  siding: { maxWind: 20, maxPrecipitation: 20, description: 'Vinyl siding brittle in cold, difficult in rain' },
+  masonry: { minTemp: 40, maxPrecipitation: 30, description: 'Mortar needs proper temp to set' },
+  excavation: { maxPrecipitation: 40, description: 'Heavy rain causes unstable soil' },
+};
+
+// ============================================
 // Daily Log / Journal Types (FEAT-S17)
 // ============================================
 
@@ -5409,3 +5669,629 @@ export const DAILY_LOG_CATEGORIES: { value: DailyLogCategory; label: string; ico
 // Note: Expense types (ExpenseCategory, ExpenseStatus, PaymentMethod, Expense, ExpenseSummary, ExpenseReceipt)
 // and constants (EXPENSE_CATEGORIES, EXPENSE_STATUSES, PAYMENT_METHODS) are defined earlier in the file
 // in the "Expense Types" section
+
+// ============================================
+// Payroll Module Types
+// ============================================
+
+// Payroll run status
+export type PayrollRunStatus = 'draft' | 'pending_approval' | 'approved' | 'processing' | 'completed' | 'cancelled';
+
+// Pay period configuration
+export interface PayPeriod {
+  id: string;
+  type: PaySchedule;
+  startDate: Date;
+  endDate: Date;
+  payDate: Date;
+  label: string; // e.g., "Jan 1-15, 2026"
+}
+
+// Payroll adjustment (bonuses, deductions, reimbursements)
+export type PayrollAdjustmentType = 'bonus' | 'commission' | 'reimbursement' | 'deduction' | 'garnishment' | 'advance' | 'other';
+
+export interface PayrollAdjustment {
+  id: string;
+  type: PayrollAdjustmentType;
+  description: string;
+  amount: number; // Positive for additions, negative for deductions
+  taxable: boolean;
+  notes?: string;
+}
+
+// Payroll entry for one employee in one pay period
+export interface PayrollEntry {
+  id: string;
+  payrollRunId: string;
+  employeeId: string;
+  employeeName: string;
+  employeeType: EmployeeType;
+
+  // Hours breakdown
+  regularHours: number;
+  overtimeHours: number;      // Hours over 8/day or 40/week
+  doubleTimeHours: number;    // e.g., 7th consecutive day, holidays
+  ptoHours: number;
+  sickHours: number;
+  holidayHours: number;
+
+  // Rates
+  regularRate: number;        // Hourly rate
+  overtimeRate: number;       // Multiplier (e.g., 1.5)
+  doubleTimeRate: number;     // Multiplier (e.g., 2.0)
+
+  // Earnings breakdown
+  regularPay: number;
+  overtimePay: number;
+  doubleTimePay: number;
+  ptoPay: number;
+  sickPay: number;
+  holidayPay: number;
+  bonuses: number;
+  commissions: number;
+  reimbursements: number;     // Non-taxable
+  grossPay: number;
+
+  // Deductions breakdown (estimates)
+  federalWithholding: number;
+  stateWithholding: number;
+  socialSecurity: number;     // 6.2% up to wage base
+  medicare: number;           // 1.45% (+ 0.9% additional above threshold)
+  localTax: number;
+  retirement401k: number;
+  healthInsurance: number;
+  otherDeductions: number;
+  totalDeductions: number;
+
+  // Net pay
+  netPay: number;
+
+  // Source tracking
+  timeEntryIds: string[];     // Time entries used for calculation
+  adjustments: PayrollAdjustment[];
+
+  // YTD totals (for reference)
+  ytdGrossPay: number;
+  ytdFederalWithholding: number;
+  ytdStateWithholding: number;
+  ytdSocialSecurity: number;
+  ytdMedicare: number;
+
+  // Notes and flags
+  notes?: string;
+  hasManualOverrides: boolean;
+  overrideReason?: string;
+}
+
+// Complete payroll run for an organization
+export interface PayrollRun {
+  id: string;
+  orgId: string;
+  runNumber: number;          // Sequential run number for the year
+
+  // Pay period
+  payPeriod: PayPeriod;
+
+  // Status
+  status: PayrollRunStatus;
+
+  // Entries (one per employee)
+  entries: PayrollEntry[];
+  employeeCount: number;
+
+  // Totals
+  totalRegularHours: number;
+  totalOvertimeHours: number;
+  totalGrossPay: number;
+  totalDeductions: number;
+  totalNetPay: number;
+
+  // Approval workflow
+  createdBy: string;
+  createdByName: string;
+  approvedBy?: string;
+  approvedByName?: string;
+  approvedAt?: Date;
+
+  // Processing
+  processedAt?: Date;
+  processedBy?: string;
+
+  // Export tracking
+  exportedAt?: Date;
+  exportFormat?: 'csv' | 'pdf' | 'gusto' | 'adp' | 'quickbooks';
+
+  // Timestamps
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Tax calculation inputs
+export interface TaxCalculationInput {
+  grossPay: number;
+  payPeriodType: PaySchedule;
+  filingStatus: W4Info['filingStatus'];
+  allowances: number;
+  additionalWithholding: number;
+  isExempt: boolean;
+  stateCode: string;          // e.g., 'NC', 'CA'
+  ytdGrossPay: number;        // For social security wage cap
+}
+
+// Tax calculation result
+export interface TaxCalculation {
+  grossPay: number;
+  federalWithholding: number;
+  stateWithholding: number;
+  socialSecurity: number;
+  medicare: number;
+  totalTax: number;
+  effectiveRate: number;      // Percentage
+}
+
+// Payroll settings for the organization
+export interface PayrollSettings {
+  id: string;
+  orgId: string;
+
+  // Default pay schedule
+  defaultPaySchedule: PaySchedule;
+
+  // Pay dates
+  payDayOfWeek?: number;      // 0-6 for weekly/bi-weekly
+  payDayOfMonth?: number;     // 1-31 for monthly/semi-monthly
+  semiMonthlyPayDays?: [number, number]; // e.g., [15, 30]
+
+  // Overtime rules
+  dailyOvertimeThreshold: number;    // Hours (default 8)
+  weeklyOvertimeThreshold: number;   // Hours (default 40)
+  overtimeMultiplier: number;        // Default 1.5
+  doubleTimeMultiplier: number;      // Default 2.0
+  enableDailyOvertime: boolean;      // Some states require daily OT
+  enableSeventhDayOvertime: boolean; // 7th consecutive day = OT
+
+  // State/locality
+  stateCode: string;
+  localTaxRate?: number;
+
+  // Employer contributions (for display/reporting)
+  employerSocialSecurityRate: number;  // 6.2%
+  employerMedicareRate: number;        // 1.45%
+  employerFutaRate: number;            // 0.6% (after credit)
+  employerSutaRate?: number;           // Varies by state
+
+  // Benefits deductions defaults
+  defaultRetirementPercent?: number;
+  healthInsuranceAmount?: number;
+
+  // Timestamps
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Pay stub for PDF generation
+export interface PayStub {
+  employee: {
+    name: string;
+    id: string;
+    address?: string;
+    ssn?: string;             // Last 4 only: ***-**-1234
+  };
+  employer: {
+    name: string;
+    address?: string;
+    ein?: string;
+  };
+  payPeriod: PayPeriod;
+  payDate: Date;
+  checkNumber?: string;
+
+  // Current period
+  currentEarnings: {
+    regular: { hours: number; rate: number; amount: number };
+    overtime: { hours: number; rate: number; amount: number };
+    doubleTime: { hours: number; rate: number; amount: number };
+    pto: { hours: number; rate: number; amount: number };
+    sick: { hours: number; rate: number; amount: number };
+    holiday: { hours: number; rate: number; amount: number };
+    bonuses: number;
+    commissions: number;
+    reimbursements: number;
+    grossPay: number;
+  };
+
+  currentDeductions: {
+    federal: number;
+    state: number;
+    socialSecurity: number;
+    medicare: number;
+    local: number;
+    retirement: number;
+    healthInsurance: number;
+    other: number;
+    total: number;
+  };
+
+  netPay: number;
+
+  // YTD totals
+  ytdEarnings: {
+    gross: number;
+    regular: number;
+    overtime: number;
+    bonuses: number;
+    pto: number;
+  };
+
+  ytdDeductions: {
+    federal: number;
+    state: number;
+    socialSecurity: number;
+    medicare: number;
+    retirement: number;
+    healthInsurance: number;
+    total: number;
+  };
+
+  ytdNetPay: number;
+
+  // PTO/Sick balances
+  ptoBalance: number;
+  sickBalance: number;
+}
+
+// Payroll summary for dashboard
+export interface PayrollSummary {
+  orgId: string;
+  period: { start: Date; end: Date };
+
+  // Overall stats
+  totalRuns: number;
+  totalEmployees: number;
+  totalGrossPay: number;
+  totalNetPay: number;
+  totalTaxes: number;
+
+  // By pay period
+  byPeriod: {
+    periodLabel: string;
+    runId: string;
+    status: PayrollRunStatus;
+    employeeCount: number;
+    grossPay: number;
+    netPay: number;
+    payDate: Date;
+  }[];
+
+  // By employee
+  byEmployee: {
+    employeeId: string;
+    employeeName: string;
+    grossPay: number;
+    netPay: number;
+    hoursWorked: number;
+    overtimeHours: number;
+  }[];
+
+  // Alerts
+  alerts: {
+    type: 'overtime_warning' | 'missing_time' | 'pending_approval' | 'upcoming_deadline';
+    message: string;
+    severity: 'info' | 'warning' | 'error';
+    employeeId?: string;
+    payrollRunId?: string;
+  }[];
+}
+
+// Constants
+export const PAYROLL_RUN_STATUSES: { value: PayrollRunStatus; label: string; color: 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info' }[] = [
+  { value: 'draft', label: 'Draft', color: 'default' },
+  { value: 'pending_approval', label: 'Pending Approval', color: 'warning' },
+  { value: 'approved', label: 'Approved', color: 'primary' },
+  { value: 'processing', label: 'Processing', color: 'info' },
+  { value: 'completed', label: 'Completed', color: 'success' },
+  { value: 'cancelled', label: 'Cancelled', color: 'danger' },
+];
+
+export const PAYROLL_ADJUSTMENT_TYPES: { value: PayrollAdjustmentType; label: string; isAddition: boolean }[] = [
+  { value: 'bonus', label: 'Bonus', isAddition: true },
+  { value: 'commission', label: 'Commission', isAddition: true },
+  { value: 'reimbursement', label: 'Reimbursement', isAddition: true },
+  { value: 'deduction', label: 'Deduction', isAddition: false },
+  { value: 'garnishment', label: 'Garnishment', isAddition: false },
+  { value: 'advance', label: 'Pay Advance', isAddition: false },
+  { value: 'other', label: 'Other', isAddition: true },
+];
+
+export const PAY_SCHEDULE_LABELS: Record<PaySchedule, string> = {
+  'weekly': 'Weekly (52 pay periods/year)',
+  'bi-weekly': 'Bi-Weekly (26 pay periods/year)',
+  'semi-monthly': 'Semi-Monthly (24 pay periods/year)',
+  'monthly': 'Monthly (12 pay periods/year)',
+};
+
+// Tax rate constants (2026 estimated - disclaimer: for estimates only!)
+export const TAX_RATES = {
+  socialSecurity: {
+    rate: 0.062,              // 6.2%
+    wageBase: 176100,         // 2026 estimated wage base
+  },
+  medicare: {
+    rate: 0.0145,             // 1.45%
+    additionalRate: 0.009,    // Additional 0.9% over threshold
+    additionalThreshold: 200000, // Single filer threshold
+  },
+  futa: {
+    rate: 0.006,              // 0.6% (after state credit)
+    wageBase: 7000,
+  },
+} as const;
+
+// ============================================================================
+// Voice Log Types (Daily Voice Log Feature - Sprint 14)
+// ============================================================================
+
+/**
+ * Voice log processing status
+ */
+export type VoiceLogStatus =
+  | 'queued'           // In local IndexedDB, waiting for upload
+  | 'uploading'        // Currently uploading to server
+  | 'uploaded'         // Audio uploaded, waiting for processing
+  | 'processing'       // AI processing in progress
+  | 'completed'        // Successfully processed
+  | 'failed'           // Processing failed (retryable)
+  | 'error';           // Permanent error (not retryable)
+
+/**
+ * Work event types that can be extracted from voice logs
+ */
+export type WorkEventType =
+  | 'arrival'          // Arrived at site
+  | 'departure'        // Left site
+  | 'break_start'      // Started break
+  | 'break_end'        // Ended break
+  | 'task_start'       // Started a task
+  | 'task_complete'    // Completed a task
+  | 'task_progress'    // Made progress on task
+  | 'issue_found'      // Found a problem/issue
+  | 'issue_resolved'   // Fixed a problem
+  | 'material_used'    // Used materials
+  | 'material_needed'  // Need materials
+  | 'weather_delay'    // Weather-related delay
+  | 'equipment_issue'  // Equipment problem
+  | 'safety_concern'   // Safety issue noted
+  | 'coordination'     // Coordinated with others
+  | 'inspection'       // Inspection performed
+  | 'photo_taken'      // Photo was taken
+  | 'other';           // Other event
+
+/**
+ * Confidence level for AI-extracted data
+ */
+export type ConfidenceLevel = 'high' | 'medium' | 'low';
+
+/**
+ * A single segment of the transcript with timing
+ */
+export interface TranscriptSegment {
+  text: string;
+  startTime: number;    // Seconds from start
+  endTime: number;
+  confidence: number;   // 0-1
+  speaker?: string;     // If speaker diarization is available
+}
+
+/**
+ * Full transcript data from audio processing
+ */
+export interface TranscriptData {
+  fullText: string;
+  segments: TranscriptSegment[];
+  language: string;           // Detected language code
+  durationSeconds: number;
+  wordCount: number;
+}
+
+/**
+ * A work event extracted from the voice log
+ */
+export interface WorkEvent {
+  id: string;
+  type: WorkEventType;
+  description: string;
+  timestamp?: Date;           // When this happened (if mentioned)
+  duration?: number;          // Duration in minutes (if applicable)
+  confidence: ConfidenceLevel;
+  sourceText: string;         // The original text this was extracted from
+  metadata?: {
+    taskId?: string;
+    projectId?: string;
+    phaseId?: string;
+    materials?: string[];
+    quantities?: Record<string, number>;
+    personnelMentioned?: string[];
+    equipmentMentioned?: string[];
+  };
+}
+
+/**
+ * A match between extracted work and a scheduled task
+ */
+export interface TaskMatch {
+  eventId: string;            // ID of the WorkEvent this matches
+  taskId: string;
+  taskName: string;
+  projectId: string;
+  projectName: string;
+  phaseId?: string;
+  phaseName?: string;
+  matchConfidence: ConfidenceLevel;
+  matchReason: string;        // Why this was matched
+  suggestedTimeEntry?: {
+    hours: number;
+    notes: string;
+  };
+}
+
+/**
+ * Summary generated from voice log
+ */
+export interface VoiceLogSummary {
+  bullets: string[];          // 2-6 bullet points
+  blockers: string[];         // Any blockers mentioned
+  nextSteps: string[];        // Planned next steps
+  mood?: 'positive' | 'neutral' | 'frustrated' | 'concerned';
+  weatherMentioned?: string;
+  hoursWorked?: number;       // Total hours if mentioned
+}
+
+/**
+ * AI processing metadata
+ */
+export interface VoiceLogProcessingMeta {
+  provider: string;           // 'gemini', 'openai', 'whisper', etc.
+  model: string;              // Model version used
+  processingTimeMs: number;
+  tokensUsed?: number;
+  costEstimate?: number;      // Estimated cost in USD
+  retryCount: number;
+  lastError?: string;
+}
+
+/**
+ * Main VoiceLog document stored in Firestore
+ */
+export interface VoiceLog {
+  id: string;
+  orgId: string;
+  userId: string;
+  userName: string;
+
+  // Recording metadata
+  recordedAt: Date;
+  durationSeconds: number;
+  fileSizeBytes: number;
+  mimeType: string;           // 'audio/webm', 'audio/mp4', etc.
+  audioUrl?: string;          // Signed URL to audio file (expires)
+
+  // Optional typed summary from user
+  userSummary?: string;
+
+  // Processing status
+  status: VoiceLogStatus;
+  statusMessage?: string;
+  uploadedAt?: Date;
+  processedAt?: Date;
+
+  // Processing results (populated when status = 'completed')
+  transcript?: TranscriptData;
+  events?: WorkEvent[];
+  taskMatches?: TaskMatch[];
+  summary?: VoiceLogSummary;
+
+  // Context at time of recording
+  location?: {
+    lat: number;
+    lng: number;
+    accuracy: number;
+    address?: string;
+  };
+  projectContext?: {
+    projectId: string;
+    projectName: string;
+    phaseId?: string;
+    phaseName?: string;
+  };
+
+  // Processing metadata
+  processingMeta?: VoiceLogProcessingMeta;
+
+  // Idempotency
+  contentHash: string;        // SHA256 of audio + userId + timestamp
+
+  // Timestamps
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * VoiceLog create payload (for API)
+ */
+export type VoiceLogCreate = Omit<VoiceLog,
+  | 'id'
+  | 'audioUrl'
+  | 'uploadedAt'
+  | 'processedAt'
+  | 'transcript'
+  | 'events'
+  | 'taskMatches'
+  | 'summary'
+  | 'processingMeta'
+  | 'createdAt'
+  | 'updatedAt'
+>;
+
+/**
+ * Item stored in IndexedDB for offline queue
+ */
+export interface VoiceLogQueueItem {
+  id: string;                 // Local UUID
+  audioBlob: Blob;            // The actual audio data
+  metadata: VoiceLogCreate;
+  queuedAt: Date;
+  retryCount: number;
+  lastError?: string;
+  status: 'pending' | 'uploading' | 'failed';
+}
+
+/**
+ * Voice log provider configuration (stored in org settings)
+ */
+export interface VoiceLogProviderConfig {
+  provider: 'gemini' | 'openai' | 'whisper' | 'azure';
+  model?: string;             // Model version (defaults to provider default)
+  apiKey?: string;            // Encrypted API key for BYO credentials
+  useVertexAI?: boolean;      // Use Vertex AI (GCP-managed) vs direct API
+  maxDurationMinutes: number; // Max recording duration (default 10)
+  dailyLimitPerUser: number;  // Max logs per user per day
+  dailyLimitPerOrg: number;   // Max logs per org per day
+  retentionDays: number;      // How long to keep audio files
+}
+
+/**
+ * Status labels for display
+ */
+export const VOICE_LOG_STATUS_LABELS: Record<VoiceLogStatus, string> = {
+  queued: 'Queued',
+  uploading: 'Uploading',
+  uploaded: 'Processing',
+  processing: 'Processing',
+  completed: 'Completed',
+  failed: 'Failed',
+  error: 'Error',
+};
+
+/**
+ * Work event type labels
+ */
+export const WORK_EVENT_TYPE_LABELS: Record<WorkEventType, string> = {
+  arrival: 'Arrived',
+  departure: 'Departed',
+  break_start: 'Break Started',
+  break_end: 'Break Ended',
+  task_start: 'Task Started',
+  task_complete: 'Task Completed',
+  task_progress: 'Task Progress',
+  issue_found: 'Issue Found',
+  issue_resolved: 'Issue Resolved',
+  material_used: 'Material Used',
+  material_needed: 'Material Needed',
+  weather_delay: 'Weather Delay',
+  equipment_issue: 'Equipment Issue',
+  safety_concern: 'Safety Concern',
+  coordination: 'Coordination',
+  inspection: 'Inspection',
+  photo_taken: 'Photo Taken',
+  other: 'Other',
+};

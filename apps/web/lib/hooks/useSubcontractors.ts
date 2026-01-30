@@ -18,13 +18,32 @@ import { Subcontractor, SubcontractorDocument, SubcontractorMetrics } from '@/ty
 import { useAuth } from '@/lib/auth';
 import { toast } from '@/components/ui/Toast';
 
+// Safe date conversion helper - handles Timestamp, Date, string, or undefined
+function safeToDate(value: unknown): Date | undefined {
+  if (!value) return undefined;
+  // Firestore Timestamp
+  if (typeof value === 'object' && value !== null && 'toDate' in value && typeof (value as { toDate: unknown }).toDate === 'function') {
+    return (value as Timestamp).toDate();
+  }
+  // Already a Date
+  if (value instanceof Date) return value;
+  // ISO string or other parseable string
+  if (typeof value === 'string') {
+    const parsed = new Date(value);
+    return isNaN(parsed.getTime()) ? undefined : parsed;
+  }
+  // Number (milliseconds timestamp)
+  if (typeof value === 'number') return new Date(value);
+  return undefined;
+}
+
 function fromFirestore(id: string, data: Record<string, unknown>): Subcontractor {
   const docs = ((data.documents as unknown[]) || []).map((d: unknown) => {
     const doc = d as Record<string, unknown>;
     return {
       ...doc,
-      expiresAt: doc.expiresAt ? (doc.expiresAt as Timestamp).toDate() : undefined,
-      uploadedAt: doc.uploadedAt ? (doc.uploadedAt as Timestamp).toDate() : new Date(),
+      expiresAt: safeToDate(doc.expiresAt),
+      uploadedAt: safeToDate(doc.uploadedAt) || new Date(),
     } as SubcontractorDocument;
   });
 
@@ -38,7 +57,7 @@ function fromFirestore(id: string, data: Record<string, unknown>): Subcontractor
     phone: data.phone as string | undefined,
     trade: data.trade as string,
     licenseNumber: data.licenseNumber as string | undefined,
-    insuranceExpiry: data.insuranceExpiry ? (data.insuranceExpiry as Timestamp).toDate() : undefined,
+    insuranceExpiry: safeToDate(data.insuranceExpiry),
     address: data.address as string | undefined,
     notes: data.notes as string | undefined,
     metrics: (data.metrics as SubcontractorMetrics) || {
@@ -49,8 +68,8 @@ function fromFirestore(id: string, data: Record<string, unknown>): Subcontractor
     },
     documents: docs,
     isActive: data.isActive !== false,
-    createdAt: data.createdAt ? (data.createdAt as Timestamp).toDate() : new Date(),
-    updatedAt: data.updatedAt ? (data.updatedAt as Timestamp).toDate() : undefined,
+    createdAt: safeToDate(data.createdAt) || new Date(),
+    updatedAt: safeToDate(data.updatedAt),
   };
 }
 

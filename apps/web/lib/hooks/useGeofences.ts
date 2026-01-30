@@ -37,9 +37,14 @@ export function useGeofences(orgId?: string) {
     return unsub;
   }, [targetOrgId]);
 
-  const createGeofence = useCallback(async (data: Omit<Geofence, 'id' | 'createdAt'>) => {
-    await addDoc(collection(db, 'geofences'), { ...data, createdAt: Timestamp.now() });
-  }, []);
+  const createGeofence = useCallback(async (data: Omit<Geofence, 'id' | 'orgId' | 'createdAt'>) => {
+    if (!targetOrgId) throw new Error('No organization');
+    await addDoc(collection(db, 'geofences'), {
+      ...data,
+      orgId: targetOrgId,
+      createdAt: Timestamp.now()
+    });
+  }, [targetOrgId]);
 
   const updateGeofence = useCallback(async (id: string, data: Partial<Geofence>) => {
     const update = { ...data } as Record<string, unknown>;

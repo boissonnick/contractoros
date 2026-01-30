@@ -122,17 +122,18 @@ export function usePayments(options: UsePaymentsOptions = {}) {
       return;
     }
 
+    // Use org-scoped collection for better security
+    const paymentsCollection = collection(db, `organizations/${orgId}/payments`);
+
     let q = query(
-      collection(db, 'payments'),
-      where('orgId', '==', orgId),
+      paymentsCollection,
       orderBy('createdAt', 'desc')
     );
 
     // Filter by invoice if provided
     if (options.invoiceId) {
       q = query(
-        collection(db, 'payments'),
-        where('orgId', '==', orgId),
+        paymentsCollection,
         where('invoiceId', '==', options.invoiceId),
         orderBy('createdAt', 'desc')
       );
@@ -141,8 +142,7 @@ export function usePayments(options: UsePaymentsOptions = {}) {
     // Filter by project if provided
     if (options.projectId) {
       q = query(
-        collection(db, 'payments'),
-        where('orgId', '==', orgId),
+        paymentsCollection,
         where('projectId', '==', options.projectId),
         orderBy('createdAt', 'desc')
       );
@@ -151,8 +151,7 @@ export function usePayments(options: UsePaymentsOptions = {}) {
     // Filter by client if provided
     if (options.clientId) {
       q = query(
-        collection(db, 'payments'),
-        where('orgId', '==', orgId),
+        paymentsCollection,
         where('clientId', '==', options.clientId),
         orderBy('createdAt', 'desc')
       );

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe, isStripeConfigured } from '@/lib/payments/stripeClient';
 import { adminDb, Timestamp } from '@/lib/firebase/admin';
+import { verifyAuth, verifyOrgAccess, verifyAdminAccess } from '@/lib/api/auth';
 
 export const runtime = 'nodejs';
 
@@ -21,6 +22,17 @@ export async function POST(
       );
     }
 
+    // Verify authentication
+    const { user, error: authError } = await verifyAuth(request);
+    if (authError) return authError;
+    if (!user) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+
+    // Verify admin access (only OWNER/PM can process refunds)
+    const adminError = verifyAdminAccess(user);
+    if (adminError) return adminError;
+
     const { id } = await params;
     const body = await request.json();
     const { amount, reason } = body;
@@ -37,6 +49,10 @@ export async function POST(
     }
 
     const payment = doc.data();
+
+    // Verify the payment belongs to the user's organization
+    const orgError = verifyOrgAccess(user, payment?.orgId);
+    if (orgError) return orgError;
 
     // Check if payment can be refunded
     if (payment?.status !== 'completed') {

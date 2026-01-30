@@ -9,6 +9,14 @@ import {
   WeatherForecast,
   WeatherCondition,
   WeatherImpact,
+  WeatherRiskAssessment,
+  WeatherRiskFactor,
+  WeatherRiskLevel,
+  DailyWeatherForecast,
+  ProjectWeatherForecast,
+  TRADE_WEATHER_THRESHOLDS,
+  Project,
+  Phase,
 } from '@/types';
 
 // OpenWeatherMap API configuration
@@ -340,4 +348,549 @@ export function getWeatherSummary(forecasts: WeatherForecast[]): {
   }
 
   return { goodDays, moderateDays, badDays, summary };
+}
+
+// ============================================
+// Project-Specific Weather Risk Assessment
+// ============================================
+
+/**
+ * Calculate risk level based on threshold violations
+ */
+function calculateRiskLevel(violations: number): WeatherRiskLevel {
+  if (violations >= 4) return 'severe';
+  if (violations >= 3) return 'high';
+  if (violations >= 2) return 'moderate';
+  if (violations >= 1) return 'low';
+  return 'none';
+}
+
+/**
+ * Assess weather risk for specific trades based on thresholds
+ */
+export function assessTradeWeatherRisk(
+  trade: string,
+  temperature: number,
+  precipitation: number,
+  windSpeed: number
+): { riskLevel: WeatherRiskLevel; factors: WeatherRiskFactor[] } {
+  const thresholds = TRADE_WEATHER_THRESHOLDS[trade.toLowerCase()];
+  const factors: WeatherRiskFactor[] = [];
+
+  if (!thresholds) {
+    // Unknown trade - use general assessment
+    return assessGeneralWeatherRisk(temperature, precipitation, windSpeed);
+  }
+
+  // Check temperature thresholds
+  if (thresholds.minTemp !== undefined && temperature < thresholds.minTemp) {
+    factors.push({
+      type: 'cold',
+      severity: temperature < thresholds.minTemp - 20 ? 'severe' :
+               temperature < thresholds.minTemp - 10 ? 'high' : 'moderate',
+      description: `Temperature ${Math.round(temperature)}°F below minimum ${thresholds.minTemp}°F for ${trade}`,
+      threshold: `Min temp: ${thresholds.minTemp}°F`,
+    });
+  }
+
+  if (thresholds.maxTemp !== undefined && temperature > thresholds.maxTemp) {
+    factors.push({
+      type: 'heat',
+      severity: temperature > thresholds.maxTemp + 20 ? 'severe' :
+               temperature > thresholds.maxTemp + 10 ? 'high' : 'moderate',
+      description: `Temperature ${Math.round(temperature)}°F above maximum ${thresholds.maxTemp}°F for ${trade}`,
+      threshold: `Max temp: ${thresholds.maxTemp}°F`,
+    });
+  }
+
+  // Check wind thresholds
+  if (thresholds.maxWind !== undefined && windSpeed > thresholds.maxWind) {
+    factors.push({
+      type: 'wind',
+      severity: windSpeed > thresholds.maxWind + 20 ? 'severe' :
+               windSpeed > thresholds.maxWind + 10 ? 'high' : 'moderate',
+      description: `Wind speed ${Math.round(windSpeed)} mph exceeds maximum ${thresholds.maxWind} mph for ${trade}`,
+      threshold: `Max wind: ${thresholds.maxWind} mph`,
+    });
+  }
+
+  // Check precipitation thresholds
+  if (thresholds.maxPrecipitation !== undefined && precipitation > thresholds.maxPrecipitation) {
+    factors.push({
+      type: 'precipitation',
+      severity: precipitation > thresholds.maxPrecipitation + 40 ? 'severe' :
+               precipitation > thresholds.maxPrecipitation + 20 ? 'high' : 'moderate',
+      description: `${precipitation}% precipitation chance exceeds maximum ${thresholds.maxPrecipitation}% for ${trade}`,
+      threshold: `Max precipitation: ${thresholds.maxPrecipitation}%`,
+    });
+  }
+
+  // Calculate overall risk level
+  const highSeverityCount = factors.filter(f => f.severity === 'severe' || f.severity === 'high').length;
+  const riskLevel = calculateRiskLevel(highSeverityCount > 0 ? highSeverityCount + 1 : factors.length);
+
+  return { riskLevel, factors };
+}
+
+/**
+ * General weather risk assessment when trade is unknown
+ */
+export function assessGeneralWeatherRisk(
+  temperature: number,
+  precipitation: number,
+  windSpeed: number
+): { riskLevel: WeatherRiskLevel; factors: WeatherRiskFactor[] } {
+  const factors: WeatherRiskFactor[] = [];
+
+  // Temperature extremes
+  if (temperature <= 20) {
+    factors.push({
+      type: 'cold',
+      severity: 'severe',
+      description: `Extreme cold: ${Math.round(temperature)}°F`,
+      threshold: 'Temp ≤ 20°F',
+    });
+  } else if (temperature <= 32) {
+    factors.push({
+      type: 'cold',
+      severity: 'high',
+      description: `Freezing temperature: ${Math.round(temperature)}°F`,
+      threshold: 'Temp ≤ 32°F',
+    });
+  } else if (temperature < 40) {
+    factors.push({
+      type: 'cold',
+      severity: 'moderate',
+      description: `Cold temperature: ${Math.round(temperature)}°F`,
+      threshold: 'Temp < 40°F',
+    });
+  }
+
+  if (temperature >= 100) {
+    factors.push({
+      type: 'heat',
+      severity: 'severe',
+      description: `Extreme heat: ${Math.round(temperature)}°F`,
+      threshold: 'Temp ≥ 100°F',
+    });
+  } else if (temperature >= 95) {
+    factors.push({
+      type: 'heat',
+      severity: 'high',
+      description: `Dangerous heat: ${Math.round(temperature)}°F`,
+      threshold: 'Temp ≥ 95°F',
+    });
+  } else if (temperature > 90) {
+    factors.push({
+      type: 'heat',
+      severity: 'moderate',
+      description: `Hot temperature: ${Math.round(temperature)}°F`,
+      threshold: 'Temp > 90°F',
+    });
+  }
+
+  // Precipitation
+  if (precipitation >= 80) {
+    factors.push({
+      type: 'precipitation',
+      severity: 'severe',
+      description: `Very high precipitation chance: ${precipitation}%`,
+      threshold: 'Precip ≥ 80%',
+    });
+  } else if (precipitation >= 60) {
+    factors.push({
+      type: 'precipitation',
+      severity: 'high',
+      description: `High precipitation chance: ${precipitation}%`,
+      threshold: 'Precip ≥ 60%',
+    });
+  } else if (precipitation >= 40) {
+    factors.push({
+      type: 'precipitation',
+      severity: 'moderate',
+      description: `Moderate precipitation chance: ${precipitation}%`,
+      threshold: 'Precip ≥ 40%',
+    });
+  }
+
+  // Wind
+  if (windSpeed >= 40) {
+    factors.push({
+      type: 'wind',
+      severity: 'severe',
+      description: `Dangerous winds: ${Math.round(windSpeed)} mph`,
+      threshold: 'Wind ≥ 40 mph',
+    });
+  } else if (windSpeed >= 30) {
+    factors.push({
+      type: 'wind',
+      severity: 'high',
+      description: `High winds: ${Math.round(windSpeed)} mph`,
+      threshold: 'Wind ≥ 30 mph',
+    });
+  } else if (windSpeed >= 20) {
+    factors.push({
+      type: 'wind',
+      severity: 'moderate',
+      description: `Windy conditions: ${Math.round(windSpeed)} mph`,
+      threshold: 'Wind ≥ 20 mph',
+    });
+  }
+
+  const highSeverityCount = factors.filter(f => f.severity === 'severe' || f.severity === 'high').length;
+  const riskLevel = calculateRiskLevel(highSeverityCount > 0 ? highSeverityCount + 1 : factors.length);
+
+  return { riskLevel, factors };
+}
+
+/**
+ * Get recommended actions based on risk factors
+ */
+function getRecommendedActions(factors: WeatherRiskFactor[], trades: string[]): string[] {
+  const actions: string[] = [];
+
+  const hasSevereRisk = factors.some(f => f.severity === 'severe');
+  const hasHighRisk = factors.some(f => f.severity === 'high');
+  const hasWindRisk = factors.some(f => f.type === 'wind');
+  const hasPrecipRisk = factors.some(f => f.type === 'precipitation');
+  const hasColdRisk = factors.some(f => f.type === 'cold');
+  const hasHeatRisk = factors.some(f => f.type === 'heat');
+
+  if (hasSevereRisk) {
+    actions.push('Consider postponing outdoor work');
+    actions.push('Monitor weather updates closely');
+  }
+
+  if (hasWindRisk) {
+    actions.push('Secure loose materials and equipment');
+    if (trades.some(t => ['roofing', 'framing', 'siding'].includes(t.toLowerCase()))) {
+      actions.push('Delay elevated work until wind subsides');
+    }
+  }
+
+  if (hasPrecipRisk) {
+    actions.push('Prepare tarps and covers for exposed materials');
+    if (trades.some(t => ['concrete', 'painting', 'masonry'].includes(t.toLowerCase()))) {
+      actions.push('Reschedule weather-sensitive finishing work');
+    }
+  }
+
+  if (hasColdRisk) {
+    actions.push('Ensure workers have cold weather gear');
+    if (trades.some(t => ['concrete', 'masonry'].includes(t.toLowerCase()))) {
+      actions.push('Use cold weather concrete additives or delay pour');
+    }
+    if (trades.some(t => ['plumbing'].includes(t.toLowerCase()))) {
+      actions.push('Protect exposed pipes from freezing');
+    }
+  }
+
+  if (hasHeatRisk) {
+    actions.push('Schedule frequent water and shade breaks');
+    actions.push('Move heavy work to early morning hours');
+    if (hasHighRisk) {
+      actions.push('Monitor workers for heat exhaustion symptoms');
+    }
+  }
+
+  return actions;
+}
+
+/**
+ * Estimate delay hours based on risk level
+ */
+function estimateDelayHours(riskLevel: WeatherRiskLevel): number {
+  switch (riskLevel) {
+    case 'severe': return 8; // Full day
+    case 'high': return 4;
+    case 'moderate': return 2;
+    case 'low': return 0.5;
+    default: return 0;
+  }
+}
+
+/**
+ * Assess weather risk for a specific project and its active phases
+ */
+export function assessProjectWeatherRisk(
+  project: Pick<Project, 'id' | 'name'>,
+  phases: Pick<Phase, 'id' | 'name' | 'trades'>[],
+  forecast: WeatherForecast
+): WeatherRiskAssessment {
+  // Collect all active trades from phases
+  const allTrades: string[] = [];
+  phases.forEach((phase: Pick<Phase, 'id' | 'name' | 'trades'>) => {
+    if (phase.trades) {
+      allTrades.push(...phase.trades);
+    }
+  });
+  const uniqueTrades = Array.from(new Set(allTrades));
+
+  // Assess risk for each trade
+  const allFactors: WeatherRiskFactor[] = [];
+  const affectedTrades: string[] = [];
+
+  if (uniqueTrades.length > 0) {
+    uniqueTrades.forEach(trade => {
+      const { riskLevel, factors } = assessTradeWeatherRisk(
+        trade,
+        forecast.tempHigh,
+        forecast.precipitation,
+        forecast.windSpeed
+      );
+
+      if (factors.length > 0) {
+        affectedTrades.push(trade);
+        factors.forEach(f => {
+          // Avoid duplicate factors
+          if (!allFactors.some(af => af.type === f.type && af.severity === f.severity)) {
+            allFactors.push(f);
+          }
+        });
+      }
+    });
+  } else {
+    // Use general assessment if no trades specified
+    const { factors } = assessGeneralWeatherRisk(
+      forecast.tempHigh,
+      forecast.precipitation,
+      forecast.windSpeed
+    );
+    allFactors.push(...factors);
+  }
+
+  // Sort factors by severity
+  const severityOrder: Record<WeatherRiskLevel, number> = {
+    severe: 4,
+    high: 3,
+    moderate: 2,
+    low: 1,
+    none: 0,
+  };
+  allFactors.sort((a, b) => severityOrder[b.severity] - severityOrder[a.severity]);
+
+  // Calculate overall risk
+  const highSeverityCount = allFactors.filter(f => f.severity === 'severe' || f.severity === 'high').length;
+  const overallRisk = calculateRiskLevel(highSeverityCount > 0 ? highSeverityCount + 1 : allFactors.length);
+
+  return {
+    projectId: project.id,
+    projectName: project.name,
+    forecastDate: forecast.date,
+    condition: forecast.condition,
+    temperature: forecast.tempHigh,
+    precipitation: forecast.precipitation,
+    windSpeed: forecast.windSpeed,
+    humidity: forecast.humidity,
+    overallRisk,
+    riskFactors: allFactors,
+    affectedTrades,
+    recommendedActions: getRecommendedActions(allFactors, affectedTrades),
+    estimatedDelayHours: estimateDelayHours(overallRisk),
+    shouldPauseWork: overallRisk === 'severe' || overallRisk === 'high',
+  };
+}
+
+/**
+ * Assess weather risk for a specific phase
+ */
+export function assessPhaseWeatherRisk(
+  project: Pick<Project, 'id' | 'name'>,
+  phase: Pick<Phase, 'id' | 'name' | 'trades'>,
+  forecast: WeatherForecast
+): WeatherRiskAssessment {
+  const trades = phase.trades || [];
+  const allFactors: WeatherRiskFactor[] = [];
+  const affectedTrades: string[] = [];
+
+  if (trades.length > 0) {
+    trades.forEach(trade => {
+      const { factors } = assessTradeWeatherRisk(
+        trade,
+        forecast.tempHigh,
+        forecast.precipitation,
+        forecast.windSpeed
+      );
+
+      if (factors.length > 0) {
+        affectedTrades.push(trade);
+        factors.forEach(f => {
+          if (!allFactors.some(af => af.type === f.type && af.severity === f.severity)) {
+            allFactors.push(f);
+          }
+        });
+      }
+    });
+  } else {
+    const { factors } = assessGeneralWeatherRisk(
+      forecast.tempHigh,
+      forecast.precipitation,
+      forecast.windSpeed
+    );
+    allFactors.push(...factors);
+  }
+
+  const severityOrder: Record<WeatherRiskLevel, number> = {
+    severe: 4,
+    high: 3,
+    moderate: 2,
+    low: 1,
+    none: 0,
+  };
+  allFactors.sort((a, b) => severityOrder[b.severity] - severityOrder[a.severity]);
+
+  const highSeverityCount = allFactors.filter(f => f.severity === 'severe' || f.severity === 'high').length;
+  const overallRisk = calculateRiskLevel(highSeverityCount > 0 ? highSeverityCount + 1 : allFactors.length);
+
+  return {
+    projectId: project.id,
+    projectName: project.name,
+    phaseId: phase.id,
+    phaseName: phase.name,
+    forecastDate: forecast.date,
+    condition: forecast.condition,
+    temperature: forecast.tempHigh,
+    precipitation: forecast.precipitation,
+    windSpeed: forecast.windSpeed,
+    humidity: forecast.humidity,
+    overallRisk,
+    riskFactors: allFactors,
+    affectedTrades,
+    recommendedActions: getRecommendedActions(allFactors, affectedTrades),
+    estimatedDelayHours: estimateDelayHours(overallRisk),
+    shouldPauseWork: overallRisk === 'severe' || overallRisk === 'high',
+  };
+}
+
+/**
+ * Create a project weather forecast with risk assessments
+ */
+export function createProjectWeatherForecast(
+  project: Pick<Project, 'id' | 'name' | 'address'>,
+  phases: Pick<Phase, 'id' | 'name' | 'trades'>[],
+  forecasts: WeatherForecast[]
+): ProjectWeatherForecast {
+  // Collect all trades
+  const allTrades: string[] = [];
+  phases.forEach((phase: Pick<Phase, 'id' | 'name' | 'trades'>) => {
+    if (phase.trades) {
+      allTrades.push(...phase.trades);
+    }
+  });
+  const uniqueTrades = Array.from(new Set(allTrades));
+
+  // Process each forecast day
+  const dailyForecasts: DailyWeatherForecast[] = forecasts.map(forecast => {
+    const allFactors: WeatherRiskFactor[] = [];
+
+    if (uniqueTrades.length > 0) {
+      uniqueTrades.forEach((trade: string) => {
+        const { factors } = assessTradeWeatherRisk(
+          trade,
+          forecast.tempHigh,
+          forecast.precipitation,
+          forecast.windSpeed
+        );
+        factors.forEach(f => {
+          if (!allFactors.some(af => af.type === f.type && af.severity === f.severity)) {
+            allFactors.push(f);
+          }
+        });
+      });
+    } else {
+      const { factors } = assessGeneralWeatherRisk(
+        forecast.tempHigh,
+        forecast.precipitation,
+        forecast.windSpeed
+      );
+      allFactors.push(...factors);
+    }
+
+    const highSeverityCount = allFactors.filter(f => f.severity === 'severe' || f.severity === 'high').length;
+    const riskLevel = calculateRiskLevel(highSeverityCount > 0 ? highSeverityCount + 1 : allFactors.length);
+
+    return {
+      date: forecast.date,
+      condition: forecast.condition,
+      highTemp: forecast.tempHigh,
+      lowTemp: forecast.tempLow,
+      precipitation: forecast.precipitation,
+      windSpeed: forecast.windSpeed,
+      windDirection: forecast.windDirection,
+      humidity: forecast.humidity,
+      riskLevel,
+      riskFactors: allFactors,
+    };
+  });
+
+  // Count high risk days
+  const highRiskDays = dailyForecasts.filter(f =>
+    f.riskLevel === 'high' || f.riskLevel === 'severe'
+  ).length;
+
+  // Find next risky day
+  const nextRiskyForecast = dailyForecasts.find(f =>
+    f.riskLevel === 'high' || f.riskLevel === 'severe'
+  );
+
+  // Format address for display
+  const addressString = typeof project.address === 'object' && project.address
+    ? `${project.address.street}, ${project.address.city}, ${project.address.state}`
+    : undefined;
+
+  return {
+    projectId: project.id,
+    projectName: project.name,
+    projectAddress: addressString,
+    forecasts: dailyForecasts,
+    highRiskDays,
+    nextRiskyDay: nextRiskyForecast?.date,
+    fetchedAt: new Date(),
+  };
+}
+
+/**
+ * Get weather risk badge color for UI
+ */
+export function getWeatherRiskColor(level: WeatherRiskLevel): string {
+  switch (level) {
+    case 'severe': return '#7c2d12'; // orange-900
+    case 'high': return '#ef4444'; // red-500
+    case 'moderate': return '#f59e0b'; // amber-500
+    case 'low': return '#22c55e'; // green-500
+    case 'none': return '#10b981'; // emerald-500
+    default: return '#6b7280'; // gray-500
+  }
+}
+
+/**
+ * Get weather risk badge background for UI
+ */
+export function getWeatherRiskBackground(level: WeatherRiskLevel): string {
+  switch (level) {
+    case 'severe': return 'bg-orange-900 text-white';
+    case 'high': return 'bg-red-100 text-red-800';
+    case 'moderate': return 'bg-amber-100 text-amber-800';
+    case 'low': return 'bg-green-100 text-green-800';
+    case 'none': return 'bg-emerald-100 text-emerald-800';
+    default: return 'bg-gray-100 text-gray-800';
+  }
+}
+
+/**
+ * Get weather condition icon name (for Heroicons)
+ */
+export function getWeatherConditionIcon(condition: WeatherCondition): string {
+  switch (condition) {
+    case 'clear': return 'sun';
+    case 'partly_cloudy': return 'cloud';
+    case 'cloudy': return 'cloud';
+    case 'rain': return 'cloud-rain';
+    case 'heavy_rain': return 'cloud-rain';
+    case 'storm': return 'bolt';
+    case 'snow': return 'snow';
+    case 'extreme_heat': return 'fire';
+    case 'extreme_cold': return 'snow';
+    default: return 'cloud';
+  }
 }

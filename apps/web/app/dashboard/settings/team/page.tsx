@@ -16,6 +16,7 @@ import { Card, Button, Badge, toast, EmptyState } from '@/components/ui';
 import { UserProfile, UserRole, UserInvitation } from '@/types';
 import { InviteUserModal } from '@/components/team';
 import { useInvitations } from '@/lib/hooks/useInvitations';
+import { useAuditLogger } from '@/lib/hooks/useAuditLog';
 import {
   UserGroupIcon,
   ShieldCheckIcon,
@@ -117,6 +118,12 @@ export default function TeamSettingsPage() {
     isExpired,
   } = useInvitations();
 
+  const {
+    logRoleChange,
+    logUserInvitation,
+    logUserStatusChange,
+  } = useAuditLogger();
+
   const isOwner = profile?.role === 'OWNER';
   const canManageTeam = profile?.role === 'OWNER' || profile?.role === 'PM';
 
@@ -177,6 +184,9 @@ export default function TeamSettingsPage() {
     if (!canManageTeam) return;
     setSaving(true);
 
+    const member = members.find((m) => m.id === memberId);
+    const previousRole = member?.role;
+
     try {
       await updateDoc(doc(db, 'users', memberId), {
         role: editRole,
@@ -190,6 +200,19 @@ export default function TeamSettingsPage() {
       );
       setEditingId(null);
       toast.success('Role updated');
+
+      // Log the role change
+      if (member && previousRole && previousRole !== editRole) {
+        await logRoleChange({
+          target: {
+            id: member.id,
+            name: member.displayName || 'Unknown',
+            email: member.email || '',
+          },
+          previousRole,
+          newRole: editRole,
+        });
+      }
     } catch (err) {
       console.error('Error updating role:', err);
       toast.error('Failed to update role');
@@ -224,6 +247,16 @@ export default function TeamSettingsPage() {
         )
       );
       toast.success('Team member deactivated');
+
+      // Log the status change
+      await logUserStatusChange(
+        {
+          id: member.id,
+          name: member.displayName || 'Unknown',
+          email: member.email || '',
+        },
+        'deactivated'
+      );
     } catch (err) {
       console.error('Error deactivating member:', err);
       toast.error('Failed to deactivate team member');
@@ -248,6 +281,16 @@ export default function TeamSettingsPage() {
         )
       );
       toast.success('Team member reactivated');
+
+      // Log the status change
+      await logUserStatusChange(
+        {
+          id: member.id,
+          name: member.displayName || 'Unknown',
+          email: member.email || '',
+        },
+        'activated'
+      );
     } catch (err) {
       console.error('Error reactivating member:', err);
       toast.error('Failed to reactivate team member');
@@ -277,6 +320,16 @@ export default function TeamSettingsPage() {
 
       setMembers((prev) => prev.filter((m) => m.id !== member.id));
       toast.success('Team member removed');
+
+      // Log the removal
+      await logUserStatusChange(
+        {
+          id: member.id,
+          name: member.displayName || 'Unknown',
+          email: member.email || '',
+        },
+        'removed'
+      );
     } catch (err) {
       console.error('Error removing member:', err);
       toast.error('Failed to remove team member');
@@ -285,6 +338,10 @@ export default function TeamSettingsPage() {
 
   const handleInvite = async (email: string, role: UserRole, message?: string): Promise<boolean> => {
     const result = await sendInvitation(email, role, message);
+    if (result) {
+      // Log the invitation
+      await logUserInvitation(email, role);
+    }
     return result !== null;
   };
 

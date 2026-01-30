@@ -1,8 +1,8 @@
 # ContractorOS Sprint Status
 
 > **Purpose:** Track current progress and enable seamless session handoffs.
-> **Last Updated:** 2026-01-29 (PM) by Claude Opus 4.5
-> **Current Phase:** Phase 4 - Efficiency & Scale
+> **Last Updated:** 2026-01-30 by Claude Opus 4.5 (Sprint 13: Field Operations)
+> **Current Phase:** Phase 4 - Efficiency & Scale (Platform Hardening Complete)
 
 ---
 
@@ -10,13 +10,13 @@
 
 | Metric | Value |
 |--------|-------|
-| **Current Sprint** | Sprint 9 - Data Architecture & Payroll |
-| **Sprint Status** | IN PROGRESS (9A Complete) |
-| **Completed This Sprint** | Sprint 9A: Client data architecture fix, demo team members persist to Firestore, payroll types added, enhanced daily logs |
-| **Next Up** | Sprint 9B (Full Payroll Module), Sprint 9C (CSV Import System) |
+| **Current Sprint** | Sprint 13 - Field Operations |
+| **Sprint Status** | COMPLETED |
+| **Completed This Sprint** | Time entry fixes, team location tracking, vehicle tracking, weather risk assessment |
+| **Next Up** | Client Self-Scheduling / Integration OAuth |
 | **Blockers** | None |
 | **TypeScript Status** | Passing |
-| **Firestore Rules** | Deployed (all features + timeEntries + dailyLogs + expenses + quoteTemplates) |
+| **Firestore Rules** | Deployed (includes auditLog collection) |
 
 ---
 
@@ -571,6 +571,547 @@ types/index.ts                                          # QuotePdfTemplate types
 
 ---
 
+### Sprint 9B: Full Payroll Module
+**Status:** COMPLETED
+**Duration:** 1 session
+
+**Files Created/Updated:**
+```
+apps/web/lib/payroll/
+├── pay-stub-pdf.tsx            # Pay stub PDF generation with @react-pdf/renderer
+├── payroll-service.ts          # Already exists - payroll CRUD, calculations
+└── tax-calculator.ts           # Already exists - federal/state tax estimation
+
+apps/web/components/payroll/
+├── PayrollRunCard.tsx          # Payroll run summary card (already exists)
+├── PayrollEntryRow.tsx         # Employee entry with hours/earnings/deductions (already exists)
+├── PayrollPreview.tsx          # Full payroll run detail view (already exists)
+├── CreatePayrollModal.tsx      # 3-step wizard to create payroll run (already exists)
+└── index.ts                    # Exports
+
+apps/web/app/dashboard/payroll/page.tsx  # Payroll dashboard (updated with pay stub generation)
+apps/web/app/dashboard/settings/payroll/page.tsx  # Payroll settings (already exists)
+```
+
+**Types (already in types/index.ts):**
+- PayrollRun, PayrollEntry, PayPeriod, PaySchedule
+- PayrollSettings, PayrollAdjustment, TaxCalculation
+- PayStub (for PDF generation)
+- PAYROLL_RUN_STATUSES, PAYROLL_ADJUSTMENT_TYPES, TAX_RATES constants
+
+**Features:**
+- Complete payroll dashboard with summary cards (gross, net, runs, employees)
+- Create payroll run wizard (select pay period, employees, review)
+- Payroll run detail view with employee breakdown
+- Hours breakdown (regular, overtime, double-time, PTO, sick)
+- Tax calculation (federal, state, SS, Medicare estimates)
+- Adjustments (bonuses, reimbursements, deductions)
+- YTD totals tracking
+- Approval workflow (draft → pending_approval → approved → completed)
+- CSV export for external payroll systems
+- PDF pay stub generation per employee
+- Tax disclaimer throughout
+
+**Firestore Rules (already deployed):**
+- `organizations/{orgId}/payrollRuns/{runId}` - admin only
+- `organizations/{orgId}/payrollSettings/{settingId}` - admin only
+
+---
+
+### Sprint 9C: CSV Import System
+**Status:** COMPLETED
+**Duration:** 1 session
+
+**Files Created:**
+```
+apps/web/lib/import/
+├── types.ts                    # ImportJob, ColumnMapping, FieldDefinition, validation types
+├── csv-parser.ts               # CSV parsing with auto-delimiter detection
+├── column-mapper.ts            # Auto-mapping with fuzzy header matching
+├── validators.ts               # Data type validation (email, phone, date, etc.)
+└── import-service.ts           # Firestore import execution, rollback support
+
+apps/web/components/import/
+├── FileUploader.tsx            # Drag & drop file upload
+├── DataPreview.tsx             # Tabular preview with error highlighting
+├── ColumnMapper.tsx            # Column-to-field mapping interface
+├── ValidationReport.tsx        # Error summary with grouped details
+├── ImportProgress.tsx          # Progress bar with result summary
+└── index.ts                    # Exports
+
+apps/web/app/dashboard/settings/import/page.tsx  # Multi-step import wizard
+```
+
+**Types Added to lib/import/types.ts:**
+- ImportStatus, ImportTarget, ColumnDataType, ColumnTransform
+- ColumnMapping, FieldDefinition, ImportValidationError, ParsedRow
+- ImportJob, ImportSummary
+- IMPORT_FIELD_DEFINITIONS (clients, projects, contacts, communication_logs)
+- IMPORT_TARGET_INFO, IMPORT_STATUS_INFO, HEADER_ALIASES (auto-mapping)
+
+**Features:**
+- Multi-step import wizard (select target → upload → map → validate → import)
+- Drag & drop CSV file upload
+- Auto-delimiter detection (comma, semicolon, tab, pipe)
+- Smart column auto-mapping with fuzzy header matching
+- Common header aliases (e.g., "phone number" → phone, "email address" → email)
+- Data type validation (string, email, phone, date, number, currency, boolean, enum)
+- Real-time validation with error/warning severity
+- Preview first 10 rows with error highlighting
+- Import targets: Clients, Projects, Contacts, Communication Logs
+- Client lookup for linking projects/contacts/logs
+- Batch processing (500 records per batch)
+- Progress tracking during import
+- Import job history in Firestore
+- Rollback support (stores created record IDs)
+
+**Import Field Definitions:**
+- Clients: name*, email, phone, company, address, status, source, notes
+- Projects: name*, clientEmail, address, budget, status, dates, description
+- Contacts: name*, email, phone, role, clientEmail, isPrimary, notes
+- Communication Logs: date*, type*, clientEmail, summary*, notes, direction
+
+**Firestore Rules Added:**
+- `organizations/{orgId}/importJobs/{jobId}` - admin only
+
+---
+
+### Sprint 9E: Security Hardening (Phase 1 & 2)
+**Status:** COMPLETED
+**Duration:** 2 sessions
+
+**Summary:** Comprehensive platform security audit and hardening - ensuring ALL Firestore collections have proper org-scoped security rules.
+
+**Phase 1 - Critical Issues Fixed:**
+
+1. **Missing Firestore Rules (CRITICAL):**
+   - `messageChannels` - Had NO security rules, allowing unauthorized access
+   - `toolCheckouts` - Had NO security rules, allowing unauthorized access
+   - Added proper org-scoped rules with appropriate RBAC
+
+2. **Cross-Organization Data Exposure in Hooks (CRITICAL):**
+   - `useReports.ts` - Fixed 3 instances of root-level `timeEntries` to use `organizations/${orgId}/timeEntries`
+   - `useClients.ts` - Fixed `invoices` collection to use `organizations/${orgId}/invoices`
+   - `usePayments.ts` - Fixed `payments` collection to use `organizations/${orgId}/payments`
+
+**Phase 2 - Comprehensive Rule Hardening:**
+
+Updated ALL root-level collections to enforce `orgId` checking in Firestore rules:
+
+| Collection | Previous Rule | Fixed Rule |
+|------------|--------------|------------|
+| `tasks` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+| `timeEntries` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+| `bids` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+| `invoices` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+| `photos` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+| `issues` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+| `dailyLogs` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+| `scheduleItems` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+| `scheduleAssignments` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+| `availabilityDefaults` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+| `availability` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+| `scopes` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+| `subcontractors` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+| `sub_assignments` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+| `changeOrders` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+| `bidSolicitations` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+| `sowTemplates` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+| `activityLog` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+| `expenses` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+| `rfis` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+| `punchItems` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+| `change_orders` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+| `estimates` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+| `weeklyTimesheets` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+| `geofences` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+| `financials` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+| `integrations` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+| `submittals` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+| `selections` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+| `beforeAfterPairs` | `isAuthenticated()` | `resource.data.orgId == getUserProfile().orgId` |
+
+**New Collections Added (were missing entirely):**
+- `safetyInspections` - org-scoped read/write
+- `safetyIncidents` - org-scoped read/write
+- `toolboxTalks` - org-scoped read/write
+- `messages` (root-level) - org-scoped read/write
+
+**Phase 3 - Additional Missing Rules:**
+
+Added rules for collections that were completely missing from firestore.rules:
+
+| Collection | Description | Fixed |
+|------------|-------------|-------|
+| `tools` | Equipment inventory tracking | ✅ Added org-scoped rules |
+| `leads` | Sales pipeline management | ✅ Added org-scoped rules |
+| `serviceTickets` | Maintenance/support requests | ✅ Added org-scoped rules |
+| `subAssignments` | Subcontractor assignments (camelCase version) | ✅ Added org-scoped rules |
+
+**Hook Fixes:**
+- `useGeofences.ts` - Fixed `createGeofence` to automatically include `orgId` (was missing)
+
+**Phase 4 - API Route Security:**
+
+Added authentication to all sensitive API routes:
+
+| File | Changes |
+|------|---------|
+| `lib/api/auth.ts` | NEW - Authentication helper with `verifyAuth()`, `verifyOrgAccess()`, `verifyAdminAccess()` |
+| `api/payments/route.ts` | Added auth verification for POST and GET |
+| `api/payments/[id]/refund/route.ts` | Added auth + admin verification |
+| `api/sms/route.ts` | Added auth verification for POST and GET |
+
+**API Security Features:**
+- Token-based authentication via Firebase Admin SDK
+- Org-scoping: Users can only access data from their organization
+- Role-based access: Admin endpoints check for OWNER/PM role
+- Proper error responses (401 for auth failures, 403 for access denied)
+
+**Webhook Security:**
+- ✅ Stripe webhook: Already uses signature verification
+- ⚠️ Twilio webhook: Missing signature verification (TODO)
+- ✅ Payment link routes: Intentionally public (token-based access for clients)
+
+**Security Status:**
+- ✅ ALL root-level collections now enforce org-scoping
+- ✅ All hooks use proper collection paths or have rule-level protection
+- ✅ All write operations include orgId
+- ✅ All sensitive API routes now require authentication
+- ✅ TypeScript passing
+- ✅ Firestore rules deployed and active (3 deployments total)
+
+---
+
+### Sprint 11: RBAC System
+**Status:** COMPLETED
+**Duration:** 1 session (January 30, 2026)
+
+**Files Created:**
+```
+apps/web/components/auth/
+├── PermissionGuard.tsx             # UI element protection based on permissions
+├── RouteGuard.tsx                  # Route protection with access denied page
+└── index.ts                        # Exports
+
+apps/web/lib/audit.ts               # Audit logging service for security events
+apps/web/lib/hooks/useAuditLog.ts   # Hook for audit log read + logging helpers
+
+apps/web/app/dashboard/settings/roles/page.tsx  # Roles & Permissions page
+```
+
+**Files Updated:**
+```
+apps/web/app/dashboard/settings/team/page.tsx   # Added audit logging for role/user changes
+apps/web/app/dashboard/settings/layout.tsx      # Added RouteGuard + Team dropdown with Roles link
+firestore.rules                                  # Added auditLog collection rules
+```
+
+**Components Created:**
+- `PermissionGuard` - Conditionally renders children based on permissions (single, all, any)
+- `RouteGuard` - Protects routes with access denied page
+- `AdminRouteGuard`, `OwnerOnlyRouteGuard`, `FinanceRouteGuard`, `SettingsRouteGuard` - Pre-configured guards
+- `useCanAccess`, `useCanAccessAll`, `useCanAccessAny` - Permission check hooks
+- `withPermission` - HOC for wrapping components
+
+**Audit Log Features:**
+- 18 audit event types covering security-sensitive actions
+- Role changes, user management, impersonation, data exports
+- Severity levels: info, warning, critical
+- Immutable logs (no update/delete allowed)
+- Admin-only read access
+
+**Roles & Permissions Page Features:**
+- Permission matrix view showing all 41 permissions across 6 roles
+- Collapsible permission categories (9 categories)
+- Role summary cards with permission counts
+- Audit log tab showing recent security events
+- Visual indicators for admin roles
+
+**Firestore Rules Added:**
+- `auditLog/{logId}` - Admin-only read, authenticated create, immutable
+
+---
+
+### Sprint 12: Reporting Dashboards
+**Status:** COMPLETED
+**Duration:** 1 session (January 30, 2026)
+
+**Files Created:**
+```
+apps/web/components/charts/
+├── types.ts                        # ChartConfig, DEFAULT_COLORS, CHART_DEFAULTS
+├── ChartTooltip.tsx               # Reusable tooltip component
+├── ChartLegend.tsx                # Reusable legend component
+├── AreaChartCard.tsx              # Area chart with card wrapper
+├── BarChartCard.tsx               # Bar chart with horizontal/stacked options
+├── PieChartCard.tsx               # Pie/donut chart with labels
+├── LineChartCard.tsx              # Line chart with dots and curves
+└── index.ts                       # Exports
+
+apps/web/app/dashboard/reports/
+├── layout.tsx                     # Tab navigation (Overview, Financial, Operational, Detailed)
+├── page.tsx                       # Overview dashboard with KPIs and charts
+├── financial/page.tsx             # Financial analytics (expenses, revenue, profitability)
+├── operational/page.tsx           # Operational metrics (timelines, tasks, hours)
+└── detailed/page.tsx              # Legacy detailed reports (moved from original page)
+```
+
+**Files Updated:**
+```
+apps/web/lib/hooks/useReports.ts   # Enhanced with dashboard hooks:
+                                   # - useDashboardReports (KPIs, project status, revenue trends)
+                                   # - useFinancialReports (expenses, invoices, profitability)
+                                   # - useOperationalReports (timelines, tasks, hours)
+```
+
+**New Libraries:**
+- `recharts` - React charting library for data visualization
+
+**Dashboard Features:**
+
+**Overview Tab:**
+- 8 KPI cards (Active Projects, Revenue, Outstanding Invoices, Hours, Expenses, etc.)
+- Revenue vs Expenses area chart (6 months)
+- Projects by Status pie chart
+- Revenue Trend bar chart
+- Team Performance bar chart (hours logged)
+- Team Productivity table with efficiency metrics
+
+**Financial Tab:**
+- 6 Financial KPI cards (Revenue, Expenses, Gross Profit, Margin, Budget, Cash Flow)
+- Expenses by Category pie chart
+- Invoice Aging bar chart
+- Project Profitability table with variance and budget progress bars
+- Invoice Aging Summary grid
+
+**Operational Tab:**
+- 6 Operational KPI cards (Avg Duration, On-Time Rate, Subs, Change Orders, etc.)
+- Tasks by Status pie chart
+- Hours by Project bar chart
+- Active Project Timelines visualization
+- Task Status Breakdown grid
+
+**Detailed Reports Tab:**
+- Original reports functionality preserved (Labor Costs, P&L, Productivity, Payroll)
+- Date range filtering
+- CSV export
+
+**TypeScript Status:** Passing
+
+---
+
+### Sprint 13: Field Operations
+**Status:** COMPLETED
+**Duration:** 1 session (January 30, 2026)
+
+**Focus:** Fix time clock issues, team location tracking, vehicle tracking, weather risk assessment
+
+**Files Created:**
+```
+apps/web/lib/hooks/useTeamLocations.ts    # Team location + vehicle tracking hooks
+apps/web/lib/hooks/useWeatherRisk.ts      # Weather risk assessment hooks
+
+apps/web/components/tracking/
+├── TeamMapView.tsx                       # Team locations display component
+└── index.ts                              # Exports
+
+apps/web/components/weather/
+├── WeatherRiskBadge.tsx                  # Risk level badge component
+├── WeatherForecastCard.tsx               # Daily forecast card
+├── ProjectWeatherWidget.tsx              # Project weather widget
+├── PhaseWeatherRisk.tsx                  # Phase-specific risk display
+└── index.ts                              # Exports
+```
+
+**Files Updated:**
+```
+apps/web/app/field/page.tsx               # Fixed collection paths to org-scoped
+apps/web/lib/weather-service.ts           # Enhanced with project/phase risk assessment:
+                                          # - assessTradeWeatherRisk()
+                                          # - assessProjectWeatherRisk()
+                                          # - assessPhaseWeatherRisk()
+                                          # - createProjectWeatherForecast()
+                                          # - Trade-specific thresholds
+apps/web/types/index.ts                   # Added location tracking + weather risk types
+```
+
+**Types Added to `types/index.ts`:**
+- TeamMemberLocation (GPS tracking, status, vehicle assignment)
+- VehicleLocation (position, speed, heading, status)
+- Vehicle (with type, license plate, GPS tracker status)
+- LocationHistory (position history tracking)
+- WeatherRiskLevel, WeatherRiskAssessment, WeatherRiskFactor
+- DailyWeatherForecast, ProjectWeatherForecast
+- VEHICLE_TYPES, LOCATION_STATUS_LABELS constants
+- TRADE_WEATHER_THRESHOLDS (roofing, concrete, painting, etc.)
+- WEATHER_RISK_LEVELS constant
+- Phase alias for ProjectPhase
+
+**Time Entry Fix:**
+- Fixed field/page.tsx to use org-scoped `organizations/${orgId}/timeEntries`
+- Was using top-level `timeEntries` causing cross-org data exposure
+
+**Team Location Tracking Features:**
+- useTeamLocations hook with real-time subscription
+- useVehicles hook for vehicle fleet management
+- useLocationTracking hook for continuous GPS updates
+- Location history tracking
+- Active/idle/offline status detection
+- Vehicle assignment to team members
+
+**Weather Risk Assessment Features:**
+- Trade-specific weather thresholds (10 trades defined)
+- Risk levels: none, low, moderate, high, severe
+- Risk factors: temperature, precipitation, wind, humidity, storm, snow, heat, cold
+- Recommended actions based on risk factors
+- Estimated delay hours calculation
+- Should-pause-work flag for severe conditions
+- Project and phase-level risk assessment
+- 5-day forecast with daily risk levels
+
+**Component Features:**
+- TeamMapView: Team/vehicle list with status indicators
+- WeatherRiskBadge: Color-coded risk level display
+- WeatherForecastCard: Compact/full forecast display
+- ProjectWeatherWidget: Full weather widget for project pages
+- PhaseWeatherRisk: Phase-specific risk with recommendations
+
+**TypeScript Status:** Passing
+
+---
+
+### Sprint 10: Core Feature Completion
+**Status:** COMPLETED
+**Duration:** 1 session
+
+#### Warranty Tracking
+**Status:** COMPLETED
+
+**Files Created:**
+```
+apps/web/lib/hooks/useWarranties.ts      # Full CRUD + claims + stats
+apps/web/app/dashboard/warranties/page.tsx  # Warranties dashboard
+apps/web/components/warranties/
+├── AddWarrantyModal.tsx                 # Add warranty form
+├── EditWarrantyModal.tsx                # Edit warranty form
+├── WarrantyClaimsModal.tsx              # Manage warranty claims
+└── index.ts                             # Exports
+```
+
+**Types Added to `types/index.ts`:**
+- WarrantyStatus: 'active' | 'expiring_soon' | 'expired' | 'claimed'
+- WarrantyItem (with category, projectName, warrantyNumber, contactPhone, contactEmail, notes)
+- WarrantyClaim (with referenceNumber)
+
+**Features:**
+- Warranty list with search and status filter
+- Stats dashboard (active, expiring soon, expired, claims)
+- Add/Edit warranty with full form validation
+- Claims management (file claim, resolve claim)
+- Project association
+- Document URL support
+- Contact information storage
+
+**Firestore Rules Added:**
+- `organizations/{orgId}/warranties/{warrantyId}` - org-scoped read/write
+
+---
+
+#### Permit Tracking
+**Status:** COMPLETED
+
+**Files Created:**
+```
+apps/web/lib/hooks/usePermits.ts         # Full CRUD + inspections + stats
+apps/web/app/dashboard/permits/page.tsx  # Permits dashboard
+apps/web/components/permits/
+├── AddPermitModal.tsx                   # Add permit form
+├── EditPermitModal.tsx                  # Edit permit form
+├── PermitInspectionsModal.tsx           # Manage inspections
+└── index.ts                             # Exports
+```
+
+**Types Added to `types/index.ts`:**
+- PermitStatus: 'draft' | 'submitted' | 'under_review' | 'approved' | 'denied' | 'expired' | 'closed'
+- PermitType: 'building' | 'electrical' | 'plumbing' | 'mechanical' | 'demolition' | 'grading' | 'fence' | 'sign' | 'other'
+- Permit (full permit tracking with fees, inspections, contacts)
+- PermitInspection (with status, notes, inspector)
+
+**Features:**
+- Permit list with search and type/status filters
+- Stats dashboard (submitted, under review, approved, denied)
+- Add/Edit permit with full form validation
+- Inspection scheduling and tracking
+- Fee tracking with payment dates
+- Project association
+- Document URL support
+- Jurisdiction tracking
+
+**Firestore Rules Added:**
+- `organizations/{orgId}/permits/{permitId}` - org-scoped read/write
+
+---
+
+#### Leads Enhancement
+**Status:** COMPLETED
+
+**Files Created:**
+```
+apps/web/components/leads/
+├── AddLeadModal.tsx                     # Add lead form with validation
+└── index.ts                             # Exports
+```
+
+**Files Updated:**
+- `apps/web/app/dashboard/leads/page.tsx` - Connected Add Lead button to modal
+
+**Features:**
+- Add lead modal with full form validation
+- Fields: name, email, phone, company, source, status, estimated value, notes
+- Lead source tracking (referral, website, google, social media, etc.)
+- Pipeline status management
+
+---
+
+### Sprint 9 - Core Functionality Verification (January 30, 2026)
+
+**Discovery:** Sprint 9D Crew Scheduling was already implemented with:
+- `useScheduleEvents` - Full CRUD for schedule events with conflict detection
+- `useCrewAvailability` - Crew availability management
+- `useTimeOffRequests` - Time-off request workflow with submit/approve/deny
+- `CrewAvailabilityPanel` - UI for managing availability and time-off requests
+- `ConflictAlert` - Conflict detection and display
+
+**Also Verified Already Complete:**
+- ✅ UX-018: Form Validation Feedback (FormField.tsx with inline errors)
+- ✅ UX-019: Required Field Indicators (red asterisks in FormField.tsx)
+- ✅ RF-001/002/003: Toast, FormField, BaseModal components
+
+**Added Route-Level Error Boundaries:**
+
+| File | Purpose |
+|------|---------|
+| `app/error.tsx` | Global error boundary with try again + go home |
+| `app/not-found.tsx` | 404 page with navigation suggestions |
+| `app/loading.tsx` | Global loading spinner |
+| `app/dashboard/error.tsx` | Dashboard-specific error handling |
+| `app/dashboard/loading.tsx` | Dashboard skeleton loading state |
+| `app/client/error.tsx` | Client portal error page |
+| `app/field/error.tsx` | Field portal error (dark theme) |
+| `app/sub/error.tsx` | Subcontractor portal error page |
+
+**Also Verified Already Complete:**
+- ✅ UX-012: Tags Feature - `TagInput.tsx` has autocomplete, colors, max tags, suggestions
+- ✅ FEAT-009: SOW Template Management - Full CRUD with duplicate, item ordering, phases
+
+**Remaining Core Functionality Items:**
+- RF-004: AuthProvider Architecture refactoring
+- AUDIT-018: Integration OAuth flows (partial - UI done, need actual OAuth)
+- Twilio webhook signature verification (security TODO)
+
+---
+
 ### Recommended Next Sprint: Remaining Audit Items
 **Sprint 7 - Final Audit Fixes (P2) - COMPLETED**
 1. ~~AUDIT-014: Material Categories (2 SP) - P2~~ ✅ Done
@@ -746,8 +1287,8 @@ apps/web/lib/weather-service.ts
 
 ### For Next Session
 1. **TypeScript is passing** - run `npx tsc --noEmit` to verify
-2. **Sprint 9A completed:** Client data architecture, demo team members, payroll types, enhanced daily logs
-3. **See `docs/SPRINT_9_PLAN.md`** for Sprint 9B-9D roadmap
+2. **Sprint 9A, 9B, 9C completed:** Payroll module + CSV Import System
+3. **See `docs/SPRINT_9_PLAN.md`** for Sprint 9D (Crew Scheduling Enhancement)
 4. **ALWAYS deploy Firebase before Docker build** - see workflow below
 
 ### Build & Deploy Workflow (CRITICAL)
@@ -768,11 +1309,16 @@ docker ps
 - Silent error handling in some places
 - Invoice pagination implemented; other lists still need pagination
 
-### Recent Decisions
-- Renamed `EstimateLineItem` to `BuilderLineItem` to avoid conflict with existing type
-- Renamed `EstimateTemplateItem` to `BuilderTemplateItem` for consistency
-- Line items use materialCost + laborCost + markup = unitPrice formula
-- Price history tracked for audit purposes
+### Recent Decisions (Sprint 9B & 9C)
+- PayStub PDF generation uses @react-pdf/renderer with Inter font
+- Pay stub includes current period earnings/deductions AND YTD totals
+- Tax calculations are estimates only - disclaimers shown throughout
+- Payroll runs have approval workflow: draft → pending_approval → approved → completed
+- CSV export available for integration with external payroll (Gusto, ADP, QuickBooks)
+- CSV import uses fuzzy header matching with HEADER_ALIASES for auto-mapping
+- Import wizard validates data types before import, skips invalid rows
+- Import jobs stored in Firestore for history and potential rollback
+- Batch processing (500 records) prevents Firestore write limits
 
 ---
 

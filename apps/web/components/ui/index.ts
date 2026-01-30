@@ -75,3 +75,29 @@ export {
 } from './Skeleton';
 
 export { default as BuildIndicator } from './BuildIndicator';
+
+// Page layout components
+export { default as PageHeader } from './PageHeader';
+export type { PageHeaderProps, BreadcrumbItem } from './PageHeader';
+
+export { default as StatsGrid } from './StatsGrid';
+export type { StatsGridProps, StatItem } from './StatsGrid';
+
+export { default as FilterBar, useFilterBar } from './FilterBar';
+export type { FilterBarProps, FilterConfig, FilterOption } from './FilterBar';
+
+export { default as FormModal, useFormModal } from './FormModal';
+export type { FormModalProps } from './FormModal';
+
+// Form components
+export { Select as SelectNew } from './Select';
+export type { SelectProps as SelectNewProps, SelectOption } from './Select';
+
+export { default as DatePicker, DateRangePicker } from './DatePicker';
+export type { DatePickerProps, DateRangePickerProps } from './DatePicker';
+
+export { default as TagInput } from './TagInput';
+export type { TagInputProps } from './TagInput';
+
+export { default as Checkbox, CheckboxGroup } from './Checkbox';
+export type { CheckboxProps, CheckboxGroupProps, CheckboxGroupOption } from './Checkbox';

@@ -341,31 +341,57 @@ export default function OrganizationSettingsPage() {
                 </p>
               </div>
 
-              {/* Progress indicator */}
+              {/* Single-line animated progress indicator */}
               {(generatingDemo || resettingDemo) && demoProgress.length > 0 && (
-                <div className="p-3 bg-white border border-gray-200 rounded-lg mb-4 space-y-2">
-                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-                    {resettingDemo ? 'Cleanup Progress' : 'Generation Progress'}
-                  </p>
-                  {demoProgress.map((p, idx) => (
-                    <div key={idx} className="flex items-center gap-2 text-sm">
-                      {p.status === 'completed' ? (
-                        <CheckIcon className="h-4 w-4 text-green-600 flex-shrink-0" />
-                      ) : p.status === 'in_progress' ? (
-                        <div className="h-4 w-4 border-2 border-purple-600 border-t-transparent rounded-full animate-spin flex-shrink-0" />
-                      ) : (
-                        <div className="h-4 w-4 rounded-full border-2 border-gray-300 flex-shrink-0" />
-                      )}
-                      <span className={p.status === 'completed' ? 'text-green-700' : p.status === 'in_progress' ? 'text-purple-700 font-medium' : 'text-gray-500'}>
-                        {p.step}
-                        {p.count !== undefined && (
-                          <span className="text-gray-500 font-normal ml-1">
-                            ({p.count}{p.total ? `/${p.total}` : ''})
+                <div className="p-3 bg-white border border-gray-200 rounded-lg mb-4">
+                  {/* Current step - single line that updates in place */}
+                  {(() => {
+                    const currentStep = demoProgress.filter(p => p.status === 'in_progress')[0] ||
+                                       demoProgress[demoProgress.length - 1];
+                    const completedCount = demoProgress.filter(p => p.status === 'completed').length;
+                    const totalSteps = resettingDemo ? 11 : 10; // Number of total steps
+
+                    return (
+                      <div className="space-y-2">
+                        {/* Progress bar */}
+                        <div className="flex items-center gap-3">
+                          <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full transition-all duration-500 ease-out"
+                              style={{ width: `${Math.min(100, (completedCount / totalSteps) * 100)}%` }}
+                            />
+                          </div>
+                          <span className="text-xs text-gray-500 tabular-nums w-12 text-right">
+                            {completedCount}/{totalSteps}
                           </span>
-                        )}
-                      </span>
-                    </div>
-                  ))}
+                        </div>
+
+                        {/* Current step with animation */}
+                        <div className="flex items-center gap-2 min-h-[24px]">
+                          {currentStep?.status === 'completed' ? (
+                            <CheckIcon className="h-4 w-4 text-green-600 flex-shrink-0 animate-[scale-in_0.2s_ease-out]" />
+                          ) : (
+                            <div className="h-4 w-4 border-2 border-purple-600 border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                          )}
+                          <span
+                            key={currentStep?.step}
+                            className={`text-sm transition-all duration-300 ${
+                              currentStep?.status === 'completed'
+                                ? 'text-green-700'
+                                : 'text-purple-700 font-medium'
+                            }`}
+                          >
+                            {currentStep?.step || 'Starting...'}
+                            {currentStep?.count !== undefined && (
+                              <span className="text-gray-500 font-normal ml-1 tabular-nums">
+                                ({currentStep.count}{currentStep.total ? `/${currentStep.total}` : ''})
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
 

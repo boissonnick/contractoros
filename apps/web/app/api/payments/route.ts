@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { stripe, isStripeConfigured } from '@/lib/payments/stripeClient';
 import { dollarsToCents } from '@/lib/payments/paymentUtils';
 import { adminDb, Timestamp } from '@/lib/firebase/admin';
+import { verifyAuthAndOrg } from '@/lib/api/auth';
 
 export const runtime = 'nodejs';
 
@@ -38,6 +39,13 @@ export async function POST(request: NextRequest) {
         { error: 'Missing required fields' },
         { status: 400 }
       );
+    }
+
+    // Verify authentication and organization access
+    const { user, error: authError } = await verifyAuthAndOrg(request, orgId);
+    if (authError) return authError;
+    if (!user) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
     // Amount should already be in cents from the client
@@ -135,6 +143,13 @@ export async function GET(request: NextRequest) {
         { error: 'Organization ID is required' },
         { status: 400 }
       );
+    }
+
+    // Verify authentication and organization access
+    const { user, error: authError } = await verifyAuthAndOrg(request, orgId);
+    if (authError) return authError;
+    if (!user) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
     let query = adminDb

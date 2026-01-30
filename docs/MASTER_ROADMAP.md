@@ -434,28 +434,51 @@ apps/web/lib/integrations/stripe-connect.ts (create)
 
 | ID | Issue | Priority | Size | Status |
 |----|-------|----------|------|--------|
-| AUDIT-001 | Photos Firebase Permissions | P0 | 3 SP | Pending |
-| AUDIT-002 | Schedule Firebase Permissions | P0 | 3 SP | Pending |
-| AUDIT-003 | SMS Firebase Permissions | P0 | 3 SP | Pending |
+| AUDIT-001 | Photos Firebase Permissions | P0 | 3 SP | ✅ Done |
+| AUDIT-002 | Schedule Firebase Permissions | P0 | 3 SP | ✅ Done |
+| AUDIT-003 | SMS Firebase Permissions | P0 | 3 SP | ✅ Done |
 | AUDIT-004 | Integrations Page Loading | P0 | 2 SP | ✅ Done |
-| AUDIT-005 | Cannot Uncancel Projects | P0 | 2 SP | Pending |
+| AUDIT-005 | Cannot Uncancel Projects | P0 | 2 SP | ✅ Done |
 | AUDIT-006 | Client Module Missing | P1 | 3 SP | ✅ Done |
-| AUDIT-007 | Budget Calculation Issues | P1 | 5 SP | Pending |
-| AUDIT-008 | Dashboard Empty States | P1 | 3 SP | Pending |
-| AUDIT-009 | Dashboard Data Overflow | P1 | 3 SP | Pending |
-| AUDIT-010 | Invoice List Performance | P1 | 2 SP | Pending |
-| AUDIT-011 | Project Tabs Order | P2 | 2 SP | Pending |
-| AUDIT-012 | Calendar Vertical Space | P2 | 3 SP | Pending |
-| AUDIT-013 | SMS Use Case Clarity | P2 | 3 SP | Pending |
-| AUDIT-014 | Material Categories | P2 | 2 SP | Pending |
-| AUDIT-015 | Line Item Search | P2 | 5 SP | Pending |
-| AUDIT-016 | Owner/Admin Controls | P2 | 5 SP | Pending |
-| AUDIT-017 | Template Management | P2 | 3 SP | Pending |
-| AUDIT-018 | Integration OAuth | P2 | 5 SP | Partial |
+| AUDIT-007 | Budget Calculation Issues | P1 | 5 SP | ✅ Done |
+| AUDIT-008 | Dashboard Empty States | P1 | 3 SP | ✅ Done |
+| AUDIT-009 | Dashboard Data Overflow | P1 | 3 SP | ✅ Done |
+| AUDIT-010 | Invoice List Performance | P1 | 2 SP | ✅ Done |
+| AUDIT-011 | Project Tabs Order | P2 | 2 SP | ✅ Done |
+| AUDIT-012 | Calendar Vertical Space | P2 | 3 SP | ✅ Done |
+| AUDIT-013 | SMS Use Case Clarity | P2 | 3 SP | ✅ Done |
+| AUDIT-014 | Material Categories | P2 | 2 SP | ✅ Done |
+| AUDIT-015 | Line Item Search | P2 | 5 SP | ✅ Done |
+| AUDIT-016 | Owner/Admin Controls | P2 | 5 SP | ✅ Done |
+| AUDIT-017 | Template Management | P2 | 3 SP | ✅ Done |
+| AUDIT-018 | Integration OAuth | P2 | 5 SP | Partial (UI done) |
 
 **Total Story Points:** 57
-**Completed:** 8 SP (3 items)
-**Remaining:** 49 SP (15 items)
+**Completed:** 52 SP (17 items)
+**Remaining:** 5 SP (OAuth integration partial)
+
+---
+
+### Sprint 9E: Security Hardening (COMPLETED January 30, 2026)
+
+**Summary:** Comprehensive platform security audit and hardening across 4 phases.
+
+**Phase 1-2: Firestore Rules Hardening**
+- Fixed 30+ root-level collections to enforce org-scoping
+- Added missing rules for: messageChannels, toolCheckouts, safetyInspections, safetyIncidents, toolboxTalks, messages, tools, leads, serviceTickets, subAssignments
+
+**Phase 3: Hook Fixes**
+- Fixed useReports.ts, useClients.ts, usePayments.ts, useGeofences.ts for proper org-scoping
+
+**Phase 4: API Route Security**
+- Created lib/api/auth.ts authentication helper
+- Added authentication to /api/payments (POST/GET), /api/payments/[id]/refund (POST), /api/sms (POST/GET)
+
+**Security Status:**
+- ✅ ALL root-level Firestore collections enforce org-scoping
+- ✅ All hooks use proper collection paths
+- ✅ All sensitive API routes require authentication
+- ⚠️ TODO: Twilio SMS webhook signature verification
 
 ---
 
@@ -1523,99 +1546,109 @@ apps/web/components/payments/
 
 | ID | Title | Priority | Size | Status |
 |----|-------|----------|------|--------|
-| AUDIT-001 | Photos Firebase Permissions | P0 | S | Pending |
-| AUDIT-002 | Schedule Firebase Permissions | P0 | S | Pending |
-| AUDIT-003 | SMS Firebase Permissions | P0 | S | Pending |
-| AUDIT-004 | Integrations Page Loading | P0 | S | Done |
-| AUDIT-005 | Cannot Uncancel Projects | P0 | S | Pending |
-| AUDIT-006 | Client Module Missing | P1 | S | Done |
-| AUDIT-007 | Budget Calculation Issues | P1 | M | Pending |
-| AUDIT-008 | Dashboard Empty States | P1 | S | Pending |
-| AUDIT-009 | Dashboard Data Overflow | P1 | S | Pending |
-| AUDIT-010 | Invoice List Performance | P1 | S | Pending |
-| AUDIT-011 | Project Tabs Order | P2 | S | Pending |
-| AUDIT-012 | Calendar Vertical Space | P2 | S | Pending |
-| AUDIT-013 | SMS Use Case Clarity | P2 | S | Pending |
-| AUDIT-014 | Material Categories | P2 | S | Pending |
-| AUDIT-015 | Line Item Search | P2 | M | Pending |
-| AUDIT-016 | Owner/Admin Controls | P2 | M | Pending |
-| AUDIT-017 | Template Management | P2 | S | Pending |
+| AUDIT-001 | Photos Firebase Permissions | P0 | S | ✅ Done |
+| AUDIT-002 | Schedule Firebase Permissions | P0 | S | ✅ Done |
+| AUDIT-003 | SMS Firebase Permissions | P0 | S | ✅ Done |
+| AUDIT-004 | Integrations Page Loading | P0 | S | ✅ Done |
+| AUDIT-005 | Cannot Uncancel Projects | P0 | S | ✅ Done |
+| AUDIT-006 | Client Module Missing | P1 | S | ✅ Done |
+| AUDIT-007 | Budget Calculation Issues | P1 | M | ✅ Done |
+| AUDIT-008 | Dashboard Empty States | P1 | S | ✅ Done |
+| AUDIT-009 | Dashboard Data Overflow | P1 | S | ✅ Done |
+| AUDIT-010 | Invoice List Performance | P1 | S | ✅ Done |
+| AUDIT-011 | Project Tabs Order | P2 | S | ✅ Done |
+| AUDIT-012 | Calendar Vertical Space | P2 | S | ✅ Done |
+| AUDIT-013 | SMS Use Case Clarity | P2 | S | ✅ Done |
+| AUDIT-014 | Material Categories | P2 | S | ✅ Done |
+| AUDIT-015 | Line Item Search | P2 | M | ✅ Done |
+| AUDIT-016 | Owner/Admin Controls | P2 | M | ✅ Done |
+| AUDIT-017 | Template Management | P2 | S | ✅ Done |
 | AUDIT-018 | Integration OAuth | P2 | M | Partial |
 
 ### Bug Fixes (from 1.28.bugfixes.pdf)
 
-| ID | Title | Priority | Size | Phase |
-|----|-------|----------|------|-------|
-| BUG-001 | Phase Dropdown Missing | P1 | S | 1 |
-| BUG-002 | Modal Close Button Offset | P2 | QW | 1 |
-| BUG-003 | Modal Scroll Issues | P2 | S | 1 |
-| BUG-004 | Gantt Task Name Overlap | P2 | S | 1 |
-| UX-005 | Task Assignment UX | P2 | S | 1 |
-| UX-006 | Checklist Save Feedback | P2 | QW | 1 |
-| UX-007 | Save Confirmation Modal Close | P1 | S | 1 |
-| BUG-008 | SOW Template Phase Assignment | P1 | S | 1 |
-| FEAT-009 | SOW Template Management | P1 | M | 1 |
-| BUG-011 | Archived Project Duplicate | P2 | S | 1 |
-| UX-012 | Tags Feature Incomplete | P3 | S | 1 |
-| WORKFLOW-013 | SOW Approval Process | P1 | S | 1 |
-| WORKFLOW-014 | SOW vs Quote Relationship | P1 | S | 1 |
-| BUG-015 | Quote Import Phase Grouping | P2 | S | 1 |
-| FEAT-016 | SOW Version Viewing | P1 | S | 1 |
-| UX-017 | Subcontractor Modal Scroll | P2 | QW | 1 |
-| UX-018 | Form Validation Feedback | P1 | S | 1 |
-| UX-019 | Required Field Indicators | P1 | S | 0 |
-| FEAT-020 | Global Subcontractor System | P0 | L | 1 |
-| BUG-021 | Responsive Design Mobile | P2 | M | 1 |
-| BUG-022 | Table Layout Overflow | P2 | S | 1 |
-| CRITICAL-023 | Brand Colors Not Applied | P1 | S | 1 |
-| BUG-024 | Org Settings Save Behavior | P1 | S | 1 |
-| BUG-025 | Org Settings Layout | P2 | S | 1 |
-| BUG-026 | Integrations Page Broken | P0 | M | 1 |
-| BUG-027 | Tax Rates Page Issues | P1 | S | 1 |
-| BUG-028 | Data Export Page Broken | P1 | S | 1 |
-| BUG-029 | Notifications Page Broken | P1 | S | 1 |
+| ID | Title | Priority | Size | Status |
+|----|-------|----------|------|--------|
+| BUG-001 | Phase Dropdown Missing | P1 | S | ✅ Done |
+| BUG-002 | Modal Close Button Offset | P2 | QW | ✅ Done |
+| BUG-003 | Modal Scroll Issues | P2 | S | ✅ Done |
+| BUG-004 | Gantt Task Name Overlap | P2 | S | ✅ Done |
+| UX-005 | Task Assignment UX | P2 | S | ✅ Done |
+| UX-006 | Checklist Save Feedback | P2 | QW | ✅ Done |
+| UX-007 | Save Confirmation Modal Close | P1 | S | ✅ Done |
+| BUG-008 | SOW Template Phase Assignment | P1 | S | ✅ Done |
+| FEAT-009 | SOW Template Management | P1 | M | ✅ Done |
+| BUG-011 | Archived Project Duplicate | P2 | S | ✅ Done |
+| UX-012 | Tags Feature Incomplete | P3 | S | ✅ Done |
+| WORKFLOW-013 | SOW Approval Process | P1 | S | ✅ Done |
+| WORKFLOW-014 | SOW vs Quote Relationship | P1 | S | ✅ Done |
+| BUG-015 | Quote Import Phase Grouping | P2 | S | ✅ Done |
+| FEAT-016 | SOW Version Viewing | P1 | S | ✅ Done |
+| UX-017 | Subcontractor Modal Scroll | P2 | QW | ✅ Done |
+| UX-018 | Form Validation Feedback | P1 | S | ✅ Done |
+| UX-019 | Required Field Indicators | P1 | S | ✅ Done |
+| FEAT-020 | Global Subcontractor System | P0 | L | ✅ Done |
+| BUG-021 | Responsive Design Mobile | P2 | M | ✅ Done |
+| BUG-022 | Table Layout Overflow | P2 | S | ✅ Done |
+| CRITICAL-023 | Brand Colors Not Applied | P1 | S | ✅ Done |
+| BUG-024 | Org Settings Save Behavior | P1 | S | ✅ Done |
+| BUG-025 | Org Settings Layout | P2 | S | ✅ Done |
+| BUG-026 | Integrations Page Broken | P0 | M | ✅ Done |
+| BUG-027 | Tax Rates Page Issues | P1 | S | ✅ Done |
+| BUG-028 | Data Export Page Broken | P1 | S | ✅ Done |
+| BUG-029 | Notifications Page Broken | P1 | S | ✅ Done |
 
 ### New Features (from Product Roadmap)
 
-| ID | Title | Priority | Size | Phase |
-|----|-------|----------|------|-------|
-| FEAT-L1 | E-Signature System | P0 | L | 2 |
-| FEAT-L2 | SMS/Text Workflows | P0 | L | 2 |
-| FEAT-L3 | Client Portal (No Login) | P1 | L | 2 |
-| FEAT-L4 | Client Management Module | P1 | L | 2 |
-| FEAT-M5 | Photo Documentation | P1 | M | 3 |
-| FEAT-M6 | Payment Processing | P1 | M | 3 |
-| FEAT-M7 | Quick Estimate Builder | P1 | M | 3 |
-| FEAT-M8 | Smart Scheduling | P1 | M | 3 |
-| FEAT-M9 | Material Tracking | P2 | M | 3 |
-| FEAT-M10 | Change Order Enhancement | P1 | M | 3 |
-| FEAT-S11 | Communication Hub | P2 | S | 4 |
-| FEAT-S12 | Document Storage | P2 | S | 4 |
-| FEAT-S13 | Time Tracking | P2 | S | 4 |
-| FEAT-S14 | Quote Templates | P2 | S | 4 |
-| FEAT-S15 | Appointment Booking | P2 | S | 4 |
-| FEAT-S16 | Expense Tracking | P2 | S | 4 |
-| FEAT-S17 | Daily Log/Journal | P2 | S | 4 |
-| FEAT-S18 | Client Feedback | P2 | S | 4 |
-| FEAT-S19 | Lead Capture Forms | P2 | S | 4 |
-| FEAT-S20 | Warranty Tracking | P2 | S | 4 |
-| FEAT-S21 | Weather Integration | P2 | S | 4 |
-| FEAT-S22 | Subcontractor Payments | P2 | S | 4 |
-| FEAT-S23 | Permit Tracking | P2 | S | 4 |
-| FEAT-S24 | Referral Tracking | P2 | S | 4 |
-| FEAT-S25 | Reporting Dashboards | P2 | S | 4 |
+| ID | Title | Priority | Size | Status |
+|----|-------|----------|------|--------|
+| FEAT-L1 | E-Signature System | P0 | L | ✅ Done |
+| FEAT-L2 | SMS/Text Workflows | P0 | L | ✅ Done |
+| FEAT-L3 | Client Portal (No Login) | P1 | L | ✅ Done |
+| FEAT-L4 | Client Management Module | P1 | L | ✅ Done |
+| FEAT-M5 | Photo Documentation | P1 | M | ✅ Done |
+| FEAT-M6 | Payment Processing | P1 | M | ✅ Done |
+| FEAT-M7 | Quick Estimate Builder | P1 | M | ✅ Done |
+| FEAT-M8 | Smart Scheduling | P1 | M | ✅ Done |
+| FEAT-M9 | Material Tracking | P2 | M | ✅ Done |
+| FEAT-M10 | Change Order Enhancement | P1 | M | ✅ Done |
+| FEAT-S11 | Communication Hub | P2 | S | ✅ Done |
+| FEAT-S12 | Document Storage | P2 | S | ✅ Done |
+| FEAT-S13 | Time Tracking | P2 | S | ✅ Done |
+| FEAT-S14 | Quote Templates | P2 | S | ✅ Done |
+| FEAT-S15 | Appointment Booking | P2 | S | Pending |
+| FEAT-S16 | Expense Tracking | P2 | S | ✅ Done |
+| FEAT-S17 | Daily Log/Journal | P2 | S | ✅ Done |
+| FEAT-S18 | Client Feedback | P2 | S | Pending |
+| FEAT-S19 | Lead Capture Forms | P2 | S | Pending |
+| FEAT-S20 | Warranty Tracking | P2 | S | Pending |
+| FEAT-S21 | Weather Integration | P2 | S | ✅ Done |
+| FEAT-S22 | Subcontractor Payments | P2 | S | Pending |
+| FEAT-S23 | Permit Tracking | P2 | S | Pending |
+| FEAT-S24 | Referral Tracking | P2 | S | Pending |
+| FEAT-S25 | Reporting Dashboards | P2 | S | Pending |
+
+### Sprint 9 Completed Features
+
+| ID | Title | Status |
+|----|-------|--------|
+| Sprint 9A | Data Architecture Bug Fixes | ✅ Done |
+| Sprint 9B | Full Payroll Module | ✅ Done |
+| Sprint 9C | CSV Import System | ✅ Done |
+| Sprint 9D | Crew Scheduling Enhancement | ✅ Done (verified Jan 30) |
+| Sprint 9E | Security Hardening | ✅ Done |
 
 ### Refactoring Tasks
 
-| ID | Title | Priority | Size | Phase |
-|----|-------|----------|------|-------|
-| RF-001 | Toast/Notification System | P1 | S | 0 |
-| RF-002 | Form Component Library | P1 | S | 0 |
-| RF-003 | BaseModal Component | P1 | S | 0 |
-| RF-004 | AuthProvider Architecture | P1 | M | 0 |
-| RF-005 | Error Boundary Enhancement | P2 | S | 0 |
-| RF-006 | Firestore Hook Factory | P2 | M | 0 |
-| RF-007 | Type Organization | P3 | S | 0 |
+| ID | Title | Priority | Size | Status |
+|----|-------|----------|------|--------|
+| RF-001 | Toast/Notification System | P1 | S | ✅ Done |
+| RF-002 | Form Component Library | P1 | S | ✅ Done |
+| RF-003 | BaseModal Component | P1 | S | ✅ Done |
+| RF-004 | AuthProvider Architecture | P1 | M | ✅ Done (verified Jan 30) |
+| RF-005 | Error Boundary Enhancement | P2 | S | ✅ Done (added Jan 30) |
+| RF-006 | Firestore Hook Factory | P2 | M | ✅ Done |
+| RF-007 | Type Organization | P3 | S | Pending |
 
 ---
 
@@ -1625,14 +1658,22 @@ apps/web/components/payments/
 
 | File | Tasks | Status |
 |------|-------|--------|
-| `components/ui/Toast.tsx` | RF-001 | Pending |
-| `components/Providers.tsx` | RF-001 | Pending |
-| `components/ui/FormField.tsx` | RF-002, UX-019 | Create |
-| `components/ui/FormError.tsx` | RF-002 | Create |
-| `components/ui/BaseModal.tsx` | RF-003 | Create |
-| `lib/hooks/useModalState.ts` | RF-003 | Create |
-| `lib/auth.tsx` | RF-004 | Pending |
-| `components/ErrorBoundary.tsx` | RF-005 | Pending |
+| `components/ui/Toast.tsx` | RF-001 | ✅ Done |
+| `components/Providers.tsx` | RF-001 | ✅ Done |
+| `components/ui/FormField.tsx` | RF-002, UX-019 | ✅ Done |
+| `components/ui/FormError.tsx` | RF-002 | ✅ Done (in FormField.tsx) |
+| `components/ui/BaseModal.tsx` | RF-003 | ✅ Done |
+| `lib/hooks/useModalState.ts` | RF-003 | ✅ Done (useFormModal) |
+| `lib/auth.tsx` | RF-004 | ✅ Done (verified) |
+| `components/ErrorBoundary.tsx` | RF-005 | ✅ Done |
+| `app/error.tsx` | RF-005 | ✅ Done (added Jan 30) |
+| `app/not-found.tsx` | RF-005 | ✅ Done (added Jan 30) |
+| `app/loading.tsx` | RF-005 | ✅ Done (added Jan 30) |
+| `app/dashboard/error.tsx` | RF-005 | ✅ Done (added Jan 30) |
+| `app/dashboard/loading.tsx` | RF-005 | ✅ Done (added Jan 30) |
+| `app/client/error.tsx` | RF-005 | ✅ Done (added Jan 30) |
+| `app/field/error.tsx` | RF-005 | ✅ Done (added Jan 30) |
+| `app/sub/error.tsx` | RF-005 | ✅ Done (added Jan 30) |
 
 ### Phase 1 Files (Bug Fixes)
 

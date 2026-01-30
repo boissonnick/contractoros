@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { twilio, isTwilioConfigured, getDefaultPhoneNumber, formatToE164 } from '@/lib/sms/twilioClient';
 import { adminDb, Timestamp } from '@/lib/firebase/admin';
 import { renderTemplate } from '@/lib/sms/smsUtils';
+import { verifyAuthAndOrg } from '@/lib/api/auth';
 
 export const runtime = 'nodejs';
 
@@ -42,6 +43,13 @@ export async function POST(request: NextRequest) {
         { error: 'Missing required fields: orgId, to, message' },
         { status: 400 }
       );
+    }
+
+    // Verify authentication and organization access
+    const { user, error: authError } = await verifyAuthAndOrg(request, orgId);
+    if (authError) return authError;
+    if (!user) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
     // Format phone number
@@ -153,6 +161,13 @@ export async function GET(request: NextRequest) {
         { error: 'Organization ID is required' },
         { status: 400 }
       );
+    }
+
+    // Verify authentication and organization access
+    const { user, error: authError } = await verifyAuthAndOrg(request, orgId);
+    if (authError) return authError;
+    if (!user) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
     let query = adminDb

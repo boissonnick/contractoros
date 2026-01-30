@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import { usePayrollConfig } from '@/lib/hooks/usePayrollConfig';
 import { calculatePayroll } from '@/lib/payroll';
-import { PayrollEntry, PayrollConfig } from '@/types';
+import { LegacyPayrollEntry, PayrollConfig } from '@/types';
 import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { cn } from '@/lib/utils';
@@ -33,7 +33,7 @@ const DEFAULT_CONFIG: PayrollConfig = {
 export default function PayrollPreviewReport({ startDate, endDate }: PayrollPreviewReportProps) {
   const { profile } = useAuth();
   const { config, loading: configLoading } = usePayrollConfig();
-  const [entries, setEntries] = useState<PayrollEntry[]>([]);
+  const [entries, setEntries] = useState<LegacyPayrollEntry[]>([]);
   const [totals, setTotals] = useState({ totalRegular: 0, totalOvertime: 0, totalPay: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

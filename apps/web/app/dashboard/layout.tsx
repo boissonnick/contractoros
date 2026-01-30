@@ -22,6 +22,7 @@ import {
   UserGroupIcon,
   PhotoIcon,
   DocumentIcon,
+  CurrencyDollarIcon,
 } from '@heroicons/react/24/outline';
 
 // Full nav items for staff - will be filtered based on permissions
@@ -34,6 +35,7 @@ const staffNavItems: (NavItem & { requiredPermission?: keyof RolePermissions })[
   { label: 'Time Tracking', href: '/dashboard/time', icon: ClockIcon, requiredPermission: 'canClockInOut' },
   { label: 'Daily Logs', href: '/dashboard/logs', icon: DocumentTextIcon },
   { label: 'Finances', href: '/dashboard/finances', icon: BanknotesIcon, requiredPermission: 'canViewAllFinances' },
+  { label: 'Payroll', href: '/dashboard/payroll', icon: CurrencyDollarIcon, requiredPermission: 'canViewAllFinances' },
   { label: 'Messaging', href: '/dashboard/messaging', icon: ChatBubbleLeftRightIcon },
   { label: 'Reports', href: '/dashboard/reports', icon: ClipboardDocumentListIcon, requiredPermission: 'canViewProjectReports' },
   { label: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon, requiredPermission: 'canViewSettings' },

@@ -1,4 +1,4 @@
-import { PayrollEntry, PayrollConfig } from '@/types';
+import { LegacyPayrollEntry, PayrollConfig } from '@/types';
 
 interface TimeData {
   userId: string;
@@ -10,8 +10,8 @@ interface TimeData {
 export function calculatePayroll(
   timeData: TimeData[],
   config: PayrollConfig
-): { entries: PayrollEntry[]; totalRegular: number; totalOvertime: number; totalPay: number } {
-  const entries: PayrollEntry[] = timeData.map(td => {
+): { entries: LegacyPayrollEntry[]; totalRegular: number; totalOvertime: number; totalPay: number } {
+  const entries: LegacyPayrollEntry[] = timeData.map(td => {
     const rate = td.hourlyRate || config.defaultHourlyRate;
     const regularHours = Math.min(td.totalHours, config.overtimeThresholdHours);
     const overtimeHours = Math.max(0, td.totalHours - config.overtimeThresholdHours);

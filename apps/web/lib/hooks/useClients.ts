@@ -2,6 +2,11 @@
  * useClients Hook
  * FEAT-L4: Client Management Module
  * Provides client data management with real-time updates
+ *
+ * REFACTORED: Now uses shared utilities:
+ * - convertTimestamps from lib/firebase/timestamp-converter.ts
+ * - useFirestoreCollection from lib/hooks/useFirestoreCollection.ts
+ * - useFirestoreCrud from lib/hooks/useFirestoreCrud.ts
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
@@ -15,13 +20,14 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
-  getDoc,
   getDocs,
   Timestamp,
-  Unsubscribe,
-  writeBatch,
+  QueryConstraint,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { convertTimestamps, DATE_FIELDS } from '@/lib/firebase/timestamp-converter';
+import { useFirestoreCollection, createConverter } from '@/lib/hooks/useFirestoreCollection';
+import { useFirestoreCrud } from '@/lib/hooks/useFirestoreCrud';
 import {
   Client,
   ClientStatus,
@@ -33,13 +39,21 @@ import {
   Invoice,
 } from '@/types';
 
-// Clients are stored in organization subcollection for proper security isolation
-// Path: organizations/{orgId}/clients/{clientId}
+// Collection paths
 const getClientsCollectionPath = (orgId: string) => `organizations/${orgId}/clients`;
 const COMMUNICATION_LOG_COLLECTION = 'clientCommunicationLogs';
 
+// Date fields for Client entity
+const CLIENT_DATE_FIELDS = ['createdAt', 'updatedAt', 'firstContactDate', 'lastContactDate'] as const;
+
+// Converter for Client documents
+const clientConverter = createConverter<Client>((id, data) => ({
+  id,
+  ...convertTimestamps(data as Record<string, unknown>, CLIENT_DATE_FIELDS),
+} as Client));
+
 // ============================================
-// useClients - Main clients list hook
+// useClients - Main clients list hook (REFACTORED)
 // ============================================
 
 interface UseClientsOptions {
@@ -56,73 +70,47 @@ interface UseClientsReturn {
 }
 
 export function useClients({ orgId, status, search }: UseClientsOptions): UseClientsReturn {
-  const [clients, setClients] = useState<Client[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
-
-  const refresh = useCallback(() => setRefreshKey((k) => k + 1), []);
-
-  useEffect(() => {
-    if (!orgId) {
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    let q = query(
-      collection(db, getClientsCollectionPath(orgId)),
-      orderBy('displayName', 'asc')
-    );
-
+  // Build constraints based on filters
+  const constraints = useMemo(() => {
+    const c: QueryConstraint[] = [orderBy('displayName', 'asc')];
     if (status) {
-      q = query(q, where('status', '==', status));
+      c.unshift(where('status', '==', status));
     }
+    return c;
+  }, [status]);
 
-    const unsubscribe: Unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        let data = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt?.toDate?.() || doc.data().createdAt,
-          updatedAt: doc.data().updatedAt?.toDate?.() || doc.data().updatedAt,
-          firstContactDate: doc.data().firstContactDate?.toDate?.() || doc.data().firstContactDate,
-          lastContactDate: doc.data().lastContactDate?.toDate?.() || doc.data().lastContactDate,
-        })) as Client[];
+  // Use shared collection hook
+  const { items, loading, error, refetch } = useFirestoreCollection<Client>({
+    path: getClientsCollectionPath(orgId),
+    constraints,
+    converter: clientConverter,
+    enabled: !!orgId,
+  });
 
-        // Client-side search filtering
-        if (search) {
-          const searchLower = search.toLowerCase();
-          data = data.filter(
-            (client) =>
-              client.displayName.toLowerCase().includes(searchLower) ||
-              client.email.toLowerCase().includes(searchLower) ||
-              client.phone?.includes(search) ||
-              client.companyName?.toLowerCase().includes(searchLower)
-          );
-        }
+  // Client-side search filtering (keeps existing behavior)
+  const filteredClients = useMemo(() => {
+    if (!search) return items;
 
-        setClients(data);
-        setLoading(false);
-      },
-      (err) => {
-        console.error('Error fetching clients:', err);
-        setError(err as Error);
-        setLoading(false);
-      }
+    const searchLower = search.toLowerCase();
+    return items.filter(
+      (client) =>
+        client.displayName.toLowerCase().includes(searchLower) ||
+        client.email.toLowerCase().includes(searchLower) ||
+        client.phone?.includes(search) ||
+        client.companyName?.toLowerCase().includes(searchLower)
     );
+  }, [items, search]);
 
-    return () => unsubscribe();
-  }, [orgId, status, search, refreshKey]);
-
-  return { clients, loading, error, refresh };
+  return {
+    clients: filteredClients,
+    loading,
+    error,
+    refresh: refetch,
+  };
 }
 
 // ============================================
-// useClient - Single client hook
+// useClient - Single client hook (REFACTORED)
 // ============================================
 
 interface UseClientReturn {
@@ -144,6 +132,12 @@ export function useClient(clientId: string | undefined, orgId: string): UseClien
 
   const refresh = useCallback(() => setRefreshKey((k) => k + 1), []);
 
+  // Use shared CRUD hook for operations
+  const { update, remove } = useFirestoreCrud<Client>(
+    getClientsCollectionPath(orgId),
+    { entityName: 'Client', showToast: false } // We handle toasts manually for better UX
+  );
+
   useEffect(() => {
     if (!clientId || !orgId) {
       setLoading(false);
@@ -162,15 +156,7 @@ export function useClient(clientId: string | undefined, orgId: string): UseClien
           return;
         }
 
-        const data = snapshot.data();
-        setClient({
-          id: snapshot.id,
-          ...data,
-          createdAt: data.createdAt?.toDate?.() || data.createdAt,
-          updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
-          firstContactDate: data.firstContactDate?.toDate?.() || data.firstContactDate,
-          lastContactDate: data.lastContactDate?.toDate?.() || data.lastContactDate,
-        } as Client);
+        setClient(clientConverter(snapshot.id, snapshot.data()));
         setLoading(false);
       },
       (err) => {
@@ -186,19 +172,15 @@ export function useClient(clientId: string | undefined, orgId: string): UseClien
   const updateClient = useCallback(
     async (updates: Partial<Client>) => {
       if (!clientId || !orgId) throw new Error('Client ID and Org ID required');
-
-      await updateDoc(doc(db, getClientsCollectionPath(orgId), clientId), {
-        ...updates,
-        updatedAt: Timestamp.now(),
-      });
+      await update(clientId, updates);
     },
-    [clientId, orgId]
+    [clientId, orgId, update]
   );
 
   const deleteClient = useCallback(async () => {
     if (!clientId || !orgId) throw new Error('Client ID and Org ID required');
-    await deleteDoc(doc(db, getClientsCollectionPath(orgId), clientId));
-  }, [clientId, orgId]);
+    await remove(clientId);
+  }, [clientId, orgId, remove]);
 
   const addNote = useCallback(
     async (note: Omit<ClientNote, 'id' | 'createdAt'>) => {
@@ -243,97 +225,72 @@ export function useClient(clientId: string | undefined, orgId: string): UseClien
 }
 
 // ============================================
-// useClientProjects - Client's projects
+// useClientProjects - Client's projects (REFACTORED)
 // ============================================
 
+const projectConverter = createConverter<Project>((id, data) => ({
+  id,
+  ...convertTimestamps(data as Record<string, unknown>, DATE_FIELDS.project),
+} as Project));
+
 export function useClientProjects(clientId: string | undefined, orgId: string) {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
+  const constraints = useMemo(() => [
+    where('clientId', '==', clientId),
+    where('orgId', '==', orgId),
+    orderBy('createdAt', 'desc'),
+  ], [clientId, orgId]);
 
-  useEffect(() => {
-    if (!clientId || !orgId) {
-      setLoading(false);
-      return;
-    }
-
-    const q = query(
-      collection(db, 'projects'),
-      where('clientId', '==', clientId),
-      where('orgId', '==', orgId),
-      orderBy('createdAt', 'desc')
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate?.(),
-        updatedAt: doc.data().updatedAt?.toDate?.(),
-        startDate: doc.data().startDate?.toDate?.(),
-        estimatedEndDate: doc.data().estimatedEndDate?.toDate?.(),
-        actualEndDate: doc.data().actualEndDate?.toDate?.(),
-      })) as Project[];
-
-      setProjects(data);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [clientId, orgId]);
+  const { items: projects, loading } = useFirestoreCollection<Project>({
+    path: 'projects',
+    constraints,
+    converter: projectConverter,
+    enabled: !!clientId && !!orgId,
+  });
 
   return { projects, loading };
 }
 
 // ============================================
-// useClientCommunicationLog
+// useClientCommunicationLog (REFACTORED)
 // ============================================
 
+const communicationLogConverter = createConverter<ClientCommunicationLog>((id, data) => ({
+  id,
+  ...convertTimestamps(data as Record<string, unknown>, ['createdAt']),
+} as ClientCommunicationLog));
+
 export function useClientCommunicationLog(clientId: string | undefined, orgId: string) {
-  const [logs, setLogs] = useState<ClientCommunicationLog[]>([]);
-  const [loading, setLoading] = useState(true);
+  const constraints = useMemo(() => [
+    where('clientId', '==', clientId),
+    where('orgId', '==', orgId),
+    orderBy('createdAt', 'desc'),
+  ], [clientId, orgId]);
 
-  useEffect(() => {
-    if (!clientId || !orgId) {
-      setLoading(false);
-      return;
-    }
+  const { items: logs, loading } = useFirestoreCollection<ClientCommunicationLog>({
+    path: COMMUNICATION_LOG_COLLECTION,
+    constraints,
+    converter: communicationLogConverter,
+    enabled: !!clientId && !!orgId,
+  });
 
-    const q = query(
-      collection(db, COMMUNICATION_LOG_COLLECTION),
-      where('clientId', '==', clientId),
-      where('orgId', '==', orgId),
-      orderBy('createdAt', 'desc')
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate?.(),
-      })) as ClientCommunicationLog[];
-
-      setLogs(data);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [clientId, orgId]);
+  // Use shared CRUD for adding logs
+  const { create } = useFirestoreCrud<ClientCommunicationLog>(
+    COMMUNICATION_LOG_COLLECTION,
+    { entityName: 'Communication log', showToast: false }
+  );
 
   const addLog = useCallback(
     async (log: Omit<ClientCommunicationLog, 'id' | 'createdAt'>) => {
-      await addDoc(collection(db, COMMUNICATION_LOG_COLLECTION), {
-        ...log,
-        createdAt: Timestamp.now(),
-      });
+      await create(log as Omit<ClientCommunicationLog, 'id' | 'createdAt' | 'updatedAt'>);
     },
-    []
+    [create]
   );
 
   return { logs, loading, addLog };
 }
 
 // ============================================
-// useClientStats - Aggregate stats
+// useClientStats - Aggregate stats (unchanged, already efficient)
 // ============================================
 
 export function useClientStats(orgId: string) {
@@ -372,7 +329,7 @@ export function useClientStats(orgId: string) {
 }
 
 // ============================================
-// Client CRUD Operations
+// Client CRUD Operations (REFACTORED)
 // ============================================
 
 export async function createClient(
@@ -421,11 +378,10 @@ export async function updateClientFinancials(
   const projectsSnap = await getDocs(projectsQuery);
   const projects = projectsSnap.docs.map((d) => d.data());
 
-  // Fetch all invoices for this client
+  // Fetch all invoices for this client (using org-scoped collection)
   const invoicesQuery = query(
-    collection(db, 'invoices'),
-    where('clientId', '==', clientId),
-    where('orgId', '==', orgId)
+    collection(db, `organizations/${orgId}/invoices`),
+    where('clientId', '==', clientId)
   );
   const invoicesSnap = await getDocs(invoicesQuery);
   const invoices = invoicesSnap.docs.map((d) => d.data()) as Invoice[];
@@ -467,7 +423,7 @@ export async function updateClientFinancials(
 }
 
 // ============================================
-// Client Source Helpers
+// Client Source Helpers (unchanged)
 // ============================================
 
 export const CLIENT_SOURCE_LABELS: Record<ClientSource, string> = {
