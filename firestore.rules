@@ -59,17 +59,28 @@ service cloud.firestore {
     }
 
     // Projects collection
+    // BUG #1 FIX: Enhanced client isolation - clients ONLY see their own projects
     match /projects/{projectId} {
-      // Admins can list all projects in their org (queries use where('orgId', '==', ...))
-      // Other users can read projects they are assigned to
-      allow read: if isAuthenticated() && (
-        isAdmin() ||
-        (userProfileExists() && resource.data.orgId == getUserProfile().orgId && (
-          request.auth.uid == resource.data.clientId ||
+      // Read access with role-based filtering:
+      // - Admins (OWNER/PM) can see all org projects
+      // - Employees can see all org projects they're assigned to or all if not restricted
+      // - Contractors can see projects they're assigned to
+      // - Clients can ONLY see projects where they are the clientId or in clientIds
+      allow read: if isAuthenticated() && userProfileExists() && (
+        // Admins see all in their org
+        (isAdmin() && resource.data.orgId == getUserProfile().orgId) ||
+        // Employees/Contractors see projects in their org where they're assigned
+        (getUserProfile().role in ['EMPLOYEE', 'CONTRACTOR', 'SUB'] &&
+         resource.data.orgId == getUserProfile().orgId && (
           request.auth.uid == resource.data.pmId ||
-          (resource.data.clientIds != null && request.auth.uid in resource.data.clientIds) ||
           (resource.data.managerIds != null && request.auth.uid in resource.data.managerIds) ||
           (resource.data.workerIds != null && request.auth.uid in resource.data.workerIds)
+        )) ||
+        // Clients can ONLY see their own projects - critical security fix
+        (getUserProfile().role == 'CLIENT' &&
+         resource.data.orgId == getUserProfile().orgId && (
+          request.auth.uid == resource.data.clientId ||
+          (resource.data.clientIds != null && request.auth.uid in resource.data.clientIds)
         ))
       );
 
@@ -149,6 +160,67 @@ service cloud.firestore {
       // Notification settings subcollection (org-level)
       match /notificationSettings/{settingId} {
         allow read, write: if isAuthenticated() && userProfileExists() && getUserProfile().orgId == orgId;
+      }
+
+      // QuickBooks entity mappings (local ↔ QBO ID mappings)
+      // Admin only - sensitive accounting linkage data
+      match /qboEntityMappings/{mappingId} {
+        allow read: if isAdmin() && getUserProfile().orgId == orgId;
+        allow write: if false; // Admin SDK only (server-side sync)
+      }
+
+      // QuickBooks sync logs (audit trail)
+      // Org members can read, server writes only
+      match /accountingSyncLogs/{logId} {
+        allow read: if isAuthenticated() && userProfileExists() && getUserProfile().orgId == orgId;
+        allow write: if false; // Admin SDK only
+      }
+
+      // QuickBooks accounting connection settings
+      // Admin only - OAuth tokens and connection state
+      match /accountingConnections/{connectionId} {
+        allow read: if isAdmin() && getUserProfile().orgId == orgId;
+        allow write: if false; // Admin SDK only (OAuth flow)
+      }
+
+      // Job Costs collection - individual cost entries per project
+      // Org members can read, admins can write, or users can create from approved sources
+      match /jobCosts/{costId} {
+        allow read: if isAuthenticated() && userProfileExists() && getUserProfile().orgId == orgId;
+
+        // Admins can create/update/delete job costs
+        // Non-admins can create costs from timesheets/expenses (with source tracking)
+        allow create: if isAuthenticated() && userProfileExists() &&
+          getUserProfile().orgId == orgId &&
+          request.resource.data.orgId == orgId && (
+          isAdmin() ||
+          request.resource.data.source in ['timesheet', 'expense']
+        );
+
+        allow update: if isAdmin() && getUserProfile().orgId == orgId;
+        allow delete: if isAdmin() && getUserProfile().orgId == orgId;
+      }
+
+      // Project Profitability collection - aggregated cost/profit data per project
+      // Admins can read, server writes only (calculated/aggregated data)
+      match /projectProfitability/{projectId} {
+        allow read: if isAuthenticated() && userProfileExists() &&
+          getUserProfile().orgId == orgId && (
+          isAdmin() ||
+          getUserProfile().role in ['PM', 'EMPLOYEE']
+        );
+        allow write: if false; // Admin SDK only (calculated by aggregation functions)
+      }
+
+      // Job Cost Alerts - budget/margin warnings
+      // Admins can read and acknowledge, server creates
+      match /jobCostAlerts/{alertId} {
+        allow read: if isAdmin() && getUserProfile().orgId == orgId;
+        // Only allow updating the acknowledgement fields
+        allow update: if isAdmin() && getUserProfile().orgId == orgId &&
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['isAcknowledged', 'acknowledgedBy', 'acknowledgedAt']);
+        allow create, delete: if false; // Admin SDK only
       }
     }
 
@@ -1450,6 +1522,68 @@ service cloud.firestore {
     }
 
     // ==========================================
+    // QuickBooks Integration Collections
+    // ==========================================
+
+    // QuickBooks connections collection (OAuth tokens, realm IDs)
+    // SECURITY: Contains sensitive OAuth refresh tokens - admin only
+    match /quickbooksConnections/{connectionId} {
+      // Only admins can read QuickBooks connections (contains sensitive tokens)
+      allow read: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      // Only admins can create QuickBooks connections (OAuth flow)
+      allow create: if isAuthenticated() && userProfileExists() &&
+        request.resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      // Only admins can update connections (token refresh, disconnect)
+      allow update: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      // Only admins can delete connections (disconnect)
+      allow delete: if isAdmin();
+    }
+
+    // QuickBooks sync logs collection (sync history and errors)
+    match /quickbooksSyncLogs/{logId} {
+      // Org admins can read sync logs
+      allow read: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId &&
+        getUserProfile().role in ['OWNER', 'PM'];
+
+      // System creates sync logs via API routes (authenticated org members)
+      allow create: if isAuthenticated() && userProfileExists() &&
+        request.resource.data.orgId == getUserProfile().orgId;
+
+      // Sync logs are immutable - no updates
+      allow update: if false;
+
+      // Admins can delete old sync logs (cleanup)
+      allow delete: if isAdmin();
+    }
+
+    // QuickBooks entity mappings (COS entity → QBO entity ID mappings)
+    match /quickbooksEntityMappings/{mappingId} {
+      // Org members can read entity mappings
+      allow read: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId;
+
+      // System creates mappings during sync
+      allow create: if isAuthenticated() && userProfileExists() &&
+        request.resource.data.orgId == getUserProfile().orgId;
+
+      // System can update mappings (re-sync scenarios)
+      allow update: if isAuthenticated() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId;
+
+      // Admins can delete mappings (disconnect/reset scenarios)
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
     // Material & Equipment Tracking Collections
     // ==========================================
 
@@ -1929,6 +2063,98 @@ service cloud.firestore {
 
       // Admins can delete voice logs
       allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // AI Intelligence Collections (Public Read - populated by Cloud Functions)
+    // ==========================================
+
+    // Material prices collection - public read, Cloud Functions write
+    match /intelligence_materials/{materialId} {
+      // Any authenticated user can read material prices (public market data)
+      allow read: if isAuthenticated();
+
+      // Only Cloud Functions can write (no direct client writes)
+      allow create, update, delete: if false;
+    }
+
+    // Labor rates collection - public read, Cloud Functions write
+    match /intelligence_labor/{laborId} {
+      // Any authenticated user can read labor rates (public market data)
+      allow read: if isAuthenticated();
+
+      // Only Cloud Functions can write (no direct client writes)
+      allow create, update, delete: if false;
+    }
+
+    // Organization-scoped intelligence settings
+    match /organizations/{orgId}/intelligenceSettings/{settingId} {
+      // Org members can read intelligence settings
+      allow read: if isSameOrg(orgId);
+
+      // Admins can create/update intelligence settings
+      allow create: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+      allow update: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Only owners can delete settings
+      allow delete: if isSameOrg(orgId) && getUserProfile().role == 'OWNER';
+    }
+
+    // Organization-scoped anonymized data contributions
+    match /organizations/{orgId}/priceContributions/{contributionId} {
+      // Org members can read their own contributions
+      allow read: if isSameOrg(orgId);
+
+      // Org members can create contributions (anonymized data sharing)
+      allow create: if isSameOrg(orgId);
+
+      // No updates or deletes (immutable audit trail)
+      allow update, delete: if false;
+    }
+
+    // ==========================================
+    // Organization-Scoped AI Settings Collection
+    // ==========================================
+    match /organizations/{orgId}/settings/ai {
+      // Org members can read AI settings
+      allow read: if isSameOrg(orgId);
+
+      // Admins can create/update AI settings
+      allow create: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+      allow update: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Only owners can delete AI settings
+      allow delete: if isSameOrg(orgId) && getUserProfile().role == 'OWNER';
+    }
+
+    // ==========================================
+    // Organization-Scoped AI Usage Collection
+    // ==========================================
+    match /organizations/{orgId}/aiUsage/{dateKey} {
+      // Org members can read AI usage stats
+      allow read: if isSameOrg(orgId);
+
+      // System writes usage - authenticated org members can create/update
+      // (API routes handle this on behalf of authenticated users)
+      allow create: if isSameOrg(orgId);
+      allow update: if isSameOrg(orgId);
+
+      // Usage records should not be deleted (audit trail)
+      allow delete: if false;
+    }
+
+    // ==========================================
+    // Organization-Scoped AI Security Logs Collection
+    // ==========================================
+    match /organizations/{orgId}/aiSecurityLogs/{logId} {
+      // Only admins can read security logs
+      allow read: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // System creates security logs via API routes
+      allow create: if isSameOrg(orgId);
+
+      // Security logs are immutable
+      allow update, delete: if false;
     }
 
     // Default deny all other access
