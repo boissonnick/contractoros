@@ -63,6 +63,7 @@ function getAdminAuthInstance(): Auth {
 // Export lazy-loaded getters
 export const adminDb = {
   collection: (path: string) => getDb().collection(path),
+  collectionGroup: (collectionId: string) => getDb().collectionGroup(collectionId),
   doc: (path: string) => getDb().doc(path),
   batch: () => getDb().batch(),
   runTransaction: <T>(updateFunction: (transaction: FirebaseFirestore.Transaction) => Promise<T>) =>

@@ -1295,6 +1295,504 @@ export interface BidSolicitation {
 }
 
 // ============================================
+// Bid Intelligence Types
+// ============================================
+
+export type BidComparisonRating = 'excellent' | 'good' | 'fair' | 'high' | 'very_high';
+
+export interface BidMarketComparison {
+  bidAmount: number;
+  marketLow: number;
+  marketAverage: number;
+  marketHigh: number;
+  percentileRank: number; // 0-100, where 50 is average
+  rating: BidComparisonRating;
+  recommendation: string;
+}
+
+export interface BidHistoryComparison {
+  bidAmount: number;
+  subAverageBid: number;
+  subLowestBid: number;
+  subHighestBid: number;
+  totalBidsFromSub: number;
+  percentChange: number; // vs their average
+  trend: 'increasing' | 'stable' | 'decreasing';
+}
+
+export interface BidAnalysis {
+  id: string;
+  bidId: string;
+  projectId: string;
+  subId: string;
+  trade: string;
+  analyzedAt: Date;
+  marketComparison: BidMarketComparison;
+  historyComparison?: BidHistoryComparison;
+  competitorComparison?: {
+    totalBidsReceived: number;
+    rank: number; // 1 = lowest bid
+    averageOfAllBids: number;
+    lowestBid: number;
+    highestBid: number;
+  };
+  overallScore: number; // 0-100
+  flags: BidFlag[];
+  recommendation: 'strongly_recommend' | 'recommend' | 'neutral' | 'caution' | 'avoid';
+}
+
+export interface BidFlag {
+  type: 'warning' | 'info' | 'positive';
+  code: string;
+  message: string;
+}
+
+export type SubcontractorScoreCategory =
+  | 'quality'
+  | 'reliability'
+  | 'communication'
+  | 'price_competitiveness'
+  | 'safety';
+
+export interface SubcontractorScoreBreakdown {
+  category: SubcontractorScoreCategory;
+  score: number; // 0-100
+  weight: number; // 0-1
+  dataPoints: number;
+  trend?: 'improving' | 'stable' | 'declining';
+}
+
+export interface SubcontractorIntelligence {
+  subId: string;
+  overallScore: number; // 0-100
+  scoreBreakdown: SubcontractorScoreBreakdown[];
+  performanceMetrics: {
+    projectsCompleted: number;
+    onTimeCompletionRate: number; // 0-100
+    budgetAdherenceRate: number; // 0-100
+    avgChangeOrderRate: number; // percent of original contract
+    warrantyCallbackRate: number; // percent with callbacks
+    repeatHireRate: number; // 0-100
+  };
+  pricingMetrics: {
+    avgBidVsMarket: number; // percent, 100 = at market rate
+    bidAcceptanceRate: number; // 0-100
+    avgNegotiationDiscount: number; // percent typically negotiated
+    priceConsistency: number; // 0-100, higher = more consistent
+  };
+  reliabilityMetrics: {
+    showUpRate: number; // 0-100
+    avgDelayDays: number;
+    communicationRating: number; // 0-5
+    documentCompleteness: number; // 0-100
+  };
+  recommendations: string[];
+  lastUpdated: Date;
+}
+
+export interface BidRecommendation {
+  projectId: string;
+  trade: string;
+  recommendedSubIds: string[];
+  optimalBidCount: number;
+  marketTiming: 'favorable' | 'neutral' | 'unfavorable';
+  marketTimingReason?: string;
+  estimatedMarketRate: {
+    low: number;
+    average: number;
+    high: number;
+  };
+  suggestedDeadline: Date;
+  notes: string[];
+}
+
+export const BID_COMPARISON_RATINGS: Record<BidComparisonRating, { label: string; color: string; description: string }> = {
+  excellent: { label: 'Excellent Value', color: 'green', description: 'Well below market average' },
+  good: { label: 'Good Value', color: 'emerald', description: 'Below market average' },
+  fair: { label: 'Fair Price', color: 'yellow', description: 'At market average' },
+  high: { label: 'Above Market', color: 'orange', description: 'Above market average' },
+  very_high: { label: 'Premium Price', color: 'red', description: 'Well above market average' },
+};
+
+export const SUBCONTRACTOR_SCORE_CATEGORIES: Record<SubcontractorScoreCategory, { label: string; icon: string; weight: number }> = {
+  quality: { label: 'Work Quality', icon: 'StarIcon', weight: 0.3 },
+  reliability: { label: 'Reliability', icon: 'ClockIcon', weight: 0.25 },
+  communication: { label: 'Communication', icon: 'ChatBubbleLeftRightIcon', weight: 0.15 },
+  price_competitiveness: { label: 'Price', icon: 'CurrencyDollarIcon', weight: 0.2 },
+  safety: { label: 'Safety', icon: 'ShieldCheckIcon', weight: 0.1 },
+};
+
+// ============================================
+// Project Intelligence Types
+// ============================================
+
+export type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
+
+export interface ProjectRiskIndicator {
+  id: string;
+  type: ProjectRiskType;
+  level: RiskLevel;
+  title: string;
+  description: string;
+  impact: string;
+  mitigation?: string;
+  relatedEntityId?: string;
+  relatedEntityType?: 'task' | 'phase' | 'expense' | 'subcontractor';
+  detectedAt: Date;
+  acknowledgedAt?: Date;
+  acknowledgedBy?: string;
+  resolvedAt?: Date;
+}
+
+export type ProjectRiskType =
+  | 'thin_margin'
+  | 'scope_creep'
+  | 'schedule_delay'
+  | 'weather_risk'
+  | 'resource_conflict'
+  | 'budget_overrun'
+  | 'sub_reliability'
+  | 'permit_delay'
+  | 'material_cost_increase'
+  | 'change_order_pattern';
+
+export interface ProfitabilityForecast {
+  projectId: string;
+  forecastDate: Date;
+  estimatedRevenue: number;
+  estimatedCosts: number;
+  estimatedProfit: number;
+  estimatedMargin: number; // percentage
+  confidence: number; // 0-100
+  factors: ProfitabilityFactor[];
+  comparison?: {
+    similarProjects: number;
+    avgMargin: number;
+    percentile: number;
+  };
+}
+
+export interface ProfitabilityFactor {
+  factor: string;
+  impact: 'positive' | 'negative' | 'neutral';
+  weight: number; // 0-1
+  description: string;
+}
+
+export interface ProjectVarianceAnalysis {
+  projectId: string;
+  analyzedAt: Date;
+  overall: {
+    estimatedTotal: number;
+    actualTotal: number;
+    variance: number;
+    variancePercent: number;
+  };
+  byCategory: Array<{
+    category: string;
+    estimated: number;
+    actual: number;
+    variance: number;
+    variancePercent: number;
+    notes?: string;
+  }>;
+  byPhase: Array<{
+    phaseId: string;
+    phaseName: string;
+    estimated: number;
+    actual: number;
+    variance: number;
+    variancePercent: number;
+  }>;
+  byTrade: Array<{
+    trade: string;
+    estimated: number;
+    actual: number;
+    variance: number;
+    variancePercent: number;
+  }>;
+  insights: string[];
+  lessonsLearned: string[];
+}
+
+export interface ProjectIntelligence {
+  projectId: string;
+  updatedAt: Date;
+  profitabilityForecast: ProfitabilityForecast;
+  riskIndicators: ProjectRiskIndicator[];
+  overallRiskScore: number; // 0-100, higher = more risk
+  healthScore: number; // 0-100, higher = healthier
+  statusSummary: {
+    scheduleStatus: 'ahead' | 'on_track' | 'behind' | 'at_risk';
+    budgetStatus: 'under' | 'on_track' | 'over' | 'at_risk';
+    qualityStatus: 'excellent' | 'good' | 'fair' | 'poor';
+  };
+  recommendations: ProjectRecommendation[];
+  varianceAnalysis?: ProjectVarianceAnalysis;
+}
+
+export interface ProjectRecommendation {
+  id: string;
+  type: 'action' | 'insight' | 'warning';
+  priority: 'low' | 'medium' | 'high';
+  title: string;
+  description: string;
+  actionLabel?: string;
+  actionType?: 'navigate' | 'modal' | 'api';
+  actionPayload?: Record<string, unknown>;
+}
+
+export const RISK_LEVEL_STYLES: Record<RiskLevel, { bg: string; text: string; icon: string }> = {
+  low: { bg: 'bg-green-100', text: 'text-green-800', icon: 'CheckCircleIcon' },
+  medium: { bg: 'bg-yellow-100', text: 'text-yellow-800', icon: 'ExclamationTriangleIcon' },
+  high: { bg: 'bg-orange-100', text: 'text-orange-800', icon: 'ExclamationTriangleIcon' },
+  critical: { bg: 'bg-red-100', text: 'text-red-800', icon: 'XCircleIcon' },
+};
+
+export const RISK_TYPE_LABELS: Record<ProjectRiskType, string> = {
+  thin_margin: 'Thin Margin',
+  scope_creep: 'Scope Creep',
+  schedule_delay: 'Schedule Delay',
+  weather_risk: 'Weather Risk',
+  resource_conflict: 'Resource Conflict',
+  budget_overrun: 'Budget Overrun',
+  sub_reliability: 'Subcontractor Reliability',
+  permit_delay: 'Permit Delay',
+  material_cost_increase: 'Material Cost Increase',
+  change_order_pattern: 'Change Order Pattern',
+};
+
+// ============================================
+// Job Costing Types
+// ============================================
+
+/**
+ * Cost category for job costing entries.
+ * Used to track where money is being spent on projects.
+ */
+export type CostCategory =
+  | 'labor_internal'      // Internal employee labor costs
+  | 'labor_subcontractor' // Subcontractor labor/services
+  | 'materials'           // Material costs
+  | 'equipment_rental'    // Equipment and tool rentals
+  | 'permits_fees'        // Permits, licenses, and fees
+  | 'overhead'            // Project overhead allocation
+  | 'other';              // Miscellaneous costs
+
+/**
+ * Source of a job cost entry - where the cost came from.
+ */
+export type JobCostSource =
+  | 'manual'        // Manually entered by user
+  | 'timesheet'     // Derived from time entries
+  | 'expense'       // From expense tracking
+  | 'invoice'       // From vendor invoice
+  | 'sub_payment'   // Subcontractor payment
+  | 'purchase_order'; // From PO system
+
+/**
+ * Job cost entry - individual cost record for a project.
+ * Stored in: organizations/{orgId}/jobCosts/{costId}
+ */
+export interface JobCostEntry {
+  id: string;
+  projectId: string;
+  orgId: string;
+
+  // Cost classification
+  category: CostCategory;
+  description: string;
+  amount: number;
+  quantity?: number;
+  unitCost?: number;
+  unit?: string;
+
+  // Date and timing
+  date: Date;
+  periodStart?: Date;  // For recurring costs
+  periodEnd?: Date;
+
+  // Source tracking
+  source: JobCostSource;
+  sourceId?: string;   // Reference to original record (timeEntryId, expenseId, etc.)
+  sourceDetails?: string;
+
+  // Phase/task association
+  phaseId?: string;
+  phaseName?: string;
+  taskId?: string;
+  taskName?: string;
+
+  // Vendor/person
+  vendorId?: string;
+  vendorName?: string;
+  userId?: string;
+  userName?: string;
+
+  // Budget comparison
+  budgetLineId?: string;  // Link to estimate line item
+  budgetedAmount?: number;
+
+  // Flags
+  isBillable: boolean;
+  isApproved: boolean;
+  approvedBy?: string;
+  approvedAt?: Date;
+
+  // Metadata
+  notes?: string;
+  tags?: string[];
+  createdAt: Date;
+  createdBy: string;
+  updatedAt?: Date;
+  updatedBy?: string;
+}
+
+/**
+ * Aggregated profitability data for a project.
+ * Stored in: organizations/{orgId}/projectProfitability/{projectId}
+ * Updated periodically (on cost entry, daily rollup, etc.)
+ */
+export interface ProjectProfitability {
+  projectId: string;
+  orgId: string;
+
+  // Contract/Revenue
+  contractValue: number;          // Original contract amount
+  changeOrdersValue: number;      // Total approved change orders
+  totalContractValue: number;     // contractValue + changeOrdersValue
+  invoicedAmount: number;         // Amount invoiced to date
+  collectedAmount: number;        // Amount collected to date
+
+  // Costs
+  totalCosts: number;             // Sum of all job cost entries
+  costsByCategory: Record<CostCategory, number>;
+  committedCosts: number;         // POs, contracts not yet billed
+  projectedFinalCost: number;     // totalCosts + uncommitted estimate
+
+  // Profitability
+  grossProfit: number;            // totalContractValue - totalCosts
+  grossMargin: number;            // Percentage: (grossProfit / totalContractValue) * 100
+  projectedProfit: number;        // totalContractValue - projectedFinalCost
+  projectedMargin: number;        // Percentage: (projectedProfit / totalContractValue) * 100
+
+  // Budget Variance
+  originalBudget: number;         // From estimate
+  budgetVariance: number;         // originalBudget - totalCosts (positive = under budget)
+  budgetVariancePercent: number;  // Percentage variance
+
+  // Cost breakdown by type
+  laborCosts: number;             // labor_internal + labor_subcontractor
+  materialCosts: number;          // materials category
+  otherCosts: number;             // equipment_rental + permits_fees + overhead + other
+
+  // Phase breakdown (optional)
+  costsByPhase?: Array<{
+    phaseId: string;
+    phaseName: string;
+    budgeted: number;
+    actual: number;
+    variance: number;
+  }>;
+
+  // Time tracking
+  totalLaborHours: number;
+  laborCostPerHour: number;       // totalLaborCosts / totalLaborHours
+
+  // Status indicators
+  isOverBudget: boolean;
+  isAtRisk: boolean;              // margin below threshold
+  marginAlertThreshold: number;   // Configured threshold for alerts
+
+  // Metadata
+  lastUpdated: Date;
+  lastUpdatedBy?: string;
+  calculationVersion: number;     // For schema migrations
+}
+
+/**
+ * Summary of job costs for reporting.
+ */
+export interface JobCostSummary {
+  projectId: string;
+  period: 'week' | 'month' | 'quarter' | 'year' | 'all';
+  startDate: Date;
+  endDate: Date;
+
+  totalCosts: number;
+  costsByCategory: Record<CostCategory, number>;
+  costsBySource: Record<JobCostSource, number>;
+
+  topVendors: Array<{
+    vendorId: string;
+    vendorName: string;
+    amount: number;
+    count: number;
+  }>;
+
+  topPhases: Array<{
+    phaseId: string;
+    phaseName: string;
+    amount: number;
+    budgeted: number;
+    variance: number;
+  }>;
+
+  dailyTrend: Array<{
+    date: string;
+    amount: number;
+    cumulative: number;
+  }>;
+}
+
+/**
+ * Job costing alert for budget overruns or margin issues.
+ */
+export interface JobCostAlert {
+  id: string;
+  projectId: string;
+  orgId: string;
+
+  type: 'budget_overrun' | 'margin_below_threshold' | 'cost_spike' | 'category_overrun';
+  severity: 'info' | 'warning' | 'critical';
+
+  title: string;
+  message: string;
+  details?: {
+    category?: CostCategory;
+    budgeted?: number;
+    actual?: number;
+    variance?: number;
+    threshold?: number;
+  };
+
+  isAcknowledged: boolean;
+  acknowledgedBy?: string;
+  acknowledgedAt?: Date;
+
+  createdAt: Date;
+}
+
+export const COST_CATEGORY_LABELS: Record<CostCategory, { label: string; icon: string; color: string }> = {
+  labor_internal: { label: 'Internal Labor', icon: 'UserGroupIcon', color: 'blue' },
+  labor_subcontractor: { label: 'Subcontractor', icon: 'WrenchScrewdriverIcon', color: 'purple' },
+  materials: { label: 'Materials', icon: 'CubeIcon', color: 'amber' },
+  equipment_rental: { label: 'Equipment Rental', icon: 'TruckIcon', color: 'orange' },
+  permits_fees: { label: 'Permits & Fees', icon: 'DocumentCheckIcon', color: 'green' },
+  overhead: { label: 'Overhead', icon: 'BuildingOfficeIcon', color: 'gray' },
+  other: { label: 'Other', icon: 'EllipsisHorizontalCircleIcon', color: 'slate' },
+};
+
+export const JOB_COST_SOURCE_LABELS: Record<JobCostSource, string> = {
+  manual: 'Manual Entry',
+  timesheet: 'Timesheet',
+  expense: 'Expense Report',
+  invoice: 'Vendor Invoice',
+  sub_payment: 'Sub Payment',
+  purchase_order: 'Purchase Order',
+};
+
+// ============================================
 // Expense Types
 // ============================================
 
@@ -2630,6 +3128,209 @@ export interface AccountingSyncLog {
   errors: string[];
   startedAt: Date;
   completedAt?: Date;
+}
+
+// ============================================
+// QuickBooks Integration Types (Sprint 19)
+// ============================================
+
+export type QuickBooksEnvironment = 'sandbox' | 'production';
+
+export type QuickBooksConnectionStatus = 'connected' | 'disconnected' | 'expired' | 'error';
+
+export type QuickBooksSyncDirection = 'cos_to_qbo' | 'qbo_to_cos' | 'bidirectional';
+
+export type QuickBooksEntityType =
+  | 'customer'
+  | 'invoice'
+  | 'payment'
+  | 'expense'
+  | 'vendor'
+  | 'item'
+  | 'account';
+
+export type QuickBooksSyncStatus = 'pending' | 'in_progress' | 'success' | 'failed' | 'partial';
+
+export interface QuickBooksConnection {
+  id: string;
+  orgId: string;
+  // OAuth credentials
+  accessToken: string;
+  refreshToken: string;
+  tokenExpiresAt: Date;
+  // QuickBooks company info
+  realmId: string;  // QuickBooks company ID
+  companyName: string;
+  companyCountry?: string;
+  // Connection metadata
+  environment: QuickBooksEnvironment;
+  status: QuickBooksConnectionStatus;
+  lastTokenRefreshAt?: Date;
+  // Sync configuration
+  syncSettings: QuickBooksSyncSettings;
+  // Audit
+  connectedBy: string;
+  connectedByName?: string;
+  connectedAt: Date;
+  disconnectedAt?: Date;
+  disconnectedBy?: string;
+  lastSyncAt?: Date;
+  lastSyncStatus?: QuickBooksSyncStatus;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+export interface QuickBooksSyncSettings {
+  // Entity sync toggles
+  syncCustomers: boolean;
+  syncInvoices: boolean;
+  syncPayments: boolean;
+  syncExpenses: boolean;
+  // Sync direction
+  customerSyncDirection: QuickBooksSyncDirection;
+  invoiceSyncDirection: QuickBooksSyncDirection;
+  paymentSyncDirection: QuickBooksSyncDirection;
+  expenseSyncDirection: QuickBooksSyncDirection;
+  // Automation
+  autoSyncEnabled: boolean;
+  autoSyncFrequency: 'realtime' | 'hourly' | 'daily' | 'manual';
+  // Default account mappings
+  defaultIncomeAccountId?: string;
+  defaultIncomeAccountName?: string;
+  defaultExpenseAccountId?: string;
+  defaultExpenseAccountName?: string;
+  defaultAssetAccountId?: string;
+  defaultAssetAccountName?: string;
+  // Tax settings
+  defaultTaxCodeId?: string;
+  defaultTaxCodeName?: string;
+}
+
+export interface QuickBooksSyncLog {
+  id: string;
+  orgId: string;
+  connectionId: string;
+  // Sync details
+  entityType: QuickBooksEntityType;
+  direction: QuickBooksSyncDirection;
+  status: QuickBooksSyncStatus;
+  // Trigger info
+  triggeredBy: 'manual' | 'auto' | 'webhook' | 'system';
+  triggeredByUserId?: string;
+  triggeredByUserName?: string;
+  // Results
+  itemsProcessed: number;
+  itemsCreated: number;
+  itemsUpdated: number;
+  itemsSkipped: number;
+  itemsFailed: number;
+  // Error tracking
+  errors: QuickBooksSyncError[];
+  // Timing
+  startedAt: Date;
+  completedAt?: Date;
+  durationMs?: number;
+  createdAt: Date;
+}
+
+export interface QuickBooksSyncError {
+  entityId: string;
+  entityName?: string;
+  errorCode?: string;
+  errorMessage: string;
+  qboErrorDetail?: string;
+  retryable: boolean;
+}
+
+export interface QuickBooksEntityMapping {
+  id: string;
+  orgId: string;
+  connectionId: string;
+  // Entity references
+  entityType: QuickBooksEntityType;
+  cosEntityId: string;       // ContractorOS entity ID
+  cosEntityName?: string;    // For display purposes
+  qboEntityId: string;       // QuickBooks entity ID
+  qboEntityRef?: string;     // QuickBooks SyncToken for optimistic locking
+  // Sync metadata
+  lastSyncedAt: Date;
+  lastSyncDirection: QuickBooksSyncDirection;
+  syncStatus: 'synced' | 'pending' | 'conflict' | 'error';
+  // Audit
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+// QuickBooks API response types (for internal use)
+export interface QBOCustomer {
+  Id: string;
+  DisplayName: string;
+  CompanyName?: string;
+  GivenName?: string;
+  FamilyName?: string;
+  PrimaryEmailAddr?: { Address: string };
+  PrimaryPhone?: { FreeFormNumber: string };
+  BillAddr?: QBOAddress;
+  ShipAddr?: QBOAddress;
+  Balance?: number;
+  SyncToken: string;
+  Active: boolean;
+}
+
+export interface QBOInvoice {
+  Id: string;
+  DocNumber?: string;
+  CustomerRef: { value: string; name?: string };
+  TxnDate: string;
+  DueDate?: string;
+  TotalAmt: number;
+  Balance: number;
+  Line: QBOInvoiceLine[];
+  SyncToken: string;
+  EmailStatus?: 'NotSet' | 'NeedToSend' | 'EmailSent';
+}
+
+export interface QBOInvoiceLine {
+  Id?: string;
+  LineNum?: number;
+  Description?: string;
+  Amount: number;
+  DetailType: 'SalesItemLineDetail' | 'SubTotalLineDetail' | 'DiscountLineDetail';
+  SalesItemLineDetail?: {
+    ItemRef?: { value: string; name?: string };
+    Qty?: number;
+    UnitPrice?: number;
+  };
+}
+
+export interface QBOPayment {
+  Id: string;
+  CustomerRef: { value: string; name?: string };
+  TotalAmt: number;
+  TxnDate: string;
+  PaymentMethodRef?: { value: string; name?: string };
+  DepositToAccountRef?: { value: string; name?: string };
+  Line?: { LinkedTxn: { TxnId: string; TxnType: string }[] }[];
+  SyncToken: string;
+}
+
+export interface QBOAddress {
+  Line1?: string;
+  Line2?: string;
+  City?: string;
+  CountrySubDivisionCode?: string;  // State
+  PostalCode?: string;
+  Country?: string;
+}
+
+export interface QBOAccount {
+  Id: string;
+  Name: string;
+  AccountType: string;
+  AccountSubType?: string;
+  AcctNum?: string;
+  Active: boolean;
+  SyncToken: string;
 }
 
 // ============================================
@@ -6295,3 +6996,134 @@ export const WORK_EVENT_TYPE_LABELS: Record<WorkEventType, string> = {
   photo_taken: 'Photo Taken',
   other: 'Other',
 };
+
+// ============================================
+// AI Assistant Types (Sprint 10)
+// ============================================
+
+/**
+ * AI Model provider options
+ */
+export type AIModelProvider = 'gemini' | 'claude' | 'openai';
+
+/**
+ * Subscription tier that determines available AI features
+ */
+export type AIModelTier = 'free' | 'pro' | 'enterprise';
+
+/**
+ * Content filter strictness level
+ */
+export type AIContentFilterLevel = 'strict' | 'balanced' | 'permissive';
+
+/**
+ * Organization-level AI settings stored in Firestore
+ * Path: organizations/{orgId}/settings/ai
+ */
+export interface OrganizationAISettings {
+  orgId: string;
+
+  // Model selection
+  selectedModel: string;           // Model key (e.g., 'gemini-2.0-flash')
+  allowedModels: string[];         // Models this org can use based on tier
+
+  // API Key status (keys stored in GCP Secret Manager, not Firestore)
+  hasCustomGeminiKey: boolean;
+  hasCustomClaudeKey: boolean;
+  hasCustomOpenAIKey: boolean;
+
+  // Usage limits
+  tier: AIModelTier;
+  dailyRequestLimit: number;
+  dailyTokenLimit: number;
+  dailyCostLimit: number;          // Max cost per day in USD
+
+  // Feature flags
+  enableAssistant: boolean;        // Master toggle for AI assistant
+  enableVoiceInput: boolean;       // Allow voice input
+  enableStreaming: boolean;        // Stream responses
+  enableIntelligence: boolean;     // AI-powered insights (pricing, etc.)
+
+  // Safety settings
+  contentFilterLevel: AIContentFilterLevel;
+  logPrompts: boolean;             // Log prompts for debugging/audit
+  blockExternalUrls: boolean;      // Block responses containing external URLs
+
+  // Metadata
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * Default AI settings for new organizations
+ */
+export const DEFAULT_AI_SETTINGS: Omit<OrganizationAISettings, 'orgId' | 'createdAt' | 'updatedAt'> = {
+  selectedModel: 'gemini-2.0-flash',
+  allowedModels: ['gemini-2.0-flash'],
+  hasCustomGeminiKey: false,
+  hasCustomClaudeKey: false,
+  hasCustomOpenAIKey: false,
+  tier: 'free',
+  dailyRequestLimit: 200,
+  dailyTokenLimit: 100000,
+  dailyCostLimit: 0,
+  enableAssistant: true,
+  enableVoiceInput: true,
+  enableStreaming: true,
+  enableIntelligence: true,
+  contentFilterLevel: 'balanced',
+  logPrompts: false,
+  blockExternalUrls: true,
+};
+
+/**
+ * Daily AI usage record
+ * Path: organizations/{orgId}/aiUsage/{YYYY-MM-DD}
+ */
+export interface AIUsageRecord {
+  orgId: string;
+  date: string;                    // YYYY-MM-DD
+
+  // Aggregate stats
+  requests: number;
+  inputTokens: number;
+  outputTokens: number;
+  estimatedCost: number;
+
+  // Per-model breakdown
+  modelBreakdown: Record<string, {
+    requests: number;
+    tokens: number;
+    cost: number;
+  }>;
+
+  // Timestamps
+  firstRequestAt: Date;
+  lastRequestAt: Date;
+}
+
+/**
+ * AI model configuration for display
+ */
+export interface AIModelDisplayConfig {
+  key: string;
+  provider: AIModelProvider;
+  displayName: string;
+  description: string;
+  tier: AIModelTier;
+  isDefault: boolean;
+  isAvailable: boolean;            // Whether API key is configured
+}
+
+/**
+ * Rate limit status returned from API
+ */
+export interface AIRateLimitStatus {
+  allowed: boolean;
+  remaining: {
+    requests: number;
+    tokens: number;
+  };
+  resetAt: Date;
+  reason?: string;
+}

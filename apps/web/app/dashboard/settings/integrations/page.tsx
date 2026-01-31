@@ -1,7 +1,9 @@
 "use client";
 
 import React from 'react';
-import { Card, Badge } from '@/components/ui';
+import Link from 'next/link';
+import { Card, Badge, Button } from '@/components/ui';
+import { ChevronRightIcon } from '@heroicons/react/24/outline';
 import {
   QuickBooksLogo,
   XeroLogo,
@@ -16,11 +18,21 @@ interface IntegrationCardProps {
   category: string;
   logo: React.ReactNode;
   comingSoon?: boolean;
+  href?: string;
+  isConnected?: boolean;
 }
 
-function IntegrationCard({ name, description, category, logo, comingSoon = true }: IntegrationCardProps) {
-  return (
-    <Card className="p-5 hover:shadow-md transition-shadow">
+function IntegrationCard({
+  name,
+  description,
+  category,
+  logo,
+  comingSoon = true,
+  href,
+  isConnected = false,
+}: IntegrationCardProps) {
+  const content = (
+    <Card className={`p-5 transition-shadow ${href ? 'hover:shadow-md cursor-pointer' : ''}`}>
       <div className="flex items-start gap-4">
         <div className="w-14 h-14 bg-gray-50 rounded-xl flex items-center justify-center flex-shrink-0 border border-gray-100">
           {logo}
@@ -28,16 +40,29 @@ function IntegrationCard({ name, description, category, logo, comingSoon = true 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <h3 className="font-semibold text-gray-900">{name}</h3>
-            {comingSoon && (
+            {comingSoon ? (
               <Badge className="bg-gray-100 text-gray-500 text-xs">Coming Soon</Badge>
+            ) : isConnected ? (
+              <Badge className="bg-green-100 text-green-700 text-xs">Connected</Badge>
+            ) : (
+              <Badge className="bg-blue-100 text-blue-700 text-xs">Available</Badge>
             )}
           </div>
           <p className="text-xs text-gray-400 mb-2">{category}</p>
           <p className="text-sm text-gray-600">{description}</p>
         </div>
+        {href && (
+          <ChevronRightIcon className="w-5 h-5 text-gray-400 flex-shrink-0" />
+        )}
       </div>
     </Card>
   );
+
+  if (href) {
+    return <Link href={href}>{content}</Link>;
+  }
+
+  return content;
 }
 
 export default function IntegrationsPage() {
@@ -47,12 +72,15 @@ export default function IntegrationsPage() {
       description: 'Two-way sync invoices, expenses, and payments with QuickBooks Online.',
       category: 'Accounting',
       logo: <QuickBooksLogo width={100} height={28} />,
+      comingSoon: false,
+      href: '/dashboard/settings/integrations/quickbooks',
     },
     {
       name: 'Xero',
       description: 'Sync financial data with Xero for seamless accounting.',
       category: 'Accounting',
       logo: <XeroLogo width={60} height={24} />,
+      comingSoon: true,
     },
   ];
 
