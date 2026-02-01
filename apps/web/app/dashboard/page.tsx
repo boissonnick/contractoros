@@ -3,14 +3,20 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
+import { useImpersonation } from '@/lib/contexts/ImpersonationContext';
+import { PermissionGuard } from '@/components/auth/PermissionGuard';
 import { db } from '@/lib/firebase/config';
 import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 import { Project, Task, Invoice, Estimate, RFI, PunchItem } from '@/types';
 import { Card, Badge, Button, EmptyState } from '@/components/ui';
 import { FirestoreError } from '@/components/ui';
 import { SkeletonList } from '@/components/ui/Skeleton';
+import { MobileStats } from '@/components/ui/MobileStats';
+import { MobileProjectList } from '@/components/projects/MobileProjectCard';
+import { MobileFAB } from '@/components/ui/MobileNav';
 import { cn, formatCurrency } from '@/lib/utils';
 import { useActivityLog } from '@/lib/hooks/useActivityLog';
+import { useMaterialPrices } from '@/lib/hooks/useIntelligence';
 import {
   calculateBudgetPercentage,
   getBudgetStatus,
@@ -34,7 +40,9 @@ import {
   ExclamationCircleIcon,
   ClipboardDocumentCheckIcon,
   ArrowRightIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
+import { MaterialPriceWidget } from '@/components/intelligence';
 import { format, differenceInDays, isAfter, isBefore, addDays } from 'date-fns';
 
 interface StatCardProps {
@@ -113,7 +121,12 @@ const statusConfig: Record<string, { label: string; color: string }> = {
 
 export default function DashboardPage() {
   const { user, profile, loading: authLoading } = useAuth();
+  const { currentRole, permissions } = useImpersonation();
   const { activities } = useActivityLog(profile?.orgId);
+  const { prices: materialPrices, loading: materialPricesLoading } = useMaterialPrices();
+
+  // Determine if user is a client (limited view)
+  const isClientRole = currentRole === 'client';
 
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -128,6 +141,9 @@ export default function DashboardPage() {
   const [punchItems, setPunchItems] = useState<PunchItem[]>([]);
   const [teamCount, setTeamCount] = useState(0);
 
+  // Mobile quick actions menu state
+  const [showMobileQuickActions, setShowMobileQuickActions] = useState(false);
+
   const fetchDashboardData = React.useCallback(async () => {
     if (!profile?.orgId) {
       setLoading(false);
@@ -138,74 +154,104 @@ export default function DashboardPage() {
     setFetchError(null);
 
     try {
-      // Fetch projects
-      const projectsQuery = query(
-        collection(db, 'projects'),
-        where('orgId', '==', profile.orgId),
-        orderBy('createdAt', 'desc')
-      );
-      const projectsSnap = await getDocs(projectsQuery);
-      const projectsData = projectsSnap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate?.() || new Date(),
-        startDate: doc.data().startDate?.toDate?.(),
-        estimatedEndDate: doc.data().estimatedEndDate?.toDate?.(),
-      })) as Project[];
+      // Fetch projects - filter by client if user is a client
+      let projectsData: Project[] = [];
+
+      if (isClientRole) {
+        // BUG #1 FIX: Clients only see projects where they are the client
+        const clientProjectsQuery = query(
+          collection(db, 'projects'),
+          where('orgId', '==', profile.orgId),
+          where('clientId', '==', user?.uid),
+          orderBy('createdAt', 'desc')
+        );
+        const projectsSnap = await getDocs(clientProjectsQuery);
+        projectsData = projectsSnap.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt?.toDate?.() || new Date(),
+          startDate: doc.data().startDate?.toDate?.(),
+          estimatedEndDate: doc.data().estimatedEndDate?.toDate?.(),
+        })) as Project[];
+      } else {
+        // Staff can see all org projects
+        const projectsQuery = query(
+          collection(db, 'projects'),
+          where('orgId', '==', profile.orgId),
+          orderBy('createdAt', 'desc')
+        );
+        const projectsSnap = await getDocs(projectsQuery);
+        projectsData = projectsSnap.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt?.toDate?.() || new Date(),
+          startDate: doc.data().startDate?.toDate?.(),
+          estimatedEndDate: doc.data().estimatedEndDate?.toDate?.(),
+        })) as Project[];
+      }
       setProjects(projectsData.filter(p => !p.isArchived));
 
-      // Fetch recent tasks
-      const tasksQuery = query(
-        collection(db, 'tasks'),
-        where('orgId', '==', profile.orgId),
-        orderBy('createdAt', 'desc'),
-        limit(50)
-      );
-      const tasksSnap = await getDocs(tasksQuery);
-      setTasks(tasksSnap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate?.() || new Date(),
-        dueDate: doc.data().dueDate?.toDate?.(),
-      })) as Task[]);
+      // BUG #2 FIX: Clients should not see tasks, invoices, estimates, or team data
+      if (!isClientRole) {
+        // Fetch recent tasks
+        const tasksQuery = query(
+          collection(db, 'tasks'),
+          where('orgId', '==', profile.orgId),
+          orderBy('createdAt', 'desc'),
+          limit(50)
+        );
+        const tasksSnap = await getDocs(tasksQuery);
+        setTasks(tasksSnap.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt?.toDate?.() || new Date(),
+          dueDate: doc.data().dueDate?.toDate?.(),
+        })) as Task[]);
 
-      // Fetch invoices
-      const invoicesQuery = query(
-        collection(db, 'invoices'),
-        where('orgId', '==', profile.orgId),
-        orderBy('createdAt', 'desc'),
-        limit(50)
-      );
-      const invoicesSnap = await getDocs(invoicesQuery);
-      setInvoices(invoicesSnap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate?.() || new Date(),
-        dueDate: doc.data().dueDate?.toDate?.(),
-      })) as Invoice[]);
+        // Fetch invoices
+        const invoicesQuery = query(
+          collection(db, 'invoices'),
+          where('orgId', '==', profile.orgId),
+          orderBy('createdAt', 'desc'),
+          limit(50)
+        );
+        const invoicesSnap = await getDocs(invoicesQuery);
+        setInvoices(invoicesSnap.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt?.toDate?.() || new Date(),
+          dueDate: doc.data().dueDate?.toDate?.(),
+        })) as Invoice[]);
 
-      // Fetch estimates
-      const estimatesQuery = query(
-        collection(db, 'estimates'),
-        where('orgId', '==', profile.orgId),
-        orderBy('createdAt', 'desc'),
-        limit(20)
-      );
-      const estimatesSnap = await getDocs(estimatesQuery);
-      setEstimates(estimatesSnap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate?.() || new Date(),
-      })) as Estimate[]);
+        // Fetch estimates
+        const estimatesQuery = query(
+          collection(db, 'estimates'),
+          where('orgId', '==', profile.orgId),
+          orderBy('createdAt', 'desc'),
+          limit(20)
+        );
+        const estimatesSnap = await getDocs(estimatesQuery);
+        setEstimates(estimatesSnap.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt?.toDate?.() || new Date(),
+        })) as Estimate[]);
 
-      // Fetch team members count
-      const usersQuery = query(
-        collection(db, 'users'),
-        where('orgId', '==', profile.orgId),
-        where('isActive', '==', true)
-      );
-      const usersSnap = await getDocs(usersQuery);
-      setTeamCount(usersSnap.size);
+        // Fetch team members count
+        const usersQuery = query(
+          collection(db, 'users'),
+          where('orgId', '==', profile.orgId),
+          where('isActive', '==', true)
+        );
+        const usersSnap = await getDocs(usersQuery);
+        setTeamCount(usersSnap.size);
+      } else {
+        // Clear sensitive data for clients
+        setTasks([]);
+        setInvoices([]);
+        setEstimates([]);
+        setTeamCount(0);
+      }
 
     } catch (error: unknown) {
       console.error('Error fetching dashboard data:', error);
@@ -220,7 +266,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  }, [profile?.orgId]);
+  }, [profile?.orgId, user?.uid, isClientRole]);
 
   useEffect(() => {
     fetchDashboardData();
@@ -343,79 +389,237 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-bold text-gray-900">
             Welcome back, {profile?.displayName?.split(' ')[0] || 'there'}
           </h1>
-          <p className="text-gray-500 mt-1">Here's what's happening across your projects.</p>
+          <p className="text-gray-500 mt-1">
+            {isClientRole
+              ? "Here's the status of your projects."
+              : "Here's what's happening across your projects."}
+          </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Link href="/dashboard/estimates/new">
-            <Button variant="outline">
-              <DocumentTextIcon className="h-4 w-4 mr-2" />
-              New Estimate
-            </Button>
-          </Link>
-          <Link href="/dashboard/projects/new">
-            <Button variant="primary">
-              <PlusIcon className="h-4 w-4 mr-2" />
-              New Project
-            </Button>
-          </Link>
-        </div>
+        {/* BUG #5 & #6 FIX: Hide admin action buttons for users without permission */}
+        <PermissionGuard permission="canCreateProjects" hide>
+          <div className="flex items-center gap-2">
+            <PermissionGuard permission="canManageInvoices" hide>
+              <Link href="/dashboard/estimates/new">
+                <Button variant="outline">
+                  <DocumentTextIcon className="h-4 w-4 mr-2" />
+                  New Estimate
+                </Button>
+              </Link>
+            </PermissionGuard>
+            <Link href="/dashboard/projects/new">
+              <Button variant="primary">
+                <PlusIcon className="h-4 w-4 mr-2" />
+                New Project
+              </Button>
+            </Link>
+          </div>
+        </PermissionGuard>
       </div>
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 items-stretch">
-        <StatCard
-          title="Active Projects"
-          value={stats.activeProjects}
-          subtitle={`${stats.pipelineProjects} in pipeline`}
-          icon={FolderIcon}
-          color="blue"
-          href="/dashboard/projects"
+      {/* Key Metrics - BUG #2 FIX: Hide sensitive stats for clients */}
+      {isClientRole ? (
+        // Simplified stats for client view - Mobile optimized
+        <MobileStats
+          stats={[
+            {
+              label: 'My Projects',
+              value: stats.activeProjects,
+              subtitle: `${stats.completedProjects} completed`,
+              icon: FolderIcon,
+              color: 'blue',
+              href: '/dashboard/projects',
+            },
+            {
+              label: 'Progress',
+              value: `${stats.totalProjects > 0 ? Math.round((stats.completedProjects / stats.totalProjects) * 100) : 0}%`,
+              subtitle: 'overall completion',
+              icon: CheckCircleIcon,
+              color: 'green',
+            },
+          ]}
+          columns={2}
+          scrollable={true}
         />
-        <StatCard
-          title="Outstanding"
-          value={formatCurrency(stats.outstandingAmount)}
-          subtitle={`${stats.overdueInvoicesCount} overdue`}
-          icon={BanknotesIcon}
-          color={stats.overdueAmount > 0 ? 'red' : 'green'}
-          href="/dashboard/invoices"
-        />
-        <StatCard
-          title="Overdue Tasks"
-          value={stats.overdueTasks}
-          subtitle={`${stats.dueSoonTasks} due soon`}
-          icon={ExclamationTriangleIcon}
-          color={stats.overdueTasks > 0 ? 'orange' : 'green'}
-        />
-        <StatCard
-          title="Pending Estimates"
-          value={stats.pendingEstimates}
-          subtitle={formatCurrency(stats.pipelineValue)}
-          icon={DocumentTextIcon}
-          color="purple"
-          href="/dashboard/estimates"
-        />
-        <StatCard
-          title="Budget Used"
-          value={`${stats.budgetUtilization}%`}
-          subtitle={formatCurrency(stats.totalSpent)}
-          icon={ChartBarIcon}
-          color={stats.budgetUtilization > 90 ? 'red' : stats.budgetUtilization > 75 ? 'yellow' : 'green'}
-        />
-        <StatCard
-          title="Team"
-          value={stats.teamCount}
-          subtitle="active members"
-          icon={UserGroupIcon}
-          color="gray"
-          href="/dashboard/team"
-        />
-      </div>
+      ) : (
+        // Full stats for staff - Mobile optimized with horizontal scroll
+        <>
+          {/* Mobile: Horizontal scrollable stats */}
+          <div className="md:hidden">
+            <MobileStats
+              stats={(() => {
+                type StatColor = 'blue' | 'green' | 'yellow' | 'red' | 'purple' | 'orange' | 'gray';
+                const mobileStats: Array<{
+                  label: string;
+                  value: string | number;
+                  subtitle: string;
+                  icon: React.ComponentType<{ className?: string }>;
+                  color: StatColor;
+                  href?: string;
+                }> = [
+                  {
+                    label: 'Active Projects',
+                    value: stats.activeProjects,
+                    subtitle: `${stats.pipelineProjects} in pipeline`,
+                    icon: FolderIcon,
+                    color: 'blue',
+                    href: '/dashboard/projects',
+                  },
+                ];
+
+                if (permissions.canViewAllFinances) {
+                  mobileStats.push({
+                    label: 'Outstanding',
+                    value: formatCurrency(stats.outstandingAmount),
+                    subtitle: `${stats.overdueInvoicesCount} overdue`,
+                    icon: BanknotesIcon,
+                    color: stats.overdueAmount > 0 ? 'red' : 'green',
+                    href: '/dashboard/invoices',
+                  });
+                }
+
+                if (permissions.canViewAllTasks) {
+                  mobileStats.push({
+                    label: 'Overdue Tasks',
+                    value: stats.overdueTasks,
+                    subtitle: `${stats.dueSoonTasks} due soon`,
+                    icon: ExclamationTriangleIcon,
+                    color: stats.overdueTasks > 0 ? 'orange' : 'green',
+                  });
+                }
+
+                if (permissions.canManageInvoices) {
+                  mobileStats.push({
+                    label: 'Estimates',
+                    value: stats.pendingEstimates,
+                    subtitle: formatCurrency(stats.pipelineValue),
+                    icon: DocumentTextIcon,
+                    color: 'purple',
+                    href: '/dashboard/estimates',
+                  });
+                }
+
+                if (permissions.canViewAllFinances) {
+                  mobileStats.push({
+                    label: 'Budget Used',
+                    value: `${stats.budgetUtilization}%`,
+                    subtitle: formatCurrency(stats.totalSpent),
+                    icon: ChartBarIcon,
+                    color: stats.budgetUtilization > 90 ? 'red' : stats.budgetUtilization > 75 ? 'yellow' : 'green',
+                  });
+                }
+
+                if (permissions.canViewTeam) {
+                  mobileStats.push({
+                    label: 'Team',
+                    value: stats.teamCount,
+                    subtitle: 'active members',
+                    icon: UserGroupIcon,
+                    color: 'gray',
+                    href: '/dashboard/team',
+                  });
+                }
+
+                return mobileStats;
+              })()}
+              columns={6}
+              scrollable={true}
+            />
+          </div>
+
+          {/* Desktop: Grid layout with PermissionGuards */}
+          <div className="hidden md:grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 items-stretch">
+            <StatCard
+              title="Active Projects"
+              value={stats.activeProjects}
+              subtitle={`${stats.pipelineProjects} in pipeline`}
+              icon={FolderIcon}
+              color="blue"
+              href="/dashboard/projects"
+            />
+            <PermissionGuard permission="canViewAllFinances" hide>
+              <StatCard
+                title="Outstanding"
+                value={formatCurrency(stats.outstandingAmount)}
+                subtitle={`${stats.overdueInvoicesCount} overdue`}
+                icon={BanknotesIcon}
+                color={stats.overdueAmount > 0 ? 'red' : 'green'}
+                href="/dashboard/invoices"
+              />
+            </PermissionGuard>
+            <PermissionGuard permission="canViewAllTasks" hide>
+              <StatCard
+                title="Overdue Tasks"
+                value={stats.overdueTasks}
+                subtitle={`${stats.dueSoonTasks} due soon`}
+                icon={ExclamationTriangleIcon}
+                color={stats.overdueTasks > 0 ? 'orange' : 'green'}
+              />
+            </PermissionGuard>
+            <PermissionGuard permission="canManageInvoices" hide>
+              <StatCard
+                title="Pending Estimates"
+                value={stats.pendingEstimates}
+                subtitle={formatCurrency(stats.pipelineValue)}
+                icon={DocumentTextIcon}
+                color="purple"
+                href="/dashboard/estimates"
+              />
+            </PermissionGuard>
+            <PermissionGuard permission="canViewAllFinances" hide>
+              <StatCard
+                title="Budget Used"
+                value={`${stats.budgetUtilization}%`}
+                subtitle={formatCurrency(stats.totalSpent)}
+                icon={ChartBarIcon}
+                color={stats.budgetUtilization > 90 ? 'red' : stats.budgetUtilization > 75 ? 'yellow' : 'green'}
+              />
+            </PermissionGuard>
+            <PermissionGuard permission="canViewTeam" hide>
+              <StatCard
+                title="Team"
+                value={stats.teamCount}
+                subtitle="active members"
+                icon={UserGroupIcon}
+                color="gray"
+                href="/dashboard/team"
+              />
+            </PermissionGuard>
+          </div>
+        </>
+      )}
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Active Projects */}
         <div className="lg:col-span-2">
-          <Card className="p-0">
+          {/* Mobile: MobileProjectList with touch-optimized cards */}
+          <div className="md:hidden">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-lg font-semibold text-gray-900">Active Projects</h2>
+              <Link href="/dashboard/projects?status=active" className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                View all <ArrowRightIcon className="h-3 w-3" />
+              </Link>
+            </div>
+            {activeProjectsList.length > 0 ? (
+              <MobileProjectList
+                projects={activeProjectsList}
+                basePath="/dashboard/projects"
+                showBudget={permissions.canViewAllFinances}
+                showClient={true}
+              />
+            ) : (
+              <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
+                <FolderIcon className="h-12 w-12 mx-auto text-gray-300 mb-3" />
+                <p className="text-gray-500 mb-3">No active projects</p>
+                <Link href="/dashboard/projects/new">
+                  <Button variant="primary" size="sm">Create Project</Button>
+                </Link>
+              </div>
+            )}
+          </div>
+
+          {/* Desktop: Original card layout */}
+          <Card className="hidden md:block p-0">
             <div className="flex items-center justify-between p-4 border-b border-gray-100">
               <h2 className="text-lg font-semibold text-gray-900">Active Projects</h2>
               <Link href="/dashboard/projects?status=active" className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
@@ -506,103 +710,124 @@ export default function DashboardPage() {
 
         {/* Right Column */}
         <div className="space-y-6">
-          {/* Overdue Tasks */}
-          {overdueTasksList.length > 0 && (
+          {/* Overdue Tasks - Hidden for clients */}
+          <PermissionGuard permission="canViewAllTasks" hide>
+            {overdueTasksList.length > 0 && (
+              <Card className="p-0">
+                <div className="flex items-center gap-2 p-4 border-b border-gray-100 bg-red-50">
+                  <ExclamationCircleIcon className="h-5 w-5 text-red-600" />
+                  <h2 className="font-semibold text-red-800">Overdue Tasks ({stats.overdueTasks})</h2>
+                </div>
+                <div className="divide-y divide-gray-100 max-h-[250px] overflow-y-auto">
+                  {overdueTasksList.map((task) => (
+                    <Link
+                      key={task.id}
+                      href={`/dashboard/projects/${task.projectId}/tasks`}
+                      className="block p-3 hover:bg-gray-50 transition-colors"
+                    >
+                      <p className="font-medium text-gray-900 truncate text-sm">{task.title}</p>
+                      <p className="text-xs text-red-600 mt-1">
+                        {task.dueDate && differenceInDays(new Date(), new Date(task.dueDate))} days overdue
+                      </p>
+                    </Link>
+                  ))}
+                </div>
+              </Card>
+            )}
+          </PermissionGuard>
+
+          {/* Pending Estimates - Hidden for clients */}
+          <PermissionGuard permission="canManageInvoices" hide>
             <Card className="p-0">
-              <div className="flex items-center gap-2 p-4 border-b border-gray-100 bg-red-50">
-                <ExclamationCircleIcon className="h-5 w-5 text-red-600" />
-                <h2 className="font-semibold text-red-800">Overdue Tasks ({stats.overdueTasks})</h2>
+              <div className="flex items-center justify-between p-4 border-b border-gray-100">
+                <h2 className="font-semibold text-gray-900">Pending Estimates</h2>
+                <Link href="/dashboard/estimates" className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                  View all <ArrowRightIcon className="h-3 w-3" />
+                </Link>
               </div>
-              <div className="divide-y divide-gray-100 max-h-[250px] overflow-y-auto">
-                {overdueTasksList.map((task) => (
+              {pendingEstimatesList.length > 0 ? (
+                <div className="divide-y divide-gray-100 max-h-[250px] overflow-y-auto">
+                  {pendingEstimatesList.map((estimate) => (
+                    <Link
+                      key={estimate.id}
+                      href={`/dashboard/estimates/${estimate.id}`}
+                      className="block p-3 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-gray-900 truncate text-sm">{estimate.name}</p>
+                          <p className="text-xs text-gray-500">{estimate.clientName}</p>
+                        </div>
+                        <p className="text-sm font-semibold text-gray-900 ml-2">
+                          {formatCurrency(estimate.total)}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <EmptyState
+                  icon={<DocumentTextIcon className="h-full w-full" />}
+                  title="No pending estimates"
+                  description="Create an estimate to start winning new work."
+                  action={{ label: 'New Estimate', href: '/dashboard/estimates/new' }}
+                  className="py-6"
+                  size="sm"
+                />
+              )}
+            </Card>
+          </PermissionGuard>
+
+          {/* Quick Actions - BUG #5 & #6 FIX: Hide for users without permissions */}
+          <PermissionGuard anyOf={['canManageInvoices', 'canInviteUsers', 'canCreateProjects']} hide>
+            <Card className="p-4">
+              <h2 className="font-semibold text-gray-900 mb-3">Quick Actions</h2>
+              <div className="space-y-2">
+                <PermissionGuard permission="canManageInvoices" hide>
                   <Link
-                    key={task.id}
-                    href={`/dashboard/projects/${task.projectId}/tasks`}
-                    className="block p-3 hover:bg-gray-50 transition-colors"
+                    href="/dashboard/invoices/new"
+                    className="flex items-center gap-3 p-2.5 rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-colors"
                   >
-                    <p className="font-medium text-gray-900 truncate text-sm">{task.title}</p>
-                    <p className="text-xs text-red-600 mt-1">
-                      {task.dueDate && differenceInDays(new Date(), new Date(task.dueDate))} days overdue
-                    </p>
+                    <div className="p-1.5 bg-purple-100 rounded-lg">
+                      <BanknotesIcon className="h-4 w-4 text-purple-600" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-900">Create Invoice</span>
                   </Link>
-                ))}
+                </PermissionGuard>
+                <PermissionGuard permission="canInviteUsers" hide>
+                  <Link
+                    href="/dashboard/team/invite"
+                    className="flex items-center gap-3 p-2.5 rounded-lg border border-gray-200 hover:border-green-300 hover:bg-green-50 transition-colors"
+                  >
+                    <div className="p-1.5 bg-green-100 rounded-lg">
+                      <UserGroupIcon className="h-4 w-4 text-green-600" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-900">Invite Team Member</span>
+                  </Link>
+                </PermissionGuard>
+                <PermissionGuard permission="canManageInvoices" hide>
+                  <Link
+                    href="/dashboard/estimates/new"
+                    className="flex items-center gap-3 p-2.5 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors"
+                  >
+                    <div className="p-1.5 bg-blue-100 rounded-lg">
+                      <DocumentTextIcon className="h-4 w-4 text-blue-600" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-900">New Estimate</span>
+                  </Link>
+                </PermissionGuard>
               </div>
             </Card>
-          )}
+          </PermissionGuard>
 
-          {/* Pending Estimates */}
-          <Card className="p-0">
-            <div className="flex items-center justify-between p-4 border-b border-gray-100">
-              <h2 className="font-semibold text-gray-900">Pending Estimates</h2>
-              <Link href="/dashboard/estimates" className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
-                View all <ArrowRightIcon className="h-3 w-3" />
-              </Link>
-            </div>
-            {pendingEstimatesList.length > 0 ? (
-              <div className="divide-y divide-gray-100 max-h-[250px] overflow-y-auto">
-                {pendingEstimatesList.map((estimate) => (
-                  <Link
-                    key={estimate.id}
-                    href={`/dashboard/estimates/${estimate.id}`}
-                    className="block p-3 hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="min-w-0 flex-1">
-                        <p className="font-medium text-gray-900 truncate text-sm">{estimate.name}</p>
-                        <p className="text-xs text-gray-500">{estimate.clientName}</p>
-                      </div>
-                      <p className="text-sm font-semibold text-gray-900 ml-2">
-                        {formatCurrency(estimate.total)}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <EmptyState
-                icon={<DocumentTextIcon className="h-full w-full" />}
-                title="No pending estimates"
-                description="Create an estimate to start winning new work."
-                action={{ label: 'New Estimate', href: '/dashboard/estimates/new' }}
-                className="py-6"
-                size="sm"
-              />
-            )}
-          </Card>
-
-          {/* Quick Actions */}
-          <Card className="p-4">
-            <h2 className="font-semibold text-gray-900 mb-3">Quick Actions</h2>
-            <div className="space-y-2">
-              <Link
-                href="/dashboard/invoices/new"
-                className="flex items-center gap-3 p-2.5 rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-colors"
-              >
-                <div className="p-1.5 bg-purple-100 rounded-lg">
-                  <BanknotesIcon className="h-4 w-4 text-purple-600" />
-                </div>
-                <span className="text-sm font-medium text-gray-900">Create Invoice</span>
-              </Link>
-              <Link
-                href="/dashboard/team/invite"
-                className="flex items-center gap-3 p-2.5 rounded-lg border border-gray-200 hover:border-green-300 hover:bg-green-50 transition-colors"
-              >
-                <div className="p-1.5 bg-green-100 rounded-lg">
-                  <UserGroupIcon className="h-4 w-4 text-green-600" />
-                </div>
-                <span className="text-sm font-medium text-gray-900">Invite Team Member</span>
-              </Link>
-              <Link
-                href="/dashboard/estimates/new"
-                className="flex items-center gap-3 p-2.5 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors"
-              >
-                <div className="p-1.5 bg-blue-100 rounded-lg">
-                  <DocumentTextIcon className="h-4 w-4 text-blue-600" />
-                </div>
-                <span className="text-sm font-medium text-gray-900">New Estimate</span>
-              </Link>
-            </div>
-          </Card>
+          {/* Material Prices Widget - AI Intelligence */}
+          <PermissionGuard permission="canManageInvoices" hide>
+            <MaterialPriceWidget
+              prices={materialPrices}
+              loading={materialPricesLoading}
+              limit={5}
+            />
+          </PermissionGuard>
         </div>
       </div>
 
@@ -639,29 +864,149 @@ export default function DashboardPage() {
         )}
       </Card>
 
-      {/* Setup Guide for new users */}
-      {stats.totalProjects === 0 && (
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6 text-white">
-          <h3 className="text-lg font-semibold mb-2">Get Started with ContractorOS</h3>
-          <p className="text-blue-100 mb-4">
-            Welcome! Let's set up your first project and get your team onboarded.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href="/dashboard/projects/new"
-              className="inline-flex items-center px-4 py-2 bg-white text-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-colors"
-            >
-              Create Your First Project
-            </Link>
-            <Link
-              href="/dashboard/settings"
-              className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-400 transition-colors"
-            >
-              Configure Settings
-            </Link>
+      {/* Setup Guide for new users - only for admins */}
+      <PermissionGuard permission="canCreateProjects" hide>
+        {stats.totalProjects === 0 && (
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6 text-white">
+            <h3 className="text-lg font-semibold mb-2">Get Started with ContractorOS</h3>
+            <p className="text-blue-100 mb-4">
+              Welcome! Let's set up your first project and get your team onboarded.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/dashboard/projects/new"
+                className="inline-flex items-center px-4 py-2 bg-white text-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-colors"
+              >
+                Create Your First Project
+              </Link>
+              <PermissionGuard permission="canViewSettings" hide>
+                <Link
+                  href="/dashboard/settings"
+                  className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-400 transition-colors"
+                >
+                  Configure Settings
+                </Link>
+              </PermissionGuard>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </PermissionGuard>
+
+      {/* Mobile Quick Actions FAB & Menu */}
+      <PermissionGuard anyOf={['canManageInvoices', 'canInviteUsers', 'canCreateProjects']} hide>
+        {/* FAB Button */}
+        {!showMobileQuickActions && (
+          <button
+            onClick={() => setShowMobileQuickActions(true)}
+            className="md:hidden fixed right-4 bottom-20 w-14 h-14 rounded-full bg-brand-primary text-white shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center transition-all z-30"
+            aria-label="Quick Actions"
+          >
+            <PlusIcon className="h-6 w-6" />
+          </button>
+        )}
+
+        {/* Quick Actions Menu Overlay */}
+        {showMobileQuickActions && (
+          <div className="md:hidden fixed inset-0 z-50">
+            {/* Backdrop */}
+            <div
+              className="absolute inset-0 bg-black/50"
+              onClick={() => setShowMobileQuickActions(false)}
+            />
+
+            {/* Menu */}
+            <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-4 pb-8 animate-bottom-sheet">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Quick Actions</h3>
+                <button
+                  onClick={() => setShowMobileQuickActions(false)}
+                  className="p-2 -mr-2 text-gray-500 hover:text-gray-700"
+                >
+                  <XMarkIcon className="h-6 w-6" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <PermissionGuard permission="canCreateProjects" hide>
+                  <Link
+                    href="/dashboard/projects/new"
+                    onClick={() => setShowMobileQuickActions(false)}
+                    className="flex flex-col items-center gap-2 p-4 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors"
+                  >
+                    <div className="p-3 bg-blue-100 rounded-xl">
+                      <FolderIcon className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <span className="text-xs font-medium text-gray-900 text-center">New Project</span>
+                  </Link>
+                </PermissionGuard>
+
+                <PermissionGuard permission="canManageInvoices" hide>
+                  <Link
+                    href="/dashboard/invoices/new"
+                    onClick={() => setShowMobileQuickActions(false)}
+                    className="flex flex-col items-center gap-2 p-4 rounded-xl bg-purple-50 hover:bg-purple-100 transition-colors"
+                  >
+                    <div className="p-3 bg-purple-100 rounded-xl">
+                      <BanknotesIcon className="h-6 w-6 text-purple-600" />
+                    </div>
+                    <span className="text-xs font-medium text-gray-900 text-center">New Invoice</span>
+                  </Link>
+                </PermissionGuard>
+
+                <PermissionGuard permission="canManageInvoices" hide>
+                  <Link
+                    href="/dashboard/estimates/new"
+                    onClick={() => setShowMobileQuickActions(false)}
+                    className="flex flex-col items-center gap-2 p-4 rounded-xl bg-green-50 hover:bg-green-100 transition-colors"
+                  >
+                    <div className="p-3 bg-green-100 rounded-xl">
+                      <DocumentTextIcon className="h-6 w-6 text-green-600" />
+                    </div>
+                    <span className="text-xs font-medium text-gray-900 text-center">New Estimate</span>
+                  </Link>
+                </PermissionGuard>
+
+                <PermissionGuard permission="canInviteUsers" hide>
+                  <Link
+                    href="/dashboard/team/invite"
+                    onClick={() => setShowMobileQuickActions(false)}
+                    className="flex flex-col items-center gap-2 p-4 rounded-xl bg-orange-50 hover:bg-orange-100 transition-colors"
+                  >
+                    <div className="p-3 bg-orange-100 rounded-xl">
+                      <UserGroupIcon className="h-6 w-6 text-orange-600" />
+                    </div>
+                    <span className="text-xs font-medium text-gray-900 text-center">Invite Team</span>
+                  </Link>
+                </PermissionGuard>
+
+                <PermissionGuard permission="canViewAllTasks" hide>
+                  <Link
+                    href="/dashboard/tasks"
+                    onClick={() => setShowMobileQuickActions(false)}
+                    className="flex flex-col items-center gap-2 p-4 rounded-xl bg-amber-50 hover:bg-amber-100 transition-colors"
+                  >
+                    <div className="p-3 bg-amber-100 rounded-xl">
+                      <ClipboardDocumentCheckIcon className="h-6 w-6 text-amber-600" />
+                    </div>
+                    <span className="text-xs font-medium text-gray-900 text-center">View Tasks</span>
+                  </Link>
+                </PermissionGuard>
+
+                <Link
+                  href="/dashboard/activity"
+                  onClick={() => setShowMobileQuickActions(false)}
+                  className="flex flex-col items-center gap-2 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
+                >
+                  <div className="p-3 bg-gray-100 rounded-xl">
+                    <ClockIcon className="h-6 w-6 text-gray-600" />
+                  </div>
+                  <span className="text-xs font-medium text-gray-900 text-center">Activity</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+      </PermissionGuard>
     </div>
   );
 }

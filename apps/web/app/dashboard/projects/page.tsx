@@ -9,6 +9,7 @@ import { Project, ProjectStatus, ProjectCategory } from '@/types';
 import { FirestoreError, Button, Card, Badge, EmptyState } from '@/components/ui';
 import { toast } from '@/components/ui/Toast';
 import { SkeletonList } from '@/components/ui/Skeleton';
+import { MobileProjectList } from '@/components/projects/MobileProjectCard';
 import { cn } from '@/lib/utils';
 import {
   PlusIcon,
@@ -486,8 +487,21 @@ export default function ProjectsPage() {
 
       {/* Projects List */}
       {filteredProjects.length > 0 ? (
-        viewMode === 'grid' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <>
+          {/* Mobile: Touch-optimized project cards */}
+          <div className="md:hidden">
+            <MobileProjectList
+              projects={filteredProjects}
+              basePath="/dashboard/projects"
+              showBudget={true}
+              showClient={true}
+              emptyMessage="No projects match your filters"
+            />
+          </div>
+
+          {/* Desktop: Grid/List view */}
+          {viewMode === 'grid' ? (
+          <div className="hidden md:grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {filteredProjects.map((project) => (
               <div
                 key={project.id}
@@ -602,8 +616,8 @@ export default function ProjectsPage() {
             ))}
           </div>
         ) : (
-          // List View
-          <div className="space-y-2">
+          // List View (Desktop only)
+          <div className="hidden md:block space-y-2">
             {filteredProjects.map((project) => (
               <div
                 key={project.id}
@@ -712,7 +726,8 @@ export default function ProjectsPage() {
               </div>
             ))}
           </div>
-        )
+        )}
+        </>
       ) : (
         <EmptyState
           icon={<FolderIcon className="h-full w-full" />}
