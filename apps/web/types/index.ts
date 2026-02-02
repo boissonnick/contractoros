@@ -7779,12 +7779,12 @@ export interface MaintenanceRecord {
 // Client Portal Types (Sprint 36)
 // ============================================================================
 
-export interface ProjectSelection {
+export interface ClientPortalSelection {
   id: string;
   projectId: string;
   orgId: string;
   category: string;
-  options: SelectionOption[];
+  options: ClientPortalSelectionOption[];
   selectedOptionId?: string;
   clientApproved: boolean;
   clientApprovedAt?: Date;
@@ -7793,7 +7793,7 @@ export interface ProjectSelection {
   updatedAt: Date;
 }
 
-export interface SelectionOption {
+export interface ClientPortalSelectionOption {
   id: string;
   name: string;
   description?: string;
@@ -7803,7 +7803,7 @@ export interface SelectionOption {
   leadTime?: string;
 }
 
-export interface ClientNote {
+export interface ClientPortalNote {
   id: string;
   projectId: string;
   orgId: string;
@@ -7833,3 +7833,7 @@ export interface PhaseProgress {
   startDate?: Date;
   endDate?: Date;
 }
+
+// Convenience aliases for client portal (using existing types)
+export type Photo = ProjectPhoto;
+export type Activity = ActivityItem;
