@@ -1,6 +1,26 @@
+/**
+ * Equipment CRUD API - Sprint 35
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
-import { adminDb } from '@/lib/firebase/admin';
-import { verifyAuth } from '@/lib/api/auth';
+import { getAuth } from 'firebase-admin/auth';
+import { getFirestore } from 'firebase-admin/firestore';
+import { initializeAdminApp } from '@/lib/assistant/firebase-admin-init';
+
+async function verifyAuth(request: NextRequest) {
+  await initializeAdminApp();
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) return null;
+  try {
+    const token = authHeader.slice(7);
+    const decodedToken = await getAuth().verifyIdToken(token);
+    const db = getFirestore();
+    const userDoc = await db.collection('users').doc(decodedToken.uid).get();
+    const userData = userDoc.data();
+    if (!userData?.orgId) return null;
+    return { uid: decodedToken.uid, orgId: userData.orgId, name: userData.displayName || 'Unknown' };
+  } catch { return null; }
+}
 
 // GET /api/equipment/[equipmentId] - Get single equipment
 export async function GET(
@@ -13,19 +33,18 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const db = getFirestore();
     const { equipmentId } = await params;
-    const doc = await adminDb.collection('equipment').doc(equipmentId).get();
+    const doc = await db
+      .collection('organizations').doc(auth.orgId)
+      .collection('equipment').doc(equipmentId)
+      .get();
 
     if (!doc.exists) {
       return NextResponse.json({ error: 'Equipment not found' }, { status: 404 });
     }
 
-    const equipment = doc.data();
-    if (equipment?.orgId !== auth.orgId) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
-
-    return NextResponse.json({ id: doc.id, ...equipment });
+    return NextResponse.json({ id: doc.id, ...doc.data() });
   } catch (error) {
     console.error('Error fetching equipment:', error);
     return NextResponse.json({ error: 'Failed to fetch equipment' }, { status: 500 });
@@ -43,16 +62,15 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const db = getFirestore();
     const { equipmentId } = await params;
-    const doc = await adminDb.collection('equipment').doc(equipmentId).get();
+    const docRef = db
+      .collection('organizations').doc(auth.orgId)
+      .collection('equipment').doc(equipmentId);
+    const doc = await docRef.get();
 
     if (!doc.exists) {
       return NextResponse.json({ error: 'Equipment not found' }, { status: 404 });
-    }
-
-    const equipment = doc.data();
-    if (equipment?.orgId !== auth.orgId) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const body = await request.json();
@@ -69,9 +87,9 @@ export async function PATCH(
       }
     }
 
-    await adminDb.collection('equipment').doc(equipmentId).update(updates);
+    await docRef.update(updates);
 
-    return NextResponse.json({ id: equipmentId, ...equipment, ...updates });
+    return NextResponse.json({ id: equipmentId, ...doc.data(), ...updates });
   } catch (error) {
     console.error('Error updating equipment:', error);
     return NextResponse.json({ error: 'Failed to update equipment' }, { status: 500 });
@@ -89,23 +107,23 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const db = getFirestore();
     const { equipmentId } = await params;
-    const doc = await adminDb.collection('equipment').doc(equipmentId).get();
+    const docRef = db
+      .collection('organizations').doc(auth.orgId)
+      .collection('equipment').doc(equipmentId);
+    const doc = await docRef.get();
 
     if (!doc.exists) {
       return NextResponse.json({ error: 'Equipment not found' }, { status: 404 });
     }
 
     const equipment = doc.data();
-    if (equipment?.orgId !== auth.orgId) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
-
     if (equipment?.status === 'checked_out') {
       return NextResponse.json({ error: 'Cannot delete checked out equipment' }, { status: 400 });
     }
 
-    await adminDb.collection('equipment').doc(equipmentId).delete();
+    await docRef.delete();
 
     return NextResponse.json({ success: true });
   } catch (error) {

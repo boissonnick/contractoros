@@ -1,7 +1,26 @@
+/**
+ * Equipment List & Create API - Sprint 35
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
-import { adminDb } from '@/lib/firebase/admin';
-import { verifyAuth } from '@/lib/api/auth';
-import { Equipment } from '@/types';
+import { getAuth } from 'firebase-admin/auth';
+import { getFirestore } from 'firebase-admin/firestore';
+import { initializeAdminApp } from '@/lib/assistant/firebase-admin-init';
+
+async function verifyAuth(request: NextRequest) {
+  await initializeAdminApp();
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) return null;
+  try {
+    const token = authHeader.slice(7);
+    const decodedToken = await getAuth().verifyIdToken(token);
+    const db = getFirestore();
+    const userDoc = await db.collection('users').doc(decodedToken.uid).get();
+    const userData = userDoc.data();
+    if (!userData?.orgId) return null;
+    return { uid: decodedToken.uid, orgId: userData.orgId, name: userData.displayName || 'Unknown' };
+  } catch { return null; }
+}
 
 // GET /api/equipment - List all equipment for org
 export async function GET(request: NextRequest) {
@@ -11,13 +30,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const db = getFirestore();
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
     const category = searchParams.get('category');
 
-    let query = adminDb
-      .collection('equipment')
-      .where('orgId', '==', auth.orgId);
+    let query: FirebaseFirestore.Query = db
+      .collection('organizations').doc(auth.orgId)
+      .collection('equipment');
 
     if (status) {
       query = query.where('status', '==', status);
@@ -47,6 +67,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const db = getFirestore();
     const body = await request.json();
     const { name, category, serialNumber, description, purchaseDate, purchasePrice, currentLocation, maintenanceSchedule } = body;
 
@@ -55,22 +76,25 @@ export async function POST(request: NextRequest) {
     }
 
     const now = new Date();
-    const equipmentData: Omit<Equipment, 'id'> = {
+    const equipmentData = {
       orgId: auth.orgId,
       name,
       category,
       status: 'available',
-      serialNumber: serialNumber || undefined,
-      description: description || undefined,
-      purchaseDate: purchaseDate ? new Date(purchaseDate) : undefined,
-      purchasePrice: purchasePrice || undefined,
-      currentLocation: currentLocation || undefined,
-      maintenanceSchedule: maintenanceSchedule || undefined,
+      serialNumber: serialNumber || null,
+      description: description || null,
+      purchaseDate: purchaseDate ? new Date(purchaseDate) : null,
+      purchasePrice: purchasePrice || null,
+      currentLocation: currentLocation || null,
+      maintenanceSchedule: maintenanceSchedule || null,
       createdAt: now,
       updatedAt: now,
     };
 
-    const docRef = await adminDb.collection('equipment').add(equipmentData);
+    const docRef = await db
+      .collection('organizations').doc(auth.orgId)
+      .collection('equipment')
+      .add(equipmentData);
 
     return NextResponse.json({
       id: docRef.id,

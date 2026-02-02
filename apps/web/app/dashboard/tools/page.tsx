@@ -5,15 +5,24 @@ import { useTools } from '@/lib/hooks/useTools';
 import { Card, Button, Badge } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import { toast } from '@/components/ui/Toast';
-import { Tool, ToolStatus } from '@/types';
+import { Tool, ToolStatus, ToolCategory } from '@/types';
 import {
   WrenchScrewdriverIcon,
   PlusIcon,
   MagnifyingGlassIcon,
   ArrowPathIcon,
   UserIcon,
+  Squares2X2Icon,
+  ListBulletIcon,
+  FunnelIcon,
+  MapPinIcon,
+  CalendarIcon,
+  ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
+import { EquipmentCard } from '@/components/equipment/EquipmentCard';
+import { EquipmentFormModal } from '@/components/equipment/EquipmentFormModal';
+import { CheckOutModal } from '@/components/equipment/CheckOutModal';
 
 const STATUS_CONFIG: Record<ToolStatus, { label: string; color: string }> = {
   available: { label: 'Available', color: 'bg-green-100 text-green-700' },
@@ -22,18 +31,54 @@ const STATUS_CONFIG: Record<ToolStatus, { label: string; color: string }> = {
   retired: { label: 'Retired', color: 'bg-gray-100 text-gray-500' },
 };
 
+const CATEGORY_CONFIG: Record<ToolCategory, string> = {
+  power_tool: 'Power Tool',
+  hand_tool: 'Hand Tool',
+  heavy_equipment: 'Heavy Equipment',
+  safety: 'Safety',
+  measuring: 'Measuring',
+  vehicle: 'Vehicle',
+  other: 'Other',
+};
+
+type ViewMode = 'grid' | 'list';
+
 export default function ToolsPage() {
-  const { tools, loading, checkoutTool, returnTool } = useTools();
+  const { tools, loading, checkoutTool, returnTool, addTool, teamMembers, projects } = useTools();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<ToolStatus | 'all'>('all');
+  const [categoryFilter, setCategoryFilter] = useState<ToolCategory | 'all'>('all');
+  const [locationFilter, setLocationFilter] = useState<string>('all');
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [showFilters, setShowFilters] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+  const [selectedTool, setSelectedTool] = useState<Tool | null>(null);
+
+  // Get unique locations
+  const locations = useMemo(() => {
+    const locs = new Set<string>();
+    tools.forEach((t) => {
+      if (t.currentLocation) locs.add(t.currentLocation);
+    });
+    return Array.from(locs).sort();
+  }, [tools]);
 
   const filtered = useMemo(() => {
     return tools.filter((tool) => {
-      if (search && !tool.name.toLowerCase().includes(search.toLowerCase())) return false;
+      // Search by name or serial number
+      if (search) {
+        const searchLower = search.toLowerCase();
+        const matchesName = tool.name.toLowerCase().includes(searchLower);
+        const matchesSerial = tool.serialNumber?.toLowerCase().includes(searchLower);
+        if (!matchesName && !matchesSerial) return false;
+      }
       if (statusFilter !== 'all' && tool.status !== statusFilter) return false;
+      if (categoryFilter !== 'all' && tool.category !== categoryFilter) return false;
+      if (locationFilter !== 'all' && tool.currentLocation !== locationFilter) return false;
       return true;
     });
-  }, [tools, search, statusFilter]);
+  }, [tools, search, statusFilter, categoryFilter, locationFilter]);
 
   const stats = useMemo(() => ({
     total: tools.length,
@@ -42,22 +87,61 @@ export default function ToolsPage() {
     maintenance: tools.filter((t) => t.status === 'maintenance').length,
   }), [tools]);
 
-  const handleCheckout = async (toolId: string) => {
-    try {
-      await checkoutTool(toolId);
-      toast.success('Tool checked out');
-    } catch {
-      toast.error('Failed to check out tool');
-    }
+  const handleCheckout = async (tool: Tool) => {
+    setSelectedTool(tool);
+    setShowCheckoutModal(true);
   };
 
-  const handleReturn = async (toolId: string) => {
+  const handleReturn = async (tool: Tool) => {
     try {
-      await returnTool(toolId);
-      toast.success('Tool returned');
+      await returnTool(tool.id);
+      toast.success('Tool returned successfully');
     } catch {
       toast.error('Failed to return tool');
     }
+  };
+
+  const handleAddEquipment = async (data: Partial<Tool>) => {
+    try {
+      await addTool(data);
+      toast.success('Equipment added successfully');
+    } catch {
+      toast.error('Failed to add equipment');
+    }
+  };
+
+  const handleCheckoutSubmit = async (data: any) => {
+    if (!selectedTool) return;
+    try {
+      await checkoutTool(selectedTool.id, data);
+      toast.success('Equipment checked out successfully');
+      setSelectedTool(null);
+    } catch {
+      toast.error('Failed to check out equipment');
+    }
+  };
+
+  const handleExport = () => {
+    // Create CSV data
+    const headers = ['Name', 'Category', 'Status', 'Serial Number', 'Location', 'Assigned To'];
+    const rows = filtered.map((t) => [
+      t.name,
+      CATEGORY_CONFIG[t.category] || t.category,
+      STATUS_CONFIG[t.status].label,
+      t.serialNumber || '',
+      t.currentLocation || '',
+      t.assignedToName || '',
+    ]);
+
+    const csv = [headers, ...rows].map((r) => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `equipment-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success('Export downloaded');
   };
 
   if (loading) {
@@ -70,22 +154,29 @@ export default function ToolsPage() {
 
   return (
     <div className="p-6 space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Tools & Equipment</h1>
           <p className="text-gray-500 mt-1">Track and manage your tool inventory</p>
         </div>
-        <Button variant="primary" size="sm">
-          <PlusIcon className="h-4 w-4 mr-1" />
-          Add Tool
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={handleExport}>
+            <ArrowDownTrayIcon className="h-4 w-4 mr-1" />
+            Export
+          </Button>
+          <Button variant="primary" size="sm" onClick={() => setShowAddModal(true)}>
+            <PlusIcon className="h-4 w-4 mr-1" />
+            Add Equipment
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="p-4 text-center">
           <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-          <p className="text-xs text-gray-500">Total Tools</p>
+          <p className="text-xs text-gray-500">Total Equipment</p>
         </Card>
         <Card className="p-4 text-center">
           <p className="text-2xl font-bold text-green-700">{stats.available}</p>
@@ -97,11 +188,11 @@ export default function ToolsPage() {
         </Card>
         <Card className="p-4 text-center">
           <p className="text-2xl font-bold text-orange-600">{stats.maintenance}</p>
-          <p className="text-xs text-gray-500">Maintenance</p>
+          <p className="text-xs text-gray-500">In Maintenance</p>
         </Card>
       </div>
 
-      {/* Filters */}
+      {/* Search and View Toggle */}
       <div className="flex items-center gap-3 flex-wrap">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -109,79 +200,221 @@ export default function ToolsPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search tools..."
+            placeholder="Search by name or serial number..."
             className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm"
           />
         </div>
-        <div className="flex gap-1">
-          {(['all', 'available', 'checked_out', 'maintenance'] as const).map((s) => (
-            <button
-              key={s}
-              onClick={() => setStatusFilter(s)}
-              className={cn(
-                'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
-                statusFilter === s ? 'bg-blue-50 text-blue-600' : 'text-gray-500 hover:bg-gray-100'
-              )}
-            >
-              {s === 'all' ? 'All' : STATUS_CONFIG[s].label}
-            </button>
-          ))}
+
+        {/* View Toggle */}
+        <div className="flex border border-gray-300 rounded-lg overflow-hidden">
+          <button
+            onClick={() => setViewMode('grid')}
+            className={cn(
+              'p-2 transition-colors',
+              viewMode === 'grid' ? 'bg-blue-50 text-blue-600' : 'bg-white text-gray-500 hover:bg-gray-50'
+            )}
+          >
+            <Squares2X2Icon className="h-5 w-5" />
+          </button>
+          <button
+            onClick={() => setViewMode('list')}
+            className={cn(
+              'p-2 transition-colors',
+              viewMode === 'list' ? 'bg-blue-50 text-blue-600' : 'bg-white text-gray-500 hover:bg-gray-50'
+            )}
+          >
+            <ListBulletIcon className="h-5 w-5" />
+          </button>
         </div>
+
+        {/* Filter Toggle */}
+        <button
+          onClick={() => setShowFilters(!showFilters)}
+          className={cn(
+            'flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+            showFilters ? 'bg-blue-50 text-blue-600' : 'text-gray-500 hover:bg-gray-100'
+          )}
+        >
+          <FunnelIcon className="h-4 w-4" />
+          Filters
+        </button>
       </div>
 
-      {/* Tools List */}
+      {/* Expanded Filters */}
+      {showFilters && (
+        <Card className="p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Status Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as ToolStatus | 'all')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+              >
+                <option value="all">All Statuses</option>
+                {Object.entries(STATUS_CONFIG).map(([key, { label }]) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Category Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value as ToolCategory | 'all')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+              >
+                <option value="all">All Categories</option>
+                {Object.entries(CATEGORY_CONFIG).map(([key, label]) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Location Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+              <select
+                value={locationFilter}
+                onChange={(e) => setLocationFilter(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+              >
+                <option value="all">All Locations</option>
+                {locations.map((loc) => (
+                  <option key={loc} value={loc}>{loc}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Quick Status Filters */}
+      <div className="flex gap-1">
+        {(['all', 'available', 'checked_out', 'maintenance'] as const).map((s) => (
+          <button
+            key={s}
+            onClick={() => setStatusFilter(s)}
+            className={cn(
+              'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
+              statusFilter === s ? 'bg-blue-50 text-blue-600' : 'text-gray-500 hover:bg-gray-100'
+            )}
+          >
+            {s === 'all' ? 'All' : STATUS_CONFIG[s].label}
+          </button>
+        ))}
+      </div>
+
+      {/* Equipment Display */}
       {filtered.length === 0 ? (
         <Card className="p-8 text-center">
           <WrenchScrewdriverIcon className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500">No tools found</p>
+          <p className="text-gray-500">No equipment found</p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-4"
+            onClick={() => setShowAddModal(true)}
+          >
+            <PlusIcon className="h-4 w-4 mr-1" />
+            Add First Equipment
+          </Button>
         </Card>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      ) : viewMode === 'grid' ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filtered.map((tool) => (
-            <Card key={tool.id} className="p-4">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gray-100 rounded-lg">
-                    <WrenchScrewdriverIcon className="h-5 w-5 text-gray-600" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">{tool.name}</p>
-                    <p className="text-xs text-gray-400">{tool.category}</p>
-                  </div>
-                </div>
-                <Badge className={STATUS_CONFIG[tool.status].color}>
-                  {STATUS_CONFIG[tool.status].label}
-                </Badge>
-              </div>
-
-              {tool.serialNumber && (
-                <p className="text-xs text-gray-500 mb-2">S/N: {tool.serialNumber}</p>
-              )}
-
-              {tool.assignedToName && (
-                <div className="flex items-center gap-2 text-sm text-blue-600 mb-2">
-                  <UserIcon className="h-4 w-4" />
-                  {tool.assignedToName}
-                </div>
-              )}
-
-              <div className="flex gap-2 mt-3">
-                {tool.status === 'available' && (
-                  <Button size="sm" variant="outline" onClick={() => handleCheckout(tool.id)}>
-                    Check Out
-                  </Button>
-                )}
-                {tool.status === 'checked_out' && (
-                  <Button size="sm" variant="outline" onClick={() => handleReturn(tool.id)}>
-                    <ArrowPathIcon className="h-4 w-4 mr-1" />
-                    Return
-                  </Button>
-                )}
-              </div>
-            </Card>
+            <EquipmentCard
+              key={tool.id}
+              equipment={tool as any}
+              onCheckOut={() => handleCheckout(tool)}
+              onReturn={() => handleReturn(tool)}
+              onView={() => {}}
+            />
           ))}
         </div>
+      ) : (
+        <Card className="overflow-hidden">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Location</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Assigned To</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filtered.map((tool) => (
+                <tr key={tool.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="p-1.5 bg-gray-100 rounded">
+                        <WrenchScrewdriverIcon className="h-4 w-4 text-gray-500" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900 text-sm">{tool.name}</p>
+                        {tool.serialNumber && (
+                          <p className="text-xs text-gray-400">SN: {tool.serialNumber}</p>
+                        )}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-600">
+                    {CATEGORY_CONFIG[tool.category] || tool.category}
+                  </td>
+                  <td className="px-4 py-3">
+                    <Badge className={cn('text-xs', STATUS_CONFIG[tool.status].color)}>
+                      {STATUS_CONFIG[tool.status].label}
+                    </Badge>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-600">
+                    {tool.currentLocation || '-'}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-600">
+                    {tool.assignedToName || '-'}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    {tool.status === 'available' && (
+                      <Button size="sm" variant="outline" onClick={() => handleCheckout(tool)}>
+                        Check Out
+                      </Button>
+                    )}
+                    {tool.status === 'checked_out' && (
+                      <Button size="sm" variant="outline" onClick={() => handleReturn(tool)}>
+                        Return
+                      </Button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Card>
       )}
+
+      {/* Modals */}
+      <EquipmentFormModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSubmit={handleAddEquipment}
+      />
+
+      <CheckOutModal
+        isOpen={showCheckoutModal}
+        onClose={() => {
+          setShowCheckoutModal(false);
+          setSelectedTool(null);
+        }}
+        onSubmit={handleCheckoutSubmit}
+        equipment={selectedTool as any}
+        teamMembers={teamMembers || []}
+        projects={projects || []}
+      />
     </div>
   );
 }

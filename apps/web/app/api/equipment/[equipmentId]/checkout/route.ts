@@ -1,7 +1,26 @@
+/**
+ * Equipment Checkout API - Sprint 35
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
-import { adminDb } from '@/lib/firebase/admin';
-import { verifyAuth } from '@/lib/api/auth';
-import { EquipmentCheckout } from '@/types';
+import { getAuth } from 'firebase-admin/auth';
+import { getFirestore } from 'firebase-admin/firestore';
+import { initializeAdminApp } from '@/lib/assistant/firebase-admin-init';
+
+async function verifyAuth(request: NextRequest) {
+  await initializeAdminApp();
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) return null;
+  try {
+    const token = authHeader.slice(7);
+    const decodedToken = await getAuth().verifyIdToken(token);
+    const db = getFirestore();
+    const userDoc = await db.collection('users').doc(decodedToken.uid).get();
+    const userData = userDoc.data();
+    if (!userData?.orgId) return null;
+    return { uid: decodedToken.uid, orgId: userData.orgId, name: userData.displayName || 'Unknown' };
+  } catch { return null; }
+}
 
 // POST /api/equipment/[equipmentId]/checkout - Check out equipment
 export async function POST(
@@ -14,8 +33,11 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const db = getFirestore();
     const { equipmentId } = await params;
-    const equipmentRef = adminDb.collection('equipment').doc(equipmentId);
+    const equipmentRef = db
+      .collection('organizations').doc(auth.orgId)
+      .collection('equipment').doc(equipmentId);
     const equipmentDoc = await equipmentRef.get();
 
     if (!equipmentDoc.exists) {
@@ -23,10 +45,6 @@ export async function POST(
     }
 
     const equipment = equipmentDoc.data();
-    if (equipment?.orgId !== auth.orgId) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
-
     if (equipment?.status !== 'available') {
       return NextResponse.json({ error: 'Equipment is not available for checkout' }, { status: 400 });
     }
@@ -41,19 +59,23 @@ export async function POST(
     const now = new Date();
 
     // Create checkout record
-    const checkoutData: Omit<EquipmentCheckout, 'id'> = {
+    const checkoutData = {
       equipmentId,
       equipmentName: equipment.name,
       userId,
       userName,
-      projectId: projectId || undefined,
-      projectName: projectName || undefined,
+      projectId: projectId || null,
+      projectName: projectName || null,
       checkedOutAt: now,
-      expectedReturnDate: expectedReturnDate ? new Date(expectedReturnDate) : undefined,
-      notes: notes || undefined,
+      expectedReturnDate: expectedReturnDate ? new Date(expectedReturnDate) : null,
+      returnedAt: null,
+      notes: notes || null,
     };
 
-    const checkoutRef = await adminDb.collection('equipmentCheckouts').add(checkoutData);
+    const checkoutRef = await db
+      .collection('organizations').doc(auth.orgId)
+      .collection('equipmentCheckouts')
+      .add(checkoutData);
 
     // Update equipment status
     await equipmentRef.update({
@@ -87,8 +109,11 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const db = getFirestore();
     const { equipmentId } = await params;
-    const equipmentRef = adminDb.collection('equipment').doc(equipmentId);
+    const equipmentRef = db
+      .collection('organizations').doc(auth.orgId)
+      .collection('equipment').doc(equipmentId);
     const equipmentDoc = await equipmentRef.get();
 
     if (!equipmentDoc.exists) {
@@ -96,10 +121,6 @@ export async function DELETE(
     }
 
     const equipment = equipmentDoc.data();
-    if (equipment?.orgId !== auth.orgId) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
-
     if (equipment?.status !== 'checked_out') {
       return NextResponse.json({ error: 'Equipment is not checked out' }, { status: 400 });
     }
@@ -107,7 +128,8 @@ export async function DELETE(
     const now = new Date();
 
     // Find and update the checkout record
-    const checkoutSnapshot = await adminDb
+    const checkoutSnapshot = await db
+      .collection('organizations').doc(auth.orgId)
       .collection('equipmentCheckouts')
       .where('equipmentId', '==', equipmentId)
       .where('returnedAt', '==', null)
