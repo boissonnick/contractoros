@@ -7127,3 +7127,64 @@ export interface AIRateLimitStatus {
   resetAt: Date;
   reason?: string;
 }
+
+// ============================================================================
+// Email Templates
+// ============================================================================
+
+/**
+ * Email template types for automated and manual sending
+ */
+export type EmailTemplateType =
+  | 'estimate_sent'
+  | 'estimate_followup'
+  | 'invoice_sent'
+  | 'invoice_reminder'
+  | 'invoice_overdue'
+  | 'payment_received'
+  | 'project_started'
+  | 'project_completed'
+  | 'document_ready'
+  | 'signature_request'
+  | 'welcome_client'
+  | 'custom';
+
+/**
+ * Email template configuration
+ * Path: organizations/{orgId}/emailTemplates/{templateId}
+ */
+export interface EmailTemplate {
+  id: string;
+  orgId: string;
+  type: EmailTemplateType;
+  name: string;
+  subject: string;
+  body: string; // HTML with {{variables}}
+  variables: string[]; // Available: clientName, projectName, amount, dueDate, etc.
+  isDefault: boolean;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * Email log entry for tracking sent emails
+ * Path: organizations/{orgId}/emailLogs/{logId}
+ */
+export interface EmailLog {
+  id: string;
+  orgId: string;
+  templateId?: string;
+  templateType: EmailTemplateType;
+  recipientEmail: string;
+  recipientName: string;
+  subject: string;
+  status: 'sent' | 'failed' | 'bounced' | 'opened';
+  clientId?: string;
+  projectId?: string;
+  invoiceId?: string;
+  estimateId?: string;
+  sentAt: Date;
+  openedAt?: Date;
+  errorMessage?: string;
+}
