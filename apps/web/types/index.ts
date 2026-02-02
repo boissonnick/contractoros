@@ -7010,6 +7010,7 @@ export type AIModelProvider = 'gemini' | 'claude' | 'openai';
  * Subscription tier that determines available AI features
  */
 export type AIModelTier = 'free' | 'pro' | 'enterprise';
+export type AIResponseStyle = 'concise' | 'detailed' | 'technical';
 
 /**
  * Content filter strictness level
@@ -7044,6 +7045,15 @@ export interface OrganizationAISettings {
   enableStreaming: boolean;        // Stream responses
   enableIntelligence: boolean;     // AI-powered insights (pricing, etc.)
 
+  // Response style
+  responseStyle: AIResponseStyle;  // concise, detailed, or technical
+
+  // Text-to-speech settings
+  enableTTS: boolean;              // Enable text-to-speech for responses
+  ttsVoiceURI: string;             // Selected voice URI
+  ttsRate: number;                 // Speech rate (0.5 - 2.0)
+  ttsAutoSpeak: boolean;           // Automatically speak AI responses
+
   // Safety settings
   contentFilterLevel: AIContentFilterLevel;
   logPrompts: boolean;             // Log prompts for debugging/audit
@@ -7071,6 +7081,11 @@ export const DEFAULT_AI_SETTINGS: Omit<OrganizationAISettings, 'orgId' | 'create
   enableVoiceInput: true,
   enableStreaming: true,
   enableIntelligence: true,
+  responseStyle: 'detailed',
+  enableTTS: false,
+  ttsVoiceURI: '',
+  ttsRate: 1.0,
+  ttsAutoSpeak: false,
   contentFilterLevel: 'balanced',
   logPrompts: false,
   blockExternalUrls: true,

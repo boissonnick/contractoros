@@ -19,6 +19,14 @@ import {
 } from '@/lib/assistant/types';
 import { ChatMessage } from './ChatMessage';
 import { VoiceInput } from './VoiceInput';
+import { speak, isTTSSupported } from '@/lib/assistant/tts-service';
+
+interface TTSSettings {
+  enabled: boolean;
+  voiceURI: string;
+  rate: number;
+  autoSpeak: boolean;
+}
 
 interface AssistantPanelProps {
   isOpen: boolean;
@@ -32,6 +40,7 @@ interface AssistantPanelProps {
   onClearHistory: () => void;
   onActionClick?: (action: QuickAction) => void;
   contextSuggestions?: string[];
+  ttsSettings?: TTSSettings;
 }
 
 export function AssistantPanel({
@@ -46,15 +55,38 @@ export function AssistantPanel({
   onClearHistory,
   onActionClick,
   contextSuggestions,
+  ttsSettings,
 }: AssistantPanelProps) {
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const lastMessageIdRef = useRef<string | null>(null);
 
   // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Auto-speak new assistant messages if enabled
+  useEffect(() => {
+    if (!ttsSettings?.enabled || !ttsSettings?.autoSpeak || !isTTSSupported()) {
+      return;
+    }
+
+    const lastMessage = messages[messages.length - 1];
+    if (
+      lastMessage &&
+      lastMessage.role === 'assistant' &&
+      lastMessage.status === 'sent' &&
+      lastMessage.id !== lastMessageIdRef.current
+    ) {
+      lastMessageIdRef.current = lastMessage.id;
+      speak(lastMessage.content, {
+        voiceURI: ttsSettings.voiceURI,
+        rate: ttsSettings.rate,
+      });
+    }
+  }, [messages, ttsSettings]);
 
   // Focus input when panel opens
   useEffect(() => {
@@ -227,6 +259,11 @@ export function AssistantPanel({
                       key={message.id}
                       message={message}
                       onActionClick={onActionClick}
+                      showTTSButton={ttsSettings?.enabled && isTTSSupported()}
+                      ttsOptions={ttsSettings ? {
+                        voiceURI: ttsSettings.voiceURI,
+                        rate: ttsSettings.rate,
+                      } : undefined}
                     />
                   ))}
 

@@ -1,19 +1,43 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { ChatMessage as ChatMessageType, DataSource, QuickAction } from '@/lib/assistant/types';
-import { UserCircleIcon, SparklesIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
+import { UserCircleIcon, SparklesIcon, ExclamationCircleIcon, SpeakerWaveIcon, StopIcon } from '@heroicons/react/24/outline';
 import ReactMarkdown from 'react-markdown';
+import { speak, stop, isSpeaking } from '@/lib/assistant/tts-service';
 
 interface ChatMessageProps {
   message: ChatMessageType;
   onActionClick?: (action: QuickAction) => void;
+  showTTSButton?: boolean;
+  ttsOptions?: {
+    voiceURI?: string;
+    rate?: number;
+  };
 }
 
-export function ChatMessage({ message, onActionClick }: ChatMessageProps) {
+export function ChatMessage({ message, onActionClick, showTTSButton, ttsOptions }: ChatMessageProps) {
   const isUser = message.role === 'user';
   const isError = message.status === 'error';
   const isStreaming = message.status === 'streaming';
+  const [speaking, setSpeaking] = useState(false);
+
+  const handleSpeak = useCallback(() => {
+    if (speaking) {
+      stop();
+      setSpeaking(false);
+    } else {
+      speak(message.content, ttsOptions);
+      setSpeaking(true);
+      // Check periodically if speaking has stopped
+      const checkInterval = setInterval(() => {
+        if (!isSpeaking()) {
+          setSpeaking(false);
+          clearInterval(checkInterval);
+        }
+      }, 500);
+    }
+  }, [speaking, message.content, ttsOptions]);
 
   return (
     <div
@@ -129,13 +153,29 @@ export function ChatMessage({ message, onActionClick }: ChatMessageProps) {
             </div>
           )}
 
-        {/* Timestamp */}
+        {/* Timestamp and TTS button */}
         <div
-          className={`mt-1 text-[10px] text-gray-400 ${isUser ? 'text-right' : ''}`}
+          className={`mt-1 flex items-center gap-2 text-[10px] text-gray-400 ${isUser ? 'justify-end' : ''}`}
         >
-          {formatTime(message.timestamp)}
-          {message.metadata?.isVoiceInput && (
-            <span className="ml-1">via voice</span>
+          <span>
+            {formatTime(message.timestamp)}
+            {message.metadata?.isVoiceInput && (
+              <span className="ml-1">via voice</span>
+            )}
+          </span>
+          {/* TTS button for assistant messages */}
+          {!isUser && showTTSButton && !isStreaming && !isError && (
+            <button
+              onClick={handleSpeak}
+              className="p-1 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded transition-colors"
+              title={speaking ? 'Stop speaking' : 'Read aloud'}
+            >
+              {speaking ? (
+                <StopIcon className="h-3.5 w-3.5" />
+              ) : (
+                <SpeakerWaveIcon className="h-3.5 w-3.5" />
+              )}
+            </button>
           )}
         </div>
       </div>

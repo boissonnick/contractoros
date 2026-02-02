@@ -6,8 +6,9 @@ import { Card, Button, Badge, toast } from '@/components/ui';
 import { useOrganizationAISettings } from '@/lib/hooks/useOrganizationAISettings';
 import { AVAILABLE_MODELS, getDefaultModelKey } from '@/lib/assistant/models';
 import { RATE_LIMITS } from '@/lib/assistant/models/types';
-import { OrganizationAISettings, AIUsageRecord } from '@/types';
+import { OrganizationAISettings, AIUsageRecord, AIResponseStyle } from '@/types';
 import { cn } from '@/lib/utils';
+import { loadVoices, TTSVoice, isTTSSupported } from '@/lib/assistant/tts-service';
 import {
   SparklesIcon,
   CpuChipIcon,
@@ -22,6 +23,8 @@ import {
   BoltIcon,
   CurrencyDollarIcon,
   ArrowPathIcon,
+  SpeakerWaveIcon,
+  ChatBubbleBottomCenterTextIcon,
 } from '@heroicons/react/24/outline';
 
 // Toggle component
@@ -246,11 +249,20 @@ function UsageStats({ usage, tier, loading, onRefresh }: UsageStatsProps) {
   );
 }
 
+// Response style options
+const RESPONSE_STYLES: { value: AIResponseStyle; label: string; description: string }[] = [
+  { value: 'concise', label: 'Concise', description: 'Short, direct answers' },
+  { value: 'detailed', label: 'Detailed', description: 'Thorough explanations with context' },
+  { value: 'technical', label: 'Technical', description: 'In-depth technical details' },
+];
+
 export default function AIAssistantSettingsPage() {
   const { profile } = useAuth();
   const { settings, loading, updateSettings, usage, refreshUsage } = useOrganizationAISettings();
   const [hasChanges, setHasChanges] = useState(false);
   const [localSettings, setLocalSettings] = useState<OrganizationAISettings | null>(null);
+  const [voices, setVoices] = useState<TTSVoice[]>([]);
+  const [ttsSupported, setTtsSupported] = useState(false);
 
   // Sync local settings when loaded
   useEffect(() => {
@@ -258,6 +270,18 @@ export default function AIAssistantSettingsPage() {
       setLocalSettings(settings);
     }
   }, [settings]);
+
+  // Load available voices
+  useEffect(() => {
+    setTtsSupported(isTTSSupported());
+    if (isTTSSupported()) {
+      loadVoices().then((loadedVoices) => {
+        // Filter to English voices for better UX
+        const englishVoices = loadedVoices.filter((v) => v.lang.startsWith('en'));
+        setVoices(englishVoices.length > 0 ? englishVoices : loadedVoices);
+      });
+    }
+  }, []);
 
   // Check which models have API keys configured (server-side check via env vars)
   const availableModels = Object.entries(AVAILABLE_MODELS).reduce((acc, [key, config]) => {
@@ -278,9 +302,27 @@ export default function AIAssistantSettingsPage() {
     setHasChanges(true);
   };
 
-  const handleToggleChange = (key: 'enableAssistant' | 'enableStreaming', value: boolean) => {
+  const handleToggleChange = (key: 'enableAssistant' | 'enableStreaming' | 'enableTTS' | 'ttsAutoSpeak', value: boolean) => {
     if (!localSettings) return;
     setLocalSettings({ ...localSettings, [key]: value });
+    setHasChanges(true);
+  };
+
+  const handleResponseStyleChange = (style: AIResponseStyle) => {
+    if (!localSettings) return;
+    setLocalSettings({ ...localSettings, responseStyle: style });
+    setHasChanges(true);
+  };
+
+  const handleVoiceChange = (voiceURI: string) => {
+    if (!localSettings) return;
+    setLocalSettings({ ...localSettings, ttsVoiceURI: voiceURI });
+    setHasChanges(true);
+  };
+
+  const handleRateChange = (rate: number) => {
+    if (!localSettings) return;
+    setLocalSettings({ ...localSettings, ttsRate: rate });
     setHasChanges(true);
   };
 
@@ -291,6 +333,11 @@ export default function AIAssistantSettingsPage() {
         selectedModel: localSettings.selectedModel,
         enableAssistant: localSettings.enableAssistant,
         enableStreaming: localSettings.enableStreaming,
+        responseStyle: localSettings.responseStyle,
+        enableTTS: localSettings.enableTTS,
+        ttsVoiceURI: localSettings.ttsVoiceURI,
+        ttsRate: localSettings.ttsRate,
+        ttsAutoSpeak: localSettings.ttsAutoSpeak,
       });
       setHasChanges(false);
       toast.success('AI Assistant settings saved');
@@ -398,6 +445,128 @@ export default function AIAssistantSettingsPage() {
             disabled={!localSettings?.enableAssistant}
           />
         </div>
+      </Card>
+
+      {/* Response Style */}
+      <Card>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-9 h-9 bg-indigo-100 rounded-lg flex items-center justify-center">
+            <ChatBubbleBottomCenterTextIcon className="h-5 w-5 text-indigo-600" />
+          </div>
+          <div>
+            <h3 className="font-medium text-gray-900">Response Style</h3>
+            <p className="text-sm text-gray-500">
+              Choose how the AI assistant formats its responses
+            </p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {RESPONSE_STYLES.map((style) => (
+            <button
+              key={style.value}
+              onClick={() => handleResponseStyleChange(style.value)}
+              disabled={!localSettings?.enableAssistant}
+              className={cn(
+                'p-3 rounded-lg border-2 text-left transition-all',
+                localSettings?.responseStyle === style.value
+                  ? 'border-indigo-500 bg-indigo-50/50 ring-2 ring-indigo-500/20'
+                  : 'border-gray-200 hover:border-gray-300',
+                !localSettings?.enableAssistant && 'opacity-50 cursor-not-allowed'
+              )}
+            >
+              <p className="font-medium text-gray-900">{style.label}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{style.description}</p>
+            </button>
+          ))}
+        </div>
+      </Card>
+
+      {/* Text-to-Speech Settings */}
+      <Card>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-amber-100 rounded-lg flex items-center justify-center">
+              <SpeakerWaveIcon className="h-5 w-5 text-amber-600" />
+            </div>
+            <div>
+              <h3 className="font-medium text-gray-900">Text-to-Speech</h3>
+              <p className="text-sm text-gray-500">
+                Have AI responses read aloud using your browser&apos;s speech synthesis
+              </p>
+            </div>
+          </div>
+          <Toggle
+            enabled={localSettings?.enableTTS ?? false}
+            onChange={(v) => handleToggleChange('enableTTS', v)}
+            disabled={!localSettings?.enableAssistant || !ttsSupported}
+          />
+        </div>
+
+        {!ttsSupported && (
+          <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+            <p className="text-sm text-amber-700">
+              Text-to-speech is not supported in your browser. Try using Chrome, Edge, or Safari.
+            </p>
+          </div>
+        )}
+
+        {ttsSupported && localSettings?.enableTTS && (
+          <div className="space-y-4 pt-2 border-t border-gray-100">
+            {/* Voice Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Voice
+              </label>
+              <select
+                value={localSettings?.ttsVoiceURI || ''}
+                onChange={(e) => handleVoiceChange(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+              >
+                <option value="">System Default</option>
+                {voices.map((voice) => (
+                  <option key={voice.voiceURI} value={voice.voiceURI}>
+                    {voice.name} ({voice.lang})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Speech Rate */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Speech Rate: {(localSettings?.ttsRate ?? 1.0).toFixed(1)}x
+              </label>
+              <input
+                type="range"
+                min="0.5"
+                max="2.0"
+                step="0.1"
+                value={localSettings?.ttsRate ?? 1.0}
+                onChange={(e) => handleRateChange(parseFloat(e.target.value))}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-amber-500"
+              />
+              <div className="flex justify-between text-xs text-gray-400 mt-1">
+                <span>0.5x (Slower)</span>
+                <span>1.0x</span>
+                <span>2.0x (Faster)</span>
+              </div>
+            </div>
+
+            {/* Auto-speak Toggle */}
+            <div className="flex items-center justify-between py-2">
+              <div>
+                <p className="text-sm font-medium text-gray-900">Auto-speak responses</p>
+                <p className="text-xs text-gray-500">
+                  Automatically read AI responses aloud when received
+                </p>
+              </div>
+              <Toggle
+                enabled={localSettings?.ttsAutoSpeak ?? false}
+                onChange={(v) => handleToggleChange('ttsAutoSpeak', v)}
+              />
+            </div>
+          </div>
+        )}
       </Card>
 
       {/* Rate Limits Info */}
