@@ -1,7 +1,7 @@
 # ContractorOS Sprint Status
 
 > **Purpose:** Track current progress and enable seamless session handoffs.
-> **Last Updated:** 2026-02-02 by Claude Opus 4.5 (Controller Session - Sprint 20 Started)
+> **Last Updated:** 2026-02-02 by Claude Opus 4.5 (Controller Session - Sprint 21 Started)
 > **Current Phase:** Phase 8 - February 2026 Strategic Sprint
 
 ---
@@ -10,10 +10,10 @@
 
 | Metric | Value |
 |--------|-------|
-| **Current Sprint** | Sprint 20 - Mobile Integration + Job Costing Dashboard |
-| **Sprint Status** | IN PROGRESS |
-| **Sprint Duration** | 1 week (Feb 3-9, 2026) |
-| **Parallel Sessions** | 4 (Controller, Dev Sprint, Database, E2E Testing) |
+| **Current Sprint** | Sprint 21 - Bug Fixes & Polish |
+| **Sprint Status** | READY TO START |
+| **Sprint Duration** | 2-3 days |
+| **Parallel Sessions** | 1 (Dev Sprint) |
 | **Blockers** | None |
 | **TypeScript Status** | ✅ Passing |
 | **Firestore Rules** | ✅ Deployed |
@@ -21,34 +21,55 @@
 
 ---
 
-## Sprint 20: Mobile Integration + Job Costing (IN PROGRESS)
+## Upcoming Sprints
 
-**Started:** 2026-02-02
-**Target End:** 2026-02-09
-**Reference:** `docs/SPRINT_20_PLAN.md`
+| Sprint | Focus | Duration |
+|--------|-------|----------|
+| **21** | Bug Fixes & Polish | 2-3 days |
+| **22** | Email Templates & Automation | 2 days |
+| **23** | Advanced Reporting Dashboard | 3 days |
 
-### Goals
+---
 
-| Feature | Priority | Effort | Session |
-|---------|----------|--------|---------|
-| Mobile UI Integration (5 pages) | P0 | 2-3 days | Dev Sprint |
-| Job Costing Dashboard | P1 | 2 days | Dev Sprint + Database |
-| E2E Validation | P2 | 1 day | E2E Testing |
+## Sprint 21: Bug Fixes & Polish (READY TO START)
+
+**Reference:** `docs/SPRINT_21_PLAN.md`
 
 ### Task Tracking
 
-| ID | Task | Session | Status | Notes |
-|----|------|---------|--------|-------|
-| 1 | Clients page mobile | Dev Sprint | ⬜ Pending | Use ResponsiveDataView |
-| 2 | Schedule page mobile | Dev Sprint | ⬜ Pending | Mobile day view |
-| 3 | Time page mobile | Dev Sprint | ⬜ Pending | Use ResponsiveDataView |
-| 4 | Invoices page mobile | Dev Sprint | ⬜ Pending | Use ResponsiveDataView |
-| 5 | Estimates page mobile | Dev Sprint | ⬜ Pending | Use ResponsiveDataView |
-| 6 | Job Costing Dashboard | Dev Sprint | ⬜ Pending | New page at /job-costing |
-| 7 | Margin Alerts System | Dev Sprint | ⬜ Pending | useMarginAlerts hook |
-| 8 | Job Costing Rules | Database | ⬜ Pending | firestore.rules |
-| 9 | E2E Mobile Tests | E2E Testing | ⬜ Pending | 22-ui-ux-mobile.md |
-| 10 | E2E Finance Tests | E2E Testing | ⬜ Pending | 07-finances.md |
+| ID | Task | Priority | Status |
+|----|------|----------|--------|
+| BUG-21-001 | Materials page projects fix | P0 | ⬜ Pending |
+| BUG-21-002 | Submittals CRUD implementation | P0 | ⬜ Pending |
+| BUG-21-003 | E-signature email integration | P0 | ⬜ Pending |
+| FEAT-21-001 | Invoice pagination | P1 | ⬜ Pending |
+| FEAT-21-002 | Projects pagination | P1 | ⬜ Pending |
+| FEAT-21-003 | Error toasts on CRUD | P1 | ⬜ Pending |
+| FEAT-21-004 | Twilio webhook security | P1 | ⬜ Pending |
+| POLISH-21-001 | Loading states consistency | P2 | ⬜ Pending |
+| POLISH-21-002 | Empty state CTAs | P2 | ⬜ Pending |
+| POLISH-21-003 | Form validation messages | P2 | ⬜ Pending |
+
+---
+
+## Sprint 20: Mobile Integration (COMPLETED)
+
+**Completed:** 2026-02-02
+
+### Final Status
+
+| Task | Status |
+|------|--------|
+| Clients page mobile | ✅ Done |
+| Schedule page mobile | ✅ Done |
+| Time page mobile | ✅ Done |
+| QuickBooks settings polish | ✅ Done |
+| Invoices page mobile | ⏭️ Deferred |
+| Estimates page mobile | ⏭️ Deferred |
+| Job Costing Dashboard | ⏭️ Deferred |
+
+### Commit
+- `af5c372` feat: Add mobile responsive views to clients, schedule, and time pages
 
 ### Files to Create/Modify
 
