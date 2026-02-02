@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
@@ -18,6 +18,7 @@ import {
   CalculatorIcon,
 } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
+import { reserveNumber, getNextNumber } from '@/lib/utils/auto-number';
 
 const unitOptions = [
   { value: 'each', label: 'Each' },
@@ -181,6 +182,8 @@ export default function NewEstimatePage() {
   const { user, profile } = useAuth();
 
   const [saving, setSaving] = useState(false);
+  const [estimateNumber, setEstimateNumber] = useState<string>('');
+  const [numberLoading, setNumberLoading] = useState(true);
   const [estimate, setEstimate] = useState<Partial<Estimate>>({
     name: '',
     clientName: '',
@@ -203,6 +206,26 @@ export default function NewEstimatePage() {
   });
 
   const [lineItems, setLineItems] = useState<EstimateLineItem[]>([]);
+
+  // Load the next estimate number on mount
+  useEffect(() => {
+    if (!profile?.orgId) return;
+
+    const loadEstimateNumber = async () => {
+      try {
+        const nextNum = await getNextNumber(profile.orgId, 'estimate');
+        setEstimateNumber(nextNum);
+      } catch (error) {
+        console.error('Failed to load estimate number:', error);
+        // Fallback to timestamp-based number
+        setEstimateNumber(`EST-${String(Date.now()).slice(-6)}`);
+      } finally {
+        setNumberLoading(false);
+      }
+    };
+
+    loadEstimateNumber();
+  }, [profile?.orgId]);
 
   const generateId = () => `item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
@@ -244,11 +267,6 @@ export default function NewEstimatePage() {
   const taxAmount = subtotalWithMarkup * ((estimate.taxRate || 0) / 100);
   const total = subtotalWithMarkup + taxAmount;
 
-  const getNextEstimateNumber = async () => {
-    // TODO: Query existing estimates to get next number
-    return `EST-${String(Date.now()).slice(-6)}`;
-  };
-
   const handleSave = async () => {
     if (!user || !profile) return;
 
@@ -269,7 +287,8 @@ export default function NewEstimatePage() {
 
     setSaving(true);
     try {
-      const number = await getNextEstimateNumber();
+      // Reserve the number atomically to prevent duplicates
+      const number = await reserveNumber(profile.orgId, 'estimate');
 
       const newEstimate = {
         ...estimate,
@@ -331,7 +350,23 @@ export default function NewEstimatePage() {
             <Card className="p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Estimate Details</h2>
               <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Estimate Number
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={numberLoading ? 'Loading...' : estimateNumber}
+                      readOnly
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-600 font-mono"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+                      Auto-generated
+                    </span>
+                  </div>
+                </div>
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Estimate Name *
                   </label>

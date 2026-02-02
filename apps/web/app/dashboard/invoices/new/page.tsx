@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
@@ -15,6 +15,7 @@ import {
   CurrencyDollarIcon,
 } from '@heroicons/react/24/outline';
 import { addDays, format } from 'date-fns';
+import { reserveNumber, getNextNumber } from '@/lib/utils/auto-number';
 
 const invoiceTypeOptions: { value: InvoiceType; label: string; description: string }[] = [
   { value: 'standard', label: 'Standard Invoice', description: 'Simple line-item invoice' },
@@ -38,6 +39,8 @@ export default function NewInvoicePage() {
   const { user, profile } = useAuth();
 
   const [saving, setSaving] = useState(false);
+  const [invoiceNumber, setInvoiceNumber] = useState<string>('');
+  const [numberLoading, setNumberLoading] = useState(true);
   const [invoice, setInvoice] = useState<Partial<Invoice>>({
     type: 'standard',
     status: 'draft',
@@ -57,6 +60,26 @@ export default function NewInvoicePage() {
   });
 
   const [lineItems, setLineItems] = useState<InvoiceLineItem[]>([]);
+
+  // Load the next invoice number on mount
+  useEffect(() => {
+    if (!profile?.orgId) return;
+
+    const loadInvoiceNumber = async () => {
+      try {
+        const nextNum = await getNextNumber(profile.orgId, 'invoice');
+        setInvoiceNumber(nextNum);
+      } catch (error) {
+        console.error('Failed to load invoice number:', error);
+        // Fallback to timestamp-based number
+        setInvoiceNumber(`INV-${String(Date.now()).slice(-6)}`);
+      } finally {
+        setNumberLoading(false);
+      }
+    };
+
+    loadInvoiceNumber();
+  }, [profile?.orgId]);
 
   const generateId = () => `item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
@@ -100,11 +123,6 @@ export default function NewInvoicePage() {
     return addDays(new Date(), term?.days || 30);
   };
 
-  const getNextInvoiceNumber = async () => {
-    // TODO: Query existing invoices to get next number
-    return `INV-${String(Date.now()).slice(-6)}`;
-  };
-
   const handleSave = async () => {
     if (!user || !profile) return;
 
@@ -120,7 +138,8 @@ export default function NewInvoicePage() {
 
     setSaving(true);
     try {
-      const number = await getNextInvoiceNumber();
+      // Reserve the number atomically to prevent duplicates
+      const number = await reserveNumber(profile.orgId, 'invoice');
 
       const newInvoice = {
         ...invoice,
@@ -203,6 +222,22 @@ export default function NewInvoicePage() {
         <Card className="p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Bill To</h2>
           <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Invoice Number
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={numberLoading ? 'Loading...' : invoiceNumber}
+                  readOnly
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-600 font-mono"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+                  Auto-generated
+                </span>
+              </div>
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Client Name *

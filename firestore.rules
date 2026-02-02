@@ -2161,6 +2161,36 @@ service cloud.firestore {
     }
 
     // ==========================================
+    // Organization-Scoped Numbering Settings
+    // ==========================================
+    match /organizations/{orgId}/settings/numbering {
+      // Org members can read numbering settings
+      allow read: if isSameOrg(orgId);
+
+      // Admins can create/update numbering settings
+      allow create: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+      allow update: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Only owners can delete numbering settings
+      allow delete: if isSameOrg(orgId) && getUserProfile().role == 'OWNER';
+    }
+
+    // ==========================================
+    // Organization-Scoped Numbering Counters
+    // ==========================================
+    match /organizations/{orgId}/settings/numberingCounters {
+      // Org members can read counters (for preview)
+      allow read: if isSameOrg(orgId);
+
+      // Any org member can increment counters (via transaction when creating documents)
+      allow create: if isSameOrg(orgId);
+      allow update: if isSameOrg(orgId);
+
+      // Counters should not be deleted
+      allow delete: if false;
+    }
+
+    // ==========================================
     // Organization-Scoped AI Usage Collection
     // ==========================================
     match /organizations/{orgId}/aiUsage/{dateKey} {
@@ -2201,6 +2231,20 @@ service cloud.firestore {
       match /messages/{messageId} {
         allow read, write: if isSameOrg(orgId);
       }
+    }
+
+    // ==========================================
+    // Organization-Scoped Audit Logs Collection
+    // ==========================================
+    match /organizations/{orgId}/auditLogs/{logId} {
+      // Only admins can read audit logs (security sensitive)
+      allow read: if isAdmin() && isSameOrg(orgId);
+
+      // Server writes only (via API routes) - org members can create
+      allow create: if isSameOrg(orgId);
+
+      // Audit logs are immutable
+      allow update, delete: if false;
     }
 
     // Default deny all other access
