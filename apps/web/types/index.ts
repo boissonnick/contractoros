@@ -7357,3 +7357,332 @@ export interface VoiceCommandStats {
   // Error breakdown
   errorsByCategory: Record<string, number>;
 }
+
+// ===========================================
+// AI ASSISTANT V2 - SPRINT 31
+// ===========================================
+
+/**
+ * Document analysis result from AI
+ * Path: organizations/{orgId}/documentAnalyses/{docId}
+ */
+export interface DocumentAnalysis {
+  id: string;
+  orgId: string;
+  userId: string;
+
+  // File info
+  fileName: string;
+  fileUrl: string;
+  fileType: string;
+  fileSize: number;
+
+  // AI-extracted data
+  extractedData: {
+    summary: string;
+    keyDates: Array<{ date: string; description: string }>;
+    amounts: Array<{ amount: number; currency: string; description: string }>;
+    parties: Array<{ name: string; role?: string }>;
+    actionItems: string[];
+    documentType?: 'contract' | 'invoice' | 'permit' | 'change_order' | 'proposal' | 'other';
+    tags: string[];
+  };
+
+  // AI metadata
+  confidence: number;
+  modelUsed: string;
+  processingTimeMs: number;
+
+  // Context
+  projectId?: string;
+  projectName?: string;
+
+  // Timestamps
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+/**
+ * Photo analysis result from vision AI
+ * Path: organizations/{orgId}/photoAnalyses/{photoId}
+ */
+export interface PhotoAnalysis {
+  id: string;
+  orgId: string;
+  userId: string;
+
+  // File info
+  fileName: string;
+  fileUrl: string;
+  thumbnailUrl?: string;
+  mimeType: string;
+  fileSize: number;
+  dimensions?: { width: number; height: number };
+
+  // AI-extracted data
+  analysis: {
+    description: string;
+    detectedObjects: Array<{
+      label: string;
+      confidence: number;
+      boundingBox?: { x: number; y: number; width: number; height: number };
+    }>;
+    suggestedTags: string[];
+    safetyObservations?: string[];
+    progressIndicators?: string[];
+    weatherConditions?: string;
+    qualityAssessment?: {
+      rating: 'good' | 'acceptable' | 'needs_attention' | 'issue';
+      notes: string;
+    };
+  };
+
+  // AI metadata
+  confidence: number;
+  modelUsed: string;
+  processingTimeMs: number;
+
+  // Context
+  projectId?: string;
+  projectName?: string;
+  photoId?: string;
+
+  // Timestamps
+  createdAt: Date;
+}
+
+/**
+ * AI-generated project summary
+ */
+export interface ProjectSummary {
+  id: string;
+  orgId: string;
+  projectId: string;
+  projectName: string;
+
+  // Summary content
+  summary: {
+    overview: string;
+    progressPercentage: number;
+    recentActivity: string[];
+    accomplishments: string[];
+    concerns: Array<{
+      issue: string;
+      severity: 'low' | 'medium' | 'high';
+      recommendation?: string;
+    }>;
+    nextSteps: string[];
+    budgetStatus?: {
+      spent: number;
+      budgeted: number;
+      projectedFinal: number;
+      status: 'under' | 'on_track' | 'over';
+    };
+    scheduleStatus?: {
+      daysRemaining: number;
+      originalDays: number;
+      status: 'ahead' | 'on_track' | 'behind';
+    };
+  };
+
+  // Data sources used
+  sourcesUsed: {
+    dailyLogs: number;
+    timeEntries: number;
+    photos: number;
+    tasks: number;
+    invoices: number;
+    expenses: number;
+  };
+
+  // AI metadata
+  confidence: number;
+  modelUsed: string;
+  processingTimeMs: number;
+  generatedAt: Date;
+}
+
+/**
+ * AI suggestion for proactive assistance
+ * Path: organizations/{orgId}/aiSuggestions/{suggestionId}
+ */
+export interface AISuggestion {
+  id: string;
+  orgId: string;
+  userId?: string;
+
+  // Suggestion content
+  type: AISuggestionType;
+  title: string;
+  description: string;
+  priority: 'low' | 'medium' | 'high';
+
+  // Context
+  entityType?: 'project' | 'invoice' | 'task' | 'estimate' | 'expense' | 'schedule';
+  entityId?: string;
+  entityName?: string;
+
+  // Action
+  suggestedAction?: {
+    type: 'navigate' | 'create' | 'update' | 'remind' | 'alert';
+    route?: string;
+    payload?: Record<string, unknown>;
+  };
+
+  // Status
+  status: 'pending' | 'viewed' | 'accepted' | 'dismissed' | 'expired';
+  viewedAt?: Date;
+  actionedAt?: Date;
+  feedback?: 'helpful' | 'not_helpful';
+
+  // AI metadata
+  confidence: number;
+  modelUsed: string;
+  triggerReason: string;
+
+  // Timestamps
+  createdAt: Date;
+  expiresAt?: Date;
+}
+
+export type AISuggestionType =
+  | 'overdue_invoice'
+  | 'budget_warning'
+  | 'schedule_delay'
+  | 'missing_document'
+  | 'incomplete_estimate'
+  | 'unusual_expense'
+  | 'follow_up_needed'
+  | 'task_reminder'
+  | 'progress_update'
+  | 'safety_concern'
+  | 'weather_alert'
+  | 'optimization'
+  | 'custom';
+
+// ===========================================
+// NATURAL LANGUAGE QUERY TYPES - SPRINT 31
+// ===========================================
+
+/**
+ * Entity types supported by NL query parser
+ */
+export type QueryEntityType =
+  | 'invoices'
+  | 'projects'
+  | 'clients'
+  | 'tasks'
+  | 'timeEntries'
+  | 'expenses'
+  | 'estimates'
+  | 'photos'
+  | 'dailyLogs'
+  | 'subcontractors'
+  | 'scheduleEvents';
+
+/**
+ * Filter operator for query conditions
+ */
+export type QueryFilterOperator =
+  | 'eq'
+  | 'neq'
+  | 'gt'
+  | 'lt'
+  | 'gte'
+  | 'lte'
+  | 'contains'
+  | 'in'
+  | 'not_in'
+  | 'between';
+
+/**
+ * Single filter condition
+ */
+export interface QueryFilter {
+  field: string;
+  operator: QueryFilterOperator;
+  value: unknown;
+  value2?: unknown;
+}
+
+/**
+ * Parsed natural language query
+ */
+export interface ParsedQuery {
+  originalText: string;
+  entity: QueryEntityType;
+  filters: QueryFilter[];
+  sort?: {
+    field: string;
+    direction: 'asc' | 'desc';
+  };
+  limit?: number;
+  offset?: number;
+  dateRange?: {
+    field: string;
+    start: Date;
+    end: Date;
+  };
+  aggregation?: {
+    type: 'count' | 'sum' | 'avg' | 'min' | 'max';
+    field?: string;
+  };
+  confidence: number;
+  ambiguities?: string[];
+  suggestions?: string[];
+}
+
+/**
+ * Result from query execution
+ */
+export interface QueryResult<T = unknown> {
+  success: boolean;
+  data: T[];
+  totalCount: number;
+  hasMore: boolean;
+  query: ParsedQuery;
+  executionTimeMs: number;
+  error?: string;
+  suggestion?: string;
+}
+
+// ===========================================
+// ESTIMATE ANALYZER TYPES - SPRINT 31
+// ===========================================
+
+/**
+ * Result from estimate analysis
+ */
+export interface EstimateAnalysisResult {
+  estimateId: string;
+  analyzedAt: Date;
+  overallScore: number;
+  riskLevel: 'low' | 'medium' | 'high';
+  potentiallyMissingItems: Array<{
+    category: string;
+    item: string;
+    reason: string;
+    suggestedAmount?: number;
+    confidence: number;
+  }>;
+  pricingFlags: Array<{
+    lineItemId: string;
+    lineItemDescription: string;
+    currentPrice: number;
+    marketRangeLow: number;
+    marketRangeHigh: number;
+    flag: 'too_low' | 'too_high' | 'significantly_low' | 'significantly_high';
+    recommendation: string;
+  }>;
+  categoryCoverage: Array<{
+    category: string;
+    itemCount: number;
+    expectedItems: string[];
+    missingCommon: string[];
+    coverage: 'complete' | 'partial' | 'minimal';
+  }>;
+  suggestions: string[];
+  confidence: number;
+  modelUsed: string;
+  processingTimeMs: number;
+}

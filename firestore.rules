@@ -2306,6 +2306,76 @@ service cloud.firestore {
       allow delete: if isSameOrg(orgId) && getUserProfile().role == 'OWNER';
     }
 
+    // ==========================================
+    // Organization-Scoped Document Analyses Collection (Sprint 31)
+    // AI-extracted data from uploaded documents
+    // ==========================================
+    match /organizations/{orgId}/documentAnalyses/{docId} {
+      // Org members can read document analyses
+      allow read: if isSameOrg(orgId);
+
+      // Server creates via API routes (on behalf of authenticated users)
+      allow create: if isSameOrg(orgId);
+
+      // Users can update their own analyses (e.g., add notes)
+      // Admins can update any
+      allow update: if isSameOrg(orgId) && (
+        request.auth.uid == resource.data.userId ||
+        getUserProfile().role in ['OWNER', 'PM']
+      );
+
+      // Users can delete their own analyses
+      // Admins can delete any
+      allow delete: if isSameOrg(orgId) && (
+        request.auth.uid == resource.data.userId ||
+        getUserProfile().role in ['OWNER', 'PM']
+      );
+    }
+
+    // ==========================================
+    // Organization-Scoped Photo Analyses Collection (Sprint 31)
+    // AI-extracted data from construction photos
+    // ==========================================
+    match /organizations/{orgId}/photoAnalyses/{photoId} {
+      // Org members can read photo analyses
+      allow read: if isSameOrg(orgId);
+
+      // Server creates via API routes (on behalf of authenticated users)
+      allow create: if isSameOrg(orgId);
+
+      // Users can update their own analyses
+      // Admins can update any
+      allow update: if isSameOrg(orgId) && (
+        request.auth.uid == resource.data.userId ||
+        getUserProfile().role in ['OWNER', 'PM']
+      );
+
+      // Users can delete their own analyses
+      // Admins can delete any
+      allow delete: if isSameOrg(orgId) && (
+        request.auth.uid == resource.data.userId ||
+        getUserProfile().role in ['OWNER', 'PM']
+      );
+    }
+
+    // ==========================================
+    // Organization-Scoped AI Suggestions Collection (Sprint 31)
+    // Proactive suggestions from AI analysis
+    // ==========================================
+    match /organizations/{orgId}/aiSuggestions/{suggestionId} {
+      // Org members can read suggestions
+      allow read: if isSameOrg(orgId);
+
+      // Server creates suggestions via API/Cloud Functions
+      allow create: if isSameOrg(orgId);
+
+      // Users can update suggestions (mark as viewed, dismissed, accepted)
+      allow update: if isSameOrg(orgId);
+
+      // Admins can delete suggestions
+      allow delete: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+    }
+
     // Default deny all other access
     match /{document=**} {
       allow read, write: if false;
