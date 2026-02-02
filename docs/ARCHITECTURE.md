@@ -731,3 +731,379 @@ Tests are executed via Chrome MCP (Model Context Protocol) or manual browser tes
 - Expected results
 - Screenshots (when applicable)
 - Pass/fail criteria
+
+---
+
+## Offline Mode Architecture
+
+> **Added:** Sprint 28-29 (2026-02)
+
+### Overview
+
+ContractorOS implements a comprehensive offline-first architecture for field workers. All changes queue locally and automatically sync when connectivity is restored.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     OFFLINE ARCHITECTURE                     │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  React Components                                           │
+│         ↓                                                   │
+│  useOffline() Hook / OfflineProvider Context               │
+│         ↓                                                   │
+│  Business Logic Services                                   │
+│  (OfflineTaskService, OfflinePhotoService, etc.)          │
+│         ↓                                                   │
+│  IndexedDB Storage Layer                                   │
+│  ├─ sync-queue (operations)                               │
+│  └─ offline-cache (general data)                          │
+│         ↓                                                   │
+│  SyncManager (Singleton)                                  │
+│  ├─ Queue operations                                      │
+│  ├─ Process with retry                                    │
+│  └─ Conflict resolution                                   │
+│         ↓                                                   │
+│  Service Worker (sw.js)                                   │
+│  ├─ Cache strategies                                      │
+│  ├─ Background sync                                       │
+│  └─ Push notifications                                    │
+│         ↓                                                   │
+│  Firebase (Online)                                        │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Service Worker Strategy
+
+**File:** `apps/web/public/sw.js`
+
+| Resource Type | Strategy | Cache |
+|--------------|----------|-------|
+| Static Assets | Cache-First | contractoros-v3 |
+| App Shell | Network-First + Fallback | contractoros-v3 |
+| Navigation | Network-First + offline.html | contractoros-v3 |
+| CSS/JS/Images | Stale-While-Revalidate | contractoros-runtime-v3 |
+
+**Precached App Shell:**
+- `/`, `/dashboard`, `/field`, `/offline.html`, `/manifest.json`
+
+**Lifecycle:**
+- **Install:** Precaches app shell, skips waiting
+- **Activate:** Cleans old caches, claims clients
+- **Fetch:** Routes through appropriate strategy
+
+### IndexedDB Storage
+
+**File:** `apps/web/lib/offline/storage.ts`
+
+**Database:** `contractoros-offline` (version 1)
+
+| Object Store | Purpose | Indexes |
+|--------------|---------|---------|
+| `sync-queue` | Pending operations | status, timestamp, collection |
+| `offline-cache` | General data with TTL | timestamp, expiresAt |
+
+**Core API:**
+```typescript
+saveOffline<T>(key, data, ttl?)     // Save with optional expiry
+getOfflineData<T>(key)              // Retrieve (checks expiry)
+getQueuedOperations()               // All pending operations
+saveQueuedOperation(op)             // Persist operation
+deleteQueuedOperation(id)           // Remove after sync
+```
+
+### Sync Queue Mechanism
+
+**File:** `apps/web/lib/offline/sync-manager.ts`
+
+**Operation Lifecycle:**
+```
+Queue → Pending → Syncing → Success/Failed
+```
+
+**Configuration:**
+- Max retries: 5
+- Base retry delay: 1 second
+- Max retry delay: 60 seconds
+- Exponential backoff with jitter
+
+**SyncManager API:**
+```typescript
+class SyncManager {
+  initialize()                    // Setup listeners, start interval
+  queueOperation(type, collection, docId, data)
+  processQueue(): SyncResult      // Sync all pending
+  retryOperation(operationId)     // Reset failed operation
+  removeOperation(operationId)    // Delete from queue
+  onStatusChange(callback)        // Subscribe to state
+  onSyncEvent(callback)           // Listen to sync events
+  forceSync()                     // Manual sync trigger
+}
+```
+
+**Sync Triggers:**
+1. Network reconnection (automatic)
+2. Service worker message (`sync-pending-data`)
+3. Periodic check (every 30 seconds)
+4. Immediate (if online when queued)
+
+### Conflict Resolution
+
+When server and client both modify a document:
+
+| Strategy | Behavior |
+|----------|----------|
+| `server_wins` | Discard local changes (default) |
+| `client_wins` | Apply local changes |
+| `merge` | Combine (client overrides server fields) |
+| `manual` | Flag for user resolution |
+
+**Detection:** Compares `updatedAt` timestamp vs `_queuedAt`
+
+### Offline Services
+
+| Service | File | Purpose |
+|---------|------|---------|
+| `OfflinePhotoService` | `offline-photos.ts` | Photo queue with compression |
+| `OfflineTaskService` | `offline-tasks.ts` | Task status updates |
+| `OfflineTimeEntryService` | `offline-time-entries.ts` | Clock in/out |
+| `OfflineDailyLogService` | `offline-daily-logs.ts` | Daily log creation |
+
+### Data Caching
+
+| Cache | TTL | Contents |
+|-------|-----|----------|
+| Projects | 24h | Active/planning/pending projects |
+| Team | 7d | Organization members |
+| Tasks | Until synced | Per-project task list |
+| Photos | Until uploaded | Compressed with thumbnails |
+
+### UI Components
+
+**File:** `apps/web/components/offline/`
+
+| Component | Purpose |
+|-----------|---------|
+| `OfflineProvider` | Context wrapper for offline state |
+| `SyncStatusIndicator` | Inline status badge |
+| `FloatingSyncIndicator` | Fixed position with details panel |
+| `OfflineBanner` | Full-width offline warning |
+
+---
+
+## Voice Command System
+
+> **Added:** Sprint 28-29 (2026-02)
+
+### Overview
+
+Natural language voice commands for field workers using the Web Speech API.
+
+```
+┌────────────────────────────────────────────────────────────┐
+│                   VOICE COMMAND FLOW                        │
+├────────────────────────────────────────────────────────────┤
+│                                                            │
+│  User taps FAB                                             │
+│        ↓                                                   │
+│  SpeechRecognition.start()                                │
+│        ↓                                                   │
+│  onresult → interim + final transcripts                   │
+│        ↓                                                   │
+│  onend → detectCommandType(transcript)                    │
+│        ↓                                                   │
+│  Route to parser:                                         │
+│  ├─ time_entry → parseTimeEntryVoice()                   │
+│  ├─ daily_log  → parseDailyLogVoice()                    │
+│  └─ task       → parseTaskVoice()                        │
+│        ↓                                                   │
+│  Show confirmation modal                                  │
+│        ↓                                                   │
+│  User confirms → Execute action                           │
+│                                                            │
+└────────────────────────────────────────────────────────────┘
+```
+
+### Directory Structure
+
+```
+apps/web/lib/voice/
+├── useVoiceCommands.ts       # Main hook
+├── time-entry-parser.ts      # Time entry parsing
+├── daily-log-parser.ts       # Daily log parsing
+├── task-parser.ts            # Task command parsing
+└── index.ts                  # Exports
+
+apps/web/components/voice/
+├── VoiceActivationFAB.tsx    # Floating action button
+└── index.ts
+```
+
+### Speech Recognition
+
+**Browser API:** `window.SpeechRecognition` / `window.webkitSpeechRecognition`
+
+**Configuration:**
+- Language: `en-US` (configurable)
+- Continuous: `false` (single utterance)
+- Interim results: `true` (real-time feedback)
+- Max alternatives: `1`
+
+**Error Handling:**
+| Error | User Message |
+|-------|-------------|
+| `no-speech` | No speech detected |
+| `audio-capture` | No microphone found |
+| `not-allowed` | Microphone access denied |
+| `network` | Network error |
+
+### Command Detection
+
+**File:** `lib/voice/useVoiceCommands.ts`
+
+Automatic type detection via keyword scoring:
+
+| Type | Keywords |
+|------|----------|
+| `time_entry` | log, record, hours, minutes, worked, spent |
+| `daily_log` | today, weather, crew, progress, summary |
+| `task` | mark, complete, done, start, finish |
+
+**Bonus patterns:**
+- `/\d+\s*(?:hours?|mins?)/` → +3 to time_entry
+- `/mark.*(?:complete|done)/` → +3 to task
+
+### Parser Architecture
+
+#### Time Entry Parser
+
+**Input:** "Log 4 hours framing at Smith house"
+
+**Output:**
+```typescript
+{
+  hours: 4.0,
+  description: "Framing",
+  projectId: "proj_123",
+  projectName: "Smith house",
+  activityType: "framing",
+  confidence: 0.82
+}
+```
+
+**Sub-parsers:**
+1. `parseHours()` — Extracts duration (digit, word, fraction, decimal)
+2. `matchActivity()` — 13 activity categories with fuzzy matching
+3. `matchProject()` — Multi-strategy project name matching
+4. `extractDescription()` — Cleans action verbs, extracts work type
+
+#### Daily Log Parser
+
+**Input:** "Today was sunny and 75 degrees. We had 5 crew members."
+
+**Output:**
+```typescript
+{
+  date: "2026-02-02",
+  category: "progress",
+  weather: { condition: "clear", temperatureHigh: 75 },
+  crewCount: 5,
+  workPerformed: [...],
+  confidence: 0.72
+}
+```
+
+**Sub-parsers:**
+1. `parseWeather()` — 9 conditions, temperature extraction
+2. `parseCrewInfo()` — Count and name extraction
+3. `parseWorkPerformed()` — Activity sentence analysis
+4. `parseIssues()` — Issue detection with severity
+5. `determineCategory()` — 10 categories by keyword density
+
+#### Task Parser
+
+**Input:** "Mark drywall installation complete"
+
+**Output:**
+```typescript
+{
+  taskId: "task_456",
+  taskTitle: "Install Drywall",
+  action: "complete",
+  updates: { status: "completed" },
+  confidence: 0.88
+}
+```
+
+**Actions:** complete, start, pause, update, assign
+
+### VoiceActivationFAB Component
+
+**File:** `components/voice/VoiceActivationFAB.tsx`
+
+**States:**
+| State | Button Color | Icon |
+|-------|-------------|------|
+| idle | Violet | Microphone |
+| listening | Red (pulsing) | Stop |
+| processing | Yellow | Loading dots |
+| success | Green | Checkmark |
+| error | Red | Warning |
+
+**Props:**
+```typescript
+interface VoiceActivationFABProps {
+  context: VoiceCommandsContext;      // Parser data
+  commandType?: VoiceCommandType;     // 'auto' | 'time_entry' | 'daily_log' | 'task'
+  onResult?: (result) => void;        // Parse complete
+  onConfirm?: (result) => void;       // User confirmed
+  bottomOffset?: number;              // Safe area (default: 80)
+  requireConfirmation?: boolean;      // Show modal (default: true)
+}
+```
+
+### Usage Example
+
+```typescript
+import { VoiceActivationFAB } from '@/components/voice';
+
+function FieldPage() {
+  const voiceContext = {
+    timeEntry: { projects, userId },
+    dailyLog: { projectId, projectName },
+    task: { tasks, projectId }
+  };
+
+  const handleConfirm = (result) => {
+    if (result.type === 'time_entry') {
+      createTimeEntry(result.data);
+    }
+  };
+
+  return (
+    <>
+      {/* Page content */}
+      <VoiceActivationFAB
+        context={voiceContext}
+        onConfirm={handleConfirm}
+        bottomOffset={80}
+      />
+    </>
+  );
+}
+```
+
+### Confidence Scoring
+
+| Parser | Formula |
+|--------|---------|
+| Time Entry | (hours × 0.5) + (activity × 0.25) + (project × 0.25) |
+| Daily Log | 0.5 base + 0.1(weather) + 0.1(crew) + 0.15(work) + 0.1(issues) |
+| Task | (action × 0.4) + (taskMatch × 0.6) |
+
+### Mobile Enhancements
+
+- Haptic feedback: `navigator.vibrate(50)` on start
+- Safe area padding for bottom navigation
+- Full-screen listening overlay
+- Auto-dismiss: 2s (success), 3s (error)

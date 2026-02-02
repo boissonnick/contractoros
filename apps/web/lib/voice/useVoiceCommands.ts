@@ -3,6 +3,25 @@
  *
  * Provides voice command functionality for field pages.
  * Supports time entries, daily logs, and task commands.
+ *
+ * @module lib/voice/useVoiceCommands
+ *
+ * @example
+ * ```tsx
+ * const { state, startListening, result } = useVoiceCommands(
+ *   { timeEntry: { projects, userId } },
+ *   { commandType: 'time_entry', onResult: handleResult }
+ * );
+ * ```
+ *
+ * ## Features
+ * - Auto-detects command type from transcript keywords
+ * - Fuzzy matching for project names and tasks
+ * - Real-time interim transcript display
+ * - Confidence scoring for parse results
+ *
+ * ## Browser Support
+ * Requires Web Speech API (Chrome, Edge, Safari)
  */
 
 'use client';
@@ -122,7 +141,16 @@ export interface VoiceCommandsContext {
 // ============================================================================
 
 /**
- * Detect what type of command the user is trying to give
+ * Detect what type of command the user is trying to give.
+ * Uses keyword scoring with bonus points for specific patterns.
+ *
+ * @param transcript - The speech recognition transcript
+ * @returns The detected command type ('time_entry' | 'daily_log' | 'task')
+ *
+ * @example
+ * detectCommandType("Log 4 hours framing") // returns 'time_entry'
+ * detectCommandType("Mark drywall complete") // returns 'task'
+ * detectCommandType("Today was sunny, 5 crew") // returns 'daily_log'
  */
 function detectCommandType(transcript: string): VoiceCommandType {
   const normalized = transcript.toLowerCase();
@@ -179,6 +207,37 @@ function detectCommandType(transcript: string): VoiceCommandType {
 // HOOK
 // ============================================================================
 
+/**
+ * React hook for voice command functionality.
+ *
+ * Manages the speech recognition lifecycle, parses transcripts into structured
+ * commands, and provides state for UI feedback.
+ *
+ * @param context - Context data for parsers (projects, tasks, etc.)
+ * @param options - Configuration options
+ * @param options.onResult - Callback when parsing completes
+ * @param options.onError - Callback on recognition error
+ * @param options.commandType - Force specific command type ('auto' by default)
+ * @param options.language - BCP-47 language tag (default: 'en-US')
+ *
+ * @returns Object with state, controls, and results
+ *
+ * @example
+ * ```tsx
+ * const {
+ *   state,           // 'idle' | 'listening' | 'processing' | 'success' | 'error'
+ *   isSupported,     // Browser supports Web Speech API
+ *   transcript,      // Final recognized text
+ *   interimTranscript, // Real-time in-progress text
+ *   error,           // Error message if applicable
+ *   result,          // Parsed VoiceCommandResult
+ *   startListening,  // Begin recording
+ *   stopListening,   // Stop and process
+ *   cancel,          // Cancel without processing
+ *   reset,           // Reset to idle state
+ * } = useVoiceCommands(context, options);
+ * ```
+ */
 export function useVoiceCommands(
   context: VoiceCommandsContext,
   options: UseVoiceCommandsOptions = {}

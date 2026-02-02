@@ -1,3 +1,37 @@
+/**
+ * VoiceActivationFAB Component
+ *
+ * Floating action button for voice command activation in the Field Portal.
+ * Provides visual feedback during speech recognition and confirmation UI.
+ *
+ * @module components/voice/VoiceActivationFAB
+ *
+ * @example
+ * ```tsx
+ * <VoiceActivationFAB
+ *   context={{ timeEntry: { projects, userId } }}
+ *   commandType="auto"
+ *   onConfirm={(result) => createTimeEntry(result.data)}
+ *   bottomOffset={80}
+ *   requireConfirmation={true}
+ * />
+ * ```
+ *
+ * ## States
+ * - idle: Violet button, microphone icon
+ * - listening: Red pulsing, stop icon
+ * - processing: Yellow, loading animation
+ * - success: Green, checkmark
+ * - error: Red, warning icon
+ *
+ * ## Features
+ * - Real-time transcript display
+ * - Confirmation modal with parsed preview
+ * - Auto-dismiss on success/error
+ * - Haptic feedback on mobile
+ * - Safe area padding support
+ */
+
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
@@ -39,6 +73,21 @@ export interface VoiceActivationFABProps {
 // COMPONENT
 // ============================================================================
 
+/**
+ * Floating action button for voice command activation.
+ *
+ * @param props - Component props
+ * @param props.context - Context data for voice parsers (projects, tasks, etc.)
+ * @param props.commandType - Command type to parse ('auto' detects from transcript)
+ * @param props.onResult - Callback when parsing completes (success or failure)
+ * @param props.onConfirm - Callback when user confirms the parsed result
+ * @param props.onCancel - Callback when user cancels
+ * @param props.bottomOffset - Distance from bottom (accounts for bottom nav, default: 80)
+ * @param props.requireConfirmation - Show confirmation modal before executing (default: true)
+ * @param props.label - Custom aria-label for accessibility
+ *
+ * @returns JSX element or null if Web Speech API not supported
+ */
 export function VoiceActivationFAB({
   context,
   commandType = 'auto',

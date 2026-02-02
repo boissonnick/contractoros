@@ -1,7 +1,40 @@
 /**
  * Sync Manager
- * Unified manager for offline sync operations
- * Handles queueing, processing, conflict resolution, and status updates
+ *
+ * Unified manager for offline sync operations.
+ * Handles queueing, processing, conflict resolution, and status updates.
+ *
+ * @module lib/offline/sync-manager
+ *
+ * @example
+ * ```tsx
+ * // Initialize on app start
+ * await SyncManager.initialize();
+ *
+ * // Queue an operation
+ * await SyncManager.queueOperation('create', 'timeEntries', docId, data);
+ *
+ * // Subscribe to status changes
+ * const unsubscribe = SyncManager.onStatusChange((state) => {
+ *   console.log('Pending:', state.pendingCount);
+ * });
+ *
+ * // Force sync
+ * const result = await SyncManager.forceSync();
+ * ```
+ *
+ * ## Features
+ * - Automatic sync on network reconnection
+ * - Exponential backoff with jitter for retries
+ * - Conflict resolution (server_wins, client_wins, merge, manual)
+ * - Service worker integration for background sync
+ * - Real-time status updates via listeners
+ *
+ * ## Configuration
+ * - Max retries: 5
+ * - Base delay: 1 second
+ * - Max delay: 60 seconds
+ * - Periodic check: 30 seconds
  */
 
 import { db } from '@/lib/firebase/config';
@@ -50,7 +83,21 @@ export type ConflictCallback = (conflict: ConflictInfo) => Promise<ConflictStrat
 export type SyncEventCallback = (event: SyncEvent) => void;
 
 /**
- * SyncManager - Singleton class for managing offline sync
+ * SyncManager - Singleton class for managing offline sync.
+ *
+ * Provides a centralized system for queuing offline operations,
+ * processing them with retry logic, and handling conflicts.
+ *
+ * @class SyncManagerClass
+ *
+ * ## State Properties
+ * - `isOnline` - Current network status
+ * - `wasOffline` - True if recently reconnected
+ * - `pendingCount` - Operations awaiting sync
+ * - `syncingCount` - Currently uploading
+ * - `failedCount` - Exceeded retry limit
+ * - `lastSyncAttempt` - Timestamp of last sync
+ * - `lastSuccessfulSync` - Timestamp of last success
  */
 class SyncManagerClass {
   private isSyncing = false;
