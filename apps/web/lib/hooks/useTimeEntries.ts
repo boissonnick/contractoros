@@ -16,6 +16,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
+import { convertTimestampsDeep } from '@/lib/firebase/timestamp-converter';
 import {
   TimeEntry,
   TimeEntryStatus,
@@ -76,42 +77,6 @@ interface UseTimeEntriesReturn {
 
   // Refresh
   refresh: () => void;
-}
-
-// Helper to convert Firestore timestamps
-function convertTimestamps(data: Record<string, unknown>): Record<string, unknown> {
-  const converted = { ...data };
-  const dateFields = [
-    'clockIn', 'clockOut', 'createdAt', 'updatedAt', 'submittedAt',
-    'approvedAt', 'rejectedAt'
-  ];
-
-  for (const field of dateFields) {
-    if (converted[field] instanceof Timestamp) {
-      converted[field] = (converted[field] as Timestamp).toDate();
-    }
-  }
-
-  // Convert break timestamps
-  if (Array.isArray(converted.breaks)) {
-    converted.breaks = (converted.breaks as TimeEntryBreak[]).map(b => ({
-      ...b,
-      startTime: b.startTime instanceof Timestamp ? (b.startTime as unknown as Timestamp).toDate() : b.startTime,
-      endTime: b.endTime instanceof Timestamp ? (b.endTime as unknown as Timestamp).toDate() : b.endTime,
-    }));
-  }
-
-  // Convert location timestamps
-  if (converted.clockInLocation && (converted.clockInLocation as TimeEntryLocation).timestamp instanceof Timestamp) {
-    (converted.clockInLocation as TimeEntryLocation).timestamp =
-      ((converted.clockInLocation as TimeEntryLocation).timestamp as unknown as Timestamp).toDate();
-  }
-  if (converted.clockOutLocation && (converted.clockOutLocation as TimeEntryLocation).timestamp instanceof Timestamp) {
-    (converted.clockOutLocation as TimeEntryLocation).timestamp =
-      ((converted.clockOutLocation as TimeEntryLocation).timestamp as unknown as Timestamp).toDate();
-  }
-
-  return converted;
 }
 
 // Calculate total minutes from entry
@@ -191,7 +156,7 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
       (snapshot) => {
         const entriesData = snapshot.docs.map((doc) => ({
           id: doc.id,
-          ...convertTimestamps(doc.data()),
+          ...convertTimestampsDeep(doc.data()),
         })) as TimeEntry[];
         setEntries(entriesData);
         setLoading(false);
