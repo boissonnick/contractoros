@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/lib/auth';
 import { useScheduleEvents, useCrewAvailability, useTimeOffRequests } from '@/lib/hooks/useSchedule';
 import { collection, query, where, getDocs } from 'firebase/firestore';
@@ -25,6 +25,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   FunnelIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
 
@@ -47,6 +48,10 @@ export default function SchedulePage() {
   const [showEventDetail, setShowEventDetail] = useState(false);
   const [filterType, setFilterType] = useState<string>('');
   const [filterProject, setFilterProject] = useState<string>('');
+
+  // Mobile-specific state
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const mobileDateScrollRef = useRef<HTMLDivElement>(null);
 
   // Hooks
   const {
@@ -122,6 +127,35 @@ export default function SchedulePage() {
   }, []);
 
   const weekDates = getWeekDates(selectedDate);
+
+  // Mobile date range - get 2 weeks of dates for horizontal scroll
+  const getMobileDateRange = useCallback(() => {
+    const dates: Date[] = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Start from 7 days ago to 14 days ahead
+    const start = new Date(today);
+    start.setDate(start.getDate() - 7);
+
+    for (let i = 0; i < 21; i++) {
+      const d = new Date(start);
+      d.setDate(d.getDate() + i);
+      dates.push(d);
+    }
+    return dates;
+  }, []);
+
+  const mobileDates = getMobileDateRange();
+
+  // Scroll to selected date on mount
+  useEffect(() => {
+    if (mobileDateScrollRef.current) {
+      const todayIndex = 7; // Today is at index 7 (7 days from start)
+      const scrollAmount = todayIndex * 60 - 100; // 60px per date item, center it
+      mobileDateScrollRef.current.scrollLeft = scrollAmount;
+    }
+  }, []);
 
   // Navigation
   const navigatePrev = () => {
@@ -236,9 +270,9 @@ export default function SchedulePage() {
   const allConflicts = events.flatMap((event) => checkConflicts(event));
 
   return (
-    <div className="flex flex-col h-full min-h-[calc(100vh-200px)] space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col h-full min-h-[calc(100vh-200px)] space-y-4 md:space-y-6">
+      {/* Desktop Header */}
+      <div className="hidden md:flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Schedule</h1>
           <p className="text-sm text-gray-500 mt-1">
@@ -251,8 +285,84 @@ export default function SchedulePage() {
         </Button>
       </div>
 
-      {/* Tabs */}
-      <div className="flex items-center gap-1 border-b border-gray-200 -mx-6 px-6">
+      {/* Mobile Header */}
+      <div className="md:hidden">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-xl font-bold text-gray-900">Schedule</h1>
+            <p className="text-xs text-gray-500">
+              {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+            </p>
+          </div>
+          <button
+            onClick={() => setShowMobileFilters(!showMobileFilters)}
+            className={cn(
+              'min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg transition-colors',
+              showMobileFilters ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:bg-gray-100'
+            )}
+          >
+            <FunnelIcon className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Mobile Date Picker - Horizontal Scroll */}
+        <div
+          ref={mobileDateScrollRef}
+          className="flex gap-1 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {mobileDates.map((date, idx) => {
+            const isSelected = date.toDateString() === selectedDate.toDateString();
+            const isToday = date.toDateString() === new Date().toDateString();
+            const hasEvents = getEventsForDate(date).length > 0;
+
+            return (
+              <button
+                key={idx}
+                onClick={() => setSelectedDate(date)}
+                className={cn(
+                  'flex flex-col items-center justify-center min-w-[52px] h-[68px] rounded-xl transition-all',
+                  isSelected
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : isToday
+                    ? 'bg-blue-50 text-blue-600 border border-blue-200'
+                    : 'bg-gray-50 text-gray-700 active:bg-gray-100'
+                )}
+              >
+                <span className={cn('text-[10px] font-medium', isSelected ? 'text-blue-100' : 'text-gray-500')}>
+                  {DAYS_OF_WEEK[date.getDay()]}
+                </span>
+                <span className="text-lg font-bold">{date.getDate()}</span>
+                {hasEvents && !isSelected && (
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-0.5" />
+                )}
+                {hasEvents && isSelected && (
+                  <div className="w-1.5 h-1.5 rounded-full bg-white mt-0.5" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Mobile Filter Panel */}
+        {showMobileFilters && (
+          <div className="mt-3 p-3 bg-gray-50 rounded-xl space-y-3">
+            <select
+              value={filterProject}
+              onChange={(e) => setFilterProject(e.target.value)}
+              className="w-full min-h-[44px] text-sm border border-gray-300 rounded-lg px-3"
+            >
+              <option value="">All Projects</option>
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
+      </div>
+
+      {/* Desktop Tabs */}
+      <div className="hidden md:flex items-center gap-1 border-b border-gray-200 -mx-6 px-6">
         {[
           { key: 'calendar', label: 'Calendar', icon: CalendarDaysIcon },
           { key: 'crew', label: 'Crew Availability', icon: UsersIcon },
@@ -279,6 +389,37 @@ export default function SchedulePage() {
         ))}
       </div>
 
+      {/* Mobile Tab Selector */}
+      <div className="md:hidden flex gap-2 overflow-x-auto pb-1 -mx-4 px-4">
+        {[
+          { key: 'calendar', label: 'Calendar', icon: CalendarDaysIcon },
+          { key: 'crew', label: 'Crew', icon: UsersIcon },
+          { key: 'time-off', label: 'Time Off', icon: CalendarDaysIcon, badge: timeOffRequests.filter((r) => r.status === 'pending').length },
+        ].map(({ key, label, icon: Icon, badge }) => (
+          <button
+            key={key}
+            onClick={() => setTab(key as Tab)}
+            className={cn(
+              'flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors min-h-[40px]',
+              tab === key
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-100 text-gray-600 active:bg-gray-200'
+            )}
+          >
+            <Icon className="h-4 w-4" />
+            {label}
+            {badge && badge > 0 && (
+              <span className={cn(
+                'ml-1 px-1.5 py-0.5 text-xs rounded-full',
+                tab === key ? 'bg-white/20 text-white' : 'bg-red-500 text-white'
+              )}>
+                {badge}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
       {/* Calendar Tab */}
       {tab === 'calendar' && (
         <div className="flex-1 flex flex-col space-y-4 min-h-0">
@@ -293,8 +434,8 @@ export default function SchedulePage() {
             />
           )}
 
-          {/* Calendar toolbar */}
-          <Card className="p-4">
+          {/* Desktop Calendar toolbar */}
+          <Card className="p-4 hidden md:block">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Button variant="secondary" size="sm" onClick={goToToday}>
@@ -348,8 +489,80 @@ export default function SchedulePage() {
             </div>
           </Card>
 
-          {/* Calendar grid - flex-1 to fill available space */}
-          <Card className="flex-1 overflow-hidden flex flex-col min-h-[500px]">
+          {/* Mobile Day View - Always show day view on mobile */}
+          <div className="md:hidden flex-1 space-y-3">
+            {eventsLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+              </div>
+            ) : getEventsForDate(selectedDate).length === 0 ? (
+              <div className="text-center py-12">
+                <CalendarDaysIcon className="h-16 w-16 mx-auto mb-4 text-gray-200" />
+                <p className="text-gray-500 mb-4">No events scheduled</p>
+                <button
+                  onClick={() => handleSlotClick(selectedDate)}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium active:scale-95 transition-transform"
+                >
+                  <PlusIcon className="h-5 w-5" />
+                  Add Event
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {getEventsForDate(selectedDate).map((event) => (
+                  <div
+                    key={event.id}
+                    onClick={() => handleEventClick(event)}
+                    className="bg-white rounded-xl border border-gray-200 p-4 active:bg-gray-50 transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={cn(
+                        'w-1 self-stretch rounded-full',
+                        event.type === 'job' ? 'bg-blue-500' :
+                        event.type === 'inspection' ? 'bg-amber-500' :
+                        event.type === 'delivery' ? 'bg-green-500' :
+                        event.type === 'meeting' ? 'bg-purple-500' : 'bg-gray-400'
+                      )} />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <h3 className="font-semibold text-gray-900 truncate">{event.title}</h3>
+                          <Badge
+                            variant={
+                              event.status === 'completed' ? 'success' :
+                              event.status === 'in_progress' ? 'primary' :
+                              event.status === 'cancelled' ? 'danger' : 'default'
+                            }
+                            className="flex-shrink-0"
+                          >
+                            {event.status?.replace('_', ' ')}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-gray-500 mt-1">
+                          {event.startDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                          {' - '}
+                          {event.endDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                        </p>
+                        {event.location && (
+                          <p className="text-sm text-gray-500 mt-1 truncate">📍 {event.location}</p>
+                        )}
+                        {event.assignedUsers && event.assignedUsers.length > 0 && (
+                          <div className="flex items-center gap-1 mt-2">
+                            <UsersIcon className="h-4 w-4 text-gray-400" />
+                            <span className="text-xs text-gray-500">
+                              {event.assignedUsers.length} assigned
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Desktop Calendar grid - flex-1 to fill available space */}
+          <Card className="hidden md:flex flex-1 overflow-hidden flex-col min-h-[500px]">
             {eventsLoading ? (
               <div className="flex items-center justify-center flex-1">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
@@ -605,7 +818,7 @@ export default function SchedulePage() {
       {/* Time Off Tab */}
       {tab === 'time-off' && (
         <Card className="p-4">
-          <h3 className="font-semibold mb-4">Time Off Requests</h3>
+          <h3 className="font-semibold mb-4 hidden md:block">Time Off Requests</h3>
 
           {timeOffRequests.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
@@ -618,41 +831,40 @@ export default function SchedulePage() {
                 <div
                   key={request.id}
                   className={cn(
-                    'flex items-center justify-between p-4 border rounded-lg',
+                    'p-4 border rounded-xl',
                     request.status === 'pending' && 'border-yellow-200 bg-yellow-50',
                     request.status === 'approved' && 'border-green-200 bg-green-50',
                     request.status === 'denied' && 'border-red-200 bg-red-50'
                   )}
                 >
-                  <div>
-                    <div className="font-medium">{request.userName}</div>
+                  {/* Mobile Layout */}
+                  <div className="md:hidden">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="font-medium">{request.userName}</div>
+                      <Badge
+                        variant={
+                          request.status === 'approved'
+                            ? 'success'
+                            : request.status === 'denied'
+                            ? 'danger'
+                            : 'warning'
+                        }
+                      >
+                        {request.status}
+                      </Badge>
+                    </div>
                     <div className="text-sm text-gray-600">
-                      {request.startDate.toLocaleDateString()} -{' '}
-                      {request.endDate.toLocaleDateString()}
+                      {request.startDate.toLocaleDateString()} - {request.endDate.toLocaleDateString()}
                       {request.halfDay && ` (${request.halfDay} only)`}
                     </div>
                     {request.reason && (
                       <div className="text-sm text-gray-500 mt-1">{request.reason}</div>
                     )}
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Badge
-                      variant={
-                        request.status === 'approved'
-                          ? 'success'
-                          : request.status === 'denied'
-                          ? 'danger'
-                          : 'warning'
-                      }
-                    >
-                      {request.status}
-                    </Badge>
-
                     {request.status === 'pending' && (
-                      <>
+                      <div className="flex gap-2 mt-3">
                         <Button
                           size="sm"
+                          className="flex-1 min-h-[44px]"
                           onClick={() => approveRequest(request.id)}
                         >
                           Approve
@@ -660,12 +872,60 @@ export default function SchedulePage() {
                         <Button
                           size="sm"
                           variant="secondary"
+                          className="flex-1 min-h-[44px]"
                           onClick={() => denyRequest(request.id, 'Scheduling conflict')}
                         >
                           Deny
                         </Button>
-                      </>
+                      </div>
                     )}
+                  </div>
+
+                  {/* Desktop Layout */}
+                  <div className="hidden md:flex items-center justify-between">
+                    <div>
+                      <div className="font-medium">{request.userName}</div>
+                      <div className="text-sm text-gray-600">
+                        {request.startDate.toLocaleDateString()} -{' '}
+                        {request.endDate.toLocaleDateString()}
+                        {request.halfDay && ` (${request.halfDay} only)`}
+                      </div>
+                      {request.reason && (
+                        <div className="text-sm text-gray-500 mt-1">{request.reason}</div>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant={
+                          request.status === 'approved'
+                            ? 'success'
+                            : request.status === 'denied'
+                            ? 'danger'
+                            : 'warning'
+                        }
+                      >
+                        {request.status}
+                      </Badge>
+
+                      {request.status === 'pending' && (
+                        <>
+                          <Button
+                            size="sm"
+                            onClick={() => approveRequest(request.id)}
+                          >
+                            Approve
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => denyRequest(request.id, 'Scheduling conflict')}
+                          >
+                            Deny
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -727,6 +987,15 @@ export default function SchedulePage() {
           </div>
         )}
       </BaseModal>
+
+      {/* Mobile FAB for Add Event */}
+      <button
+        onClick={() => { setSelectedEvent(null); setShowEventModal(true); }}
+        className="md:hidden fixed right-4 bottom-20 w-14 h-14 rounded-full bg-blue-600 text-white shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center transition-all z-30"
+        aria-label="Add Event"
+      >
+        <PlusIcon className="h-6 w-6" />
+      </button>
     </div>
   );
 }

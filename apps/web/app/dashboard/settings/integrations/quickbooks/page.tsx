@@ -260,7 +260,7 @@ export default function QuickBooksSettingsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Toast Notification */}
       {toast && (
         <div
@@ -282,27 +282,76 @@ export default function QuickBooksSettingsPage() {
       )}
 
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 md:gap-4">
         <button
           onClick={() => router.push('/dashboard/settings/integrations')}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
         >
           <ArrowLeftIcon className="w-5 h-5 text-gray-500" />
         </button>
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center border border-gray-100">
-            <QuickBooksLogo width={80} height={24} />
+          <div className="w-10 h-10 md:w-12 md:h-12 bg-gray-50 rounded-xl flex items-center justify-center border border-gray-100">
+            <QuickBooksLogo width={60} height={18} />
           </div>
           <div>
-            <h1 className="text-xl font-semibold text-gray-900">QuickBooks Online</h1>
-            <p className="text-sm text-gray-500">Sync invoices, payments, and customers</p>
+            <h1 className="text-lg md:text-xl font-semibold text-gray-900">QuickBooks Online</h1>
+            <p className="text-xs md:text-sm text-gray-500">Sync invoices, payments & customers</p>
           </div>
         </div>
       </div>
 
       {/* Connection Status Card */}
-      <Card className="p-6">
-        <div className="flex items-start justify-between">
+      <Card className="p-4 md:p-6">
+        {/* Mobile Layout */}
+        <div className="md:hidden space-y-4">
+          <div className="flex items-center gap-3">
+            <div
+              className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
+                connection?.isConnected ? 'bg-green-100' : 'bg-gray-100'
+              }`}
+            >
+              {connection?.isConnected ? (
+                <CheckCircleIcon className="w-6 h-6 text-green-600" />
+              ) : (
+                <LinkIcon className="w-6 h-6 text-gray-400" />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <h2 className="text-base font-semibold text-gray-900">Status</h2>
+                {getStatusBadge()}
+              </div>
+              {connection?.isConnected ? (
+                <p className="text-sm text-gray-600 truncate">{connection.companyName}</p>
+              ) : (
+                <p className="text-sm text-gray-500">Not connected</p>
+              )}
+            </div>
+          </div>
+
+          {connection?.isConnected && (
+            <div className="text-sm text-gray-600 space-y-1">
+              <p><span className="font-medium">Last Sync:</span> {formatDate(connection.lastSyncAt)}</p>
+              {connection.lastSyncError && (
+                <p className="text-red-600"><span className="font-medium">Error:</span> {connection.lastSyncError}</p>
+              )}
+            </div>
+          )}
+
+          {connection?.isConnected ? (
+            <Button variant="outline" onClick={handleDisconnect} className="w-full min-h-[44px]">
+              Disconnect
+            </Button>
+          ) : (
+            <Button onClick={handleConnect} className="w-full min-h-[44px]">
+              <LinkIcon className="w-4 h-4 mr-2" />
+              Connect QuickBooks
+            </Button>
+          )}
+        </div>
+
+        {/* Desktop Layout */}
+        <div className="hidden md:flex items-start justify-between">
           <div className="flex items-start gap-4">
             <div
               className={`w-12 h-12 rounded-full flex items-center justify-center ${
@@ -448,17 +497,86 @@ export default function QuickBooksSettingsPage() {
           </Card>
 
           {/* Manual Sync */}
-          <Card className="p-6">
+          <Card className="p-4 md:p-6">
             <div className="flex items-center gap-2 mb-4">
               <ArrowPathIcon className="w-5 h-5 text-gray-400" />
-              <h2 className="text-lg font-semibold text-gray-900">Manual Sync</h2>
+              <h2 className="text-base md:text-lg font-semibold text-gray-900">Manual Sync</h2>
             </div>
 
             <p className="text-sm text-gray-600 mb-4">
-              Trigger a manual sync for specific data types or sync everything at once.
+              Trigger a manual sync for specific data types.
             </p>
 
-            <div className="flex flex-wrap gap-3">
+            {/* Mobile: Grid layout */}
+            <div className="md:hidden grid grid-cols-2 gap-3">
+              <button
+                onClick={() => handleSync('customers')}
+                disabled={syncing !== null}
+                className="flex flex-col items-center justify-center gap-2 p-4 bg-gray-50 rounded-xl min-h-[80px] active:bg-gray-100 disabled:opacity-50 transition-colors"
+              >
+                {syncing === 'customers' ? (
+                  <ArrowPathIcon className="w-6 h-6 text-gray-600 animate-spin" />
+                ) : (
+                  <UserGroupIcon className="w-6 h-6 text-gray-600" />
+                )}
+                <span className="text-sm font-medium text-gray-700">Customers</span>
+              </button>
+
+              <button
+                onClick={() => handleSync('invoices')}
+                disabled={syncing !== null}
+                className="flex flex-col items-center justify-center gap-2 p-4 bg-gray-50 rounded-xl min-h-[80px] active:bg-gray-100 disabled:opacity-50 transition-colors"
+              >
+                {syncing === 'invoices' ? (
+                  <ArrowPathIcon className="w-6 h-6 text-gray-600 animate-spin" />
+                ) : (
+                  <DocumentTextIcon className="w-6 h-6 text-gray-600" />
+                )}
+                <span className="text-sm font-medium text-gray-700">Invoices</span>
+              </button>
+
+              <button
+                onClick={() => handleSync('payments')}
+                disabled={syncing !== null}
+                className="flex flex-col items-center justify-center gap-2 p-4 bg-gray-50 rounded-xl min-h-[80px] active:bg-gray-100 disabled:opacity-50 transition-colors"
+              >
+                {syncing === 'payments' ? (
+                  <ArrowPathIcon className="w-6 h-6 text-gray-600 animate-spin" />
+                ) : (
+                  <CreditCardIcon className="w-6 h-6 text-gray-600" />
+                )}
+                <span className="text-sm font-medium text-gray-700">Payments</span>
+              </button>
+
+              <button
+                onClick={() => handleSync('expenses')}
+                disabled={syncing !== null}
+                className="flex flex-col items-center justify-center gap-2 p-4 bg-gray-50 rounded-xl min-h-[80px] active:bg-gray-100 disabled:opacity-50 transition-colors"
+              >
+                {syncing === 'expenses' ? (
+                  <ArrowPathIcon className="w-6 h-6 text-gray-600 animate-spin" />
+                ) : (
+                  <BanknotesIcon className="w-6 h-6 text-gray-600" />
+                )}
+                <span className="text-sm font-medium text-gray-700">Expenses</span>
+              </button>
+
+              <button
+                onClick={() => handleSync('all')}
+                disabled={syncing !== null}
+                className="col-span-2 flex items-center justify-center gap-2 p-4 bg-blue-600 text-white rounded-xl min-h-[48px] active:bg-blue-700 disabled:opacity-50 transition-colors"
+              >
+                {syncing === 'all' ? (
+                  <ArrowPathIcon className="w-5 h-5 animate-spin" />
+                ) : (
+                  <ArrowPathIcon className="w-5 h-5" />
+                )}
+                <span className="font-medium">Sync All</span>
+              </button>
+            </div>
+
+            {/* Desktop: Flex layout */}
+            <div className="hidden md:flex flex-wrap gap-3">
               <Button
                 variant="outline"
                 size="sm"
