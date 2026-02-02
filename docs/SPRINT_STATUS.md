@@ -1,8 +1,8 @@
 # ContractorOS Sprint Status
 
 > **Purpose:** Track current progress and enable seamless session handoffs.
-> **Last Updated:** 2026-02-02 by Database Session
-> **Current Phase:** Phase 8 - Field-First Completion - IN PROGRESS
+> **Last Updated:** 2026-02-02 by Controller Session
+> **Current Phase:** Phase 8 - Field-First Completion - FINAL SPRINT
 
 ---
 
@@ -10,14 +10,15 @@
 
 | Metric | Value |
 |--------|-------|
-| **Current Sprint** | Sprint 29 - Voice Commands |
+| **Current Sprint** | Sprint 30 - Mobile UX Polish |
 | **Sprint Status** | 🚀 IN PROGRESS |
-| **Platform Completion** | ~88% |
+| **Platform Completion** | ~90% |
 | **TypeScript Status** | ✅ Passing |
 | **Firestore Rules** | ✅ Deployed |
 | **Docker Status** | ✅ Running on localhost:3000 |
 | **Demo Account** | ✅ Horizon Construction Co. seeded |
 | **Offline Mode** | ✅ Sprint 28 Complete |
+| **Voice Commands** | ✅ Sprint 29 Complete |
 
 ---
 
@@ -39,6 +40,7 @@
 | **Integrations** | 60% | QBO connected, Twilio partial |
 | **Mobile UI** | 75% | Responsive components |
 | **Offline Mode** | 90% | True offline for field portal |
+| **Voice Commands** | 85% | Time, daily log, task voice input |
 
 ---
 
@@ -46,7 +48,8 @@
 
 | Sprint | Focus | Status | Key Deliverables |
 |--------|-------|--------|------------------|
-| **29** | Voice Commands | 🚀 IN PROGRESS | Voice time entry, daily logs, navigation |
+| **30** | Mobile UX Polish | 🚀 IN PROGRESS | Touch targets, gestures, bottom nav |
+| **29** | Voice Commands | ✅ COMPLETE | Voice time/daily log/task commands |
 | **28** | True Offline Mode | ✅ COMPLETE | Offline time/tasks/photos/daily logs |
 | **27** | Demo Seed Scripts | ✅ COMPLETE | Horizon Construction demo data |
 | **26** | Document Generation | ✅ COMPLETE | Signed PDF, file uploads |
@@ -59,25 +62,52 @@
 
 ---
 
-## Sprint 29: Voice Commands (IN PROGRESS)
+## Sprint 30: Mobile UX Polish (IN PROGRESS)
 
 **Started:** 2026-02-02
-**Goal:** Voice-first experience for field workers
+**Goal:** Best-in-class mobile field experience
 
 ### Session Assignments
 
 | Session | Role | Assigned Work |
 |---------|------|---------------|
 | **Controller** | Coordination | Review code, coordinate sessions, deploy |
-| **Dev Sprint** | Voice Features | Voice capture, command parsing, UI |
-| **Database** | Backend | Firestore rules, indexes if needed |
-| **E2E Testing** | Testing | Test voice features, regression |
+| **Dev Sprint** | UI Components | Bottom nav, FAB, swipe gestures |
+| **Database** | N/A | No database changes needed |
+| **E2E Testing** | Testing | Mobile viewport testing |
 
-### Sprint 29 Tasks
+### Sprint 30 Tasks
 
 | Feature | Priority | Assigned | Status |
 |---------|----------|----------|--------|
-| Voice Command Types | P0 | Database | ✅ Complete |
+| Touch Target Audit | P1 | Dev Sprint | 🔲 Not Started |
+| Swipe Gestures | P1 | Dev Sprint | 🔲 Not Started |
+| Pull to Refresh | P1 | Dev Sprint | 🔲 Not Started |
+| Bottom Navigation | P1 | Dev Sprint | 🔲 Not Started |
+| Quick Actions FAB | P1 | Dev Sprint | 🔲 Not Started |
+| Photo Gallery Optimization | P1 | Dev Sprint | 🔲 Not Started |
+
+### Technical Approach
+
+1. **Touch Targets** - Audit all buttons/links, ensure 44x44px minimum
+2. **Swipe Gestures** - Use react-swipeable or custom touch handlers
+3. **Pull to Refresh** - Add to all list views in field portal
+4. **Bottom Navigation** - Thumb-friendly nav bar for field portal
+5. **Quick Actions FAB** - Floating action button with context-aware actions
+6. **Photo Gallery** - Virtual scrolling, lazy loading, thumbnail optimization
+
+---
+
+## Sprint 29: Voice Commands (COMPLETE)
+
+**Completed:** 2026-02-02
+**Commit:** `3c68d37`
+
+### Deliverables
+
+| Feature | Status |
+|---------|--------|
+| Voice Command Types | ✅ Complete |
 | Firestore Rules (Voice) | P0 | Database | ✅ Complete |
 | Firestore Indexes (Voice) | P0 | Database | ✅ Complete |
 | Voice Settings Schema | P0 | Database | ✅ Complete |
