@@ -2,21 +2,19 @@ import type { Submittal, SubmittalStatus, SubmittalType } from '@/types';
 
 export const SUBMITTAL_STATUS_LABELS: Record<SubmittalStatus, string> = {
   draft: 'Draft',
-  submitted: 'Submitted',
-  under_review: 'Under Review',
+  pending_review: 'Pending Review',
   approved: 'Approved',
   approved_as_noted: 'Approved as Noted',
-  revision_required: 'Revision Required',
+  revise_resubmit: 'Revise & Resubmit',
   rejected: 'Rejected',
 };
 
 export const SUBMITTAL_STATUS_COLORS: Record<SubmittalStatus, string> = {
   draft: 'bg-gray-100 text-gray-800',
-  submitted: 'bg-blue-100 text-blue-800',
-  under_review: 'bg-yellow-100 text-yellow-800',
+  pending_review: 'bg-yellow-100 text-yellow-800',
   approved: 'bg-green-100 text-green-800',
   approved_as_noted: 'bg-green-50 text-green-700',
-  revision_required: 'bg-orange-100 text-orange-800',
+  revise_resubmit: 'bg-orange-100 text-orange-800',
   rejected: 'bg-red-100 text-red-800',
 };
 
@@ -25,11 +23,8 @@ export const SUBMITTAL_TYPE_LABELS: Record<SubmittalType, string> = {
   product_data: 'Product Data',
   sample: 'Sample',
   mock_up: 'Mock-Up',
-  design_data: 'Design Data',
-  test_report: 'Test Report',
   certificate: 'Certificate',
-  manufacturer_instructions: 'Manufacturer Instructions',
-  closeout: 'Closeout',
+  test_report: 'Test Report',
   other: 'Other',
 };
 
@@ -38,11 +33,8 @@ export const SUBMITTAL_TYPE_ICONS: Record<SubmittalType, string> = {
   product_data: 'ClipboardDocumentListIcon',
   sample: 'SwatchIcon',
   mock_up: 'CubeIcon',
-  design_data: 'DocumentChartBarIcon',
-  test_report: 'BeakerIcon',
   certificate: 'DocumentCheckIcon',
-  manufacturer_instructions: 'BookOpenIcon',
-  closeout: 'ArchiveBoxIcon',
+  test_report: 'BeakerIcon',
   other: 'DocumentIcon',
 };
 
@@ -58,7 +50,7 @@ export function isApproved(submittal: Submittal): boolean {
 }
 
 export function needsAction(submittal: Submittal): boolean {
-  return submittal.status === 'submitted' || submittal.status === 'under_review';
+  return submittal.status === 'pending_review';
 }
 
 export function sortSubmittals(
@@ -66,13 +58,12 @@ export function sortSubmittals(
   sortBy: 'date' | 'status' | 'type' = 'date'
 ): Submittal[] {
   const statusOrder: Record<SubmittalStatus, number> = {
-    submitted: 0,
-    under_review: 1,
-    revision_required: 2,
-    draft: 3,
-    approved_as_noted: 4,
-    approved: 5,
-    rejected: 6,
+    pending_review: 0,
+    revise_resubmit: 1,
+    draft: 2,
+    approved_as_noted: 3,
+    approved: 4,
+    rejected: 5,
   };
 
   return [...submittals].sort((a, b) => {
@@ -83,7 +74,7 @@ export function sortSubmittals(
       return statusOrder[a.status] - statusOrder[b.status];
     }
     if (sortBy === 'type') {
-      return a.type.localeCompare(b.type);
+      return (a.type || '').localeCompare(b.type || '');
     }
     return 0;
   });
@@ -102,7 +93,7 @@ export function filterSubmittals(
 ): Submittal[] {
   return submittals.filter(submittal => {
     if (filters.status?.length && !filters.status.includes(submittal.status)) return false;
-    if (filters.type?.length && !filters.type.includes(submittal.type)) return false;
+    if (filters.type?.length && submittal.type && !filters.type.includes(submittal.type)) return false;
     if (filters.specSection && submittal.specSection !== filters.specSection) return false;
     if (filters.submittedBy && submittal.submittedBy !== filters.submittedBy) return false;
     if (filters.needsActionOnly && !needsAction(submittal)) return false;
@@ -131,18 +122,17 @@ export function getSubmittalSummary(submittals: Submittal[]) {
     total: submittals.length,
     byStatus: {
       draft: submittals.filter(s => s.status === 'draft').length,
-      submitted: submittals.filter(s => s.status === 'submitted').length,
-      under_review: submittals.filter(s => s.status === 'under_review').length,
+      pending_review: submittals.filter(s => s.status === 'pending_review').length,
       approved: submittals.filter(s => s.status === 'approved').length,
       approved_as_noted: submittals.filter(s => s.status === 'approved_as_noted').length,
-      revision_required: submittals.filter(s => s.status === 'revision_required').length,
+      revise_resubmit: submittals.filter(s => s.status === 'revise_resubmit').length,
       rejected: submittals.filter(s => s.status === 'rejected').length,
     },
     byType: {
       shop_drawing: submittals.filter(s => s.type === 'shop_drawing').length,
       product_data: submittals.filter(s => s.type === 'product_data').length,
       sample: submittals.filter(s => s.type === 'sample').length,
-      other: submittals.filter(s => !['shop_drawing', 'product_data', 'sample'].includes(s.type)).length,
+      other: submittals.filter(s => s.type && !['shop_drawing', 'product_data', 'sample'].includes(s.type)).length,
     },
     needsAction: submittals.filter(s => needsAction(s)).length,
     approvalRate: submittals.length > 0

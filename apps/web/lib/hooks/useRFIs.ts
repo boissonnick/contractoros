@@ -56,8 +56,8 @@ export function useRFIs({ projectId, status }: UseRFIsOptions) {
     await fetchRFIs();
   };
 
-  const respondToRFI = async (rfiId: string, response: string) => {
-    await updateRFI(rfiId, { response, status: 'answered' });
+  const respondToRFI = async (rfiId: string, responseText: string) => {
+    await updateRFI(rfiId, { status: 'answered' });
   };
 
   const closeRFI = async (rfiId: string) => {
