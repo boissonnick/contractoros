@@ -2113,6 +2113,39 @@ service cloud.firestore {
     }
 
     // ==========================================
+    // Organization-Scoped Email Templates Collection
+    // ==========================================
+    match /organizations/{orgId}/emailTemplates/{templateId} {
+      // Org members can read email templates
+      allow read: if isSameOrg(orgId);
+
+      // Admins can create/update email templates
+      allow create: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+      allow update: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Only owners can delete email templates
+      allow delete: if isSameOrg(orgId) && getUserProfile().role == 'OWNER';
+    }
+
+    // ==========================================
+    // Organization-Scoped Email Logs Collection
+    // ==========================================
+    match /organizations/{orgId}/emailLogs/{logId} {
+      // Org members can read email logs
+      allow read: if isSameOrg(orgId);
+
+      // System creates logs via Cloud Functions/API routes
+      // Authenticated org members can create (for API route access)
+      allow create: if isSameOrg(orgId);
+
+      // Logs can be updated for status changes (opened, bounced)
+      allow update: if isSameOrg(orgId);
+
+      // Email logs should not be deleted (audit trail)
+      allow delete: if false;
+    }
+
+    // ==========================================
     // Organization-Scoped AI Settings Collection
     // ==========================================
     match /organizations/{orgId}/settings/ai {
