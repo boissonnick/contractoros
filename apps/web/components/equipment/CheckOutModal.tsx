@@ -1,15 +1,21 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Equipment, EquipmentCheckout, OrganizationMember, Project } from '@/types';
+import { Equipment, EquipmentCheckout, Project } from '@/types';
 import { XMarkIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
+
+interface TeamMember {
+  userId: string;
+  displayName?: string;
+  email?: string;
+}
 
 interface CheckOutModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: Partial<EquipmentCheckout>) => Promise<void>;
   equipment: Equipment | null;
-  teamMembers: OrganizationMember[];
+  teamMembers: TeamMember[];
   projects: Project[];
 }
 

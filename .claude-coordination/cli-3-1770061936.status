@@ -1,0 +1,5 @@
+CLI: 3
+STATUS: complete
+TASK: Sprint 35 API - Equipment types, CRUD, checkout, maintenance, Firestore rules
+COMMIT: c473ced
+MESSAGE: All tasks complete. TypeScript passes for new files. Pre-existing errors in tools/page.tsx unrelated to Sprint 35.

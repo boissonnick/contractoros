@@ -1,5 +1,0 @@
-CLI: 2
-STATUS: complete
-TASK: Sprint 34 UI - RFI card, RFI form, submittal card, submittal form, log page
-COMMIT: 879941d
-MESSAGE: Ready for review. Pre-existing type errors in hooks/utils need separate fix.
