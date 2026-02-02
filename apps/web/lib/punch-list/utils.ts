@@ -3,15 +3,17 @@ import type { PunchItem, PunchItemStatus, PunchItemPriority } from '@/types';
 export const PUNCH_STATUS_LABELS: Record<PunchItemStatus, string> = {
   open: 'Open',
   in_progress: 'In Progress',
-  complete: 'Complete',
-  verified: 'Verified',
+  ready_for_review: 'Ready for Review',
+  approved: 'Approved',
+  rejected: 'Rejected',
 };
 
 export const PUNCH_STATUS_COLORS: Record<PunchItemStatus, string> = {
   open: 'bg-red-100 text-red-800',
   in_progress: 'bg-yellow-100 text-yellow-800',
-  complete: 'bg-blue-100 text-blue-800',
-  verified: 'bg-green-100 text-green-800',
+  ready_for_review: 'bg-blue-100 text-blue-800',
+  approved: 'bg-green-100 text-green-800',
+  rejected: 'bg-orange-100 text-orange-800',
 };
 
 export const PUNCH_PRIORITY_LABELS: Record<PunchItemPriority, string> = {
@@ -58,8 +60,9 @@ export function sortPunchItems(items: PunchItem[], sortBy: 'priority' | 'status'
   const statusOrder: Record<PunchItemStatus, number> = {
     open: 0,
     in_progress: 1,
-    complete: 2,
-    verified: 3,
+    ready_for_review: 2,
+    approved: 3,
+    rejected: 4,
   };
 
   return [...items].sort((a, b) => {
@@ -92,8 +95,8 @@ export function filterPunchItems(
       const search = filters.search.toLowerCase();
       return (
         item.title.toLowerCase().includes(search) ||
-        item.description.toLowerCase().includes(search) ||
-        item.location.toLowerCase().includes(search)
+        (item.description?.toLowerCase().includes(search) ?? false) ||
+        (item.location?.toLowerCase().includes(search) ?? false)
       );
     }
     return true;
@@ -106,8 +109,9 @@ export function getPunchListSummary(items: PunchItem[]) {
     byStatus: {
       open: items.filter(i => i.status === 'open').length,
       in_progress: items.filter(i => i.status === 'in_progress').length,
-      complete: items.filter(i => i.status === 'complete').length,
-      verified: items.filter(i => i.status === 'verified').length,
+      ready_for_review: items.filter(i => i.status === 'ready_for_review').length,
+      approved: items.filter(i => i.status === 'approved').length,
+      rejected: items.filter(i => i.status === 'rejected').length,
     },
     byPriority: {
       critical: items.filter(i => i.priority === 'critical').length,
@@ -115,7 +119,6 @@ export function getPunchListSummary(items: PunchItem[]) {
       medium: items.filter(i => i.priority === 'medium').length,
       low: items.filter(i => i.priority === 'low').length,
     },
-    clientReported: items.filter(i => i.clientReported).length,
     unassigned: items.filter(i => !i.assignedTo).length,
   };
 }

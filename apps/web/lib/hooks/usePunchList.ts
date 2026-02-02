@@ -17,8 +17,9 @@ interface UsePunchListReturn {
     total: number;
     open: number;
     inProgress: number;
-    complete: number;
-    verified: number;
+    readyForReview: number;
+    approved: number;
+    rejected: number;
     percentComplete: number;
   };
   createItem: (data: Partial<PunchItem>) => Promise<PunchItem>;
@@ -63,10 +64,11 @@ export function usePunchList({ projectId, status }: UsePunchListOptions): UsePun
     total: items.length,
     open: items.filter(i => i.status === 'open').length,
     inProgress: items.filter(i => i.status === 'in_progress').length,
-    complete: items.filter(i => i.status === 'complete').length,
-    verified: items.filter(i => i.status === 'verified').length,
+    readyForReview: items.filter(i => i.status === 'ready_for_review').length,
+    approved: items.filter(i => i.status === 'approved').length,
+    rejected: items.filter(i => i.status === 'rejected').length,
     percentComplete: items.length > 0
-      ? Math.round((items.filter(i => i.status === 'verified').length / items.length) * 100)
+      ? Math.round((items.filter(i => i.status === 'approved').length / items.length) * 100)
       : 0,
   };
 
