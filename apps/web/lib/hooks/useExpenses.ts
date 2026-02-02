@@ -16,6 +16,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
+import { convertTimestampsDeep } from '@/lib/firebase/timestamp-converter';
 import {
   Expense,
   ExpenseCategory,
@@ -59,30 +60,6 @@ interface UseExpensesReturn {
 
   // Refresh
   refresh: () => void;
-}
-
-// Helper to convert Firestore timestamps
-function convertTimestamps(data: Record<string, unknown>): Record<string, unknown> {
-  const converted = { ...data };
-  const dateFields = ['createdAt', 'updatedAt', 'approvedAt', 'reimbursedAt'];
-
-  for (const field of dateFields) {
-    if (converted[field] instanceof Timestamp) {
-      converted[field] = (converted[field] as Timestamp).toDate();
-    }
-  }
-
-  // Convert receipt timestamps
-  if (Array.isArray(converted.receipts)) {
-    converted.receipts = (converted.receipts as ExpenseReceipt[]).map(r => ({
-      ...r,
-      uploadedAt: r.uploadedAt instanceof Timestamp
-        ? (r.uploadedAt as unknown as Timestamp).toDate()
-        : r.uploadedAt,
-    }));
-  }
-
-  return converted;
 }
 
 export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn {
@@ -160,7 +137,7 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
       (snapshot) => {
         const expensesData = snapshot.docs.map((doc) => ({
           id: doc.id,
-          ...convertTimestamps(doc.data()),
+          ...convertTimestampsDeep(doc.data()),
         })) as Expense[];
 
         setExpenses(expensesData);

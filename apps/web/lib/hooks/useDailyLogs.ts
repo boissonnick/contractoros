@@ -16,6 +16,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
+import { convertTimestampsDeep } from '@/lib/firebase/timestamp-converter';
 import {
   DailyLogEntry,
   DailyLogCategory,
@@ -52,30 +53,6 @@ interface UseDailyLogsReturn {
 
   // Refresh
   refresh: () => void;
-}
-
-// Helper to convert Firestore timestamps
-function convertTimestamps(data: Record<string, unknown>): Record<string, unknown> {
-  const converted = { ...data };
-  const dateFields = ['createdAt', 'updatedAt', 'followUpDate'];
-
-  for (const field of dateFields) {
-    if (converted[field] instanceof Timestamp) {
-      converted[field] = (converted[field] as Timestamp).toDate();
-    }
-  }
-
-  // Convert photo timestamps
-  if (Array.isArray(converted.photos)) {
-    converted.photos = (converted.photos as DailyLogPhoto[]).map(p => ({
-      ...p,
-      uploadedAt: p.uploadedAt instanceof Timestamp
-        ? (p.uploadedAt as unknown as Timestamp).toDate()
-        : p.uploadedAt,
-    }));
-  }
-
-  return converted;
 }
 
 export function useDailyLogs(options: UseDailyLogsOptions = {}): UseDailyLogsReturn {
@@ -136,7 +113,7 @@ export function useDailyLogs(options: UseDailyLogsOptions = {}): UseDailyLogsRet
       (snapshot) => {
         let logsData = snapshot.docs.map((doc) => ({
           id: doc.id,
-          ...convertTimestamps(doc.data()),
+          ...convertTimestampsDeep(doc.data()),
         })) as DailyLogEntry[];
 
         // Filter private logs if not a manager and not including private
