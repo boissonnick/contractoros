@@ -647,7 +647,7 @@ export default function ProjectsPage() {
                     <EllipsisVerticalIcon className="h-5 w-5 text-gray-500" />
                   </button>
                   {menuOpenId === project.id && (
-                    <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 w-48 z-20">
+                    <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 w-48 z-50">
                       <button
                         onClick={() => handleDuplicate(project)}
                         disabled={duplicating === project.id}
@@ -687,7 +687,7 @@ export default function ProjectsPage() {
 
                 <Link href={`/dashboard/projects/${project.id}`} prefetch={false} className="block p-6">
                   <div className="flex items-start justify-between mb-4">
-                    <h3 className="font-semibold text-gray-900 line-clamp-1 pr-8">{project.name}</h3>
+                    <h3 className="font-semibold text-gray-900 truncate pr-8" title={project.name}>{project.name}</h3>
                   </div>
                   <div className="flex items-center gap-2 mb-3">
                     <Badge className={statusConfig[project.status].color}>

@@ -28,7 +28,9 @@ import {
   PhotoIcon,
   DocumentIcon,
   CurrencyDollarIcon,
+  QuestionMarkCircleIcon,
 } from '@heroicons/react/24/outline';
+import Link from 'next/link';
 
 // Full nav items for staff - will be filtered based on permissions
 const staffNavItems: (NavItem & { requiredPermission?: keyof RolePermissions })[] = [
@@ -112,9 +114,16 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       {/* Offline Banner */}
       <OfflineBanner />
 
-      {/* Global Search - positioned in header area on desktop */}
-      <div className="hidden md:block fixed top-4 right-8 z-40">
+      {/* Global Search and Help - positioned in header area on desktop */}
+      <div className="hidden md:flex items-center gap-2 fixed top-4 right-4 lg:right-8 z-40">
         <GlobalSearchBar />
+        <Link
+          href="/dashboard/help"
+          className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+          title="Help & Support"
+        >
+          <QuestionMarkCircleIcon className="h-5 w-5" />
+        </Link>
       </div>
 
       {/* Main App Shell */}
@@ -145,8 +154,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         contextSuggestions={assistant.suggestions}
       />
 
-      {/* Offline Sync Status Indicator */}
-      <FloatingSyncIndicator position="bottom-left" showWhenOnline />
+      {/* Offline Sync Status Indicator - only shows when offline/syncing */}
+      <FloatingSyncIndicator position="bottom-right" />
     </div>
   );
 }
