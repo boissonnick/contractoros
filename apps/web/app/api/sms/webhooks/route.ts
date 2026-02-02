@@ -1,8 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { adminDb, Timestamp } from '@/lib/firebase/admin';
 import { isOptOutRequest, isOptInRequest } from '@/lib/sms/smsUtils';
 
 export const runtime = 'nodejs';
+
+const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
+
+/**
+ * Verify Twilio webhook signature using HMAC-SHA1
+ * https://www.twilio.com/docs/usage/security#validating-requests
+ */
+function verifyTwilioSignature(
+  url: string,
+  params: Record<string, string>,
+  signature: string
+): boolean {
+  if (!TWILIO_AUTH_TOKEN) {
+    console.error('TWILIO_AUTH_TOKEN not configured');
+    return false;
+  }
+
+  // Sort params by key and concatenate key+value
+  const sortedKeys = Object.keys(params).sort();
+  let dataString = url;
+  for (const key of sortedKeys) {
+    dataString += key + params[key];
+  }
+
+  // Compute HMAC-SHA1 and base64 encode
+  const computedSignature = crypto
+    .createHmac('sha1', TWILIO_AUTH_TOKEN)
+    .update(dataString)
+    .digest('base64');
+
+  // Use timing-safe comparison to prevent timing attacks
+  try {
+    return crypto.timingSafeEqual(
+      Buffer.from(computedSignature),
+      Buffer.from(signature)
+    );
+  } catch {
+    // Lengths don't match
+    return false;
+  }
+}
 
 /**
  * POST /api/sms/webhooks
@@ -10,6 +52,25 @@ export const runtime = 'nodejs';
  */
 export async function POST(request: NextRequest) {
   try {
+    // Security: Verify TWILIO_AUTH_TOKEN is configured
+    if (!TWILIO_AUTH_TOKEN) {
+      console.error('TWILIO_AUTH_TOKEN not configured - rejecting webhook');
+      return NextResponse.json(
+        { error: 'Webhook not configured' },
+        { status: 403 }
+      );
+    }
+
+    // Security: Verify X-Twilio-Signature header is present
+    const twilioSignature = request.headers.get('X-Twilio-Signature');
+    if (!twilioSignature) {
+      console.warn('Missing X-Twilio-Signature header');
+      return NextResponse.json(
+        { error: 'Missing signature' },
+        { status: 403 }
+      );
+    }
+
     // Parse form data (Twilio sends as application/x-www-form-urlencoded)
     const formData = await request.formData();
     const data: Record<string, string> = {};
@@ -17,6 +78,17 @@ export async function POST(request: NextRequest) {
     formData.forEach((value, key) => {
       data[key] = value.toString();
     });
+
+    // Security: Verify Twilio signature
+    // Use the full URL from the request
+    const webhookUrl = request.url;
+    if (!verifyTwilioSignature(webhookUrl, data, twilioSignature)) {
+      console.warn('Invalid Twilio signature - rejecting webhook');
+      return NextResponse.json(
+        { error: 'Invalid signature' },
+        { status: 403 }
+      );
+    }
 
     // Determine webhook type
     const messageSid = data.MessageSid || data.SmsSid;
