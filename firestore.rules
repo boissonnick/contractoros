@@ -2247,6 +2247,65 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // ==========================================
+    // Organization-Scoped Voice Commands Collection (Sprint 29)
+    // ==========================================
+    match /organizations/{orgId}/voiceCommands/{commandId} {
+      // Users can read their own commands, admins can read all
+      allow read: if isSameOrg(orgId) && (
+        request.auth.uid == resource.data.userId ||
+        getUserProfile().role in ['OWNER', 'PM']
+      );
+
+      // Users can create commands for themselves
+      allow create: if isSameOrg(orgId) &&
+        request.auth.uid == request.resource.data.userId;
+
+      // Users can update their own commands (for confirmation/cancellation)
+      // Admins can update any command
+      allow update: if isSameOrg(orgId) && (
+        request.auth.uid == resource.data.userId ||
+        getUserProfile().role in ['OWNER', 'PM']
+      );
+
+      // Users can delete their own commands, admins can delete any
+      allow delete: if isSameOrg(orgId) && (
+        request.auth.uid == resource.data.userId ||
+        getUserProfile().role in ['OWNER', 'PM']
+      );
+    }
+
+    // ==========================================
+    // Organization-Scoped Voice Command Logs Collection (Sprint 29)
+    // Analytics/audit - admin read only, server write only
+    // ==========================================
+    match /organizations/{orgId}/voiceCommandLogs/{logId} {
+      // Only admins can read voice command logs (for analytics)
+      allow read: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Server writes only via admin SDK - no client writes
+      // API routes handle creation with admin credentials
+      allow create: if false;
+
+      // Logs are immutable - no updates or deletes
+      allow update, delete: if false;
+    }
+
+    // ==========================================
+    // Organization-Scoped Voice Settings (Sprint 29)
+    // ==========================================
+    match /organizations/{orgId}/settings/voice {
+      // Org members can read voice settings
+      allow read: if isSameOrg(orgId);
+
+      // Admins can create/update voice settings
+      allow create: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+      allow update: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Only owners can delete voice settings
+      allow delete: if isSameOrg(orgId) && getUserProfile().role == 'OWNER';
+    }
+
     // Default deny all other access
     match /{document=**} {
       allow read, write: if false;

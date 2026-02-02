@@ -149,6 +149,12 @@ export interface OrgSettings {
   workdayEnd: string;      // "17:00"
   overtimeThreshold: number; // hours per week
   requireGeoLocation: boolean;
+
+  // Voice Command Settings (Sprint 29)
+  voiceEnabled?: boolean;              // Master toggle for voice commands
+  voiceLanguage?: string;              // Default: 'en-US'
+  voiceConfirmationRequired?: boolean; // Require confirm before executing
+  voiceWakeWord?: string | null;       // Optional wake word (e.g., 'Hey ContractorOS')
 }
 
 // ============================================
@@ -7202,4 +7208,152 @@ export interface EmailLog {
   sentAt: Date;
   openedAt?: Date;
   errorMessage?: string;
+}
+
+// ============================================================================
+// Voice Command Types (Sprint 29)
+// ============================================================================
+
+/**
+ * Voice command types supported by the system
+ */
+export type VoiceCommandType =
+  | 'time_entry'      // Clock in/out, add time
+  | 'daily_log'       // Create/update daily log entries
+  | 'task_update'     // Update task status, assign tasks
+  | 'navigation'      // Navigate to pages/sections
+  | 'photo_note';     // Add notes to photos
+
+/**
+ * Status of a voice command execution
+ */
+export type VoiceCommandStatus =
+  | 'pending'         // Command received, not yet processed
+  | 'processing'      // Currently being parsed/executed
+  | 'completed'       // Successfully executed
+  | 'failed'          // Execution failed
+  | 'cancelled';      // User cancelled confirmation
+
+/**
+ * Parsed voice command structure
+ */
+export interface ParsedVoiceCommand {
+  type: VoiceCommandType;
+  action: string;           // e.g., 'clock_in', 'create', 'update', 'navigate'
+  entityType?: string;      // e.g., 'time_entry', 'daily_log', 'task'
+  entityId?: string;        // ID if referencing existing entity
+  parameters: Record<string, unknown>; // Command-specific params
+  confidence: number;       // 0-1 confidence score from parser
+}
+
+/**
+ * Voice command record
+ * Path: organizations/{orgId}/voiceCommands/{commandId}
+ */
+export interface VoiceCommand {
+  id: string;
+  orgId: string;
+  userId: string;
+  userName: string;
+
+  // Input
+  rawText: string;          // Original transcribed text
+  audioUrl?: string;        // Optional audio recording URL
+  language: string;         // e.g., 'en-US'
+
+  // Parsing
+  parsedCommand?: ParsedVoiceCommand;
+  parsingError?: string;
+
+  // Execution
+  status: VoiceCommandStatus;
+  result?: VoiceCommandResult;
+
+  // Context
+  contextPage?: string;     // Page where command was issued (e.g., '/field/time')
+  projectId?: string;       // Active project context if any
+  projectName?: string;
+
+  // Confirmation
+  requiresConfirmation: boolean;
+  confirmedAt?: Date;
+  confirmedBy?: string;
+
+  // Timestamps
+  createdAt: Date;
+  processedAt?: Date;
+  completedAt?: Date;
+}
+
+/**
+ * Result of voice command execution
+ */
+export interface VoiceCommandResult {
+  success: boolean;
+  action: string;           // Action that was performed
+  entityType?: string;      // Type of entity affected
+  entityId?: string;        // ID of created/updated entity
+  message: string;          // Human-readable result message
+  error?: string;           // Error message if failed
+  undoAction?: {            // Info for undo capability
+    type: string;
+    entityId: string;
+    previousState?: Record<string, unknown>;
+  };
+}
+
+/**
+ * Voice command analytics log
+ * Path: organizations/{orgId}/voiceCommandLogs/{logId}
+ * Note: Admins only for analytics, write-only via admin SDK
+ */
+export interface VoiceCommandLog {
+  id: string;
+  orgId: string;
+
+  // Aggregated stats (no PII)
+  commandType: VoiceCommandType;
+  action: string;
+  success: boolean;
+  confidence: number;
+  processingTimeMs: number;
+
+  // Context (anonymized)
+  contextPage?: string;
+  language: string;
+
+  // Error tracking
+  errorCode?: string;
+  errorCategory?: 'parsing' | 'validation' | 'execution' | 'timeout' | 'cancelled';
+
+  // Timestamp
+  createdAt: Date;
+}
+
+/**
+ * Voice command statistics for analytics dashboard
+ */
+export interface VoiceCommandStats {
+  orgId: string;
+  period: 'day' | 'week' | 'month';
+  date: string;             // Period start date
+
+  // Totals
+  totalCommands: number;
+  successfulCommands: number;
+  failedCommands: number;
+
+  // By type breakdown
+  byType: Record<VoiceCommandType, {
+    total: number;
+    success: number;
+    avgConfidence: number;
+  }>;
+
+  // Performance
+  avgProcessingTimeMs: number;
+  avgConfidence: number;
+
+  // Error breakdown
+  errorsByCategory: Record<string, number>;
 }
