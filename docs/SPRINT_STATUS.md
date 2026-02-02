@@ -10,9 +10,9 @@
 
 | Metric | Value |
 |--------|-------|
-| **Current Sprint** | Sprint 31 - AI Assistant V2 |
+| **Current Sprint** | Sprint 32 - Smart Automation |
 | **Sprint Status** | 🚀 IN PROGRESS |
-| **Platform Completion** | ~92% |
+| **Platform Completion** | ~94% |
 | **TypeScript Status** | ✅ Passing |
 | **Firestore Rules** | ✅ Deployed |
 | **Docker Status** | ✅ Running on localhost:3000 |
@@ -20,6 +20,7 @@
 | **Offline Mode** | ✅ Sprint 28 Complete |
 | **Voice Commands** | ✅ Sprint 29 Complete |
 | **Mobile UX** | ✅ Sprint 30 Complete |
+| **AI Assistant V2** | ✅ Sprint 31 Complete |
 
 ---
 
@@ -36,7 +37,7 @@
 | **Time Tracking** | 85% | Timesheets, entries |
 | **E-Signature** | 80% | Send, sign, PDF generation |
 | **Client Portal** | 80% | Magic links, messaging |
-| **AI Assistant** | 85% | Multi-model, streaming, settings |
+| **AI Assistant** | 95% | Doc analysis, photo AI, NL queries, suggestions |
 | **Reports** | 65% | Basic reports, needs custom builder |
 | **Integrations** | 60% | QBO connected, Twilio partial |
 | **Mobile UI** | 90% | Bottom nav, swipe gestures, pull-to-refresh |
@@ -49,7 +50,8 @@
 
 | Sprint | Focus | Status | Key Deliverables |
 |--------|-------|--------|------------------|
-| **31** | AI Assistant V2 | 🚀 IN PROGRESS | Doc analysis, photo AI, NL queries |
+| **32** | Smart Automation | 🚀 IN PROGRESS | Scheduling AI, change order detection, alerts |
+| **31** | AI Assistant V2 | ✅ COMPLETE | Doc analysis, photo AI, NL queries |
 | **30** | Mobile UX Polish | ✅ COMPLETE | Bottom nav, swipe gestures, FAB |
 | **29** | Voice Commands | ✅ COMPLETE | Voice time/daily log/task commands |
 | **28** | True Offline Mode | ✅ COMPLETE | Offline time/tasks/photos/daily logs |
