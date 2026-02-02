@@ -7686,3 +7686,34 @@ export interface EstimateAnalysisResult {
   modelUsed: string;
   processingTimeMs: number;
 }
+
+// ============================================================================
+
+// ============================================================================
+// Closeout Checklist Types (Sprint 33)
+// ============================================================================
+
+export interface CloseoutChecklist {
+  id: string;
+  projectId: string;
+  orgId: string;
+
+  items: CloseoutChecklistItem[];
+  completedCount: number;
+  totalCount: number;
+
+  completedAt?: Date;
+  completedBy?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface CloseoutChecklistItem {
+  id: string;
+  label: string;
+  category: 'documentation' | 'inspection' | 'client' | 'financial' | 'warranty';
+  completed: boolean;
+  completedAt?: Date;
+  completedBy?: string;
+  notes?: string;
+}

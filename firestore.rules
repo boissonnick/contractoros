@@ -2397,6 +2397,24 @@ service cloud.firestore {
       allow write: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
     }
 
+    // ==========================================
+    // Punch Items Collection (Sprint 33)
+    // ==========================================
+    match /organizations/{orgId}/punchItems/{itemId} {
+      allow read: if isSameOrg(orgId);
+      allow create: if isSameOrg(orgId);
+      allow update: if isSameOrg(orgId);
+      allow delete: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+    }
+
+    // ==========================================
+    // Closeout Checklists Collection (Sprint 33)
+    // ==========================================
+    match /organizations/{orgId}/closeoutChecklists/{checklistId} {
+      allow read: if isSameOrg(orgId);
+      allow write: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+    }
+
     // Default deny all other access
     match /{document=**} {
       allow read, write: if false;

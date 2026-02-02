@@ -89,7 +89,7 @@ export function filterPunchItems(
   return items.filter(item => {
     if (filters.status?.length && !filters.status.includes(item.status)) return false;
     if (filters.priority?.length && !filters.priority.includes(item.priority)) return false;
-    if (filters.category?.length && !filters.category.includes(item.category)) return false;
+    if (filters.category?.length && item.trade && !filters.category.includes(item.trade)) return false;
     if (filters.assignedTo && item.assignedTo !== filters.assignedTo) return false;
     if (filters.search) {
       const search = filters.search.toLowerCase();
