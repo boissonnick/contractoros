@@ -16,7 +16,11 @@ const ROLES: ImpersonationRole[] = [
   'assistant',
 ];
 
-export function ImpersonationSelector() {
+interface ImpersonationSelectorProps {
+  variant?: 'default' | 'sidebar';
+}
+
+export function ImpersonationSelector({ variant = 'default' }: ImpersonationSelectorProps) {
   const {
     isImpersonating,
     currentRole,
@@ -49,6 +53,7 @@ export function ImpersonationSelector() {
   }
 
   const currentRoleInfo = roleInfo[currentRole];
+  const isSidebar = variant === 'sidebar';
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -56,15 +61,18 @@ export function ImpersonationSelector() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all',
-          'border shadow-sm',
+          'flex items-center gap-2 rounded-lg text-sm font-medium transition-all',
+          'border',
+          isSidebar ? 'w-full px-2.5 py-2' : 'px-3 py-2 shadow-sm',
           isImpersonating
             ? 'bg-amber-50 border-amber-300 text-amber-800 hover:bg-amber-100'
-            : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+            : isSidebar
+              ? 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
+              : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
         )}
       >
-        <span className="text-base">{currentRoleInfo.icon}</span>
-        <span>{currentRoleInfo.label}</span>
+        <span className={isSidebar ? 'text-sm' : 'text-base'}>{currentRoleInfo.icon}</span>
+        <span className={cn('flex-1 text-left', isSidebar && 'text-xs')}>{currentRoleInfo.label}</span>
         <ChevronUpIcon
           className={cn(
             'h-4 w-4 transition-transform',
@@ -72,7 +80,10 @@ export function ImpersonationSelector() {
           )}
         />
         {isImpersonating && (
-          <span className="ml-1 px-1.5 py-0.5 text-xs font-semibold bg-amber-200 text-amber-800 rounded">
+          <span className={cn(
+            'px-1.5 py-0.5 font-semibold bg-amber-200 text-amber-800 rounded',
+            isSidebar ? 'text-[10px]' : 'text-xs ml-1'
+          )}>
             DEMO
           </span>
         )}
@@ -80,7 +91,10 @@ export function ImpersonationSelector() {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute bottom-full left-0 mb-2 w-64 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-50">
+        <div className={cn(
+          'absolute w-64 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-50',
+          isSidebar ? 'bottom-full left-0 mb-2' : 'bottom-full left-0 mb-2'
+        )}>
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
               View As

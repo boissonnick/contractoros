@@ -11,6 +11,8 @@ import { Button, Card, StatusBadge, Avatar, toast, ConfirmDialog } from '@/compo
 import { cn, formatCurrency } from '@/lib/utils';
 import PhaseProgressBar from '@/components/projects/PhaseProgressBar';
 import QuoteSummaryCard from '@/components/projects/QuoteSummaryCard';
+import { JobCostingCard } from '@/components/job-costing';
+import { useProjectProfitability } from '@/lib/hooks/useJobCosting';
 import {
   MapPinIcon,
   CurrencyDollarIcon,
@@ -63,6 +65,9 @@ export default function ProjectDetailPage() {
     variant: 'danger' | 'warning' | 'info';
   }>({ open: false, status: null, title: '', message: '', variant: 'warning' });
   const statusRef = useRef<HTMLDivElement>(null);
+
+  // Job Costing
+  const { profitability, loading: profitabilityLoading } = useProjectProfitability(projectId);
 
   useEffect(() => {
     async function fetchData() {
@@ -365,25 +370,37 @@ export default function ProjectDetailPage() {
         </Card>
       </div>
 
-      {/* Quote + Preferences Summary */}
+      {/* Quote + Job Costing Summary */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <QuoteSummaryCard sections={quoteSections} quoteTotal={project.quoteTotal} />
+        <JobCostingCard
+          profitability={profitability}
+          loading={profitabilityLoading}
+          compact={false}
+          showDetails={true}
+          onViewDetails={() => router.push(`/dashboard/projects/${projectId}/costs`)}
+        />
+      </div>
 
-        <Card>
-          <div className="flex items-center gap-3 mb-4">
+      {/* Client Preferences */}
+      <Card>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
             <div className="p-2 bg-blue-100 rounded-lg">
               <UserGroupIcon className="h-5 w-5 text-blue-600" />
             </div>
-            <h3 className="font-semibold text-gray-900">Client Preferences</h3>
+            <div>
+              <h3 className="font-semibold text-gray-900">Client Preferences</h3>
+              <p className="text-sm text-gray-500">
+                Collect client preferences for finishes, budget, and timeline.
+              </p>
+            </div>
           </div>
-          <p className="text-sm text-gray-500 mb-4">
-            Collect client preferences for finishes, budget, and timeline.
-          </p>
           <Link href={`/dashboard/projects/${projectId}/preferences`}>
             <Button variant="outline" size="sm">View / Edit Preferences</Button>
           </Link>
-        </Card>
-      </div>
+        </div>
+      </Card>
 
       {/* Tasks Summary — link to full Tasks tab */}
       {tasks.length > 0 && (

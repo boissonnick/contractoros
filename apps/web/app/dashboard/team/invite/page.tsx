@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Card } from '@/components/ui';
+import { RouteGuard } from '@/components/auth';
 import { UserGroupIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import InviteForm from '@/components/invitations/InviteForm';
@@ -9,6 +10,10 @@ import InviteList from '@/components/invitations/InviteList';
 
 export default function TeamInvitePage() {
   return (
+    <RouteGuard
+      allowedRoles={['OWNER', 'PM']}
+      redirectTo="/dashboard"
+    >
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
@@ -57,5 +62,6 @@ export default function TeamInvitePage() {
         </Card>
       </div>
     </div>
+    </RouteGuard>
   );
 }

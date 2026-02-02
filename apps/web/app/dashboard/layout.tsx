@@ -4,10 +4,12 @@ import React, { useMemo } from 'react';
 import { useAuth } from '@/lib/auth';
 import AuthGuard from '@/components/auth/AuthGuard';
 import AppShell from '@/components/ui/AppShell';
-import { NavItem, RolePermissions, ImpersonationRole } from '@/types';
+import { NavItem, RolePermissions } from '@/types';
 import { useImpersonation } from '@/lib/contexts/ImpersonationContext';
 import { ImpersonationBanner } from '@/components/impersonation';
-import DevToolsWidget from '@/components/ui/DevToolsWidget';
+import SidebarDevTools from '@/components/ui/SidebarDevTools';
+import { AssistantPanel, AssistantTrigger } from '@/components/assistant';
+import { useAssistant } from '@/lib/hooks/useAssistant';
 import {
   HomeIcon,
   FolderIcon,
@@ -53,6 +55,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const { profile, signOut } = useAuth();
   const { permissions, currentRole } = useImpersonation();
 
+  // AI Assistant state
+  const assistant = useAssistant();
+
   // Get nav items based on current role
   const filteredNavItems = useMemo(() => {
     // Client view gets simplified navigation
@@ -80,13 +85,27 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           navItems={filteredNavItems}
           userDisplayName={profile?.displayName}
           onSignOut={signOut}
+          sidebarFooter={<SidebarDevTools />}
         >
           {children}
         </AppShell>
       </div>
 
-      {/* Dev Tools Widget - Impersonation + Version indicator */}
-      <DevToolsWidget />
+      {/* AI Assistant */}
+      <AssistantTrigger onClick={assistant.open} />
+      <AssistantPanel
+        isOpen={assistant.isOpen}
+        onClose={assistant.close}
+        messages={assistant.messages}
+        isProcessing={assistant.isProcessing}
+        voiceState={assistant.voiceState}
+        onSendMessage={assistant.sendMessage}
+        onStartVoice={assistant.startVoice}
+        onStopVoice={assistant.stopVoice}
+        onClearHistory={assistant.clearHistory}
+        onActionClick={assistant.handleAction}
+        contextSuggestions={assistant.suggestions}
+      />
     </div>
   );
 }

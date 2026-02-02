@@ -105,6 +105,58 @@
     padding-bottom: max(1rem, env(safe-area-inset-bottom));
   }
 
+  /* Mobile bottom sheet animation */
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  /* Mobile drawer slide-in from right */
+  .animate-slide-in-right {
+    animation: slideInRight 0.3s ease-out;
+  }
+
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  /* Fade in animation */
+  .animate-fade-in {
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* Mobile card press effect */
+  .mobile-press {
+    @apply active:scale-[0.98] active:bg-gray-50 transition-all duration-100;
+  }
+
+  /* Touch feedback */
+  .touch-feedback {
+    @apply active:opacity-70 transition-opacity;
+  }
+
   /* Gradient text */
   .text-gradient {
     @apply bg-gradient-to-r from-brand-primary to-brand-primary-light bg-clip-text text-transparent;

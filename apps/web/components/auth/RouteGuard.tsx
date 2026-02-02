@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { RolePermissions, UserRole } from '@/types';
-import { usePermissions } from '@/lib/contexts/ImpersonationContext';
+import { usePermissions, useImpersonation } from '@/lib/contexts/ImpersonationContext';
 import { ShieldExclamationIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui';
 
@@ -145,10 +145,11 @@ export function RouteGuard({
 
 /**
  * Default Access Denied page component
+ * BUG #7 FIX: Shows impersonated role instead of actual role when impersonating
  */
 function AccessDeniedPage({ pathname }: { pathname: string }) {
   const router = useRouter();
-  const { profile } = useAuth();
+  const { currentRole, isImpersonating } = useImpersonation();
 
   return (
     <div className="flex items-center justify-center min-h-[60vh] px-4">
@@ -159,11 +160,12 @@ function AccessDeniedPage({ pathname }: { pathname: string }) {
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h1>
         <p className="text-gray-600 mb-6">
           You don&apos;t have permission to access this page.
-          {profile?.role && (
-            <span className="block mt-1 text-sm text-gray-500">
-              Your current role: <span className="font-medium">{profile.role}</span>
-            </span>
-          )}
+          <span className="block mt-1 text-sm text-gray-500">
+            Your current role: <span className="font-medium uppercase">{currentRole.replace('_', ' ')}</span>
+            {isImpersonating && (
+              <span className="ml-1 text-amber-600">(Demo Mode)</span>
+            )}
+          </span>
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Button variant="outline" onClick={() => router.back()}>

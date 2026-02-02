@@ -75,6 +75,7 @@ export {
 } from './Skeleton';
 
 export { default as BuildIndicator } from './BuildIndicator';
+export { default as SidebarDevTools } from './SidebarDevTools';
 
 // Page layout components
 export { default as PageHeader } from './PageHeader';
@@ -101,3 +102,25 @@ export type { TagInputProps } from './TagInput';
 
 export { default as Checkbox, CheckboxGroup } from './Checkbox';
 export type { CheckboxProps, CheckboxGroupProps, CheckboxGroupOption } from './Checkbox';
+
+// Mobile-optimized components
+export { MobileCard, MobileCardList, ResponsiveDataView } from './MobileCard';
+export {
+  MobileFormSection,
+  MobileFormField,
+  MobileInput,
+  MobileTextarea,
+  MobileSelect,
+  MobileButton,
+  MobileActionBar,
+  MobileBottomSheet,
+} from './MobileForm';
+export {
+  MobileBottomNav,
+  MobileHeader,
+  MobileDrawer,
+  MobilePageHeader,
+  MobileFAB,
+  MobilePullToRefresh,
+} from './MobileNav';
+export { MobileStats, MobileKPI, MobileStatBar } from './MobileStats';

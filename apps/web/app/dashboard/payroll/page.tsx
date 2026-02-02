@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
+import { useImpersonation } from '@/lib/contexts/ImpersonationContext';
 import { usePayroll } from '@/lib/hooks/usePayroll';
 import { useTeamMembers } from '@/lib/hooks/useQueryHooks';
 import { useTimeEntries } from '@/lib/hooks/useTimeEntries';
@@ -17,13 +19,44 @@ import {
   CalendarDaysIcon,
   ClockIcon,
   ExclamationTriangleIcon,
+  ShieldExclamationIcon,
 } from '@heroicons/react/24/outline';
 import { PayrollRun, PayPeriod, UserProfile } from '@/types';
 import { pdf } from '@react-pdf/renderer';
 import { PayStubPdf, payrollEntryToPayStub } from '@/lib/payroll/pay-stub-pdf';
 
+// Roles allowed to access payroll (BUG #3 FIX)
+const PAYROLL_ALLOWED_ROLES = ['owner', 'finance'];
+
 export default function PayrollDashboardPage() {
-  const { profile } = useAuth();
+  const router = useRouter();
+  const { profile, loading: authLoading } = useAuth();
+  const { currentRole } = useImpersonation();
+
+  // BUG #3 FIX: Check if current role has payroll access
+  // Only Owner and Finance Manager can access payroll (not PM)
+  const hasPayrollAccess = PAYROLL_ALLOWED_ROLES.includes(currentRole);
+
+  // Show access denied if user doesn't have payroll permission
+  if (!authLoading && !hasPayrollAccess) {
+    return (
+      <div className="p-6">
+        <Card className="p-8 text-center max-w-md mx-auto">
+          <ShieldExclamationIcon className="h-12 w-12 mx-auto text-red-500 mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Access Denied</h3>
+          <p className="text-gray-500 mb-4">
+            Payroll data is restricted to Owner and Finance Manager roles only.
+          </p>
+          <p className="text-sm text-gray-400 mb-4">
+            Your current role: <span className="font-medium uppercase">{currentRole.replace('_', ' ')}</span>
+          </p>
+          <Button variant="outline" onClick={() => router.push('/dashboard')}>
+            Return to Dashboard
+          </Button>
+        </Card>
+      </div>
+    );
+  }
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedRun, setSelectedRun] = useState<PayrollRun | null>(null);
 

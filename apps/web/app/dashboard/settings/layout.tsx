@@ -16,6 +16,7 @@ import {
   Cog6ToothIcon,
   ChevronDownIcon,
   ShieldCheckIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/outline';
 
 // Grouped navigation structure - reduced from 13 to 6 primary items
@@ -57,6 +58,15 @@ const SETTINGS_NAV: NavSection[] = [
     children: [
       { key: 'members', label: 'Members', href: '/dashboard/settings/team' },
       { key: 'roles', label: 'Roles & Permissions', href: '/dashboard/settings/roles' },
+    ],
+  },
+  {
+    key: 'ai',
+    label: 'AI',
+    icon: SparklesIcon,
+    children: [
+      { key: 'intelligence', label: 'AI Intelligence', href: '/dashboard/settings/intelligence' },
+      { key: 'assistant', label: 'AI Assistant', href: '/dashboard/settings/assistant' },
     ],
   },
   {
@@ -107,12 +117,19 @@ const ACCOUNT_PATHS = [
   '/dashboard/settings/notifications',
 ];
 
+// Paths that should highlight the AI section
+const AI_PATHS = [
+  '/dashboard/settings/intelligence',
+  '/dashboard/settings/assistant',
+];
+
 function isPathInSection(pathname: string, section: NavSection): boolean {
   if (section.href && pathname === section.href) return true;
   if (section.key === 'templates' && TEMPLATE_PATHS.includes(pathname)) return true;
   if (section.key === 'resources' && RESOURCES_PATHS.includes(pathname)) return true;
   if (section.key === 'team' && TEAM_PATHS.includes(pathname)) return true;
   if (section.key === 'account' && ACCOUNT_PATHS.includes(pathname)) return true;
+  if (section.key === 'ai' && AI_PATHS.includes(pathname)) return true;
   if (section.children) {
     return section.children.some((child) => pathname === child.href);
   }

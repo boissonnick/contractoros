@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
 import { collection, query, where, getDocs, doc, updateDoc, deleteDoc, Timestamp } from 'firebase/firestore';
 import { Button, Card, Avatar, Badge, EmptyState, toast, useConfirmDialog } from '@/components/ui';
+import { RouteGuard } from '@/components/auth';
 import { cn, formatRelativeTime } from '@/lib/utils';
 import {
   UserPlusIcon,
@@ -148,6 +149,10 @@ export default function TeamPage() {
   );
 
   return (
+    <RouteGuard
+      allowedRoles={['OWNER', 'PM', 'EMPLOYEE', 'CONTRACTOR']}
+      redirectTo="/dashboard"
+    >
     <div className="min-h-screen bg-gray-50">
       <DialogComponent />
       {/* Header */}
@@ -336,5 +341,6 @@ export default function TeamPage() {
         )}
       </div>
     </div>
+    </RouteGuard>
   );
 }

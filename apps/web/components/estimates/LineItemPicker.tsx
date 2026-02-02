@@ -20,7 +20,10 @@ import {
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
   ChartBarIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/outline';
+import { usePriceSuggestion } from '@/lib/hooks/useIntelligence';
+import { PriceSuggestionCard } from '@/components/intelligence';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { format } from 'date-fns';
 
@@ -184,6 +187,69 @@ function PriceHistoryTooltip({ lineItemId }: { lineItemId: string }) {
 }
 
 /**
+ * AI Price Insight Badge - shows market comparison inline
+ */
+function PriceInsightBadge({
+  itemName,
+  currentPrice,
+  unit,
+}: {
+  itemName: string;
+  currentPrice: number;
+  unit: string;
+}) {
+  const { suggestion, loading } = usePriceSuggestion(itemName);
+  const [showDetails, setShowDetails] = useState(false);
+
+  if (loading || !suggestion) return null;
+
+  // Compare current price to market range
+  const isAboveMarket = currentPrice > suggestion.priceRange.high;
+  const isBelowMarket = currentPrice < suggestion.priceRange.low;
+  const isAtMarket = !isAboveMarket && !isBelowMarket;
+
+  // Calculate percentage difference from median
+  const percentDiff = ((currentPrice - suggestion.suggestedPrice) / suggestion.suggestedPrice) * 100;
+
+  return (
+    <div className="relative">
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowDetails(!showDetails);
+        }}
+        className={cn(
+          'flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors',
+          isAboveMarket && 'bg-red-50 text-red-600 hover:bg-red-100',
+          isBelowMarket && 'bg-green-50 text-green-600 hover:bg-green-100',
+          isAtMarket && 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+        )}
+        title="AI price insight"
+      >
+        <SparklesIcon className="h-3 w-3" />
+        {isAboveMarket && `+${Math.abs(percentDiff).toFixed(0)}% above market`}
+        {isBelowMarket && `${Math.abs(percentDiff).toFixed(0)}% below market`}
+        {isAtMarket && 'Market rate'}
+      </button>
+
+      {showDetails && (
+        <div
+          className="absolute right-0 top-full mt-1 z-50 w-64"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <PriceSuggestionCard
+            suggestion={suggestion}
+            unit={unit}
+            compact
+            onDismiss={() => setShowDetails(false)}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
  * Line Item Row with hover tooltip
  */
 function LineItemRow({
@@ -277,7 +343,7 @@ function LineItemRow({
           </div>
         </div>
 
-        <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
+        <div className="flex items-center flex-wrap gap-2 mt-1 text-sm text-gray-500">
           <span className="px-1.5 py-0.5 bg-gray-100 rounded text-xs">
             {LINE_ITEM_TRADES.find((t) => t.value === item.trade)?.label || item.trade}
           </span>
@@ -288,6 +354,12 @@ function LineItemRow({
           {item.usageCount && item.usageCount > 0 && (
             <span className="text-gray-400 text-xs">Used {item.usageCount}x</span>
           )}
+          {/* AI Price Insight */}
+          <PriceInsightBadge
+            itemName={item.name}
+            currentPrice={item.unitPrice}
+            unit={getUnitAbbr(item.unit)}
+          />
         </div>
       </div>
     </div>

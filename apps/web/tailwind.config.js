@@ -72,6 +72,7 @@ module.exports = {
         'slide-down': 'slideDown 0.3s ease-out',
         'scale-in': 'scaleIn 0.2s ease-out',
         'slide-in-right': 'slideInRight 0.3s ease-out',
+        'bottom-sheet': 'bottomSheet 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
       },
       keyframes: {
         fadeIn: {
@@ -81,6 +82,10 @@ module.exports = {
         slideUp: {
           '0%': { transform: 'translateY(10px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        bottomSheet: {
+          '0%': { transform: 'translateY(100%)' },
+          '100%': { transform: 'translateY(0)' },
         },
         slideDown: {
           '0%': { transform: 'translateY(-10px)', opacity: '0' },
