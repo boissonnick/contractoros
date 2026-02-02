@@ -1,8 +1,8 @@
 # ContractorOS Sprint Status
 
 > **Purpose:** Track current progress and enable seamless session handoffs.
-> **Last Updated:** 2026-02-02 by Session 4 (Documentation & Testing)
-> **Current Phase:** Phase 8 - February 2026 Strategic Sprint - COMPLETE
+> **Last Updated:** 2026-02-02 by Controller Session
+> **Current Phase:** Phase 8 - Field-First Completion - IN PROGRESS
 
 ---
 
@@ -10,13 +10,14 @@
 
 | Metric | Value |
 |--------|-------|
-| **Current Sprint** | Sprint 27 - Demo Seed Scripts |
-| **Sprint Status** | ✅ COMPLETE |
-| **Platform Completion** | ~85% |
+| **Current Sprint** | Sprint 29 - Voice Commands |
+| **Sprint Status** | 🚀 IN PROGRESS |
+| **Platform Completion** | ~88% |
 | **TypeScript Status** | ✅ Passing |
 | **Firestore Rules** | ✅ Deployed |
 | **Docker Status** | ✅ Running on localhost:3000 |
 | **Demo Account** | ✅ Horizon Construction Co. seeded |
+| **Offline Mode** | ✅ Sprint 28 Complete |
 
 ---
 
@@ -37,6 +38,7 @@
 | **Reports** | 65% | Basic reports, needs custom builder |
 | **Integrations** | 60% | QBO connected, Twilio partial |
 | **Mobile UI** | 75% | Responsive components |
+| **Offline Mode** | 90% | True offline for field portal |
 
 ---
 
@@ -44,6 +46,8 @@
 
 | Sprint | Focus | Status | Key Deliverables |
 |--------|-------|--------|------------------|
+| **29** | Voice Commands | 🚀 IN PROGRESS | Voice time entry, daily logs, navigation |
+| **28** | True Offline Mode | ✅ COMPLETE | Offline time/tasks/photos/daily logs |
 | **27** | Demo Seed Scripts | ✅ COMPLETE | Horizon Construction demo data |
 | **26** | Document Generation | ✅ COMPLETE | Signed PDF, file uploads |
 | **25** | Auto-numbering | ✅ COMPLETE | Estimate/invoice numbering |
@@ -52,6 +56,88 @@
 | **22** | Parallel Feature Development | ✅ COMPLETE | Multiple workstreams |
 | **21** | Bug Fixes & Polish | ✅ COMPLETE | Materials, submittals, pagination |
 | **20** | Mobile Integration | ✅ COMPLETE | Mobile responsive views |
+
+---
+
+## Sprint 29: Voice Commands (IN PROGRESS)
+
+**Started:** 2026-02-02
+**Goal:** Voice-first experience for field workers
+
+### Session Assignments
+
+| Session | Role | Assigned Work |
+|---------|------|---------------|
+| **Controller** | Coordination | Review code, coordinate sessions, deploy |
+| **Dev Sprint** | Voice Features | Voice capture, command parsing, UI |
+| **Database** | Backend | Firestore rules, indexes if needed |
+| **E2E Testing** | Testing | Test voice features, regression |
+
+### Sprint 29 Tasks
+
+| Feature | Priority | Assigned | Status |
+|---------|----------|----------|--------|
+| Voice Time Entry | P0 | Dev Sprint | 🔲 Not Started |
+| Voice Daily Log | P0 | Dev Sprint | 🔲 Not Started |
+| Voice Photo Notes | P1 | Dev Sprint | 🔲 Not Started |
+| Voice Task Completion | P1 | Dev Sprint | 🔲 Not Started |
+| Voice Navigation | P2 | Dev Sprint | 🔲 Not Started |
+| Voice Activation Button | P1 | Dev Sprint | 🔲 Not Started |
+| Command Confirmation UI | P1 | Dev Sprint | 🔲 Not Started |
+
+### Technical Approach
+
+1. **Web Speech API** - Use browser's built-in speech recognition
+2. **Command Parser** - NLP-style command parsing for natural language
+3. **Confirmation Flow** - Show parsed command, confirm before executing
+4. **Field-First** - Voice button accessible on all field portal pages
+
+---
+
+## Sprint 28: True Offline Mode (COMPLETE)
+
+**Completed:** 2026-02-02
+**Commit:** `e4d3816`
+
+### Deliverables
+
+| Feature | Status |
+|---------|--------|
+| Service Worker Completion | ✅ Done |
+| Offline Time Entry | ✅ Done |
+| Offline Photo Queue | ✅ Done |
+| Offline Daily Logs | ✅ Done |
+| Offline Task Updates | ✅ Done |
+| Sync Conflict Resolution | ✅ Done |
+| Offline Status Indicator | ✅ Done |
+| Sync Progress UI | ✅ Done |
+
+### Files Added/Modified
+
+**New Offline Modules (lib/offline/):**
+- `cache-projects.ts` - Project data caching
+- `cache-team.ts` - Team member caching
+- `offline-daily-logs.ts` - Daily log offline storage
+- `offline-photos.ts` - Photo queue with compression
+- `offline-tasks.ts` - Task offline storage
+- `offline-time-entries.ts` - Time entry offline storage
+- `photo-compression.ts` - Image compression utilities
+- `sync-manager.ts` - Coordinated sync management
+
+**New Components:**
+- `components/field/OfflineDailyLogForm.tsx`
+- `components/field/OfflineTaskCard.tsx`
+- `components/time/OfflineTimeEntryForm.tsx`
+- `components/photos/OfflinePhotoCapture.tsx`
+- `components/photos/PendingPhotosGrid.tsx`
+
+**New Pages:**
+- `app/field/daily-log/page.tsx`
+
+**Enhanced:**
+- Service worker with full background sync
+- SyncStatusIndicator with progress UI
+- Field pages (time, tasks, photos) with offline support
 
 ---
 
