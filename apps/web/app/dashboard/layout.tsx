@@ -7,6 +7,7 @@ import AppShell from '@/components/ui/AppShell';
 import { NavItem, RolePermissions } from '@/types';
 import { useImpersonation } from '@/lib/contexts/ImpersonationContext';
 import { ImpersonationBanner } from '@/components/impersonation';
+import { OfflineBanner } from '@/components/offline/OfflineBanner';
 import SidebarDevTools from '@/components/ui/SidebarDevTools';
 import { AssistantPanel, AssistantTrigger } from '@/components/assistant';
 import { useAssistant } from '@/lib/hooks/useAssistant';
@@ -78,6 +79,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     <div className="flex flex-col min-h-screen">
       {/* Impersonation Banner at the very top */}
       <ImpersonationBanner />
+
+      {/* Offline Banner */}
+      <OfflineBanner />
 
       {/* Main App Shell */}
       <div className="flex-1">
