@@ -1,27 +1,23 @@
-"use client";
+'use client';
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { useAuth } from '@/lib/auth';
-import { useDashboardReports } from '@/lib/hooks/useReports';
-import { Card } from '@/components/ui';
+import { useDashboardReports, useFinancialReports } from '@/lib/hooks/useReports';
+import { PageHeader } from '@/components/ui';
+import { ReportCard } from '@/components/reports/ReportCard';
+import { RevenueChart } from '@/components/reports/RevenueChart';
+import { DateRangePicker } from '@/components/reports/DateRangePicker';
 import {
-  AreaChartCard,
-  BarChartCard,
-  PieChartCard,
-} from '@/components/charts';
+  DateRange,
+  getDateRangeFromPreset,
+} from '@/lib/reports/types';
 import {
-  BriefcaseIcon,
-  CheckCircleIcon,
   CurrencyDollarIcon,
+  ChartBarIcon,
   ClockIcon,
-  UsersIcon,
-  ClipboardDocumentListIcon,
-  ArrowTrendingUpIcon,
-  ArrowTrendingDownIcon,
-  BanknotesIcon,
+  FolderIcon,
   ExclamationCircleIcon,
 } from '@heroicons/react/24/outline';
-import { cn } from '@/lib/utils';
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat('en-US', {
@@ -32,238 +28,243 @@ function formatCurrency(value: number): string {
   }).format(value);
 }
 
-function formatNumber(value: number): string {
-  return new Intl.NumberFormat('en-US').format(Math.round(value));
-}
-
 function formatPercent(value: number): string {
-  return `${value.toFixed(1)}%`;
+  return `${value >= 0 ? '+' : ''}${value.toFixed(1)}%`;
 }
 
-interface StatCardProps {
-  title: string;
-  value: string | number;
-  icon: React.ComponentType<{ className?: string }>;
-  trend?: {
-    value: number;
-    isPositive: boolean;
-  };
-  subtitle?: string;
-  color?: 'blue' | 'green' | 'amber' | 'red' | 'purple';
-}
-
-function StatCard({ title, value, icon: Icon, trend, subtitle, color = 'blue' }: StatCardProps) {
-  const colorClasses = {
-    blue: 'bg-blue-50 text-blue-600',
-    green: 'bg-green-50 text-green-600',
-    amber: 'bg-amber-50 text-amber-600',
-    red: 'bg-red-50 text-red-600',
-    purple: 'bg-purple-50 text-purple-600',
-  };
-
-  return (
-    <Card className="p-4">
-      <div className="flex items-start justify-between">
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-gray-500 truncate">{title}</p>
-          <p className="mt-1 text-2xl font-semibold text-gray-900 truncate">{value}</p>
-          {subtitle && (
-            <p className="mt-1 text-xs text-gray-500">{subtitle}</p>
-          )}
-          {trend && (
-            <div className="mt-2 flex items-center gap-1">
-              {trend.isPositive ? (
-                <ArrowTrendingUpIcon className="h-4 w-4 text-green-500" />
-              ) : (
-                <ArrowTrendingDownIcon className="h-4 w-4 text-red-500" />
-              )}
-              <span className={cn('text-xs font-medium', trend.isPositive ? 'text-green-600' : 'text-red-600')}>
-                {trend.value > 0 ? '+' : ''}{trend.value.toFixed(1)}%
-              </span>
-              <span className="text-xs text-gray-500">vs last month</span>
-            </div>
-          )}
-        </div>
-        <div className={cn('p-2 rounded-lg', colorClasses[color])}>
-          <Icon className="h-5 w-5" />
-        </div>
-      </div>
-    </Card>
-  );
-}
-
-function LoadingState() {
-  return (
-    <div className="space-y-6">
-      {/* KPI Cards skeleton */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[1, 2, 3, 4].map((i) => (
-          <Card key={i} className="p-4 animate-pulse">
-            <div className="h-4 bg-gray-200 rounded w-1/2 mb-2" />
-            <div className="h-8 bg-gray-200 rounded w-3/4" />
-          </Card>
-        ))}
-      </div>
-      {/* Charts skeleton */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {[1, 2].map((i) => (
-          <Card key={i} className="p-4 animate-pulse">
-            <div className="h-4 bg-gray-200 rounded w-1/3 mb-4" />
-            <div className="h-[300px] bg-gray-100 rounded" />
-          </Card>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-export default function ReportsOverviewPage() {
+export default function ReportsPage() {
   const { profile } = useAuth();
-  const {
-    loading,
-    error,
-    kpis,
-    projectStatusDistribution,
-    revenueByMonth,
-    teamPerformance,
-  } = useDashboardReports(profile?.orgId);
+  const orgId = profile?.orgId;
 
-  if (loading) {
-    return <LoadingState />;
+  // Date range state - default to this month
+  const [dateRange, setDateRange] = useState<DateRange>(() =>
+    getDateRangeFromPreset('this_month')
+  );
+
+  // Fetch dashboard data using existing hook
+  const {
+    loading: dashboardLoading,
+    error: dashboardError,
+    kpis,
+    revenueByMonth,
+    projectStatusDistribution,
+    teamPerformance,
+  } = useDashboardReports(orgId);
+
+  // Fetch financial data for profitability
+  const {
+    loading: financialLoading,
+    summary: financialSummary,
+    projectProfitability,
+  } = useFinancialReports(orgId);
+
+  const loading = dashboardLoading || financialLoading;
+
+  // Transform revenue data for chart
+  const revenueChartData = useMemo(() => {
+    if (!revenueByMonth?.length) return [];
+    return revenueByMonth.map((item) => ({
+      label: item.name,
+      revenue: item.revenue,
+      paid: item.revenue, // All revenue is paid in this dataset
+      pending: 0,
+    }));
+  }, [revenueByMonth]);
+
+  // Get mini chart data for cards
+  const revenueChartMini = useMemo(() => {
+    return revenueByMonth?.map((item) => item.revenue) || [];
+  }, [revenueByMonth]);
+
+  const profitChartMini = useMemo(() => {
+    return revenueByMonth?.map((item) => item.profit) || [];
+  }, [revenueByMonth]);
+
+  const hoursChartMini = useMemo(() => {
+    return teamPerformance?.map((item) => item.hoursLogged) || [];
+  }, [teamPerformance]);
+
+  const projectsChartMini = useMemo(() => {
+    return projectStatusDistribution?.map((item) => item.value) || [];
+  }, [projectStatusDistribution]);
+
+  // Error state
+  if (!orgId) {
+    return (
+      <div className="p-8 text-center">
+        <ExclamationCircleIcon className="h-12 w-12 text-red-400 mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-gray-900">Not authenticated</h3>
+        <p className="text-gray-500 mt-1">Please log in to view reports.</p>
+      </div>
+    );
   }
 
-  if (error) {
+  if (dashboardError) {
     return (
-      <Card className="p-8 text-center">
+      <div className="p-8 text-center">
         <ExclamationCircleIcon className="h-12 w-12 text-red-400 mx-auto mb-4" />
         <h3 className="text-lg font-medium text-gray-900">Failed to load reports</h3>
-        <p className="text-gray-500 mt-1">{error.message}</p>
-      </Card>
-    );
-  }
-
-  if (!kpis) {
-    return (
-      <Card className="p-8 text-center">
-        <ClipboardDocumentListIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900">No data available</h3>
-        <p className="text-gray-500 mt-1">Start adding projects and tracking time to see analytics.</p>
-      </Card>
+        <p className="text-gray-500 mt-1">{dashboardError.message}</p>
+      </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Primary KPIs */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="Active Projects"
-          value={kpis.activeProjects}
-          icon={BriefcaseIcon}
-          color="blue"
-          subtitle={`${kpis.completedProjects} completed`}
-        />
-        <StatCard
-          title="Total Revenue"
-          value={formatCurrency(kpis.totalRevenue)}
-          icon={CurrencyDollarIcon}
-          color="green"
-          subtitle={`${formatPercent(kpis.profitMargin)} margin`}
-        />
-        <StatCard
-          title="Outstanding Invoices"
-          value={formatCurrency(kpis.outstandingInvoices)}
-          icon={BanknotesIcon}
-          color={kpis.outstandingInvoices > 0 ? 'amber' : 'green'}
-        />
-        <StatCard
-          title="Hours This Month"
-          value={formatNumber(kpis.hoursLoggedThisMonth)}
-          icon={ClockIcon}
-          color="purple"
-          subtitle={`${kpis.activeTeamMembers} team members`}
-        />
-      </div>
-
-      {/* Secondary KPIs */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="Project Value"
-          value={formatCurrency(kpis.totalProjectValue)}
-          icon={BriefcaseIcon}
-          color="blue"
-          subtitle={`Avg ${formatCurrency(kpis.averageProjectValue)}`}
-        />
-        <StatCard
-          title="Total Expenses"
-          value={formatCurrency(kpis.totalExpenses)}
-          icon={CurrencyDollarIcon}
-          color="red"
-        />
-        <StatCard
-          title="Open Tasks"
-          value={kpis.openTasks}
-          icon={ClipboardDocumentListIcon}
-          color="amber"
-          subtitle={`${kpis.completedTasksThisMonth} completed this month`}
-        />
-        <StatCard
-          title="Task Completion"
-          value={formatPercent(kpis.taskCompletionRate)}
-          icon={CheckCircleIcon}
-          color="green"
-        />
-      </div>
-
-      {/* Charts Row 1 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <AreaChartCard
-          title="Revenue vs Expenses"
-          subtitle="Last 6 months"
-          data={revenueByMonth}
-          dataKeys={['revenue', 'expenses']}
-          xAxisKey="name"
-          valueFormatter={formatCurrency}
-          config={{ colors: ['#10B981', '#EF4444'] }}
-        />
-        <PieChartCard
-          title="Projects by Status"
-          subtitle="Current distribution"
-          data={projectStatusDistribution}
-          dataKey="value"
-          nameKey="name"
-          showLabels
-        />
-      </div>
-
-      {/* Charts Row 2 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <BarChartCard
-          title="Revenue Trend"
-          subtitle="Monthly profit/loss"
-          data={revenueByMonth}
-          dataKeys={['profit']}
-          xAxisKey="name"
-          valueFormatter={formatCurrency}
-          config={{ colors: ['#3B82F6'] }}
-        />
-        {teamPerformance.length > 0 && (
-          <BarChartCard
-            title="Team Performance"
-            subtitle="Hours logged by team member"
-            data={teamPerformance}
-            dataKeys={['hoursLogged']}
-            xAxisKey="name"
-            horizontal
-            config={{ colors: ['#8B5CF6'] }}
+      <PageHeader
+        title="Reports"
+        description="Business insights and analytics"
+        actions={
+          <DateRangePicker
+            value={dateRange}
+            onChange={setDateRange}
           />
-        )}
+        }
+      />
+
+      {/* Report Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Revenue Card */}
+        <ReportCard
+          title="Revenue"
+          value={kpis ? formatCurrency(kpis.totalRevenue) : '$0'}
+          subtitle={kpis ? `${formatPercent(kpis.profitMargin)} margin` : 'No data'}
+          chartData={revenueChartMini}
+          icon={CurrencyDollarIcon}
+          iconColor="green"
+          loading={loading}
+        />
+
+        {/* Profitability Card */}
+        <ReportCard
+          title="Profitability"
+          value={financialSummary ? formatPercent(financialSummary.profitMargin) : '0%'}
+          subtitle={financialSummary ? `${formatCurrency(financialSummary.grossProfit)} profit` : 'No data'}
+          chartData={profitChartMini}
+          icon={ChartBarIcon}
+          iconColor={
+            financialSummary && financialSummary.profitMargin >= 20
+              ? 'green'
+              : financialSummary && financialSummary.profitMargin >= 10
+              ? 'amber'
+              : 'red'
+          }
+          loading={loading}
+        />
+
+        {/* Hours Card */}
+        <ReportCard
+          title="Hours Logged"
+          value={kpis ? `${Math.round(kpis.hoursLoggedThisMonth)} hrs` : '0 hrs'}
+          subtitle={kpis ? `${kpis.activeTeamMembers} team members` : 'No data'}
+          chartData={hoursChartMini}
+          icon={ClockIcon}
+          iconColor="purple"
+          loading={loading}
+        />
+
+        {/* Projects Card */}
+        <ReportCard
+          title="Projects"
+          value={kpis?.activeProjects ?? 0}
+          subtitle={kpis ? `${kpis.completedProjects} completed` : 'No data'}
+          chartData={projectsChartMini}
+          icon={FolderIcon}
+          iconColor="blue"
+          loading={loading}
+        />
       </div>
 
-      {/* Team Performance Detail */}
-      {teamPerformance.length > 0 && (
-        <Card className="p-4">
-          <h3 className="text-sm font-semibold text-gray-900 mb-4">Team Productivity</h3>
+      {/* Revenue Chart */}
+      <RevenueChart
+        data={revenueChartData}
+        title="Revenue by Month"
+        showBreakdown={false}
+        height={350}
+      />
+
+      {/* Profitability Table */}
+      {projectProfitability && projectProfitability.length > 0 && (
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <h3 className="text-sm font-semibold text-gray-900 mb-4">
+            Project Profitability
+          </h3>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Project
+                  </th>
+                  <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Budget
+                  </th>
+                  <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actual Spend
+                  </th>
+                  <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Variance
+                  </th>
+                  <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {projectProfitability.slice(0, 10).map((project, idx) => {
+                  const marginPercent = project.budget > 0
+                    ? (project.variance / project.budget) * 100
+                    : 0;
+                  return (
+                    <tr key={idx} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                        {project.projectName}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600 text-right">
+                        {formatCurrency(project.budget)}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600 text-right">
+                        {formatCurrency(project.actualSpend)}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-right">
+                        <span
+                          className={
+                            project.variance >= 0
+                              ? 'text-green-600'
+                              : 'text-red-600'
+                          }
+                        >
+                          {formatCurrency(project.variance)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                            marginPercent >= 20
+                              ? 'bg-green-100 text-green-800'
+                              : marginPercent >= 0
+                              ? 'bg-amber-100 text-amber-800'
+                              : 'bg-red-100 text-red-800'
+                          }`}
+                        >
+                          {marginPercent >= 0 ? 'On Budget' : 'Over Budget'}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Team Performance Table */}
+      {teamPerformance && teamPerformance.length > 0 && (
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <h3 className="text-sm font-semibold text-gray-900 mb-4">
+            Team Performance
+          </h3>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead>
@@ -296,14 +297,13 @@ export default function ReportsOverviewPage() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <span
-                        className={cn(
-                          'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium',
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                           member.efficiency >= 80
                             ? 'bg-green-100 text-green-800'
                             : member.efficiency >= 50
                             ? 'bg-amber-100 text-amber-800'
                             : 'bg-gray-100 text-gray-800'
-                        )}
+                        }`}
                       >
                         {member.efficiency}%
                       </span>
@@ -313,7 +313,18 @@ export default function ReportsOverviewPage() {
               </tbody>
             </table>
           </div>
-        </Card>
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!loading && !kpis && (
+        <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
+          <FolderIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900">No data yet</h3>
+          <p className="text-gray-500 mt-1">
+            Start creating projects and invoices to see your reports.
+          </p>
+        </div>
       )}
     </div>
   );
