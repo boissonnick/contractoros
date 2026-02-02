@@ -69,29 +69,30 @@ export default function EmptyState({
   const sizeConfig = sizes[size];
 
   return (
-    <div className={cn('text-center', sizeConfig.container, className)}>
+    <div className={cn('text-center animate-in fade-in duration-500', sizeConfig.container, className)}>
       {icon && (
         <div
           className={cn(
-            'mx-auto rounded-full bg-gray-100 flex items-center justify-center mb-4 animate-pulse',
+            'mx-auto rounded-full bg-gray-100 flex items-center justify-center mb-4 animate-bounce',
             sizeConfig.iconWrapper
           )}
+          style={{ animationDuration: '2s' }}
         >
           <div className={cn('text-gray-300', sizeConfig.icon)}>
             {icon}
           </div>
         </div>
       )}
-      <h3 className={cn('font-semibold text-gray-900 mb-2', sizeConfig.title)}>
+      <h3 className={cn('font-semibold text-gray-900 mb-2 animate-in fade-in slide-in-from-bottom-2 duration-300 delay-100', sizeConfig.title)}>
         {title}
       </h3>
       {description && (
-        <p className={cn('text-gray-500 max-w-sm mx-auto mb-6', sizeConfig.description)}>
+        <p className={cn('text-gray-500 max-w-sm mx-auto mb-6 animate-in fade-in slide-in-from-bottom-2 duration-300 delay-200', sizeConfig.description)}>
           {description}
         </p>
       )}
       {(action || secondaryAction) && (
-        <div className="flex items-center justify-center gap-3">
+        <div className="flex items-center justify-center gap-3 animate-in fade-in slide-in-from-bottom-4 duration-300 delay-300">
           {action && (
             action.href ? (
               <Link href={action.href}>
