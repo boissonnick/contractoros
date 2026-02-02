@@ -2,7 +2,7 @@
 
 > **Purpose:** Track current progress and enable seamless session handoffs.
 > **Last Updated:** 2026-02-02 by Controller Session
-> **Current Phase:** Phase 8 - Field-First Completion - FINAL SPRINT
+> **Current Phase:** Phase 9 - AI as Competitive Moat - IN PROGRESS
 
 ---
 
@@ -10,15 +10,16 @@
 
 | Metric | Value |
 |--------|-------|
-| **Current Sprint** | Sprint 30 - Mobile UX Polish |
+| **Current Sprint** | Sprint 31 - AI Assistant V2 |
 | **Sprint Status** | 🚀 IN PROGRESS |
-| **Platform Completion** | ~90% |
+| **Platform Completion** | ~92% |
 | **TypeScript Status** | ✅ Passing |
 | **Firestore Rules** | ✅ Deployed |
 | **Docker Status** | ✅ Running on localhost:3000 |
 | **Demo Account** | ✅ Horizon Construction Co. seeded |
 | **Offline Mode** | ✅ Sprint 28 Complete |
 | **Voice Commands** | ✅ Sprint 29 Complete |
+| **Mobile UX** | ✅ Sprint 30 Complete |
 
 ---
 
@@ -38,7 +39,7 @@
 | **AI Assistant** | 85% | Multi-model, streaming, settings |
 | **Reports** | 65% | Basic reports, needs custom builder |
 | **Integrations** | 60% | QBO connected, Twilio partial |
-| **Mobile UI** | 75% | Responsive components |
+| **Mobile UI** | 90% | Bottom nav, swipe gestures, pull-to-refresh |
 | **Offline Mode** | 90% | True offline for field portal |
 | **Voice Commands** | 85% | Time, daily log, task voice input |
 
@@ -48,7 +49,8 @@
 
 | Sprint | Focus | Status | Key Deliverables |
 |--------|-------|--------|------------------|
-| **30** | Mobile UX Polish | 🚀 IN PROGRESS | Touch targets, gestures, bottom nav |
+| **31** | AI Assistant V2 | 🚀 IN PROGRESS | Doc analysis, photo AI, NL queries |
+| **30** | Mobile UX Polish | ✅ COMPLETE | Bottom nav, swipe gestures, FAB |
 | **29** | Voice Commands | ✅ COMPLETE | Voice time/daily log/task commands |
 | **28** | True Offline Mode | ✅ COMPLETE | Offline time/tasks/photos/daily logs |
 | **27** | Demo Seed Scripts | ✅ COMPLETE | Horizon Construction demo data |
@@ -62,39 +64,57 @@
 
 ---
 
-## Sprint 30: Mobile UX Polish (IN PROGRESS)
+## Sprint 31: AI Assistant V2 (IN PROGRESS)
 
 **Started:** 2026-02-02
-**Goal:** Best-in-class mobile field experience
+**Goal:** AI features competitors can't match
 
 ### Session Assignments
 
 | Session | Role | Assigned Work |
 |---------|------|---------------|
 | **Controller** | Coordination | Review code, coordinate sessions, deploy |
-| **Dev Sprint** | UI Components | Bottom nav, FAB, swipe gestures |
-| **Database** | N/A | No database changes needed |
-| **E2E Testing** | Testing | Mobile viewport testing |
+| **Dev Sprint (CLI 2)** | UI Components | Document upload UI, photo analysis UI |
+| **Database (CLI 3)** | API & Backend | AI API routes, Firestore rules |
+| **Support (CLI 4)** | NLP & Utils | Natural language query parser |
 
-### Sprint 30 Tasks
+### Sprint 31 Tasks
 
 | Feature | Priority | Assigned | Status |
 |---------|----------|----------|--------|
-| Touch Target Audit | P1 | Dev Sprint | 🔲 Not Started |
-| Swipe Gestures | P1 | Dev Sprint | 🔲 Not Started |
-| Pull to Refresh | P1 | Dev Sprint | 🔲 Not Started |
-| Bottom Navigation | P1 | Dev Sprint | 🔲 Not Started |
-| Quick Actions FAB | P1 | Dev Sprint | 🔲 Not Started |
-| Photo Gallery Optimization | P1 | Dev Sprint | 🔲 Not Started |
+| Document Upload & Analysis | P0 | CLI 2 + CLI 3 | 🔲 Not Started |
+| Photo Analysis | P0 | CLI 2 + CLI 3 | 🔲 Not Started |
+| Natural Language Queries | P0 | CLI 4 | 🔲 Not Started |
+| Proactive Suggestions | P1 | CLI 2 | 🔲 Not Started |
+| Project Summary Generation | P1 | CLI 3 | 🔲 Not Started |
+| Estimate Review | P1 | CLI 4 | 🔲 Not Started |
 
 ### Technical Approach
 
-1. **Touch Targets** - Audit all buttons/links, ensure 44x44px minimum
-2. **Swipe Gestures** - Use react-swipeable or custom touch handlers
-3. **Pull to Refresh** - Add to all list views in field portal
-4. **Bottom Navigation** - Thumb-friendly nav bar for field portal
-5. **Quick Actions FAB** - Floating action button with context-aware actions
-6. **Photo Gallery** - Virtual scrolling, lazy loading, thumbnail optimization
+1. **Document Upload** - Firebase Storage + AI extraction via Gemini/Claude
+2. **Photo Analysis** - Vision API integration for construction photo descriptions
+3. **NL Queries** - Parse "show overdue invoices over $5000" into Firestore queries
+4. **Proactive Suggestions** - Background analysis, notification when issues detected
+5. **Project Summaries** - Auto-generate weekly status reports from project data
+6. **Estimate Review** - AI reviews estimates for missing line items
+
+---
+
+## Sprint 30: Mobile UX Polish (COMPLETE)
+
+**Completed:** 2026-02-02
+**Commit:** `58e2c54`
+
+### Deliverables
+
+| Feature | Status |
+|---------|--------|
+| Bottom Navigation | ✅ Complete |
+| Swipe Gestures | ✅ Complete |
+| Pull to Refresh | ✅ Complete |
+| Touch Target Audit | ✅ Complete |
+| Quick Actions FAB | ✅ Complete |
+| Photo Gallery Optimization | ✅ Complete |
 
 ---
 
