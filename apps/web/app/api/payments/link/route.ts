@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb, Timestamp } from '@/lib/firebase/admin';
+import { verifyAuth } from '@/lib/api/auth';
 
 export const runtime = 'nodejs';
 
 /**
  * GET /api/payments/link?token=xxx
  * Fetch payment link by token with org and invoice info
+ *
+ * Public access: Allowed for payment processing (clients making payments)
+ * Authenticated access: Returns full data, verifies orgId matches
  */
 export async function GET(request: NextRequest) {
   try {
@@ -18,6 +22,10 @@ export async function GET(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Check for authentication (optional for public payment access)
+    const authResult = await verifyAuth(request);
+    const authenticatedUser = authResult.user;
 
     // Find payment link by token
     const snapshot = await adminDb
@@ -35,6 +43,14 @@ export async function GET(request: NextRequest) {
 
     const linkDoc = snapshot.docs[0];
     const linkData = linkDoc.data();
+
+    // If user is authenticated, verify they have access to this payment link's org
+    if (authenticatedUser && linkData.orgId && authenticatedUser.orgId !== linkData.orgId) {
+      return NextResponse.json(
+        { error: 'You do not have access to this payment link' },
+        { status: 403 }
+      );
+    }
 
     const paymentLink = {
       id: linkDoc.id,
@@ -74,6 +90,8 @@ export async function GET(request: NextRequest) {
       paymentLink,
       org,
       invoice,
+      // Include auth status for client to know if they're authenticated
+      isAuthenticated: !!authenticatedUser,
     });
   } catch (error) {
     console.error('Get payment link error:', error);
@@ -87,6 +105,9 @@ export async function GET(request: NextRequest) {
 /**
  * PATCH /api/payments/link
  * Update payment link status (e.g., mark as used)
+ *
+ * Authentication required for administrative updates.
+ * Exception: status='used' can be set by payment processor callbacks (no auth).
  */
 export async function PATCH(request: NextRequest) {
   try {
@@ -115,6 +136,36 @@ export async function PATCH(request: NextRequest) {
     }
 
     const linkDoc = snapshot.docs[0];
+    const linkData = linkDoc.data();
+
+    // Allow unauthenticated updates ONLY for marking as 'used' (payment processor callback)
+    // All other updates require authentication and org verification
+    const isPaymentCallback = status === 'used' && paymentId;
+
+    if (!isPaymentCallback) {
+      // Require authentication for administrative updates
+      const { user, error: authError } = await verifyAuth(request);
+
+      if (authError) {
+        return authError;
+      }
+
+      if (!user) {
+        return NextResponse.json(
+          { error: 'Authentication required' },
+          { status: 401 }
+        );
+      }
+
+      // Verify user belongs to the same organization as the payment link
+      if (linkData.orgId && user.orgId !== linkData.orgId) {
+        return NextResponse.json(
+          { error: 'You do not have permission to update this payment link' },
+          { status: 403 }
+        );
+      }
+    }
+
     const updates: Record<string, unknown> = {
       updatedAt: Timestamp.now(),
     };
