@@ -1,5 +1,6 @@
 import { onRequest } from "firebase-functions/v2/https";
 import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/firestore";
+import { onSchedule } from "firebase-functions/v2/scheduler";
 import { auth } from "firebase-functions/v1";
 import * as admin from "firebase-admin";
 import { handleInviteCreated } from "./email/sendInviteEmail";
@@ -9,6 +10,12 @@ import {
   sendSignatureDeclinedEmail,
   sendSignedDocumentCopy,
 } from "./email/sendSignatureEmails";
+import {
+  sendInvoiceEmail,
+  sendPaymentReceivedEmail,
+  sendEstimateEmail,
+  processInvoiceReminders,
+} from "./email/automatedEmails";
 
 // Intelligence data fetching functions
 export {
@@ -306,5 +313,111 @@ export const onSignatureRequestUpdated = onDocumentUpdated(
         await sendSignatureDeclinedEmail(requestId, { ...afterData, id: requestId }, i);
       }
     }
+  }
+);
+
+// ============================================
+// Automated Email Cloud Functions
+// ============================================
+
+/**
+ * Send invoice email when invoice status changes to 'sent'
+ * Triggered on invoices/{invoiceId} update
+ */
+export const onInvoiceSent = onDocumentUpdated(
+  { document: "invoices/{invoiceId}", region: REGION },
+  async (event) => {
+    const beforeData = event.data?.before.data();
+    const afterData = event.data?.after.data();
+
+    if (!beforeData || !afterData) {
+      console.log("No data for invoice update");
+      return;
+    }
+
+    const invoiceId = event.params.invoiceId;
+
+    // Check if status changed to 'sent'
+    if (beforeData.status !== "sent" && afterData.status === "sent") {
+      console.log(`Invoice ${invoiceId} status changed to sent, sending email`);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await sendInvoiceEmail({ id: invoiceId, ...afterData } as any);
+    }
+  }
+);
+
+/**
+ * Send payment received email when payment is recorded
+ * Triggered on payments/{paymentId} creation
+ */
+export const onPaymentCreated = onDocumentCreated(
+  { document: "payments/{paymentId}", region: REGION },
+  async (event) => {
+    const snapshot = event.data;
+    if (!snapshot) {
+      console.log("No data for payment event");
+      return;
+    }
+
+    const paymentData = snapshot.data();
+    const paymentId = event.params.paymentId;
+
+    console.log(`Payment ${paymentId} created, sending confirmation email`);
+
+    // Get the related invoice
+    if (paymentData.invoiceId) {
+      const invoiceDoc = await db.collection("invoices").doc(paymentData.invoiceId).get();
+      if (invoiceDoc.exists) {
+        const invoiceData = invoiceDoc.data();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await sendPaymentReceivedEmail(
+          { id: paymentId, ...paymentData } as any,
+          { id: invoiceDoc.id, ...invoiceData } as any
+        );
+      }
+    }
+  }
+);
+
+/**
+ * Send estimate email when estimate status changes to 'sent'
+ * Triggered on estimates/{estimateId} update
+ */
+export const onEstimateSent = onDocumentUpdated(
+  { document: "estimates/{estimateId}", region: REGION },
+  async (event) => {
+    const beforeData = event.data?.before.data();
+    const afterData = event.data?.after.data();
+
+    if (!beforeData || !afterData) {
+      console.log("No data for estimate update");
+      return;
+    }
+
+    const estimateId = event.params.estimateId;
+
+    // Check if status changed to 'sent'
+    if (beforeData.status !== "sent" && afterData.status === "sent") {
+      console.log(`Estimate ${estimateId} status changed to sent, sending email`);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await sendEstimateEmail({ id: estimateId, ...afterData } as any);
+    }
+  }
+);
+
+/**
+ * Scheduled function to send invoice reminders
+ * Runs daily at 9:00 AM UTC
+ */
+export const sendDailyInvoiceReminders = onSchedule(
+  {
+    schedule: "0 9 * * *", // 9:00 AM UTC daily
+    region: REGION,
+    timeZone: "America/Los_Angeles",
+  },
+  async () => {
+    console.log("Running daily invoice reminder job");
+    await processInvoiceReminders();
+    console.log("Daily invoice reminder job complete");
   }
 );
