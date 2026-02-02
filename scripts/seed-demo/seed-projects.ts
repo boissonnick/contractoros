@@ -469,7 +469,9 @@ async function seedProjects(): Promise<void> {
   logProgress(`Creating ${allProjects.length} projects...`);
 
   const batch = db.batch();
-  const projectsRef = db.collection('organizations').doc(DEMO_ORG_ID).collection('projects');
+  // NOTE: Projects are stored in top-level 'projects' collection with orgId field
+  // NOT in organizations/{orgId}/projects subcollection
+  const projectsRef = db.collection('projects');
   const phasesCreated: { projectId: string; phaseCount: number }[] = [];
 
   for (const project of allProjects) {
