@@ -7837,3 +7837,32 @@ export interface PhaseProgress {
 // Convenience aliases for client portal (using existing types)
 export type Photo = ProjectPhoto;
 export type Activity = ActivityItem;
+
+// ============================================================================
+// Organization Settings Extensions (Sprint 37B)
+// ============================================================================
+
+export interface FiscalYearConfig {
+  startMonth: number; // 1-12 (January = 1)
+  startDay: number;   // 1-31
+}
+
+export interface PayrollPeriodConfig {
+  frequency: 'weekly' | 'biweekly' | 'semimonthly' | 'monthly';
+  periodStartDay: number;    // Day of week (0-6) or day of month (1-31)
+  payDateOffset: number;     // Days after period end to pay
+}
+
+export interface TaxConfig {
+  entityType: 'sole_proprietor' | 'llc' | 'partnership' | 's_corp' | 'c_corp';
+  federalTaxRate: number;
+  stateTaxRate: number;
+  localTaxRate: number;
+  state: string;
+}
+
+export interface OrganizationSettings {
+  fiscalYear?: FiscalYearConfig;
+  payrollPeriod?: PayrollPeriodConfig;
+  taxConfig?: TaxConfig;
+}
