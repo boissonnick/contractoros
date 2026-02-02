@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
 
 // ============================================================================

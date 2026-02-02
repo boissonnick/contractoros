@@ -11,13 +11,11 @@ import {
   updateDoc,
   deleteDoc,
   getDoc,
-  Timestamp,
   serverTimestamp,
 } from 'firebase/firestore';
 import {
   QueuedOperation,
   OperationType,
-  SyncStatus,
   OfflineState,
   SyncEvent,
 } from './types';
@@ -30,8 +28,6 @@ import { checkNetworkStatus, subscribeToNetworkStatus } from './network-status';
 
 // Sync configuration
 const MAX_RETRIES = 5;
-const BASE_RETRY_DELAY_MS = 1000;
-const MAX_RETRY_DELAY_MS = 60000;
 
 // Conflict resolution strategies
 export type ConflictStrategy = 'server_wins' | 'client_wins' | 'merge' | 'manual';
@@ -544,9 +540,12 @@ class SyncManagerClass {
   private async requestBackgroundSync(): Promise<void> {
     if (typeof window === 'undefined') return;
 
+    // Background Sync API - experimental, no TypeScript types available
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ('serviceWorker' in navigator && 'sync' in (window as any).SyncManager?.prototype) {
       try {
         const registration = await navigator.serviceWorker.ready;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (registration as any).sync.register('sync-pending-data');
       } catch (error) {
         console.warn('Background sync registration failed:', error);

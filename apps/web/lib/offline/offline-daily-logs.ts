@@ -3,8 +3,8 @@
  * Manages daily log creation and updates when offline
  */
 
-import { saveOffline, getOfflineData, deleteOfflineData } from './storage';
-import { addToQueue, getQueueLength, subscribeToQueue } from './sync-queue';
+import { saveOffline, getOfflineData } from './storage';
+import { addToQueue, subscribeToQueue } from './sync-queue';
 import { checkNetworkStatus } from './network-status';
 import { DailyLogCategory, WeatherCondition } from '@/types';
 
@@ -84,7 +84,7 @@ export class OfflineDailyLogService {
   constructor() {
     // Subscribe to sync queue changes
     if (typeof window !== 'undefined') {
-      subscribeToQueue((count) => {
+      subscribeToQueue(() => {
         this.updatePendingCount();
       });
       this.updatePendingCount();

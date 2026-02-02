@@ -3,14 +3,13 @@
  * Provides offline-first time entry functionality with sync support
  */
 
-import { TimeEntry, TimeEntryBreak, TimeEntryLocation, UserRole } from '@/types';
-import { saveOffline, getOfflineData, deleteOfflineData } from './storage';
+import { TimeEntry, TimeEntryLocation, UserRole } from '@/types';
+import { saveOffline, getOfflineData } from './storage';
 import { addToQueue, subscribeToQueue } from './sync-queue';
 import { checkNetworkStatus } from './network-status';
 
 // Key prefix for offline time entries
 const OFFLINE_ENTRIES_KEY = 'offline-time-entries';
-const ACTIVE_ENTRY_KEY = 'active-time-entry';
 
 /**
  * Offline time entry with local tracking fields
@@ -441,7 +440,8 @@ export class OfflineTimeEntryService {
     return deleteOfflineTimeEntry(this.orgId, localId);
   }
 
-  async getTimeEntries(filters?: TimeEntryFilters): Promise<OfflineTimeEntry[]> {
+  async getTimeEntries(_filters?: TimeEntryFilters): Promise<OfflineTimeEntry[]> {
+    // TODO: Implement filter support for offline entries
     return getOfflineTimeEntries(this.orgId);
   }
 

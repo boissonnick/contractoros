@@ -3,7 +3,7 @@
  * Handles queuing and processing of offline operations
  */
 
-import { QueuedOperation, OperationType, SyncStatus } from './types';
+import { QueuedOperation, OperationType } from './types';
 import {
   getQueuedOperations,
   saveQueuedOperation,
@@ -11,22 +11,6 @@ import {
 } from './storage';
 
 const MAX_RETRIES = 5;
-const BASE_RETRY_DELAY_MS = 1000;
-const MAX_RETRY_DELAY_MS = 60000;
-
-/**
- * Calculate exponential backoff delay
- */
-function getRetryDelay(retryCount: number): number {
-  // Exponential backoff: 1s, 2s, 4s, 8s, 16s... capped at 60s
-  const delay = Math.min(
-    BASE_RETRY_DELAY_MS * Math.pow(2, retryCount),
-    MAX_RETRY_DELAY_MS
-  );
-  // Add jitter (±25%) to prevent thundering herd
-  const jitter = delay * 0.25 * (Math.random() * 2 - 1);
-  return Math.floor(delay + jitter);
-}
 
 // Track if sync is in progress
 let isSyncing = false;

@@ -5,7 +5,6 @@
 
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import { Project } from '@/types';
 import { saveOffline, getOfflineData } from './storage';
 
 // Cache keys
@@ -74,8 +73,6 @@ export async function cacheProjectsForOffline(orgId: string): Promise<void> {
     // Save to offline storage
     await saveOffline(getProjectsCacheKey(orgId), cachedProjects);
     await saveOffline(getTimestampKey(orgId), Date.now());
-
-    console.log(`[OfflineCache] Cached ${cachedProjects.length} projects for org ${orgId}`);
   } catch (error) {
     console.error('[OfflineCache] Failed to cache projects:', error);
     throw error;

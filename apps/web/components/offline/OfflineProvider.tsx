@@ -34,7 +34,7 @@ const OfflineContext = createContext<OfflineContextValue | null>(null);
 // ============================================
 
 export function OfflineProvider({ children }: { children: React.ReactNode }) {
-  const { isOnline, wasOffline } = useNetworkStatus();
+  const { isOnline: _isOnline, wasOffline: _wasOffline } = useNetworkStatus();
   const initRef = useRef(false);
 
   const [state, setState] = useState<OfflineState>({

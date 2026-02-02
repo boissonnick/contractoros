@@ -68,7 +68,6 @@ export async function cacheTeamForOffline(orgId: string): Promise<void> {
     };
 
     await saveOffline(getCacheKey(orgId), cache, CACHE_TTL);
-    console.log(`Cached ${members.length} team members for offline use`);
   } catch (error) {
     console.error('Failed to cache team for offline:', error);
     throw error;
@@ -85,16 +84,11 @@ export async function getCachedTeam(orgId: string): Promise<CachedTeamMember[]> 
     const cache = await getOfflineData<TeamCache>(getCacheKey(orgId));
 
     if (!cache) {
-      console.log('No cached team found');
       return [];
     }
 
     // Check if cache is stale (older than 7 days)
-    const isStale = Date.now() - cache.cachedAt > CACHE_TTL;
-    if (isStale) {
-      console.log('Team cache is stale');
-      // Still return the data, but it might trigger a refresh
-    }
+    // Cache staleness is handled by the caller - we still return data
 
     return cache.members;
   } catch (error) {

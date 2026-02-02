@@ -8,7 +8,6 @@ import {
   CloudArrowUpIcon,
   ChevronRightIcon,
   PlayIcon,
-  PauseIcon,
   ChatBubbleLeftIcon,
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckCircleSolidIcon } from '@heroicons/react/24/solid';

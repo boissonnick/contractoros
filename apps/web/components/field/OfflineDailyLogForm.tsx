@@ -7,7 +7,6 @@ import {
   ExclamationTriangleIcon,
   CheckCircleIcon,
   SunIcon,
-  CloudIcon as CloudyIcon,
   UserGroupIcon,
   ClockIcon,
   DocumentTextIcon,
@@ -87,7 +86,7 @@ export function OfflineDailyLogForm({
   );
   const [delays, setDelays] = useState(existingLog?.delays || '');
   const [issues, setIssues] = useState(existingLog?.issues || '');
-  const [notes, setNotes] = useState(existingLog?.notes || '');
+  const [notes] = useState(existingLog?.notes || '');
 
   // Load cached team members
   useEffect(() => {

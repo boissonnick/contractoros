@@ -47,7 +47,7 @@ export function MobileFieldLayout({
   onQuickAction,
   className = '',
 }: MobileFieldLayoutProps) {
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [, setIsRefreshing] = useState(false);
 
   const handleRefresh = useCallback(async () => {
     if (!onRefresh) return;
