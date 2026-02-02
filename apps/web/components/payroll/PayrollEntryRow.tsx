@@ -83,7 +83,7 @@ export function PayrollEntryRow({
               <div className="font-medium text-gray-900">{entry.employeeName}</div>
               <div className="text-sm text-gray-500">
                 {entry.employeeType === 'salaried' ? 'Salaried' : 'Hourly'} •{' '}
-                {entry.regularHours + entry.overtimeHours + entry.ptoHours + entry.sickHours}h total
+                {(entry.regularHours || 0) + (entry.overtimeHours || 0) + (entry.ptoHours || 0) + (entry.sickHours || 0)}h total
               </div>
             </div>
           </div>

@@ -827,7 +827,9 @@ async function seedEstimates(): Promise<void> {
   logProgress(`Creating ${allEstimates.length} estimates...`);
 
   const batch = db.batch();
-  const estimatesRef = db.collection('organizations').doc(DEMO_ORG_ID).collection('estimates');
+  // NOTE: Estimates are stored in top-level 'estimates' collection with orgId field
+  // NOT in organizations/{orgId}/estimates subcollection
+  const estimatesRef = db.collection('estimates');
 
   for (const estimate of allEstimates) {
     const lineItems = createLineItems(estimate.lineItemTemplates, estimate.markupPercent);

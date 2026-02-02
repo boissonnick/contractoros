@@ -85,7 +85,10 @@ export default function FinancesPage() {
     const totalBudget = projects.reduce((sum, p) => sum + (p.budget || 0), 0);
 
     const grossProfit = totalRevenue - totalExpenses;
-    const profitMargin = totalRevenue > 0 ? (grossProfit / totalRevenue) * 100 : 0;
+    // Use totalInvoiced as basis if no payments yet received (more accurate for active projects)
+    // Fall back to 0 only if both revenue and invoiced amounts are 0
+    const revenueBase = totalRevenue > 0 ? totalRevenue : totalInvoiced;
+    const profitMargin = revenueBase > 0 ? (grossProfit / revenueBase) * 100 : 0;
 
     return {
       totalRevenue, totalInvoiced, outstandingAmount, overdueAmount,

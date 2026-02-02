@@ -594,7 +594,8 @@ async function seedChangeOrders(): Promise<void> {
     db,
     changeOrders,
     (batch, co) => {
-      const ref = db.collection('organizations').doc(orgId).collection('changeOrders').doc(co.id);
+      // NOTE: Change orders stored in top-level 'changeOrders' collection with orgId field
+      const ref = db.collection('changeOrders').doc(co.id);
       batch.set(ref, convertToFirestore(co));
     },
     'Change Orders'
