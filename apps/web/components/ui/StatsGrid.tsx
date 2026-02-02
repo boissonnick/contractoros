@@ -180,7 +180,7 @@ function StatCard({
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-gray-500 truncate">{label}</p>
             <div className="flex items-baseline gap-2 mt-1">
-              <p className="text-2xl font-semibold text-gray-900 truncate">
+              <p className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900 tabular-nums truncate">
                 {typeof value === 'number' ? value.toLocaleString() : value}
               </p>
               {change && (
