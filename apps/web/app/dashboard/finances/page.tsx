@@ -135,7 +135,7 @@ export default function FinancesPage() {
             </div>
             <div>
               <p className="text-xs text-gray-500 uppercase tracking-wide">Revenue</p>
-              <p className="text-3xl font-bold text-gray-900">{formatCurrency(stats.totalRevenue)}</p>
+              <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 tabular-nums">{formatCurrency(stats.totalRevenue)}</p>
             </div>
           </div>
           <div className="space-y-1 text-sm">
@@ -163,7 +163,7 @@ export default function FinancesPage() {
             </div>
             <div>
               <p className="text-xs text-gray-500 uppercase tracking-wide">Expenses</p>
-              <p className="text-3xl font-bold text-gray-900">{formatCurrency(stats.totalExpenses)}</p>
+              <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 tabular-nums">{formatCurrency(stats.totalExpenses)}</p>
             </div>
           </div>
           <div className="space-y-1 text-sm">
@@ -187,7 +187,7 @@ export default function FinancesPage() {
             </div>
             <div>
               <p className="text-xs text-gray-500 uppercase tracking-wide">Gross Profit</p>
-              <p className={cn('text-3xl font-bold', stats.grossProfit >= 0 ? 'text-green-700' : 'text-red-700')}>
+              <p className={cn('text-xl sm:text-2xl md:text-3xl font-bold tabular-nums', stats.grossProfit >= 0 ? 'text-green-700' : 'text-red-700')}>
                 {formatCurrency(stats.grossProfit)}
               </p>
             </div>
@@ -209,11 +209,11 @@ export default function FinancesPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="p-3 bg-gray-50 rounded-lg">
             <p className="text-xs text-gray-500 mb-1">Estimates Pipeline</p>
-            <p className="text-xl font-bold text-gray-900">{formatCurrency(stats.estimatePipeline)}</p>
+            <p className="text-base sm:text-lg md:text-xl font-bold text-gray-900 tabular-nums">{formatCurrency(stats.estimatePipeline)}</p>
           </div>
           <div className="p-3 bg-green-50 rounded-lg">
             <p className="text-xs text-gray-500 mb-1">Won Deals</p>
-            <p className="text-xl font-bold text-green-700">{formatCurrency(stats.wonDeals)}</p>
+            <p className="text-base sm:text-lg md:text-xl font-bold text-green-700 tabular-nums">{formatCurrency(stats.wonDeals)}</p>
           </div>
           <div className="p-3 bg-blue-50 rounded-lg">
             <p className="text-xs text-gray-500 mb-1">Active Projects</p>
