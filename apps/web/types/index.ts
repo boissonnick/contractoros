@@ -7774,3 +7774,62 @@ export interface MaintenanceRecord {
   performedAt: Date;
   nextScheduledDate?: Date;
 }
+
+// ============================================================================
+// Client Portal Types (Sprint 36)
+// ============================================================================
+
+export interface ProjectSelection {
+  id: string;
+  projectId: string;
+  orgId: string;
+  category: string;
+  options: SelectionOption[];
+  selectedOptionId?: string;
+  clientApproved: boolean;
+  clientApprovedAt?: Date;
+  notes?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface SelectionOption {
+  id: string;
+  name: string;
+  description?: string;
+  imageUrl?: string;
+  price?: number;
+  supplier?: string;
+  leadTime?: string;
+}
+
+export interface ClientNote {
+  id: string;
+  projectId: string;
+  orgId: string;
+  clientId: string;
+  clientName: string;
+  content: string;
+  addressed: boolean;
+  addressedBy?: string;
+  addressedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ProjectProgress {
+  projectId: string;
+  orgId: string;
+  overallPercent: number;
+  phases: PhaseProgress[];
+  estimatedCompletion?: Date;
+  lastUpdated: Date;
+}
+
+export interface PhaseProgress {
+  phaseId: string;
+  phaseName: string;
+  percent: number;
+  startDate?: Date;
+  endDate?: Date;
+}
