@@ -1,7 +1,16 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Document } from '@/types';
+
+interface Document {
+  id: string;
+  name: string;
+  url?: string;
+  fileType?: string;
+  fileSize?: number;
+  category?: string;
+  createdAt?: Date;
+}
 import {
   DocumentTextIcon,
   DocumentIcon,

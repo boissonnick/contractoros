@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import type { ClientNote } from '@/types';
+import type { ClientPortalNote } from '@/types';
 
 export function useClientNotes({ token }: { token: string }) {
-  const [notes, setNotes] = useState<ClientNote[]>([]);
+  const [notes, setNotes] = useState<ClientPortalNote[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchNotes = useCallback(async () => {

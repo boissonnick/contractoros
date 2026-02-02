@@ -1,0 +1,5 @@
+CLI: 3
+STATUS: complete
+TASK: Sprint 36 API - Client portal types, selections, notes, progress, documents, rules
+COMMIT: f9dd51a
+MESSAGE: All tasks complete. Types renamed to avoid conflicts. Client API files pass TypeScript.

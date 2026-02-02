@@ -47,7 +47,7 @@ export function SelectionBoard({
   const categories = useMemo(() => {
     const cats = new Set<SelectionCategory>();
     selections.forEach((s) => {
-      if (s.category) cats.add(s.category as SelectionCategory);
+      if (s.categoryId) cats.add(s.categoryId as SelectionCategory);
     });
     return Array.from(cats);
   }, [selections]);
@@ -55,7 +55,7 @@ export function SelectionBoard({
   // Filter selections by category
   const filteredSelections = useMemo(() => {
     if (activeCategory === 'all') return selections;
-    return selections.filter((s) => s.category === activeCategory);
+    return selections.filter((s) => s.categoryId === activeCategory);
   }, [selections, activeCategory]);
 
   // Get items being compared
@@ -155,12 +155,12 @@ export function SelectionBoard({
               );
               return (
                 <div key={selection.id} className="bg-white rounded-lg p-4">
-                  <h4 className="font-medium text-gray-900 mb-2">{selection.name}</h4>
+                  <h4 className="font-medium text-gray-900 mb-2">{selection.categoryName}</h4>
                   {selectedOption && (
                     <>
-                      {selectedOption.imageUrl && (
+                      {selectedOption.imageURL && (
                         <img
-                          src={selectedOption.imageUrl}
+                          src={selectedOption.imageURL}
                           alt={selectedOption.name}
                           className="w-full h-32 object-cover rounded mb-2"
                         />
@@ -197,10 +197,10 @@ export function SelectionBoard({
                 }`}
               >
                 {/* Image */}
-                {selectedOption?.imageUrl ? (
+                {selectedOption?.imageURL ? (
                   <div className="relative aspect-video bg-gray-100">
                     <img
-                      src={selectedOption.imageUrl}
+                      src={selectedOption.imageURL}
                       alt={selectedOption.name}
                       className="w-full h-full object-cover"
                     />
@@ -220,7 +220,7 @@ export function SelectionBoard({
                 {/* Content */}
                 <div className="p-3">
                   <div className="flex items-start justify-between mb-1">
-                    <h4 className="font-medium text-gray-900 text-sm">{selection.name}</h4>
+                    <h4 className="font-medium text-gray-900 text-sm">{selection.categoryName}</h4>
                     {compareMode && (
                       <button
                         onClick={() => toggleCompare(selection.id)}

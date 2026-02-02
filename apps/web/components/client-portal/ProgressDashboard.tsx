@@ -207,11 +207,11 @@ export function ProgressDashboard({
                   <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-gray-700 line-clamp-2">
-                      {activity.description || activity.title}
+                      {activity.action} - {activity.entityName}
                     </p>
                     <p className="text-xs text-gray-400 mt-0.5">
-                      {new Date(activity.createdAt).toLocaleDateString()} at{' '}
-                      {new Date(activity.createdAt).toLocaleTimeString([], {
+                      {new Date(activity.timestamp).toLocaleDateString()} at{' '}
+                      {new Date(activity.timestamp).toLocaleTimeString([], {
                         hour: '2-digit',
                         minute: '2-digit',
                       })}

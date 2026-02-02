@@ -12,7 +12,7 @@ import {
 
 interface PhotoGroup {
   date: string;
-  phase?: string;
+  phaseId?: string;
   photos: Photo[];
 }
 
@@ -26,7 +26,7 @@ export function PhotoTimeline({ photos, onViewAll }: PhotoTimelineProps) {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [selectedGroup, setSelectedGroup] = useState<PhotoGroup | null>(null);
 
-  // Group photos by date and phase
+  // Group photos by date and phaseId
   const groupedPhotos = useMemo(() => {
     const groups = new Map<string, PhotoGroup>();
 
@@ -38,12 +38,12 @@ export function PhotoTimeline({ photos, onViewAll }: PhotoTimelineProps) {
           month: 'long',
           day: 'numeric',
         });
-        const key = `${date}-${photo.phase || 'General'}`;
+        const key = `${date}-${photo.phaseId || 'General'}`;
 
         if (!groups.has(key)) {
           groups.set(key, {
             date,
-            phase: photo.phase,
+            phaseId: photo.phaseId,
             photos: [],
           });
         }
@@ -117,9 +117,9 @@ export function PhotoTimeline({ photos, onViewAll }: PhotoTimelineProps) {
                 {/* Date & Phase */}
                 <div className="mb-2">
                   <p className="text-sm font-medium text-gray-900">{group.date}</p>
-                  {group.phase && (
+                  {group.phaseId && (
                     <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded">
-                      {group.phase}
+                      {group.phaseId}
                     </span>
                   )}
                 </div>

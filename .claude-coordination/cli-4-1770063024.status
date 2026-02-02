@@ -1,0 +1,5 @@
+CLI: 4
+STATUS: complete
+TASK: Sprint 36 Utils - useClientPortal, useClientNotes, client-portal utilities
+COMMIT: 2f57f37
+MESSAGE: Ready for review. Skipped useSelections (existing Firestore impl is better). Pre-existing files have TS errors.
