@@ -119,27 +119,41 @@ Known issues from development documentation.
 ### Category E: January 2026 Audit Findings
 Critical issues discovered during platform audit (January 29, 2026).
 
-### Category F: February 2026 Comprehensive Audit ⭐ NEW
-Comprehensive platform audit with 60 issues across 6 categories (February 2, 2026).
-See `docs/PLATFORM_AUDIT_ISSUES.md` for full tracker.
+### Category F: February 2026 Comprehensive Audit ⭐ UPDATED
+Comprehensive platform audit with **101 issues** across 2 phases (February 2, 2026).
+
+| Phase | Issues | Focus Areas | Effort | Tracker |
+|-------|--------|-------------|--------|---------|
+| Phase 1 | #1-60 | UI/UX, Demo Data, Navigation, Integrations | 316-448h | `docs/PLATFORM_AUDIT_ISSUES.md` |
+| Phase 2 | #61-101 | Messaging, Reporting, Settings | 196-282h | `docs/PLATFORM_AUDIT_ISSUES_PHASE2.md` |
+| **Total** | **101** | | **512-730h** | |
 
 ---
 
 ## February 2026 Audit Summary
 
 > **Source:** Comprehensive platform audit conducted February 2, 2026
-> **Total Items:** 60 issues
-> **Estimated Effort:** 316-448 hours (3.5-5 weeks for 2-3 developers)
-> **Full Tracker:** `docs/PLATFORM_AUDIT_ISSUES.md`
+> **Total Items:** 101 issues (Phase 1: 60, Phase 2: 41)
+> **Estimated Effort:** 512-730 hours (~13-18 weeks for 2-3 developers)
+> **Full Trackers:**
+> - Phase 1: `docs/PLATFORM_AUDIT_ISSUES.md`
+> - Phase 2: `docs/PLATFORM_AUDIT_ISSUES_PHASE2.md`
 
-### Critical Issues (Must Fix First)
+### Critical Issues - Sprint 37A ✅ COMPLETE
 
 | ID | Issue | Effort | Status |
 |----|-------|--------|--------|
-| FEB-011 | Category filter causes projects to disappear | 4-6h | `[ ]` |
-| FEB-013 | Firebase permissions blocking 8+ features | 6-10h | `[ ]` |
-| FEB-053 | Profit margin shows 0% for negative values | 2-3h | `[ ]` |
-| FEB-057 | Payroll displaying "NaNh total" | 1-2h | `[ ]` |
+| FEB-011 | Category filter causes projects to disappear | 4-6h | `[x]` ✅ |
+| FEB-013 | Firebase permissions blocking 8+ features | 6-10h | `[x]` ✅ |
+| FEB-053 | Profit margin shows 0% for negative values | 2-3h | `[x]` ✅ |
+| FEB-057 | Payroll displaying "NaNh total" | 1-2h | `[x]` ✅ |
+
+### Critical Issues - Phase 2 (Next)
+
+| ID | Issue | Effort | Status |
+|----|-------|--------|--------|
+| #69 | Operational Reports Load Error | 2-4h | `[ ]` |
+| #76 | Payroll Reports Load Error | 2-4h | `[ ]` |
 
 ### High Priority Issues by Category
 
@@ -211,18 +225,95 @@ See `docs/PLATFORM_AUDIT_ISSUES.md` for full tracker.
 | FEB-058 | Payroll integration | 25-40h |
 | FEB-028 | Microanimations sprint | Planning |
 
+### Phase 2: Messaging, Reporting & Settings (Issues 61-101) ⭐ NEW
+
+> **Added:** February 2, 2026
+> **Full Tracker:** `docs/PLATFORM_AUDIT_ISSUES_PHASE2.md`
+
+#### Messaging (1 strategic research issue)
+| ID | Issue | Effort |
+|----|-------|--------|
+| #61 | Comprehensive Messaging Architecture Redesign | 40-60h |
+
+#### Reporting & Analytics (15 issues)
+| ID | Issue | Effort |
+|----|-------|--------|
+| #62 | Reports navigation to sidebar | 2-3h |
+| #63 | Historical revenue demo data | 12-16h |
+| #64 | Labor costs demo data | 6-8h |
+| #65 | Invoice aging demo data | 3-4h |
+| #66 | Financial reporting customization | 6-8h |
+| #67 | Custom Reports Builder (research) | 30-40h |
+| #68 | Reports as owner's source of truth | 8-12h |
+| #69 | **Operational Reports Load Error** | 2-4h |
+| #70 | Detailed reports P&L demo data | 10-14h |
+| #71 | Profitability percentages | 4-6h |
+| #72 | Benchmarking & comparative analysis | 8-12h |
+| #73 | AI-powered insights | 12-16h |
+| #74 | Team productivity demo data | 8-12h |
+| #75 | Task performance metrics | 6-8h |
+| #76 | **Payroll Reports Load Error** | 2-4h |
+| #77 | Date picker UX enhancement | 3-4h |
+| #78 | Relative date selection | 2-3h |
+
+#### Settings & Configuration (19 issues)
+| ID | Issue | Effort |
+|----|-------|--------|
+| #79 | Fiscal year configuration | 2-3h |
+| #80 | Payroll period configuration | 2-3h |
+| #81 | Payroll provider integration | 15-25h |
+| #82 | Template management consolidation | 3-4h |
+| #83 | Tax configuration | 3-4h |
+| #84 | Corporate structure settings | 2-3h |
+| #85 | Workers comp & insurance | 2-3h |
+| #86 | Team dropdown layout | 1-2h |
+| #87 | Move AI settings to Org Preferences | 2-3h |
+| #88 | Default AI contribution setting | 1h |
+| #89 | Settings consolidation | 4-6h |
+| #90 | User AI Model OAuth (future) | 8-12h |
+| #91 | User API Key Management (future) | 4-6h |
+| #92 | Multiple AI Provider Support (future) | 6-8h |
+| #93 | Secure AI Credential Storage | 3-4h |
+| #94 | Google Workspace Integration (future) | 15-20h |
+| #95 | Microsoft 365/AD Integration (future) | 15-20h |
+| #96 | Automated User Onboarding (future) | 6-8h |
+| #97 | Automated User Offboarding (future) | 4-6h |
+| #98 | Browser Notification Permissions | 3-4h |
+| #99 | OS-Level Notification Pass-Through | 4-6h |
+| #100 | Granular Notification Control | 4-6h |
+| #101 | Do Not Disturb & Quiet Hours | 4-6h |
+
 ### Recommended Sprint Structure
 
+#### Phase 1 Sprints (Issues 1-60)
+| Sprint | Focus | Duration | Issues | Status |
+|--------|-------|----------|--------|--------|
+| **37A** | Critical bugs | 1 week | FEB-011, 013, 053, 057 | ✅ DONE |
+| **37B** | UI/Layout + animations | 1 week | FEB-001, 004, 005, 007-010, 029 | Next |
+| **38** | Demo data (core) | 1-2 weeks | FEB-012, 014, 015, 016, 017, 030 | |
+| **39** | Demo data (complete) | 1-2 weeks | FEB-018-024, 035, 041, 043, 046 | |
+| **40** | Navigation architecture | 1-2 weeks | FEB-033, 059, 060 | |
+| **41** | Finance module | 1-2 weeks | FEB-026, 047, 049, 050, 054, 055 | |
+
+#### Phase 2 Sprints (Issues 61-101)
 | Sprint | Focus | Duration | Issues |
 |--------|-------|----------|--------|
-| **A** | Critical bugs + animations | 1 week | FEB-011, 013, 053, 057, 008-010 |
-| **B** | UI/Layout fixes | 1 week | FEB-001, 004, 005, 029, 007 |
-| **C** | Demo data (core) | 1-2 weeks | FEB-012, 014, 015, 016, 017, 030 |
-| **D** | Demo data (complete) | 1-2 weeks | FEB-018-024, 035, 041, 043, 046 |
-| **E** | Navigation architecture | 1-2 weeks | FEB-033, 059, 060 |
-| **F** | Finance module | 1-2 weeks | FEB-026, 047, 049, 050, 054, 055 |
-| **G** | Schedule enhancement | 2 weeks | FEB-036, 037, 038, 039, 042 |
-| **H** | Strategic features | 2-3 weeks | FEB-034, 040 |
+| **42** | Reports bugs + config | 1-2 weeks | #62, 69, 76, 79, 80, 83 |
+| **43** | Reports demo data | 2-3 weeks | #63, 64, 65, 70, 74, 75 |
+| **44** | Settings consolidation | 1-2 weeks | #82, 84, 85, 87, 89 |
+| **45** | Reporting enhancements | 2 weeks | #66, 68, 71, 72 |
+| **46** | Notification system | 1-2 weeks | #98, 99, 100, 101 |
+
+#### Future Sprints (Strategic)
+| Sprint | Focus | Duration | Issues |
+|--------|-------|----------|--------|
+| **F1** | Messaging research | 2-3 weeks | #61 |
+| **F2** | AI model integration | 2 weeks | #90, 91, 92, 93 |
+| **F3** | Directory integration | 3-4 weeks | #94, 95, 96, 97 |
+| **F4** | Custom reports builder | 2-3 weeks | #67 |
+| **F5** | AI-powered insights | 2 weeks | #73 |
+| **F6** | Schedule enhancement | 2 weeks | FEB-036, 037, 038, 039, 042 |
+| **F7** | Strategic features | 2-3 weeks | FEB-034, 040 |
 
 ---
 

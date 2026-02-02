@@ -1,23 +1,29 @@
 # ContractorOS Sprint Status
 
 > **Purpose:** Track current progress and enable seamless session handoffs.
-> **Last Updated:** 2026-02-02 17:00 by Controller Session
+> **Last Updated:** 2026-02-02 22:00 by CLI 2 (Dev Sprint)
 > **Current Phase:** Phase 10 - Platform Hardening & Bug Fixes
 
 ---
 
 ## ⚠️ PRIORITY: February 2026 Platform Audit
 
-**60 issues identified** requiring 316-448 hours of work.
-**Full tracker:** `docs/PLATFORM_AUDIT_ISSUES.md`
+**101 total issues identified** across 2 audit phases:
+- **Phase 1:** 60 issues (`docs/PLATFORM_AUDIT_ISSUES.md`)
+- **Phase 2:** 41 issues (`docs/PLATFORM_AUDIT_ISSUES_PHASE2.md`)
+- **Combined Effort:** 512-730 hours (~13-18 weeks for 2-3 developers)
 
-### Critical Blockers (Fix First)
+### Critical Blockers - Sprint 37A Status
 | ID | Issue | Status |
 |----|-------|--------|
-| FEB-011 | Category filter breaks project list | `[ ]` |
-| FEB-013 | Firebase permissions blocking 8+ features | `[ ]` |
-| FEB-053 | Profit margin calculation wrong | `[ ]` |
-| FEB-057 | Payroll showing "NaNh total" | `[ ]` |
+| FEB-011 | Category filter breaks project list | `[x]` ✅ |
+| FEB-013 | Firebase permissions (seed scripts fixed) | `[x]` ✅ |
+| FEB-053 | Profit margin calculation wrong | `[x]` ✅ |
+| FEB-057 | Payroll showing "NaNh total" | `[x]` ✅ |
+| #69 | Operational Reports Load Error | `[ ]` |
+| #76 | Payroll Reports Load Error | `[ ]` |
+
+**Sprint 37A Complete:** Core bugs fixed, demo data re-seeded, docker rebuilt.
 
 ---
 
@@ -25,10 +31,10 @@
 
 | Metric | Value |
 |--------|-------|
-| **Current Sprint** | Sprint 37A - Critical Bug Fixes 🔧 |
-| **Sprint Status** | 🚧 IN PROGRESS |
+| **Current Sprint** | Sprint 37B - UI/Layout + Animations 🎨 |
+| **Sprint Status** | 🚧 READY TO START |
 | **Platform Completion** | ~90% (adjusted per audit) |
-| **Audit Issues** | 60 total (4 critical, 35 high, 17 medium, 4 low) |
+| **Audit Issues** | 101 total (6 critical, 47 high, 40 medium, 8 low) |
 | **TypeScript Status** | ✅ Passing |
 | **Firestore Rules** | ⚠️ Needs review (FEB-013) |
 | **Docker Status** | ✅ Running on localhost:3000 |
@@ -96,30 +102,54 @@
 **Date:** 2026-02-02
 **Priority:** CRITICAL - Audit findings must be resolved before production
 
-### Sprint Plan (February - March 2026)
+### Sprint Plan (February - April 2026)
 
+#### Phase 1 Audit (Issues 1-60)
 | Sprint | Focus | Duration | Est. Hours |
 |--------|-------|----------|------------|
-| **37A** | Critical Bugs | 1 week | 13-21h |
+| **37A** | Critical Bugs | 1 week | 13-21h | ✅ COMPLETE |
 | **37B** | UI/Layout + Animations | 1 week | 25-36h |
 | **38** | Demo Data (Core) | 1-2 weeks | 40-55h |
 | **39** | Demo Data (Complete) | 1-2 weeks | 45-60h |
 | **40** | Navigation Architecture | 1-2 weeks | 18-26h |
 | **41** | Finance Module | 1-2 weeks | 40-55h |
-| **42** | Schedule Enhancement | 2 weeks | 45-65h |
-| **43** | Strategic Features | 2-3 weeks | 32-46h |
 
-### Sprint 37A: Critical Bugs (Current)
+#### Phase 2 Audit (Issues 61-101)
+| Sprint | Focus | Duration | Est. Hours |
+|--------|-------|----------|------------|
+| **42** | Reports Bugs + Configuration | 1-2 weeks | 15-22h |
+| **43** | Reports Demo Data | 2-3 weeks | 46-62h |
+| **44** | Settings Consolidation | 1-2 weeks | 15-22h |
+| **45** | Reporting Enhancements | 2 weeks | 28-38h |
+| **46** | Notification System | 1-2 weeks | 15-22h |
+
+#### Future Sprints (Strategic)
+| Sprint | Focus | Duration | Est. Hours |
+|--------|-------|----------|------------|
+| **F1** | Messaging Research (#61) | 2-3 weeks | 40-60h |
+| **F2** | AI Model Integration (#90-93) | 2 weeks | 22-30h |
+| **F3** | Directory Integration (#94-97) | 3-4 weeks | 40-54h |
+| **F4** | Custom Reports Builder (#67) | 2-3 weeks | 30-40h |
+
+### Sprint 37A: Critical Bugs ✅ COMPLETE
 
 **Duration:** 1 week
-**Effort:** 13-21 hours
+**Completed:** 2026-02-02
 
 | Issue | Description | Effort | Status |
 |-------|-------------|--------|--------|
-| FEB-011 | Category filter causes projects to disappear | 4-6h | `[ ]` |
-| FEB-013 | Firebase permissions blocking features | 6-10h | `[ ]` |
-| FEB-053 | Profit margin calculation | 2-3h | `[ ]` |
-| FEB-057 | Payroll "NaNh total" display | 1-2h | `[ ]` |
+| FEB-011 | Category filter causes projects to disappear | 4-6h | `[x]` ✅ |
+| FEB-013 | Firebase permissions (seed scripts) | 6-10h | `[x]` ✅ |
+| FEB-053 | Profit margin calculation | 2-3h | `[x]` ✅ |
+| FEB-057 | Payroll "NaNh total" display | 1-2h | `[x]` ✅ |
+
+**Fixes Applied:**
+- `seed-projects.ts`: Fixed to write to top-level `projects` collection
+- `seed-estimates.ts`: Fixed to write to top-level `estimates` collection
+- `seed-change-orders.ts`: Fixed to write to top-level `changeOrders` collection
+- `seed-tasks.ts`: Fixed to write to top-level `tasks` collection
+- `finances/page.tsx`: Fixed profit margin to use totalInvoiced as fallback
+- `PayrollEntryRow.tsx`: Fixed NaN by adding null coalescing to hour fields
 
 ### Sprint 37B: UI/Layout + Animations
 
@@ -181,13 +211,21 @@
 3. **UI Polish** - Bouncing animations distracting; layout issues on dashboard
 4. **Navigation** - Team/Subcontractor separation needed; role-based navigation
 
-### Full Issue Tracker
+### Full Issue Trackers
 
-See `docs/PLATFORM_AUDIT_ISSUES.md` for complete list of 60 issues with:
+**Phase 1 (Issues 1-60):** `docs/PLATFORM_AUDIT_ISSUES.md`
+- Critical bugs, UI/UX, Demo Data, Navigation, Integrations
+- Effort: 316-448 hours
+
+**Phase 2 (Issues 61-101):** `docs/PLATFORM_AUDIT_ISSUES_PHASE2.md`
+- Messaging architecture, Reports & Analytics, Settings
+- Effort: 196-282 hours
+
+Both documents include:
 - Detailed acceptance criteria
-- Effort estimates
+- Effort estimates per issue
 - File locations
-- Status tracking
+- Status tracking checkboxes
 
 ---
 
