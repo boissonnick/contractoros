@@ -1,7 +1,7 @@
 # ContractorOS Sprint Status
 
 > **Purpose:** Track current progress and enable seamless session handoffs.
-> **Last Updated:** 2026-02-02 by Controller Session
+> **Last Updated:** 2026-02-02 by Database Session
 > **Current Phase:** Phase 8 - Field-First Completion - IN PROGRESS
 
 ---
@@ -77,6 +77,10 @@
 
 | Feature | Priority | Assigned | Status |
 |---------|----------|----------|--------|
+| Voice Command Types | P0 | Database | ✅ Complete |
+| Firestore Rules (Voice) | P0 | Database | ✅ Complete |
+| Firestore Indexes (Voice) | P0 | Database | ✅ Complete |
+| Voice Settings Schema | P0 | Database | ✅ Complete |
 | Voice Time Entry | P0 | Dev Sprint | 🔲 Not Started |
 | Voice Daily Log | P0 | Dev Sprint | 🔲 Not Started |
 | Voice Photo Notes | P1 | Dev Sprint | 🔲 Not Started |
@@ -84,6 +88,32 @@
 | Voice Navigation | P2 | Dev Sprint | 🔲 Not Started |
 | Voice Activation Button | P1 | Dev Sprint | 🔲 Not Started |
 | Command Confirmation UI | P1 | Dev Sprint | 🔲 Not Started |
+
+### Database Session Deliverables (Complete)
+
+**Types Added (`apps/web/types/index.ts`):**
+- `VoiceCommandType` enum: `time_entry`, `daily_log`, `task_update`, `navigation`, `photo_note`
+- `VoiceCommandStatus` enum: `pending`, `processing`, `completed`, `failed`, `cancelled`
+- `VoiceCommand` interface - Full command record
+- `VoiceCommandResult` interface - Execution result
+- `VoiceCommandLog` interface - Analytics log (admin-only)
+- `VoiceCommandStats` interface - Aggregated statistics
+- `OrgSettings.voiceEnabled`, `voiceLanguage`, `voiceConfirmationRequired`, `voiceWakeWord`
+
+**Firestore Rules Added:**
+- `organizations/{orgId}/voiceCommands/{commandId}` - User owns OR admin
+- `organizations/{orgId}/voiceCommandLogs/{logId}` - Admin read, server write only
+- `organizations/{orgId}/settings/voice` - Admin settings
+
+**Firestore Indexes Added:**
+- `voiceCommands`: userId + createdAt DESC
+- `voiceCommands`: status + createdAt DESC
+- `voiceCommands`: userId + status + createdAt DESC
+- `voiceCommandLogs`: commandType + createdAt DESC
+- `voiceCommandLogs`: success + createdAt DESC
+- `voiceCommandLogs`: commandType + success + createdAt DESC
+
+**Deployed:** 2026-02-02
 
 ### Technical Approach
 
