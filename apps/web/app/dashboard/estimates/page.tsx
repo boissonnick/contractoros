@@ -13,7 +13,7 @@ import {
   deleteDoc,
   doc,
 } from 'firebase/firestore';
-import { Button, Card, Badge, EmptyState } from '@/components/ui';
+import { Button, Card, Badge, EmptyState, PageHeader } from '@/components/ui';
 import { toast } from '@/components/ui/Toast';
 import { SkeletonList } from '@/components/ui/Skeleton';
 import { cn } from '@/lib/utils';
@@ -140,22 +140,28 @@ export default function EstimatesPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Estimates</h1>
-          <p className="text-gray-500 mt-1">
-            Create and manage project estimates and proposals
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          onClick={() => router.push('/dashboard/estimates/new')}
-        >
-          <PlusIcon className="h-4 w-4 mr-2" />
-          New Estimate
-        </Button>
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+      {/* Desktop Header */}
+      <div className="hidden md:block">
+        <PageHeader
+          title="Estimates"
+          description="Create and manage project estimates and proposals"
+          actions={
+            <Button
+              variant="primary"
+              onClick={() => router.push('/dashboard/estimates/new')}
+            >
+              <PlusIcon className="h-4 w-4 mr-2" />
+              New Estimate
+            </Button>
+          }
+        />
+      </div>
+
+      {/* Mobile Header */}
+      <div className="md:hidden">
+        <h1 className="text-xl font-bold text-gray-900">Estimates</h1>
+        <p className="text-xs text-gray-500">Create and manage proposals</p>
       </div>
 
       {/* Stats */}
@@ -303,6 +309,15 @@ export default function EstimatesPage() {
           })}
         </div>
       )}
+
+      {/* Mobile FAB for New Estimate */}
+      <button
+        onClick={() => router.push('/dashboard/estimates/new')}
+        className="md:hidden fixed right-4 bottom-20 w-14 h-14 rounded-full bg-blue-600 text-white shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center transition-all z-30"
+        aria-label="New Estimate"
+      >
+        <PlusIcon className="h-6 w-6" />
+      </button>
     </div>
   );
 }

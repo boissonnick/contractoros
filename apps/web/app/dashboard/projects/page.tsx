@@ -22,7 +22,7 @@ import {
   DocumentData,
 } from 'firebase/firestore';
 import { Project, ProjectStatus, ProjectCategory } from '@/types';
-import { FirestoreError, Button, Card, Badge, EmptyState } from '@/components/ui';
+import { FirestoreError, Button, Card, Badge, EmptyState, PageHeader } from '@/components/ui';
 import { toast } from '@/components/ui/Toast';
 import { SkeletonList } from '@/components/ui/Skeleton';
 import { MobileProjectList } from '@/components/projects/MobileProjectCard';
@@ -409,39 +409,63 @@ export default function ProjectsPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Projects</h1>
-          <p className="text-gray-500 mt-1">
-            {showArchived ? `${stats.archived} archived projects` : `${stats.total} total projects`}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+      {/* Desktop Header */}
+      <div className="hidden md:block">
+        <PageHeader
+          title="Projects"
+          description={showArchived ? `${stats.archived} archived projects` : `${stats.total} total projects`}
+          actions={
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowArchived(!showArchived)}
+                className={showArchived ? 'bg-gray-100' : ''}
+              >
+                {showArchived ? (
+                  <>
+                    <ArchiveBoxXMarkIcon className="h-4 w-4 mr-2" />
+                    Show Active
+                  </>
+                ) : (
+                  <>
+                    <ArchiveBoxIcon className="h-4 w-4 mr-2" />
+                    Archive ({stats.archived})
+                  </>
+                )}
+              </Button>
+              <Link href="/dashboard/projects/new">
+                <Button variant="primary">
+                  <PlusIcon className="h-4 w-4 mr-2" />
+                  New Project
+                </Button>
+              </Link>
+            </div>
+          }
+        />
+      </div>
+
+      {/* Mobile Header */}
+      <div className="md:hidden">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold text-gray-900">Projects</h1>
+            <p className="text-xs text-gray-500">
+              {showArchived ? `${stats.archived} archived` : `${stats.total} total`}
+            </p>
+          </div>
           <Button
             variant="outline"
+            size="sm"
             onClick={() => setShowArchived(!showArchived)}
             className={showArchived ? 'bg-gray-100' : ''}
           >
             {showArchived ? (
-              <>
-                <ArchiveBoxXMarkIcon className="h-4 w-4 mr-2" />
-                Show Active
-              </>
+              <ArchiveBoxXMarkIcon className="h-4 w-4" />
             ) : (
-              <>
-                <ArchiveBoxIcon className="h-4 w-4 mr-2" />
-                Archive ({stats.archived})
-              </>
+              <ArchiveBoxIcon className="h-4 w-4" />
             )}
           </Button>
-          <Link href="/dashboard/projects/new">
-            <Button variant="primary">
-              <PlusIcon className="h-4 w-4 mr-2" />
-              New Project
-            </Button>
-          </Link>
         </div>
       </div>
 
@@ -902,6 +926,15 @@ export default function ProjectsPage() {
           </div>
         </div>
       )}
+
+      {/* Mobile FAB for New Project */}
+      <Link
+        href="/dashboard/projects/new"
+        className="md:hidden fixed right-4 bottom-20 w-14 h-14 rounded-full bg-blue-600 text-white shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center transition-all z-30"
+        aria-label="New Project"
+      >
+        <PlusIcon className="h-6 w-6" />
+      </Link>
     </div>
   );
 }

@@ -37,6 +37,7 @@ import Input from '@/components/ui/Input';
 import Badge, { BadgeProps } from '@/components/ui/Badge';
 import EmptyState from '@/components/ui/EmptyState';
 import Skeleton from '@/components/ui/Skeleton';
+import PageHeader from '@/components/ui/PageHeader';
 import { toast } from '@/components/ui/Toast';
 import {
   MaterialItem,
@@ -289,44 +290,49 @@ export default function MaterialsPage() {
 
   const loading = materialsLoading || equipmentLoading || suppliersLoading || ordersLoading || alertsLoading;
 
+  const getAddButtonConfig = () => {
+    switch (activeTab) {
+      case 'inventory':
+        return { label: 'Add Material', onClick: () => setShowMaterialForm(true) };
+      case 'equipment':
+        return { label: 'Add Equipment', onClick: () => setShowEquipmentForm(true) };
+      case 'orders':
+        return { label: 'New Order', onClick: () => setShowOrderForm(true) };
+      case 'suppliers':
+        return { label: 'Add Supplier', onClick: () => setShowSupplierForm(true) };
+      default:
+        return null;
+    }
+  };
+
+  const addButton = getAddButtonConfig();
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Materials & Equipment</h1>
-          <p className="text-gray-500">Manage inventory, equipment, and purchase orders</p>
-        </div>
-        <div className="flex items-center gap-3">
-          {activeTab === 'inventory' && (
-            <Button onClick={() => setShowMaterialForm(true)}>
-              <PlusIcon className="w-4 h-4 mr-2" />
-              Add Material
-            </Button>
-          )}
-          {activeTab === 'equipment' && (
-            <Button onClick={() => setShowEquipmentForm(true)}>
-              <PlusIcon className="w-4 h-4 mr-2" />
-              Add Equipment
-            </Button>
-          )}
-          {activeTab === 'orders' && (
-            <Button onClick={() => setShowOrderForm(true)}>
-              <PlusIcon className="w-4 h-4 mr-2" />
-              New Order
-            </Button>
-          )}
-          {activeTab === 'suppliers' && (
-            <Button onClick={() => setShowSupplierForm(true)}>
-              <PlusIcon className="w-4 h-4 mr-2" />
-              Add Supplier
-            </Button>
-          )}
-        </div>
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+      {/* Desktop Header */}
+      <div className="hidden md:block">
+        <PageHeader
+          title="Materials & Equipment"
+          description="Manage inventory, equipment, and purchase orders"
+          actions={
+            addButton && (
+              <Button onClick={addButton.onClick}>
+                <PlusIcon className="w-4 h-4 mr-2" />
+                {addButton.label}
+              </Button>
+            )
+          }
+        />
+      </div>
+
+      {/* Mobile Header */}
+      <div className="md:hidden">
+        <h1 className="text-xl font-bold text-gray-900">Materials & Equipment</h1>
+        <p className="text-xs text-gray-500">Inventory, equipment, and orders</p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <Card className="p-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-blue-100 rounded-lg">
@@ -791,6 +797,17 @@ export default function MaterialsPage() {
         materials={materials}
         projects={projects}
       />
+
+      {/* Mobile FAB */}
+      {addButton && (
+        <button
+          onClick={addButton.onClick}
+          className="md:hidden fixed right-4 bottom-20 w-14 h-14 rounded-full bg-blue-600 text-white shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center transition-all z-30"
+          aria-label={addButton.label}
+        >
+          <PlusIcon className="h-6 w-6" />
+        </button>
+      )}
     </div>
   );
 }

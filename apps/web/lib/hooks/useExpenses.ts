@@ -17,6 +17,7 @@ import {
 import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
 import { convertTimestampsDeep } from '@/lib/firebase/timestamp-converter';
+import { toast } from '@/components/ui/Toast';
 import {
   Expense,
   ExpenseCategory,
@@ -162,59 +163,78 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
       throw new Error('Not authenticated');
     }
 
-    const now = new Date();
-    const docRef = await addDoc(
-      collection(db, `organizations/${orgId}/expenses`),
-      {
-        ...expenseData,
-        orgId,
-        userId: currentUserId,
-        userName: currentUserName,
-        receipts: expenseData.receipts?.map(r => ({
-          ...r,
-          uploadedAt: Timestamp.fromDate(new Date(r.uploadedAt)),
-        })) || [],
-        createdAt: Timestamp.fromDate(now),
-        updatedAt: Timestamp.fromDate(now),
-      }
-    );
-
-    return docRef.id;
+    try {
+      const now = new Date();
+      const docRef = await addDoc(
+        collection(db, `organizations/${orgId}/expenses`),
+        {
+          ...expenseData,
+          orgId,
+          userId: currentUserId,
+          userName: currentUserName,
+          receipts: expenseData.receipts?.map(r => ({
+            ...r,
+            uploadedAt: Timestamp.fromDate(new Date(r.uploadedAt)),
+          })) || [],
+          createdAt: Timestamp.fromDate(now),
+          updatedAt: Timestamp.fromDate(now),
+        }
+      );
+      toast.success('Expense created');
+      return docRef.id;
+    } catch (err) {
+      console.error('Create expense error:', err);
+      toast.error('Failed to create expense');
+      throw err;
+    }
   }, [orgId, currentUserId, currentUserName]);
 
   // Update expense
   const updateExpense = useCallback(async (expenseId: string, updates: Partial<Expense>): Promise<void> => {
     if (!orgId) throw new Error('Not authenticated');
 
-    const now = new Date();
-    const updateData: Record<string, unknown> = {
-      ...updates,
-      updatedAt: Timestamp.fromDate(now),
-    };
+    try {
+      const now = new Date();
+      const updateData: Record<string, unknown> = {
+        ...updates,
+        updatedAt: Timestamp.fromDate(now),
+      };
 
-    // Convert dates
-    if (updates.approvedAt) {
-      updateData.approvedAt = Timestamp.fromDate(updates.approvedAt);
-    }
-    if (updates.reimbursedAt) {
-      updateData.reimbursedAt = Timestamp.fromDate(updates.reimbursedAt);
-    }
+      // Convert dates
+      if (updates.approvedAt) {
+        updateData.approvedAt = Timestamp.fromDate(updates.approvedAt);
+      }
+      if (updates.reimbursedAt) {
+        updateData.reimbursedAt = Timestamp.fromDate(updates.reimbursedAt);
+      }
 
-    // Convert receipts
-    if (updates.receipts) {
-      updateData.receipts = updates.receipts.map(r => ({
-        ...r,
-        uploadedAt: Timestamp.fromDate(new Date(r.uploadedAt)),
-      }));
-    }
+      // Convert receipts
+      if (updates.receipts) {
+        updateData.receipts = updates.receipts.map(r => ({
+          ...r,
+          uploadedAt: Timestamp.fromDate(new Date(r.uploadedAt)),
+        }));
+      }
 
-    await updateDoc(doc(db, `organizations/${orgId}/expenses/${expenseId}`), updateData);
+      await updateDoc(doc(db, `organizations/${orgId}/expenses/${expenseId}`), updateData);
+    } catch (err) {
+      console.error('Update expense error:', err);
+      toast.error('Failed to update expense');
+      throw err;
+    }
   }, [orgId]);
 
   // Delete expense
   const deleteExpense = useCallback(async (expenseId: string): Promise<void> => {
     if (!orgId) throw new Error('Not authenticated');
-    await deleteDoc(doc(db, `organizations/${orgId}/expenses/${expenseId}`));
+    try {
+      await deleteDoc(doc(db, `organizations/${orgId}/expenses/${expenseId}`));
+      toast.success('Expense deleted');
+    } catch (err) {
+      console.error('Delete expense error:', err);
+      toast.error('Failed to delete expense');
+      throw err;
+    }
   }, [orgId]);
 
   // Add receipt to expense
@@ -227,15 +247,22 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
     const expense = expenses.find(e => e.id === expenseId);
     if (!expense) throw new Error('Expense not found');
 
-    const newReceipt: ExpenseReceipt = {
-      ...receipt,
-      id: `receipt_${Date.now()}`,
-      uploadedAt: new Date(),
-    };
+    try {
+      const newReceipt: ExpenseReceipt = {
+        ...receipt,
+        id: `receipt_${Date.now()}`,
+        uploadedAt: new Date(),
+      };
 
-    await updateExpense(expenseId, {
-      receipts: [...expense.receipts, newReceipt],
-    });
+      await updateExpense(expenseId, {
+        receipts: [...expense.receipts, newReceipt],
+      });
+      toast.success('Receipt added');
+    } catch (err) {
+      console.error('Add receipt error:', err);
+      toast.error('Failed to add receipt');
+      throw err;
+    }
   }, [orgId, expenses, updateExpense]);
 
   // Remove receipt from expense
@@ -245,9 +272,16 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
     const expense = expenses.find(e => e.id === expenseId);
     if (!expense) throw new Error('Expense not found');
 
-    await updateExpense(expenseId, {
-      receipts: expense.receipts.filter(r => r.id !== receiptId),
-    });
+    try {
+      await updateExpense(expenseId, {
+        receipts: expense.receipts.filter(r => r.id !== receiptId),
+      });
+      toast.success('Receipt removed');
+    } catch (err) {
+      console.error('Remove receipt error:', err);
+      toast.error('Failed to remove receipt');
+      throw err;
+    }
   }, [orgId, expenses, updateExpense]);
 
   // Approve expense
@@ -255,11 +289,18 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
     if (!orgId || !currentUserId) throw new Error('Not authenticated');
     if (!isManager) throw new Error('Only managers can approve expenses');
 
-    await updateExpense(expenseId, {
-      status: 'approved',
-      approvedBy: currentUserId,
-      approvedAt: new Date(),
-    });
+    try {
+      await updateExpense(expenseId, {
+        status: 'approved',
+        approvedBy: currentUserId,
+        approvedAt: new Date(),
+      });
+      toast.success('Expense approved');
+    } catch (err) {
+      console.error('Approve expense error:', err);
+      toast.error('Failed to approve expense');
+      throw err;
+    }
   }, [orgId, currentUserId, isManager, updateExpense]);
 
   // Reject expense
@@ -267,11 +308,18 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
     if (!orgId || !currentUserId) throw new Error('Not authenticated');
     if (!isManager) throw new Error('Only managers can reject expenses');
 
-    await updateExpense(expenseId, {
-      status: 'rejected',
-      approvedBy: currentUserId,
-      rejectionReason: reason,
-    });
+    try {
+      await updateExpense(expenseId, {
+        status: 'rejected',
+        approvedBy: currentUserId,
+        rejectionReason: reason,
+      });
+      toast.success('Expense rejected');
+    } catch (err) {
+      console.error('Reject expense error:', err);
+      toast.error('Failed to reject expense');
+      throw err;
+    }
   }, [orgId, currentUserId, isManager, updateExpense]);
 
   // Mark as reimbursed
@@ -279,11 +327,18 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
     if (!orgId) throw new Error('Not authenticated');
     if (!isManager) throw new Error('Only managers can mark as reimbursed');
 
-    await updateExpense(expenseId, {
-      status: 'reimbursed',
-      reimbursedAt: new Date(),
-      reimbursementMethod: method,
-    });
+    try {
+      await updateExpense(expenseId, {
+        status: 'reimbursed',
+        reimbursedAt: new Date(),
+        reimbursementMethod: method,
+      });
+      toast.success('Expense marked as reimbursed');
+    } catch (err) {
+      console.error('Mark reimbursed error:', err);
+      toast.error('Failed to mark expense as reimbursed');
+      throw err;
+    }
   }, [orgId, isManager, updateExpense]);
 
   // Get summary

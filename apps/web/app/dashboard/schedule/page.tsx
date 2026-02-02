@@ -13,7 +13,7 @@ import {
   WeatherWidget,
   ConflictAlert,
 } from '@/components/schedule';
-import { Card, Button, Badge } from '@/components/ui';
+import { Card, Button, Badge, PageHeader } from '@/components/ui';
 import BaseModal from '@/components/ui/BaseModal';
 import {
   PlusIcon,
@@ -272,17 +272,17 @@ export default function SchedulePage() {
   return (
     <div className="flex flex-col h-full min-h-[calc(100vh-200px)] space-y-4 md:space-y-6">
       {/* Desktop Header */}
-      <div className="hidden md:flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Schedule</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Manage jobs, inspections, and crew assignments
-          </p>
-        </div>
-        <Button onClick={() => { setSelectedEvent(null); setShowEventModal(true); }}>
-          <PlusIcon className="h-4 w-4 mr-2" />
-          Add Event
-        </Button>
+      <div className="hidden md:block">
+        <PageHeader
+          title="Schedule"
+          description="Manage jobs, inspections, and crew assignments"
+          actions={
+            <Button onClick={() => { setSelectedEvent(null); setShowEventModal(true); }}>
+              <PlusIcon className="h-4 w-4 mr-2" />
+              Add Event
+            </Button>
+          }
+        />
       </div>
 
       {/* Mobile Header */}

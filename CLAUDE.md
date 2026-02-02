@@ -273,6 +273,8 @@ All in **GCP Secret Manager** (project: `contractoros-483812`):
 | `docs/DEVELOPMENT_GUIDE.md` | Feature patterns |
 | `docs/ARCHITECTURE.md` | Technical deep-dive |
 | `docs/TESTING_STRATEGY.md` | E2E testing approach |
+| `docs/LAUNCH_CHECKLIST.md` | Pre-deployment verification |
+| `docs/STRATEGIC_ROADMAP_NEXT_SPRINTS.md` | Platform analysis & roadmap |
 
 ---
 
@@ -284,6 +286,7 @@ Location: `apps/web/e2e/`
 # In Claude Code with Chrome MCP:
 "Run smoke tests from apps/web/e2e/suites/00-smoke.md at localhost:3000"
 "Run mobile tests from apps/web/e2e/suites/22-ui-ux-mobile.md at 375x812"
+"Run full regression from apps/web/e2e/suites/27-regression.md"
 ```
 
 | Suite | File | Duration |
@@ -291,7 +294,31 @@ Location: `apps/web/e2e/`
 | Smoke | 00-smoke.md | 10 min |
 | Security | 02-rbac.md | 20 min |
 | Mobile | 22-ui-ux-mobile.md | 30 min |
+| AI Assistant | 24-ai-assistant.md | 15 min |
+| Full Regression | 27-regression.md | 2-3 hours |
 | Full UAT | 23-uat-checklist.md | 2 hours |
+
+**Test Results:** Store results in `apps/web/e2e/results/` using the template at `sprint-27-regression-template.md`
+
+---
+
+## Demo Seed Scripts
+
+Location: `scripts/`
+
+To seed demo data for "Horizon Construction Co.":
+
+```bash
+cd scripts
+npx ts-node seed-demo-org.ts           # Create org & users
+npx ts-node seed-demo-projects.ts      # Projects & estimates
+npx ts-node seed-demo-financial.ts     # Invoices, payments, expenses
+npx ts-node seed-demo-activities.ts    # Time entries, communications
+```
+
+Demo credentials:
+- Owner: `owner@demo.contractoros.com`
+- Password: (set in seed script)
 
 ---
 

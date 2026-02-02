@@ -16,7 +16,7 @@ import {
   DocumentData,
   getCountFromServer,
 } from 'firebase/firestore';
-import { Button, Card, Badge, EmptyState } from '@/components/ui';
+import { Button, Card, Badge, EmptyState, PageHeader } from '@/components/ui';
 import { toast } from '@/components/ui/Toast';
 import { SkeletonList } from '@/components/ui/Skeleton';
 import { cn } from '@/lib/utils';
@@ -248,22 +248,28 @@ export default function InvoicesPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Invoices</h1>
-          <p className="text-gray-500 mt-1">
-            Manage invoices and track payments
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          onClick={() => router.push('/dashboard/invoices/new')}
-        >
-          <PlusIcon className="h-4 w-4 mr-2" />
-          New Invoice
-        </Button>
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+      {/* Desktop Header */}
+      <div className="hidden md:block">
+        <PageHeader
+          title="Invoices"
+          description="Manage invoices and track payments"
+          actions={
+            <Button
+              variant="primary"
+              onClick={() => router.push('/dashboard/invoices/new')}
+            >
+              <PlusIcon className="h-4 w-4 mr-2" />
+              New Invoice
+            </Button>
+          }
+        />
+      </div>
+
+      {/* Mobile Header */}
+      <div className="md:hidden">
+        <h1 className="text-xl font-bold text-gray-900">Invoices</h1>
+        <p className="text-xs text-gray-500">Manage invoices and payments</p>
       </div>
 
       {/* Stats */}
@@ -474,6 +480,15 @@ export default function InvoicesPage() {
           </div>
         </div>
       )}
+
+      {/* Mobile FAB for New Invoice */}
+      <button
+        onClick={() => router.push('/dashboard/invoices/new')}
+        className="md:hidden fixed right-4 bottom-20 w-14 h-14 rounded-full bg-blue-600 text-white shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center transition-all z-30"
+        aria-label="New Invoice"
+      >
+        <PlusIcon className="h-6 w-6" />
+      </button>
     </div>
   );
 }

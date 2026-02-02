@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { useClients, useClientStats, CLIENT_STATUS_LABELS, CLIENT_SOURCE_LABELS } from '@/lib/hooks/useClients';
 import { Client, ClientStatus, ClientSource } from '@/types';
-import { Button, Card, Badge, EmptyState } from '@/components/ui';
+import { Button, Card, Badge, EmptyState, PageHeader } from '@/components/ui';
 import { SkeletonList } from '@/components/ui/Skeleton';
 import Skeleton from '@/components/ui/Skeleton';
 import { AddClientModal } from '@/components/clients';
@@ -71,20 +71,20 @@ export default function ClientsPage() {
   return (
     <div className="p-4 md:p-6 space-y-4 md:space-y-6">
       {/* Desktop Header */}
-      <div className="hidden md:flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Clients</h1>
-          <p className="text-gray-500 mt-1">
-            Manage your client relationships and track project history
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          onClick={() => setShowAddModal(true)}
-        >
-          <PlusIcon className="h-4 w-4 mr-2" />
-          Add Client
-        </Button>
+      <div className="hidden md:block">
+        <PageHeader
+          title="Clients"
+          description="Manage your client relationships and track project history"
+          actions={
+            <Button
+              variant="primary"
+              onClick={() => setShowAddModal(true)}
+            >
+              <PlusIcon className="h-4 w-4 mr-2" />
+              Add Client
+            </Button>
+          }
+        />
       </div>
 
       {/* Mobile Header */}

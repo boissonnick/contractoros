@@ -183,7 +183,14 @@ export function useChangeOrders({ projectId }: UseChangeOrdersOptions) {
 
   const updateChangeOrder = useCallback(
     async (coId: string, data: Partial<ChangeOrder>) => {
-      await updateDoc(doc(db, 'change_orders', coId), toFirestore({ ...data, updatedAt: new Date() }));
+      try {
+        await updateDoc(doc(db, 'change_orders', coId), toFirestore({ ...data, updatedAt: new Date() }));
+        toast.success('Change order updated');
+      } catch (err) {
+        console.error('Failed to update change order:', err);
+        toast.error('Failed to update change order');
+        throw err;
+      }
     },
     []
   );

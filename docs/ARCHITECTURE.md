@@ -1,7 +1,7 @@
 # ContractorOS Technical Architecture
 
 > **Purpose:** Deep technical reference for understanding system design and making architectural decisions.
-> **Last Updated:** 2026-01-28
+> **Last Updated:** 2026-02-02
 
 ---
 
@@ -36,8 +36,16 @@
 ├─────────────────────────────────────────────────────────────────┤
 │  ├── Mailgun - Transactional emails                             │
 │  ├── Google Maps - Address autocomplete, maps                   │
+│  ├── QuickBooks Online - Accounting sync                        │
 │  ├── Stripe (planned) - Payment processing                      │
 │  └── Twilio (planned) - SMS messaging                           │
+├─────────────────────────────────────────────────────────────────┤
+│                         AI LAYER                                 │
+├─────────────────────────────────────────────────────────────────┤
+│  AI Assistant (Multi-model support)                              │
+│  ├── Claude (Anthropic) - Primary AI model                      │
+│  ├── Gemini (Google) - Default free tier                        │
+│  └── GPT-4 (OpenAI) - Enterprise option                         │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -460,3 +468,266 @@ When creating a new module (e.g., "vendors"), follow this structure:
 ```
 
 This pattern ensures consistency and makes code predictable.
+
+---
+
+## AI Assistant Architecture
+
+### Overview
+
+The AI Assistant provides contextual help to contractors via a multi-model chat interface.
+
+```
+┌────────────────────────────────────────────────────────────┐
+│                    AI ASSISTANT FLOW                        │
+├────────────────────────────────────────────────────────────┤
+│                                                            │
+│  User Input ──▶ Prompt Guard ──▶ Model Router ──▶ Response │
+│       │              │               │              │      │
+│       ▼              ▼               ▼              ▼      │
+│   [Voice/Text]  [Security]     [Claude/Gemini]  [Stream]   │
+│                      │           [/GPT-4]           │      │
+│                      ▼                              ▼      │
+│                 Rate Limiter              Output Guard     │
+│                      │                              │      │
+│                      ▼                              ▼      │
+│                 Audit Log                    Persistence   │
+│                                                            │
+└────────────────────────────────────────────────────────────┘
+```
+
+### Directory Structure
+
+```
+apps/web/lib/assistant/
+├── types.ts                    # ChatMessage, AssistantContext types
+├── claude-client.ts            # Claude API adapter
+├── prompts.ts                  # System prompts and context
+├── context-builder.ts          # Build context from user data
+├── voice-service.ts            # Text-to-speech service
+├── models/
+│   ├── model-adapter.ts        # Model adapter interface
+│   ├── claude-adapter.ts       # Claude/Anthropic adapter
+│   ├── gemini-adapter.ts       # Google Gemini adapter
+│   ├── openai-adapter.ts       # OpenAI GPT-4 adapter
+│   └── model-router.ts         # Route to correct model
+└── security/
+    ├── prompt-guard.ts         # Input validation
+    ├── output-guard.ts         # Output sanitization
+    └── rate-limiter.ts         # Rate limiting
+
+apps/web/components/assistant/
+├── AssistantTrigger.tsx        # Floating action button
+├── AssistantPanel.tsx          # Slide-out chat panel
+├── ChatMessage.tsx             # Message display
+├── VoiceInput.tsx              # Voice input overlay
+└── index.ts
+
+apps/web/app/api/assistant/
+├── route.ts                    # Non-streaming endpoint
+└── stream/route.ts             # SSE streaming endpoint
+```
+
+### Security Features
+
+- **Prompt Guard:** Validates user input, blocks injection attempts
+- **Output Guard:** Sanitizes AI responses, removes sensitive data
+- **Rate Limiting:** Per-user limits (30/hour free, 100/hour pro)
+- **Audit Logging:** All interactions logged for compliance
+
+### Model Configuration
+
+| Model | Provider | Use Case | Rate Limit |
+|-------|----------|----------|------------|
+| Gemini 2.0 Flash | Google | Default (free tier) | 30/hour |
+| Claude Sonnet | Anthropic | Pro tier | 100/hour |
+| GPT-4o | OpenAI | Enterprise | Unlimited |
+
+---
+
+## Intelligence System Architecture
+
+### Overview
+
+The Intelligence System provides pricing insights, bid analysis, and project recommendations using external data sources.
+
+```
+apps/web/lib/intelligence/
+├── types.ts                    # Intelligence types (500+ lines)
+├── material-prices.ts          # FRED API integration
+├── labor-rates.ts              # BLS data with regional adjustments
+├── bid-intelligence.ts         # Bid analysis and recommendations
+└── project-intelligence.ts     # Project profitability/risk
+
+apps/web/components/intelligence/
+├── InsightCard.tsx             # Generic insight display
+├── MarketComparison.tsx        # Price comparison visual
+├── ConfidenceScore.tsx         # Estimate confidence
+├── PriceSuggestionCard.tsx     # Pricing recommendations
+└── MaterialPriceWidget.tsx     # Dashboard widget
+
+apps/web/lib/hooks/
+├── useIntelligence.ts          # Intelligence data hooks
+├── useBidIntelligence.ts       # Bid analysis hooks
+└── useProjectIntelligence.ts   # Project profitability hooks
+```
+
+### Data Sources
+
+| Source | Data | Update Frequency |
+|--------|------|------------------|
+| FRED API | Material prices (lumber, steel, etc.) | Daily |
+| BLS | Labor rates by region | Monthly |
+| Internal | Historical project data | Real-time |
+
+---
+
+## QuickBooks Integration
+
+### OAuth Flow
+
+```
+User ──▶ /api/integrations/quickbooks/connect
+         └──▶ Intuit OAuth ──▶ /api/integrations/quickbooks/callback
+                                └──▶ Store tokens in Firestore
+```
+
+### Sync Architecture
+
+```
+apps/web/lib/integrations/quickbooks/
+├── types.ts                    # QBO API types
+├── oauth.ts                    # OAuth 2.0 flow
+├── client.ts                   # Authenticated API client
+├── sync-customers.ts           # Client <-> Customer sync
+├── sync-invoices.ts            # Invoice sync
+└── index.ts
+
+apps/web/app/api/integrations/quickbooks/
+├── connect/route.ts            # Initiate OAuth
+├── callback/route.ts           # OAuth callback
+├── disconnect/route.ts         # Revoke connection
+├── status/route.ts             # Connection status
+└── sync/route.ts               # Trigger sync operations
+```
+
+### Entity Mapping
+
+Mappings stored in: `organizations/{orgId}/qboEntityMappings/{mappingId}`
+
+| Local Entity | QBO Entity | Sync Direction |
+|--------------|------------|----------------|
+| Client | Customer | Bidirectional |
+| Invoice | Invoice | Push to QBO |
+| Payment | Payment | Pull from QBO |
+
+---
+
+## Auto-Numbering System
+
+### Configuration
+
+Stored in: `organizations/{orgId}/settings/numbering`
+
+```typescript
+interface NumberingSettings {
+  estimates: {
+    prefix: string;      // "EST"
+    separator: string;   // "-"
+    includeYear: boolean;
+    yearFormat: '2' | '4';
+    padding: number;     // 4 = "0001"
+    nextNumber: number;
+  };
+  invoices: {
+    // Same structure
+  };
+}
+```
+
+### Format Examples
+
+| Setting | Format | Example |
+|---------|--------|---------|
+| Default | `{prefix}-{year}-{number}` | EST-2026-0001 |
+| Simple | `{prefix}{number}` | EST0001 |
+| Custom | `{prefix}/{year}/{number}` | EST/26/0001 |
+
+---
+
+## Demo Seed Scripts
+
+### Location
+
+```
+scripts/
+├── seed-demo-org.ts           # Create Horizon Construction Co.
+├── seed-demo-projects.ts      # Projects and estimates
+├── seed-demo-financial.ts     # Invoices, payments, expenses
+├── seed-demo-activities.ts    # Time entries, communications
+└── seed-demo-photos.ts        # Project photos (placeholder)
+```
+
+### Demo Organization Structure
+
+```
+Horizon Construction Co.
+├── Users
+│   ├── Mike Johnson (Owner)
+│   ├── Sarah Williams (PM)
+│   ├── Carlos Rodriguez (Foreman)
+│   └── 3 Field Workers
+├── Clients (8)
+│   ├── 5 Residential
+│   └── 3 Commercial
+├── Projects (12)
+│   ├── 5 Completed
+│   ├── 4 Active
+│   ├── 2 Upcoming
+│   └── 1 On Hold
+└── Financial Data (12 months)
+    ├── 45 Invoices
+    ├── 38 Payments
+    ├── 500+ Time Entries
+    └── 200+ Daily Logs
+```
+
+---
+
+## E2E Testing Architecture
+
+### Test Suites
+
+```
+apps/web/e2e/
+├── RUN_TESTS.md               # Test runner instructions
+├── suites/
+│   ├── 00-smoke.md            # Quick smoke tests
+│   ├── 01-auth.md             # Authentication
+│   ├── 02-rbac.md             # Role-based access
+│   ├── 03-dashboard.md        # Dashboard
+│   ├── 04-projects.md         # Projects
+│   ├── 05-clients.md          # Clients
+│   ├── 06-team.md             # Team management
+│   ├── 07-finances.md         # Invoices/estimates
+│   ├── 08-scheduling.md       # Calendar/schedule
+│   ├── 09-documents.md        # Documents
+│   ├── 10-mobile.md           # Mobile viewport
+│   ├── 11-regression.md       # Bug regression
+│   ├── 20-ui-ux-desktop.md    # Desktop UI
+│   ├── 21-ui-ux-tablet.md     # Tablet UI
+│   ├── 22-ui-ux-mobile.md     # Mobile UI
+│   ├── 23-uat-checklist.md    # User acceptance
+│   ├── 24-ai-assistant.md     # AI Assistant
+│   └── 27-regression.md       # Full regression
+└── results/
+    └── *.md                   # Test results by sprint
+```
+
+### Test Execution
+
+Tests are executed via Chrome MCP (Model Context Protocol) or manual browser testing. Each suite contains:
+- Test steps
+- Expected results
+- Screenshots (when applicable)
+- Pass/fail criteria

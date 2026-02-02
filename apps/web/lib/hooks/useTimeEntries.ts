@@ -17,6 +17,7 @@ import {
 import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
 import { convertTimestampsDeep } from '@/lib/firebase/timestamp-converter';
+import { toast } from '@/components/ui/Toast';
 import {
   TimeEntry,
   TimeEntryStatus,
@@ -223,12 +224,18 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
       };
     }
 
-    const docRef = await addDoc(
-      collection(db, `organizations/${orgId}/timeEntries`),
-      entryData
-    );
-
-    return docRef.id;
+    try {
+      const docRef = await addDoc(
+        collection(db, `organizations/${orgId}/timeEntries`),
+        entryData
+      );
+      toast.success('Clocked in successfully');
+      return docRef.id;
+    } catch (err) {
+      console.error('Clock in error:', err);
+      toast.error('Failed to clock in', 'Please try again');
+      throw err;
+    }
   }, [orgId, currentUserId, currentUserName, currentUserRole, profile?.hourlyRate, activeEntry]);
 
   // Clock out
@@ -255,23 +262,30 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
 
     const totalBreakMinutes = updatedBreaks.reduce((sum, b) => sum + (b.duration || 0), 0);
 
-    await updateDoc(doc(db, `organizations/${orgId}/timeEntries/${entryId}`), {
-      clockOut: Timestamp.fromDate(now),
-      status: 'completed',
-      totalMinutes,
-      totalBreakMinutes,
-      breaks: updatedBreaks.map(b => ({
-        ...b,
-        startTime: Timestamp.fromDate(new Date(b.startTime)),
-        endTime: b.endTime ? Timestamp.fromDate(new Date(b.endTime)) : null,
-      })),
-      notes: clockOutOptions?.notes || entry.notes,
-      clockOutLocation: clockOutOptions?.location ? {
-        ...clockOutOptions.location,
-        timestamp: Timestamp.fromDate(clockOutOptions.location.timestamp),
-      } : undefined,
-      updatedAt: Timestamp.fromDate(now),
-    });
+    try {
+      await updateDoc(doc(db, `organizations/${orgId}/timeEntries/${entryId}`), {
+        clockOut: Timestamp.fromDate(now),
+        status: 'completed',
+        totalMinutes,
+        totalBreakMinutes,
+        breaks: updatedBreaks.map(b => ({
+          ...b,
+          startTime: Timestamp.fromDate(new Date(b.startTime)),
+          endTime: b.endTime ? Timestamp.fromDate(new Date(b.endTime)) : null,
+        })),
+        notes: clockOutOptions?.notes || entry.notes,
+        clockOutLocation: clockOutOptions?.location ? {
+          ...clockOutOptions.location,
+          timestamp: Timestamp.fromDate(clockOutOptions.location.timestamp),
+        } : undefined,
+        updatedAt: Timestamp.fromDate(now),
+      });
+      toast.success('Clocked out successfully');
+    } catch (err) {
+      console.error('Clock out error:', err);
+      toast.error('Failed to clock out', 'Please try again');
+      throw err;
+    }
   }, [orgId, entries]);
 
   // Start break
@@ -290,14 +304,21 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
       isPaid,
     };
 
-    await updateDoc(doc(db, `organizations/${orgId}/timeEntries/${entryId}`), {
-      status: 'paused',
-      breaks: [...entry.breaks, {
-        ...newBreak,
-        startTime: Timestamp.fromDate(now),
-      }],
-      updatedAt: Timestamp.fromDate(now),
-    });
+    try {
+      await updateDoc(doc(db, `organizations/${orgId}/timeEntries/${entryId}`), {
+        status: 'paused',
+        breaks: [...entry.breaks, {
+          ...newBreak,
+          startTime: Timestamp.fromDate(now),
+        }],
+        updatedAt: Timestamp.fromDate(now),
+      });
+      toast.success('Break started');
+    } catch (err) {
+      console.error('Start break error:', err);
+      toast.error('Failed to start break');
+      throw err;
+    }
   }, [orgId, entries]);
 
   // End break
@@ -316,15 +337,22 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
       return b;
     });
 
-    await updateDoc(doc(db, `organizations/${orgId}/timeEntries/${entryId}`), {
-      status: 'active',
-      breaks: updatedBreaks.map(b => ({
-        ...b,
-        startTime: Timestamp.fromDate(new Date(b.startTime)),
-        endTime: b.endTime ? Timestamp.fromDate(new Date(b.endTime)) : null,
-      })),
-      updatedAt: Timestamp.fromDate(now),
-    });
+    try {
+      await updateDoc(doc(db, `organizations/${orgId}/timeEntries/${entryId}`), {
+        status: 'active',
+        breaks: updatedBreaks.map(b => ({
+          ...b,
+          startTime: Timestamp.fromDate(new Date(b.startTime)),
+          endTime: b.endTime ? Timestamp.fromDate(new Date(b.endTime)) : null,
+        })),
+        updatedAt: Timestamp.fromDate(now),
+      });
+      toast.success('Break ended');
+    } catch (err) {
+      console.error('End break error:', err);
+      toast.error('Failed to end break');
+      throw err;
+    }
   }, [orgId, entries]);
 
   // Create manual entry
@@ -336,30 +364,36 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
       ? calculateTotalMinutes(entryData.clockIn, entryData.clockOut, entryData.breaks || [])
       : 0;
 
-    const docRef = await addDoc(
-      collection(db, `organizations/${orgId}/timeEntries`),
-      {
-        ...entryData,
-        orgId,
-        userId: currentUserId,
-        userName: currentUserName,
-        userRole: currentUserRole,
-        type: 'manual',
-        status: 'completed',
-        totalMinutes,
-        clockIn: Timestamp.fromDate(entryData.clockIn),
-        clockOut: entryData.clockOut ? Timestamp.fromDate(entryData.clockOut) : null,
-        breaks: (entryData.breaks || []).map(b => ({
-          ...b,
-          startTime: Timestamp.fromDate(new Date(b.startTime)),
-          endTime: b.endTime ? Timestamp.fromDate(new Date(b.endTime)) : null,
-        })),
-        createdAt: Timestamp.fromDate(now),
-        updatedAt: Timestamp.fromDate(now),
-      }
-    );
-
-    return docRef.id;
+    try {
+      const docRef = await addDoc(
+        collection(db, `organizations/${orgId}/timeEntries`),
+        {
+          ...entryData,
+          orgId,
+          userId: currentUserId,
+          userName: currentUserName,
+          userRole: currentUserRole,
+          type: 'manual',
+          status: 'completed',
+          totalMinutes,
+          clockIn: Timestamp.fromDate(entryData.clockIn),
+          clockOut: entryData.clockOut ? Timestamp.fromDate(entryData.clockOut) : null,
+          breaks: (entryData.breaks || []).map(b => ({
+            ...b,
+            startTime: Timestamp.fromDate(new Date(b.startTime)),
+            endTime: b.endTime ? Timestamp.fromDate(new Date(b.endTime)) : null,
+          })),
+          createdAt: Timestamp.fromDate(now),
+          updatedAt: Timestamp.fromDate(now),
+        }
+      );
+      toast.success('Time entry created');
+      return docRef.id;
+    } catch (err) {
+      console.error('Create manual entry error:', err);
+      toast.error('Failed to create time entry');
+      throw err;
+    }
   }, [orgId, currentUserId, currentUserName, currentUserRole]);
 
   // Update entry
@@ -411,13 +445,27 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
     if (updates.clockIn) updateData.clockIn = Timestamp.fromDate(updates.clockIn);
     if (updates.clockOut) updateData.clockOut = Timestamp.fromDate(updates.clockOut);
 
-    await updateDoc(doc(db, `organizations/${orgId}/timeEntries/${entryId}`), updateData);
+    try {
+      await updateDoc(doc(db, `organizations/${orgId}/timeEntries/${entryId}`), updateData);
+      toast.success('Time entry updated');
+    } catch (err) {
+      console.error('Update entry error:', err);
+      toast.error('Failed to update time entry');
+      throw err;
+    }
   }, [orgId, currentUserId, currentUserName, entries]);
 
   // Delete entry
   const deleteEntry = useCallback(async (entryId: string): Promise<void> => {
     if (!orgId) throw new Error('Not authenticated');
-    await deleteDoc(doc(db, `organizations/${orgId}/timeEntries/${entryId}`));
+    try {
+      await deleteDoc(doc(db, `organizations/${orgId}/timeEntries/${entryId}`));
+      toast.success('Time entry deleted');
+    } catch (err) {
+      console.error('Delete entry error:', err);
+      toast.error('Failed to delete time entry');
+      throw err;
+    }
   }, [orgId]);
 
   // Submit for approval
@@ -425,11 +473,18 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
     if (!orgId) throw new Error('Not authenticated');
 
     const now = new Date();
-    await updateDoc(doc(db, `organizations/${orgId}/timeEntries/${entryId}`), {
-      status: 'pending_approval',
-      submittedAt: Timestamp.fromDate(now),
-      updatedAt: Timestamp.fromDate(now),
-    });
+    try {
+      await updateDoc(doc(db, `organizations/${orgId}/timeEntries/${entryId}`), {
+        status: 'pending_approval',
+        submittedAt: Timestamp.fromDate(now),
+        updatedAt: Timestamp.fromDate(now),
+      });
+      toast.success('Time entry submitted for approval');
+    } catch (err) {
+      console.error('Submit for approval error:', err);
+      toast.error('Failed to submit for approval');
+      throw err;
+    }
   }, [orgId]);
 
   // Approve entry
@@ -437,13 +492,20 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
     if (!orgId || !currentUserId) throw new Error('Not authenticated');
 
     const now = new Date();
-    await updateDoc(doc(db, `organizations/${orgId}/timeEntries/${entryId}`), {
-      status: 'approved',
-      approvedBy: currentUserId,
-      approvedByName: currentUserName,
-      approvedAt: Timestamp.fromDate(now),
-      updatedAt: Timestamp.fromDate(now),
-    });
+    try {
+      await updateDoc(doc(db, `organizations/${orgId}/timeEntries/${entryId}`), {
+        status: 'approved',
+        approvedBy: currentUserId,
+        approvedByName: currentUserName,
+        approvedAt: Timestamp.fromDate(now),
+        updatedAt: Timestamp.fromDate(now),
+      });
+      toast.success('Time entry approved');
+    } catch (err) {
+      console.error('Approve entry error:', err);
+      toast.error('Failed to approve time entry');
+      throw err;
+    }
   }, [orgId, currentUserId, currentUserName]);
 
   // Reject entry
@@ -451,14 +513,21 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
     if (!orgId || !currentUserId) throw new Error('Not authenticated');
 
     const now = new Date();
-    await updateDoc(doc(db, `organizations/${orgId}/timeEntries/${entryId}`), {
-      status: 'rejected',
-      rejectedBy: currentUserId,
-      rejectedByName: currentUserName,
-      rejectedAt: Timestamp.fromDate(now),
-      rejectionReason: reason,
-      updatedAt: Timestamp.fromDate(now),
-    });
+    try {
+      await updateDoc(doc(db, `organizations/${orgId}/timeEntries/${entryId}`), {
+        status: 'rejected',
+        rejectedBy: currentUserId,
+        rejectedByName: currentUserName,
+        rejectedAt: Timestamp.fromDate(now),
+        rejectionReason: reason,
+        updatedAt: Timestamp.fromDate(now),
+      });
+      toast.success('Time entry rejected');
+    } catch (err) {
+      console.error('Reject entry error:', err);
+      toast.error('Failed to reject time entry');
+      throw err;
+    }
   }, [orgId, currentUserId, currentUserName]);
 
   // Get daily summary

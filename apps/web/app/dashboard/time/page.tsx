@@ -16,6 +16,7 @@ import Card from '@/components/ui/Card';
 import EmptyState from '@/components/ui/EmptyState';
 import Skeleton from '@/components/ui/Skeleton';
 import Badge from '@/components/ui/Badge';
+import PageHeader from '@/components/ui/PageHeader';
 import {
   TimeClockWidget,
   TimeEntryCard,
@@ -117,60 +118,60 @@ export default function TimeTrackingPage() {
   return (
     <div className="space-y-4 md:space-y-6">
       {/* Desktop Header */}
-      <div className="hidden md:flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Time Tracking</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Track your work hours, breaks, and timesheets
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          {/* View Mode Toggle */}
-          <div className="flex rounded-md shadow-sm">
-            <button
-              onClick={() => setViewMode('timesheet')}
-              className={`px-3 py-2 text-sm font-medium rounded-l-md border ${
-                viewMode === 'timesheet'
-                  ? 'bg-blue-50 text-blue-700 border-blue-200'
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              <CalendarDaysIcon className="h-5 w-5" />
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`px-3 py-2 text-sm font-medium border-t border-b ${
-                viewMode === 'list'
-                  ? 'bg-blue-50 text-blue-700 border-blue-200'
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              <ListBulletIcon className="h-5 w-5" />
-            </button>
-            {canApprove && (
-              <button
-                onClick={() => setViewMode('team')}
-                className={`px-3 py-2 text-sm font-medium rounded-r-md border relative ${
-                  viewMode === 'team'
-                    ? 'bg-blue-50 text-blue-700 border-blue-200'
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                }`}
-              >
-                <UserGroupIcon className="h-5 w-5" />
-                {pendingApprovalsCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-4 w-4 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
-                    {pendingApprovalsCount}
-                  </span>
+      <div className="hidden md:block">
+        <PageHeader
+          title="Time Tracking"
+          description="Track your work hours, breaks, and timesheets"
+          actions={
+            <div className="flex items-center gap-3">
+              {/* View Mode Toggle */}
+              <div className="flex rounded-md shadow-sm">
+                <button
+                  onClick={() => setViewMode('timesheet')}
+                  className={`px-3 py-2 text-sm font-medium rounded-l-md border ${
+                    viewMode === 'timesheet'
+                      ? 'bg-blue-50 text-blue-700 border-blue-200'
+                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  <CalendarDaysIcon className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`px-3 py-2 text-sm font-medium border-t border-b ${
+                    viewMode === 'list'
+                      ? 'bg-blue-50 text-blue-700 border-blue-200'
+                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  <ListBulletIcon className="h-5 w-5" />
+                </button>
+                {canApprove && (
+                  <button
+                    onClick={() => setViewMode('team')}
+                    className={`px-3 py-2 text-sm font-medium rounded-r-md border relative ${
+                      viewMode === 'team'
+                        ? 'bg-blue-50 text-blue-700 border-blue-200'
+                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    <UserGroupIcon className="h-5 w-5" />
+                    {pendingApprovalsCount > 0 && (
+                      <span className="absolute -top-1 -right-1 h-4 w-4 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
+                        {pendingApprovalsCount}
+                      </span>
+                    )}
+                  </button>
                 )}
-              </button>
-            )}
-          </div>
+              </div>
 
-          <Button onClick={() => setShowAddModal(true)}>
-            <PlusIcon className="h-5 w-5 mr-2" />
-            Add Entry
-          </Button>
-        </div>
+              <Button onClick={() => setShowAddModal(true)}>
+                <PlusIcon className="h-5 w-5 mr-2" />
+                Add Entry
+              </Button>
+            </div>
+          }
+        />
       </div>
 
       {/* Mobile Header */}

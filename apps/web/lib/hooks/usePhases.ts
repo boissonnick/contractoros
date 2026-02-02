@@ -176,13 +176,19 @@ export function usePhases({ projectId }: UsePhasesOptions) {
 
   const reorderPhases = useCallback(
     async (orderedIds: string[]) => {
-      const { writeBatch } = await import('firebase/firestore');
-      const batch = writeBatch(db);
-      orderedIds.forEach((id, index) => {
-        const ref = doc(db, 'projects', projectId, 'phases', id);
-        batch.update(ref, { order: index, updatedAt: Timestamp.now() });
-      });
-      await batch.commit();
+      try {
+        const { writeBatch } = await import('firebase/firestore');
+        const batch = writeBatch(db);
+        orderedIds.forEach((id, index) => {
+          const ref = doc(db, 'projects', projectId, 'phases', id);
+          batch.update(ref, { order: index, updatedAt: Timestamp.now() });
+        });
+        await batch.commit();
+      } catch (err) {
+        console.error('Failed to reorder phases:', err);
+        toast.error('Failed to reorder phases');
+        throw err;
+      }
     },
     [projectId]
   );
