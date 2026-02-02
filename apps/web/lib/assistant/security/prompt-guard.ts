@@ -9,6 +9,8 @@
  * - System prompt leaks
  */
 
+import { logAuditEvent, type AuditEventType } from '@/lib/security/audit-logger';
+
 export type PromptThreat =
   | 'injection_attempt'
   | 'jailbreak_attempt'
@@ -272,6 +274,17 @@ function sanitizePrompt(prompt: string): string {
 }
 
 /**
+ * Map prompt threats to audit event types
+ */
+function mapThreatToAuditType(threats: PromptThreat[]): AuditEventType {
+  if (threats.includes('injection_attempt')) return 'prompt_injection';
+  if (threats.includes('jailbreak_attempt')) return 'jailbreak_attempt';
+  if (threats.includes('data_exfiltration')) return 'data_exfiltration';
+  if (threats.includes('pii_exposure')) return 'pii_exposure';
+  return 'security_threat';
+}
+
+/**
  * Log security events for analysis
  */
 export function logSecurityEvent(
@@ -290,8 +303,23 @@ export function logSecurityEvent(
       blocked: !validation.isValid,
     });
 
-    // TODO: In production, write to Firestore security audit log
-    // TODO: Implement alerting for high-frequency attacks
+    // Write to Firestore security audit log
+    logAuditEvent({
+      type: mapThreatToAuditType(validation.threats),
+      orgId: context.orgId,
+      userId: context.userId,
+      timestamp: new Date(),
+      details: {
+        threats: validation.threats,
+        riskScore: validation.riskScore,
+        detectionDetails: validation.details,
+        promptPreview: context.promptPreview?.slice(0, 100),
+        blocked: !validation.isValid,
+      },
+    }).catch((err) => {
+      // Don't let audit logging failures affect the main flow
+      console.error('[SECURITY] Failed to write audit log:', err);
+    });
   }
 }
 

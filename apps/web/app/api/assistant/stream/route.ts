@@ -13,6 +13,10 @@ import { buildSystemPrompt } from '@/lib/assistant/prompts';
 import { AssistantContext } from '@/lib/assistant/types';
 import { initializeAdminApp } from '@/lib/assistant/firebase-admin-init';
 import { getAuth } from 'firebase-admin/auth';
+import { getFirestore } from 'firebase/firestore';
+import { checkRateLimit, recordUsage, getRateLimitHeaders } from '@/lib/assistant/security/rate-limiter';
+import { validatePrompt, logSecurityEvent, getBlockedPromptMessage } from '@/lib/assistant/security/prompt-guard';
+import { logRateLimitExceeded } from '@/lib/security/audit-logger';
 
 // Initialize Anthropic client
 const anthropic = new Anthropic();
@@ -134,6 +138,69 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // =====================================
+    // STEP 1: Security Validation
+    // =====================================
+    const promptValidation = validatePrompt(message, {
+      orgId: verifiedOrgId,
+      userId: verifiedUserId || undefined,
+    });
+
+    if (!promptValidation.isValid) {
+      // Log the security event
+      logSecurityEvent(promptValidation, {
+        orgId: verifiedOrgId,
+        userId: verifiedUserId || 'unknown',
+        promptPreview: message.slice(0, 100),
+      });
+
+      return new Response(
+        JSON.stringify({
+          error: getBlockedPromptMessage(promptValidation.threats),
+          blocked: true,
+          threats: promptValidation.threats,
+        }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // =====================================
+    // STEP 2: Rate Limiting
+    // =====================================
+    try {
+      const db = getFirestore();
+      const rateCheck = await checkRateLimit(db, verifiedOrgId, 'free');
+
+      if (!rateCheck.allowed) {
+        const headers = getRateLimitHeaders(rateCheck);
+
+        // Log rate limit exceeded
+        await logRateLimitExceeded(verifiedOrgId, verifiedUserId || undefined, {
+          limit: rateCheck.remaining.requests + 1,
+          current: rateCheck.remaining.requests + 1,
+          resetAt: rateCheck.resetAt,
+          endpoint: '/api/assistant/stream',
+        });
+
+        return new Response(
+          JSON.stringify({
+            error: rateCheck.reason || 'Rate limit exceeded',
+            resetAt: rateCheck.resetAt,
+          }),
+          {
+            status: 429,
+            headers: {
+              'Content-Type': 'application/json',
+              ...headers,
+            },
+          }
+        );
+      }
+    } catch (rateLimitError) {
+      console.warn('[Assistant Stream] Rate limit check failed:', rateLimitError);
+      // Continue if rate limiting fails
+    }
+
     // Check if API key is configured
     if (!process.env.ANTHROPIC_API_KEY) {
       return new Response(
@@ -204,6 +271,19 @@ export async function POST(request: NextRequest) {
             outputTokens: finalMessage.usage.output_tokens,
           })}\n\n`;
           controller.enqueue(encoder.encode(usageData));
+
+          // Record usage for rate limiting
+          try {
+            const db = getFirestore();
+            await recordUsage(db, verifiedOrgId, {
+              inputTokens: finalMessage.usage.input_tokens,
+              outputTokens: finalMessage.usage.output_tokens,
+              estimatedCost: (finalMessage.usage.input_tokens * 0.003 + finalMessage.usage.output_tokens * 0.015) / 1000,
+              modelKey: 'claude-sonnet',
+            });
+          } catch (usageError) {
+            console.warn('[Assistant Stream] Usage recording failed:', usageError);
+          }
 
           controller.close();
         } catch (error) {

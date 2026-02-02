@@ -313,6 +313,35 @@ export function clearRateLimitCache(): void {
 }
 
 /**
+ * Clean up stale cache entries older than the specified max age
+ * Call this periodically to prevent memory leaks
+ */
+export function cleanupStaleCache(maxAgeMs: number = 60 * 60 * 1000): number {
+  const now = Date.now();
+  let cleanedCount = 0;
+
+  rateLimitCache.forEach((value, key) => {
+    if (now - value.timestamp > maxAgeMs) {
+      rateLimitCache.delete(key);
+      cleanedCount++;
+    }
+  });
+
+  if (cleanedCount > 0) {
+    console.log(`[RateLimiter] Cleaned up ${cleanedCount} stale cache entries`);
+  }
+
+  return cleanedCount;
+}
+
+// Auto-cleanup stale cache entries every 30 minutes
+if (typeof setInterval !== 'undefined') {
+  setInterval(() => {
+    cleanupStaleCache();
+  }, 30 * 60 * 1000);
+}
+
+/**
  * Format rate limit info for API response headers
  */
 export function getRateLimitHeaders(check: RateLimitCheck): Record<string, string> {

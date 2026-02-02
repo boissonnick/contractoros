@@ -24,6 +24,7 @@ import { checkRateLimit, recordUsage, getRateLimitHeaders } from '@/lib/assistan
 import { initializeAdminApp } from '@/lib/assistant/firebase-admin-init';
 import { loadServerContext, type ServerContext } from '@/lib/assistant/server-context-loader';
 import { getAuth } from 'firebase-admin/auth';
+import { logRateLimitExceeded } from '@/lib/security/audit-logger';
 
 interface RequestBody {
   message: string;
@@ -163,6 +164,15 @@ export async function POST(request: NextRequest) {
 
         if (!rateCheck.allowed) {
           const headers = getRateLimitHeaders(rateCheck);
+
+          // Log rate limit exceeded event
+          logRateLimitExceeded(effectiveOrgId, effectiveUserId, {
+            limit: rateCheck.remaining.requests + 1,
+            current: rateCheck.remaining.requests + 1,
+            resetAt: rateCheck.resetAt,
+            endpoint: '/api/assistant',
+          }).catch((err) => console.error('[Assistant API] Failed to log rate limit:', err));
+
           return NextResponse.json(
             {
               error: rateCheck.reason || 'Rate limit exceeded',
