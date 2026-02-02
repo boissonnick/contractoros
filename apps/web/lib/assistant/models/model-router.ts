@@ -5,6 +5,7 @@
 
 import { GeminiAdapter } from './gemini-adapter';
 import { ClaudeAdapter } from './claude-adapter';
+import { OpenAIAdapter } from './openai-adapter';
 import {
   ModelAdapter,
   ChatRequest,
@@ -59,7 +60,7 @@ function createAdapter(modelKey: string): ModelAdapter {
     case 'claude':
       return new ClaudeAdapter(apiKey, config.modelId);
     case 'openai':
-      throw new Error('OpenAI adapter not yet implemented');
+      return new OpenAIAdapter(apiKey, config.modelId);
     default:
       throw new Error(`Unsupported provider: ${config.provider}`);
   }

@@ -80,6 +80,19 @@ export const AVAILABLE_MODELS: Record<string, ModelConfig> = {
     supportsStreaming: true,
     supportsVision: true,
   },
+  'gpt-4o-mini': {
+    provider: 'openai',
+    modelId: 'gpt-4o-mini',
+    displayName: 'GPT-4o Mini',
+    description: 'Fast and cost-effective for simple tasks.',
+    tier: 'pro',
+    maxTokens: 4096,
+    contextWindow: 128000,
+    costPer1kInputTokens: 0.00015,
+    costPer1kOutputTokens: 0.0006,
+    supportsStreaming: true,
+    supportsVision: true,
+  },
 };
 
 /**
