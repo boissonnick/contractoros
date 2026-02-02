@@ -1,368 +1,354 @@
 # ContractorOS Next Phases Development Roadmap
 
 > **Created:** 2026-02-02
-> **Status:** Post-Beta Planning
+> **Status:** Post-Beta - Feature Development
 > **Platform Completion:** ~92%
-> **Goal:** Competitive parity + differentiation for market launch
+> **Goal:** Competitive parity + differentiation before monetization
 
 ---
 
 ## Executive Summary
 
-ContractorOS has reached **beta readiness** with strong core functionality. The next phases focus on:
+ContractorOS has reached **beta readiness**. Before adding payments/billing, we need to:
 
-1. **Revenue Enablement** - Payment processing, subscriptions
-2. **Integration Ecosystem** - QuickBooks, Xero, Stripe, payroll
-3. **Field-First Features** - True offline, voice commands, mobile native
-4. **Enterprise Features** - Multi-org, advanced permissions, compliance
-5. **AI Differentiation** - Predictive analytics, smart automation
+1. **Complete the Field-First Vision** - True offline, voice commands (our differentiator)
+2. **Fix Remaining Gaps** - Features competitors have that we're missing
+3. **Enhance AI Capabilities** - Make the AI Assistant a true competitive moat
+4. **Polish Client Experience** - Best-in-class client portal
+5. **Add Missing Workflows** - Equipment, compliance, advanced scheduling
 
-### Competitive Position
+### What We're NOT Doing Yet
+- ❌ Payment processing (Stripe)
+- ❌ Subscription billing
+- ❌ QuickBooks/Xero integration
+- ❌ Payroll integrations
 
-| Competitor | Their Strength | Our Gap | Our Differentiator |
-|------------|----------------|---------|-------------------|
-| **Buildertrend** | Mature, full-featured | Integrations, reports | AI Assistant, simpler UX |
-| **CoConstruct** | Client experience | Selections, financing | Magic links, mobile-first |
-| **Procore** | Enterprise scale | Native mobile, compliance | SMB focus, pricing |
-| **Jobber** | Field service | Recurring jobs | Construction specialization |
-
----
-
-## Phase 8: Revenue & Payments (2 weeks)
-
-> **Goal:** Enable payment collection and subscription billing
-
-### Sprint 28: Payment Processing (4-5 days)
-
-| Feature | Priority | Effort | Description |
-|---------|----------|--------|-------------|
-| Stripe Connect Onboarding | P0 | 8h | OAuth flow for contractor Stripe accounts |
-| Invoice Payment Links | P0 | 6h | Generate payment links for invoices |
-| Client Payment Portal | P0 | 8h | Client-facing payment page |
-| Payment Confirmation | P1 | 4h | Email/SMS confirmation on payment |
-| Partial Payments | P1 | 4h | Accept partial invoice payments |
-| Payment Dashboard | P1 | 4h | Payment analytics for contractors |
-
-**Deliverables:**
-- Contractors can collect payments through invoices
-- Clients can pay via credit card or ACH
-- Payment status auto-syncs to invoices
-
-### Sprint 29: Subscription & Billing (3-4 days)
-
-| Feature | Priority | Effort | Description |
-|---------|----------|--------|-------------|
-| Subscription Plans | P0 | 6h | Free, Pro, Enterprise tiers |
-| Billing Portal | P0 | 6h | Manage subscription, payment method |
-| Usage Metering | P1 | 4h | Track AI usage, storage, users |
-| Upgrade Flows | P1 | 4h | In-app upgrade prompts |
-| Invoice Generation | P1 | 3h | Automatic monthly invoices |
-
-**Deliverables:**
-- Self-service subscription management
-- Stripe billing integration
-- Usage-based limits enforced
+These come later when we're ready to monetize.
 
 ---
 
-## Phase 9: Integration Ecosystem (2 weeks)
+## Competitive Analysis: What We're Missing
 
-> **Goal:** Connect to contractor's existing tools
+### vs. Buildertrend
+| Feature | Them | Us | Priority |
+|---------|------|-----|----------|
+| Custom report builder | ✅ | ❌ | P1 |
+| Photo timeline view | ✅ | ❌ | P1 |
+| Selection boards | ✅ | Basic | P1 |
+| Warranty tracking | ✅ | ❌ | P2 |
+| Lead management | ✅ | ❌ | P2 |
 
-### Sprint 30: Accounting Integrations (4-5 days)
+### vs. CoConstruct
+| Feature | Them | Us | Priority |
+|---------|------|-----|----------|
+| Interactive selections | ✅ | Basic | P1 |
+| Client communication hub | ✅ | Basic | P1 |
+| To-do assignments | ✅ | ✅ | Done |
+| Spec management | ✅ | ❌ | P2 |
 
-| Feature | Priority | Effort | Description |
-|---------|----------|--------|-------------|
-| QuickBooks OAuth | P0 | 4h | Complete OAuth flow |
-| QBO Customer Sync | P0 | 4h | Bi-directional client sync |
-| QBO Invoice Sync | P0 | 6h | Push invoices to QBO |
-| QBO Payment Sync | P1 | 4h | Sync payments received |
-| QBO Expense Sync | P1 | 4h | Push expenses to QBO |
-| Xero OAuth | P2 | 4h | Basic Xero connection |
-| Xero Invoice Sync | P2 | 6h | Push invoices to Xero |
+### vs. Procore
+| Feature | Them | Us | Priority |
+|---------|------|-----|----------|
+| True offline mode | ✅ | Partial | P0 |
+| Equipment tracking | ✅ | ❌ | P1 |
+| RFIs/Submittals | ✅ | Basic | P1 |
+| Punch lists | ✅ | ❌ | P1 |
+| Drawing management | ✅ | ❌ | P2 |
 
-**Deliverables:**
-- Full QuickBooks Online integration
-- Basic Xero support
-- Automatic data synchronization
-
-### Sprint 31: Payroll & HR Integrations (3-4 days)
-
-| Feature | Priority | Effort | Description |
-|---------|----------|--------|-------------|
-| Gusto OAuth | P1 | 4h | Connect Gusto account |
-| Gusto Time Export | P1 | 6h | Export approved time to Gusto |
-| Gusto Employee Sync | P2 | 4h | Sync employee data |
-| ADP Integration | P2 | 6h | Basic ADP connection |
-| Payroll Reports | P1 | 4h | Payroll-ready reports |
-
-**Deliverables:**
-- Time entries flow to payroll
-- Employee data syncs
-- Payroll preparation simplified
+### Our Differentiators (Double Down)
+| Feature | Status | Action |
+|---------|--------|--------|
+| AI Assistant | 90% | Enhance with document analysis, proactive suggestions |
+| Voice Commands | 0% | Build out - huge field worker differentiator |
+| Magic Link Auth | ✅ | Done |
+| Simple UX | ✅ | Maintain |
+| Mobile-First | 70% | Complete offline, optimize UX |
 
 ---
 
-## Phase 10: Field-First Mobile (2 weeks)
+## Revised Phase Plan
 
-> **Goal:** True offline capability and field worker optimization
+### Phase 8: Field-First Completion (2 weeks)
+> **Goal:** Make ContractorOS the best mobile field experience
 
-### Sprint 32: Offline Mode Completion (4-5 days)
+### Phase 9: AI as Competitive Moat (1.5 weeks)
+> **Goal:** AI features competitors can't match
+
+### Phase 10: Missing Core Features (2 weeks)
+> **Goal:** Competitive parity on must-have features
+
+### Phase 11: Client Portal Excellence (1 week)
+> **Goal:** Best-in-class client experience
+
+### Phase 12: Advanced Workflows (1.5 weeks)
+> **Goal:** Equipment, punch lists, compliance
+
+### Phase 13: Reporting & Analytics (1 week)
+> **Goal:** Custom reports and business intelligence
+
+---
+
+## Phase 8: Field-First Completion (2 weeks)
+
+> **Why First:** This is our stated differentiator. If field workers love us, we win.
+
+### Sprint 28: True Offline Mode (4-5 days)
 
 | Feature | Priority | Effort | Description |
 |---------|----------|--------|-------------|
-| Service Worker Sync | P0 | 8h | Background data synchronization |
+| Service Worker Completion | P0 | 8h | Full background sync |
 | Offline Time Entry | P0 | 6h | Log time without connection |
-| Offline Photo Capture | P0 | 6h | Queue photos for upload |
-| Offline Daily Logs | P1 | 4h | Create logs offline |
-| Sync Conflict Resolution | P1 | 6h | Handle sync conflicts gracefully |
-| Offline Indicator | P1 | 2h | Clear offline/online status |
+| Offline Photo Queue | P0 | 6h | Capture photos, upload when connected |
+| Offline Daily Logs | P0 | 4h | Create daily logs offline |
+| Offline Task Updates | P0 | 4h | Mark tasks complete offline |
+| Sync Conflict Resolution | P1 | 6h | Smart merge when conflicts occur |
+| Offline Status Indicator | P1 | 2h | Clear visual of connection state |
+| Sync Progress UI | P1 | 3h | Show what's syncing |
 
-**Deliverables:**
-- Core field operations work without internet
-- Automatic sync when connection restored
-- No data loss on poor connectivity
+**CLI Prompts Ready:** 4 parallel sessions
 
-### Sprint 33: Voice & Hands-Free (3-4 days)
+### Sprint 29: Voice Commands (3-4 days)
 
 | Feature | Priority | Effort | Description |
 |---------|----------|--------|-------------|
-| Voice Time Entry | P1 | 6h | "Log 4 hours on Smith kitchen" |
-| Voice Photo Notes | P1 | 4h | Voice-to-text photo descriptions |
-| Voice Daily Log | P1 | 6h | Dictate daily log entries |
-| Voice Commands | P2 | 6h | Navigation via voice |
-| Wake Word Detection | P3 | 8h | "Hey ContractorOS" activation |
+| Voice Time Entry | P0 | 6h | "Log 4 hours framing at Smith house" |
+| Voice Daily Log | P0 | 6h | Dictate end-of-day summary |
+| Voice Photo Notes | P1 | 4h | Describe photo while taking it |
+| Voice Task Completion | P1 | 4h | "Mark drywall task complete" |
+| Voice Navigation | P2 | 4h | "Show me today's schedule" |
+| Voice Activation Button | P1 | 2h | Easy-access mic button on all field pages |
+| Command Confirmation | P1 | 3h | Confirm before executing |
 
-**Deliverables:**
-- Hands-free time logging
-- Voice-powered field operations
-- Differentiated mobile experience
+### Sprint 30: Mobile UX Polish (2-3 days)
+
+| Feature | Priority | Effort | Description |
+|---------|----------|--------|-------------|
+| Touch Target Audit | P1 | 3h | All buttons 44x44px minimum |
+| Swipe Gestures | P1 | 4h | Swipe to complete, swipe to call |
+| Pull to Refresh | P1 | 2h | Standard mobile pattern |
+| Bottom Navigation | P1 | 4h | Thumb-friendly nav for field portal |
+| Quick Actions FAB | P1 | 3h | Floating button for common actions |
+| Photo Gallery Optimization | P1 | 4h | Fast scrolling, lazy loading |
 
 ---
 
-## Phase 11: Client Experience (1.5 weeks)
+## Phase 9: AI as Competitive Moat (1.5 weeks)
 
-> **Goal:** Best-in-class client portal
+> **Why:** No competitor has AI this integrated. Make it indispensable.
 
-### Sprint 34: Client Portal Enhancement (4-5 days)
-
-| Feature | Priority | Effort | Description |
-|---------|----------|--------|-------------|
-| Client Self-Registration | P1 | 4h | Clients create accounts |
-| Selection Boards | P1 | 8h | Visual selection experience |
-| Photo Timeline | P1 | 6h | Project progress photo view |
-| Document Portal | P1 | 4h | Client document access |
-| Change Order Approval | P1 | 6h | In-portal CO approval workflow |
-| Client Notifications | P2 | 4h | Email/SMS preferences |
-
-**Deliverables:**
-- Clients can self-serve
-- Interactive selection process
-- Clear project visibility
-
-### Sprint 35: Communication Enhancements (3 days)
+### Sprint 31: AI Assistant V2 (4-5 days)
 
 | Feature | Priority | Effort | Description |
 |---------|----------|--------|-------------|
-| Rich Media Messages | P1 | 4h | Images/files in messages |
-| Message Templates | P1 | 4h | Quick reply templates |
-| Bulk Messaging | P2 | 4h | Message multiple clients |
-| Read Receipts | P2 | 3h | Track message reads |
-| Scheduled Messages | P2 | 4h | Send later functionality |
+| Document Upload & Analysis | P0 | 8h | Upload specs, AI extracts key info |
+| Photo Analysis | P0 | 6h | "What's in this photo?" descriptions |
+| Natural Language Queries | P0 | 6h | "Show overdue invoices over $5000" |
+| Proactive Suggestions | P1 | 6h | AI notices issues, suggests fixes |
+| Project Summary Generation | P1 | 4h | Auto-generate status reports |
+| Estimate Review | P1 | 4h | AI reviews estimate for missing items |
+
+### Sprint 32: Smart Automation (3-4 days)
+
+| Feature | Priority | Effort | Description |
+|---------|----------|--------|-------------|
+| Smart Scheduling Suggestions | P1 | 6h | AI optimizes crew assignments |
+| Auto Change Order Detection | P1 | 6h | Detects scope changes, suggests CO |
+| Intelligent Reminders | P1 | 4h | Context-aware, not annoying |
+| Material Predictions | P2 | 4h | Predict material needs from scope |
+| Budget Alerts | P1 | 3h | Proactive "you're trending over budget" |
 
 ---
 
-## Phase 12: Reporting & Analytics (1.5 weeks)
+## Phase 10: Missing Core Features (2 weeks)
 
-> **Goal:** Actionable business intelligence
+> **Why:** Features every competitor has that we're missing
 
-### Sprint 36: Custom Reports (4-5 days)
-
-| Feature | Priority | Effort | Description |
-|---------|----------|--------|-------------|
-| Report Builder UI | P1 | 8h | Drag-and-drop report creation |
-| Report Templates | P1 | 4h | Pre-built report templates |
-| Scheduled Reports | P1 | 4h | Email reports on schedule |
-| Export Options | P1 | 4h | PDF, Excel, CSV export |
-| Report Sharing | P2 | 3h | Share reports with clients |
-
-### Sprint 37: Predictive Analytics (3-4 days)
+### Sprint 33: Punch Lists & Closeout (4-5 days)
 
 | Feature | Priority | Effort | Description |
 |---------|----------|--------|-------------|
-| Project Forecasting | P1 | 6h | Predicted completion dates |
-| Budget Alerts | P1 | 4h | Proactive budget warnings |
-| Cash Flow Projection | P1 | 6h | Future cash flow based on schedule |
-| Performance Trends | P2 | 4h | Historical performance analysis |
-| AI Insights Dashboard | P2 | 6h | AI-generated recommendations |
+| Punch List Creation | P0 | 6h | Create punch items with photos |
+| Punch Item Assignment | P0 | 4h | Assign to team members |
+| Punch Item Workflow | P0 | 4h | Open → In Progress → Complete → Verified |
+| Client Punch Review | P1 | 4h | Client can add punch items |
+| Punch List Reports | P1 | 3h | PDF export for closeout |
+| Final Walkthrough Checklist | P1 | 4h | Structured closeout process |
+
+### Sprint 34: RFIs & Submittals Enhancement (3-4 days)
+
+| Feature | Priority | Effort | Description |
+|---------|----------|--------|-------------|
+| RFI Workflow | P1 | 6h | Request → Response → Closed |
+| Submittal Tracking | P1 | 6h | Track approval status |
+| Document Linking | P1 | 4h | Link RFIs to drawings/specs |
+| Notification Workflow | P1 | 3h | Alert on RFI responses |
+| RFI/Submittal Log | P1 | 3h | Searchable log with filters |
+
+### Sprint 35: Equipment & Tool Tracking (3-4 days)
+
+| Feature | Priority | Effort | Description |
+|---------|----------|--------|-------------|
+| Equipment Inventory | P1 | 4h | List all tools/equipment |
+| Check-Out System | P1 | 6h | Who has what, when |
+| Equipment Location | P1 | 4h | Which job site |
+| Maintenance Tracking | P2 | 4h | Service schedules |
+| Equipment Costs | P2 | 3h | Track equipment expenses |
+| QR Code Support | P2 | 4h | Scan to check out |
 
 ---
 
-## Phase 13: Compliance & Safety (1 week)
+## Phase 11: Client Portal Excellence (1 week)
 
-> **Goal:** Enterprise-ready compliance features
+> **Why:** Happy clients = referrals = growth
 
-### Sprint 38: Safety & Compliance (4-5 days)
+### Sprint 36: Enhanced Client Portal (4-5 days)
 
 | Feature | Priority | Effort | Description |
 |---------|----------|--------|-------------|
-| Safety Checklists | P1 | 6h | Customizable safety forms |
-| Incident Reporting | P1 | 6h | Safety incident workflow |
+| Photo Timeline | P0 | 6h | Visual project progress |
+| Selection Boards | P0 | 8h | Interactive material selections |
+| Document Library | P1 | 4h | All project docs in one place |
+| Change Order Portal | P1 | 6h | Review and approve COs |
+| Progress Dashboard | P1 | 4h | Visual completion percentage |
+| Client Notes | P1 | 3h | Clients can add notes/requests |
+
+### Sprint 37: Communication Hub (2-3 days)
+
+| Feature | Priority | Effort | Description |
+|---------|----------|--------|-------------|
+| Unified Inbox | P1 | 6h | All client messages in one view |
+| Rich Media Messages | P1 | 4h | Send photos, files in messages |
+| Message Templates | P1 | 3h | Quick replies |
+| Read Receipts | P2 | 2h | Know when client read message |
+| Scheduled Messages | P2 | 3h | Send later |
+
+---
+
+## Phase 12: Advanced Workflows (1.5 weeks)
+
+> **Why:** Features that make daily work easier
+
+### Sprint 38: Compliance & Safety (4-5 days)
+
+| Feature | Priority | Effort | Description |
+|---------|----------|--------|-------------|
+| Safety Checklists | P1 | 6h | Daily/weekly safety checks |
+| Incident Reporting | P1 | 6h | Report and track incidents |
+| Toolbox Talk Records | P1 | 4h | Log safety meetings |
 | Permit Tracking | P1 | 4h | Track permits per project |
-| Document Compliance | P2 | 4h | Required document tracking |
-| Insurance Verification | P2 | 6h | Sub insurance tracking |
-| Toolbox Talks | P2 | 4h | Safety meeting records |
+| OSHA Compliance Docs | P2 | 4h | Required documentation |
+| Subcontractor Insurance | P2 | 4h | Track sub insurance/certs |
 
----
-
-## Phase 14: Enterprise Features (2 weeks)
-
-> **Goal:** Support larger organizations
-
-### Sprint 39: Multi-Org & Permissions (4-5 days)
+### Sprint 39: Advanced Scheduling (3-4 days)
 
 | Feature | Priority | Effort | Description |
 |---------|----------|--------|-------------|
-| Advanced Roles | P1 | 6h | Custom role creation |
-| Permission Sets | P1 | 6h | Granular permissions |
-| Multi-Division | P2 | 8h | Support business divisions |
-| Approval Workflows | P2 | 6h | Configurable approvals |
-| Audit Logging | P1 | 4h | Complete audit trail |
-
-### Sprint 40: Equipment & Resources (3-4 days)
-
-| Feature | Priority | Effort | Description |
-|---------|----------|--------|-------------|
-| Equipment Tracking | P1 | 6h | Track tools and equipment |
-| Equipment Checkout | P1 | 4h | Check-out/check-in workflow |
-| Maintenance Schedules | P2 | 4h | Equipment maintenance tracking |
-| Resource Calendar | P2 | 6h | Visual resource allocation |
+| Resource Calendar | P1 | 6h | See all crew availability |
+| Conflict Detection | P1 | 4h | Warn on double-booking |
+| Drag-Drop Scheduling | P1 | 6h | Visual schedule management |
+| Weather Integration | P2 | 4h | Weather forecast on schedule |
+| Schedule Templates | P2 | 3h | Reusable schedule patterns |
 
 ---
 
-## Phase 15: AI Enhancement (1.5 weeks)
+## Phase 13: Reporting & Analytics (1 week)
 
-> **Goal:** AI as competitive moat
+> **Why:** Data-driven contractors win
 
-### Sprint 41: Smart Automation (4-5 days)
-
-| Feature | Priority | Effort | Description |
-|---------|----------|--------|-------------|
-| Smart Scheduling | P1 | 8h | AI-optimized crew scheduling |
-| Auto Change Orders | P1 | 6h | Detect and suggest COs |
-| Smart Reminders | P1 | 4h | Context-aware reminders |
-| Estimate Intelligence | P1 | 6h | AI-powered pricing suggestions |
-| Material Forecasting | P2 | 6h | Predict material needs |
-
-### Sprint 42: AI Assistant V2 (3-4 days)
+### Sprint 40: Custom Reports (4-5 days)
 
 | Feature | Priority | Effort | Description |
 |---------|----------|--------|-------------|
-| Document Analysis | P1 | 6h | Upload and analyze specs |
-| Photo Analysis | P1 | 6h | AI description of photos |
-| Natural Language Queries | P1 | 6h | "Show me overdue invoices" |
-| Proactive Suggestions | P2 | 6h | AI-initiated recommendations |
-| Multi-turn Context | P2 | 4h | Remember conversation context |
+| Report Builder | P1 | 8h | Drag-drop report creation |
+| Report Templates | P1 | 4h | Pre-built common reports |
+| Scheduled Reports | P1 | 4h | Auto-email weekly/monthly |
+| Export Options | P1 | 4h | PDF, Excel, CSV |
+| Dashboard Customization | P2 | 4h | Choose dashboard widgets |
+| Project Profitability | P1 | 4h | Detailed profit analysis |
 
 ---
 
-## Summary: Next 15 Sprints
+## Sprint Priority Order
 
-| Phase | Sprints | Duration | Focus |
-|-------|---------|----------|-------|
-| **8** | 28-29 | 2 weeks | Revenue & Payments |
-| **9** | 30-31 | 2 weeks | Integrations |
-| **10** | 32-33 | 2 weeks | Field-First Mobile |
-| **11** | 34-35 | 1.5 weeks | Client Experience |
-| **12** | 36-37 | 1.5 weeks | Reporting & Analytics |
-| **13** | 38 | 1 week | Compliance & Safety |
-| **14** | 39-40 | 2 weeks | Enterprise Features |
-| **15** | 41-42 | 1.5 weeks | AI Enhancement |
+| Order | Sprint | Phase | Focus | Duration |
+|-------|--------|-------|-------|----------|
+| 1 | 28 | 8 | True Offline Mode | 4-5 days |
+| 2 | 29 | 8 | Voice Commands | 3-4 days |
+| 3 | 30 | 8 | Mobile UX Polish | 2-3 days |
+| 4 | 31 | 9 | AI Assistant V2 | 4-5 days |
+| 5 | 32 | 9 | Smart Automation | 3-4 days |
+| 6 | 33 | 10 | Punch Lists | 4-5 days |
+| 7 | 34 | 10 | RFIs & Submittals | 3-4 days |
+| 8 | 35 | 10 | Equipment Tracking | 3-4 days |
+| 9 | 36 | 11 | Client Portal | 4-5 days |
+| 10 | 37 | 11 | Communication Hub | 2-3 days |
+| 11 | 38 | 12 | Compliance & Safety | 4-5 days |
+| 12 | 39 | 12 | Advanced Scheduling | 3-4 days |
+| 13 | 40 | 13 | Custom Reports | 4-5 days |
 
-**Total Duration:** ~13-14 weeks (3-3.5 months)
+**Total: 13 sprints, ~7-8 weeks**
 
 ---
 
-## Priority Matrix
+## What Makes Us Different (Our Moat)
 
-### Must-Have for Launch (Phases 8-9)
-- Payment processing via Stripe
-- QuickBooks integration
-- Subscription billing
+### 1. AI-First Platform
+- Document analysis (upload specs, AI extracts)
+- Photo understanding
+- Proactive suggestions
+- Natural language queries
+- Smart scheduling
 
-### Should-Have for Competitive Parity (Phases 10-12)
-- True offline mode
-- Voice commands
-- Custom reports
-- Client portal improvements
+### 2. Field-First Mobile
+- True offline (not just "read-only")
+- Voice commands for hands-free
+- Optimized for gloves/outdoor
+- Fast photo capture and upload
 
-### Nice-to-Have for Differentiation (Phases 13-15)
-- Compliance automation
-- Enterprise features
-- Advanced AI
+### 3. Simplicity
+- 3 clicks to any feature
+- Magic links (no passwords for clients)
+- Clean, uncluttered UI
+- Mobile-first design
+
+### 4. Speed
+- Fast load times
+- Quick data entry
+- Batch operations
+- Keyboard shortcuts
 
 ---
 
 ## Success Metrics
 
-### Phase 8-9 (Revenue)
-- [ ] 80% of invoices have payment links
-- [ ] 50% reduction in payment collection time
-- [ ] 90% QuickBooks sync success rate
+### Field-First (Sprints 28-30)
+- [ ] 95% of operations work offline
+- [ ] Voice commands used by 40% of field users
+- [ ] Mobile session time increases 2x
+- [ ] Photo upload success rate 99%+
 
-### Phase 10-11 (Mobile/Client)
-- [ ] 95% offline operation success
-- [ ] 30% increase in field app usage
-- [ ] 40% client portal adoption
+### AI Enhancement (Sprints 31-32)
+- [ ] 50% of users try document upload
+- [ ] AI suggestions acted on 30%+ of time
+- [ ] Natural language queries used daily
+- [ ] Proactive alerts prevent 20% of budget overruns
 
-### Phase 12-13 (Analytics/Compliance)
-- [ ] 5+ custom reports per org
-- [ ] 90% safety checklist completion
-- [ ] 2x report generation vs manual
+### Core Features (Sprints 33-35)
+- [ ] 80% of projects use punch lists
+- [ ] Equipment utilization tracked
+- [ ] RFI response time reduced 50%
 
-### Phase 14-15 (Enterprise/AI)
-- [ ] Support 100+ employee orgs
-- [ ] 50% reduction in scheduling time
-- [ ] AI recommendations acted on 30%+
-
----
-
-## Resource Requirements
-
-### Per Sprint (4 parallel sessions)
-- Session 1: UI/Frontend
-- Session 2: Backend/API
-- Session 3: Integrations/Data
-- Session 4: Testing/QA
-
-### External Dependencies
-- Stripe account setup
-- QuickBooks developer account
-- Xero developer account
-- Gusto partnership (for API access)
+### Client Portal (Sprints 36-37)
+- [ ] Client portal adoption 60%+
+- [ ] Selection approval time reduced 40%
+- [ ] Client satisfaction score 4.5+/5
 
 ---
 
-## Risk Mitigation
+## Immediate Next Step
 
-| Risk | Mitigation |
-|------|------------|
-| Integration API changes | Abstract integration layer |
-| Offline sync complexity | Progressive enhancement |
-| Payment compliance | Use Stripe for PCI compliance |
-| AI cost overruns | Usage limits and metering |
-| Enterprise scope creep | Strict feature prioritization |
+**Ready to start Sprint 28: True Offline Mode?**
 
----
+This is our biggest differentiator gap - field workers need to work without connectivity, and our offline mode is incomplete.
 
-## Immediate Next Steps
-
-1. **Validate with beta users** - Which features are most requested?
-2. **Set up Stripe Connect** - Revenue enablement is critical
-3. **QuickBooks developer account** - Start OAuth certification
-4. **Define subscription tiers** - Free/Pro/Enterprise features
-5. **Mobile UX audit** - Identify offline pain points
-
----
-
-*This roadmap positions ContractorOS to compete with established players while leveraging AI and simplicity as key differentiators.*
+I can provide 4 CLI prompts for parallel development sessions.
