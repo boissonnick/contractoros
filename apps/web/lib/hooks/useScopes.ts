@@ -70,10 +70,11 @@ export function useScopes({ projectId }: UseScopesOptions) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!projectId) return;
+    if (!projectId || !profile?.orgId) return;
 
     const q = query(
       collection(db, 'scopes'),
+      where('orgId', '==', profile.orgId),
       where('projectId', '==', projectId),
       orderBy('version', 'desc')
     );
@@ -92,7 +93,7 @@ export function useScopes({ projectId }: UseScopesOptions) {
     );
 
     return unsub;
-  }, [projectId]);
+  }, [projectId, profile?.orgId]);
 
   const currentScope = scopes.find(s => s.status !== 'superseded') || scopes[0] || null;
 

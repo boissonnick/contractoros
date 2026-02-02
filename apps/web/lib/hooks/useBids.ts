@@ -80,14 +80,19 @@ export function useBids(projectId: string) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!projectId) {
+    if (!projectId || !profile?.orgId) {
       setLoading(false);
       return;
     }
 
     setError(null);
 
-    const bidQ = query(collection(db, 'bids'), where('projectId', '==', projectId), orderBy('createdAt', 'desc'));
+    const bidQ = query(
+      collection(db, 'bids'),
+      where('orgId', '==', profile.orgId),
+      where('projectId', '==', projectId),
+      orderBy('createdAt', 'desc')
+    );
     const unsub1 = onSnapshot(bidQ, (snap) => {
       setBids(snap.docs.map(d => bidFromFirestore(d.id, d.data())));
       setLoading(false);
@@ -104,7 +109,12 @@ export function useBids(projectId: string) {
       setLoading(false);
     });
 
-    const solQ = query(collection(db, 'bidSolicitations'), where('projectId', '==', projectId), orderBy('createdAt', 'desc'));
+    const solQ = query(
+      collection(db, 'bidSolicitations'),
+      where('orgId', '==', profile.orgId),
+      where('projectId', '==', projectId),
+      orderBy('createdAt', 'desc')
+    );
     const unsub2 = onSnapshot(solQ, (snap) => {
       setSolicitations(snap.docs.map(d => solicitationFromFirestore(d.id, d.data())));
     }, (err) => {
@@ -113,7 +123,7 @@ export function useBids(projectId: string) {
     });
 
     return () => { unsub1(); unsub2(); };
-  }, [projectId]);
+  }, [projectId, profile?.orgId]);
 
   const createSolicitation = useCallback(async (data: Omit<BidSolicitation, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'orgId'>) => {
     if (!user || !profile) return;

@@ -98,10 +98,11 @@ export function useChangeOrders({ projectId }: UseChangeOrdersOptions) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!projectId) return;
+    if (!projectId || !profile?.orgId) return;
 
     const q = query(
       collection(db, 'change_orders'),
+      where('orgId', '==', profile.orgId),
       where('projectId', '==', projectId),
       orderBy('createdAt', 'desc')
     );
@@ -128,7 +129,7 @@ export function useChangeOrders({ projectId }: UseChangeOrdersOptions) {
     );
 
     return unsub;
-  }, [projectId]);
+  }, [projectId, profile?.orgId]);
 
   const createChangeOrder = useCallback(
     async (data: {

@@ -14,6 +14,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { SubAssignment, SubAssignmentStatus, SubPaymentScheduleItem } from '@/types';
+import { useAuth } from '@/lib/auth';
 
 function fromFirestore(id: string, data: Record<string, unknown>): SubAssignment {
   const schedule = ((data.paymentSchedule as unknown[]) || []).map((p: unknown) => {
@@ -73,14 +74,15 @@ interface UseSubAssignmentsOptions {
 }
 
 export function useSubAssignments({ projectId, subId }: UseSubAssignmentsOptions) {
+  const { profile } = useAuth();
   const [assignments, setAssignments] = useState<SubAssignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!projectId && !subId) return;
+    if ((!projectId && !subId) || !profile?.orgId) return;
 
-    const constraints = [];
+    const constraints = [where('orgId', '==', profile.orgId)];
     if (projectId) constraints.push(where('projectId', '==', projectId));
     if (subId) constraints.push(where('subId', '==', subId));
 
@@ -100,7 +102,7 @@ export function useSubAssignments({ projectId, subId }: UseSubAssignmentsOptions
     );
 
     return unsub;
-  }, [projectId, subId]);
+  }, [projectId, subId, profile?.orgId]);
 
   const createAssignment = useCallback(
     async (data: Omit<SubAssignment, 'id' | 'createdAt' | 'updatedAt'>) => {
