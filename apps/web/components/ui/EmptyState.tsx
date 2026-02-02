@@ -73,11 +73,11 @@ export default function EmptyState({
       {icon && (
         <div
           className={cn(
-            'mx-auto rounded-full bg-gray-100 flex items-center justify-center mb-4',
+            'mx-auto rounded-full bg-gray-100 flex items-center justify-center mb-4 animate-pulse',
             sizeConfig.iconWrapper
           )}
         >
-          <div className={cn('text-gray-400', sizeConfig.icon)}>
+          <div className={cn('text-gray-300', sizeConfig.icon)}>
             {icon}
           </div>
         </div>
