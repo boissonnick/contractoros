@@ -1,0 +1,46 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "viewports": {
+    "mobile": { "width": 375, "height": 812, "label": "iPhone X" },
+    "tablet": { "width": 768, "height": 1024, "label": "iPad" },
+    "desktop": { "width": 1280, "height": 800, "label": "Desktop" },
+    "desktop-large": { "width": 1920, "height": 1080, "label": "Desktop Large" }
+  },
+  "roles": {
+    "owner": {
+      "label": "Owner/Admin",
+      "permissions": ["all"],
+      "testAccount": "owner@test.contractoros.com"
+    },
+    "project_manager": {
+      "label": "Project Manager",
+      "permissions": ["projects", "clients", "team", "tasks", "documents"],
+      "restricted": ["payroll", "organization_settings", "roles"]
+    },
+    "finance": {
+      "label": "Finance Manager",
+      "permissions": ["finances", "invoices", "expenses", "payroll", "reports"]
+    },
+    "employee": {
+      "label": "Employee",
+      "permissions": ["assigned_projects", "time_tracking", "own_tasks"]
+    },
+    "contractor": {
+      "label": "Contractor",
+      "permissions": ["assigned_projects", "own_time", "own_tasks"]
+    },
+    "client": {
+      "label": "Client",
+      "permissions": ["own_projects", "documents", "messages", "photos"]
+    },
+    "assistant": {
+      "label": "Assistant",
+      "permissions": ["projects", "clients", "tasks", "templates"]
+    }
+  },
+  "timeouts": {
+    "navigation": 5000,
+    "animation": 500,
+    "api": 10000
+  }
+}

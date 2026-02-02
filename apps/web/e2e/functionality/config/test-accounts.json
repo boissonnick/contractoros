@@ -1,0 +1,172 @@
+{
+  "accounts": {
+    "owner": {
+      "email": "owner@test.contractoros.com",
+      "password": "TestPassword123!",
+      "role": "OWNER",
+      "displayName": "Test Owner",
+      "orgId": "test-org-001",
+      "permissions": ["*"],
+      "description": "Full system access, can manage everything"
+    },
+    "pm": {
+      "email": "pm@test.contractoros.com",
+      "password": "TestPassword123!",
+      "role": "PM",
+      "displayName": "Test Project Manager",
+      "orgId": "test-org-001",
+      "permissions": ["projects", "clients", "team", "tasks", "documents", "scheduling"],
+      "restrictions": ["payroll", "organization_settings", "billing"],
+      "description": "Project management access, no payroll or org settings"
+    },
+    "finance": {
+      "email": "finance@test.contractoros.com",
+      "password": "TestPassword123!",
+      "role": "FINANCE",
+      "displayName": "Test Finance Manager",
+      "orgId": "test-org-001",
+      "permissions": ["finances", "invoices", "expenses", "payroll", "reports"],
+      "restrictions": ["team_management", "role_assignment"],
+      "description": "Financial operations access, including payroll"
+    },
+    "employee": {
+      "email": "employee@test.contractoros.com",
+      "password": "TestPassword123!",
+      "role": "EMPLOYEE",
+      "displayName": "Test Employee",
+      "orgId": "test-org-001",
+      "permissions": ["assigned_projects", "own_tasks", "time_tracking"],
+      "restrictions": ["admin", "create_project", "create_estimate", "invoices"],
+      "description": "Limited to assigned projects and own work"
+    },
+    "contractor": {
+      "email": "contractor@test.contractoros.com",
+      "password": "TestPassword123!",
+      "role": "CONTRACTOR",
+      "displayName": "Test Contractor",
+      "orgId": "test-org-001",
+      "permissions": ["assigned_work", "own_bids", "own_time"],
+      "restrictions": ["admin", "project_creation", "client_data"],
+      "description": "Subcontractor with minimal access"
+    },
+    "client": {
+      "email": "client@test.contractoros.com",
+      "password": "TestPassword123!",
+      "role": "CLIENT",
+      "displayName": "Test Client",
+      "orgId": "test-org-001",
+      "clientId": "client-001",
+      "permissions": ["own_projects", "documents", "messages", "photos", "selections"],
+      "restrictions": ["other_clients", "financial_details", "team_data"],
+      "description": "Client portal access, own projects only"
+    },
+    "assistant": {
+      "email": "assistant@test.contractoros.com",
+      "password": "TestPassword123!",
+      "role": "ASSISTANT",
+      "displayName": "Test Assistant",
+      "orgId": "test-org-001",
+      "permissions": ["projects", "clients", "tasks", "templates", "scheduling"],
+      "restrictions": ["payroll", "organization_settings", "role_management"],
+      "description": "Administrative assistant role"
+    }
+  },
+
+  "testData": {
+    "projects": {
+      "active": {
+        "id": "proj-test-001",
+        "name": "Test Active Project",
+        "status": "active",
+        "clientId": "client-001",
+        "budget": 50000,
+        "address": "123 Test Street, Test City, TS 12345"
+      },
+      "completed": {
+        "id": "proj-test-002",
+        "name": "Test Completed Project",
+        "status": "completed",
+        "clientId": "client-002",
+        "budget": 25000
+      },
+      "archived": {
+        "id": "proj-test-003",
+        "name": "Test Archived Project",
+        "status": "archived",
+        "clientId": "client-001",
+        "budget": 15000
+      }
+    },
+    "clients": {
+      "standard": {
+        "id": "client-001",
+        "name": "Test Client Standard",
+        "email": "testclient@example.com",
+        "phone": "555-0100",
+        "status": "active"
+      },
+      "inactive": {
+        "id": "client-002",
+        "name": "Test Client Inactive",
+        "email": "inactive@example.com",
+        "phone": "555-0101",
+        "status": "inactive"
+      }
+    },
+    "tasks": {
+      "pending": {
+        "id": "task-test-001",
+        "title": "Test Pending Task",
+        "status": "pending",
+        "projectId": "proj-test-001"
+      },
+      "inProgress": {
+        "id": "task-test-002",
+        "title": "Test In Progress Task",
+        "status": "in_progress",
+        "projectId": "proj-test-001",
+        "assigneeId": "employee-001"
+      },
+      "completed": {
+        "id": "task-test-003",
+        "title": "Test Completed Task",
+        "status": "completed",
+        "projectId": "proj-test-001"
+      }
+    },
+    "invoices": {
+      "draft": {
+        "id": "inv-test-001",
+        "status": "draft",
+        "amount": 1000,
+        "projectId": "proj-test-001"
+      },
+      "sent": {
+        "id": "inv-test-002",
+        "status": "sent",
+        "amount": 2500,
+        "projectId": "proj-test-001"
+      },
+      "paid": {
+        "id": "inv-test-003",
+        "status": "paid",
+        "amount": 5000,
+        "projectId": "proj-test-002"
+      }
+    }
+  },
+
+  "multiOrg": {
+    "org1": {
+      "id": "test-org-001",
+      "name": "Test Organization 1",
+      "owner": "owner@test.contractoros.com"
+    },
+    "org2": {
+      "id": "test-org-002",
+      "name": "Test Organization 2 (Isolation)",
+      "owner": "owner2@test.contractoros.com",
+      "description": "Used to verify cross-org isolation"
+    }
+  }
+}

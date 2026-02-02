@@ -1,0 +1,18 @@
+{
+  "metadata": {
+    "projectName": "ContractorOS",
+    "createdAt": "2026-01-30",
+    "lastUpdated": "2026-01-30",
+    "currentSprint": 14,
+    "lastFullRegression": null,
+    "nextFullRegressionDue": null
+  },
+  "sprints": [],
+  "testRuns": [],
+  "issues": {
+    "open": [],
+    "resolved": []
+  },
+  "consoleErrorHistory": [],
+  "notes": "Initialize functionality testing framework. First test run pending."
+}

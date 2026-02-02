@@ -1,0 +1,188 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "environment": "development",
+
+  "viewports": {
+    "desktop": { "width": 1280, "height": 800 },
+    "tablet": { "width": 768, "height": 1024 },
+    "mobile": { "width": 375, "height": 812 }
+  },
+
+  "timeouts": {
+    "navigation": 10000,
+    "action": 5000,
+    "animation": 500,
+    "api": 15000,
+    "pageLoad": 30000
+  },
+
+  "retries": {
+    "maxRetries": 2,
+    "retryDelay": 1000
+  },
+
+  "consoleCapture": {
+    "captureErrors": true,
+    "captureWarnings": true,
+    "captureInfo": false,
+    "captureDebug": false,
+    "ignorePatterns": [
+      "Download the React DevTools",
+      "Warning: ReactDOM.render is deprecated",
+      "Hot Module Replacement",
+      "[HMR]"
+    ]
+  },
+
+  "networkCapture": {
+    "enabled": true,
+    "captureFailedOnly": false,
+    "ignorePatterns": [
+      "*.hot-update.json",
+      "_next/webpack-hmr",
+      "favicon.ico"
+    ]
+  },
+
+  "screenshots": {
+    "captureOnFailure": true,
+    "captureOnSuccess": false,
+    "captureSteps": true,
+    "format": "png",
+    "quality": 80
+  },
+
+  "reporting": {
+    "outputDir": "./e2e/functionality/reports",
+    "logsDir": "./e2e/functionality/logs",
+    "formats": ["json", "markdown", "html"],
+    "includeScreenshots": true,
+    "includeConsoleOutput": true,
+    "includeNetworkLog": true
+  },
+
+  "suites": {
+    "smoke": {
+      "id": "00-smoke",
+      "name": "Smoke Tests",
+      "priority": "P0",
+      "timeout": 60000,
+      "description": "Basic health checks to verify app is functional"
+    },
+    "auth": {
+      "id": "01-auth",
+      "name": "Authentication",
+      "priority": "P0",
+      "timeout": 120000,
+      "description": "Login, logout, password reset, session management"
+    },
+    "rbac": {
+      "id": "02-rbac",
+      "name": "Role-Based Access Control",
+      "priority": "P0",
+      "timeout": 180000,
+      "description": "Permission verification for all user roles"
+    },
+    "projects": {
+      "id": "03-projects",
+      "name": "Project Management",
+      "priority": "P1",
+      "timeout": 300000,
+      "description": "Project CRUD, phases, scope, tasks"
+    },
+    "clients": {
+      "id": "04-clients",
+      "name": "Client CRM",
+      "priority": "P1",
+      "timeout": 180000,
+      "description": "Client CRUD, notes, communication logs"
+    },
+    "tasks": {
+      "id": "05-tasks",
+      "name": "Task Management",
+      "priority": "P1",
+      "timeout": 240000,
+      "description": "Task CRUD, assignments, status updates, comments"
+    },
+    "team": {
+      "id": "06-team",
+      "name": "Team Management",
+      "priority": "P1",
+      "timeout": 180000,
+      "description": "Invitations, role assignments, team settings"
+    },
+    "finances": {
+      "id": "07-finances",
+      "name": "Financial Operations",
+      "priority": "P1",
+      "timeout": 300000,
+      "description": "Invoices, expenses, payroll, payments"
+    },
+    "scheduling": {
+      "id": "08-scheduling",
+      "name": "Scheduling & Time",
+      "priority": "P1",
+      "timeout": 240000,
+      "description": "Calendar, time entries, timesheets, availability"
+    },
+    "documents": {
+      "id": "09-documents",
+      "name": "Documents & Signatures",
+      "priority": "P1",
+      "timeout": 300000,
+      "description": "Estimates, SOW, change orders, e-signatures"
+    },
+    "materials": {
+      "id": "10-materials",
+      "name": "Materials & Tools",
+      "priority": "P2",
+      "timeout": 180000,
+      "description": "Inventory, checkout, purchase orders"
+    },
+    "settings": {
+      "id": "11-settings",
+      "name": "Settings & Configuration",
+      "priority": "P2",
+      "timeout": 180000,
+      "description": "User profile, org settings, templates"
+    },
+    "portals": {
+      "id": "12-portals",
+      "name": "Portal Access",
+      "priority": "P1",
+      "timeout": 240000,
+      "description": "Client, subcontractor, and field portals"
+    }
+  },
+
+  "severity": {
+    "BLOCKER": {
+      "description": "Application crashes or core feature completely broken",
+      "sla": "Fix immediately before release"
+    },
+    "CRITICAL": {
+      "description": "Major feature not working, no workaround",
+      "sla": "Fix before release"
+    },
+    "MAJOR": {
+      "description": "Feature impaired but workaround exists",
+      "sla": "Fix in current sprint"
+    },
+    "MINOR": {
+      "description": "Cosmetic issue or minor inconvenience",
+      "sla": "Fix in next sprint"
+    },
+    "TRIVIAL": {
+      "description": "Enhancement suggestion or very minor issue",
+      "sla": "Backlog"
+    }
+  },
+
+  "testIdFormat": "{suiteId}-{testNumber}",
+  "screenshotFormat": "{testId}-{step}-{timestamp}",
+
+  "sprintTracking": {
+    "currentSprint": 14,
+    "logFile": "./e2e/functionality/logs/sprint-history.json"
+  }
+}

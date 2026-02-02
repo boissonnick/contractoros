@@ -1,0 +1,108 @@
+{
+  "testAccounts": {
+    "owner": {
+      "email": "owner@test.contractoros.com",
+      "role": "OWNER",
+      "displayName": "Test Owner"
+    },
+    "pm": {
+      "email": "pm@test.contractoros.com",
+      "role": "PM",
+      "displayName": "Test PM"
+    },
+    "finance": {
+      "email": "finance@test.contractoros.com",
+      "role": "FINANCE",
+      "displayName": "Test Finance"
+    },
+    "employee": {
+      "email": "employee@test.contractoros.com",
+      "role": "EMPLOYEE",
+      "displayName": "Test Employee"
+    },
+    "contractor": {
+      "email": "contractor@test.contractoros.com",
+      "role": "CONTRACTOR",
+      "displayName": "Test Contractor"
+    },
+    "client": {
+      "email": "client@test.contractoros.com",
+      "role": "CLIENT",
+      "displayName": "Test Client"
+    }
+  },
+  "testProjects": {
+    "active": {
+      "name": "E2E Test Project - Active",
+      "status": "active",
+      "budget": 50000
+    },
+    "completed": {
+      "name": "E2E Test Project - Completed",
+      "status": "completed",
+      "budget": 25000
+    }
+  },
+  "testClients": {
+    "standard": {
+      "name": "E2E Test Client",
+      "email": "testclient@example.com",
+      "phone": "555-0100",
+      "status": "active"
+    }
+  },
+  "testInvoices": {
+    "draft": {
+      "status": "draft",
+      "amount": 1000
+    },
+    "sent": {
+      "status": "sent",
+      "amount": 2500
+    }
+  },
+  "viewports": {
+    "mobile": {
+      "width": 375,
+      "height": 812,
+      "device": "iPhone X"
+    },
+    "tablet": {
+      "width": 768,
+      "height": 1024,
+      "device": "iPad"
+    },
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "device": "Desktop"
+    }
+  },
+  "selectors": {
+    "common": {
+      "loadingSpinner": "[data-testid='loading']",
+      "toastSuccess": "[data-testid='toast-success']",
+      "toastError": "[data-testid='toast-error']"
+    },
+    "navigation": {
+      "sidebar": "[data-testid='sidebar']",
+      "hamburgerMenu": "[data-testid='mobile-menu']",
+      "userMenu": "[data-testid='user-menu']"
+    },
+    "dashboard": {
+      "statsGrid": "[data-testid='stats-grid']",
+      "projectsList": "[data-testid='active-projects']",
+      "quickActions": "[data-testid='quick-actions']"
+    },
+    "forms": {
+      "submitButton": "button[type='submit']",
+      "cancelButton": "[data-testid='cancel']"
+    }
+  },
+  "timeouts": {
+    "short": 1000,
+    "medium": 3000,
+    "long": 10000,
+    "navigation": 5000
+  }
+}
