@@ -2,12 +2,17 @@
  * AI Assistant Streaming API Route
  *
  * Handles streaming chat requests to the Claude API using Server-Sent Events.
+ *
+ * SECURITY: User's orgId is verified against Firebase Auth token, not client-provided data.
+ * This prevents cross-organization data leakage.
  */
 
 import { NextRequest } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { buildSystemPrompt } from '@/lib/assistant/prompts';
 import { AssistantContext } from '@/lib/assistant/types';
+import { initializeAdminApp } from '@/lib/assistant/firebase-admin-init';
+import { getAuth } from 'firebase-admin/auth';
 
 // Initialize Anthropic client
 const anthropic = new Anthropic();
@@ -23,18 +28,110 @@ interface RequestBody {
     maxTokens?: number;
     temperature?: number;
   };
+  /** Firebase Auth ID token for verification */
+  idToken?: string;
+}
+
+/**
+ * Verify Firebase Auth token and extract user claims
+ * Returns verified orgId and userId from token, not from client request
+ */
+async function verifyAuthToken(idToken: string): Promise<{
+  uid: string;
+  orgId: string | null;
+  email: string | null;
+}> {
+  try {
+    await initializeAdminApp();
+    const auth = getAuth();
+    const decodedToken = await auth.verifyIdToken(idToken);
+
+    return {
+      uid: decodedToken.uid,
+      orgId: decodedToken.orgId || null,
+      email: decodedToken.email || null,
+    };
+  } catch (error) {
+    console.error('[Assistant Stream API] Auth verification failed:', error);
+    throw new Error('Invalid authentication token');
+  }
+}
+
+/**
+ * Get orgId from user document if not in token claims
+ */
+async function getOrgIdFromUser(userId: string): Promise<string | null> {
+  try {
+    await initializeAdminApp();
+    const { getFirestore } = await import('firebase-admin/firestore');
+    const db = getFirestore();
+
+    const userDoc = await db.collection('users').doc(userId).get();
+    if (userDoc.exists) {
+      return userDoc.data()?.orgId || null;
+    }
+    return null;
+  } catch (error) {
+    console.error('[Assistant Stream API] Failed to get orgId from user:', error);
+    return null;
+  }
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body: RequestBody = await request.json();
-    const { message, context, conversationHistory, options } = body;
+    const { message, context, conversationHistory, options, idToken } = body;
 
     if (!message) {
       return new Response(JSON.stringify({ error: 'Message is required' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
+    }
+
+    // =====================================
+    // STEP 0: Verify Authentication
+    // =====================================
+    // SECURITY: We verify the auth token server-side and extract orgId from it
+    // This prevents users from spoofing orgId to access other organizations' data
+
+    // Try to get token from Authorization header first, then from body
+    const authHeader = request.headers.get('Authorization');
+    const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.split('Bearer ')[1] : null;
+    const token = bearerToken || idToken;
+
+    if (!token) {
+      return new Response(
+        JSON.stringify({ error: 'Authentication required. Please provide a valid auth token.' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    let verifiedOrgId: string | null = null;
+    let verifiedUserId: string | null = null;
+
+    try {
+      const authResult = await verifyAuthToken(token);
+      verifiedUserId = authResult.uid;
+      verifiedOrgId = authResult.orgId;
+
+      // If orgId not in claims, get from user document
+      if (!verifiedOrgId && verifiedUserId) {
+        verifiedOrgId = await getOrgIdFromUser(verifiedUserId);
+      }
+    } catch (authError) {
+      console.error('[Assistant Stream API] Auth verification failed:', authError);
+      return new Response(
+        JSON.stringify({ error: 'Invalid or expired authentication token.' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!verifiedOrgId) {
+      return new Response(
+        JSON.stringify({ error: 'User not associated with an organization.' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
     // Check if API key is configured
@@ -45,8 +142,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Build system prompt with context
-    const systemPrompt = buildSystemPrompt(context);
+    // Build verified context with server-verified orgId (not client-provided)
+    const verifiedContext: AssistantContext = {
+      ...context,
+      organization: {
+        ...context?.organization,
+        orgId: verifiedOrgId, // Use verified orgId, not client-provided
+      },
+      user: {
+        ...context?.user,
+        userId: verifiedUserId || context?.user?.userId || 'unknown',
+      },
+    };
+
+    // Build system prompt with verified context
+    const systemPrompt = buildSystemPrompt(verifiedContext);
 
     // Build messages array
     const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [];
