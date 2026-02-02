@@ -96,45 +96,64 @@ service cloud.firestore {
       // Only admins can create/update/delete projects
       allow create, update, delete: if isAdmin();
 
+      // SECURITY FIX (M-003): All subcollections now verify org membership
+      // Helper: Check if user can access this project's org
+      // Note: Parent project orgId is checked via get() on the project document
+
       // Project phases subcollection
       match /phases/{phaseId} {
-        allow read: if isAuthenticated();
-        allow create, update, delete: if isAdmin();
+        allow read: if isAuthenticated() && userProfileExists() &&
+          get(/databases/$(database)/documents/projects/$(projectId)).data.orgId == getUserProfile().orgId;
+        allow create, update, delete: if isAdmin() &&
+          get(/databases/$(database)/documents/projects/$(projectId)).data.orgId == getUserProfile().orgId;
       }
 
       // Quote sections subcollection
       match /quoteSections/{sectionId} {
-        allow read: if isAuthenticated();
-        allow create, update, delete: if isAdmin();
+        allow read: if isAuthenticated() && userProfileExists() &&
+          get(/databases/$(database)/documents/projects/$(projectId)).data.orgId == getUserProfile().orgId;
+        allow create, update, delete: if isAdmin() &&
+          get(/databases/$(database)/documents/projects/$(projectId)).data.orgId == getUserProfile().orgId;
       }
 
       // Client preferences subcollection
       match /clientPreferences/{docId} {
-        allow read: if isAuthenticated();
-        allow create, update: if isAuthenticated();
-        allow delete: if isAdmin();
+        allow read: if isAuthenticated() && userProfileExists() &&
+          get(/databases/$(database)/documents/projects/$(projectId)).data.orgId == getUserProfile().orgId;
+        allow create, update: if isAuthenticated() && userProfileExists() &&
+          get(/databases/$(database)/documents/projects/$(projectId)).data.orgId == getUserProfile().orgId;
+        allow delete: if isAdmin() &&
+          get(/databases/$(database)/documents/projects/$(projectId)).data.orgId == getUserProfile().orgId;
       }
 
       // Project activity subcollection (singular - legacy)
       match /activity/{activityId} {
-        allow read: if isAuthenticated();
-        allow create: if isAuthenticated();
+        allow read: if isAuthenticated() && userProfileExists() &&
+          get(/databases/$(database)/documents/projects/$(projectId)).data.orgId == getUserProfile().orgId;
+        allow create: if isAuthenticated() && userProfileExists() &&
+          get(/databases/$(database)/documents/projects/$(projectId)).data.orgId == getUserProfile().orgId;
         allow update, delete: if false;
       }
 
       // Project activities subcollection (plural - used by activity page)
       match /activities/{activityId} {
-        allow read: if isAuthenticated();
-        allow create: if isAuthenticated();
+        allow read: if isAuthenticated() && userProfileExists() &&
+          get(/databases/$(database)/documents/projects/$(projectId)).data.orgId == getUserProfile().orgId;
+        allow create: if isAuthenticated() && userProfileExists() &&
+          get(/databases/$(database)/documents/projects/$(projectId)).data.orgId == getUserProfile().orgId;
         allow update, delete: if false;
       }
 
       // Project notes subcollection
       match /notes/{noteId} {
-        allow read: if isAuthenticated();
-        allow create: if isAuthenticated();
-        // Users can update/delete their own notes
-        allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+        allow read: if isAuthenticated() && userProfileExists() &&
+          get(/databases/$(database)/documents/projects/$(projectId)).data.orgId == getUserProfile().orgId;
+        allow create: if isAuthenticated() && userProfileExists() &&
+          get(/databases/$(database)/documents/projects/$(projectId)).data.orgId == getUserProfile().orgId;
+        // Users can update/delete their own notes (still requires org membership)
+        allow update, delete: if isAuthenticated() && userProfileExists() &&
+          resource.data.userId == request.auth.uid &&
+          get(/databases/$(database)/documents/projects/$(projectId)).data.orgId == getUserProfile().orgId;
       }
     }
 
@@ -475,14 +494,22 @@ service cloud.firestore {
     }
 
     // Client onboarding tokens collection
+    // SECURITY FIX (H-001): Restrict update to specific fields only
     match /clientOnboardingTokens/{tokenId} {
-      // Anyone can read (public onboarding page validates tokens)
+      // Anyone can read (public onboarding page validates tokens via document ID)
       allow read: if true;
+
+      // Only admins can create tokens
       allow create: if isAuthenticated() &&
         userProfileExists() &&
         getUserProfile().role in ['OWNER', 'PM'];
-      // Allow update for marking token as used (public page does this)
-      allow update: if true;
+
+      // SECURITY: Only allow updating status fields, not arbitrary data
+      allow update: if request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['usedAt', 'status', 'updatedAt'])
+        && request.resource.data.status in ['used', 'expired', 'pending'];
+
+      // Only admins can delete
       allow delete: if isAdmin();
     }
 
@@ -1012,15 +1039,16 @@ service cloud.firestore {
     }
 
     // Public signature access (magic link signing)
-    // This allows unauthenticated users to read/update via magic link token
-    // Token validation happens in application code
+    // SECURITY FIX (M-001): Restrict public read to pending signatures only
     match /signatureRequests/{requestId} {
-      // Allow read for magic link access (token validated in app)
-      allow read: if true;
+      // Allow read for magic link access - only if still awaiting signatures
+      // SECURITY: Completed/cancelled requests should not be publicly readable
+      allow read: if resource.data.status in ['pending', 'partially_signed'];
 
       // Allow limited updates for signing (signature data, status)
       allow update: if request.resource.data.diff(resource.data).affectedKeys()
-        .hasOnly(['signers', 'status', 'auditTrail', 'updatedAt']);
+        .hasOnly(['signers', 'status', 'auditTrail', 'updatedAt'])
+        && request.resource.data.status in ['partially_signed', 'completed', 'declined'];
     }
 
     // Photo albums collection
@@ -1083,21 +1111,22 @@ service cloud.firestore {
     }
 
     // Payment links collection
+    // SECURITY FIX (M-002): Restrict public read to active links only
     match /paymentLinks/{linkId} {
       // Org members can read payment links in their org
       allow read: if isAuthenticated() && userProfileExists() &&
         resource.data.orgId == getUserProfile().orgId;
 
-      // Public read access for payment link validation via token
-      // Token-based validation happens in application code
-      allow read: if true;
+      // Public read access for payment link validation
+      // SECURITY: Only allow reading active payment links (not expired/used)
+      allow read: if resource.data.status == 'active';
 
       // Admins can create payment links
       allow create: if isAuthenticated() && userProfileExists() &&
         request.resource.data.orgId == getUserProfile().orgId &&
         getUserProfile().role in ['OWNER', 'PM'];
 
-      // Allow updates for marking link as used (status changes)
+      // Allow updates for marking link as used (status changes only)
       allow update: if request.resource.data.diff(resource.data).affectedKeys()
         .hasOnly(['status', 'usedAt', 'paymentId', 'updatedAt']);
 
