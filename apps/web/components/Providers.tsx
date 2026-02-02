@@ -6,6 +6,7 @@ import { AuthProvider } from '@/lib/auth';
 import { ThemeProvider } from '@/lib/theme/ThemeProvider';
 import { ToastProvider, Toaster } from '@/components/ui/Toast';
 import { ImpersonationProvider } from '@/lib/contexts/ImpersonationContext';
+import { OfflineProvider } from '@/components/offline/OfflineProvider';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
 // Create a client with sensible defaults for construction app
@@ -28,7 +29,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
           <AuthProvider>
             <ImpersonationProvider>
               <ThemeProvider>
-                {children}
+                <OfflineProvider>
+                  {children}
+                </OfflineProvider>
               </ThemeProvider>
             </ImpersonationProvider>
           </AuthProvider>

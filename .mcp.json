@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "chrome": {
+      "command": "node",
+      "args": ["/Users/nickbodkins/Library/Application Support/Claude/Claude Extensions/ant.dir.ant.anthropic.chrome-control/server/index.js"]
+    }
+  }
+}
