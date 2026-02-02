@@ -2190,6 +2190,19 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // ==========================================
+    // Organization-Scoped Assistant Conversations Collection
+    // ==========================================
+    match /organizations/{orgId}/assistantConversations/{conversationId} {
+      // Org members can read and write their conversations
+      allow read, write: if isSameOrg(orgId);
+
+      // Messages subcollection
+      match /messages/{messageId} {
+        allow read, write: if isSameOrg(orgId);
+      }
+    }
+
     // Default deny all other access
     match /{document=**} {
       allow read, write: if false;

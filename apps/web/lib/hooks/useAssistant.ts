@@ -70,7 +70,7 @@ declare global {
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useAuth } from '@/lib/auth';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   ChatMessage,
   AssistantState,
@@ -86,6 +86,14 @@ import {
 } from '@/lib/assistant/context-builder';
 import { sendMessage, sendMessageStreaming } from '@/lib/assistant/claude-client';
 import { getQuickResponse } from '@/lib/assistant/prompts';
+import {
+  createConversation,
+  saveMessage as saveMessageToFirestore,
+  getConversation,
+  getMostRecentConversation,
+  deleteConversation,
+  Conversation,
+} from '@/lib/assistant/conversation-service';
 
 // Generate unique ID for messages
 function generateId(): string {
@@ -153,16 +161,36 @@ interface UseAssistantReturn {
   suggestions: string[];
   /** Error message if any */
   error: string | null;
+  /** Current conversation ID */
+  conversationId: string | null;
+  /** Start a new conversation */
+  newConversation: () => Promise<void>;
+  /** Load an existing conversation */
+  loadConversation: (id: string) => Promise<void>;
+  /** List of past conversations */
+  conversations: Conversation[];
+  /** Whether showing time entry modal */
+  showTimeEntryModal: boolean;
+  /** Close time entry modal */
+  closeTimeEntryModal: () => void;
+  /** File input ref for photo capture */
+  photoInputRef: React.RefObject<HTMLInputElement | null>;
 }
 
 export function useAssistant(options: UseAssistantOptions = {}): UseAssistantReturn {
   const { profile } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
   const [state, setState] = useState<AssistantState>(INITIAL_ASSISTANT_STATE);
   const [error, setError] = useState<string | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [showTimeEntryModal, setShowTimeEntryModal] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const streamingMessageIdRef = useRef<string | null>(null);
+  const photoInputRef = useRef<HTMLInputElement | null>(null);
+  const conversationLoadedRef = useRef(false);
 
   // Build context from current state
   const buildContext = useCallback((): AssistantContext => {
@@ -217,14 +245,99 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
     setState((prev) => ({ ...prev, isOpen: !prev.isOpen }));
   }, []);
 
+  // Load most recent conversation on mount
+  useEffect(() => {
+    if (!profile?.orgId || !profile?.uid || conversationLoadedRef.current) return;
+
+    const loadRecentConversation = async () => {
+      try {
+        const recent = await getMostRecentConversation(profile.orgId, profile.uid);
+        if (recent) {
+          setConversationId(recent.id);
+          const messages = await getConversation(profile.orgId, recent.id);
+          setState((prev) => ({ ...prev, messages }));
+        }
+        conversationLoadedRef.current = true;
+      } catch (err) {
+        console.error('Failed to load recent conversation:', err);
+        conversationLoadedRef.current = true;
+      }
+    };
+
+    loadRecentConversation();
+  }, [profile?.orgId, profile?.uid]);
+
+  // Save message to Firestore
+  const persistMessage = useCallback(
+    async (message: ChatMessage) => {
+      if (!profile?.orgId || !conversationId) return;
+
+      try {
+        await saveMessageToFirestore(profile.orgId, conversationId, message);
+      } catch (err) {
+        console.error('Failed to persist message:', err);
+      }
+    },
+    [profile?.orgId, conversationId]
+  );
+
+  // Start a new conversation
+  const newConversation = useCallback(async () => {
+    if (!profile?.orgId || !profile?.uid) return;
+
+    try {
+      const newId = await createConversation(profile.orgId, profile.uid);
+      setConversationId(newId);
+      setState((prev) => ({ ...prev, messages: [] }));
+      setError(null);
+    } catch (err) {
+      console.error('Failed to create new conversation:', err);
+      setError('Failed to create new conversation');
+    }
+  }, [profile?.orgId, profile?.uid]);
+
+  // Load an existing conversation
+  const loadConversation = useCallback(
+    async (id: string) => {
+      if (!profile?.orgId) return;
+
+      try {
+        const messages = await getConversation(profile.orgId, id);
+        setConversationId(id);
+        setState((prev) => ({ ...prev, messages }));
+        setError(null);
+      } catch (err) {
+        console.error('Failed to load conversation:', err);
+        setError('Failed to load conversation');
+      }
+    },
+    [profile?.orgId]
+  );
+
+  // Close time entry modal
+  const closeTimeEntryModal = useCallback(() => {
+    setShowTimeEntryModal(false);
+  }, []);
+
   // Clear history
-  const clearHistory = useCallback(() => {
+  const clearHistory = useCallback(async () => {
+    // Delete from Firestore if we have a conversation
+    if (profile?.orgId && conversationId) {
+      try {
+        await deleteConversation(profile.orgId, conversationId);
+      } catch (err) {
+        console.error('Failed to delete conversation:', err);
+      }
+    }
+
+    // Clear local state
     setState((prev) => ({
       ...prev,
       messages: [],
     }));
+    setConversationId(null);
     setError(null);
-  }, []);
+  }, [profile?.orgId, conversationId]);
 
   // Send a message
   const handleSendMessage = useCallback(
@@ -232,6 +345,17 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
       if (!text.trim()) return;
 
       setError(null);
+
+      // Create a conversation if we don't have one
+      let currentConvId = conversationId;
+      if (!currentConvId && profile?.orgId && profile?.uid) {
+        try {
+          currentConvId = await createConversation(profile.orgId, profile.uid);
+          setConversationId(currentConvId);
+        } catch (err) {
+          console.error('Failed to create conversation:', err);
+        }
+      }
 
       // Add user message
       const userMessage: ChatMessage = {
@@ -247,6 +371,13 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
         messages: [...prev.messages, userMessage],
         isProcessing: true,
       }));
+
+      // Persist user message
+      if (profile?.orgId && currentConvId) {
+        saveMessageToFirestore(profile.orgId, currentConvId, userMessage).catch((err) =>
+          console.error('Failed to persist user message:', err)
+        );
+      }
 
       // Check for quick responses first
       const quickResponse = getQuickResponse(text);
@@ -264,6 +395,13 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
           messages: [...prev.messages, assistantMessage],
           isProcessing: false,
         }));
+
+        // Persist quick response
+        if (profile?.orgId && currentConvId) {
+          saveMessageToFirestore(profile.orgId, currentConvId, assistantMessage).catch((err) =>
+            console.error('Failed to persist assistant message:', err)
+          );
+        }
         return;
       }
 
@@ -305,6 +443,13 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
           messages: [...prev.messages, assistantMessage],
           isProcessing: false,
         }));
+
+        // Persist assistant response
+        if (profile?.orgId && currentConvId) {
+          saveMessageToFirestore(profile.orgId, currentConvId, assistantMessage).catch((err) =>
+            console.error('Failed to persist assistant message:', err)
+          );
+        }
       } catch (err) {
         console.error('Assistant error:', err);
         setError(err instanceof Error ? err.message : 'Failed to get response');
@@ -326,7 +471,7 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
         }));
       }
     },
-    [buildContext, state.messages]
+    [buildContext, state.messages, conversationId, profile?.orgId, profile?.uid]
   );
 
   // Send a message with streaming response
@@ -336,6 +481,17 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
 
       setError(null);
       setIsStreaming(true);
+
+      // Create a conversation if we don't have one
+      let currentConvId = conversationId;
+      if (!currentConvId && profile?.orgId && profile?.uid) {
+        try {
+          currentConvId = await createConversation(profile.orgId, profile.uid);
+          setConversationId(currentConvId);
+        } catch (err) {
+          console.error('Failed to create conversation:', err);
+        }
+      }
 
       // Add user message
       const userMessage: ChatMessage = {
@@ -348,13 +504,14 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
 
       // Add placeholder assistant message for streaming
       const assistantMessageId = generateId();
+      const assistantTimestamp = new Date();
       streamingMessageIdRef.current = assistantMessageId;
 
       const assistantMessage: ChatMessage = {
         id: assistantMessageId,
         role: 'assistant',
         content: '',
-        timestamp: new Date(),
+        timestamp: assistantTimestamp,
         status: 'streaming',
       };
 
@@ -364,19 +521,39 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
         isProcessing: true,
       }));
 
+      // Persist user message
+      if (profile?.orgId && currentConvId) {
+        saveMessageToFirestore(profile.orgId, currentConvId, userMessage).catch((err) =>
+          console.error('Failed to persist user message:', err)
+        );
+      }
+
       // Check for quick responses first
       const quickResponse = getQuickResponse(text);
       if (quickResponse) {
+        const finalMessage: ChatMessage = {
+          id: assistantMessageId,
+          role: 'assistant',
+          content: quickResponse,
+          timestamp: assistantTimestamp,
+          status: 'sent',
+        };
+
         setState((prev) => ({
           ...prev,
           messages: prev.messages.map((m) =>
-            m.id === assistantMessageId
-              ? { ...m, content: quickResponse, status: 'sent' as const }
-              : m
+            m.id === assistantMessageId ? finalMessage : m
           ),
           isProcessing: false,
         }));
         setIsStreaming(false);
+
+        // Persist quick response
+        if (profile?.orgId && currentConvId) {
+          saveMessageToFirestore(profile.orgId, currentConvId, finalMessage).catch((err) =>
+            console.error('Failed to persist assistant message:', err)
+          );
+        }
         return;
       }
 
@@ -415,15 +592,28 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
             throw new Error(chunk.content || 'Stream error');
           } else if (chunk.type === 'done') {
             // Mark message as complete
+            const finalMessage: ChatMessage = {
+              id: assistantMessageId,
+              role: 'assistant',
+              content: fullContent,
+              timestamp: assistantTimestamp,
+              status: 'sent',
+            };
+
             setState((prev) => ({
               ...prev,
               messages: prev.messages.map((m) =>
-                m.id === assistantMessageId
-                  ? { ...m, status: 'sent' as const }
-                  : m
+                m.id === assistantMessageId ? finalMessage : m
               ),
               isProcessing: false,
             }));
+
+            // Persist final assistant message
+            if (profile?.orgId && currentConvId) {
+              saveMessageToFirestore(profile.orgId, currentConvId, finalMessage).catch((err) =>
+                console.error('Failed to persist assistant message:', err)
+              );
+            }
           }
         }
       } catch (err) {
@@ -449,7 +639,7 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
         streamingMessageIdRef.current = null;
       }
     },
-    [buildContext, state.messages]
+    [buildContext, state.messages, conversationId, profile?.orgId, profile?.uid]
   );
 
   // Start voice input
@@ -527,20 +717,56 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
     (action: QuickAction) => {
       switch (action.type) {
         case 'pricing_query':
-          // Could open panel with pre-filled text
+          // Open panel for pricing query
+          open();
           break;
-        case 'navigate':
-          // Could navigate to a page
-          if (action.payload?.route) {
-            // router.push(action.payload.route as string);
+
+        case 'create_estimate':
+          // Navigate to create new estimate
+          router.push('/dashboard/estimates/new');
+          break;
+
+        case 'log_time':
+          // Open time entry modal
+          setShowTimeEntryModal(true);
+          break;
+
+        case 'take_photo':
+          // Trigger file input with camera capture on mobile
+          if (photoInputRef.current) {
+            photoInputRef.current.click();
           }
           break;
+
+        case 'view_report':
+          // Navigate to reports with specific type
+          const reportType = action.payload?.reportType as string || 'overview';
+          router.push(`/dashboard/reports/${reportType}`);
+          break;
+
+        case 'send_message':
+          // Navigate to messages
+          router.push('/dashboard/messages');
+          break;
+
+        case 'schedule_event':
+          // Navigate to schedule
+          router.push('/dashboard/schedule');
+          break;
+
+        case 'navigate':
+          // Navigate to a specific page
+          if (action.payload?.route) {
+            router.push(action.payload.route as string);
+          }
+          break;
+
         default:
           // For other actions, just open the panel
           open();
       }
     },
-    [open]
+    [open, router]
   );
 
   // Keyboard shortcut (Cmd/Ctrl + K)
@@ -573,6 +799,13 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
     handleAction,
     suggestions,
     error,
+    conversationId,
+    newConversation,
+    loadConversation,
+    conversations,
+    showTimeEntryModal,
+    closeTimeEntryModal,
+    photoInputRef,
   };
 }
 
