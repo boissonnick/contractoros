@@ -2415,6 +2415,26 @@ service cloud.firestore {
       allow write: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
     }
 
+    // ==========================================
+    // RFIs Collection (Sprint 34)
+    // ==========================================
+    match /organizations/{orgId}/rfis/{rfiId} {
+      allow read: if isSameOrg(orgId);
+      allow create: if isSameOrg(orgId);
+      allow update: if isSameOrg(orgId);
+      allow delete: if isSameOrg(orgId) && resource.data.status == 'draft';
+    }
+
+    // ==========================================
+    // Submittals Collection (Sprint 34)
+    // ==========================================
+    match /organizations/{orgId}/submittals/{submittalId} {
+      allow read: if isSameOrg(orgId);
+      allow create: if isSameOrg(orgId);
+      allow update: if isSameOrg(orgId);
+      allow delete: if isSameOrg(orgId) && resource.data.status == 'pending';
+    }
+
     // Default deny all other access
     match /{document=**} {
       allow read, write: if false;
