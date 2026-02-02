@@ -416,3 +416,251 @@ export const GREETING_MESSAGES = [
   "Hello! I can help with pricing, estimates, and project questions. What do you need?",
   "Hey there! Ask me about material prices, labor rates, or help creating estimates.",
 ];
+
+// ============================================================================
+// DOCUMENT ANALYSIS TYPES
+// ============================================================================
+
+/**
+ * Supported document types for upload
+ */
+export type DocumentType = 'pdf' | 'docx' | 'image' | 'spreadsheet';
+
+/**
+ * Status of document analysis
+ */
+export type DocumentAnalysisStatus = 'uploading' | 'analyzing' | 'complete' | 'error';
+
+/**
+ * Result of AI document analysis
+ */
+export interface DocumentAnalysis {
+  id: string;
+  fileName: string;
+  fileType: DocumentType;
+  fileSize: number;
+  thumbnailUrl?: string;
+  status: DocumentAnalysisStatus;
+  uploadedAt: Date;
+  /** Extracted text summary */
+  summary?: string;
+  /** Key data points extracted */
+  extractedData?: ExtractedDocumentData;
+  /** Confidence score 0-1 */
+  confidence?: number;
+  /** Error message if analysis failed */
+  error?: string;
+}
+
+/**
+ * Data extracted from document analysis
+ */
+export interface ExtractedDocumentData {
+  /** Document type detected (invoice, contract, spec sheet, etc.) */
+  documentType?: string;
+  /** Key dates found */
+  dates?: Array<{
+    label: string;
+    value: Date | string;
+  }>;
+  /** Monetary amounts found */
+  amounts?: Array<{
+    label: string;
+    value: number;
+    currency?: string;
+  }>;
+  /** Contact information */
+  contacts?: Array<{
+    name?: string;
+    company?: string;
+    email?: string;
+    phone?: string;
+  }>;
+  /** Line items (for invoices/estimates) */
+  lineItems?: Array<{
+    description: string;
+    quantity?: number;
+    unitPrice?: number;
+    total?: number;
+  }>;
+  /** Material specifications */
+  materials?: Array<{
+    name: string;
+    specs?: string;
+    quantity?: string;
+  }>;
+  /** General key-value pairs */
+  fields?: Record<string, string>;
+}
+
+// ============================================================================
+// PHOTO ANALYSIS TYPES
+// ============================================================================
+
+/**
+ * Status of photo analysis
+ */
+export type PhotoAnalysisStatus = 'uploading' | 'analyzing' | 'complete' | 'error';
+
+/**
+ * Result of AI photo analysis
+ */
+export interface PhotoAnalysis {
+  id: string;
+  fileName: string;
+  fileSize: number;
+  thumbnailUrl?: string;
+  fullUrl?: string;
+  status: PhotoAnalysisStatus;
+  uploadedAt: Date;
+  /** AI-generated description of the photo */
+  description?: string;
+  /** Detected tags/categories */
+  tags?: PhotoTag[];
+  /** Detected issues or concerns */
+  issues?: PhotoIssue[];
+  /** Suggested project phase this relates to */
+  suggestedPhase?: string;
+  /** Confidence score 0-1 */
+  confidence?: number;
+  /** Error message if analysis failed */
+  error?: string;
+}
+
+/**
+ * Tag detected in a photo
+ */
+export interface PhotoTag {
+  id: string;
+  label: string;
+  category: 'trade' | 'material' | 'phase' | 'issue' | 'location' | 'equipment';
+  confidence: number;
+}
+
+/**
+ * Issue detected in a photo
+ */
+export interface PhotoIssue {
+  id: string;
+  type: 'safety' | 'quality' | 'progress' | 'compliance';
+  description: string;
+  severity: 'low' | 'medium' | 'high';
+  confidence: number;
+}
+
+/**
+ * Common construction photo tags
+ */
+export const CONSTRUCTION_PHOTO_TAGS: PhotoTag[] = [
+  { id: 'framing', label: 'Framing', category: 'trade', confidence: 1 },
+  { id: 'electrical', label: 'Electrical', category: 'trade', confidence: 1 },
+  { id: 'plumbing', label: 'Plumbing', category: 'trade', confidence: 1 },
+  { id: 'hvac', label: 'HVAC', category: 'trade', confidence: 1 },
+  { id: 'drywall', label: 'Drywall', category: 'trade', confidence: 1 },
+  { id: 'flooring', label: 'Flooring', category: 'trade', confidence: 1 },
+  { id: 'roofing', label: 'Roofing', category: 'trade', confidence: 1 },
+  { id: 'concrete', label: 'Concrete', category: 'material', confidence: 1 },
+  { id: 'lumber', label: 'Lumber', category: 'material', confidence: 1 },
+  { id: 'insulation', label: 'Insulation', category: 'material', confidence: 1 },
+  { id: 'exterior', label: 'Exterior', category: 'location', confidence: 1 },
+  { id: 'interior', label: 'Interior', category: 'location', confidence: 1 },
+  { id: 'foundation', label: 'Foundation', category: 'phase', confidence: 1 },
+  { id: 'rough-in', label: 'Rough-In', category: 'phase', confidence: 1 },
+  { id: 'finish', label: 'Finish Work', category: 'phase', confidence: 1 },
+];
+
+// ============================================================================
+// PROACTIVE SUGGESTIONS TYPES
+// ============================================================================
+
+/**
+ * Category of proactive suggestion
+ */
+export type SuggestionCategory = 'budget' | 'schedule' | 'safety' | 'quality' | 'general';
+
+/**
+ * Priority level of a suggestion
+ */
+export type SuggestionPriority = 'low' | 'medium' | 'high' | 'critical';
+
+/**
+ * A proactive suggestion from the AI
+ */
+export interface ProactiveSuggestion {
+  id: string;
+  category: SuggestionCategory;
+  priority: SuggestionPriority;
+  title: string;
+  description: string;
+  /** Link to relevant page */
+  actionUrl?: string;
+  /** Label for the action button */
+  actionLabel?: string;
+  /** When the suggestion was generated */
+  createdAt: Date;
+  /** Whether the user has seen this */
+  isRead: boolean;
+  /** Whether the user has dismissed this */
+  isDismissed: boolean;
+  /** Related entity */
+  relatedEntity?: {
+    type: 'project' | 'invoice' | 'task' | 'estimate' | 'client';
+    id: string;
+    name: string;
+  };
+}
+
+/**
+ * Category icons and colors for suggestions
+ */
+export const SUGGESTION_CATEGORY_CONFIG: Record<SuggestionCategory, {
+  icon: string;
+  color: string;
+  bgColor: string;
+  borderColor: string;
+}> = {
+  budget: {
+    icon: 'CurrencyDollarIcon',
+    color: 'text-green-700',
+    bgColor: 'bg-green-50',
+    borderColor: 'border-green-200',
+  },
+  schedule: {
+    icon: 'CalendarIcon',
+    color: 'text-blue-700',
+    bgColor: 'bg-blue-50',
+    borderColor: 'border-blue-200',
+  },
+  safety: {
+    icon: 'ShieldExclamationIcon',
+    color: 'text-red-700',
+    bgColor: 'bg-red-50',
+    borderColor: 'border-red-200',
+  },
+  quality: {
+    icon: 'CheckBadgeIcon',
+    color: 'text-purple-700',
+    bgColor: 'bg-purple-50',
+    borderColor: 'border-purple-200',
+  },
+  general: {
+    icon: 'LightBulbIcon',
+    color: 'text-amber-700',
+    bgColor: 'bg-amber-50',
+    borderColor: 'border-amber-200',
+  },
+};
+
+/**
+ * Priority badge colors
+ */
+export const SUGGESTION_PRIORITY_CONFIG: Record<SuggestionPriority, {
+  color: string;
+  bgColor: string;
+  label: string;
+}> = {
+  low: { color: 'text-gray-600', bgColor: 'bg-gray-100', label: 'Low' },
+  medium: { color: 'text-blue-600', bgColor: 'bg-blue-100', label: 'Medium' },
+  high: { color: 'text-orange-600', bgColor: 'bg-orange-100', label: 'High' },
+  critical: { color: 'text-red-600', bgColor: 'bg-red-100', label: 'Critical' },
+};
