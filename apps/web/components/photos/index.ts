@@ -22,6 +22,10 @@ export { default as PhotoLightbox } from './PhotoLightbox';
 // Grid layout
 export { default as PhotoGrid, PhotoGridSkeleton } from './PhotoGrid';
 
+// Offline capture components
+export { default as OfflinePhotoCapture } from './OfflinePhotoCapture';
+export { default as PendingPhotosGrid } from './PendingPhotosGrid';
+
 // Re-export types for convenience
 export type { PhotoAlbumCardProps } from './PhotoAlbumCard';
 export type { CreateAlbumModalProps } from './CreateAlbumModal';

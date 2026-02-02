@@ -18,6 +18,16 @@ import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
 import { convertTimestampsDeep } from '@/lib/firebase/timestamp-converter';
 import { toast } from '@/components/ui/Toast';
+import { useNetworkStatus, checkNetworkStatus } from '@/lib/offline/network-status';
+import {
+  OfflineTimeEntryService,
+  createManualEntryOffline,
+  clockInOffline,
+  clockOutOffline,
+  getOfflineTimeEntries,
+  getPendingOfflineEntriesCount,
+  getMergedTimeEntries,
+} from '@/lib/offline/offline-time-entries';
 import {
   TimeEntry,
   TimeEntryStatus,
@@ -29,6 +39,12 @@ import {
   BreakType,
 } from '@/types';
 
+// Extended TimeEntry with sync status for UI
+export interface TimeEntryWithSyncStatus extends TimeEntry {
+  syncStatus?: 'pending' | 'synced' | 'conflict';
+  localId?: string;
+}
+
 interface UseTimeEntriesOptions {
   userId?: string;
   projectId?: string;
@@ -39,10 +55,14 @@ interface UseTimeEntriesOptions {
 }
 
 interface UseTimeEntriesReturn {
-  entries: TimeEntry[];
-  activeEntry: TimeEntry | null;
+  entries: TimeEntryWithSyncStatus[];
+  activeEntry: TimeEntryWithSyncStatus | null;
   loading: boolean;
   error: string | null;
+
+  // Offline status
+  isOnline: boolean;
+  pendingOfflineCount: number;
 
   // Clock operations
   clockIn: (options?: {
@@ -98,17 +118,40 @@ function calculateTotalMinutes(clockIn: Date, clockOut: Date, breaks: TimeEntryB
 
 export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntriesReturn {
   const { user, profile } = useAuth();
-  const [entries, setEntries] = useState<TimeEntry[]>([]);
+  const { isOnline } = useNetworkStatus();
+  const [entries, setEntries] = useState<TimeEntryWithSyncStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [pendingOfflineCount, setPendingOfflineCount] = useState(0);
 
   const orgId = profile?.orgId;
   const currentUserId = profile?.uid;
   const currentUserName = profile?.displayName || user?.email || 'Unknown';
   const currentUserRole = profile?.role || 'EMPLOYEE';
 
-  // Fetch entries with real-time updates
+  // Track pending offline entries count
+  useEffect(() => {
+    if (!orgId) return;
+
+    const updatePendingCount = async () => {
+      const count = await getPendingOfflineEntriesCount(orgId);
+      setPendingOfflineCount(count);
+    };
+
+    updatePendingCount();
+
+    // Update count periodically and on visibility change
+    const interval = setInterval(updatePendingCount, 5000);
+    document.addEventListener('visibilitychange', updatePendingCount);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', updatePendingCount);
+    };
+  }, [orgId, refreshTrigger]);
+
+  // Fetch entries with real-time updates and merge offline entries
   useEffect(() => {
     if (!orgId) {
       setLoading(false);
@@ -152,19 +195,62 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
       ...constraints
     );
 
+    // Helper to merge online and offline entries
+    const mergeWithOffline = async (onlineEntries: TimeEntry[]) => {
+      try {
+        const merged = await getMergedTimeEntries(orgId, onlineEntries, {
+          userId: options.includeAllUsers ? undefined : (options.userId || currentUserId),
+          projectId: options.projectId,
+          startDate: options.startDate,
+          endDate: options.endDate,
+          status: options.status ? (Array.isArray(options.status) ? options.status : [options.status]) : undefined,
+        });
+        setEntries(merged);
+      } catch (err) {
+        console.error('Error merging offline entries:', err);
+        // Fallback to online entries only
+        setEntries(onlineEntries.map(e => ({ ...e, syncStatus: 'synced' as const })));
+      }
+    };
+
     const unsubscribe = onSnapshot(
       q,
-      (snapshot) => {
-        const entriesData = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...convertTimestampsDeep(doc.data()),
+      async (snapshot) => {
+        const entriesData = snapshot.docs.map((docSnap) => ({
+          id: docSnap.id,
+          ...convertTimestampsDeep(docSnap.data()),
         })) as TimeEntry[];
-        setEntries(entriesData);
+
+        // Merge with offline entries
+        await mergeWithOffline(entriesData);
         setLoading(false);
         setError(null);
       },
-      (err) => {
+      async (err) => {
         console.error('Error fetching time entries:', err);
+
+        // If offline, load from offline storage only
+        if (!checkNetworkStatus()) {
+          try {
+            const offlineEntries = await getOfflineTimeEntries(orgId);
+            const filtered = offlineEntries.filter(e => {
+              if (options.userId && e.userId !== options.userId) return false;
+              if (!options.includeAllUsers && currentUserId && e.userId !== currentUserId) return false;
+              if (options.projectId && e.projectId !== options.projectId) return false;
+              return true;
+            }).map(e => ({
+              ...e,
+              id: e.localId,
+            }));
+            setEntries(filtered as TimeEntryWithSyncStatus[]);
+            setLoading(false);
+            setError('Showing offline entries only');
+            return;
+          } catch (offlineErr) {
+            console.error('Error loading offline entries:', offlineErr);
+          }
+        }
+
         setError(err.message);
         setLoading(false);
       }
@@ -176,7 +262,7 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
   // Get active entry (currently clocked in)
   const activeEntry = entries.find(e => e.status === 'active' || e.status === 'paused') || null;
 
-  // Clock in
+  // Clock in (works offline)
   const clockIn = useCallback(async (clockInOptions?: {
     projectId?: string;
     projectName?: string;
@@ -192,6 +278,29 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
     // Check if already clocked in
     if (activeEntry) {
       throw new Error('Already clocked in. Please clock out first.');
+    }
+
+    // If offline, use offline service
+    if (!checkNetworkStatus()) {
+      try {
+        const localId = await clockInOffline(
+          orgId,
+          currentUserId,
+          currentUserName,
+          currentUserRole,
+          {
+            ...clockInOptions,
+            hourlyRate: profile?.hourlyRate,
+          }
+        );
+        toast.success('Clocked in offline', 'Will sync when connected');
+        setRefreshTrigger(prev => prev + 1);
+        return localId;
+      } catch (err) {
+        console.error('Offline clock in error:', err);
+        toast.error('Failed to clock in offline');
+        throw err;
+      }
     }
 
     const now = new Date();
@@ -355,9 +464,38 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
     }
   }, [orgId, entries]);
 
-  // Create manual entry
+  // Create manual entry (works offline)
   const createManualEntry = useCallback(async (entryData: Omit<TimeEntry, 'id' | 'orgId' | 'userId' | 'userName' | 'userRole' | 'type' | 'status' | 'createdAt' | 'updatedAt'>): Promise<string> => {
     if (!orgId || !currentUserId) throw new Error('Not authenticated');
+
+    // If offline, use offline service
+    if (!checkNetworkStatus()) {
+      try {
+        const localId = await createManualEntryOffline(
+          orgId,
+          currentUserId,
+          currentUserName,
+          currentUserRole,
+          {
+            projectId: entryData.projectId,
+            projectName: entryData.projectName,
+            taskId: entryData.taskId,
+            taskName: entryData.taskName,
+            notes: entryData.notes,
+            clockIn: entryData.clockIn,
+            clockOut: entryData.clockOut!,
+            hourlyRate: profile?.hourlyRate,
+          }
+        );
+        toast.success('Time entry saved offline', 'Will sync when connected');
+        setRefreshTrigger(prev => prev + 1);
+        return localId;
+      } catch (err) {
+        console.error('Offline create manual entry error:', err);
+        toast.error('Failed to create time entry offline');
+        throw err;
+      }
+    }
 
     const now = new Date();
     const totalMinutes = entryData.clockOut
@@ -394,7 +532,7 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
       toast.error('Failed to create time entry');
       throw err;
     }
-  }, [orgId, currentUserId, currentUserName, currentUserRole]);
+  }, [orgId, currentUserId, currentUserName, currentUserRole, profile?.hourlyRate]);
 
   // Update entry
   const updateEntry = useCallback(async (entryId: string, updates: Partial<TimeEntry>, reason?: string): Promise<void> => {
@@ -650,6 +788,8 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
     activeEntry,
     loading,
     error,
+    isOnline,
+    pendingOfflineCount,
     clockIn,
     clockOut,
     startBreak,

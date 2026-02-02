@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   collection,
   query,
@@ -26,6 +26,8 @@ import {
   generatePhotoFilename,
   isValidImageFile,
 } from '@/lib/photo-processing';
+import { getOfflinePhotoService, PendingPhoto, PhotoCategory } from '@/lib/offline/offline-photos';
+import { useNetworkStatus } from '@/lib/offline/network-status';
 
 function photoFromFirestore(id: string, data: Record<string, unknown>): ProjectPhoto {
   return {
@@ -115,13 +117,26 @@ export interface UploadPhotoOptions {
   captureLocation?: boolean;
 }
 
+// Extended photo type to include pending status
+export interface MergedPhoto extends Omit<ProjectPhoto, 'id' | 'syncStatus'> {
+  id: string;
+  isPending?: boolean;
+  localId?: string;
+  syncStatus?: 'pending' | 'uploading' | 'failed' | 'completed' | 'synced';
+}
+
 export function useProjectPhotos(projectId: string) {
   const { user, profile } = useAuth();
+  const { isOnline } = useNetworkStatus();
   const [photos, setPhotos] = useState<ProjectPhoto[]>([]);
+  const [pendingPhotos, setPendingPhotos] = useState<PendingPhoto[]>([]);
   const [albums, setAlbums] = useState<PhotoAlbum[]>([]);
   const [folders, setFolders] = useState<PhotoFolder[]>([]);
   const [beforeAfterPairs, setBeforeAfterPairs] = useState<BeforeAfterPair[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const offlineService = getOfflinePhotoService();
 
   // Subscribe to photos
   useEffect(() => {
@@ -193,6 +208,151 @@ export function useProjectPhotos(projectId: string) {
 
     return unsubPairs;
   }, [projectId]);
+
+  // Subscribe to pending photos from IndexedDB
+  useEffect(() => {
+    if (!projectId) return;
+
+    const loadPendingPhotos = async () => {
+      try {
+        const pending = await offlineService.getPendingPhotosForProject(projectId);
+        setPendingPhotos(pending.filter((p) => p.syncStatus !== 'completed'));
+      } catch (error) {
+        console.error('Failed to load pending photos:', error);
+      }
+    };
+
+    loadPendingPhotos();
+
+    const unsubscribe = offlineService.subscribeToQueueChanges(() => {
+      loadPendingPhotos();
+    });
+
+    return unsubscribe;
+  }, [projectId, offlineService]);
+
+  // Merged photos: synced photos + pending photos (pending first, marked)
+  const mergedPhotos = useMemo((): MergedPhoto[] => {
+    // Convert pending photos to MergedPhoto format
+    const pendingAsMerged: MergedPhoto[] = pendingPhotos
+      .filter((p) => p.syncStatus !== 'completed')
+      .map((p) => ({
+        id: p.localId,
+        localId: p.localId,
+        projectId: p.projectId,
+        userId: p.userId,
+        userName: p.userName,
+        url: p.thumbnail, // Use thumbnail as temporary URL
+        thumbnailUrl: p.thumbnail,
+        type: p.category as ProjectPhoto['type'],
+        caption: p.caption,
+        location: p.location,
+        takenAt: new Date(p.takenAt),
+        createdAt: new Date(p.createdAt),
+        isPending: true,
+        syncStatus: p.syncStatus,
+      }));
+
+    // Convert synced photos
+    const syncedAsMerged: MergedPhoto[] = photos.map((p) => ({
+      ...p,
+      isPending: false,
+      syncStatus: 'synced' as const,
+    }));
+
+    // Return pending first, then synced (both sorted by createdAt desc)
+    return [
+      ...pendingAsMerged.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()),
+      ...syncedAsMerged,
+    ];
+  }, [photos, pendingPhotos]);
+
+  // Capture photo offline (for field use)
+  const capturePhotoOffline = useCallback(
+    async (
+      blob: Blob,
+      options: {
+        category?: PhotoCategory;
+        caption?: string;
+        phaseId?: string;
+        albumId?: string;
+        taskId?: string;
+        location?: { lat: number; lng: number };
+      } = {}
+    ) => {
+      if (!user || !profile?.orgId) {
+        toast.error('You must be logged in to capture photos');
+        return null;
+      }
+
+      try {
+        const localId = await offlineService.queuePhoto({
+          projectId,
+          orgId: profile.orgId,
+          userId: user.uid,
+          userName: profile.displayName || profile.email || 'Unknown',
+          blob,
+          thumbnail: '',
+          filename: generatePhotoFilename('photo.jpg'),
+          category: options.category || 'progress',
+          caption: options.caption,
+          takenAt: Date.now(),
+          location: options.location,
+          phaseId: options.phaseId,
+          albumId: options.albumId,
+          taskId: options.taskId,
+        });
+
+        toast.success('Photo saved! Will upload when online.');
+        return localId;
+      } catch (error) {
+        console.error('Failed to capture photo offline:', error);
+        toast.error('Failed to save photo');
+        return null;
+      }
+    },
+    [projectId, user, profile, offlineService]
+  );
+
+  // Sync pending photos
+  const syncPendingPhotos = useCallback(async () => {
+    if (!isOnline) {
+      toast.error('No network connection');
+      return { success: 0, failed: 0 };
+    }
+
+    setIsSyncing(true);
+    try {
+      const result = await offlineService.processUploadQueue();
+      if (result.successful > 0) {
+        toast.success(`${result.successful} photo${result.successful > 1 ? 's' : ''} uploaded`);
+      }
+      if (result.failed > 0) {
+        toast.error(`${result.failed} upload${result.failed > 1 ? 's' : ''} failed`);
+      }
+      return { success: result.successful, failed: result.failed };
+    } catch (error) {
+      console.error('Sync failed:', error);
+      toast.error('Sync failed');
+      return { success: 0, failed: 0 };
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [isOnline, offlineService]);
+
+  // Delete pending photo
+  const deletePendingPhoto = useCallback(
+    async (localId: string) => {
+      try {
+        await offlineService.deletePendingPhoto(localId);
+        toast.success('Pending photo deleted');
+      } catch (error) {
+        console.error('Failed to delete pending photo:', error);
+        toast.error('Failed to delete photo');
+      }
+    },
+    [offlineService]
+  );
 
   // Upload a photo with processing
   const uploadPhoto = useCallback(
@@ -619,10 +779,17 @@ export function useProjectPhotos(projectId: string) {
   return {
     // Data
     photos,
+    mergedPhotos,
+    pendingPhotos,
     albums,
     folders,
     beforeAfterPairs,
     loading,
+
+    // Offline state
+    isOnline,
+    isSyncing,
+    pendingCount: pendingPhotos.filter((p) => p.syncStatus !== 'completed').length,
 
     // Photo operations
     uploadPhoto,
@@ -632,6 +799,11 @@ export function useProjectPhotos(projectId: string) {
     approvePhoto,
     addAnnotation,
     removeAnnotation,
+
+    // Offline operations
+    capturePhotoOffline,
+    syncPendingPhotos,
+    deletePendingPhoto,
 
     // Album operations
     createAlbum,

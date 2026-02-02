@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#2563eb">
+  <title>Offline - ContractorOS</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      text-align: center;
+      max-width: 400px;
+    }
+
+    .icon {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 24px;
+      background: #e2e8f0;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .icon svg {
+      width: 64px;
+      height: 64px;
+      color: #64748b;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 12px;
+    }
+
+    p {
+      font-size: 16px;
+      color: #64748b;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: #fef3c7;
+      border-radius: 8px;
+      margin-bottom: 24px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: #f59e0b;
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .status-text {
+      font-size: 14px;
+      font-weight: 500;
+      color: #92400e;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: #2563eb;
+      color: white;
+      font-size: 14px;
+      font-weight: 500;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn:hover {
+      background: #1d4ed8;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .pending-info {
+      margin-top: 24px;
+      padding: 16px;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .pending-info h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 8px;
+    }
+
+    .pending-info p {
+      font-size: 13px;
+      color: #64748b;
+      margin-bottom: 0;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z" />
+      </svg>
+    </div>
+
+    <h1>You're Offline</h1>
+    <p>It looks like you've lost your internet connection. Don't worry - any changes you make will be saved and synced when you're back online.</p>
+
+    <div class="status">
+      <div class="status-dot"></div>
+      <span class="status-text">Waiting for connection...</span>
+    </div>
+
+    <button class="btn" onclick="tryReconnect()">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+      </svg>
+      Try Again
+    </button>
+
+    <div id="pending-info" class="pending-info hidden">
+      <h3>Pending Changes</h3>
+      <p id="pending-count">You have changes waiting to sync</p>
+    </div>
+  </div>
+
+  <script>
+    // Try to reconnect
+    function tryReconnect() {
+      window.location.reload();
+    }
+
+    // Auto-refresh when back online
+    window.addEventListener('online', function() {
+      window.location.reload();
+    });
+
+    // Check for pending operations in IndexedDB
+    async function checkPendingOps() {
+      try {
+        const DB_NAME = 'contractoros-offline';
+        const STORE_NAME = 'sync-queue';
+
+        const request = indexedDB.open(DB_NAME, 1);
+
+        request.onsuccess = function(event) {
+          const db = event.target.result;
+
+          if (!db.objectStoreNames.contains(STORE_NAME)) {
+            return;
+          }
+
+          const tx = db.transaction(STORE_NAME, 'readonly');
+          const store = tx.objectStore(STORE_NAME);
+          const countRequest = store.count();
+
+          countRequest.onsuccess = function() {
+            const count = countRequest.result;
+            if (count > 0) {
+              const info = document.getElementById('pending-info');
+              const countEl = document.getElementById('pending-count');
+              info.classList.remove('hidden');
+              countEl.textContent = `You have ${count} change${count !== 1 ? 's' : ''} waiting to sync`;
+            }
+          };
+        };
+      } catch (err) {
+        console.log('Could not check pending operations');
+      }
+    }
+
+    checkPendingOps();
+  </script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import AuthGuard from '@/components/auth/AuthGuard';
 import AppShell from '@/components/ui/AppShell';
@@ -8,6 +8,7 @@ import { NavItem, RolePermissions } from '@/types';
 import { useImpersonation } from '@/lib/contexts/ImpersonationContext';
 import { ImpersonationBanner } from '@/components/impersonation';
 import { OfflineBanner } from '@/components/offline/OfflineBanner';
+import { FloatingSyncIndicator } from '@/components/offline/SyncStatusIndicator';
 import SidebarDevTools from '@/components/ui/SidebarDevTools';
 import { AssistantPanel, AssistantTrigger } from '@/components/assistant';
 import { useAssistant } from '@/lib/hooks/useAssistant';
@@ -59,6 +60,33 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
   // AI Assistant state
   const assistant = useAssistant();
+
+  // Register service worker for offline support
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register('/sw.js')
+        .then((registration) => {
+          console.log('[SW] Service worker registered:', registration.scope);
+
+          // Check for updates periodically
+          registration.addEventListener('updatefound', () => {
+            const newWorker = registration.installing;
+            if (newWorker) {
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  // New content available, prompt user to refresh
+                  console.log('[SW] New content available, refresh to update');
+                }
+              });
+            }
+          });
+        })
+        .catch((error) => {
+          console.warn('[SW] Service worker registration failed:', error);
+        });
+    }
+  }, []);
 
   // Get nav items based on current role
   const filteredNavItems = useMemo(() => {
@@ -116,6 +144,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         onActionClick={assistant.handleAction}
         contextSuggestions={assistant.suggestions}
       />
+
+      {/* Offline Sync Status Indicator */}
+      <FloatingSyncIndicator position="bottom-left" />
     </div>
   );
 }

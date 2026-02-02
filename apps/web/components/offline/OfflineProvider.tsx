@@ -1,9 +1,9 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { OfflineState, QueuedOperation, OperationType } from '@/lib/offline/types';
+import { OfflineState, QueuedOperation, OperationType, SyncEvent } from '@/lib/offline/types';
 import { useNetworkStatus } from '@/lib/offline/network-status';
-import { subscribeToQueue, processQueue, getQueueStats, addToQueue } from '@/lib/offline/sync-queue';
+import { SyncManager, SyncResult } from '@/lib/offline/sync-manager';
 
 // ============================================
 // Types
@@ -11,13 +11,16 @@ import { subscribeToQueue, processQueue, getQueueStats, addToQueue } from '@/lib
 
 interface OfflineContextValue {
   state: OfflineState;
-  syncNow: () => Promise<void>;
+  syncNow: () => Promise<SyncResult>;
   queueOperation: (
     type: OperationType,
     collection: string,
     documentId: string,
     data: Record<string, unknown>
   ) => Promise<string>;
+  getPendingOperations: () => Promise<QueuedOperation[]>;
+  retryOperation: (operationId: string) => Promise<void>;
+  removeOperation: (operationId: string) => Promise<void>;
 }
 
 // ============================================
@@ -27,29 +30,12 @@ interface OfflineContextValue {
 const OfflineContext = createContext<OfflineContextValue | null>(null);
 
 // ============================================
-// Default sync handler (placeholder)
-// ============================================
-
-async function defaultSyncHandler(operation: QueuedOperation): Promise<void> {
-  // This should be replaced with actual Firestore sync logic
-  // For now, just log the operation
-  console.log('[OfflineSync] Processing operation:', operation);
-
-  // Simulate network request
-  await new Promise((resolve) => setTimeout(resolve, 500));
-
-  // In production, this would:
-  // 1. Call Firestore API based on operation.type
-  // 2. Handle conflicts if document was modified
-  // 3. Throw error if request fails
-}
-
-// ============================================
 // Provider
 // ============================================
 
 export function OfflineProvider({ children }: { children: React.ReactNode }) {
   const { isOnline, wasOffline } = useNetworkStatus();
+  const initRef = useRef(false);
 
   const [state, setState] = useState<OfflineState>({
     isOnline: true,
@@ -61,83 +47,65 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
     lastSuccessfulSync: null,
   });
 
-  const syncInProgressRef = useRef(false);
-
-  // Update online status
+  // Initialize SyncManager
   useEffect(() => {
-    setState((prev) => ({
-      ...prev,
-      isOnline,
-      wasOffline,
-    }));
-  }, [isOnline, wasOffline]);
+    if (initRef.current) return;
+    initRef.current = true;
 
-  // Subscribe to queue changes
-  useEffect(() => {
-    const updateQueueStats = async () => {
-      try {
-        const stats = await getQueueStats();
-        setState((prev) => ({
-          ...prev,
-          pendingCount: stats.pending,
-          syncingCount: stats.syncing,
-          failedCount: stats.failed,
-        }));
-      } catch (error) {
-        console.error('Failed to get queue stats:', error);
-      }
+    SyncManager.initialize().catch(console.error);
+
+    return () => {
+      SyncManager.cleanup();
     };
-
-    const unsubscribe = subscribeToQueue(() => {
-      updateQueueStats();
-    });
-
-    // Initial load
-    updateQueueStats();
-
-    return unsubscribe;
   }, []);
 
-  // Auto-sync when coming back online
+  // Subscribe to SyncManager state changes
   useEffect(() => {
-    if (isOnline && wasOffline && state.pendingCount > 0) {
-      syncNow();
-    }
-  }, [isOnline, wasOffline, state.pendingCount]);
+    const unsubscribe = SyncManager.onStatusChange((newState) => {
+      setState(newState);
+    });
 
-  // Sync function
-  const syncNow = useCallback(async () => {
-    if (!isOnline || syncInProgressRef.current) {
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  // Subscribe to sync events for logging/debugging
+  useEffect(() => {
+    const unsubscribe = SyncManager.onSyncEvent((event: SyncEvent) => {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[OfflineProvider] Sync event:', event);
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  // Listen for service worker messages
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
       return;
     }
 
-    syncInProgressRef.current = true;
-    setState((prev) => ({ ...prev, lastSyncAttempt: Date.now() }));
-
-    try {
-      const result = await processQueue(defaultSyncHandler);
-
-      if (result.success > 0) {
-        setState((prev) => ({
-          ...prev,
-          lastSuccessfulSync: Date.now(),
-        }));
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'SYNC_REQUESTED') {
+        SyncManager.forceSync().catch(console.error);
       }
-    } catch (error) {
-      console.error('Sync failed:', error);
-    } finally {
-      syncInProgressRef.current = false;
+    };
 
-      // Refresh stats
-      const stats = await getQueueStats();
-      setState((prev) => ({
-        ...prev,
-        pendingCount: stats.pending,
-        syncingCount: stats.syncing,
-        failedCount: stats.failed,
-      }));
-    }
-  }, [isOnline]);
+    navigator.serviceWorker.addEventListener('message', handleMessage);
+
+    return () => {
+      navigator.serviceWorker.removeEventListener('message', handleMessage);
+    };
+  }, []);
+
+  // Sync function
+  const syncNow = useCallback(async (): Promise<SyncResult> => {
+    return SyncManager.forceSync();
+  }, []);
 
   // Queue an operation
   const queueOperation = useCallback(
@@ -147,22 +115,33 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
       documentId: string,
       data: Record<string, unknown>
     ): Promise<string> => {
-      const operationId = await addToQueue(type, collection, documentId, data);
-
-      // If online, try to sync immediately
-      if (isOnline) {
-        syncNow();
-      }
-
-      return operationId;
+      return SyncManager.queueOperation(type, collection, documentId, data);
     },
-    [isOnline, syncNow]
+    []
   );
+
+  // Get pending operations
+  const getPendingOperations = useCallback(async (): Promise<QueuedOperation[]> => {
+    return SyncManager.getPendingOperations();
+  }, []);
+
+  // Retry a failed operation
+  const retryOperation = useCallback(async (operationId: string): Promise<void> => {
+    return SyncManager.retryOperation(operationId);
+  }, []);
+
+  // Remove an operation from queue
+  const removeOperation = useCallback(async (operationId: string): Promise<void> => {
+    return SyncManager.removeOperation(operationId);
+  }, []);
 
   const value: OfflineContextValue = {
     state,
     syncNow,
     queueOperation,
+    getPendingOperations,
+    retryOperation,
+    removeOperation,
   };
 
   return (
