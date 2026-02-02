@@ -1,4 +1,4 @@
-import * as admin from "firebase-admin";
+import { getFirestore, Timestamp } from "firebase-admin/firestore";
 import { sendEmail } from "./sendEmail";
 import {
   signatureRequestEmailTemplate,
@@ -8,8 +8,6 @@ import {
 } from "./emailTemplates";
 import { format } from "date-fns";
 
-const db = admin.firestore();
-
 interface SignerInfo {
   id: string;
   order: number;
@@ -18,10 +16,10 @@ interface SignerInfo {
   phone?: string;
   role: string;
   accessToken: string;
-  tokenExpiresAt: admin.firestore.Timestamp | Date;
+  tokenExpiresAt: Timestamp | Date;
   status: "pending" | "sent" | "viewed" | "signed" | "declined";
-  signedAt?: admin.firestore.Timestamp | Date;
-  declinedAt?: admin.firestore.Timestamp | Date;
+  signedAt?: Timestamp | Date;
+  declinedAt?: Timestamp | Date;
   declineReason?: string;
   remindersSent: number;
 }
@@ -39,7 +37,7 @@ interface SignatureRequestData {
   status: string;
   emailSubject?: string;
   emailMessage?: string;
-  expiresAt?: admin.firestore.Timestamp | Date;
+  expiresAt?: Timestamp | Date;
   createdBy: string;
   createdByName: string;
 }
@@ -57,6 +55,7 @@ interface OrgData {
  * Get organization data for email branding
  */
 async function getOrgData(orgId: string): Promise<OrgData | null> {
+  const db = getFirestore();
   const orgSnap = await db.collection("organizations").doc(orgId).get();
   if (!orgSnap.exists) return null;
   return orgSnap.data() as OrgData;
@@ -74,9 +73,9 @@ function generateSigningUrl(requestId: string, signerIndex: number): string {
 /**
  * Format a date for email display
  */
-function formatDate(date: admin.firestore.Timestamp | Date | undefined): string {
+function formatDate(date: Timestamp | Date | undefined): string {
   if (!date) return "N/A";
-  const d = date instanceof admin.firestore.Timestamp ? date.toDate() : date;
+  const d = date instanceof Timestamp ? date.toDate() : date;
   return format(d, "MMMM d, yyyy 'at' h:mm a");
 }
 
@@ -176,6 +175,7 @@ export async function sendSignatureCompletedEmail(
   const signer = data.signers[signerIndex];
   if (!signer) return;
 
+  const db = getFirestore();
   const orgData = await getOrgData(data.orgId);
   const orgName = orgData?.name || "ContractorOS";
   const primaryColor = orgData?.branding?.primaryColor;
@@ -225,6 +225,7 @@ export async function sendSignatureDeclinedEmail(
   const signer = data.signers[signerIndex];
   if (!signer) return;
 
+  const db = getFirestore();
   const orgData = await getOrgData(data.orgId);
   const orgName = orgData?.name || "ContractorOS";
   const primaryColor = orgData?.branding?.primaryColor;

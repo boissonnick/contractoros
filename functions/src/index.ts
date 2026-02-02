@@ -10,6 +10,16 @@ import {
   sendSignedDocumentCopy,
 } from "./email/sendSignatureEmails";
 
+// Intelligence data fetching functions
+export {
+  fetchMaterialPricesScheduled,
+  fetchMaterialPricesHttp,
+} from "./intelligence/fetchMaterialPrices";
+export {
+  fetchLaborRatesScheduled,
+  fetchLaborRatesHttp,
+} from "./intelligence/fetchLaborRates";
+
 // Initialize Firebase Admin SDK
 admin.initializeApp();
 

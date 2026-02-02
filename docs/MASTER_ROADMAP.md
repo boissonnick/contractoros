@@ -1512,6 +1512,41 @@ apps/web/components/payments/
 
 > **Goal:** Enterprise-ready features and advanced capabilities.
 
+### EPIC: Lead Generation Integration Platform
+**Category:** New Feature | **Priority:** P1 | **Size:** XL (16-20 weeks)
+**Status:** BACKLOG
+**Full Spec:** `docs/EPIC_LEAD_GENERATION_PLATFORM.md`
+
+**Business Value:** "Killer feature" - unified lead management hub eliminating manual data transfer between platforms.
+
+**Components:**
+
+| Component | Description | Size | Priority |
+|-----------|-------------|------|----------|
+| **Lead Inbox** | Unified view of all leads | L (2 weeks) | P0 |
+| **Thumbtack Integration** | Full Partner API | L (2 weeks) | P0 |
+| **Angi Integration** | Webhook-based leads | M (1.5 weeks) | P0 |
+| **Google LSA Integration** | Leads + budget management | L (2 weeks) | P0 |
+| **Meta Lead Ads** | Facebook/Instagram leads | M (1 week) | P1 |
+| **Website Builder** | White-label Duda or Payload CMS | XL (4 weeks) | P1 |
+| **Lead Capture Forms** | Embeddable forms | M (1 week) | P1 |
+| **Marketing ROI Dashboard** | Cost-per-lead analytics | M (2 weeks) | P1 |
+| **Zapier Integration** | For unsupported platforms | M (2 weeks) | P2 |
+
+**Lead Sources Researched:**
+- **Tier 1 (API):** Thumbtack, Angi, Google LSA, Meta Lead Ads
+- **Tier 2 (Zapier):** Houzz Pro (import only), Bark, Nextdoor
+- **Tier 3 (Partnership):** Porch, Yelp (partner-only)
+- **Regional:** Checkatrade (UK), HomeStars (Canada)
+
+**Key Findings:**
+- Thumbtack has the most complete API (leads, two-way messaging, reviews)
+- Angi/HomeAdvisor is webhook-only, no ad spend control
+- Google LSA allows budget/bidding control via Google Ads API
+- Houzz Pro has NO public API, one-way Zapier import only
+
+---
+
 ### Team Management Overhaul
 - Certifications and training system
 - Onboarding workflows
@@ -1532,11 +1567,199 @@ apps/web/components/payments/
 
 ### Future Considerations
 - Native mobile apps (iOS, Android)
-- AI features (estimate suggestions, photo categorization)
-- Voice commands throughout
 - Offline mode enhancements
 - International expansion
 - White-label opportunities
+
+---
+
+## Phase 6: AI Intelligence Platform
+
+> **Goal:** Transform ContractorOS into an AI-powered construction intelligence platform.
+> **See:** `docs/AI_INTELLIGENCE_VISION.md` for full strategic vision.
+
+### AI-L1: Construction Intelligence Database
+**Category:** New Feature | **Priority:** P0 | **Size:** XL (8 weeks)
+**Business Value:** Foundation for all AI features, competitive moat
+
+**Data Sources (External):**
+- FRED API (material price indices - lumber, steel, cement)
+- BLS OEWS (labor wage data by occupation and geography)
+- SAM.gov Davis-Bacon (prevailing wage rates by county)
+- Census Bureau (construction activity and permits)
+- HUD Cost Indices (location adjustment factors)
+
+**Data Sources (Internal - The Moat):**
+- Aggregated, anonymized user estimates
+- Subcontractor bid history
+- Invoice actuals vs estimates
+- Time tracking productivity data
+- Change order patterns
+
+**Files to Create:**
+```
+apps/web/lib/intelligence/
+├── types.ts                    # Intelligence data types
+├── material-prices.ts          # FRED API integration
+├── labor-rates.ts              # BLS data integration
+├── benchmarks.ts               # Benchmark calculations
+└── anonymizer.ts               # Data anonymization
+
+functions/src/intelligence/
+├── fetchMaterialPrices.ts      # Scheduled FRED fetch
+├── fetchLaborRates.ts          # Scheduled BLS fetch
+├── aggregateUserData.ts        # Anonymized aggregation
+└── index.ts
+```
+
+---
+
+### AI-L2: Estimation Intelligence
+**Category:** New Feature | **Priority:** P0 | **Size:** L (4 weeks)
+**Business Value:** Increase estimate accuracy, reduce revision time by 30%
+
+**Features:**
+1. **Smart Line Item Suggestions**
+   - Suggest unit costs based on region, project type, historical data
+   - Show market range for each line item
+   - "Your typical price" vs "market average" comparison
+
+2. **Estimate Confidence Score**
+   - Calculate risk score based on data availability
+   - Flag thin margins vs historical averages
+   - Show estimate position vs market range
+
+3. **Material Price Alerts**
+   - Proactive notifications when prices change >5%
+   - Suggest estimate updates for pending quotes
+   - Seasonal trend indicators
+
+**UI Integration Points:**
+- Line item picker shows AI suggestions
+- Estimate summary includes confidence meter
+- Dashboard shows pending quote risk alerts
+
+**Files to Create:**
+```
+apps/web/components/intelligence/
+├── InsightCard.tsx             # Reusable insight display
+├── MarketComparison.tsx        # Price comparison visual
+├── ConfidenceScore.tsx         # Estimate confidence meter
+├── PriceAlertBanner.tsx        # Material price alerts
+└── index.ts
+
+apps/web/lib/hooks/useIntelligence.ts  # Intelligence data hooks
+```
+
+---
+
+### AI-M3: Bid Intelligence
+**Category:** New Feature | **Priority:** P1 | **Size:** M (2 weeks)
+**Business Value:** Optimize subcontractor selection, improve bid acceptance rates
+
+**Features:**
+1. **Bid Comparison Analysis**
+   - Compare bid to market rates for trade
+   - Compare to sub's historical bids
+   - Compare to other received bids
+
+2. **Subcontractor Scoring**
+   - Performance score based on past projects
+   - Price competitiveness rating
+   - Reliability index
+
+3. **Bid Recommendations**
+   - Suggest optimal number of bids to request
+   - Identify best value subs for project type
+   - Market timing recommendations
+
+---
+
+### AI-M4: Project Intelligence
+**Category:** New Feature | **Priority:** P1 | **Size:** M (2 weeks)
+**Business Value:** Predict profitability, reduce project risk
+
+**Features:**
+1. **Profitability Predictions**
+   - Pre-project profit forecast
+   - Risk factors identification
+   - Similar project comparison
+
+2. **Risk Indicators**
+   - Thin margin warnings
+   - Scope creep patterns
+   - Weather risk for outdoor work
+   - Schedule conflict detection
+
+3. **Post-Project Analysis**
+   - Automated estimate vs actuals comparison
+   - Trade-by-trade variance breakdown
+   - Change order pattern analysis
+   - Lessons learned suggestions
+
+---
+
+### AI-L5: AI Assistant
+**Category:** New Feature | **Priority:** P1 | **Size:** L (3 weeks)
+**Business Value:** Instant answers, reduced learning curve, hands-free field operation
+
+**Features:**
+1. **Contextual Chat Interface**
+   - Claude API integration
+   - Context-aware responses (knows current project, user history)
+   - Natural language queries ("What should I charge for bathroom remodels?")
+
+2. **Voice Commands**
+   - Speech-to-text input
+   - Text-to-speech responses
+   - Hands-free field operation
+   - Mobile-optimized
+
+3. **Proactive Insights**
+   - "You might want to know..." notifications
+   - Weekly intelligence digest
+   - Trend alerts
+
+**Files to Create:**
+```
+apps/web/components/assistant/
+├── AssistantPanel.tsx          # Slide-out chat panel
+├── ChatMessage.tsx             # Message display
+├── VoiceInput.tsx              # Voice command UI
+└── index.ts
+
+apps/web/lib/assistant/
+├── claude-client.ts            # Claude API wrapper
+├── context-builder.ts          # Build context from user data
+├── voice-service.ts            # Speech-to-text/text-to-speech
+└── types.ts
+```
+
+---
+
+### AI Feature Index
+
+| ID | Title | Priority | Size | Status |
+|----|-------|----------|------|--------|
+| AI-L1 | Construction Intelligence Database | P0 | XL | Sprint 14 |
+| AI-L2 | Estimation Intelligence | P0 | L | Sprint 15-16 |
+| AI-M3 | Bid Intelligence | P1 | M | Sprint 17 |
+| AI-M4 | Project Intelligence | P1 | M | Sprint 18 |
+| AI-L5 | AI Assistant | P1 | L | Sprint 19-20 |
+
+### AI Data Sources Summary
+
+| Source | Data Type | Cost | Priority |
+|--------|-----------|------|----------|
+| FRED API | Material price indices | Free | P0 |
+| BLS OEWS | Labor wage data | Free | P0 |
+| SAM.gov Davis-Bacon | Prevailing wages | Free | P0 |
+| Census Bureau | Construction activity | Free | P1 |
+| HUD Cost Indices | Location factors | Free | P1 |
+| User Data (aggregated) | Estimates, bids, actuals | Internal | P0 |
+| Home Depot/Lowe's | Retail material prices | Scraping | P2 |
+| Craftsman Estimator | Unit costs | $14/mo | P2 |
+| 1build API | Live cost data | $$$ | Future |
 
 ---
 
@@ -1627,6 +1850,26 @@ apps/web/components/payments/
 | FEAT-S23 | Permit Tracking | P2 | S | Pending |
 | FEAT-S24 | Referral Tracking | P2 | S | Pending |
 | FEAT-S25 | Reporting Dashboards | P2 | S | Pending |
+
+### Lead Generation Platform (Epic)
+
+| ID | Title | Priority | Size | Status |
+|----|-------|----------|------|--------|
+| LEAD-001 | Unified Lead Inbox | P0 | L | Backlog |
+| LEAD-002 | Webhook Infrastructure | P0 | M | Backlog |
+| LEAD-003 | Real-Time Notifications | P0 | S | Backlog |
+| LEAD-010 | Thumbtack Integration | P0 | L | Backlog |
+| LEAD-011 | Angi Integration | P0 | M | Backlog |
+| LEAD-012 | Google LSA Integration | P0 | L | Backlog |
+| LEAD-013 | Meta Lead Ads Integration | P1 | M | Backlog |
+| LEAD-014 | Google Business Profile | P2 | S | Backlog |
+| LEAD-020 | Website Builder Platform | P1 | XL | Backlog |
+| LEAD-021 | Lead Capture Forms | P1 | M | Backlog |
+| LEAD-022 | Website Chat Widget | P2 | S | Backlog |
+| LEAD-030 | Marketing ROI Dashboard | P1 | M | Backlog |
+| LEAD-031 | Lead Scoring & Auto-Assignment | P2 | M | Backlog |
+| LEAD-032 | Two-Way Messaging Hub | P1 | M | Backlog |
+| LEAD-040 | Zapier App | P2 | M | Backlog |
 
 ### Sprint 9 Completed Features
 

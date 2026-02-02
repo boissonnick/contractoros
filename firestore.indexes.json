@@ -526,61 +526,59 @@
       ]
     },
     {
-      "collectionGroup": "quickbooksConnections",
+      "collectionGroup": "accountingConnections",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "orgId", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
+        { "fieldPath": "provider", "order": "ASCENDING" },
+        { "fieldPath": "isConnected", "order": "ASCENDING" }
       ]
     },
     {
-      "collectionGroup": "quickbooksConnections",
+      "collectionGroup": "accountingSyncLogs",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "orgId", "order": "ASCENDING" },
-        { "fieldPath": "status", "order": "ASCENDING" }
+        { "fieldPath": "action", "order": "ASCENDING" },
+        { "fieldPath": "startedAt", "order": "DESCENDING" }
       ]
     },
     {
-      "collectionGroup": "quickbooksSyncLogs",
+      "collectionGroup": "accountingSyncLogs",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "orgId", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "quickbooksSyncLogs",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "orgId", "order": "ASCENDING" },
         { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
+        { "fieldPath": "startedAt", "order": "DESCENDING" }
       ]
     },
     {
-      "collectionGroup": "quickbooksSyncLogs",
+      "collectionGroup": "accountingSyncLogs",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "orgId", "order": "ASCENDING" },
+        { "fieldPath": "provider", "order": "ASCENDING" },
+        { "fieldPath": "startedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "qboEntityMappings",
+      "queryScope": "COLLECTION",
+      "fields": [
         { "fieldPath": "entityType", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
+        { "fieldPath": "localId", "order": "ASCENDING" }
       ]
     },
     {
-      "collectionGroup": "quickbooksEntityMappings",
+      "collectionGroup": "qboEntityMappings",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "orgId", "order": "ASCENDING" },
-        { "fieldPath": "entityType", "order": "ASCENDING" }
+        { "fieldPath": "entityType", "order": "ASCENDING" },
+        { "fieldPath": "qboId", "order": "ASCENDING" }
       ]
     },
     {
-      "collectionGroup": "quickbooksEntityMappings",
+      "collectionGroup": "qboEntityMappings",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "orgId", "order": "ASCENDING" },
-        { "fieldPath": "cosEntityId", "order": "ASCENDING" }
+        { "fieldPath": "entityType", "order": "ASCENDING" },
+        { "fieldPath": "lastSyncedAt", "order": "DESCENDING" }
       ]
     },
     {
