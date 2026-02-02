@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { Button, Card, Badge, EmptyState } from '@/components/ui';
 import {
@@ -19,6 +19,20 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import CreateSubmittalModal from '@/components/projects/submittals/CreateSubmittalModal';
 import SubmittalDetailModal from '@/components/projects/submittals/SubmittalDetailModal';
+import { useAuth } from '@/lib/auth';
+import { db } from '@/lib/firebase/config';
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  doc,
+  onSnapshot,
+  query,
+  orderBy,
+  serverTimestamp,
+  Timestamp,
+} from 'firebase/firestore';
+import { toast } from '@/components/ui/Toast';
 
 // Mock data for development
 const mockSubmittals: Submittal[] = [
@@ -109,13 +123,60 @@ const statusConfig: Record<SubmittalStatus, { label: string; color: string; icon
 export default function SubmittalsPage() {
   const params = useParams();
   const projectId = params.id as string;
+  const { profile } = useAuth();
 
-  const [submittals] = useState<Submittal[]>(mockSubmittals);
+  const [submittals, setSubmittals] = useState<Submittal[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<SubmittalStatus | 'all'>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedSubmittal, setSelectedSubmittal] = useState<Submittal | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+  // Fetch submittals from Firestore
+  useEffect(() => {
+    if (!profile?.orgId || !projectId) {
+      setLoading(false);
+      return;
+    }
+
+    const submittalsRef = collection(
+      db,
+      'organizations',
+      profile.orgId,
+      'projects',
+      projectId,
+      'submittals'
+    );
+    const q = query(submittalsRef, orderBy('createdAt', 'desc'));
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const items = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            ...data,
+            dueDate: data.dueDate?.toDate?.() || null,
+            submittedAt: data.submittedAt?.toDate?.() || null,
+            reviewedAt: data.reviewedAt?.toDate?.() || null,
+            createdAt: data.createdAt?.toDate?.() || new Date(),
+            updatedAt: data.updatedAt?.toDate?.() || null,
+          } as Submittal;
+        });
+        setSubmittals(items);
+        setLoading(false);
+      },
+      (error) => {
+        console.error('Error fetching submittals:', error);
+        toast.error('Failed to load submittals');
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [profile?.orgId, projectId]);
 
   // Filter submittals
   const filteredSubmittals = useMemo(() => {
@@ -140,14 +201,85 @@ export default function SubmittalsPage() {
   }, [submittals]);
 
   const handleCreateSubmittal = async (data: Partial<Submittal>) => {
-    console.log('Creating submittal:', data);
-    // TODO: Implement Firestore create
-    setIsCreateModalOpen(false);
+    if (!profile?.orgId) {
+      toast.error('Not authenticated');
+      return;
+    }
+
+    try {
+      const submittalsRef = collection(
+        db,
+        'organizations',
+        profile.orgId,
+        'projects',
+        projectId,
+        'submittals'
+      );
+
+      // Generate submittal number
+      const submittalNumber = `SUB-${String(submittals.length + 1).padStart(3, '0')}`;
+
+      await addDoc(submittalsRef, {
+        ...data,
+        projectId,
+        number: submittalNumber,
+        status: data.status || 'pending_review',
+        revisionNumber: 0,
+        submittedBy: profile.uid,
+        submittedByName: profile.displayName || profile.email,
+        submittedAt: serverTimestamp(),
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+
+      toast.success('Submittal created successfully');
+      setIsCreateModalOpen(false);
+    } catch (error) {
+      console.error('Error creating submittal:', error);
+      toast.error('Failed to create submittal');
+    }
   };
 
   const handleUpdateStatus = async (submittalId: string, status: SubmittalStatus, comments?: string) => {
-    console.log('Updating submittal status:', submittalId, status, comments);
-    // TODO: Implement Firestore update
+    if (!profile?.orgId) {
+      toast.error('Not authenticated');
+      return;
+    }
+
+    try {
+      const submittalRef = doc(
+        db,
+        'organizations',
+        profile.orgId,
+        'projects',
+        projectId,
+        'submittals',
+        submittalId
+      );
+
+      await updateDoc(submittalRef, {
+        status,
+        reviewComments: comments || null,
+        reviewedAt: serverTimestamp(),
+        reviewedBy: profile.uid,
+        reviewedByName: profile.displayName || profile.email,
+        updatedAt: serverTimestamp(),
+      });
+
+      toast.success('Submittal status updated');
+
+      // Update the selected submittal if it's the one being updated
+      if (selectedSubmittal?.id === submittalId) {
+        setSelectedSubmittal({
+          ...selectedSubmittal,
+          status,
+          reviewComments: comments,
+        });
+      }
+    } catch (error) {
+      console.error('Error updating submittal:', error);
+      toast.error('Failed to update submittal');
+    }
   };
 
   const openDetail = (submittal: Submittal) => {

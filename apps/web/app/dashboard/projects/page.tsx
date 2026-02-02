@@ -4,7 +4,23 @@ import React, { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
-import { collection, query, where, getDocs, orderBy, doc, updateDoc, Timestamp, addDoc, deleteDoc } from 'firebase/firestore';
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  orderBy,
+  doc,
+  updateDoc,
+  Timestamp,
+  addDoc,
+  deleteDoc,
+  limit,
+  startAfter,
+  getCountFromServer,
+  QueryDocumentSnapshot,
+  DocumentData,
+} from 'firebase/firestore';
 import { Project, ProjectStatus, ProjectCategory } from '@/types';
 import { FirestoreError, Button, Card, Badge, EmptyState } from '@/components/ui';
 import { toast } from '@/components/ui/Toast';
@@ -27,8 +43,14 @@ import {
   Squares2X2Icon,
   ListBulletIcon,
   ChartBarIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
+
+// Pagination settings
+const PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
+type PageSize = typeof PAGE_SIZE_OPTIONS[number];
 
 const statusConfig: Record<ProjectStatus, { label: string; color: string }> = {
   lead: { label: 'Lead', color: 'bg-gray-100 text-gray-700' },
@@ -68,7 +90,30 @@ export default function ProjectsPage() {
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [duplicating, setDuplicating] = useState<string | null>(null);
 
-  const fetchProjects = React.useCallback(async () => {
+  // Pagination state
+  const [pageSize, setPageSize] = useState<PageSize>(25);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
+  const [firstDoc, setFirstDoc] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
+  const [pageHistory, setPageHistory] = useState<QueryDocumentSnapshot<DocumentData>[]>([]);
+
+  const totalPages = Math.ceil(totalCount / pageSize);
+
+  const parseProjectDoc = (docSnapshot: QueryDocumentSnapshot<DocumentData>): Project => {
+    const data = docSnapshot.data();
+    return {
+      id: docSnapshot.id,
+      ...data,
+      createdAt: data.createdAt?.toDate?.() || new Date(),
+      updatedAt: data.updatedAt?.toDate?.(),
+      startDate: data.startDate?.toDate?.(),
+      estimatedEndDate: data.estimatedEndDate?.toDate?.(),
+      archivedAt: data.archivedAt?.toDate?.(),
+    } as Project;
+  };
+
+  const fetchProjects = React.useCallback(async (direction: 'first' | 'next' | 'prev' = 'first') => {
     if (!profile?.orgId) {
       setLoading(false);
       return;
@@ -78,33 +123,92 @@ export default function ProjectsPage() {
     setFetchError(null);
 
     try {
-      const projectsQuery = query(
+      // Get total count for pagination info
+      const countQuery = query(
+        collection(db, 'projects'),
+        where('orgId', '==', profile.orgId)
+      );
+      const countSnapshot = await getCountFromServer(countQuery);
+      setTotalCount(countSnapshot.data().count);
+
+      // Build paginated query
+      let q = query(
         collection(db, 'projects'),
         where('orgId', '==', profile.orgId),
-        orderBy('createdAt', 'desc')
+        orderBy('createdAt', 'desc'),
+        limit(pageSize)
       );
-      const snapshot = await getDocs(projectsQuery);
-      const projectsData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate?.() || new Date(),
-        updatedAt: doc.data().updatedAt?.toDate?.(),
-        startDate: doc.data().startDate?.toDate?.(),
-        estimatedEndDate: doc.data().estimatedEndDate?.toDate?.(),
-        archivedAt: doc.data().archivedAt?.toDate?.(),
-      })) as Project[];
+
+      if (direction === 'next' && lastDoc) {
+        q = query(
+          collection(db, 'projects'),
+          where('orgId', '==', profile.orgId),
+          orderBy('createdAt', 'desc'),
+          startAfter(lastDoc),
+          limit(pageSize)
+        );
+      } else if (direction === 'prev' && pageHistory.length >= 2) {
+        const prevPageStart = pageHistory[pageHistory.length - 2];
+        q = query(
+          collection(db, 'projects'),
+          where('orgId', '==', profile.orgId),
+          orderBy('createdAt', 'desc'),
+          startAfter(prevPageStart),
+          limit(pageSize)
+        );
+      }
+
+      const snapshot = await getDocs(q);
+      const projectsData = snapshot.docs.map(parseProjectDoc);
       setProjects(projectsData);
+
+      // Update pagination cursors
+      if (snapshot.docs.length > 0) {
+        setFirstDoc(snapshot.docs[0]);
+        setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
+
+        if (direction === 'next') {
+          setPageHistory(prev => [...prev, firstDoc!]);
+        } else if (direction === 'prev') {
+          setPageHistory(prev => prev.slice(0, -1));
+        } else {
+          setPageHistory([]);
+        }
+      }
     } catch (error) {
       console.error('Error fetching projects:', error);
       setFetchError('Failed to load projects. The database may be unreachable.');
     } finally {
       setLoading(false);
     }
-  }, [profile?.orgId]);
+  }, [profile?.orgId, pageSize, lastDoc, firstDoc, pageHistory]);
 
   useEffect(() => {
-    fetchProjects();
-  }, [fetchProjects]);
+    if (profile?.orgId) {
+      setCurrentPage(1);
+      fetchProjects('first');
+    }
+  }, [profile?.orgId, pageSize]);
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(prev => prev + 1);
+      fetchProjects('next');
+    }
+  };
+
+  const goToPrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prev => prev - 1);
+      fetchProjects('prev');
+    }
+  };
+
+  const handlePageSizeChange = (newSize: PageSize) => {
+    setPageSize(newSize);
+    setCurrentPage(1);
+    setPageHistory([]);
+  };
 
   // Get all unique tags across projects
   const allTags = useMemo(() => {
@@ -743,6 +847,60 @@ export default function ProjectsPage() {
             onClick: () => window.location.href = '/dashboard/projects/new',
           } : undefined}
         />
+      )}
+
+      {/* Pagination Controls */}
+      {!loading && totalCount > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-gray-200">
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <span>Show</span>
+            <select
+              value={pageSize}
+              onChange={(e) => handlePageSizeChange(Number(e.target.value) as PageSize)}
+              className="px-2 py-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              {PAGE_SIZE_OPTIONS.map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </select>
+            <span>per page</span>
+          </div>
+
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <span>
+              Showing {Math.min((currentPage - 1) * pageSize + 1, totalCount)}-
+              {Math.min(currentPage * pageSize, totalCount)} of {totalCount} projects
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={goToPrevPage}
+              disabled={currentPage === 1}
+              className="flex items-center gap-1"
+            >
+              <ChevronLeftIcon className="h-4 w-4" />
+              Previous
+            </Button>
+            <span className="px-3 py-1 text-sm text-gray-700">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={goToNextPage}
+              disabled={currentPage >= totalPages}
+              className="flex items-center gap-1"
+            >
+              Next
+              <ChevronRightIcon className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -103,6 +103,7 @@ export default function ProjectLogsPage() {
       setLogs(logsData);
     } catch (error) {
       console.error('Error loading logs:', error);
+      toast.error('Failed to load logs');
     } finally {
       setLoading(false);
     }

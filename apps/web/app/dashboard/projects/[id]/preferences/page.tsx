@@ -61,6 +61,7 @@ export default function ClientPreferencesPage() {
         }
       } catch (error) {
         console.error('Error fetching preferences:', error);
+        toast.error('Failed to load preferences');
       } finally {
         setLoading(false);
       }

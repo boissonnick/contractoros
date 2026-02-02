@@ -214,8 +214,8 @@ export async function sendSignatureRequest(
       updatedAt: Timestamp.now(),
     });
 
-    // TODO: Send emails to signers
-    // This would typically be done via a Cloud Function triggered by the status change
+    // Emails are sent automatically via Cloud Function (onSignatureRequestUpdated)
+    // when status changes from 'draft' to 'pending'
 
     return { success: true };
   } catch (error) {
@@ -281,54 +281,27 @@ export async function cancelSignatureRequest(
 export async function sendReminder(
   requestId: string,
   signerIndex: number,
-  senderId: string,
-  senderName: string
+  orgId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const requestDoc = await getDoc(doc(db, SIGNATURE_REQUESTS_COLLECTION, requestId));
-    if (!requestDoc.exists()) {
-      return { success: false, error: 'Signature request not found' };
-    }
-
-    const request = { id: requestDoc.id, ...requestDoc.data() } as SignatureRequest;
-
-    if (request.status !== 'pending' && request.status !== 'viewed') {
-      return { success: false, error: 'Cannot send reminder for this request' };
-    }
-
-    const signer = request.signers[signerIndex];
-    if (!signer || signer.status === 'signed') {
-      return { success: false, error: 'Signer not found or already signed' };
-    }
-
-    // Update signer reminder count
-    const updatedSigners = [...request.signers];
-    updatedSigners[signerIndex] = {
-      ...signer,
-      remindersSent: (signer.remindersSent || 0) + 1,
-      lastReminderAt: new Date(),
-    };
-
-    // Add audit entry
-    const auditEntry: SignatureAuditEntry = {
-      id: `audit_${Date.now()}`,
-      action: 'reminder_sent',
-      timestamp: new Date(),
-      actorId: senderId,
-      actorName: senderName,
-      actorRole: 'sender',
-      details: `Reminder sent to ${signer.name} (${signer.email})`,
-    };
-
-    await updateDoc(doc(db, SIGNATURE_REQUESTS_COLLECTION, requestId), {
-      signers: updatedSigners,
-      remindersSent: (request.remindersSent || 0) + 1,
-      lastReminderAt: Timestamp.now(),
-      auditTrail: [...request.auditTrail, auditEntry],
-      updatedAt: Timestamp.now(),
+    // Call the API endpoint to send reminder email and update Firestore
+    const response = await fetch('/api/esignature/send-reminder', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        orgId,
+        requestId,
+        signerIndex,
+      }),
     });
 
-    // TODO: Send reminder email via Cloud Function
+    const data = await response.json();
+
+    if (!response.ok) {
+      return { success: false, error: data.error || 'Failed to send reminder' };
+    }
 
     return { success: true };
   } catch (error) {

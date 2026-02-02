@@ -67,13 +67,17 @@ export default function SignaturesDashboard() {
 
   // Handle send reminder
   const handleSendReminder = async (request: SignatureRequest, signerIndex: number) => {
-    if (!profile?.uid || !profile?.displayName) return;
+    if (!profile?.orgId) return;
 
     setActionLoading(`reminder-${request.id}-${signerIndex}`);
     try {
-      await sendReminder(request.id, signerIndex, profile.uid, profile.displayName);
-      toast.success('Reminder sent');
-      refresh();
+      const result = await sendReminder(request.id, signerIndex, profile.orgId);
+      if (result.success) {
+        toast.success('Reminder sent');
+        refresh();
+      } else {
+        toast.error(result.error || 'Failed to send reminder');
+      }
     } catch (err) {
       console.error('Error sending reminder:', err);
       toast.error('Failed to send reminder');

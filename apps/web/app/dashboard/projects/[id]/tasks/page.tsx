@@ -64,6 +64,7 @@ export default function ProjectTasksPage() {
         setPhases(data);
       } catch (err) {
         console.error('Error fetching phases:', err);
+        toast.error('Failed to load phases');
       } finally {
         setPhasesLoading(false);
       }
@@ -97,6 +98,7 @@ export default function ProjectTasksPage() {
         setTeamMembers(members);
       } catch (err) {
         console.error('Error fetching team members:', err);
+        toast.error('Failed to load team members');
       } finally {
         setTeamLoading(false);
       }

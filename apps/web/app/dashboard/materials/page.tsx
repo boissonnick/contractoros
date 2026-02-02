@@ -19,6 +19,7 @@ import {
   usePurchaseOrders,
   useLowStockAlerts,
 } from '@/lib/hooks/useMaterials';
+import { useProjects } from '@/lib/hooks/useQueryHooks';
 import {
   MaterialItemCard,
   MaterialFormModal,
@@ -131,6 +132,16 @@ export default function MaterialsPage() {
     acknowledgeAlert,
     resolveAlert,
   } = useLowStockAlerts();
+
+  // Projects for equipment checkout and purchase orders
+  const { data: projectsData = [] } = useProjects();
+  const projects = useMemo(() =>
+    (projectsData as Array<{ id: string; name?: string }>).map(p => ({
+      id: p.id,
+      name: p.name || 'Unnamed Project'
+    })),
+    [projectsData]
+  );
 
   // Filtered data based on search
   const filteredSuppliers = useMemo(() => {
@@ -752,7 +763,7 @@ export default function MaterialsPage() {
           onClose={() => setCheckoutEquipment(undefined)}
           equipment={checkoutEquipment}
           mode={checkoutMode}
-          projects={[]} // TODO: Load projects
+          projects={projects}
           onCheckout={handleCheckout}
           onReturn={handleReturn}
         />
@@ -778,7 +789,7 @@ export default function MaterialsPage() {
         order={editingOrder}
         suppliers={suppliers}
         materials={materials}
-        projects={[]} // TODO: Load projects
+        projects={projects}
       />
     </div>
   );

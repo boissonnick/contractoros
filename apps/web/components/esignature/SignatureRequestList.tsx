@@ -6,6 +6,7 @@ import { useSignatureRequests } from '@/lib/hooks/useSignatureRequests';
 import { useAuth } from '@/lib/auth';
 import SignatureStatusBadge from './SignatureStatusBadge';
 import { Card, Button } from '@/components/ui';
+import { toast } from '@/components/ui/Toast';
 import { cn } from '@/lib/utils';
 import {
   cancelSignatureRequest,
@@ -53,14 +54,15 @@ export default function SignatureRequestList({
 
   // Handle sending reminder
   const handleSendReminder = async (request: SignatureRequest, signerIndex: number) => {
-    if (!profile?.uid || !profile?.displayName) return;
+    if (!profile?.orgId) return;
 
     setActionLoading(`reminder-${request.id}-${signerIndex}`);
     try {
-      await sendReminder(request.id, signerIndex, profile.uid, profile.displayName);
+      await sendReminder(request.id, signerIndex, profile.orgId);
       refresh();
     } catch (err) {
       console.error('Error sending reminder:', err);
+      toast.error('Failed to send reminder');
     }
     setActionLoading(null);
   };
@@ -76,6 +78,7 @@ export default function SignatureRequestList({
       refresh();
     } catch (err) {
       console.error('Error cancelling request:', err);
+      toast.error('Failed to cancel request');
     }
     setActionLoading(null);
   };

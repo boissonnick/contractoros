@@ -7,6 +7,7 @@ import { useExpenses } from '@/lib/hooks/useExpenses';
 import { db } from '@/lib/firebase/config';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { Button, Card, Badge, EmptyState } from '@/components/ui';
+import { toast } from '@/components/ui/Toast';
 import { cn } from '@/lib/utils';
 import { Expense, Invoice, Project, ExpenseCategory } from '@/types';
 import {
@@ -83,6 +84,7 @@ export default function ProjectFinancesPage() {
         })) as Invoice[]);
       } catch (err) {
         console.error('Error loading finances:', err);
+        toast.error('Failed to load financial data');
       } finally {
         setLoading(false);
       }

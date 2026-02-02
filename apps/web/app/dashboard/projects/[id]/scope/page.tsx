@@ -6,6 +6,7 @@ import { db } from '@/lib/firebase/config';
 import { collection, getDocs } from 'firebase/firestore';
 import { ProjectPhase, QuoteSection, Scope, ScopeItem } from '@/types';
 import { useScopes } from '@/lib/hooks/useScopes';
+import { toast } from '@/components/ui/Toast';
 import ScopeBuilder from '@/components/projects/scope/ScopeBuilder';
 
 export default function ProjectScopePage() {
@@ -35,6 +36,7 @@ export default function ProjectScopePage() {
         );
       } catch (err) {
         console.error('Error fetching scope data:', err);
+        toast.error('Failed to load scope data');
       } finally {
         setDataLoading(false);
       }

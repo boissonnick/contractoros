@@ -18,6 +18,7 @@ import BidComparison from '@/components/projects/bids/BidComparison';
 import BidSolicitationForm from '@/components/projects/bids/BidSolicitationForm';
 import BidSolicitationList from '@/components/projects/bids/BidSolicitationList';
 import { Button } from '@/components/ui';
+import { toast } from '@/components/ui/Toast';
 import { cn } from '@/lib/utils';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/lib/auth';
@@ -47,6 +48,7 @@ export default function ProjectSubsPage() {
         setPhases(phaseSnap.docs.map(d => ({ id: d.id, ...d.data() }) as ProjectPhase).sort((a, b) => a.order - b.order));
       } catch (err) {
         console.error('Error fetching subs data:', err);
+        toast.error('Failed to load subcontractor data');
       } finally {
         setLoading(false);
       }
