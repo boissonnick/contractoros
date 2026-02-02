@@ -125,8 +125,10 @@ export function useReports(orgId?: string) {
     if (!orgId) return [];
     setLoading(true);
     try {
+      // NOTE: timeEntries is top-level collection with orgId field
       const entriesSnap = await getDocs(query(
-        collection(db, `organizations/${orgId}/timeEntries`),
+        collection(db, 'timeEntries'),
+        where('orgId', '==', orgId),
         where('clockIn', '>=', Timestamp.fromDate(startDate)),
         where('clockIn', '<=', Timestamp.fromDate(endDate))
       ));
@@ -171,16 +173,19 @@ export function useReports(orgId?: string) {
     setLoading(true);
     try {
       const projectsSnap = await getDocs(query(collection(db, 'projects'), where('orgId', '==', orgId)));
+      // NOTE: timeEntries is top-level collection with orgId field
       const entriesSnap = await getDocs(query(
-        collection(db, `organizations/${orgId}/timeEntries`),
+        collection(db, 'timeEntries'),
+        where('orgId', '==', orgId),
         where('clockIn', '>=', Timestamp.fromDate(startDate)),
         where('clockIn', '<=', Timestamp.fromDate(endDate))
       ));
       const usersSnap = await getDocs(query(collection(db, 'users'), where('orgId', '==', orgId)));
 
-      // Fetch expenses from org-scoped collection
+      // NOTE: expenses is top-level collection with orgId field
       const expensesSnap = await getDocs(query(
-        collection(db, `organizations/${orgId}/expenses`),
+        collection(db, 'expenses'),
+        where('orgId', '==', orgId),
         where('status', '==', 'approved')
       ));
 
@@ -232,8 +237,10 @@ export function useReports(orgId?: string) {
     try {
       const usersSnap = await getDocs(query(collection(db, 'users'), where('orgId', '==', orgId)));
       const tasksSnap = await getDocs(query(collection(db, 'tasks'), where('orgId', '==', orgId)));
+      // NOTE: timeEntries is top-level collection with orgId field
       const entriesSnap = await getDocs(query(
-        collection(db, `organizations/${orgId}/timeEntries`),
+        collection(db, 'timeEntries'),
+        where('orgId', '==', orgId),
         where('clockIn', '>=', Timestamp.fromDate(startDate)),
         where('clockIn', '<=', Timestamp.fromDate(endDate))
       ));
@@ -287,13 +294,14 @@ export function useDashboardReports(orgId?: string) {
 
     try {
       // Fetch all required data in parallel
+      // NOTE: All collections are top-level with orgId field, not subcollections
       const [projectsSnap, usersSnap, tasksSnap, timeEntriesSnap, expensesSnap, invoicesSnap] = await Promise.all([
         getDocs(query(collection(db, 'projects'), where('orgId', '==', orgId))),
         getDocs(query(collection(db, 'users'), where('orgId', '==', orgId))),
         getDocs(query(collection(db, 'tasks'), where('orgId', '==', orgId))),
-        getDocs(query(collection(db, `organizations/${orgId}/timeEntries`))),
-        getDocs(query(collection(db, `organizations/${orgId}/expenses`))),
-        getDocs(query(collection(db, `organizations/${orgId}/invoices`))),
+        getDocs(query(collection(db, 'timeEntries'), where('orgId', '==', orgId))),
+        getDocs(query(collection(db, 'expenses'), where('orgId', '==', orgId))),
+        getDocs(query(collection(db, 'invoices'), where('orgId', '==', orgId))),
       ]);
 
       // Process projects
@@ -514,11 +522,12 @@ export function useFinancialReports(orgId?: string) {
     setError(null);
 
     try {
+      // NOTE: All collections are top-level with orgId field, not subcollections
       const [projectsSnap, expensesSnap, invoicesSnap, timeEntriesSnap, usersSnap] = await Promise.all([
         getDocs(query(collection(db, 'projects'), where('orgId', '==', orgId))),
-        getDocs(query(collection(db, `organizations/${orgId}/expenses`))),
-        getDocs(query(collection(db, `organizations/${orgId}/invoices`))),
-        getDocs(query(collection(db, `organizations/${orgId}/timeEntries`))),
+        getDocs(query(collection(db, 'expenses'), where('orgId', '==', orgId))),
+        getDocs(query(collection(db, 'invoices'), where('orgId', '==', orgId))),
+        getDocs(query(collection(db, 'timeEntries'), where('orgId', '==', orgId))),
         getDocs(query(collection(db, 'users'), where('orgId', '==', orgId))),
       ]);
 
@@ -717,12 +726,13 @@ export function useOperationalReports(orgId?: string) {
     setError(null);
 
     try {
+      // NOTE: All collections are top-level with orgId field, not subcollections
       const [projectsSnap, tasksSnap, timeEntriesSnap, subsSnap, changeOrdersSnap] = await Promise.all([
         getDocs(query(collection(db, 'projects'), where('orgId', '==', orgId))),
         getDocs(query(collection(db, 'tasks'), where('orgId', '==', orgId))),
-        getDocs(query(collection(db, `organizations/${orgId}/timeEntries`))),
-        getDocs(query(collection(db, `organizations/${orgId}/subcontractors`))),
-        getDocs(query(collection(db, `organizations/${orgId}/changeOrders`))),
+        getDocs(query(collection(db, 'timeEntries'), where('orgId', '==', orgId))),
+        getDocs(query(collection(db, 'subcontractors'), where('orgId', '==', orgId))),
+        getDocs(query(collection(db, 'changeOrders'), where('orgId', '==', orgId))),
       ]);
 
       // Process projects

@@ -50,6 +50,7 @@ export default function PayrollPreviewReport({ startDate, endDate }: PayrollPrev
       getDocs(query(collection(db, 'users'), where('orgId', '==', profile.orgId))),
       getDocs(query(
         collection(db, 'timeEntries'),
+        where('orgId', '==', profile.orgId),
         where('clockIn', '>=', Timestamp.fromDate(startDate)),
         where('clockIn', '<=', Timestamp.fromDate(endDate))
       )),
