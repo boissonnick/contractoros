@@ -5,6 +5,8 @@ import { useAuth } from '@/lib/auth';
 import AuthGuard from '@/components/auth/AuthGuard';
 import AppShell from '@/components/ui/AppShell';
 import { NavItem } from '@/types';
+import { FloatingSyncIndicator } from '@/components/offline/SyncStatusIndicator';
+import { VoiceActivationFAB } from '@/components/voice';
 import {
   HomeIcon,
   ClockIcon,
@@ -31,13 +33,19 @@ function FieldLayoutContent({ children }: { children: React.ReactNode }) {
       onSignOut={signOut}
     >
       {children}
+      <VoiceActivationFAB
+        context={{}}
+        bottomOffset={80}
+        requireConfirmation={true}
+      />
+      <FloatingSyncIndicator position="bottom-left" showWhenOnline />
     </AppShell>
   );
 }
 
 export default function FieldLayout({ children }: { children: React.ReactNode }) {
   return (
-    <AuthGuard allowedRoles={['EMPLOYEE', 'CONTRACTOR']}>
+    <AuthGuard allowedRoles={['OWNER', 'PM', 'EMPLOYEE', 'CONTRACTOR', 'SUB']}>
       <FieldLayoutContent>{children}</FieldLayoutContent>
     </AuthGuard>
   );

@@ -146,7 +146,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       />
 
       {/* Offline Sync Status Indicator */}
-      <FloatingSyncIndicator position="bottom-left" />
+      <FloatingSyncIndicator position="bottom-left" showWhenOnline />
     </div>
   );
 }
