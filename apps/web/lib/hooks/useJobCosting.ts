@@ -17,6 +17,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
+import { convertTimestamps } from '@/lib/firebase/timestamp-converter';
 import {
   JobCostEntry,
   ProjectProfitability,
@@ -55,19 +56,8 @@ interface UseJobCostsReturn {
   refresh: () => void;
 }
 
-// Helper to convert Firestore timestamps
-function convertTimestamps(data: Record<string, unknown>): Record<string, unknown> {
-  const converted = { ...data };
-  const dateFields = ['date', 'periodStart', 'periodEnd', 'createdAt', 'updatedAt', 'approvedAt'];
-
-  for (const field of dateFields) {
-    if (converted[field] instanceof Timestamp) {
-      converted[field] = (converted[field] as Timestamp).toDate();
-    }
-  }
-
-  return converted;
-}
+// Date fields for job cost entities
+const JOB_COST_DATE_FIELDS = ['date', 'periodStart', 'periodEnd', 'createdAt', 'updatedAt', 'approvedAt'] as const;
 
 /**
  * Hook for managing job cost entries for a project
@@ -106,7 +96,7 @@ export function useJobCosts(options: UseJobCostsOptions): UseJobCostsReturn {
       (snapshot) => {
         let costsData = snapshot.docs.map((doc) => ({
           id: doc.id,
-          ...convertTimestamps(doc.data()),
+          ...convertTimestamps(doc.data(), JOB_COST_DATE_FIELDS),
         })) as JobCostEntry[];
 
         // Client-side filtering for optional filters
@@ -272,7 +262,7 @@ export function useProjectProfitability(projectId: string): UseProjectProfitabil
       profitRef,
       (snapshot) => {
         if (snapshot.exists()) {
-          const data = convertTimestamps(snapshot.data()) as unknown as ProjectProfitability;
+          const data = convertTimestamps(snapshot.data(), JOB_COST_DATE_FIELDS) as unknown as ProjectProfitability;
           setProfitability({ ...data, projectId: snapshot.id });
         } else {
           setProfitability(null);
@@ -356,7 +346,7 @@ export function useJobCostAlerts(projectId?: string): UseJobCostAlertsReturn {
       (snapshot) => {
         const alertsData = snapshot.docs.map((doc) => ({
           id: doc.id,
-          ...convertTimestamps(doc.data()),
+          ...convertTimestamps(doc.data(), JOB_COST_DATE_FIELDS),
         })) as JobCostAlert[];
 
         setAlerts(alertsData);
