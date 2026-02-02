@@ -1,11 +1,20 @@
 // ContractorOS Service Worker
 // Provides offline caching, background sync, and push notification support
 
-const CACHE_NAME = 'contractoros-v1';
+const CACHE_NAME = 'contractoros-v2';
 const STATIC_ASSETS = [
   '/',
   '/dashboard',
   '/manifest.json',
+];
+
+// URLs to cache on fetch (app shell resources)
+const CACHE_ON_FETCH = [
+  /\/_next\/static\//,
+  /\/fonts\//,
+  /\.woff2?$/,
+  /\.css$/,
+  /\.js$/,
 ];
 
 // Install: cache static assets
@@ -32,7 +41,7 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch: network-first with cache fallback
+// Fetch: network-first with cache fallback for GET requests
 self.addEventListener('fetch', (event) => {
   const { request } = event;
 
@@ -44,16 +53,20 @@ self.addEventListener('fetch', (event) => {
     request.url.includes('/api/') ||
     request.url.includes('firestore.googleapis.com') ||
     request.url.includes('firebase') ||
-    request.url.includes('googleapis.com')
+    request.url.includes('googleapis.com') ||
+    request.url.includes('identitytoolkit')
   ) {
     return;
   }
 
+  // Check if this is a cacheable resource
+  const shouldCache = CACHE_ON_FETCH.some((pattern) => pattern.test(request.url));
+
   event.respondWith(
     fetch(request)
       .then((response) => {
-        // Cache successful responses
-        if (response.status === 200) {
+        // Cache successful responses for static assets
+        if (response.status === 200 && (shouldCache || STATIC_ASSETS.some(asset => request.url.endsWith(asset)))) {
           const responseClone = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(request, responseClone);
@@ -85,10 +98,44 @@ self.addEventListener('sync', (event) => {
 });
 
 async function syncPendingData() {
-  // In production, read pending operations from IndexedDB
-  // and replay them against the server
   console.log('[SW] Background sync triggered');
+
+  // Notify all clients that sync is starting
+  const clients = await self.clients.matchAll();
+  clients.forEach((client) => {
+    client.postMessage({ type: 'SYNC_STARTED' });
+  });
+
+  try {
+    // The actual sync is handled by the OfflineProvider in the app
+    // This just triggers a sync check via message
+    clients.forEach((client) => {
+      client.postMessage({ type: 'SYNC_REQUESTED' });
+    });
+  } catch (error) {
+    console.error('[SW] Background sync failed:', error);
+    clients.forEach((client) => {
+      client.postMessage({ type: 'SYNC_FAILED', error: error.message });
+    });
+  }
 }
+
+// Listen for messages from the app
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+
+  if (event.data && event.data.type === 'CACHE_URLS') {
+    // Allow app to request specific URLs be cached
+    const urls = event.data.urls || [];
+    caches.open(CACHE_NAME).then((cache) => {
+      cache.addAll(urls).catch((err) => {
+        console.warn('[SW] Failed to cache URLs:', err);
+      });
+    });
+  }
+});
 
 // Push notifications
 self.addEventListener('push', (event) => {
