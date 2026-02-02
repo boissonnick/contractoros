@@ -2465,6 +2465,32 @@ service cloud.firestore {
       allow delete: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
     }
 
+    // ==========================================
+    // Client Notes Collection (Sprint 36)
+    // ==========================================
+    match /organizations/{orgId}/clientNotes/{noteId} {
+      allow read: if isSameOrg(orgId);
+      allow create: if isSameOrg(orgId);
+      allow update: if isSameOrg(orgId);
+      allow delete: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+    }
+
+    // ==========================================
+    // Project Selections Collection (Sprint 36)
+    // ==========================================
+    match /organizations/{orgId}/projectSelections/{selectionId} {
+      allow read: if isSameOrg(orgId);
+      allow write: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+    }
+
+    // ==========================================
+    // Project Progress Collection (Sprint 36)
+    // ==========================================
+    match /organizations/{orgId}/projectProgress/{progressId} {
+      allow read: if isSameOrg(orgId);
+      allow write: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+    }
+
     // Default deny all other access
     match /{document=**} {
       allow read, write: if false;
