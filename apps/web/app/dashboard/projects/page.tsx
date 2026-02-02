@@ -83,7 +83,7 @@ export default function ProjectsPage() {
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<ProjectStatus | 'all'>('all');
-  const [categoryFilter, setCategoryFilter] = useState<ProjectCategory | 'all'>('all');
+  const [categoryFilter, setCategoryFilter] = useState<ProjectCategory | 'all' | 'uncategorized'>('all');
   const [showArchived, setShowArchived] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -235,7 +235,9 @@ export default function ProjectsPage() {
       const matchesStatus = statusFilter === 'all' || project.status === statusFilter;
 
       // Category filter
-      const matchesCategory = categoryFilter === 'all' || project.category === categoryFilter;
+      const matchesCategory = categoryFilter === 'all' ||
+        (categoryFilter === 'uncategorized' && !project.category) ||
+        project.category === categoryFilter;
 
       // Tags filter
       const matchesTags = selectedTags.length === 0 ||
@@ -551,10 +553,11 @@ export default function ProjectsPage() {
           </div>
           <select
             value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value as ProjectCategory | 'all')}
+            onChange={(e) => setCategoryFilter(e.target.value as ProjectCategory | 'all' | 'uncategorized')}
             className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
           >
             <option value="all">All Categories</option>
+            <option value="uncategorized">Uncategorized</option>
             {Object.entries(categoryConfig).map(([key, label]) => (
               <option key={key} value={key}>{label}</option>
             ))}
@@ -866,7 +869,7 @@ export default function ProjectsPage() {
               ? 'Try adjusting your search or filter criteria'
               : 'Get started by creating your first project'
           }
-          action={!showArchived && !searchTerm && statusFilter === 'all' && categoryFilter === 'all' && selectedTags.length === 0 ? {
+          action={!showArchived && !searchTerm && statusFilter === 'all' && (categoryFilter === 'all' || categoryFilter === 'uncategorized') && selectedTags.length === 0 ? {
             label: 'New Project',
             onClick: () => window.location.href = '/dashboard/projects/new',
           } : undefined}

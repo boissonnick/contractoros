@@ -1,8 +1,23 @@
 # ContractorOS Sprint Status
 
 > **Purpose:** Track current progress and enable seamless session handoffs.
-> **Last Updated:** 2026-02-02 15:30 by Controller Session
-> **Current Phase:** Phase 9 - AI as Competitive Moat - COMPLETE
+> **Last Updated:** 2026-02-02 17:00 by Controller Session
+> **Current Phase:** Phase 10 - Platform Hardening & Bug Fixes
+
+---
+
+## ⚠️ PRIORITY: February 2026 Platform Audit
+
+**60 issues identified** requiring 316-448 hours of work.
+**Full tracker:** `docs/PLATFORM_AUDIT_ISSUES.md`
+
+### Critical Blockers (Fix First)
+| ID | Issue | Status |
+|----|-------|--------|
+| FEB-011 | Category filter breaks project list | `[ ]` |
+| FEB-013 | Firebase permissions blocking 8+ features | `[ ]` |
+| FEB-053 | Profit margin calculation wrong | `[ ]` |
+| FEB-057 | Payroll showing "NaNh total" | `[ ]` |
 
 ---
 
@@ -10,13 +25,14 @@
 
 | Metric | Value |
 |--------|-------|
-| **Current Sprint** | Sprint 36 - Enhanced Client Portal ✅ |
-| **Sprint Status** | ✅ COMPLETE |
-| **Platform Completion** | ~96% |
+| **Current Sprint** | Sprint 37A - Critical Bug Fixes 🔧 |
+| **Sprint Status** | 🚧 IN PROGRESS |
+| **Platform Completion** | ~90% (adjusted per audit) |
+| **Audit Issues** | 60 total (4 critical, 35 high, 17 medium, 4 low) |
 | **TypeScript Status** | ✅ Passing |
-| **Firestore Rules** | ✅ Deployed |
+| **Firestore Rules** | ⚠️ Needs review (FEB-013) |
 | **Docker Status** | ✅ Running on localhost:3000 |
-| **Demo Account** | ✅ Horizon Construction Co. seeded |
+| **Demo Data Quality** | ⚠️ 25 issues identified |
 | **Offline Mode** | ✅ Sprint 28 Complete |
 | **Voice Commands** | ✅ Sprint 29 Complete |
 | **Mobile UX** | ✅ Sprint 30 Complete |
@@ -75,38 +91,103 @@
 
 ---
 
-## Next Steps: Comprehensive Testing Required
+## Next Steps: February 2026 Audit Resolution
 
 **Date:** 2026-02-02
-**Priority:** CRITICAL before production deployment
+**Priority:** CRITICAL - Audit findings must be resolved before production
 
-### Testing Scope
+### Sprint Plan (February - March 2026)
 
-Sprints 32-36 added significant new functionality that needs thorough end-to-end testing:
+| Sprint | Focus | Duration | Est. Hours |
+|--------|-------|----------|------------|
+| **37A** | Critical Bugs | 1 week | 13-21h |
+| **37B** | UI/Layout + Animations | 1 week | 25-36h |
+| **38** | Demo Data (Core) | 1-2 weeks | 40-55h |
+| **39** | Demo Data (Complete) | 1-2 weeks | 45-60h |
+| **40** | Navigation Architecture | 1-2 weeks | 18-26h |
+| **41** | Finance Module | 1-2 weeks | 40-55h |
+| **42** | Schedule Enhancement | 2 weeks | 45-65h |
+| **43** | Strategic Features | 2-3 weeks | 32-46h |
 
-| Sprint | Features to Test | Risk Level |
-|--------|------------------|------------|
-| **32** | Smart Automation - scheduling AI, change order detection | HIGH |
-| **33** | Punch Lists - item CRUD, completion, photos | MEDIUM |
-| **34** | RFIs & Submittals - workflow, responses, approvals | HIGH |
-| **35** | Equipment Tracking - CRUD, check-out, maintenance, QR | MEDIUM |
-| **36** | Client Portal - photo timeline, selections, progress | HIGH |
+### Sprint 37A: Critical Bugs (Current)
 
-### Known Areas Needing Attention
+**Duration:** 1 week
+**Effort:** 13-21 hours
 
-1. **Database/Firestore** - New collections need rules verification
-2. **API Routes** - Many new endpoints need auth/error handling review
-3. **Type Safety** - Several type conflicts were resolved, need runtime verification
-4. **UI/UX** - New components need mobile responsiveness testing
-5. **Integration** - Client portal magic links, equipment QR codes
+| Issue | Description | Effort | Status |
+|-------|-------------|--------|--------|
+| FEB-011 | Category filter causes projects to disappear | 4-6h | `[ ]` |
+| FEB-013 | Firebase permissions blocking features | 6-10h | `[ ]` |
+| FEB-053 | Profit margin calculation | 2-3h | `[ ]` |
+| FEB-057 | Payroll "NaNh total" display | 1-2h | `[ ]` |
 
-### Recommended Test Plan
+### Sprint 37B: UI/Layout + Animations
 
-1. Full platform walkthrough (30-60 min) via Chrome MCP
-2. All CRUD operations for new entities
-3. Firestore rules security testing
-4. Mobile viewport testing (375x812, 414x896)
-5. Error state and edge case testing
+**Duration:** 1 week
+**Effort:** 25-36 hours
+
+| Issue | Description | Effort |
+|-------|-------------|--------|
+| FEB-001 | Search bar overlaps CTA buttons | 2-3h |
+| FEB-004 | Active Projects dominates dashboard | 3-4h |
+| FEB-005 | Project card padding too large | 3-4h |
+| FEB-007 | Sub-navigation spacing | 2h |
+| FEB-008 | Bouncing Pending Estimates icon | 1h |
+| FEB-009 | Bouncing folder icon empty state | 1h |
+| FEB-010 | Platform-wide animation audit | 4-6h |
+| FEB-029 | Client Preferences layout | 3-4h |
+| FEB-044 | Empty state pattern consistency | 2-3h |
+| FEB-045 | Daily Logs animated icon | 1h |
+
+### Sprint 38: Demo Data (Core)
+
+**Duration:** 1-2 weeks
+**Effort:** 40-55 hours
+**Goal:** Make demo account fully testable
+
+| Issue | Description | Effort |
+|-------|-------------|--------|
+| FEB-012 | Categorize demo projects | 2-3h |
+| FEB-014 | Assign clients to projects | 2-3h |
+| FEB-030 | Create demo clients | 3-4h |
+| FEB-015 | Demo quotes with line items | 6-8h |
+| FEB-016 | Demo Scope of Work | 4-6h |
+| FEB-017 | Demo tasks (15-25 per project) | 8-12h |
+| FEB-035 | Schedule demo events | 8-12h |
+
+### Sprint 39: Demo Data (Complete)
+
+**Duration:** 1-2 weeks
+**Effort:** 45-60 hours
+
+| Issue | Description | Effort |
+|-------|-------------|--------|
+| FEB-018 | Demo sub assignments | 4-6h |
+| FEB-019 | Demo bids | 4-6h |
+| FEB-020 | Demo bid solicitations | 4-6h |
+| FEB-021 | Demo RFIs | 3-4h |
+| FEB-022 | Demo submittals | 3-4h |
+| FEB-023 | Demo punch list items | 3-4h |
+| FEB-024 | Demo change orders | 3-4h |
+| FEB-025 | Demo client preferences | 2-3h |
+| FEB-041 | Crew availability data | 2-3h |
+| FEB-043 | Time off requests data | 2-3h |
+| FEB-046 | Daily logs data | 4-6h |
+
+### Areas Requiring Attention
+
+1. **Firebase Rules (FEB-013)** - Change Orders, Sub Assignments, Bids, Solicitations, Submittals, Finances, Tasks, Scopes all showing permission errors
+2. **Demo Data Quality** - 25 issues identified; demo account not fully testable
+3. **UI Polish** - Bouncing animations distracting; layout issues on dashboard
+4. **Navigation** - Team/Subcontractor separation needed; role-based navigation
+
+### Full Issue Tracker
+
+See `docs/PLATFORM_AUDIT_ISSUES.md` for complete list of 60 issues with:
+- Detailed acceptance criteria
+- Effort estimates
+- File locations
+- Status tracking
 
 ---
 

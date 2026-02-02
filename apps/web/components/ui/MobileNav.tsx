@@ -19,6 +19,7 @@ import {
   ChevronRightIcon,
   HomeIcon,
 } from '@heroicons/react/24/outline';
+import { useNetworkStatus } from '@/lib/offline/network-status';
 
 // ============================================
 // MobileBottomNav - Fixed bottom navigation
@@ -156,6 +157,7 @@ export function MobileDrawer({
   footer,
 }: MobileDrawerProps) {
   const pathname = usePathname();
+  const { isOnline } = useNetworkStatus();
 
   // Prevent body scroll when drawer is open
   useEffect(() => {
@@ -203,14 +205,23 @@ export function MobileDrawer({
         {userDisplayName && (
           <div className="px-4 py-4 border-b border-gray-100 bg-gray-50">
             <div className="flex items-center gap-3">
-              {userAvatar || (
-                <div className="h-10 w-10 rounded-full bg-brand-primary-light flex items-center justify-center text-brand-primary font-bold">
-                  {userDisplayName.charAt(0).toUpperCase()}
-                </div>
-              )}
+              <div className="relative">
+                {userAvatar || (
+                  <div className="h-10 w-10 rounded-full bg-brand-primary-light flex items-center justify-center text-brand-primary font-bold">
+                    {userDisplayName.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                {/* Online status indicator */}
+                <span
+                  className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-gray-50 ${
+                    isOnline ? 'bg-green-500' : 'bg-gray-400'
+                  }`}
+                  title={isOnline ? 'Online' : 'Offline'}
+                />
+              </div>
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-gray-900 truncate">{userDisplayName}</p>
-                <p className="text-sm text-gray-500">Signed in</p>
+                <p className="text-sm text-gray-500">{isOnline ? 'Online' : 'Offline'}</p>
               </div>
             </div>
           </div>

@@ -73,10 +73,9 @@ export default function EmptyState({
       {icon && (
         <div
           className={cn(
-            'mx-auto rounded-full bg-gray-100 flex items-center justify-center mb-4 animate-bounce',
+            'mx-auto rounded-full bg-gray-100 flex items-center justify-center mb-4',
             sizeConfig.iconWrapper
           )}
-          style={{ animationDuration: '2s' }}
         >
           <div className={cn('text-gray-300', sizeConfig.icon)}>
             {icon}

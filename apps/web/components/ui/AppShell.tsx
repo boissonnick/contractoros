@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { NavItem, UserRole } from '@/types';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { MobileHeader, MobileDrawer, MobileBottomNav } from './MobileNav';
+import { useNetworkStatus } from '@/lib/offline/network-status';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -24,6 +25,7 @@ export default function AppShell({
 }: AppShellProps) {
   const pathname = usePathname();
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const { isOnline } = useNetworkStatus();
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
@@ -64,8 +66,17 @@ export default function AppShell({
 
         <div className="p-4 border-t border-gray-200">
           <div className="flex items-center mb-4">
-            <div className="h-8 w-8 rounded-full bg-brand-primary-light flex items-center justify-center text-brand-primary font-bold">
-              {userDisplayName ? userDisplayName.charAt(0) : 'U'}
+            <div className="relative">
+              <div className="h-8 w-8 rounded-full bg-brand-primary-light flex items-center justify-center text-brand-primary font-bold">
+                {userDisplayName ? userDisplayName.charAt(0) : 'U'}
+              </div>
+              {/* Online status indicator */}
+              <span
+                className={`absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white ${
+                  isOnline ? 'bg-green-500' : 'bg-gray-400'
+                }`}
+                title={isOnline ? 'Online' : 'Offline'}
+              />
             </div>
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-700 truncate w-32">{userDisplayName}</p>
@@ -99,7 +110,8 @@ export default function AppShell({
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto pb-20 md:pb-0">
-        <div className="max-w-7xl mx-auto p-4 md:p-8">
+        {/* Added pr-40 on md screens to prevent overlap with fixed search bar */}
+        <div className="max-w-7xl mx-auto p-4 md:p-8 md:pr-40 lg:pr-8">
           {children}
         </div>
       </main>
