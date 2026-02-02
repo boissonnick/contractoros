@@ -40,7 +40,7 @@ const RFI_TEMPLATES = {
     {
       subject: 'Beam size clarification at kitchen opening',
       question: 'Drawing A-102 shows a beam at the kitchen opening but doesn\'t specify the size. Please confirm the required beam dimensions and connection details.',
-      answer: 'Use 2x LVL 1.75" x 9.5" with Simpson?"
+      answer: 'Use 2x LVL 1.75 x 9.5 inch with Simpson strong-tie hangers at each end.',
     },
     {
       subject: 'Foundation reinforcement requirements',
