@@ -503,7 +503,72 @@ export function generateTasks(orgId: string): TaskSeed[] {
 
   console.log(`Generated ${tasks.length} tasks across ${projectsWithTasks.length} projects`);
 
+  // Add dependencies between sequential tasks within each project
+  addTaskDependencies(tasks);
+
   return tasks;
+}
+
+/**
+ * Add dependencies between tasks to create proper Gantt chart relationships
+ * Tasks within the same phase depend on the previous task in that phase
+ * First task of each phase depends on last task of previous phase
+ */
+function addTaskDependencies(tasks: TaskSeed[]): void {
+  // Group tasks by project
+  const tasksByProject: Record<string, TaskSeed[]> = {};
+  for (const task of tasks) {
+    if (!tasksByProject[task.projectId]) {
+      tasksByProject[task.projectId] = [];
+    }
+    tasksByProject[task.projectId].push(task);
+  }
+
+  // For each project, set up dependencies based on order and phase
+  for (const projectId of Object.keys(tasksByProject)) {
+    const projectTasks = tasksByProject[projectId];
+
+    // Sort by start date to establish order
+    projectTasks.sort((a, b) => {
+      const aTime = a.startDate?.getTime() || 0;
+      const bTime = b.startDate?.getTime() || 0;
+      return aTime - bTime;
+    });
+
+    // Add dependencies - each task depends on the previous one (finish-to-start)
+    for (let i = 1; i < projectTasks.length; i++) {
+      const currentTask = projectTasks[i];
+      const previousTask = projectTasks[i - 1];
+
+      // Only add dependency if both tasks have dates and current isn't completed
+      if (previousTask.id && currentTask.status !== 'completed') {
+        // Add 30% chance of dependency to create realistic schedule
+        if (Math.random() < 0.3 || i <= 3) {
+          currentTask.dependencies.push({
+            taskId: previousTask.id,
+            type: 'finish_to_start',
+            lag: 0, // days
+          });
+        }
+      }
+    }
+
+    // Ensure at least first 5 tasks have sequential dependencies
+    for (let i = 1; i < Math.min(5, projectTasks.length); i++) {
+      const currentTask = projectTasks[i];
+      const previousTask = projectTasks[i - 1];
+
+      if (!currentTask.dependencies.find(d => d.taskId === previousTask.id)) {
+        currentTask.dependencies.push({
+          taskId: previousTask.id,
+          type: 'finish_to_start',
+          lag: 0,
+        });
+      }
+    }
+  }
+
+  console.log('Added task dependencies for Gantt chart');
 }
 
 // Export for seeding
