@@ -11,6 +11,7 @@ import { OfflineBanner } from '@/components/offline/OfflineBanner';
 import SidebarDevTools from '@/components/ui/SidebarDevTools';
 import { AssistantPanel, AssistantTrigger } from '@/components/assistant';
 import { useAssistant } from '@/lib/hooks/useAssistant';
+import { GlobalSearchBar } from '@/components/search';
 import {
   HomeIcon,
   FolderIcon,
@@ -82,6 +83,11 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
       {/* Offline Banner */}
       <OfflineBanner />
+
+      {/* Global Search - positioned in header area on desktop */}
+      <div className="hidden md:block fixed top-4 right-8 z-40">
+        <GlobalSearchBar />
+      </div>
 
       {/* Main App Shell */}
       <div className="flex-1">
