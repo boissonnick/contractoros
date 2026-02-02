@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import {
   doc,
@@ -14,6 +14,11 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { PortalNav, MessageThread, ThreadMessage } from '@/components/client-portal';
+import {
+  uploadMultipleAttachments,
+  getAttachmentType,
+  UploadProgress,
+} from '@/lib/storage/message-attachments';
 
 interface ClientPortalData {
   projectId: string;
@@ -32,6 +37,11 @@ export default function MessagesPage() {
   const [messages, setMessages] = useState<ThreadMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<{
+    current: number;
+    total: number;
+    percentage: number;
+  } | null>(null);
 
   useEffect(() => {
     async function fetchPortalData() {
@@ -135,26 +145,59 @@ export default function MessagesPage() {
     return () => unsubscribe();
   }, [portalData]);
 
-  const handleSendMessage = async (content: string, attachments?: File[]) => {
+  const handleSendMessage = useCallback(async (content: string, attachments?: File[]) => {
     if (!portalData) return;
 
-    // TODO: Handle file uploads to Firebase Storage
+    try {
+      // Upload attachments if any
+      let uploadedAttachments: { url: string; type: 'image' | 'file'; name: string }[] = [];
 
-    await addDoc(
-      collection(
-        db,
-        `organizations/${portalData.orgId}/projects/${portalData.projectId}/messages`
-      ),
-      {
-        content,
-        senderType: 'client',
-        senderId: portalData.clientId,
-        senderName: portalData.clientName,
-        createdAt: serverTimestamp(),
-        attachments: [], // TODO: Add uploaded file URLs
+      if (attachments && attachments.length > 0) {
+        setUploadProgress({ current: 0, total: attachments.length, percentage: 0 });
+
+        const uploaded = await uploadMultipleAttachments(
+          attachments,
+          portalData.orgId,
+          portalData.projectId,
+          (current, total, progress) => {
+            setUploadProgress({
+              current,
+              total,
+              percentage: progress.percentage,
+            });
+          }
+        );
+
+        uploadedAttachments = uploaded.map((att) => ({
+          url: att.url,
+          type: att.type === 'image' ? 'image' as const : 'file' as const,
+          name: att.name,
+        }));
+
+        setUploadProgress(null);
       }
-    );
-  };
+
+      // Save message to Firestore
+      await addDoc(
+        collection(
+          db,
+          `organizations/${portalData.orgId}/projects/${portalData.projectId}/messages`
+        ),
+        {
+          content,
+          senderType: 'client',
+          senderId: portalData.clientId,
+          senderName: portalData.clientName,
+          createdAt: serverTimestamp(),
+          attachments: uploadedAttachments,
+        }
+      );
+    } catch (err) {
+      console.error('Error sending message:', err);
+      setUploadProgress(null);
+      throw err; // Re-throw to let MessageThread handle the error UI
+    }
+  }, [portalData]);
 
   if (loading) {
     return (
@@ -197,6 +240,7 @@ export default function MessagesPage() {
             contractorName={portalData.companyName}
             clientName={portalData.clientName}
             onSendMessage={handleSendMessage}
+            uploadProgress={uploadProgress}
             className="h-full"
           />
         </div>

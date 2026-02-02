@@ -1,0 +1,63 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Message attachments - used by client portal messages
+    // Note: Client portal uses tokens (not Firebase Auth), so reads are public
+    // Writes require authentication (staff uploading on behalf of clients)
+    match /organizations/{orgId}/projects/{projectId}/messages/{filename} {
+      // Allow public read - client portal uses magic link tokens, not auth
+      allow read: if true;
+
+      // Allow write only for authenticated users
+      allow write: if isAuthenticated();
+    }
+
+    // Project photos and documents
+    match /organizations/{orgId}/projects/{projectId}/photos/{filename} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Profile avatars
+    match /organizations/{orgId}/avatars/{filename} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Organization logos and branding
+    match /organizations/{orgId}/branding/{filename} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Daily log photos
+    match /organizations/{orgId}/projects/{projectId}/daily-logs/{logId}/{filename} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Issue/punch list photos
+    match /organizations/{orgId}/projects/{projectId}/issues/{issueId}/{filename} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // E-signature documents
+    match /organizations/{orgId}/documents/{documentId}/{filename} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Deny all other paths by default
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

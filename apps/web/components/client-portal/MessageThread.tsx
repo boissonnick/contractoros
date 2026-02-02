@@ -6,6 +6,8 @@ import {
   PhotoIcon,
   XMarkIcon,
   ChatBubbleLeftIcon,
+  DocumentIcon,
+  ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
 import { format, isToday, isYesterday } from 'date-fns';
@@ -19,11 +21,18 @@ export interface ThreadMessage {
   attachments?: { url: string; type: 'image' | 'file'; name: string }[];
 }
 
+interface UploadProgressInfo {
+  current: number;
+  total: number;
+  percentage: number;
+}
+
 interface MessageThreadProps {
   messages: ThreadMessage[];
   contractorName?: string;
   clientName?: string;
   onSendMessage: (content: string, attachments?: File[]) => Promise<void>;
+  uploadProgress?: UploadProgressInfo | null;
   className?: string;
 }
 
@@ -38,6 +47,7 @@ export function MessageThread({
   contractorName = 'Contractor',
   clientName = 'You',
   onSendMessage,
+  uploadProgress,
   className,
 }: MessageThreadProps) {
   const [newMessage, setNewMessage] = useState('');
@@ -142,9 +152,13 @@ export function MessageThread({
                               className="max-w-full max-h-48 object-cover"
                             />
                           ) : (
-                            <div className="flex items-center gap-2 p-2 text-sm">
-                              <PhotoIcon className="w-4 h-4" />
-                              {attachment.name}
+                            <div className={cn(
+                              'flex items-center gap-2 p-3 text-sm',
+                              isClient ? 'text-white' : 'text-gray-700'
+                            )}>
+                              <DocumentIcon className="w-5 h-5 flex-shrink-0" />
+                              <span className="truncate flex-1">{attachment.name}</span>
+                              <ArrowDownTrayIcon className="w-4 h-4 flex-shrink-0" />
                             </div>
                           )}
                         </a>
@@ -169,8 +183,28 @@ export function MessageThread({
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Upload progress indicator */}
+      {uploadProgress && (
+        <div className="px-4 py-3 border-t border-gray-200 bg-blue-50">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-sm text-blue-700">
+              Uploading file {uploadProgress.current} of {uploadProgress.total}...
+            </span>
+            <span className="text-sm font-medium text-blue-700">
+              {uploadProgress.percentage}%
+            </span>
+          </div>
+          <div className="w-full bg-blue-200 rounded-full h-2">
+            <div
+              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${uploadProgress.percentage}%` }}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Attachment previews */}
-      {attachments.length > 0 && (
+      {attachments.length > 0 && !uploadProgress && (
         <div className="px-4 py-2 border-t border-gray-200 flex gap-2 overflow-x-auto">
           {attachments.map((file, index) => (
             <div
@@ -184,8 +218,11 @@ export function MessageThread({
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <PhotoIcon className="w-6 h-6 text-gray-400" />
+                <div className="w-full h-full flex flex-col items-center justify-center p-1">
+                  <DocumentIcon className="w-6 h-6 text-gray-400" />
+                  <span className="text-[8px] text-gray-500 truncate w-full text-center">
+                    {file.name.split('.').pop()?.toUpperCase()}
+                  </span>
                 </div>
               )}
               <button
@@ -205,7 +242,7 @@ export function MessageThread({
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx"
             multiple
             onChange={handleFileSelect}
             className="hidden"
@@ -213,7 +250,13 @@ export function MessageThread({
 
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex-shrink-0 p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
+            disabled={!!uploadProgress || sending}
+            className={cn(
+              'flex-shrink-0 p-2 rounded-lg',
+              uploadProgress || sending
+                ? 'text-gray-300 cursor-not-allowed'
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+            )}
           >
             <PhotoIcon className="w-6 h-6" />
           </button>
@@ -230,11 +273,11 @@ export function MessageThread({
 
           <button
             onClick={handleSend}
-            disabled={sending || (!newMessage.trim() && attachments.length === 0)}
+            disabled={sending || !!uploadProgress || (!newMessage.trim() && attachments.length === 0)}
             className={cn(
               'flex-shrink-0 p-2.5 rounded-lg transition-colors',
-              sending || (!newMessage.trim() && attachments.length === 0)
-                ? 'bg-gray-100 text-gray-400'
+              sending || uploadProgress || (!newMessage.trim() && attachments.length === 0)
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                 : 'bg-blue-600 text-white hover:bg-blue-700'
             )}
           >
