@@ -1,0 +1,5 @@
+CLI: 4
+STATUS: complete
+TASK: Sprint 33 Utils - usePunchList hook, closeout templates, punch list utilities, useCloseout hook, exports
+COMMIT: d844ec9
+MESSAGE: Ready for review. Note: types/index.ts has duplicate PunchItem types from another CLI causing tsc errors - not from my files.
