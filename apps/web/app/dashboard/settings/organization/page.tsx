@@ -7,7 +7,7 @@ import { db } from '@/lib/firebase/config';
 import { doc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
 import { uploadCompanyLogo } from '@/lib/firebase/storage-helpers';
 import { Button, Input, toast } from '@/components/ui';
-import { Organization } from '@/types';
+import { Organization, FiscalYearConfig, PayrollPeriodConfig, TaxConfig } from '@/types';
 import {
   CloudArrowUpIcon,
   XMarkIcon,
@@ -44,6 +44,18 @@ export default function OrganizationSettingsPage() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
 
+  // Fiscal Year, Payroll, and Tax Configuration (Sprint 37B)
+  const [fiscalStartMonth, setFiscalStartMonth] = useState(1);
+  const [fiscalStartDay, setFiscalStartDay] = useState(1);
+  const [payrollFrequency, setPayrollFrequency] = useState<PayrollPeriodConfig['frequency']>('biweekly');
+  const [payrollStartDay, setPayrollStartDay] = useState(1);
+  const [payDateOffset, setPayDateOffset] = useState(3);
+  const [taxEntityType, setTaxEntityType] = useState<TaxConfig['entityType']>('llc');
+  const [federalTaxRate, setFederalTaxRate] = useState(0);
+  const [stateTaxRate, setStateTaxRate] = useState(0);
+  const [localTaxRate, setLocalTaxRate] = useState(0);
+  const [taxState, setTaxState] = useState('');
+
   // Load org data
   useEffect(() => {
     if (!profile?.orgId) return;
@@ -63,6 +75,25 @@ export default function OrganizationSettingsPage() {
         }
         if (data.branding?.logoURL || data.logoURL) {
           setLogoPreview(data.branding?.logoURL || data.logoURL);
+        }
+        // Load fiscal year config
+        if (data.fiscalYear) {
+          setFiscalStartMonth(data.fiscalYear.startMonth || 1);
+          setFiscalStartDay(data.fiscalYear.startDay || 1);
+        }
+        // Load payroll config
+        if (data.payrollPeriod) {
+          setPayrollFrequency(data.payrollPeriod.frequency || 'biweekly');
+          setPayrollStartDay(data.payrollPeriod.periodStartDay || 1);
+          setPayDateOffset(data.payrollPeriod.payDateOffset || 3);
+        }
+        // Load tax config
+        if (data.taxConfig) {
+          setTaxEntityType(data.taxConfig.entityType || 'llc');
+          setFederalTaxRate(data.taxConfig.federalTaxRate || 0);
+          setStateTaxRate(data.taxConfig.stateTaxRate || 0);
+          setLocalTaxRate(data.taxConfig.localTaxRate || 0);
+          setTaxState(data.taxConfig.state || '');
         }
       }
       setLoading(false);
@@ -130,6 +161,25 @@ export default function OrganizationSettingsPage() {
           primaryColor,
           secondaryColor,
           accentColor,
+        },
+        // Fiscal year configuration
+        fiscalYear: {
+          startMonth: fiscalStartMonth,
+          startDay: fiscalStartDay,
+        },
+        // Payroll configuration
+        payrollPeriod: {
+          frequency: payrollFrequency,
+          periodStartDay: payrollStartDay,
+          payDateOffset: payDateOffset,
+        },
+        // Tax configuration
+        taxConfig: {
+          entityType: taxEntityType,
+          federalTaxRate: federalTaxRate,
+          stateTaxRate: stateTaxRate,
+          localTaxRate: localTaxRate,
+          state: taxState,
         },
         updatedAt: Timestamp.now(),
       });
@@ -288,6 +338,179 @@ export default function OrganizationSettingsPage() {
                 <span className="px-2 py-0.5 rounded-full text-xs font-bold text-white" style={{ backgroundColor: accentColor }}>
                   Accent
                 </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Financial Configuration Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Fiscal Year Configuration */}
+        <div className="bg-white border border-gray-200 rounded-xl p-5">
+          <h3 className="text-sm font-semibold text-gray-900 mb-4">Fiscal Year</h3>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Start Month</label>
+              <select
+                value={fiscalStartMonth}
+                onChange={(e) => setFiscalStartMonth(Number(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value={1}>January</option>
+                <option value={2}>February</option>
+                <option value={3}>March</option>
+                <option value={4}>April</option>
+                <option value={5}>May</option>
+                <option value={6}>June</option>
+                <option value={7}>July</option>
+                <option value={8}>August</option>
+                <option value={9}>September</option>
+                <option value={10}>October</option>
+                <option value={11}>November</option>
+                <option value={12}>December</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Start Day</label>
+              <select
+                value={fiscalStartDay}
+                onChange={(e) => setFiscalStartDay(Number(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                {Array.from({ length: 28 }, (_, i) => i + 1).map((day) => (
+                  <option key={day} value={day}>{day}</option>
+                ))}
+              </select>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              Common: Jan 1, Apr 1, Jul 1, Oct 1
+            </p>
+          </div>
+        </div>
+
+        {/* Payroll Period Configuration */}
+        <div className="bg-white border border-gray-200 rounded-xl p-5">
+          <h3 className="text-sm font-semibold text-gray-900 mb-4">Payroll Period</h3>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Frequency</label>
+              <select
+                value={payrollFrequency}
+                onChange={(e) => setPayrollFrequency(e.target.value as PayrollPeriodConfig['frequency'])}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="weekly">Weekly</option>
+                <option value="biweekly">Bi-weekly</option>
+                <option value="semimonthly">Semi-monthly</option>
+                <option value="monthly">Monthly</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                Period Start {payrollFrequency === 'weekly' || payrollFrequency === 'biweekly' ? '(Day of Week)' : '(Day of Month)'}
+              </label>
+              <select
+                value={payrollStartDay}
+                onChange={(e) => setPayrollStartDay(Number(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                {payrollFrequency === 'weekly' || payrollFrequency === 'biweekly' ? (
+                  <>
+                    <option value={0}>Sunday</option>
+                    <option value={1}>Monday</option>
+                    <option value={2}>Tuesday</option>
+                    <option value={3}>Wednesday</option>
+                    <option value={4}>Thursday</option>
+                    <option value={5}>Friday</option>
+                    <option value={6}>Saturday</option>
+                  </>
+                ) : (
+                  Array.from({ length: 28 }, (_, i) => i + 1).map((day) => (
+                    <option key={day} value={day}>{day}</option>
+                  ))
+                )}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Pay Date Offset (days after period end)</label>
+              <input
+                type="number"
+                min={0}
+                max={14}
+                value={payDateOffset}
+                onChange={(e) => setPayDateOffset(Number(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Tax Configuration */}
+        <div className="bg-white border border-gray-200 rounded-xl p-5">
+          <h3 className="text-sm font-semibold text-gray-900 mb-4">Tax Configuration</h3>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Entity Type</label>
+              <select
+                value={taxEntityType}
+                onChange={(e) => setTaxEntityType(e.target.value as TaxConfig['entityType'])}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="sole_proprietor">Sole Proprietor</option>
+                <option value="llc">LLC</option>
+                <option value="partnership">Partnership</option>
+                <option value="s_corp">S Corporation</option>
+                <option value="c_corp">C Corporation</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">State</label>
+              <input
+                type="text"
+                value={taxState}
+                onChange={(e) => setTaxState(e.target.value)}
+                placeholder="e.g., TX, CA, NY"
+                maxLength={2}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 uppercase"
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Federal %</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={50}
+                  step={0.1}
+                  value={federalTaxRate}
+                  onChange={(e) => setFederalTaxRate(Number(e.target.value))}
+                  className="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">State %</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={20}
+                  step={0.1}
+                  value={stateTaxRate}
+                  onChange={(e) => setStateTaxRate(Number(e.target.value))}
+                  className="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Local %</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={10}
+                  step={0.1}
+                  value={localTaxRate}
+                  onChange={(e) => setLocalTaxRate(Number(e.target.value))}
+                  className="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
               </div>
             </div>
           </div>
