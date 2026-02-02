@@ -74,7 +74,7 @@ export function useSubmittals({ projectId, status }: UseSubmittalsOptions) {
 
   const requestRevision = async (submittalId: string, comments: string) => {
     await updateSubmittal(submittalId, {
-      status: 'revision_required',
+      status: 'revise_resubmit',
       reviewComments: comments,
       reviewedAt: new Date(),
     });
@@ -83,11 +83,10 @@ export function useSubmittals({ projectId, status }: UseSubmittalsOptions) {
   const stats = {
     total: submittals.length,
     draft: submittals.filter(s => s.status === 'draft').length,
-    submitted: submittals.filter(s => s.status === 'submitted').length,
-    underReview: submittals.filter(s => s.status === 'under_review').length,
+    pendingReview: submittals.filter(s => s.status === 'pending_review').length,
     approved: submittals.filter(s => s.status === 'approved').length,
     approvedAsNoted: submittals.filter(s => s.status === 'approved_as_noted').length,
-    revisionRequired: submittals.filter(s => s.status === 'revision_required').length,
+    reviseResubmit: submittals.filter(s => s.status === 'revise_resubmit').length,
     rejected: submittals.filter(s => s.status === 'rejected').length,
   };
 

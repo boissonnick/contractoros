@@ -2,30 +2,32 @@ import type { RFI, RFIStatus, RFIPriority } from '@/types';
 
 export const RFI_STATUS_LABELS: Record<RFIStatus, string> = {
   draft: 'Draft',
-  submitted: 'Submitted',
-  responded: 'Responded',
+  open: 'Open',
+  pending_response: 'Pending Response',
+  answered: 'Answered',
   closed: 'Closed',
 };
 
 export const RFI_STATUS_COLORS: Record<RFIStatus, string> = {
   draft: 'bg-gray-100 text-gray-800',
-  submitted: 'bg-blue-100 text-blue-800',
-  responded: 'bg-green-100 text-green-800',
+  open: 'bg-blue-100 text-blue-800',
+  pending_response: 'bg-yellow-100 text-yellow-800',
+  answered: 'bg-green-100 text-green-800',
   closed: 'bg-purple-100 text-purple-800',
 };
 
 export const RFI_PRIORITY_LABELS: Record<RFIPriority, string> = {
-  urgent: 'Urgent',
-  high: 'High',
-  normal: 'Normal',
   low: 'Low',
+  medium: 'Medium',
+  high: 'High',
+  urgent: 'Urgent',
 };
 
 export const RFI_PRIORITY_COLORS: Record<RFIPriority, string> = {
-  urgent: 'bg-red-600 text-white',
-  high: 'bg-orange-500 text-white',
-  normal: 'bg-blue-500 text-white',
   low: 'bg-gray-400 text-white',
+  medium: 'bg-blue-500 text-white',
+  high: 'bg-orange-500 text-white',
+  urgent: 'bg-red-600 text-white',
 };
 
 export function calculateDaysOpen(rfi: RFI): number {
@@ -43,15 +45,16 @@ export function sortRFIs(rfis: RFI[], sortBy: 'date' | 'priority' | 'status' = '
   const priorityOrder: Record<RFIPriority, number> = {
     urgent: 0,
     high: 1,
-    normal: 2,
+    medium: 2,
     low: 3,
   };
 
   const statusOrder: Record<RFIStatus, number> = {
-    submitted: 0,
-    draft: 1,
-    responded: 2,
-    closed: 3,
+    open: 0,
+    pending_response: 1,
+    draft: 2,
+    answered: 3,
+    closed: 4,
   };
 
   return [...rfis].sort((a, b) => {
@@ -104,19 +107,19 @@ export function generateRFINumber(existingRFIs: RFI[]): string {
 }
 
 export function getRFISummary(rfis: RFI[]) {
-  const now = new Date();
   return {
     total: rfis.length,
     byStatus: {
       draft: rfis.filter(r => r.status === 'draft').length,
-      submitted: rfis.filter(r => r.status === 'submitted').length,
-      responded: rfis.filter(r => r.status === 'responded').length,
+      open: rfis.filter(r => r.status === 'open').length,
+      pending_response: rfis.filter(r => r.status === 'pending_response').length,
+      answered: rfis.filter(r => r.status === 'answered').length,
       closed: rfis.filter(r => r.status === 'closed').length,
     },
     byPriority: {
       urgent: rfis.filter(r => r.priority === 'urgent').length,
       high: rfis.filter(r => r.priority === 'high').length,
-      normal: rfis.filter(r => r.priority === 'normal').length,
+      medium: rfis.filter(r => r.priority === 'medium').length,
       low: rfis.filter(r => r.priority === 'low').length,
     },
     overdue: rfis.filter(r => isOverdue(r)).length,

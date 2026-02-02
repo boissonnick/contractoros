@@ -57,7 +57,7 @@ export function useRFIs({ projectId, status }: UseRFIsOptions) {
   };
 
   const respondToRFI = async (rfiId: string, response: string) => {
-    await updateRFI(rfiId, { response, status: 'responded' });
+    await updateRFI(rfiId, { response, status: 'answered' });
   };
 
   const closeRFI = async (rfiId: string) => {
@@ -67,8 +67,9 @@ export function useRFIs({ projectId, status }: UseRFIsOptions) {
   const stats = {
     total: rfis.length,
     draft: rfis.filter(r => r.status === 'draft').length,
-    submitted: rfis.filter(r => r.status === 'submitted').length,
-    responded: rfis.filter(r => r.status === 'responded').length,
+    open: rfis.filter(r => r.status === 'open').length,
+    pendingResponse: rfis.filter(r => r.status === 'pending_response').length,
+    answered: rfis.filter(r => r.status === 'answered').length,
     closed: rfis.filter(r => r.status === 'closed').length,
     overdue: rfis.filter(r => r.dueDate && new Date(r.dueDate) < new Date() && r.status !== 'closed').length,
   };
