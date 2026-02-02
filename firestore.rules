@@ -56,6 +56,15 @@ service cloud.firestore {
 
       // Only admins can delete profiles
       allow delete: if isAdmin();
+
+      // ==========================================
+      // User Reminders Subcollection (Sprint 32)
+      // Personal reminders scoped to individual users
+      // ==========================================
+      match /reminders/{reminderId} {
+        // Users can only access their own reminders
+        allow read, write: if request.auth.uid == userId;
+      }
     }
 
     // Projects collection
@@ -2374,6 +2383,18 @@ service cloud.firestore {
 
       // Admins can delete suggestions
       allow delete: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+    }
+
+    // ==========================================
+    // Organization-Scoped Automation Alerts Collection (Sprint 32)
+    // Budget alerts, scheduling suggestions, change order detection
+    // ==========================================
+    match /organizations/{orgId}/automationAlerts/{alertId} {
+      // Org members can read alerts
+      allow read: if isSameOrg(orgId);
+
+      // Only admins can create/update/delete alerts
+      allow write: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
     }
 
     // Default deny all other access
