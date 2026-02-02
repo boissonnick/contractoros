@@ -7717,3 +7717,60 @@ export interface CloseoutChecklistItem {
   completedBy?: string;
   notes?: string;
 }
+
+// ============================================================================
+// Equipment Types (Sprint 35)
+// ============================================================================
+
+export type EquipmentStatus = 'available' | 'checked_out' | 'maintenance' | 'retired';
+export type EquipmentCategory = 'power_tool' | 'hand_tool' | 'heavy_equipment' | 'safety' | 'measuring' | 'vehicle' | 'other';
+
+export interface Equipment {
+  id: string;
+  orgId: string;
+  name: string;
+  category: EquipmentCategory;
+  status: EquipmentStatus;
+  serialNumber?: string;
+  description?: string;
+  photoUrl?: string;
+  purchaseDate?: Date;
+  purchasePrice?: number;
+  currentValue?: number;
+  currentLocation?: string;
+  currentProjectId?: string;
+  checkedOutTo?: string;
+  checkedOutToName?: string;
+  checkedOutAt?: Date;
+  expectedReturnDate?: Date;
+  maintenanceSchedule?: 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+  lastMaintenanceDate?: Date;
+  nextMaintenanceDate?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface EquipmentCheckout {
+  id: string;
+  equipmentId: string;
+  equipmentName: string;
+  userId: string;
+  userName: string;
+  projectId?: string;
+  projectName?: string;
+  checkedOutAt: Date;
+  expectedReturnDate?: Date;
+  returnedAt?: Date;
+  notes?: string;
+}
+
+export interface MaintenanceRecord {
+  id: string;
+  equipmentId: string;
+  type: 'routine' | 'repair' | 'inspection';
+  description: string;
+  cost?: number;
+  performedBy: string;
+  performedAt: Date;
+  nextScheduledDate?: Date;
+}
