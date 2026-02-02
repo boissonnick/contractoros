@@ -20,10 +20,10 @@
 | FEB-013 | Firebase permissions (seed scripts fixed) | `[x]` ✅ |
 | FEB-053 | Profit margin calculation wrong | `[x]` ✅ |
 | FEB-057 | Payroll showing "NaNh total" | `[x]` ✅ |
-| #69 | Operational Reports Load Error | `[ ]` |
-| #76 | Payroll Reports Load Error | `[ ]` |
+| #69 | Operational Reports Load Error | `[x]` ✅ |
+| #76 | Payroll Reports Load Error | `[x]` ✅ |
 
-**Sprint 37A Complete:** Core bugs fixed, demo data re-seeded, docker rebuilt.
+**All Critical Bugs Fixed:** 6/6 complete. Ready for Sprint 37B (UI/Layout) or coordinated 4-CLI development.
 
 ---
 
@@ -34,7 +34,7 @@
 | **Current Sprint** | Sprint 37B - UI/Layout + Animations 🎨 |
 | **Sprint Status** | 🚧 READY TO START |
 | **Platform Completion** | ~90% (adjusted per audit) |
-| **Audit Issues** | 101 total (6 critical, 47 high, 40 medium, 8 low) |
+| **Audit Issues** | 101 total (0 critical ✅, 47 high, 40 medium, 8 low) |
 | **TypeScript Status** | ✅ Passing |
 | **Firestore Rules** | ⚠️ Needs review (FEB-013) |
 | **Docker Status** | ✅ Running on localhost:3000 |

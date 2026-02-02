@@ -46,7 +46,7 @@
 ### 2A: Critical Bugs (Fix First)
 
 #### Issue #69: Operational Reports Load Error
-- **Status:** `[ ]`
+- **Status:** `[x]` ✅ Fixed 2026-02-02
 - **Severity:** CRITICAL
 - **Type:** Bug
 - **Effort:** 2-4 hours
@@ -59,7 +59,7 @@
   - [ ] No console permission errors
 
 #### Issue #76: Payroll Data Load Error in Reports
-- **Status:** `[ ]`
+- **Status:** `[x]` ✅ Fixed 2026-02-02
 - **Severity:** CRITICAL
 - **Type:** Bug
 - **Effort:** 2-4 hours
