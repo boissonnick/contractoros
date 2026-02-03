@@ -613,8 +613,8 @@ async function seedTasks(): Promise<void> {
     admin.initializeApp({ projectId: 'contractoros-483812' });
   }
 
-  import { getDb } from "./db";
-const db = getDb();
+  const { getDb } = await import("./db");
+  const db = getDb();
   const orgId = DEMO_ORG_ID;
 
   logSection('Seeding Tasks');

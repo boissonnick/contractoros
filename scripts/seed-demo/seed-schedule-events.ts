@@ -33,8 +33,8 @@ const DEMO_PROJECTS = [
   { id: 'demo-proj-garcia-basement', name: 'Garcia Basement Finish', active: true },
 ];
 
-// Event types
-type ScheduleEventType = 'work' | 'meeting' | 'inspection' | 'delivery' | 'milestone' | 'deadline' | 'other';
+// Event types (matching the template keys)
+type ScheduleEventType = 'work' | 'meeting' | 'inspection' | 'delivery' | 'milestone';
 
 // Event templates
 const EVENT_TEMPLATES = {
@@ -84,8 +84,6 @@ const EVENT_COLORS: Record<ScheduleEventType, string> = {
   inspection: '#f59e0b', // amber
   delivery: '#10b981',  // emerald
   milestone: '#ec4899', // pink
-  deadline: '#ef4444',  // red
-  other: '#6b7280',     // gray
 };
 
 // Get demo crew members
@@ -198,7 +196,7 @@ async function seedScheduleEvents(): Promise<number> {
   const companyEvents = [
     { title: 'Safety Training', type: 'meeting' as ScheduleEventType, daysForward: 14, duration: 4 },
     { title: 'Team Meeting', type: 'meeting' as ScheduleEventType, daysForward: 7, duration: 1 },
-    { title: 'Equipment Maintenance', type: 'other' as ScheduleEventType, daysForward: 21, duration: 8 },
+    { title: 'Equipment Maintenance', type: 'work' as ScheduleEventType, daysForward: 21, duration: 8 },
   ];
 
   for (const evt of companyEvents) {

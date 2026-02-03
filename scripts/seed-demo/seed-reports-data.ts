@@ -30,6 +30,25 @@ import {
 // Type Definitions
 // ============================================
 
+interface DemoClient {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  isCommercial: boolean;
+  companyName?: string;
+  address: { street: string; city: string; state: string; zip: string };
+}
+
+interface DemoProject {
+  id: string;
+  name: string;
+  client: DemoClient;
+  budget: number;
+  completedMonthsAgo?: number;
+}
+
 type InvoiceStatus = 'draft' | 'sent' | 'viewed' | 'partial' | 'paid' | 'overdue' | 'void';
 
 interface InvoiceLineItem {
@@ -79,62 +98,62 @@ interface Invoice {
 // ============================================
 
 // Completed projects for historical data
-const COMPLETED_PROJECTS = [
+const COMPLETED_PROJECTS: DemoProject[] = [
   {
     id: 'demo-proj-smith-kitchen',
     name: 'Smith Kitchen Remodel',
-    client: DEMO_CLIENTS.smith,
+    client: DEMO_CLIENTS.smith as unknown as DemoClient,
     budget: 45000,
     completedMonthsAgo: 8,
   },
   {
     id: 'demo-proj-wilson-fence',
     name: 'Wilson Fence Installation',
-    client: DEMO_CLIENTS.wilson,
+    client: DEMO_CLIENTS.wilson as unknown as DemoClient,
     budget: 8500,
     completedMonthsAgo: 6,
   },
   {
     id: 'demo-proj-mainst-retail',
     name: 'Main St. Retail Storefront',
-    client: DEMO_CLIENTS.mainStRetail,
+    client: DEMO_CLIENTS.mainStRetail as unknown as DemoClient,
     budget: 125000,
     completedMonthsAgo: 4,
   },
   {
     id: 'demo-proj-garcia-bath',
     name: 'Garcia Master Bath',
-    client: DEMO_CLIENTS.garcia,
+    client: DEMO_CLIENTS.garcia as unknown as DemoClient,
     budget: 35000,
     completedMonthsAgo: 2,
   },
   {
     id: 'demo-proj-cafe-ti',
     name: 'Downtown Cafe TI',
-    client: DEMO_CLIENTS.downtownCafe,
+    client: DEMO_CLIENTS.downtownCafe as unknown as DemoClient,
     budget: 65000,
     completedMonthsAgo: 1,
   },
 ];
 
 // Active projects for current invoices
-const ACTIVE_PROJECTS = [
+const ACTIVE_PROJECTS: DemoProject[] = [
   {
     id: 'demo-proj-thompson-deck',
     name: 'Thompson Deck Build',
-    client: DEMO_CLIENTS.thompson,
+    client: DEMO_CLIENTS.thompson as unknown as DemoClient,
     budget: 22000,
   },
   {
     id: 'demo-proj-office-park',
     name: 'Office Park Suite 200',
-    client: DEMO_CLIENTS.officePark,
+    client: DEMO_CLIENTS.officePark as unknown as DemoClient,
     budget: 95000,
   },
   {
     id: 'demo-proj-garcia-basement',
     name: 'Garcia Basement Finish',
-    client: DEMO_CLIENTS.garcia,
+    client: DEMO_CLIENTS.garcia as unknown as DemoClient,
     budget: 55000,
   },
 ];
@@ -169,7 +188,7 @@ function createLineItem(
 }
 
 function createInvoice(
-  project: { id: string; name: string; client: typeof DEMO_CLIENTS.smith; budget: number },
+  project: DemoProject,
   amount: number,
   status: InvoiceStatus,
   createdDate: Date,
@@ -186,7 +205,7 @@ function createInvoice(
     createLineItem('Progress Payment - ' + project.name, 1, 'each', amount, 1),
   ];
 
-  const clientName = project.client.companyName || `${project.client.firstName} ${project.client.lastName}`;
+  const clientName = (project.client as any).companyName || `${project.client.firstName} ${project.client.lastName}`;
 
   return {
     id: generateId('inv'),
@@ -239,7 +258,7 @@ export async function seedHistoricalRevenue(db: FirebaseFirestore.Firestore): Pr
     const invoiceAmount = project.budget / invoiceCount;
 
     for (let i = 0; i < invoiceCount; i++) {
-      const monthOffset = project.completedMonthsAgo + (invoiceCount - i - 1);
+      const monthOffset = (project.completedMonthsAgo || 1) + (invoiceCount - i - 1);
       const createdDate = monthsAgo(monthOffset);
       const dueDate = new Date(createdDate);
       dueDate.setDate(dueDate.getDate() + 30);
@@ -449,16 +468,8 @@ export async function seedReportsData(db: FirebaseFirestore.Firestore): Promise<
 
 // CLI execution
 if (require.main === module) {
-  const { initializeApp, cert } = require('firebase-admin/app');
-  const { getFirestore } = require('firebase-admin/firestore');
-
-  // Initialize Firebase Admin
-  const serviceAccount = require('../../apps/web/firebase-service-account.json');
-  initializeApp({
-    credential: cert(serviceAccount),
-  });
-
-  const db = getFirestore();
+  const { getDb } = require('./db');
+  const db = getDb();
 
   seedReportsData(db)
     .then((result) => {
