@@ -8,6 +8,7 @@
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { onRequest } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
+import { getApp } from "firebase-admin/app";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
 import { BigQuery } from "@google-cloud/bigquery";
 
@@ -171,7 +172,7 @@ async function storeToBigQuery(records: LaborRateRecord[]): Promise<void> {
  * Store data in Firestore for real-time access
  */
 async function storeToFirestore(records: LaborRateRecord[]): Promise<void> {
-  const db = getFirestore();
+  const db = getFirestore(getApp(), "contractoros");
   const batch = db.batch();
 
   for (const record of records) {

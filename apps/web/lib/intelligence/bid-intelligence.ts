@@ -607,20 +607,11 @@ export function generateBidRecommendations(
   };
 }
 
-/**
- * Format currency for display
- */
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
+// Re-export from centralized formatters
+export { formatCurrencyCompact as formatCurrency } from '@/lib/utils/formatters';
 
 /**
- * Format percentage for display
+ * Format percentage for display (rounded to integer)
  */
 export function formatPercent(value: number): string {
   return `${Math.round(value)}%`;

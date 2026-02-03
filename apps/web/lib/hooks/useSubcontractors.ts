@@ -93,6 +93,56 @@ function toFirestore(sub: Partial<Subcontractor>): Record<string, unknown> {
   return data;
 }
 
+/**
+ * Hook for managing subcontractors with real-time updates.
+ *
+ * Provides a list of subcontractors for the organization with CRUD operations.
+ * Subscribes to Firestore for real-time updates. Subcontractors are ordered
+ * alphabetically by company name.
+ *
+ * @returns {Object} Subcontractor data and operations
+ * @returns {Subcontractor[]} subs - Array of subcontractors for the organization
+ * @returns {boolean} loading - True while initial fetch is in progress
+ * @returns {string|null} error - Error message if the subscription failed
+ * @returns {Function} addSub - Create a new subcontractor
+ * @returns {Function} updateSub - Update a subcontractor by ID
+ * @returns {Function} deleteSub - Delete a subcontractor by ID
+ *
+ * @example
+ * // Display subcontractor directory
+ * const { subs, loading, addSub } = useSubcontractors();
+ *
+ * if (loading) return <Spinner />;
+ *
+ * return subs.map(sub => <SubCard key={sub.id} subcontractor={sub} />);
+ *
+ * @example
+ * // Add a new subcontractor
+ * const { addSub } = useSubcontractors();
+ *
+ * await addSub({
+ *   orgId,
+ *   companyName: 'ABC Plumbing',
+ *   contactName: 'John Smith',
+ *   email: 'john@abcplumbing.com',
+ *   trade: 'plumbing',
+ *   isActive: true
+ * });
+ *
+ * @example
+ * // Filter by trade
+ * const { subs } = useSubcontractors();
+ * const electricians = subs.filter(s => s.trade === 'electrical');
+ * const plumbers = subs.filter(s => s.trade === 'plumbing');
+ *
+ * @example
+ * // Check for expiring insurance
+ * const { subs } = useSubcontractors();
+ * const thirtyDaysFromNow = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+ * const expiringSoon = subs.filter(s =>
+ *   s.insuranceExpiry && s.insuranceExpiry < thirtyDaysFromNow
+ * );
+ */
 export function useSubcontractors() {
   const { profile } = useAuth();
   const [subs, setSubs] = useState<Subcontractor[]>([]);

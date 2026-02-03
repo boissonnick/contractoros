@@ -14,6 +14,7 @@ import {
 } from '@react-pdf/renderer';
 import { Organization, ChangeOrder } from '@/types';
 import { format } from 'date-fns';
+import { formatCurrencySigned as formatCurrency } from '@/lib/utils/formatters';
 
 // Styles
 const styles = StyleSheet.create({
@@ -233,14 +234,6 @@ const styles = StyleSheet.create({
 interface ChangeOrderPdfProps {
   changeOrder: ChangeOrder;
   organization: Organization;
-}
-
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    signDisplay: 'always',
-  }).format(amount);
 }
 
 function formatDate(date: Date | string | undefined): string {

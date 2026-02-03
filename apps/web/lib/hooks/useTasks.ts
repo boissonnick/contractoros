@@ -161,6 +161,69 @@ export interface NewTaskInput {
   templateId?: string;
 }
 
+/**
+ * Hook for managing project tasks with real-time updates and bulk operations.
+ *
+ * Provides comprehensive task management including CRUD operations,
+ * status transitions, reordering, and bulk actions. Subscribes to Firestore
+ * for real-time updates when tasks change.
+ *
+ * @param {UseTasksOptions} options - Configuration options
+ * @param {string} options.projectId - Project ID to fetch tasks for (required)
+ * @param {string|null} [options.phaseId] - Filter tasks by phase ID
+ * @param {string|null} [options.parentTaskId] - Filter to subtasks of a parent task, or null for root tasks
+ *
+ * @returns {UseTasksReturn} Tasks data and operations
+ * @returns {Task[]} tasks - Array of tasks matching the filters, ordered by position
+ * @returns {boolean} loading - True while initial fetch is in progress
+ * @returns {string|null} error - Error message if the subscription failed
+ * @returns {Function} addTask - Create a new task, returns the new task ID
+ * @returns {Function} updateTask - Update a task by ID with partial data
+ * @returns {Function} deleteTask - Delete a task by ID
+ * @returns {Function} moveTask - Change a task's status (handles completedAt automatically)
+ * @returns {Function} reorderTasks - Reorder multiple tasks by setting new order values
+ * @returns {Function} bulkUpdateStatus - Update status of multiple tasks at once
+ * @returns {Function} bulkAssign - Assign multiple tasks to team members
+ * @returns {Function} bulkDelete - Delete multiple tasks at once
+ * @returns {Function} bulkSetPriority - Set priority for multiple tasks
+ *
+ * @example
+ * // Basic task list for a project
+ * const { tasks, loading, addTask } = useTasks({ projectId });
+ *
+ * if (loading) return <Spinner />;
+ *
+ * return tasks.map(task => <TaskCard key={task.id} task={task} />);
+ *
+ * @example
+ * // Create a new task
+ * const { addTask } = useTasks({ projectId });
+ *
+ * const taskId = await addTask({
+ *   title: 'Install drywall',
+ *   priority: 'high',
+ *   assignedTo: [userId],
+ *   dueDate: new Date()
+ * });
+ *
+ * @example
+ * // Kanban board with status changes
+ * const { tasks, moveTask } = useTasks({ projectId });
+ *
+ * const handleDrop = async (taskId: string, newStatus: TaskStatus) => {
+ *   await moveTask(taskId, newStatus);
+ * };
+ *
+ * @example
+ * // Bulk operations for selected tasks
+ * const { bulkUpdateStatus, bulkAssign } = useTasks({ projectId });
+ *
+ * // Complete multiple tasks
+ * await bulkUpdateStatus(selectedTaskIds, 'completed');
+ *
+ * // Assign to team member
+ * await bulkAssign(selectedTaskIds, [assigneeId]);
+ */
 export function useTasks({ projectId, phaseId, parentTaskId }: UseTasksOptions): UseTasksReturn {
   const { user, profile } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);

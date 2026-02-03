@@ -22,6 +22,37 @@ const AuthContext = createContext<AuthContextType>({
   signOut: async () => {},
 });
 
+/**
+ * Hook for accessing authentication state and user profile.
+ *
+ * Provides the current Firebase user, their Firestore profile, loading state,
+ * authentication errors, and a sign-out function.
+ *
+ * @returns {AuthContextType} Authentication state and operations
+ * @returns {User|null} user - Firebase Auth user object or null if not authenticated
+ * @returns {UserProfile|null} profile - Firestore user profile with role, orgId, permissions
+ * @returns {boolean} loading - True while auth state is being determined
+ * @returns {string|null} authError - Error message if auth initialization failed
+ * @returns {Function} signOut - Async function to sign out the current user
+ *
+ * @example
+ * // Basic usage - check authentication
+ * const { user, profile, loading } = useAuth();
+ *
+ * if (loading) return <Spinner />;
+ * if (!user) return <LoginPage />;
+ *
+ * @example
+ * // Access user role and organization
+ * const { profile } = useAuth();
+ * const isAdmin = profile?.role === 'OWNER' || profile?.role === 'PM';
+ * const orgId = profile?.orgId;
+ *
+ * @example
+ * // Sign out
+ * const { signOut } = useAuth();
+ * await signOut();
+ */
 export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }: { children?: React.ReactNode }) {

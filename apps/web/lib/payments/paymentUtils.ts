@@ -20,15 +20,10 @@ export function dollarsToCents(dollars: number): number {
   return Math.round(dollars * 100);
 }
 
-/**
- * Format currency for display
- */
-export function formatCurrency(cents: number, currency: string = 'USD'): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency,
-  }).format(centsToDollars(cents));
-}
+// Import from centralized formatters and re-export
+// Note: this version takes cents, hence using formatCurrencyFromCents
+import { formatCurrencyFromCents } from '@/lib/utils/formatters';
+export const formatCurrency = formatCurrencyFromCents;
 
 /**
  * Format payment status for display

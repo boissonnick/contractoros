@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Subcontractor, CONSTRUCTION_TRADES, Certification } from '@/types';
 import { Button, Input, Textarea } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
@@ -30,18 +30,24 @@ export default function SubForm({ initialData, onSubmit, onCancel }: SubFormProp
   const [showTradeSelector, setShowTradeSelector] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const toggleTrade = (t: string) => {
+  const toggleTrade = useCallback((t: string) => {
     setTrades(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]);
-    if (!trade) setTrade(t);
-  };
+    setTrade(prevTrade => prevTrade || t);
+  }, []);
 
-  const addCert = () => setCertifications(prev => [...prev, { name: '', number: '', expiryDate: '' }]);
-  const removeCert = (idx: number) => setCertifications(prev => prev.filter((_, i) => i !== idx));
-  const updateCert = (idx: number, field: keyof Certification, value: string) => {
+  const addCert = useCallback(() => {
+    setCertifications(prev => [...prev, { name: '', number: '', expiryDate: '' }]);
+  }, []);
+
+  const removeCert = useCallback((idx: number) => {
+    setCertifications(prev => prev.filter((_, i) => i !== idx));
+  }, []);
+
+  const updateCert = useCallback((idx: number, field: keyof Certification, value: string) => {
     setCertifications(prev => prev.map((c, i) => i === idx ? { ...c, [field]: value } : c));
-  };
+  }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!companyName.trim() || !contactName.trim() || !email.trim()) return;
     setSaving(true);
@@ -66,7 +72,7 @@ export default function SubForm({ initialData, onSubmit, onCancel }: SubFormProp
     } finally {
       setSaving(false);
     }
-  };
+  }, [companyName, contactName, email, phone, trade, trades, licenseNumber, address, notes, insuranceExpiry, certifications, taxClassification, profile?.orgId, initialData?.documents, initialData?.isActive, onSubmit]);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">

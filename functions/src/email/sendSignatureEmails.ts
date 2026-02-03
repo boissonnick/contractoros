@@ -1,3 +1,4 @@
+import { getApp } from "firebase-admin/app";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
 import { sendEmail } from "./sendEmail";
 import {
@@ -55,7 +56,7 @@ interface OrgData {
  * Get organization data for email branding
  */
 async function getOrgData(orgId: string): Promise<OrgData | null> {
-  const db = getFirestore();
+  const db = getFirestore(getApp(), "contractoros");
   const orgSnap = await db.collection("organizations").doc(orgId).get();
   if (!orgSnap.exists) return null;
   return orgSnap.data() as OrgData;
@@ -175,7 +176,7 @@ export async function sendSignatureCompletedEmail(
   const signer = data.signers[signerIndex];
   if (!signer) return;
 
-  const db = getFirestore();
+  const db = getFirestore(getApp(), "contractoros");
   const orgData = await getOrgData(data.orgId);
   const orgName = orgData?.name || "ContractorOS";
   const primaryColor = orgData?.branding?.primaryColor;
@@ -225,7 +226,7 @@ export async function sendSignatureDeclinedEmail(
   const signer = data.signers[signerIndex];
   if (!signer) return;
 
-  const db = getFirestore();
+  const db = getFirestore(getApp(), "contractoros");
   const orgData = await getOrgData(data.orgId);
   const orgName = orgData?.name || "ContractorOS";
   const primaryColor = orgData?.branding?.primaryColor;

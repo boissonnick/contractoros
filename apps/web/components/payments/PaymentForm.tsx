@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { loadStripe, Stripe, StripeElements } from '@stripe/stripe-js';
 import {
   Elements,
@@ -50,7 +50,7 @@ function PaymentFormInner({
   const [message, setMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
   const [paymentElementReady, setPaymentElementReady] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!stripe || !elements) {
@@ -81,7 +81,7 @@ function PaymentFormInner({
     }
 
     setIsProcessing(false);
-  };
+  }, [stripe, elements, returnUrl, onError, onSuccess]);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

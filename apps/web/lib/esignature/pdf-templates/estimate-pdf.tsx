@@ -16,6 +16,7 @@ import {
 } from '@react-pdf/renderer';
 import { Estimate, Organization, QuotePdfTemplate, createDefaultQuotePdfTemplate } from '@/types';
 import { format } from 'date-fns';
+import { formatCurrency } from '@/lib/utils/formatters';
 
 // Register fonts
 Font.register({
@@ -340,13 +341,6 @@ interface EstimatePdfProps {
   organization: Organization;
   includeSignatureFields?: boolean;
   template?: QuotePdfTemplate;
-}
-
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(amount);
 }
 
 function formatDate(date: Date | string | undefined): string {

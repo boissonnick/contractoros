@@ -169,29 +169,8 @@ export function extractSubtotalFromTotal(totalWithTax: number, taxRatePercent: n
   return Math.round(subtotal * 100) / 100;
 }
 
-/**
- * Format a currency value for display
- * @param amount - The amount to format
- * @param currency - The currency code (default: USD)
- * @returns Formatted currency string
- */
-export function formatCurrency(amount: number, currency: string = 'USD'): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
-}
-
-/**
- * Format a tax rate percentage for display
- * @param rate - The tax rate as a number
- * @returns Formatted percentage string
- */
-export function formatTaxRate(rate: number): string {
-  return `${rate.toFixed(2)}%`;
-}
+// Re-export from centralized formatters
+export { formatCurrency, formatTaxRate } from './formatters';
 
 /**
  * Validate a tax rate is within reasonable bounds

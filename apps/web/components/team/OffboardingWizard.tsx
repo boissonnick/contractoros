@@ -1,49 +1,38 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { BaseModal, Button, Badge, toast } from '@/components/ui';
+import { BaseModal, Button, toast } from '@/components/ui';
 import {
   OffboardingOptions,
   OffboardingReport,
   OffboardingWizardStep,
   OffboardingWizardState,
-  UserProfile,
   UserRole,
-  OFFBOARDING_STATUS_LABELS,
 } from '@/types';
 import {
   UserMinusIcon,
   ArrowRightIcon,
   ArrowLeftIcon,
   CheckCircleIcon,
-  ExclamationTriangleIcon,
-  UserIcon,
-  FolderIcon,
-  ClockIcon,
-  CurrencyDollarIcon,
-  ArchiveBoxIcon,
-  TrashIcon,
-  BellIcon,
-  CalendarIcon,
-  ShieldCheckIcon,
-  DocumentTextIcon,
-  XCircleIcon,
 } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
 import {
   initiateOffboarding,
   executeOffboarding,
   getOffboardingImpactPreview,
 } from '@/lib/offboarding/user-offboarding';
 import { useAuth } from '@/lib/auth';
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-} from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import {
+  ConfirmStep,
+  ReassignStep,
+  DataHandlingStep,
+  ReviewStep,
+  ProcessingStep,
+  CompleteStep,
+  TeamMember,
+} from './offboarding';
 
 interface OffboardingWizardProps {
   isOpen: boolean;
@@ -57,13 +46,6 @@ interface OffboardingWizardProps {
   };
   /** Callback when offboarding completes */
   onComplete?: (report: OffboardingReport) => void;
-}
-
-interface TeamMember {
-  id: string;
-  displayName: string;
-  email: string;
-  role: UserRole;
 }
 
 const STEP_CONFIG: Record<OffboardingWizardStep, { title: string; description: string }> = {
@@ -328,11 +310,7 @@ export function OffboardingWizard({
       case 'processing':
         return <ProcessingStep />;
       case 'complete':
-        return (
-          <CompleteStep
-            report={state.report}
-          />
-        );
+        return <CompleteStep report={state.report} />;
       default:
         return null;
     }
@@ -444,514 +422,6 @@ export function OffboardingWizard({
 
       {renderStepContent()}
     </BaseModal>
-  );
-}
-
-// Step 1: Confirm
-function ConfirmStep({
-  targetUser,
-  impactPreview,
-}: {
-  targetUser: OffboardingWizardProps['targetUser'];
-  impactPreview: OffboardingWizardState['impactPreview'];
-}) {
-  return (
-    <div className="space-y-6">
-      {/* Warning */}
-      <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-        <ExclamationTriangleIcon className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
-        <div>
-          <p className="text-sm font-medium text-amber-800">
-            You are about to offboard this user
-          </p>
-          <p className="text-sm text-amber-700 mt-1">
-            This action will revoke their access, and optionally reassign their work
-            and archive their data. This can be reversed within 30 days.
-          </p>
-        </div>
-      </div>
-
-      {/* User info */}
-      <div className="p-4 bg-gray-50 rounded-lg">
-        <div className="flex items-center gap-4">
-          <div className="h-12 w-12 bg-gray-200 rounded-full flex items-center justify-center">
-            <UserIcon className="h-6 w-6 text-gray-500" />
-          </div>
-          <div>
-            <p className="font-medium text-gray-900">{targetUser.name}</p>
-            <p className="text-sm text-gray-500">{targetUser.email}</p>
-            <Badge variant="default" className="mt-1">
-              {targetUser.role}
-            </Badge>
-          </div>
-        </div>
-      </div>
-
-      {/* Impact preview */}
-      {impactPreview && (
-        <div>
-          <h4 className="text-sm font-medium text-gray-900 mb-3">Impact Summary</h4>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex items-center gap-2 p-3 bg-white border border-gray-200 rounded-lg">
-              <FolderIcon className="h-5 w-5 text-blue-500" />
-              <div>
-                <p className="text-lg font-semibold text-gray-900">{impactPreview.taskCount}</p>
-                <p className="text-xs text-gray-500">Tasks assigned</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 p-3 bg-white border border-gray-200 rounded-lg">
-              <DocumentTextIcon className="h-5 w-5 text-green-500" />
-              <div>
-                <p className="text-lg font-semibold text-gray-900">{impactPreview.projectCount}</p>
-                <p className="text-xs text-gray-500">Projects managed</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 p-3 bg-white border border-gray-200 rounded-lg">
-              <ClockIcon className="h-5 w-5 text-purple-500" />
-              <div>
-                <p className="text-lg font-semibold text-gray-900">{impactPreview.timeEntryCount}</p>
-                <p className="text-xs text-gray-500">Time entries</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 p-3 bg-white border border-gray-200 rounded-lg">
-              <CurrencyDollarIcon className="h-5 w-5 text-orange-500" />
-              <div>
-                <p className="text-lg font-semibold text-gray-900">{impactPreview.expenseCount}</p>
-                <p className="text-xs text-gray-500">Expenses submitted</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Step 2: Reassign
-function ReassignStep({
-  teamMembers,
-  loadingTeam,
-  selectedUser,
-  impactPreview,
-  onSelectUser,
-}: {
-  teamMembers: TeamMember[];
-  loadingTeam: boolean;
-  selectedUser: OffboardingWizardState['reassignToUser'];
-  impactPreview: OffboardingWizardState['impactPreview'];
-  onSelectUser: (user: { id: string; name: string } | null) => void;
-}) {
-  const hasWorkToReassign =
-    impactPreview && (impactPreview.taskCount > 0 || impactPreview.projectCount > 0);
-
-  return (
-    <div className="space-y-4">
-      {!hasWorkToReassign ? (
-        <div className="text-center py-8">
-          <CheckCircleIcon className="h-12 w-12 text-green-500 mx-auto mb-3" />
-          <p className="text-gray-900 font-medium">No work to reassign</p>
-          <p className="text-sm text-gray-500 mt-1">
-            This user has no assigned tasks or managed projects.
-          </p>
-        </div>
-      ) : (
-        <>
-          <p className="text-sm text-gray-600">
-            Select a team member to receive the {impactPreview?.taskCount || 0} tasks and{' '}
-            {impactPreview?.projectCount || 0} projects currently assigned to this user.
-          </p>
-
-          {/* No reassignment option */}
-          <label
-            className={cn(
-              'flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors',
-              !selectedUser
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-200 hover:border-gray-300'
-            )}
-          >
-            <input
-              type="radio"
-              name="reassign"
-              checked={!selectedUser}
-              onChange={() => onSelectUser(null)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500"
-            />
-            <div>
-              <p className="font-medium text-gray-900">Leave unassigned</p>
-              <p className="text-sm text-gray-500">Tasks will have no assignee</p>
-            </div>
-          </label>
-
-          {/* Team member options */}
-          {loadingTeam ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-            </div>
-          ) : teamMembers.length === 0 ? (
-            <p className="text-sm text-gray-500 text-center py-4">
-              No other team members available for reassignment.
-            </p>
-          ) : (
-            <div className="space-y-2 max-h-60 overflow-y-auto">
-              {teamMembers.map((member) => (
-                <label
-                  key={member.id}
-                  className={cn(
-                    'flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors',
-                    selectedUser?.id === member.id
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  )}
-                >
-                  <input
-                    type="radio"
-                    name="reassign"
-                    checked={selectedUser?.id === member.id}
-                    onChange={() =>
-                      onSelectUser({ id: member.id, name: member.displayName })
-                    }
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500"
-                  />
-                  <div className="h-8 w-8 bg-gray-200 rounded-full flex items-center justify-center">
-                    <UserIcon className="h-4 w-4 text-gray-500" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-900">{member.displayName}</p>
-                    <p className="text-sm text-gray-500">{member.email}</p>
-                  </div>
-                  <Badge variant="default" size="sm">
-                    {member.role}
-                  </Badge>
-                </label>
-              ))}
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  );
-}
-
-// Step 3: Data handling
-function DataHandlingStep({
-  options,
-  onUpdateOptions,
-}: {
-  options: Partial<OffboardingOptions>;
-  onUpdateOptions: (updates: Partial<OffboardingOptions>) => void;
-}) {
-  return (
-    <div className="space-y-4">
-      <p className="text-sm text-gray-600">
-        Choose how to handle the user's data and configure notification settings.
-      </p>
-
-      {/* Archive data option */}
-      <div className="space-y-3">
-        <label
-          className={cn(
-            'flex items-start gap-3 p-4 border rounded-lg cursor-pointer transition-colors',
-            options.archiveData
-              ? 'border-blue-500 bg-blue-50'
-              : 'border-gray-200 hover:border-gray-300'
-          )}
-        >
-          <input
-            type="radio"
-            name="dataHandling"
-            checked={options.archiveData === true}
-            onChange={() => onUpdateOptions({ archiveData: true })}
-            className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500"
-          />
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <ArchiveBoxIcon className="h-5 w-5 text-blue-600" />
-              <p className="font-medium text-gray-900">Archive data (Recommended)</p>
-            </div>
-            <p className="text-sm text-gray-500 mt-1">
-              Preserve user data for compliance and audit purposes.
-              Data will be retained for 7 years as per standard compliance requirements.
-            </p>
-          </div>
-        </label>
-
-        <label
-          className={cn(
-            'flex items-start gap-3 p-4 border rounded-lg cursor-pointer transition-colors',
-            options.archiveData === false
-              ? 'border-amber-500 bg-amber-50'
-              : 'border-gray-200 hover:border-gray-300'
-          )}
-        >
-          <input
-            type="radio"
-            name="dataHandling"
-            checked={options.archiveData === false}
-            onChange={() => onUpdateOptions({ archiveData: false })}
-            className="mt-1 h-4 w-4 text-amber-600 focus:ring-amber-500"
-          />
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <TrashIcon className="h-5 w-5 text-amber-600" />
-              <p className="font-medium text-gray-900">Skip archiving</p>
-            </div>
-            <p className="text-sm text-gray-500 mt-1">
-              User data will not be separately archived. Existing records in
-              projects will remain intact but user profile will be marked inactive.
-            </p>
-          </div>
-        </label>
-      </div>
-
-      {/* Notification toggle */}
-      <div className="pt-4 border-t border-gray-200">
-        <label className="flex items-center justify-between cursor-pointer">
-          <div className="flex items-center gap-2">
-            <BellIcon className="h-5 w-5 text-gray-500" />
-            <div>
-              <p className="font-medium text-gray-900">Send notifications</p>
-              <p className="text-sm text-gray-500">
-                Notify relevant team members about this offboarding
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={options.sendNotification}
-            onClick={() =>
-              onUpdateOptions({ sendNotification: !options.sendNotification })
-            }
-            className={cn(
-              'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
-              options.sendNotification ? 'bg-blue-600' : 'bg-gray-200'
-            )}
-          >
-            <span
-              className={cn(
-                'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
-                options.sendNotification ? 'translate-x-5' : 'translate-x-0'
-              )}
-            />
-          </button>
-        </label>
-      </div>
-
-      {/* Optional reason */}
-      <div className="pt-4 border-t border-gray-200">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Reason for offboarding (optional)
-        </label>
-        <textarea
-          value={options.reason || ''}
-          onChange={(e) => onUpdateOptions({ reason: e.target.value })}
-          placeholder="e.g., Resignation, end of contract, restructuring..."
-          rows={2}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-        />
-      </div>
-    </div>
-  );
-}
-
-// Step 4: Review
-function ReviewStep({
-  targetUser,
-  options,
-  reassignToUser,
-  impactPreview,
-  error,
-}: {
-  targetUser: OffboardingWizardProps['targetUser'];
-  options: Partial<OffboardingOptions>;
-  reassignToUser: OffboardingWizardState['reassignToUser'];
-  impactPreview: OffboardingWizardState['impactPreview'];
-  error: string | null;
-}) {
-  return (
-    <div className="space-y-4">
-      {error && (
-        <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <XCircleIcon className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm font-medium text-red-800">Offboarding failed</p>
-            <p className="text-sm text-red-700 mt-1">{error}</p>
-          </div>
-        </div>
-      )}
-
-      <div className="bg-gray-50 rounded-lg p-4 space-y-4">
-        {/* User */}
-        <div className="flex justify-between items-start">
-          <div className="flex items-center gap-2 text-gray-600">
-            <UserIcon className="h-4 w-4" />
-            <span className="text-sm">User to offboard</span>
-          </div>
-          <div className="text-right">
-            <p className="font-medium text-gray-900">{targetUser.name}</p>
-            <p className="text-sm text-gray-500">{targetUser.email}</p>
-          </div>
-        </div>
-
-        {/* Reassignment */}
-        <div className="flex justify-between items-start pt-3 border-t border-gray-200">
-          <div className="flex items-center gap-2 text-gray-600">
-            <FolderIcon className="h-4 w-4" />
-            <span className="text-sm">Work reassigned to</span>
-          </div>
-          <div className="text-right">
-            {reassignToUser ? (
-              <p className="font-medium text-gray-900">{reassignToUser.name}</p>
-            ) : (
-              <p className="text-gray-500">No reassignment</p>
-            )}
-            {impactPreview && (
-              <p className="text-xs text-gray-500">
-                {impactPreview.taskCount} tasks, {impactPreview.projectCount} projects
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Data handling */}
-        <div className="flex justify-between items-center pt-3 border-t border-gray-200">
-          <div className="flex items-center gap-2 text-gray-600">
-            <ArchiveBoxIcon className="h-4 w-4" />
-            <span className="text-sm">Data archiving</span>
-          </div>
-          <Badge variant={options.archiveData ? 'success' : 'default'}>
-            {options.archiveData ? 'Enabled' : 'Disabled'}
-          </Badge>
-        </div>
-
-        {/* Notifications */}
-        <div className="flex justify-between items-center pt-3 border-t border-gray-200">
-          <div className="flex items-center gap-2 text-gray-600">
-            <BellIcon className="h-4 w-4" />
-            <span className="text-sm">Notifications</span>
-          </div>
-          <Badge variant={options.sendNotification ? 'success' : 'default'}>
-            {options.sendNotification ? 'Enabled' : 'Disabled'}
-          </Badge>
-        </div>
-
-        {/* Reason */}
-        {options.reason && (
-          <div className="pt-3 border-t border-gray-200">
-            <div className="flex items-center gap-2 text-gray-600 mb-1">
-              <DocumentTextIcon className="h-4 w-4" />
-              <span className="text-sm">Reason</span>
-            </div>
-            <p className="text-sm text-gray-900">{options.reason}</p>
-          </div>
-        )}
-      </div>
-
-      {/* Final warning */}
-      <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
-        <ShieldCheckIcon className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-        <div>
-          <p className="text-sm font-medium text-red-800">
-            This action will immediately revoke access
-          </p>
-          <p className="text-sm text-red-700 mt-1">
-            The user will no longer be able to sign in. You have 30 days to
-            restore their access if needed.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Processing step
-function ProcessingStep() {
-  return (
-    <div className="flex flex-col items-center justify-center py-12">
-      <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4" />
-      <p className="text-lg font-medium text-gray-900">Processing offboarding...</p>
-      <p className="text-sm text-gray-500 mt-1">This may take a few moments</p>
-    </div>
-  );
-}
-
-// Complete step
-function CompleteStep({ report }: { report: OffboardingReport | null }) {
-  if (!report) return null;
-
-  const hasErrors = report.errors && report.errors.length > 0;
-
-  return (
-    <div className="space-y-6">
-      <div className="text-center">
-        {hasErrors ? (
-          <ExclamationTriangleIcon className="h-16 w-16 text-amber-500 mx-auto mb-4" />
-        ) : (
-          <CheckCircleIcon className="h-16 w-16 text-green-500 mx-auto mb-4" />
-        )}
-        <h3 className="text-xl font-semibold text-gray-900">
-          {hasErrors ? 'Offboarding completed with warnings' : 'Offboarding complete'}
-        </h3>
-        <p className="text-gray-500 mt-1">
-          {report.userName} has been offboarded from the organization
-        </p>
-      </div>
-
-      {/* Summary */}
-      <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-600">Access revoked</span>
-          <Badge variant={report.accessRevoked ? 'success' : 'danger'}>
-            {report.accessRevoked ? 'Yes' : 'No'}
-          </Badge>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-600">Tasks reassigned</span>
-          <span className="font-medium text-gray-900">{report.tasksReassigned}</span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-600">Projects transferred</span>
-          <span className="font-medium text-gray-900">{report.projectsTransferred}</span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-600">Data archived</span>
-          <Badge variant={report.dataArchived ? 'success' : 'default'}>
-            {report.dataArchived ? 'Yes' : 'No'}
-          </Badge>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-600">Completed at</span>
-          <span className="text-sm text-gray-900">
-            {format(new Date(report.completedAt), 'MMM d, yyyy h:mm a')}
-          </span>
-        </div>
-      </div>
-
-      {/* Errors */}
-      {hasErrors && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-          <h4 className="text-sm font-medium text-amber-800 mb-2">Warnings</h4>
-          <ul className="text-sm text-amber-700 space-y-1">
-            {report.errors!.map((err, i) => (
-              <li key={i}>- {err}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Restore notice */}
-      <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <CalendarIcon className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-        <div>
-          <p className="text-sm font-medium text-blue-800">30-day restoration window</p>
-          <p className="text-sm text-blue-700 mt-1">
-            This user can be restored within 30 days from the Team Settings page.
-            After that, the offboarding becomes permanent.
-          </p>
-        </div>
-      </div>
-    </div>
   );
 }
 

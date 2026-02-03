@@ -14,6 +14,7 @@ import {
 } from '@react-pdf/renderer';
 import { Organization, Invoice } from '@/types';
 import { format } from 'date-fns';
+import { formatCurrency } from '@/lib/utils/formatters';
 
 // Styles
 const styles = StyleSheet.create({
@@ -245,13 +246,6 @@ const styles = StyleSheet.create({
 interface InvoicePdfProps {
   invoice: Invoice;
   organization: Organization;
-}
-
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(amount);
 }
 
 function formatDate(date: Date | string | undefined): string {

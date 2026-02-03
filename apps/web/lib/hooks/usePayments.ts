@@ -105,7 +105,69 @@ export interface UsePaymentsOptions {
 }
 
 /**
- * Hook for managing payments within an organization
+ * Hook for managing payments with Stripe integration and payment links.
+ *
+ * Provides payment management including Stripe payment intents, payment links
+ * for client self-service, refund processing, and payment statistics.
+ * Subscribes to Firestore for real-time payment status updates.
+ *
+ * @param {UsePaymentsOptions} [options={}] - Filter options
+ * @param {string} [options.invoiceId] - Filter payments by invoice ID
+ * @param {string} [options.projectId] - Filter payments by project ID
+ * @param {string} [options.clientId] - Filter payments by client ID
+ *
+ * @returns {Object} Payment data and operations
+ * @returns {StripePayment[]} payments - Array of payments matching filters
+ * @returns {PaymentLink[]} paymentLinks - Active payment links for the filter
+ * @returns {boolean} loading - True while initial fetch is in progress
+ * @returns {Function} createPaymentIntent - Create a Stripe payment intent for card/ACH
+ * @returns {Function} createPaymentLink - Generate a shareable payment link for clients
+ * @returns {Function} cancelPaymentLink - Cancel an active payment link
+ * @returns {Function} processRefund - Process a full or partial refund
+ * @returns {Function} getStats - Get payment statistics (totals, counts by status)
+ *
+ * @example
+ * // View payments for an invoice
+ * const { payments, loading, createPaymentLink } = usePayments({
+ *   invoiceId: 'inv123'
+ * });
+ *
+ * if (loading) return <Spinner />;
+ *
+ * return payments.map(p => <PaymentRow key={p.id} payment={p} />);
+ *
+ * @example
+ * // Create a payment link to send to client
+ * const { createPaymentLink } = usePayments();
+ *
+ * const link = await createPaymentLink({
+ *   invoiceId: 'inv123',
+ *   projectId: 'proj456',
+ *   clientId: 'client789',
+ *   amount: 1500.00,
+ *   expirationDays: 7
+ * });
+ *
+ * console.log(link.url); // https://yoursite.com/pay/token123
+ *
+ * @example
+ * // Get payment statistics
+ * const { getStats, payments } = usePayments({ projectId });
+ * const stats = getStats();
+ *
+ * console.log(`Collected: $${stats.totalCollected}`);
+ * console.log(`Pending: $${stats.totalPending}`);
+ * console.log(`${stats.completed} completed, ${stats.pending} pending`);
+ *
+ * @example
+ * // Process a refund
+ * const { processRefund } = usePayments();
+ *
+ * // Full refund
+ * await processRefund(paymentId);
+ *
+ * // Partial refund
+ * await processRefund(paymentId, 50.00, 'Customer requested partial refund');
  */
 export function usePayments(options: UsePaymentsOptions = {}) {
   const { user, profile } = useAuth();
@@ -385,7 +447,38 @@ export function usePayments(options: UsePaymentsOptions = {}) {
 }
 
 /**
- * Hook for managing saved payment methods for a client
+ * Hook for managing saved payment methods for a client.
+ *
+ * Allows clients to save and manage their payment methods (cards, bank accounts)
+ * for faster checkout. Supports setting default methods and soft-deleting methods.
+ *
+ * @param {string} clientId - The client ID to fetch payment methods for
+ *
+ * @returns {Object} Saved payment methods and operations
+ * @returns {SavedPaymentMethod[]} methods - Array of saved payment methods
+ * @returns {boolean} loading - True while initial fetch is in progress
+ * @returns {Function} setDefaultMethod - Set a method as the default
+ * @returns {Function} deleteMethod - Soft-delete a saved method
+ * @returns {SavedPaymentMethod|undefined} defaultMethod - The default payment method
+ *
+ * @example
+ * // Display saved payment methods
+ * const { methods, loading, defaultMethod } = useSavedPaymentMethods(clientId);
+ *
+ * if (loading) return <Spinner />;
+ *
+ * return methods.map(method => (
+ *   <PaymentMethodCard
+ *     key={method.id}
+ *     method={method}
+ *     isDefault={method.id === defaultMethod?.id}
+ *   />
+ * ));
+ *
+ * @example
+ * // Set default payment method
+ * const { setDefaultMethod } = useSavedPaymentMethods(clientId);
+ * await setDefaultMethod(methodId);
  */
 export function useSavedPaymentMethods(clientId: string) {
   const { profile } = useAuth();

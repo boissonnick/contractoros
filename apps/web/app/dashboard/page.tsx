@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 import { useImpersonation } from '@/lib/contexts/ImpersonationContext';
@@ -56,27 +56,28 @@ interface StatCardProps {
   subtitle?: string;
 }
 
+// Color classes defined outside component to avoid recreation on each render
+const ICON_COLOR_CLASSES = {
+  blue: 'text-blue-600',
+  green: 'text-green-600',
+  yellow: 'text-amber-500',
+  red: 'text-red-500',
+  purple: 'text-purple-600',
+  orange: 'text-orange-500',
+  gray: 'text-gray-500',
+} as const;
+
+const BG_COLOR_CLASSES = {
+  blue: 'bg-blue-50',
+  green: 'bg-green-50',
+  yellow: 'bg-amber-50',
+  red: 'bg-red-50',
+  purple: 'bg-purple-50',
+  orange: 'bg-orange-50',
+  gray: 'bg-gray-100',
+} as const;
+
 function StatCard({ title, value, icon: Icon, trend, trendUp, href, color, subtitle }: StatCardProps) {
-  const iconColorClasses = {
-    blue: 'text-blue-600',
-    green: 'text-green-600',
-    yellow: 'text-amber-500',
-    red: 'text-red-500',
-    purple: 'text-purple-600',
-    orange: 'text-orange-500',
-    gray: 'text-gray-500',
-  };
-
-  const bgColorClasses = {
-    blue: 'bg-blue-50',
-    green: 'bg-green-50',
-    yellow: 'bg-amber-50',
-    red: 'bg-red-50',
-    purple: 'bg-purple-50',
-    orange: 'bg-orange-50',
-    gray: 'bg-gray-100',
-  };
-
   const content = (
     <div className={cn(
       'bg-white rounded-xl border border-gray-200 p-4 h-full min-h-[130px] flex flex-col',
@@ -87,8 +88,8 @@ function StatCard({ title, value, icon: Icon, trend, trendUp, href, color, subti
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{title}</p>
           <p className="mt-2 text-3xl font-bold text-gray-900 tabular-nums">{value}</p>
         </div>
-        <div className={cn('p-2.5 rounded-lg flex-shrink-0', bgColorClasses[color])}>
-          <Icon className={cn('h-5 w-5', iconColorClasses[color])} />
+        <div className={cn('p-2.5 rounded-lg flex-shrink-0', BG_COLOR_CLASSES[color])}>
+          <Icon className={cn('h-5 w-5', ICON_COLOR_CLASSES[color])} />
         </div>
       </div>
       {(subtitle || trend) && (
@@ -143,6 +144,10 @@ export default function DashboardPage() {
 
   // Mobile quick actions menu state
   const [showMobileQuickActions, setShowMobileQuickActions] = useState(false);
+
+  // Memoized callbacks for mobile quick actions menu
+  const openMobileQuickActions = useCallback(() => setShowMobileQuickActions(true), []);
+  const closeMobileQuickActions = useCallback(() => setShowMobileQuickActions(false), []);
 
   const fetchDashboardData = React.useCallback(async () => {
     if (!profile?.orgId) {
@@ -345,6 +350,83 @@ export default function DashboardPage() {
       .slice(0, 5);
   }, [estimates]);
 
+  // Memoized mobile stats to prevent recreation on every render
+  type StatColor = 'blue' | 'green' | 'yellow' | 'red' | 'purple' | 'orange' | 'gray';
+  const mobileStatsData = useMemo(() => {
+    const mobileStats: Array<{
+      label: string;
+      value: string | number;
+      subtitle: string;
+      icon: React.ComponentType<{ className?: string }>;
+      color: StatColor;
+      href?: string;
+    }> = [
+      {
+        label: 'Active Projects',
+        value: stats.activeProjects,
+        subtitle: `${stats.pipelineProjects} in pipeline`,
+        icon: FolderIcon,
+        color: 'blue',
+        href: '/dashboard/projects',
+      },
+    ];
+
+    if (permissions.canViewAllFinances) {
+      mobileStats.push({
+        label: 'Outstanding',
+        value: formatCurrency(stats.outstandingAmount),
+        subtitle: `${stats.overdueInvoicesCount} overdue`,
+        icon: BanknotesIcon,
+        color: stats.overdueAmount > 0 ? 'red' : 'green',
+        href: '/dashboard/invoices',
+      });
+    }
+
+    if (permissions.canViewAllTasks) {
+      mobileStats.push({
+        label: 'Overdue Tasks',
+        value: stats.overdueTasks,
+        subtitle: `${stats.dueSoonTasks} due soon`,
+        icon: ExclamationTriangleIcon,
+        color: stats.overdueTasks > 0 ? 'orange' : 'green',
+      });
+    }
+
+    if (permissions.canManageInvoices) {
+      mobileStats.push({
+        label: 'Estimates',
+        value: stats.pendingEstimates,
+        subtitle: formatCurrency(stats.pipelineValue),
+        icon: DocumentTextIcon,
+        color: 'purple',
+        href: '/dashboard/estimates',
+      });
+    }
+
+    if (permissions.canViewAllFinances) {
+      mobileStats.push({
+        label: 'Budget Used',
+        value: `${stats.budgetUtilization}%`,
+        subtitle: formatCurrency(stats.totalSpent),
+        icon: ChartBarIcon,
+        color: stats.budgetUtilization > 90 ? 'red' : stats.budgetUtilization > 75 ? 'yellow' : 'green',
+      });
+    }
+
+    if (permissions.canViewTeam) {
+      mobileStats.push({
+        label: 'Team',
+        value: stats.teamCount,
+        subtitle: 'active members',
+        icon: UserGroupIcon,
+        color: 'gray',
+        href: '/dashboard/team',
+      });
+    }
+
+    return mobileStats;
+  }, [stats, permissions]);
+
   if (authLoading || loading) {
     return (
       <div className="space-y-6">
@@ -446,81 +528,7 @@ export default function DashboardPage() {
           {/* Mobile: Horizontal scrollable stats */}
           <div className="md:hidden">
             <MobileStats
-              stats={(() => {
-                type StatColor = 'blue' | 'green' | 'yellow' | 'red' | 'purple' | 'orange' | 'gray';
-                const mobileStats: Array<{
-                  label: string;
-                  value: string | number;
-                  subtitle: string;
-                  icon: React.ComponentType<{ className?: string }>;
-                  color: StatColor;
-                  href?: string;
-                }> = [
-                  {
-                    label: 'Active Projects',
-                    value: stats.activeProjects,
-                    subtitle: `${stats.pipelineProjects} in pipeline`,
-                    icon: FolderIcon,
-                    color: 'blue',
-                    href: '/dashboard/projects',
-                  },
-                ];
-
-                if (permissions.canViewAllFinances) {
-                  mobileStats.push({
-                    label: 'Outstanding',
-                    value: formatCurrency(stats.outstandingAmount),
-                    subtitle: `${stats.overdueInvoicesCount} overdue`,
-                    icon: BanknotesIcon,
-                    color: stats.overdueAmount > 0 ? 'red' : 'green',
-                    href: '/dashboard/invoices',
-                  });
-                }
-
-                if (permissions.canViewAllTasks) {
-                  mobileStats.push({
-                    label: 'Overdue Tasks',
-                    value: stats.overdueTasks,
-                    subtitle: `${stats.dueSoonTasks} due soon`,
-                    icon: ExclamationTriangleIcon,
-                    color: stats.overdueTasks > 0 ? 'orange' : 'green',
-                  });
-                }
-
-                if (permissions.canManageInvoices) {
-                  mobileStats.push({
-                    label: 'Estimates',
-                    value: stats.pendingEstimates,
-                    subtitle: formatCurrency(stats.pipelineValue),
-                    icon: DocumentTextIcon,
-                    color: 'purple',
-                    href: '/dashboard/estimates',
-                  });
-                }
-
-                if (permissions.canViewAllFinances) {
-                  mobileStats.push({
-                    label: 'Budget Used',
-                    value: `${stats.budgetUtilization}%`,
-                    subtitle: formatCurrency(stats.totalSpent),
-                    icon: ChartBarIcon,
-                    color: stats.budgetUtilization > 90 ? 'red' : stats.budgetUtilization > 75 ? 'yellow' : 'green',
-                  });
-                }
-
-                if (permissions.canViewTeam) {
-                  mobileStats.push({
-                    label: 'Team',
-                    value: stats.teamCount,
-                    subtitle: 'active members',
-                    icon: UserGroupIcon,
-                    color: 'gray',
-                    href: '/dashboard/team',
-                  });
-                }
-
-                return mobileStats;
-              })()}
+              stats={mobileStatsData}
               columns={6}
               scrollable={true}
             />
@@ -897,7 +905,7 @@ export default function DashboardPage() {
         {/* FAB Button */}
         {!showMobileQuickActions && (
           <button
-            onClick={() => setShowMobileQuickActions(true)}
+            onClick={openMobileQuickActions}
             className="md:hidden fixed right-4 bottom-20 w-14 h-14 rounded-full bg-brand-primary text-white shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center transition-all z-30"
             aria-label="Quick Actions"
           >
@@ -911,7 +919,7 @@ export default function DashboardPage() {
             {/* Backdrop */}
             <div
               className="absolute inset-0 bg-black/50"
-              onClick={() => setShowMobileQuickActions(false)}
+              onClick={closeMobileQuickActions}
             />
 
             {/* Menu */}
@@ -919,7 +927,7 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">Quick Actions</h3>
                 <button
-                  onClick={() => setShowMobileQuickActions(false)}
+                  onClick={closeMobileQuickActions}
                   className="p-2 -mr-2 text-gray-500 hover:text-gray-700"
                 >
                   <XMarkIcon className="h-6 w-6" />
@@ -930,7 +938,7 @@ export default function DashboardPage() {
                 <PermissionGuard permission="canCreateProjects" hide>
                   <Link
                     href="/dashboard/projects/new"
-                    onClick={() => setShowMobileQuickActions(false)}
+                    onClick={closeMobileQuickActions}
                     className="flex flex-col items-center gap-2 p-4 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors"
                   >
                     <div className="p-3 bg-blue-100 rounded-xl">
@@ -943,7 +951,7 @@ export default function DashboardPage() {
                 <PermissionGuard permission="canManageInvoices" hide>
                   <Link
                     href="/dashboard/invoices/new"
-                    onClick={() => setShowMobileQuickActions(false)}
+                    onClick={closeMobileQuickActions}
                     className="flex flex-col items-center gap-2 p-4 rounded-xl bg-purple-50 hover:bg-purple-100 transition-colors"
                   >
                     <div className="p-3 bg-purple-100 rounded-xl">
@@ -956,7 +964,7 @@ export default function DashboardPage() {
                 <PermissionGuard permission="canManageInvoices" hide>
                   <Link
                     href="/dashboard/estimates/new"
-                    onClick={() => setShowMobileQuickActions(false)}
+                    onClick={closeMobileQuickActions}
                     className="flex flex-col items-center gap-2 p-4 rounded-xl bg-green-50 hover:bg-green-100 transition-colors"
                   >
                     <div className="p-3 bg-green-100 rounded-xl">
@@ -969,7 +977,7 @@ export default function DashboardPage() {
                 <PermissionGuard permission="canInviteUsers" hide>
                   <Link
                     href="/dashboard/team/invite"
-                    onClick={() => setShowMobileQuickActions(false)}
+                    onClick={closeMobileQuickActions}
                     className="flex flex-col items-center gap-2 p-4 rounded-xl bg-orange-50 hover:bg-orange-100 transition-colors"
                   >
                     <div className="p-3 bg-orange-100 rounded-xl">
@@ -982,7 +990,7 @@ export default function DashboardPage() {
                 <PermissionGuard permission="canViewAllTasks" hide>
                   <Link
                     href="/dashboard/tasks"
-                    onClick={() => setShowMobileQuickActions(false)}
+                    onClick={closeMobileQuickActions}
                     className="flex flex-col items-center gap-2 p-4 rounded-xl bg-amber-50 hover:bg-amber-100 transition-colors"
                   >
                     <div className="p-3 bg-amber-100 rounded-xl">
@@ -994,7 +1002,7 @@ export default function DashboardPage() {
 
                 <Link
                   href="/dashboard/activity"
-                  onClick={() => setShowMobileQuickActions(false)}
+                  onClick={closeMobileQuickActions}
                   className="flex flex-col items-center gap-2 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
                 >
                   <div className="p-3 bg-gray-100 rounded-xl">

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { ScopeChange, ScopeChangeType, ChangeOrderImpact, ProjectPhase } from '@/types';
 import { Button, Input, Textarea } from '@/components/ui';
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
@@ -26,26 +26,28 @@ export default function ChangeOrderForm({ phases, onSubmit, onCancel }: ChangeOr
   const [scheduleChange, setScheduleChange] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const addScopeChange = () => {
-    setScopeChanges([...scopeChanges, {
+  const addScopeChange = useCallback(() => {
+    setScopeChanges(prev => [...prev, {
       id: Date.now().toString(),
       type: 'add',
       proposedDescription: '',
       costImpact: 0,
     }]);
-  };
+  }, []);
 
-  const updateScopeChange = (index: number, updates: Partial<ScopeChange>) => {
-    const updated = [...scopeChanges];
-    updated[index] = { ...updated[index], ...updates };
-    setScopeChanges(updated);
-  };
+  const updateScopeChange = useCallback((index: number, updates: Partial<ScopeChange>) => {
+    setScopeChanges(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], ...updates };
+      return updated;
+    });
+  }, []);
 
-  const removeScopeChange = (index: number) => {
-    setScopeChanges(scopeChanges.filter((_, i) => i !== index));
-  };
+  const removeScopeChange = useCallback((index: number) => {
+    setScopeChanges(prev => prev.filter((_, i) => i !== index));
+  }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !description.trim() || !reason.trim()) return;
     setSaving(true);
@@ -66,7 +68,7 @@ export default function ChangeOrderForm({ phases, onSubmit, onCancel }: ChangeOr
     } finally {
       setSaving(false);
     }
-  };
+  }, [title, description, reason, scopeChanges, costChange, scheduleChange, onSubmit]);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">

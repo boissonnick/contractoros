@@ -66,6 +66,88 @@ interface UseExpensesReturn {
   refresh: () => void;
 }
 
+/**
+ * Hook for managing expenses with real-time updates and approval workflows.
+ *
+ * Provides comprehensive expense management including CRUD operations,
+ * receipt attachments, and a complete approval workflow (pending -> under_review ->
+ * approved/rejected -> paid). Non-managers only see their own expenses by default.
+ *
+ * @param {UseExpensesOptions} [options={}] - Filter options
+ * @param {string} [options.projectId] - Filter by project ID
+ * @param {string} [options.userId] - Filter by user who created the expense
+ * @param {ExpenseCategory} [options.category] - Filter by expense category
+ * @param {ExpenseStatus} [options.status] - Filter by status
+ * @param {string} [options.startDate] - ISO date string for date range start
+ * @param {string} [options.endDate] - ISO date string for date range end
+ * @param {boolean} [options.reimbursableOnly] - Only show reimbursable expenses
+ * @param {boolean} [options.billableOnly] - Only show billable expenses
+ *
+ * @returns {UseExpensesReturn} Expense data and operations
+ * @returns {Expense[]} expenses - Array of expenses matching filters
+ * @returns {boolean} loading - True while initial fetch is in progress
+ * @returns {string|null} error - Error message if the subscription failed
+ * @returns {Function} createExpense - Create a new expense
+ * @returns {Function} updateExpense - Update an expense by ID
+ * @returns {Function} deleteExpense - Delete an expense by ID
+ * @returns {Function} addReceipt - Add a receipt to an expense
+ * @returns {Function} removeReceipt - Remove a receipt from an expense
+ * @returns {Function} startReview - Mark expense as under review (managers)
+ * @returns {Function} approveExpense - Approve an expense (managers)
+ * @returns {Function} rejectExpense - Reject an expense with reason (managers)
+ * @returns {Function} requestMoreInfo - Send back for more information (managers)
+ * @returns {Function} markPaid - Mark approved expense as paid (managers)
+ * @returns {Function} cancelExpense - Cancel a pending expense (owner only)
+ * @returns {Function} getSummary - Get expense summary for a date range
+ * @returns {Function} refresh - Manually refresh the expense list
+ *
+ * @example
+ * // View all expenses (managers) or own expenses (employees)
+ * const { expenses, loading, createExpense } = useExpenses();
+ *
+ * if (loading) return <Spinner />;
+ *
+ * return expenses.map(exp => <ExpenseRow key={exp.id} expense={exp} />);
+ *
+ * @example
+ * // Filter by project and status
+ * const { expenses } = useExpenses({
+ *   projectId: 'project123',
+ *   status: 'pending',
+ *   startDate: '2024-01-01',
+ *   endDate: '2024-01-31'
+ * });
+ *
+ * @example
+ * // Create a new expense
+ * const { createExpense } = useExpenses();
+ *
+ * const expenseId = await createExpense({
+ *   date: '2024-01-15',
+ *   amount: 125.50,
+ *   category: 'materials',
+ *   description: 'Lumber for deck project',
+ *   projectId: 'project123',
+ *   reimbursable: true,
+ *   receipts: []
+ * });
+ *
+ * @example
+ * // Approval workflow (managers)
+ * const { approveExpense, rejectExpense, markPaid } = useExpenses();
+ *
+ * await approveExpense(expenseId, 'Looks good');
+ * // or
+ * await rejectExpense(expenseId, 'Missing receipt');
+ * // After approval
+ * await markPaid(expenseId, 'direct_deposit');
+ *
+ * @example
+ * // Get expense summary
+ * const { getSummary } = useExpenses();
+ * const summary = getSummary('2024-01-01', '2024-01-31');
+ * console.log(summary.totalExpenses, summary.totalPending);
+ */
 export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn {
   const { user, profile } = useAuth();
   const [expenses, setExpenses] = useState<Expense[]>([]);

@@ -104,6 +104,33 @@ async function fetchCollection<T>(
 // PROJECT HOOKS
 // ==========================================
 
+/**
+ * Hook for fetching all projects for the current organization.
+ *
+ * Uses React Query for caching and automatic refetching. Projects are
+ * ordered by creation date descending.
+ *
+ * @returns {UseQueryResult} React Query result object
+ * @returns {Project[]} data - Array of projects for the organization
+ * @returns {boolean} isLoading - True while initial fetch is in progress
+ * @returns {boolean} isFetching - True while any fetch is in progress
+ * @returns {Error|null} error - Error if the query failed
+ * @returns {Function} refetch - Function to manually refetch data
+ *
+ * @example
+ * // List all projects
+ * const { data: projects, isLoading, error } = useProjects();
+ *
+ * if (isLoading) return <Spinner />;
+ * if (error) return <ErrorMessage error={error} />;
+ *
+ * return projects.map(p => <ProjectCard key={p.id} project={p} />);
+ *
+ * @example
+ * // Filter projects by status
+ * const { data: projects } = useProjects();
+ * const activeProjects = projects?.filter(p => p.status === 'active') || [];
+ */
 export function useProjects() {
   const { profile } = useAuth();
 
@@ -260,6 +287,35 @@ export function useDeleteTask() {
 // TEAM HOOKS
 // ==========================================
 
+/**
+ * Hook for fetching all active team members in the current organization.
+ *
+ * Returns only users who are marked as active (isActive: true).
+ * Uses React Query for caching and automatic refetching.
+ *
+ * @returns {UseQueryResult} React Query result object
+ * @returns {UserProfile[]} data - Array of active team member profiles
+ * @returns {boolean} isLoading - True while initial fetch is in progress
+ * @returns {boolean} isFetching - True while any fetch is in progress
+ * @returns {Error|null} error - Error if the query failed
+ * @returns {Function} refetch - Function to manually refetch data
+ *
+ * @example
+ * // Display team member list
+ * const { data: team, isLoading } = useTeamMembers();
+ *
+ * if (isLoading) return <Spinner />;
+ *
+ * return team?.map(member => (
+ *   <TeamMemberCard key={member.id} member={member} />
+ * ));
+ *
+ * @example
+ * // Filter by role
+ * const { data: team } = useTeamMembers();
+ * const fieldWorkers = team?.filter(m => m.role === 'FIELD') || [];
+ * const managers = team?.filter(m => m.role === 'PM' || m.role === 'OWNER') || [];
+ */
 export function useTeamMembers() {
   const { profile } = useAuth();
 

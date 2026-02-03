@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { TaskPriority, TaskDependency, Task, ProjectPhase, RecurrenceConfig, TaskChecklistItem } from '@/types';
 import { Button, Input, Textarea, Select } from '@/components/ui';
 import InlineCreateModal from '@/components/ui/InlineCreateModal';
@@ -94,7 +94,7 @@ export default function TaskForm({
     onDirtyChange(isDirty);
   }, [title, description, priority, phaseId, trade, onDirtyChange]);
 
-  const handleTemplateSelect = (template: DefaultTaskTemplate) => {
+  const handleTemplateSelect = useCallback((template: DefaultTaskTemplate) => {
     setTitle(template.defaultTitle);
     setDescription(template.defaultDescription || '');
     setPriority(template.defaultPriority);
@@ -112,9 +112,9 @@ export default function TaskForm({
       );
     }
     setShowTemplateSelector(false);
-  };
+  }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
 
@@ -136,7 +136,7 @@ export default function TaskForm({
       isRecurring: isRecurring || undefined,
       recurrenceConfig: isRecurring ? recurrenceConfig : undefined,
     });
-  };
+  }, [title, description, phaseId, parentTaskId, priority, assignedTo, assignedSubId, trade, startDate, dueDate, duration, estimatedHours, dependencies, checklist, isRecurring, recurrenceConfig, onSubmit]);
 
   // Exclude current task from dependency options
   const dependencyOptions = allTasks.filter((t) => t.id !== task?.id);

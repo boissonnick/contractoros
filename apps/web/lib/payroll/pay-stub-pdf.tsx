@@ -14,6 +14,7 @@ import {
 } from '@react-pdf/renderer';
 import { PayStub, Organization } from '@/types';
 import { format } from 'date-fns';
+import { formatCurrency } from '@/lib/utils/formatters';
 
 // Register fonts
 Font.register({
@@ -270,14 +271,6 @@ const styles = StyleSheet.create({
   deductionDescCol: { width: '60%' },
   deductionAmountCol: { width: '40%', textAlign: 'right' },
 });
-
-// Format currency
-const formatCurrency = (amount: number): string => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(amount);
-};
 
 // Format date
 const formatDate = (date: Date): string => {

@@ -1,7 +1,15 @@
 /**
- * useClients Hook
+ * @fileoverview Client Management Hooks
+ *
  * FEAT-L4: Client Management Module
- * Provides client data management with real-time updates
+ * Provides comprehensive client data management with real-time Firestore updates.
+ *
+ * This module exports several hooks:
+ * - useClients: List and filter clients
+ * - useClient: Single client with CRUD operations
+ * - useClientProjects: Client's associated projects
+ * - useClientCommunicationLog: Client communication history
+ * - useClientStats: Aggregate client statistics
  *
  * REFACTORED: Now uses shared utilities:
  * - convertTimestamps from lib/firebase/timestamp-converter.ts
@@ -69,6 +77,48 @@ interface UseClientsReturn {
   refresh: () => void;
 }
 
+/**
+ * Hook for fetching and filtering clients with real-time updates.
+ *
+ * Provides a list of clients for the organization with optional filtering
+ * by status and client-side search. Subscribes to Firestore for real-time updates.
+ *
+ * @param {UseClientsOptions} options - Configuration options
+ * @param {string} options.orgId - Organization ID to fetch clients for (required)
+ * @param {ClientStatus} [options.status] - Filter by client status ('active', 'past', 'potential', 'inactive')
+ * @param {string} [options.search] - Search term to filter by name, email, phone, or company
+ *
+ * @returns {UseClientsReturn} Clients data and operations
+ * @returns {Client[]} clients - Array of filtered clients
+ * @returns {boolean} loading - True while initial fetch is in progress
+ * @returns {Error|null} error - Error if the subscription failed
+ * @returns {Function} refresh - Function to manually refresh the data
+ *
+ * @example
+ * // Fetch all clients for an organization
+ * const { clients, loading, error } = useClients({ orgId });
+ *
+ * @example
+ * // Filter by status and search
+ * const { clients } = useClients({
+ *   orgId,
+ *   status: 'active',
+ *   search: 'John'
+ * });
+ *
+ * @example
+ * // Display client list with loading state
+ * const { clients, loading, refresh } = useClients({ orgId });
+ *
+ * if (loading) return <Skeleton />;
+ *
+ * return (
+ *   <>
+ *     <Button onClick={refresh}>Refresh</Button>
+ *     {clients.map(c => <ClientCard key={c.id} client={c} />)}
+ *   </>
+ * );
+ */
 export function useClients({ orgId, status, search }: UseClientsOptions): UseClientsReturn {
   // Build constraints based on filters
   const constraints = useMemo(() => {
@@ -124,6 +174,54 @@ interface UseClientReturn {
   deleteNote: (noteId: string) => Promise<void>;
 }
 
+/**
+ * Hook for fetching and managing a single client with real-time updates.
+ *
+ * Provides client data and operations including updating, deleting, and
+ * managing client notes. Subscribes to Firestore for real-time updates.
+ *
+ * @param {string|undefined} clientId - Client ID to fetch (undefined skips fetch)
+ * @param {string} orgId - Organization ID the client belongs to
+ *
+ * @returns {UseClientReturn} Client data and operations
+ * @returns {Client|null} client - Client data or null if not found/loading
+ * @returns {boolean} loading - True while fetching
+ * @returns {Error|null} error - Error if fetch failed
+ * @returns {Function} refresh - Manually refresh client data
+ * @returns {Function} updateClient - Update client with partial data
+ * @returns {Function} deleteClient - Delete the client
+ * @returns {Function} addNote - Add a note to the client
+ * @returns {Function} deleteNote - Delete a note by ID
+ *
+ * @example
+ * // Client detail page
+ * const { client, loading, updateClient } = useClient(clientId, orgId);
+ *
+ * if (loading) return <Spinner />;
+ * if (!client) return <NotFound />;
+ *
+ * return <ClientDetail client={client} />;
+ *
+ * @example
+ * // Update client status
+ * const { updateClient } = useClient(clientId, orgId);
+ * await updateClient({ status: 'active', phone: '555-1234' });
+ *
+ * @example
+ * // Manage client notes
+ * const { client, addNote, deleteNote } = useClient(clientId, orgId);
+ *
+ * // Add note
+ * await addNote({
+ *   content: 'Called about project timeline',
+ *   type: 'call',
+ *   createdBy: userId,
+ *   createdByName: 'John Doe'
+ * });
+ *
+ * // Delete note
+ * await deleteNote(noteId);
+ */
 export function useClient(clientId: string | undefined, orgId: string): UseClientReturn {
   const [client, setClient] = useState<Client | null>(null);
   const [loading, setLoading] = useState(true);

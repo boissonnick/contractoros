@@ -1,24 +1,26 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
+// Re-export all formatters for convenience
+export {
+  formatCurrency,
+  formatCurrencyCompact,
+  formatCurrencyFromCents,
+  formatCurrencySigned,
+  formatPercent,
+  formatPercentNoSign,
+  formatNumber,
+  formatPhoneNumber,
+  formatTaxRate,
+  formatFileSize,
+} from './utils/formatters';
+
 /**
  * Merge Tailwind CSS classes with clsx
  * Handles conflicts properly (e.g., "p-4 p-2" becomes "p-2")
  */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
-}
-
-/**
- * Format currency for display
- */
-export function formatCurrency(amount: number, currency = 'USD'): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  }).format(amount);
 }
 
 /**

@@ -4,10 +4,11 @@
  */
 
 import * as admin from "firebase-admin";
+import { getFirestore } from "firebase-admin/firestore";
 import { sendEmail } from "./sendEmail";
 
-// Firestore reference
-const db = admin.firestore();
+// Firestore reference - use named database 'contractoros'
+const db = getFirestore(admin.app(), "contractoros");
 
 // Base URL for links
 const BASE_URL = process.env.APP_URL || "https://app.contractoros.com";

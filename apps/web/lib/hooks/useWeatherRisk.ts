@@ -20,7 +20,7 @@ import {
   assessPhaseWeatherRisk,
   createProjectWeatherForecast,
   getWeatherSummary,
-} from '@/lib/weather-service';
+} from '@/lib/services/weather';
 
 // Project with coordinates extracted from address
 interface ProjectWithCoords {

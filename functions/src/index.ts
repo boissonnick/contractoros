@@ -3,6 +3,7 @@ import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/fire
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { auth } from "firebase-functions/v1";
 import * as admin from "firebase-admin";
+import { getFirestore } from "firebase-admin/firestore";
 import { handleInviteCreated } from "./email/sendInviteEmail";
 import {
   sendSignatureRequestEmails,
@@ -30,7 +31,8 @@ export {
 // Initialize Firebase Admin SDK
 admin.initializeApp();
 
-const db = admin.firestore();
+// Use named database 'contractoros' instead of default database
+const db = getFirestore(admin.app(), "contractoros");
 
 // Region configuration for Cloud Functions Gen 2
 const REGION = "us-east1";

@@ -342,12 +342,8 @@ export function formatBudgetCurrency(
   return amount >= 0 ? formatted : `-${formatted.replace('-', '')}`;
 }
 
-/**
- * Format percentage consistently
- */
-export function formatPercentage(value: number, decimals: number = 1): string {
-  return `${value.toFixed(decimals)}%`;
-}
+// Re-export from centralized formatters
+export { formatPercent as formatPercentage } from '@/lib/utils/formatters';
 
 // ============================================
 // Tooltip/Help Text

@@ -1,3 +1,4 @@
+import { getApp } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 import { sendEmail } from "./sendEmail";
 import { inviteEmailTemplate } from "./emailTemplates";
@@ -21,7 +22,7 @@ export async function handleInviteCreated(
 ): Promise<void> {
   if (data.status !== "pending") return;
 
-  const db = getFirestore();
+  const db = getFirestore(getApp(), "contractoros");
 
   // Get org info for branding
   let orgName = "your organization";

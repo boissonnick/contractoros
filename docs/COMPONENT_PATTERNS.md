@@ -1,7 +1,151 @@
 # ContractorOS Component Patterns
 
 > **Purpose:** UI component library reference and usage patterns.
-> **Last Updated:** 2026-01-28
+> **Last Updated:** 2026-02-03
+
+---
+
+## Table of Contents
+
+1. [Page Component Structure](#page-component-structure)
+2. [Modal Component Structure](#modal-component-structure)
+3. [Form Component Structure](#form-component-structure)
+4. [List/Card Component Structure](#listcard-component-structure)
+5. [Hook Usage Patterns](#hook-usage-patterns)
+6. [Memoization Guidelines](#memoization-guidelines)
+7. [UI Component Library](#ui-component-library)
+
+---
+
+## Page Component Structure
+
+Dashboard pages follow a consistent structure with header, filters, stats, content, and loading/error states.
+
+### Standard Page Layout
+
+```tsx
+"use client";
+
+import React, { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/auth';
+import { useClients, useClientStats } from '@/lib/hooks/useClients';
+import { Button, Card, Badge, PageHeader } from '@/components/ui';
+import Skeleton, { SkeletonList } from '@/components/ui/Skeleton';
+import { PlusIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+
+export default function ClientsPage() {
+  const router = useRouter();
+  const { profile } = useAuth();
+
+  // Filter state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [showAddModal, setShowAddModal] = useState(false);
+
+  // Data fetching with domain-specific hook
+  const { clients, loading, error } = useClients({
+    orgId: profile?.orgId || '',
+    status: statusFilter === 'all' ? undefined : statusFilter,
+    search: searchQuery,
+  });
+
+  const { stats, loading: statsLoading } = useClientStats(profile?.orgId || '');
+
+  return (
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+      {/* Desktop Header */}
+      <div className="hidden md:block">
+        <PageHeader
+          title="Clients"
+          description="Manage your client relationships"
+          actions={
+            <Button variant="primary" onClick={() => setShowAddModal(true)}>
+              <PlusIcon className="h-4 w-4 mr-2" />
+              Add Client
+            </Button>
+          }
+        />
+      </div>
+
+      {/* Mobile Header */}
+      <div className="md:hidden">
+        <h1 className="text-xl font-bold text-gray-900">Clients</h1>
+        <p className="text-xs text-gray-500">Manage relationships</p>
+      </div>
+
+      {/* Mobile Stats - Horizontal Scroll */}
+      <div className="md:hidden flex gap-3 overflow-x-auto pb-2 -mx-4 px-4">
+        {/* Compact stat cards */}
+      </div>
+
+      {/* Desktop Stats Grid */}
+      <div className="hidden md:grid grid-cols-2 md:grid-cols-4 gap-4">
+        {/* Full stat cards */}
+      </div>
+
+      {/* Filters */}
+      <FilterSection
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        statusFilter={statusFilter}
+        onStatusChange={setStatusFilter}
+      />
+
+      {/* Content with Loading/Error/Empty States */}
+      {loading ? (
+        <div className="space-y-3">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Skeleton key={i} className="h-24 rounded-xl" />
+          ))}
+        </div>
+      ) : error ? (
+        <Card className="p-8 text-center">
+          <ExclamationCircleIcon className="h-12 w-12 text-red-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading</h3>
+          <p className="text-gray-500">{error.message}</p>
+        </Card>
+      ) : clients.length === 0 ? (
+        <EmptyState
+          icon={<UserGroupIcon className="h-16 w-16" />}
+          title={searchQuery ? "No matching clients" : "No clients yet"}
+          description={searchQuery ? "Try adjusting your search." : "Add your first client."}
+          action={!searchQuery ? { label: 'Add Client', onClick: () => setShowAddModal(true) } : undefined}
+        />
+      ) : (
+        <div className="space-y-3">
+          {clients.map((client) => (
+            <ClientCard key={client.id} client={client} />
+          ))}
+        </div>
+      )}
+
+      {/* Modal */}
+      <AddClientModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSuccess={(id) => router.push(`/dashboard/clients/${id}`)}
+      />
+
+      {/* Mobile FAB - positioned above bottom nav */}
+      <button
+        onClick={() => setShowAddModal(true)}
+        className="md:hidden fixed right-4 bottom-20 w-14 h-14 rounded-full bg-brand-primary text-white shadow-lg z-30"
+      >
+        <PlusIcon className="h-6 w-6" />
+      </button>
+    </div>
+  );
+}
+```
+
+### Key Page Patterns
+
+1. **Responsive Design**: Separate mobile and desktop layouts with `md:hidden` / `hidden md:block`
+2. **Loading States**: Use Skeleton components during data fetch
+3. **Error Handling**: Dedicated error card with icon and message
+4. **Empty States**: Contextual message with primary action when appropriate
+5. **Mobile FAB**: Floating action button positioned at `bottom-20` to avoid bottom nav
 
 ---
 
@@ -552,3 +696,459 @@ import { cn } from '@/lib/utils';
   variant === 'primary' && "variant-classes"
 )}>
 ```
+
+---
+
+## Hook Usage Patterns
+
+### Domain-Specific Hook Naming
+
+Hooks use domain-specific naming (e.g., `clients`, `projects`) instead of generic `items`:
+
+```typescript
+// Good - Domain specific names
+const { clients, loading, error, refresh } = useClients({ orgId });
+const { client, updateClient, deleteClient } = useClient(clientId, orgId);
+const { projects, loading } = useClientProjects(clientId, orgId);
+
+// Bad - Generic naming
+const { items, loading } = useItems({ orgId });
+```
+
+### Collection Hook Pattern (useFirestoreCollection)
+
+**File:** `lib/hooks/useFirestoreCollection.ts`
+
+```typescript
+import { useFirestoreCollection, createConverter } from '@/lib/hooks/useFirestoreCollection';
+import { convertTimestamps } from '@/lib/firebase/timestamp-converter';
+
+// 1. Create a stable converter outside the hook
+const clientConverter = createConverter<Client>((id, data) => ({
+  id,
+  ...convertTimestamps(data, ['createdAt', 'updatedAt', 'lastContactDate']),
+} as Client));
+
+// 2. Build domain-specific hook
+export function useClients({ orgId, status, search }: UseClientsOptions): UseClientsReturn {
+  // Build constraints with useMemo to prevent infinite loops
+  const constraints = useMemo(() => {
+    const c: QueryConstraint[] = [orderBy('displayName', 'asc')];
+    if (status) {
+      c.unshift(where('status', '==', status));
+    }
+    return c;
+  }, [status]);
+
+  // Use shared collection hook
+  const { items, loading, error, refetch } = useFirestoreCollection<Client>({
+    path: `organizations/${orgId}/clients`,
+    constraints,
+    converter: clientConverter,
+    enabled: !!orgId,  // Skip query if no orgId
+  });
+
+  // Client-side search filtering
+  const filteredClients = useMemo(() => {
+    if (!search) return items;
+    const searchLower = search.toLowerCase();
+    return items.filter((client) =>
+      client.displayName.toLowerCase().includes(searchLower) ||
+      client.email.toLowerCase().includes(searchLower)
+    );
+  }, [items, search]);
+
+  return {
+    clients: filteredClients,
+    loading,
+    error,
+    refresh: refetch,
+  };
+}
+```
+
+### CRUD Hook Pattern (useFirestoreCrud)
+
+**File:** `lib/hooks/useFirestoreCrud.ts`
+
+```typescript
+import { useFirestoreCrud } from '@/lib/hooks/useFirestoreCrud';
+
+export function useClient(clientId: string | undefined, orgId: string): UseClientReturn {
+  const [client, setClient] = useState<Client | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  // Use shared CRUD hook for operations
+  const { update, remove } = useFirestoreCrud<Client>(
+    `organizations/${orgId}/clients`,
+    { entityName: 'Client', showToast: true }
+  );
+
+  // Real-time subscription
+  useEffect(() => {
+    if (!clientId || !orgId) {
+      setLoading(false);
+      return;
+    }
+
+    const unsubscribe = onSnapshot(
+      doc(db, `organizations/${orgId}/clients`, clientId),
+      (snapshot) => {
+        if (!snapshot.exists()) {
+          setClient(null);
+        } else {
+          setClient(clientConverter(snapshot.id, snapshot.data()));
+        }
+        setLoading(false);
+      },
+      (err) => {
+        setError(err);
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [clientId, orgId]);
+
+  const updateClient = useCallback(
+    async (updates: Partial<Client>) => {
+      if (!clientId) throw new Error('Client ID required');
+      await update(clientId, updates);
+    },
+    [clientId, update]
+  );
+
+  return { client, loading, error, updateClient, deleteClient: () => remove(clientId!) };
+}
+```
+
+### Hook Return Pattern
+
+Always return consistent object shape:
+
+```typescript
+interface UseClientsReturn {
+  clients: Client[];       // Domain-specific name (not "items")
+  loading: boolean;        // Initial load state
+  error: Error | null;     // Error object
+  refresh: () => void;     // Manual refresh function
+}
+
+interface UseClientReturn {
+  client: Client | null;   // Single item or null
+  loading: boolean;
+  error: Error | null;
+  refresh: () => void;
+  updateClient: (updates: Partial<Client>) => Promise<void>;
+  deleteClient: () => Promise<void>;
+}
+```
+
+### Early Return Pattern
+
+Always check for required parameters before fetching:
+
+```typescript
+export function useClient(clientId: string | undefined, orgId: string) {
+  const [client, setClient] = useState<Client | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Early return if missing required params
+    if (!clientId || !orgId) {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    // ... fetch logic
+  }, [clientId, orgId]);
+}
+```
+
+### Stats Hook Pattern
+
+Derive stats from existing data hooks:
+
+```typescript
+export function useClientStats(orgId: string) {
+  const { clients, loading } = useClients({ orgId });
+
+  const stats = useMemo(() => {
+    if (!clients.length) {
+      return { total: 0, active: 0, totalLifetimeValue: 0 };
+    }
+
+    return {
+      total: clients.length,
+      active: clients.filter((c) => c.status === 'active').length,
+      totalLifetimeValue: clients.reduce(
+        (sum, c) => sum + (c.financials?.lifetimeValue || 0), 0
+      ),
+    };
+  }, [clients]);
+
+  return { stats, loading };
+}
+```
+
+---
+
+## Memoization Guidelines
+
+### When to Use useMemo
+
+**DO use useMemo for:**
+
+1. **Expensive computations**
+```typescript
+const stats = useMemo(() => {
+  return clients.reduce((acc, client) => ({
+    total: acc.total + 1,
+    active: acc.active + (client.status === 'active' ? 1 : 0),
+    totalValue: acc.totalValue + (client.financials?.lifetimeValue || 0),
+  }), { total: 0, active: 0, totalValue: 0 });
+}, [clients]);
+```
+
+2. **Query constraints (prevents infinite loops in useEffect)**
+```typescript
+const constraints = useMemo(() => {
+  const c: QueryConstraint[] = [orderBy('createdAt', 'desc')];
+  if (status) c.unshift(where('status', '==', status));
+  return c;
+}, [status]);
+```
+
+3. **Filtered/sorted data**
+```typescript
+const filteredClients = useMemo(() => {
+  if (!search) return clients;
+  const searchLower = search.toLowerCase();
+  return clients.filter(c =>
+    c.name.toLowerCase().includes(searchLower)
+  );
+}, [clients, search]);
+```
+
+**DON'T use useMemo for:**
+- Simple value transformations
+- Primitive values
+- Values that change every render anyway
+
+### When to Use useCallback
+
+**DO use useCallback for:**
+
+1. **Functions passed to child components (prevents re-renders)**
+```typescript
+const handleClick = useCallback(() => {
+  router.push(`/clients/${clientId}`);
+}, [router, clientId]);
+
+return <ChildComponent onClick={handleClick} />;
+```
+
+2. **Functions in useEffect dependency arrays**
+```typescript
+const refresh = useCallback(() => {
+  setRefreshKey(k => k + 1);
+}, []);
+
+useEffect(() => {
+  refresh();
+}, [refresh]);
+```
+
+3. **Event handlers that use state/props**
+```typescript
+const handleSubmit = useCallback(async (e: FormEvent) => {
+  e.preventDefault();
+  if (onSubmit && !loading) {
+    await onSubmit();
+  }
+}, [onSubmit, loading]);
+```
+
+**DON'T use useCallback for:**
+- Functions only used in the same component (unless causing re-renders)
+- Functions without dependencies
+- Simple inline event handlers
+
+### Converter Pattern (createConverter)
+
+Use `createConverter` to create stable converter functions that don't cause re-renders:
+
+```typescript
+// Good - Stable reference created outside component
+const clientConverter = createConverter<Client>((id, data) => ({
+  id,
+  ...convertTimestamps(data, DATE_FIELDS),
+} as Client));
+
+// Use in hook
+const { items } = useFirestoreCollection({
+  path: `organizations/${orgId}/clients`,
+  converter: clientConverter,  // Stable reference
+});
+
+// Bad - Creates new function each render, causing infinite loops
+const { items } = useFirestoreCollection({
+  converter: (id, data) => ({ id, ...data }),  // New function every render!
+});
+```
+
+### Common Memoization Pitfalls
+
+1. **Object/array literals in dependencies**
+```typescript
+// Bad - new object every render
+useEffect(() => { ... }, [{ status, search }]);
+
+// Good - primitive values
+useEffect(() => { ... }, [status, search]);
+```
+
+2. **Inline function in dependency**
+```typescript
+// Bad - new function every render
+useEffect(() => {
+  const fn = () => console.log(value);
+  fn();
+}, [() => console.log(value)]);  // Always different!
+
+// Good - use useCallback
+const logValue = useCallback(() => console.log(value), [value]);
+useEffect(() => { logValue(); }, [logValue]);
+```
+
+3. **Missing dependencies**
+```typescript
+// Bad - stale closure
+useCallback(() => {
+  doSomething(status);  // status not in deps!
+}, []);
+
+// Good - include all dependencies
+useCallback(() => {
+  doSomething(status);
+}, [status]);
+```
+
+---
+
+## FormModal Pattern
+
+The `FormModal` component provides a standardized modal wrapper for forms with loading states and error handling.
+
+**File:** `components/ui/FormModal.tsx`
+
+```typescript
+import { FormModal, useFormModal } from '@/components/ui/FormModal';
+
+function ParentComponent() {
+  const { isOpen, open, close, loading, error, handleSubmit } = useFormModal();
+
+  const onSubmit = async () => {
+    await handleSubmit(async () => {
+      await createClient(formData);
+    });
+  };
+
+  return (
+    <>
+      <Button onClick={open}>Add Client</Button>
+
+      <FormModal
+        isOpen={isOpen}
+        onClose={close}
+        title="Add Client"
+        description="Enter client details"
+        submitLabel="Create Client"
+        loading={loading}
+        error={error}
+        onSubmit={onSubmit}
+      >
+        {/* Form fields */}
+      </FormModal>
+    </>
+  );
+}
+```
+
+### FormModal Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `isOpen` | boolean | - | Controls modal visibility |
+| `onClose` | () => void | - | Close callback |
+| `title` | string | - | Modal header title |
+| `description?` | string | - | Optional subtitle |
+| `onSubmit?` | () => Promise<void> | - | Form submit handler |
+| `submitLabel?` | string | 'Save' | Submit button text |
+| `cancelLabel?` | string | 'Cancel' | Cancel button text |
+| `loading?` | boolean | false | Shows loading state |
+| `disabled?` | boolean | false | Disables submit button |
+| `size?` | 'sm' \| 'md' \| 'lg' \| 'xl' \| 'full' | 'md' | Modal width |
+| `error?` | string \| null | - | Error message |
+| `submitVariant?` | 'primary' \| 'danger' | 'primary' | Submit button style |
+
+---
+
+## Form Validation with Zod
+
+Standard pattern for forms using React Hook Form with Zod validation:
+
+```typescript
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+// 1. Define schema
+const clientSchema = z.object({
+  firstName: z.string().min(1, 'First name is required'),
+  lastName: z.string().min(1, 'Last name is required'),
+  email: z.string().email('Invalid email address'),
+  phone: z.string().optional(),
+  status: z.enum(['active', 'past', 'potential', 'inactive']),
+});
+
+type ClientFormData = z.infer<typeof clientSchema>;
+
+// 2. Initialize form
+const {
+  register,
+  handleSubmit,
+  watch,
+  setValue,
+  reset,
+  formState: { errors },
+} = useForm<ClientFormData>({
+  resolver: zodResolver(clientSchema),
+  defaultValues: { status: 'potential' },
+});
+
+// 3. Handle submit
+const onSubmit = async (data: ClientFormData) => {
+  setIsSubmitting(true);
+  try {
+    await createClient(data);
+    toast.success('Client created');
+    reset();
+    onClose();
+  } catch (err) {
+    toast.error('Failed to create client');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+```
+
+---
+
+## Related Documentation
+
+- [CLAUDE.md](/CLAUDE.md) - Development instructions and session setup
+- [DEVELOPMENT_GUIDE.md](/docs/DEVELOPMENT_GUIDE.md) - Feature development patterns
+- [ARCHITECTURE.md](/docs/ARCHITECTURE.md) - Technical architecture overview
