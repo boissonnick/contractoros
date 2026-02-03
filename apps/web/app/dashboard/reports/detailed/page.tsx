@@ -3,39 +3,16 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import { useReports, LaborCostData, ProjectPnLData, ProductivityData } from '@/lib/hooks/useReports';
-import ReportDatePicker from '@/components/reports/ReportDatePicker';
 import ReportExport from '@/components/reports/ReportExport';
 import LaborCostReport from '@/components/reports/LaborCostReport';
 import ProjectPnLReport from '@/components/reports/ProjectPnLReport';
 import TeamProductivityReport from '@/components/reports/TeamProductivityReport';
 import PayrollPreviewReport from '@/components/reports/PayrollPreviewReport';
 import Card from '@/components/ui/Card';
+import { DateRangePresets, DatePresetValue } from '@/components/ui/DateRangePresets';
 import { cn } from '@/lib/utils';
 
 type Tab = 'labor' | 'pnl' | 'productivity' | 'payroll';
-
-function getPresetDates(preset: string): { start: Date; end: Date } {
-  const now = new Date();
-  switch (preset) {
-    case 'This Week': {
-      const s = new Date(now);
-      s.setDate(s.getDate() - s.getDay() + 1);
-      s.setHours(0, 0, 0, 0);
-      return { start: s, end: now };
-    }
-    case 'This Month': {
-      return { start: new Date(now.getFullYear(), now.getMonth(), 1), end: now };
-    }
-    case 'Last Month': {
-      return { start: new Date(now.getFullYear(), now.getMonth() - 1, 1), end: new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59) };
-    }
-    case 'This Year': {
-      return { start: new Date(now.getFullYear(), 0, 1), end: now };
-    }
-    default:
-      return { start: new Date(now.getFullYear(), now.getMonth(), 1), end: now };
-  }
-}
 
 export default function DetailedReportsPage() {
   const { profile } = useAuth();
@@ -43,6 +20,7 @@ export default function DetailedReportsPage() {
   const [tab, setTab] = useState<Tab>('labor');
   const [startDate, setStartDate] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
   const [endDate, setEndDate] = useState(() => new Date());
+  const [selectedPreset, setSelectedPreset] = useState<DatePresetValue | null>('this_month');
   const [laborData, setLaborData] = useState<LaborCostData[]>([]);
   const [pnlData, setPnlData] = useState<ProjectPnLData[]>([]);
   const [productivityData, setProductivityData] = useState<ProductivityData[]>([]);
@@ -54,10 +32,36 @@ export default function DetailedReportsPage() {
     if (tab === 'productivity') fetchProductivity(startDate, endDate).then(setProductivityData);
   }, [tab, startDate, endDate, profile?.orgId, fetchLaborCosts, fetchProjectPnL, fetchProductivity]);
 
-  const handlePreset = (preset: string) => {
-    const { start, end } = getPresetDates(preset);
-    setStartDate(start);
-    setEndDate(end);
+  const handlePresetSelect = (range: { start: Date; end: Date; label: string }) => {
+    setStartDate(range.start);
+    setEndDate(range.end);
+    // Map label back to preset value
+    const presetMap: Record<string, DatePresetValue> = {
+      'Today': 'today',
+      'Yesterday': 'yesterday',
+      'This Week': 'this_week',
+      'Last Week': 'last_week',
+      'This Month': 'this_month',
+      'Last Month': 'last_month',
+      'This Quarter': 'this_quarter',
+      'Last Quarter': 'last_quarter',
+      'This Year': 'this_year',
+      'Last Year': 'last_year',
+      'Last 7 Days': 'last_7_days',
+      'Last 30 Days': 'last_30_days',
+      'Last 90 Days': 'last_90_days',
+    };
+    setSelectedPreset(presetMap[range.label] || null);
+  };
+
+  const handleStartDateChange = (d: Date) => {
+    setStartDate(d);
+    setSelectedPreset(null);
+  };
+
+  const handleEndDateChange = (d: Date) => {
+    setEndDate(d);
+    setSelectedPreset(null);
   };
 
   const exportData: Record<string, unknown>[] = tab === 'labor'
@@ -77,7 +81,34 @@ export default function DetailedReportsPage() {
         <ReportExport data={exportData} filename={`${tab}-report`} />
       </div>
 
-      <ReportDatePicker startDate={startDate} endDate={endDate} onChangeStart={setStartDate} onChangeEnd={setEndDate} onPreset={handlePreset} />
+      {/* Date Range Selection */}
+      <div className="space-y-3">
+        <DateRangePresets
+          presets="extended"
+          selectedPreset={selectedPreset}
+          onSelect={handlePresetSelect}
+          layout="scroll"
+          variant="pills"
+          size="sm"
+        />
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <input
+              type="date"
+              value={startDate.toISOString().split('T')[0]}
+              onChange={(e) => handleStartDateChange(new Date(e.target.value + 'T00:00:00'))}
+              className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm"
+            />
+            <span className="text-gray-400 text-sm">to</span>
+            <input
+              type="date"
+              value={endDate.toISOString().split('T')[0]}
+              onChange={(e) => handleEndDateChange(new Date(e.target.value + 'T23:59:59'))}
+              className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm"
+            />
+          </div>
+        </div>
+      </div>
 
       <div className="flex border-b border-gray-200">
         {([['labor', 'Labor Costs'], ['pnl', 'Project P&L'], ['productivity', 'Team Productivity'], ['payroll', 'Payroll Preview']] as [Tab, string][]).map(([id, label]) => (

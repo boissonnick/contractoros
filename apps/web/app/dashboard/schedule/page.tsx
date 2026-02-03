@@ -11,6 +11,7 @@ import {
   EventFormModal,
   CrewAvailabilityPanel,
   WeatherWidget,
+  SimpleWeatherWidget,
   ConflictAlert,
   DayView,
   AssignmentModal,
@@ -318,16 +319,19 @@ export default function SchedulePage() {
     <div className="flex flex-col h-full min-h-[calc(100vh-200px)] space-y-4 md:space-y-6">
       {/* Desktop Header */}
       <div className="hidden md:block">
-        <PageHeader
-          title="Schedule"
-          description="Manage jobs, inspections, and crew assignments"
-          actions={
-            <Button onClick={() => { setSelectedEvent(null); setShowEventModal(true); }}>
-              <PlusIcon className="h-4 w-4 mr-2" />
-              Add Event
-            </Button>
-          }
-        />
+        <div className="flex items-start justify-between gap-6">
+          <PageHeader
+            title="Schedule"
+            description="Manage jobs, inspections, and crew assignments"
+            actions={
+              <Button onClick={() => { setSelectedEvent(null); setShowEventModal(true); }}>
+                <PlusIcon className="h-4 w-4 mr-2" />
+                Add Event
+              </Button>
+            }
+          />
+          <SimpleWeatherWidget location="San Francisco, CA" className="w-72 flex-shrink-0" />
+        </div>
       </div>
 
       {/* Mobile Header */}
@@ -388,6 +392,38 @@ export default function SchedulePage() {
             );
           })}
         </div>
+
+        {/* Mobile Weather Summary */}
+        {weatherData.length > 0 && (
+          <div className="mt-3 flex items-center gap-2 p-3 bg-gradient-to-r from-blue-50 to-sky-50 rounded-xl">
+            <CloudIcon className="h-5 w-5 text-blue-500 flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                {weatherData.slice(0, 5).map((day) => {
+                  const isSelected = new Date(day.date).toDateString() === selectedDate.toDateString();
+                  return (
+                    <button
+                      key={day.date}
+                      onClick={() => setSelectedDate(new Date(day.date))}
+                      className={cn(
+                        'flex flex-col items-center px-2 py-1 rounded-lg transition-colors min-w-[40px]',
+                        isSelected ? 'bg-white shadow-sm' : 'hover:bg-white/50'
+                      )}
+                    >
+                      <span className="text-[10px] text-gray-500">{day.dayOfWeek?.slice(0, 2) || day.date.slice(5)}</span>
+                      <span className="text-sm">
+                        {day.conditions === 'sunny' ? '☀️' :
+                         day.conditions === 'rain' ? '🌧️' :
+                         day.conditions === 'cloudy' ? '☁️' : '⛅'}
+                      </span>
+                      <span className="text-[10px] font-medium text-gray-700">{day.high}°</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Mobile Filter Panel */}
         {showMobileFilters && (

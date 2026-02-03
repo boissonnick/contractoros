@@ -5,26 +5,26 @@
  * Can be used standalone or integrated with any date picker component.
  *
  * @example
- * // Standalone usage
+ * // Simple usage with range object
  * <DateRangePresets
- *   onSelect={(startDate, endDate, label) => {
- *     setDateRange({ startDate, endDate });
+ *   onSelect={(range) => {
+ *     console.log(range.start, range.end, range.label);
  *   }}
  * />
  *
  * @example
- * // With custom presets
+ * // With custom presets and grid layout
  * <DateRangePresets
  *   presets={['today', 'this_week', 'this_month']}
  *   selectedPreset={currentPreset}
  *   onSelect={handleSelect}
- *   variant="pills"
+ *   layout="grid"
  * />
  *
  * @example
- * // Compact layout for tight spaces
+ * // Mobile-friendly scrollable layout
  * <DateRangePresets
- *   layout="compact"
+ *   layout="scroll"
  *   size="sm"
  *   onSelect={handleSelect}
  * />
@@ -34,6 +34,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
 
 // Date preset types
 export type DatePresetValue =
@@ -84,6 +85,15 @@ export const PRESET_GROUPS = {
   all: DATE_PRESET_CONFIGS.map(p => p.value),
 };
 
+/**
+ * Range object returned by onSelect callback
+ */
+export interface DateRange {
+  start: Date;
+  end: Date;
+  label: string;
+}
+
 export interface DateRangePresetsProps {
   /**
    * Which presets to show (default: extended)
@@ -94,13 +104,18 @@ export interface DateRangePresetsProps {
   /**
    * Currently selected preset (for controlled usage)
    */
-  selectedPreset?: DatePresetValue | null;
+  selectedPreset?: DatePresetValue | string | null;
 
   /**
    * Callback when a preset is selected
-   * Provides start date, end date, and human-readable label
+   * Returns an object with start, end, and label
    */
-  onSelect?: (startDate: Date, endDate: Date, label: string, preset: DatePresetValue) => void;
+  onSelect?: (range: DateRange) => void;
+
+  /**
+   * Legacy callback (deprecated, use onSelect with range object)
+   */
+  onSelectLegacy?: (startDate: Date, endDate: Date, label: string, preset: DatePresetValue) => void;
 
   /**
    * Visual variant
@@ -121,8 +136,10 @@ export interface DateRangePresetsProps {
    * - inline: All in a row with wrapping (default)
    * - compact: Tight spacing, short labels
    * - stacked: Vertical list
+   * - scroll: Horizontal scrollable on mobile, wrapping on desktop
+   * - grid: 2-3 column grid layout on desktop, scrollable on mobile
    */
-  layout?: 'inline' | 'compact' | 'stacked';
+  layout?: 'inline' | 'compact' | 'stacked' | 'scroll' | 'grid';
 
   /**
    * Whether the component is disabled
@@ -143,6 +160,11 @@ export interface DateRangePresetsProps {
    * Use short labels (for compact layouts)
    */
   useShortLabels?: boolean;
+
+  /**
+   * Show date range in tooltip on hover (default: true)
+   */
+  showDateRangeTooltip?: boolean;
 }
 
 /**
@@ -328,12 +350,29 @@ const layoutClasses = {
   inline: 'flex flex-wrap gap-1.5',
   compact: 'flex flex-wrap gap-1',
   stacked: 'flex flex-col gap-1',
+  scroll: 'flex gap-2 overflow-x-auto pb-2 -mx-2 px-2 md:flex-wrap md:overflow-visible md:pb-0 md:mx-0 md:px-0 no-scrollbar',
+  grid: 'flex gap-2 overflow-x-auto pb-2 -mx-2 px-2 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-2 md:overflow-visible md:pb-0 md:mx-0 md:px-0 no-scrollbar',
 };
+
+/**
+ * Format date range for tooltip display
+ */
+function formatDateRangeTooltip(startDate: Date, endDate: Date): string {
+  const formatStr = 'MMM d, yyyy';
+  const start = format(startDate, formatStr);
+  const end = format(endDate, formatStr);
+
+  if (start === end) {
+    return start;
+  }
+  return `${start} - ${end}`;
+}
 
 export function DateRangePresets({
   presets = 'extended',
   selectedPreset,
   onSelect,
+  onSelectLegacy,
   variant = 'pills',
   size = 'sm',
   layout = 'inline',
@@ -341,6 +380,7 @@ export function DateRangePresets({
   className,
   label,
   useShortLabels = false,
+  showDateRangeTooltip = true,
 }: DateRangePresetsProps) {
   // Resolve presets array
   const resolvedPresets = useMemo(() => {
@@ -351,19 +391,48 @@ export function DateRangePresets({
     });
   }, [presets]);
 
+  // Pre-calculate date ranges for tooltips (memoized to avoid recalculation)
+  const presetRanges = useMemo(() => {
+    const ranges: Record<DatePresetValue, { startDate: Date; endDate: Date; tooltip: string }> = {} as any;
+    resolvedPresets.forEach(preset => {
+      const range = getDateRangeFromPresetValue(preset.value);
+      ranges[preset.value] = {
+        ...range,
+        tooltip: formatDateRangeTooltip(range.startDate, range.endDate),
+      };
+    });
+    return ranges;
+  }, [resolvedPresets]);
+
   // Use short labels in compact mode or when explicitly requested
   const shouldUseShortLabels = useShortLabels || layout === 'compact';
 
   const handleSelect = useCallback(
     (preset: DatePresetConfig) => {
-      if (disabled || !onSelect) return;
+      if (disabled) return;
       const range = getDateRangeFromPresetValue(preset.value);
-      onSelect(range.startDate, range.endDate, range.label, preset.value);
+
+      // Call the new onSelect with range object
+      if (onSelect) {
+        onSelect({
+          start: range.startDate,
+          end: range.endDate,
+          label: range.label,
+        });
+      }
+
+      // Also call legacy callback if provided
+      if (onSelectLegacy) {
+        onSelectLegacy(range.startDate, range.endDate, range.label, preset.value);
+      }
     },
-    [disabled, onSelect]
+    [disabled, onSelect, onSelectLegacy]
   );
 
   const variantStyle = variantClasses[variant];
+
+  // Determine if we need flex-shrink-0 for scroll/grid layouts
+  const isScrollable = layout === 'scroll' || layout === 'grid';
 
   return (
     <div className={cn('w-full', className)}>
@@ -379,6 +448,11 @@ export function DateRangePresets({
             ? preset.shortLabel
             : preset.label;
 
+          // Build tooltip: show date range if enabled
+          const tooltip = showDateRangeTooltip
+            ? `${preset.label}: ${presetRanges[preset.value]?.tooltip || ''}`
+            : preset.label;
+
           return (
             <button
               key={preset.value}
@@ -386,7 +460,7 @@ export function DateRangePresets({
               onClick={() => handleSelect(preset)}
               disabled={disabled}
               aria-pressed={isSelected}
-              title={preset.label}
+              title={tooltip}
               className={cn(
                 variantStyle.base,
                 sizeClasses[size],
@@ -394,7 +468,9 @@ export function DateRangePresets({
                   ? variantStyle.disabled
                   : isSelected
                   ? variantStyle.selected
-                  : variantStyle.idle
+                  : variantStyle.idle,
+                // Prevent shrinking in scroll/grid layouts on mobile
+                isScrollable && 'flex-shrink-0 md:flex-shrink'
               )}
             >
               {displayLabel}
@@ -427,6 +503,58 @@ export function InlineDateRangePresets({
       disabled={disabled}
       className={className}
       useShortLabels
+    />
+  );
+}
+
+/**
+ * Mobile-optimized version with horizontal scroll on mobile and grid on desktop
+ */
+export function ResponsiveDateRangePresets({
+  presets = 'all',
+  selectedPreset,
+  onSelect,
+  disabled = false,
+  className,
+  label,
+}: Pick<DateRangePresetsProps, 'presets' | 'selectedPreset' | 'onSelect' | 'disabled' | 'className' | 'label'>) {
+  return (
+    <DateRangePresets
+      presets={presets}
+      selectedPreset={selectedPreset}
+      onSelect={onSelect}
+      variant="pills"
+      size="sm"
+      layout="grid"
+      disabled={disabled}
+      className={className}
+      label={label}
+      showDateRangeTooltip
+    />
+  );
+}
+
+/**
+ * Scrollable horizontal preset bar - great for filter bars
+ */
+export function ScrollableDateRangePresets({
+  presets = 'extended',
+  selectedPreset,
+  onSelect,
+  disabled = false,
+  className,
+}: Pick<DateRangePresetsProps, 'presets' | 'selectedPreset' | 'onSelect' | 'disabled' | 'className'>) {
+  return (
+    <DateRangePresets
+      presets={presets}
+      selectedPreset={selectedPreset}
+      onSelect={onSelect}
+      variant="chips"
+      size="sm"
+      layout="scroll"
+      disabled={disabled}
+      className={className}
+      showDateRangeTooltip
     />
   );
 }

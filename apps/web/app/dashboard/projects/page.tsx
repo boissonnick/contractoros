@@ -806,7 +806,7 @@ export default function ProjectsPage() {
                         <EllipsisVerticalIcon className="h-5 w-5 text-gray-500" />
                       </button>
                       {menuOpenId === project.id && (
-                        <div className="absolute right-4 top-12 bg-white border border-gray-200 rounded-lg shadow-lg py-1 w-48 z-20">
+                        <div className="absolute right-4 top-12 bg-white border border-gray-200 rounded-lg shadow-lg py-1 w-48 z-50">
                           <button
                             onClick={(e) => {
                               e.preventDefault();

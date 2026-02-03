@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/auth';
 import AuthGuard from '@/components/auth/AuthGuard';
 import AppShell from '@/components/ui/AppShell';
 import { NavItem, RolePermissions } from '@/types';
+import { NavSection } from '@/components/navigation';
 import { useImpersonation } from '@/lib/contexts/ImpersonationContext';
 import { ImpersonationBanner } from '@/components/impersonation';
 import { OfflineBanner } from '@/components/offline/OfflineBanner';
@@ -229,6 +230,171 @@ const clientNavItems: NavItem[] = [
   { label: 'Documents', href: '/dashboard/documents', icon: DocumentIcon },
 ];
 
+// =============================================================================
+// NAVIGATION SECTIONS - Grouped navigation for better organization
+// =============================================================================
+// Helper function to create filtered sections based on permissions
+function createOwnerPmSections(permissions: RolePermissions): NavSection[] {
+  const sections: NavSection[] = [];
+
+  // Projects & Work section - always visible
+  sections.push({
+    id: 'projects-work',
+    title: 'Projects & Work',
+    icon: FolderIcon,
+    defaultOpen: true,
+    items: [
+      { label: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+      { label: 'Projects', href: '/dashboard/projects', icon: FolderIcon },
+      { label: 'Schedule', href: '/dashboard/schedule', icon: CalendarIcon },
+      { label: 'Daily Logs', href: '/dashboard/logs', icon: DocumentTextIcon },
+    ],
+  });
+
+  // Sales & Clients section - requires client permissions
+  if (permissions.canViewClients) {
+    sections.push({
+      id: 'sales-clients',
+      title: 'Sales & Clients',
+      icon: UserGroupIcon,
+      defaultOpen: true,
+      items: [
+        { label: 'Clients', href: '/dashboard/clients', icon: UserGroupIcon },
+        { label: 'Estimates', href: '/dashboard/estimates', icon: CalculatorIcon },
+        { label: 'E-Signatures', href: '/dashboard/signatures', icon: PencilSquareIcon },
+      ],
+    });
+  }
+
+  // Finance section - requires finance permissions
+  if (permissions.canViewAllFinances) {
+    sections.push({
+      id: 'finance',
+      title: 'Finance',
+      icon: BanknotesIcon,
+      defaultOpen: true,
+      items: [
+        {
+          label: 'Finance',
+          href: '/dashboard/finances',
+          icon: BanknotesIcon,
+          children: [
+            { label: 'Overview', href: '/dashboard/finances' },
+            { label: 'Invoices', href: '/dashboard/invoices' },
+            { label: 'Expenses', href: '/dashboard/expenses' },
+            { label: 'Payroll', href: '/dashboard/payroll' },
+            { label: 'Reports', href: '/dashboard/reports/financial' },
+          ],
+        },
+      ],
+    });
+  }
+
+  // Operations section - requires team permissions
+  const operationsItems: NavItem[] = [];
+  if (permissions.canViewTeam) {
+    operationsItems.push({
+      label: 'Team',
+      href: '/dashboard/team',
+      icon: UsersIcon,
+      children: [
+        { label: 'Directory', href: '/dashboard/team' },
+        { label: 'Time Tracking', href: '/dashboard/time' },
+        { label: 'Availability', href: '/dashboard/team/availability' },
+        { label: 'Time Off', href: '/dashboard/team/time-off' },
+      ],
+    });
+    operationsItems.push({
+      label: 'Subcontractors',
+      href: '/dashboard/subcontractors',
+      icon: WrenchScrewdriverIcon,
+      children: [
+        { label: 'Directory', href: '/dashboard/subcontractors' },
+        { label: 'Bids', href: '/dashboard/subcontractors/bids' },
+        { label: 'Compare', href: '/dashboard/subcontractors/compare' },
+      ],
+    });
+  }
+  // Equipment and Materials - always visible
+  operationsItems.push({ label: 'Equipment', href: '/dashboard/equipment', icon: TruckIcon });
+  operationsItems.push({ label: 'Materials', href: '/dashboard/materials', icon: InboxIcon });
+
+  if (operationsItems.length > 0) {
+    sections.push({
+      id: 'operations',
+      title: 'Operations',
+      icon: WrenchScrewdriverIcon,
+      defaultOpen: true,
+      items: operationsItems,
+    });
+  }
+
+  // Documents & Communication section
+  const docsItems: NavItem[] = [
+    { label: 'Messages', href: '/dashboard/messaging', icon: ChatBubbleLeftRightIcon },
+    { label: 'Documents', href: '/dashboard/documents', icon: DocumentIcon },
+  ];
+
+  sections.push({
+    id: 'documents',
+    title: 'Documents',
+    icon: DocumentIcon,
+    defaultOpen: true,
+    items: docsItems,
+  });
+
+  // Reports section - requires report permissions
+  if (permissions.canViewProjectReports) {
+    sections.push({
+      id: 'reports',
+      title: 'Reports',
+      icon: ClipboardDocumentListIcon,
+      defaultOpen: false,
+      items: [
+        {
+          label: 'Reports',
+          href: '/dashboard/reports',
+          icon: ClipboardDocumentListIcon,
+          children: [
+            { label: 'Overview', href: '/dashboard/reports' },
+            { label: 'Financial', href: '/dashboard/reports/financial' },
+            { label: 'Operational', href: '/dashboard/reports/operational' },
+            { label: 'Benchmarking', href: '/dashboard/reports/benchmarking' },
+            { label: 'Detailed', href: '/dashboard/reports/detailed' },
+          ],
+        },
+      ],
+    });
+  }
+
+  // Settings & Help section - always at the bottom
+  const settingsItems: NavItem[] = [];
+  if (permissions.canViewSettings) {
+    settingsItems.push({ label: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon });
+  }
+  settingsItems.push({
+    label: 'Help & Support',
+    href: '/dashboard/help',
+    icon: QuestionMarkCircleIcon,
+    children: [
+      { label: 'Getting Started', href: '/dashboard/help' },
+      { label: 'Keyboard Shortcuts', href: '/dashboard/help/shortcuts' },
+      { label: 'Contact Support', href: '/dashboard/help/contact' },
+      { label: "What's New", href: '/dashboard/help/changelog' },
+    ],
+  });
+
+  sections.push({
+    id: 'settings-help',
+    title: 'Settings & Help',
+    icon: Cog6ToothIcon,
+    defaultOpen: false,
+    items: settingsItems,
+  });
+
+  return sections;
+}
+
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const { profile, signOut } = useAuth();
   const { permissions, currentRole } = useImpersonation();
@@ -289,6 +455,15 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     });
   }, [permissions, currentRole]);
 
+  // Get nav sections for Owner/PM roles (collapsible sections on desktop)
+  const navSections = useMemo(() => {
+    // Only Owner/PM roles get sectioned navigation
+    if (currentRole === 'client' || currentRole === 'employee' || currentRole === 'contractor') {
+      return undefined; // Use flat navItems for these roles
+    }
+    return createOwnerPmSections(permissions);
+  }, [permissions, currentRole]);
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Impersonation Banner at the very top */}
@@ -304,6 +479,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       <div className="flex-1">
         <AppShell
           navItems={filteredNavItems}
+          navSections={navSections}
           userDisplayName={profile?.displayName}
           onSignOut={signOut}
           sidebarFooter={<SidebarDevTools />}

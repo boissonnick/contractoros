@@ -9,6 +9,7 @@ import { MobileHeader, MobileDrawer, MobileBottomNav } from './MobileNav';
 import { useNetworkStatus } from '@/lib/offline/network-status';
 import { GlobalSearchBar } from '@/components/search';
 import { cn } from '@/lib/utils';
+import { CollapsibleNavSection, NavSection } from '@/components/navigation';
 
 // Collapsible nav item component for sections with children
 function CollapsibleNavItem({
@@ -74,6 +75,8 @@ function CollapsibleNavItem({
 interface AppShellProps {
   children: React.ReactNode;
   navItems: NavItem[];
+  /** Optional sections for grouped navigation (used instead of flat navItems on desktop) */
+  navSections?: NavSection[];
   userDisplayName?: string;
   onSignOut: () => void;
   sidebarFooter?: React.ReactNode;
@@ -82,6 +85,7 @@ interface AppShellProps {
 export default function AppShell({
   children,
   navItems,
+  navSections,
   userDisplayName,
   onSignOut,
   sidebarFooter
@@ -89,6 +93,43 @@ export default function AppShell({
   const pathname = usePathname();
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const { isOnline } = useNetworkStatus();
+
+  // Helper to render a single nav item (used by both flat list and sections)
+  const renderNavItem = (item: NavItem, isActive: boolean) => {
+    const hasChildren = item.children && item.children.length > 0;
+    const isChildActive = hasChildren && item.children?.some(
+      child => pathname === child.href || pathname.startsWith(child.href + '/')
+    );
+
+    // For items with children, render collapsible section
+    if (hasChildren) {
+      return (
+        <CollapsibleNavItem
+          key={item.href}
+          item={item}
+          isActive={isActive || !!isChildActive}
+          pathname={pathname}
+        />
+      );
+    }
+
+    // For regular items, render simple link
+    return (
+      <Link
+        key={item.href}
+        href={item.href}
+        className={cn(
+          'flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors',
+          isActive
+            ? 'bg-brand-primary-light text-brand-primary'
+            : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+        )}
+      >
+        <item.icon className={cn('mr-3 h-5 w-5', isActive ? 'text-brand-primary' : 'text-gray-400')} />
+        {item.label}
+      </Link>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
@@ -106,42 +147,24 @@ export default function AppShell({
         </div>
 
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
-            const hasChildren = item.children && item.children.length > 0;
-            const isChildActive = hasChildren && item.children?.some(
-              child => pathname === child.href || pathname.startsWith(child.href + '/')
-            );
-
-            // For items with children, render collapsible section
-            if (hasChildren) {
-              return (
-                <CollapsibleNavItem
-                  key={item.href}
-                  item={item}
-                  isActive={isActive || !!isChildActive}
-                  pathname={pathname}
+          {/* If sections are provided, render grouped navigation */}
+          {navSections && navSections.length > 0 ? (
+            <div className="space-y-2">
+              {navSections.map((section) => (
+                <CollapsibleNavSection
+                  key={section.id}
+                  section={section}
+                  renderNavItem={renderNavItem}
                 />
-              );
-            }
-
-            // For regular items, render simple link
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  'flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors',
-                  isActive
-                    ? 'bg-brand-primary-light text-brand-primary'
-                    : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                )}
-              >
-                <item.icon className={cn('mr-3 h-5 w-5', isActive ? 'text-brand-primary' : 'text-gray-400')} />
-                {item.label}
-              </Link>
-            );
-          })}
+              ))}
+            </div>
+          ) : (
+            /* Otherwise render flat navigation items */
+            navItems.map((item) => {
+              const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+              return renderNavItem(item, isActive);
+            })
+          )}
         </nav>
 
         {/* Dev Tools / Admin Tools above user section */}

@@ -9,6 +9,7 @@ import { SkeletonReports } from '@/components/ui/Skeleton';
 import { ReportCard } from '@/components/reports/ReportCard';
 import { RevenueChart } from '@/components/reports/RevenueChart';
 import { DateRangePicker } from '@/components/reports/DateRangePicker';
+import { DateRangePresets, DatePresetValue } from '@/components/ui/DateRangePresets';
 import {
   DateRange,
   getDateRangeFromPreset,
@@ -334,6 +335,39 @@ export default function ReportsPage() {
   const [dateRange, setDateRange] = useState<DateRange>(() =>
     getDateRangeFromPreset('this_month')
   );
+  const [selectedPreset, setSelectedPreset] = useState<DatePresetValue | null>('this_month');
+
+  // Handle date range preset selection
+  const handlePresetSelect = (range: { start: Date; end: Date; label: string }) => {
+    setDateRange({
+      startDate: range.start,
+      endDate: range.end,
+      label: range.label,
+    });
+    // Try to match the preset value from the label
+    const presetMap: Record<string, DatePresetValue> = {
+      'Today': 'today',
+      'Yesterday': 'yesterday',
+      'This Week': 'this_week',
+      'Last Week': 'last_week',
+      'This Month': 'this_month',
+      'Last Month': 'last_month',
+      'This Quarter': 'this_quarter',
+      'Last Quarter': 'last_quarter',
+      'This Year': 'this_year',
+      'Last Year': 'last_year',
+      'Last 7 Days': 'last_7_days',
+      'Last 30 Days': 'last_30_days',
+      'Last 90 Days': 'last_90_days',
+    };
+    setSelectedPreset(presetMap[range.label] || null);
+  };
+
+  // Handle custom date range change (clears preset selection)
+  const handleDateRangeChange = (range: DateRange) => {
+    setDateRange(range);
+    setSelectedPreset(null);
+  };
 
   // Fetch dashboard data using existing hook
   const {
@@ -471,9 +505,20 @@ export default function ReportsPage() {
         actions={
           <DateRangePicker
             value={dateRange}
-            onChange={setDateRange}
+            onChange={handleDateRangeChange}
           />
         }
+      />
+
+      {/* Quick Date Presets */}
+      <DateRangePresets
+        presets="comparison"
+        selectedPreset={selectedPreset}
+        onSelect={handlePresetSelect}
+        layout="scroll"
+        variant="pills"
+        size="sm"
+        label="Quick Date Selection"
       />
 
       {/* Executive Summary Section */}

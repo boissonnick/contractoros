@@ -22,8 +22,16 @@ export interface DayViewProps {
   date: Date;
   events: ScheduleEvent[];
   onEventClick?: (event: ScheduleEvent) => void;
+  /** Click on an empty time slot - receives the date and hour clicked */
   onSlotClick?: (date: Date, hour: number) => void;
+  /** Alias for onSlotClick - click on a time slot to create new event */
+  onTimeSlotClick?: (time: Date) => void;
+  /** Drag and drop event to new time - TODO: Implement drag-and-drop functionality */
+  onEventDrop?: (event: ScheduleEvent, newTime: Date) => void;
+  /** Weather data to display in header */
   weather?: WeatherData;
+  /** Whether to show weather summary at top (requires weather data) */
+  showWeather?: boolean;
   className?: string;
   /** Show navigation controls (Previous/Today/Next buttons) */
   showNavigation?: boolean;
@@ -94,13 +102,34 @@ export function DayView({
   events,
   onEventClick,
   onSlotClick,
+  onTimeSlotClick,
+  onEventDrop,
   weather,
+  showWeather = true,
   className,
   showNavigation = false,
   onNavigatePrev,
   onNavigateNext,
   onNavigateToday,
 }: DayViewProps) {
+  // Handle time slot click - supports both callback styles
+  const handleSlotClick = (clickDate: Date, hour: number) => {
+    // Call legacy callback
+    onSlotClick?.(clickDate, hour);
+    // Call new style callback with full Date object
+    if (onTimeSlotClick) {
+      const time = new Date(clickDate);
+      time.setHours(hour, 0, 0, 0);
+      onTimeSlotClick(time);
+    }
+  };
+
+  // TODO: Implement drag-and-drop for events
+  // When implemented, should:
+  // 1. Make event cards draggable
+  // 2. Calculate new time based on drop position
+  // 3. Call onEventDrop(event, newTime) callback
+  // Consider using @dnd-kit/core or react-beautiful-dnd
   const dayEvents = useMemo(() => {
     return events.filter((e) => {
       const eventDate = e.startDate instanceof Date ? e.startDate : new Date(e.startDate);
@@ -165,7 +194,7 @@ export function DayView({
             </p>
           </div>
         </div>
-        {weather && (
+        {showWeather && weather && (
           <div className="flex items-center gap-2 text-sm">
             <span className="text-xl">{getWeatherEmoji(weather.conditions)}</span>
             <div className="text-right">
@@ -203,7 +232,7 @@ export function DayView({
               {/* Event Slot */}
               <div
                 className="flex-1 min-h-[60px] relative cursor-pointer hover:bg-gray-50/50 transition-colors"
-                onClick={() => onSlotClick?.(date, hour)}
+                onClick={() => handleSlotClick(date, hour)}
               >
                 {/* Current time indicator */}
                 {isCurrentHour && (
@@ -324,7 +353,7 @@ export function DayView({
                       className="flex items-center gap-1 px-2 py-1 text-xs text-gray-500 bg-white border border-gray-200 rounded hover:bg-gray-50"
                       onClick={(e) => {
                         e.stopPropagation();
-                        onSlotClick?.(date, hour);
+                        handleSlotClick(date, hour);
                       }}
                     >
                       <PlusIcon className="h-3 w-3" />
@@ -346,7 +375,7 @@ export function DayView({
           <Button
             variant="secondary"
             size="sm"
-            onClick={() => onSlotClick?.(date, 9)}
+            onClick={() => handleSlotClick(date, 9)}
           >
             <PlusIcon className="h-4 w-4 mr-1" />
             Add Event
