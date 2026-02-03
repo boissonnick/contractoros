@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useAuth } from '@/lib/auth';
 import { useOperationalReports } from '@/lib/hooks/useReports';
 import { Card } from '@/components/ui';
@@ -18,6 +18,9 @@ import {
   ChartBarIcon,
 } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
+import AIInsightsPanel from '@/components/reports/AIInsightsPanel';
+import { generateInsightSummary, explainInsight } from '@/lib/ai/insights-engine';
+import type { AIInsight } from '@/types';
 
 function formatNumber(value: number): string {
   return new Intl.NumberFormat('en-US').format(Math.round(value));
@@ -120,6 +123,115 @@ export default function OperationalReportsPage() {
     );
   }
 
+  // Generate operational insights
+  const operationalInsights: AIInsight[] = useMemo(() => {
+    const insights: AIInsight[] = [];
+    const now = new Date();
+
+    // On-time completion rate insight
+    if (metrics.onTimeCompletionRate < 70) {
+      insights.push({
+        id: `ops-ontime-${now.getTime()}`,
+        type: 'anomaly',
+        severity: metrics.onTimeCompletionRate < 50 ? 'critical' : 'warning',
+        category: 'operational',
+        title: 'Low On-Time Completion Rate',
+        description: `Only ${metrics.onTimeCompletionRate.toFixed(0)}% of projects are completing on time. Review project planning and resource allocation.`,
+        metric: 'On-Time Completion',
+        value: metrics.onTimeCompletionRate,
+        expectedValue: 80,
+        action: { label: 'View Projects', url: '/dashboard/projects', type: 'navigate' },
+        confidence: 0.9,
+        generatedAt: now,
+        source: 'rule_based',
+      });
+    }
+
+    // Pending change orders insight
+    if (metrics.pendingChangeOrders > 5) {
+      insights.push({
+        id: `ops-cos-${now.getTime()}`,
+        type: 'anomaly',
+        severity: metrics.pendingChangeOrders > 10 ? 'critical' : 'warning',
+        category: 'operational',
+        title: 'High Pending Change Orders',
+        description: `${metrics.pendingChangeOrders} change orders are pending approval. This may cause project delays and scope uncertainty.`,
+        metric: 'Pending Change Orders',
+        value: metrics.pendingChangeOrders,
+        expectedValue: 3,
+        action: { label: 'Review Change Orders', url: '/dashboard/change-orders', type: 'navigate' },
+        confidence: 1.0,
+        generatedAt: now,
+        source: 'rule_based',
+      });
+    }
+
+    // Average project duration insight
+    if (metrics.averageProjectDuration > 90) {
+      insights.push({
+        id: `ops-duration-${now.getTime()}`,
+        type: 'trend',
+        severity: 'info',
+        category: 'operational',
+        title: 'Long Average Project Duration',
+        description: `Average project duration is ${Math.round(metrics.averageProjectDuration)} days. Consider analyzing project phases for efficiency improvements.`,
+        metric: 'Avg Duration',
+        value: metrics.averageProjectDuration,
+        trend: 'stable',
+        confidence: 0.8,
+        generatedAt: now,
+        source: 'rule_based',
+      });
+    }
+
+    // Overdue projects insight
+    const overdueProjects = projectTimelines.filter(p => p.actual > p.planned && p.planned > 0);
+    if (overdueProjects.length > 0) {
+      insights.push({
+        id: `ops-overdue-${now.getTime()}`,
+        type: 'anomaly',
+        severity: overdueProjects.length > 3 ? 'critical' : 'warning',
+        category: 'project_health',
+        title: `${overdueProjects.length} Projects Behind Schedule`,
+        description: `${overdueProjects.map(p => p.name).slice(0, 3).join(', ')}${overdueProjects.length > 3 ? ' and more' : ''} are running behind schedule.`,
+        metric: 'Overdue Projects',
+        value: overdueProjects.length,
+        expectedValue: 0,
+        action: { label: 'View Timeline', url: '/dashboard/schedule', type: 'navigate' },
+        confidence: 1.0,
+        generatedAt: now,
+        source: 'rule_based',
+      });
+    }
+
+    // Tasks status insight
+    const blockedTasks = tasksByStatus.find(t => t.name.toLowerCase().includes('blocked'))?.value || 0;
+    if (blockedTasks > 5) {
+      insights.push({
+        id: `ops-blocked-${now.getTime()}`,
+        type: 'anomaly',
+        severity: blockedTasks > 10 ? 'critical' : 'warning',
+        category: 'productivity',
+        title: 'Blocked Tasks Detected',
+        description: `${blockedTasks} tasks are blocked. Review blockers to maintain project velocity.`,
+        metric: 'Blocked Tasks',
+        value: blockedTasks,
+        expectedValue: 0,
+        action: { label: 'View Tasks', url: '/dashboard/tasks?status=blocked', type: 'navigate' },
+        confidence: 1.0,
+        generatedAt: now,
+        source: 'rule_based',
+      });
+    }
+
+    return insights;
+  }, [metrics, projectTimelines, tasksByStatus]);
+
+  const operationalSummary = useMemo(
+    () => generateInsightSummary(operationalInsights, { periodLabel: 'this period', dataType: 'operational' }),
+    [operationalInsights]
+  );
+
   return (
     <div className="space-y-6">
       {/* Operational KPIs */}
@@ -167,6 +279,23 @@ export default function OperationalReportsPage() {
           subtitle="Team capacity usage"
         />
       </div>
+
+      {/* AI Insights Panel */}
+      {operationalInsights.length > 0 && (
+        <AIInsightsPanel
+          insights={operationalInsights}
+          summary={operationalSummary}
+          title="Operational Insights"
+          defaultCollapsed={false}
+          maxVisible={5}
+          getExplanation={explainInsight}
+          onAction={(insight) => {
+            if (insight.action?.url) {
+              window.location.href = insight.action.url;
+            }
+          }}
+        />
+      )}
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

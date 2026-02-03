@@ -13,8 +13,9 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { Card, Button, Badge, toast, EmptyState } from '@/components/ui';
-import { UserProfile, UserRole, UserInvitation } from '@/types';
-import { InviteUserModal } from '@/components/team';
+import { UserProfile, UserRole, UserInvitation, OffboardingRecord, OffboardingReport } from '@/types';
+import { InviteUserModal, OnboardingChecklist, OffboardingWizard } from '@/components/team';
+import { getRestorableUsers, restoreUser } from '@/lib/offboarding/user-offboarding';
 import { useInvitations } from '@/lib/hooks/useInvitations';
 import { useAuditLogger } from '@/lib/hooks/useAuditLog';
 import {
@@ -34,6 +35,10 @@ import {
   ClockIcon,
   ArrowPathIcon,
   NoSymbolIcon,
+  RocketLaunchIcon,
+  UserMinusIcon,
+  ArchiveBoxIcon,
+  CalendarIcon,
 } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
@@ -107,7 +112,18 @@ export default function TeamSettingsPage() {
   const [editRole, setEditRole] = useState<UserRole>('EMPLOYEE');
   const [saving, setSaving] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'members' | 'invitations'>('members');
+  const [activeTab, setActiveTab] = useState<'members' | 'invitations' | 'onboarding' | 'offboarded'>('members');
+
+  // Offboarding state
+  const [showOffboardingWizard, setShowOffboardingWizard] = useState(false);
+  const [offboardingTarget, setOffboardingTarget] = useState<{
+    id: string;
+    name: string;
+    email: string;
+    role: UserRole;
+  } | null>(null);
+  const [restorableUsers, setRestorableUsers] = useState<OffboardingRecord[]>([]);
+  const [loadingRestorable, setLoadingRestorable] = useState(false);
 
   const {
     pendingInvitations,
@@ -172,6 +188,25 @@ export default function TeamSettingsPage() {
 
     loadMembers();
   }, [profile?.orgId]);
+
+  // Load restorable (offboarded) users
+  useEffect(() => {
+    if (!profile?.orgId || !isOwner) return;
+
+    async function loadRestorableUsers() {
+      setLoadingRestorable(true);
+      try {
+        const users = await getRestorableUsers(profile!.orgId);
+        setRestorableUsers(users);
+      } catch (err) {
+        console.error('Error loading restorable users:', err);
+      } finally {
+        setLoadingRestorable(false);
+      }
+    }
+
+    loadRestorableUsers();
+  }, [profile?.orgId, isOwner]);
 
   const startEditing = (member: TeamMember) => {
     if (!canManageTeam) return;
@@ -345,6 +380,104 @@ export default function TeamSettingsPage() {
     return result !== null;
   };
 
+  // Offboarding handlers
+  const handleStartOffboarding = (member: TeamMember) => {
+    if (!isOwner) {
+      toast.error('Only organization owners can offboard team members');
+      return;
+    }
+    if (member.role === 'OWNER') {
+      toast.error('Cannot offboard the organization owner');
+      return;
+    }
+
+    setOffboardingTarget({
+      id: member.id,
+      name: member.displayName || 'Unknown User',
+      email: member.email || '',
+      role: member.role,
+    });
+    setShowOffboardingWizard(true);
+  };
+
+  const handleOffboardingComplete = (report: OffboardingReport) => {
+    // Remove user from active members list
+    setMembers((prev) => prev.filter((m) => m.id !== report.userId));
+
+    // Refresh restorable users list
+    if (profile?.orgId) {
+      getRestorableUsers(profile.orgId).then(setRestorableUsers).catch(console.error);
+    }
+
+    // Log the offboarding (using 'deactivated' as the closest match)
+    logUserStatusChange(
+      {
+        id: report.userId,
+        name: report.userName,
+        email: report.userEmail,
+      },
+      'deactivated'
+    );
+  };
+
+  const handleRestoreUser = async (record: OffboardingRecord) => {
+    if (!isOwner || !profile?.orgId || !profile?.uid) {
+      toast.error('Only organization owners can restore users');
+      return;
+    }
+
+    if (!confirm(`Restore ${record.userName}? They will regain access to the organization.`)) {
+      return;
+    }
+
+    try {
+      await restoreUser(record.id, profile.orgId, record.userId, profile.uid);
+
+      // Refresh restorable users list
+      const users = await getRestorableUsers(profile.orgId);
+      setRestorableUsers(users);
+
+      // Reload team members to show restored user
+      const q = query(
+        collection(db, 'users'),
+        where('orgId', '==', profile.orgId)
+      );
+      const snap = await getDocs(q);
+      const rawData = snap.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+        createdAt: d.data().createdAt?.toDate() || new Date(),
+      })) as unknown as TeamMember[];
+
+      const rolePriority: Record<UserRole, number> = {
+        OWNER: 0, PM: 1, CONTRACTOR: 2, EMPLOYEE: 3, SUB: 4, CLIENT: 5,
+      };
+      const data = rawData
+        .filter((m) => m.role !== 'CLIENT' && m.role !== 'SUB')
+        .sort((a, b) => {
+          const priorityDiff = (rolePriority[a.role] || 99) - (rolePriority[b.role] || 99);
+          if (priorityDiff !== 0) return priorityDiff;
+          return (a.displayName || '').localeCompare(b.displayName || '');
+        });
+      setMembers(data);
+
+      toast.success('User restored successfully');
+
+      // Log the restoration (using 'activated' as the closest match)
+      await logUserStatusChange(
+        {
+          id: record.userId,
+          name: record.userName,
+          email: record.userEmail,
+        },
+        'activated'
+      );
+    } catch (err) {
+      console.error('Error restoring user:', err);
+      toast.error(err instanceof Error ? err.message : 'Failed to restore user');
+    }
+  };
+
   const getMemberStatus = (member: TeamMember): MemberStatus => {
     if (member.isActive === false) return 'inactive';
     return 'active';
@@ -416,6 +549,32 @@ export default function TeamSettingsPage() {
           >
             Pending Invitations ({pendingInvitations.length})
           </button>
+          <button
+            onClick={() => setActiveTab('onboarding')}
+            className={cn(
+              'pb-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-1.5',
+              activeTab === 'onboarding'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            )}
+          >
+            <RocketLaunchIcon className="h-4 w-4" />
+            Onboarding
+          </button>
+          {isOwner && (
+            <button
+              onClick={() => setActiveTab('offboarded')}
+              className={cn(
+                'pb-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-1.5',
+                activeTab === 'offboarded'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              )}
+            >
+              <ArchiveBoxIcon className="h-4 w-4" />
+              Offboarded ({restorableUsers.length})
+            </button>
+          )}
         </nav>
       </div>
 
@@ -543,6 +702,13 @@ export default function TeamSettingsPage() {
                             </button>
                             {isOwner && member.role !== 'OWNER' && (
                               <>
+                                <button
+                                  onClick={() => handleStartOffboarding(member)}
+                                  className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded"
+                                  title="Offboard user"
+                                >
+                                  <UserMinusIcon className="h-4 w-4" />
+                                </button>
                                 <button
                                   onClick={() => handleDeactivateMember(member)}
                                   className="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded"
@@ -757,6 +923,121 @@ export default function TeamSettingsPage() {
         </div>
       )}
 
+      {activeTab === 'onboarding' && (
+        /* Onboarding Tab */
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-medium text-gray-900">User Onboarding Status</h3>
+              <p className="text-sm text-gray-500 mt-1">
+                Track onboarding progress and manually trigger steps for team members.
+              </p>
+            </div>
+          </div>
+          <OnboardingChecklist showBulkActions={canManageTeam} />
+        </div>
+      )}
+
+      {activeTab === 'offboarded' && isOwner && (
+        /* Offboarded Users Tab */
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-medium text-gray-900">Offboarded Users</h3>
+              <p className="text-sm text-gray-500 mt-1">
+                Recently offboarded users can be restored within 30 days.
+              </p>
+            </div>
+          </div>
+
+          {loadingRestorable ? (
+            <div className="flex items-center justify-center h-32">
+              <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : restorableUsers.length === 0 ? (
+            <EmptyState
+              icon={<ArchiveBoxIcon className="h-full w-full" />}
+              title="No offboarded users"
+              description="Users who are offboarded will appear here for 30 days and can be restored"
+            />
+          ) : (
+            <Card className="divide-y divide-gray-100">
+              {restorableUsers.map((record) => {
+                const roleConfig = ROLE_CONFIG[record.userRole] || ROLE_CONFIG.EMPLOYEE;
+                const daysRemaining = record.restorableUntil
+                  ? Math.ceil((new Date(record.restorableUntil).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+                  : 0;
+
+                return (
+                  <div
+                    key={record.id}
+                    className="p-4 flex items-center gap-4"
+                  >
+                    {/* User Info */}
+                    <div className="h-10 w-10 bg-gray-200 rounded-full flex items-center justify-center">
+                      <UserIcon className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-gray-900 truncate">{record.userName}</p>
+                        <span className={cn('px-2 py-0.5 text-xs font-medium rounded-full', roleConfig.color)}>
+                          {roleConfig.label}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-500 truncate">{record.userEmail}</p>
+                      <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
+                        <span className="flex items-center gap-1">
+                          <ClockIcon className="h-3 w-3" />
+                          Offboarded {record.completedAt ? formatDistanceToNow(new Date(record.completedAt), { addSuffix: true }) : ''}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <CalendarIcon className="h-3 w-3" />
+                          {daysRemaining > 0 ? `${daysRemaining} days to restore` : 'Expires today'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Offboarding summary */}
+                    {record.report && (
+                      <div className="hidden sm:flex items-center gap-4 text-xs text-gray-500">
+                        <span>{record.report.tasksReassigned} tasks reassigned</span>
+                        <span>{record.report.projectsTransferred} projects transferred</span>
+                        {record.report.dataArchived && (
+                          <Badge variant="default" size="sm">Data Archived</Badge>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Restore Action */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleRestoreUser(record)}
+                    >
+                      <ArrowPathIcon className="h-4 w-4 mr-1" />
+                      Restore
+                    </Button>
+                  </div>
+                );
+              })}
+            </Card>
+          )}
+
+          {/* Info notice */}
+          <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <ArchiveBoxIcon className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-blue-800">About Offboarding</p>
+              <p className="text-sm text-blue-700 mt-1">
+                When a user is offboarded, their access is revoked immediately, their tasks and projects
+                can be reassigned, and their data is optionally archived for compliance. Users can be
+                restored within 30 days of offboarding.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Owner Notice */}
       {!isOwner && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
@@ -779,6 +1060,19 @@ export default function TeamSettingsPage() {
         onClose={() => setShowInviteModal(false)}
         onInvite={handleInvite}
       />
+
+      {/* Offboarding Wizard */}
+      {offboardingTarget && (
+        <OffboardingWizard
+          isOpen={showOffboardingWizard}
+          onClose={() => {
+            setShowOffboardingWizard(false);
+            setOffboardingTarget(null);
+          }}
+          targetUser={offboardingTarget}
+          onComplete={handleOffboardingComplete}
+        />
+      )}
     </div>
   );
 }

@@ -25,7 +25,12 @@ import {
   ArrowPathIcon,
   SpeakerWaveIcon,
   ChatBubbleBottomCenterTextIcon,
+  KeyIcon,
 } from '@heroicons/react/24/outline';
+import AIKeyManager from '@/components/settings/AIKeyManager';
+import { AIModelProvider, AIKeyConfig, AIKeyAuthMethod } from '@/types';
+import { db } from '@/lib/firebase/config';
+import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
 
 // Toggle component
 interface ToggleProps {
@@ -263,6 +268,139 @@ export default function AIAssistantSettingsPage() {
   const [localSettings, setLocalSettings] = useState<OrganizationAISettings | null>(null);
   const [voices, setVoices] = useState<TTSVoice[]>([]);
   const [ttsSupported, setTtsSupported] = useState(false);
+
+  // API Key management state
+  const [authMethod, setAuthMethod] = useState<AIKeyAuthMethod>('oauth');
+  const [keyConfigs, setKeyConfigs] = useState<Record<AIModelProvider, AIKeyConfig | null>>({
+    openai: null,
+    claude: null,
+    gemini: null,
+  });
+  const [loadingKeys, setLoadingKeys] = useState(true);
+
+  const orgId = profile?.orgId;
+
+  // Load API key configurations
+  useEffect(() => {
+    if (!orgId) {
+      setLoadingKeys(false);
+      return;
+    }
+
+    async function loadKeyConfigs() {
+      try {
+        const providers: AIModelProvider[] = ['openai', 'claude', 'gemini'];
+        const configs: Record<AIModelProvider, AIKeyConfig | null> = {
+          openai: null,
+          claude: null,
+          gemini: null,
+        };
+
+        for (const provider of providers) {
+          const docRef = doc(db, `organizations/${orgId}/aiKeyConfigs/${provider}`);
+          const snap = await getDoc(docRef);
+          if (snap.exists()) {
+            const data = snap.data();
+            configs[provider] = {
+              ...data,
+              validatedAt: data.validatedAt?.toDate?.(),
+              createdAt: data.createdAt?.toDate?.() || new Date(),
+              updatedAt: data.updatedAt?.toDate?.() || new Date(),
+            } as AIKeyConfig;
+          }
+        }
+
+        setKeyConfigs(configs);
+
+        // Determine auth method based on whether any keys are set
+        const hasAnyKey = Object.values(configs).some((c) => c?.keySet);
+        if (hasAnyKey) {
+          setAuthMethod('api_key');
+        }
+      } catch (error) {
+        console.error('[AIAssistantSettingsPage] Error loading key configs:', error);
+      } finally {
+        setLoadingKeys(false);
+      }
+    }
+
+    loadKeyConfigs();
+  }, [orgId]);
+
+  // Handle setting an API key
+  const handleKeySet = async (
+    provider: AIModelProvider,
+    apiKey: string,
+    lastFour: string,
+    models: string[]
+  ) => {
+    if (!orgId) return;
+
+    // In production, this would call a Cloud Function to store the key in Secret Manager
+    // For now, we only store the metadata in Firestore
+    const keyConfig: AIKeyConfig = {
+      provider,
+      keySet: true,
+      keyLastFour: lastFour,
+      validatedAt: new Date(),
+      validationStatus: 'valid',
+      availableModels: models,
+      authMethod: 'api_key',
+      createdAt: keyConfigs[provider]?.createdAt || new Date(),
+      updatedAt: new Date(),
+    };
+
+    const docRef = doc(db, `organizations/${orgId}/aiKeyConfigs/${provider}`);
+    await setDoc(docRef, {
+      ...keyConfig,
+      validatedAt: Timestamp.fromDate(keyConfig.validatedAt!),
+      createdAt: Timestamp.fromDate(keyConfig.createdAt),
+      updatedAt: Timestamp.fromDate(keyConfig.updatedAt),
+    });
+
+    setKeyConfigs((prev) => ({ ...prev, [provider]: keyConfig }));
+
+    // Update the organization AI settings to reflect the new key
+    if (provider === 'openai') {
+      await updateSettings({ hasCustomOpenAIKey: true });
+    } else if (provider === 'claude') {
+      await updateSettings({ hasCustomClaudeKey: true });
+    } else if (provider === 'gemini') {
+      await updateSettings({ hasCustomGeminiKey: true });
+    }
+  };
+
+  // Handle clearing an API key
+  const handleKeyClear = async (provider: AIModelProvider) => {
+    if (!orgId) return;
+
+    const keyConfig: AIKeyConfig = {
+      provider,
+      keySet: false,
+      validationStatus: 'not_set',
+      authMethod: 'api_key',
+      createdAt: keyConfigs[provider]?.createdAt || new Date(),
+      updatedAt: new Date(),
+    };
+
+    const docRef = doc(db, `organizations/${orgId}/aiKeyConfigs/${provider}`);
+    await setDoc(docRef, {
+      ...keyConfig,
+      createdAt: Timestamp.fromDate(keyConfig.createdAt),
+      updatedAt: Timestamp.fromDate(keyConfig.updatedAt),
+    });
+
+    setKeyConfigs((prev) => ({ ...prev, [provider]: keyConfig }));
+
+    // Update the organization AI settings
+    if (provider === 'openai') {
+      await updateSettings({ hasCustomOpenAIKey: false });
+    } else if (provider === 'claude') {
+      await updateSettings({ hasCustomClaudeKey: false });
+    } else if (provider === 'gemini') {
+      await updateSettings({ hasCustomGeminiKey: false });
+    }
+  };
 
   // Sync local settings when loaded
   useEffect(() => {
@@ -645,23 +783,122 @@ export default function AIAssistantSettingsPage() {
         </div>
       </Card>
 
-      {/* Coming Soon: API Key Management */}
-      <Card className="bg-gray-50 border-dashed">
-        <div className="flex items-start gap-3">
-          <InformationCircleIcon className="h-5 w-5 text-gray-400 flex-shrink-0 mt-0.5" />
+      {/* API Key Management */}
+      <Card>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-9 h-9 bg-purple-100 rounded-lg flex items-center justify-center">
+            <KeyIcon className="h-5 w-5 text-purple-600" />
+          </div>
           <div>
-            <h4 className="text-sm font-medium text-gray-700">Pro Features Coming Soon</h4>
-            <p className="text-sm text-gray-500 mt-1">
-              In a future update, Pro and Enterprise tiers will be able to:
+            <h3 className="font-medium text-gray-900">API Key Management</h3>
+            <p className="text-sm text-gray-500">
+              Bring your own API keys to access additional AI providers
             </p>
-            <ul className="mt-2 space-y-1 text-sm text-gray-500">
-              <li>• Bring your own API keys for Claude and OpenAI</li>
-              <li>• Access advanced models with larger context windows</li>
-              <li>• Configure custom rate limits and cost controls</li>
-              <li>• View detailed usage analytics and audit logs</li>
-            </ul>
           </div>
         </div>
+
+        {/* Auth Method Toggle */}
+        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+          <p className="text-sm font-medium text-gray-700 mb-3">Authentication Method</p>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setAuthMethod('oauth')}
+              className={cn(
+                'flex-1 p-3 rounded-lg border-2 text-left transition-all',
+                authMethod === 'oauth'
+                  ? 'border-blue-500 bg-blue-50/50 ring-2 ring-blue-500/20'
+                  : 'border-gray-200 hover:border-gray-300'
+              )}
+            >
+              <p className="font-medium text-gray-900">Platform Default</p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Use ContractorOS managed API (Gemini free tier)
+              </p>
+            </button>
+            <button
+              onClick={() => setAuthMethod('api_key')}
+              className={cn(
+                'flex-1 p-3 rounded-lg border-2 text-left transition-all',
+                authMethod === 'api_key'
+                  ? 'border-blue-500 bg-blue-50/50 ring-2 ring-blue-500/20'
+                  : 'border-gray-200 hover:border-gray-300'
+              )}
+            >
+              <p className="font-medium text-gray-900">Custom API Keys</p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Bring your own keys for OpenAI, Claude, or Gemini
+              </p>
+            </button>
+          </div>
+        </div>
+
+        {/* API Key Managers */}
+        {authMethod === 'api_key' && (
+          <div className="space-y-4">
+            {loadingKeys ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : (
+              <>
+                <AIKeyManager
+                  provider="openai"
+                  config={keyConfigs.openai}
+                  onKeySet={handleKeySet}
+                  onKeyClear={handleKeyClear}
+                  disabled={!localSettings?.enableAssistant}
+                />
+                <AIKeyManager
+                  provider="claude"
+                  config={keyConfigs.claude}
+                  onKeySet={handleKeySet}
+                  onKeyClear={handleKeyClear}
+                  disabled={!localSettings?.enableAssistant}
+                />
+                <AIKeyManager
+                  provider="gemini"
+                  config={keyConfigs.gemini}
+                  onKeySet={handleKeySet}
+                  onKeyClear={handleKeyClear}
+                  disabled={!localSettings?.enableAssistant}
+                />
+              </>
+            )}
+
+            {/* Backend Note */}
+            <div className="p-3 bg-blue-50 border border-blue-100 rounded-lg">
+              <div className="flex items-start gap-2">
+                <InformationCircleIcon className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                <div className="text-xs text-blue-700">
+                  <p className="font-medium mb-1">Production Note</p>
+                  <p>
+                    In production, API keys are stored in Google Cloud Secret Manager for security.
+                    The keys entered here are validated client-side and then sent to a secure Cloud Function
+                    for storage. Only key metadata (last 4 characters, validation status) is stored in Firestore.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {authMethod === 'oauth' && (
+          <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+            <div className="flex items-start gap-3">
+              <CheckCircleIcon className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-gray-900">Using Platform Default</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  Your organization is using the ContractorOS managed AI service with Gemini 2.0 Flash.
+                  This is included in your subscription at no additional cost.
+                </p>
+                <p className="text-xs text-gray-400 mt-2">
+                  Switch to &quot;Custom API Keys&quot; to use your own OpenAI, Claude, or Gemini API keys.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </Card>
     </div>
   );

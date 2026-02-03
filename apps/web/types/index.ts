@@ -619,6 +619,58 @@ export interface UserInvitation {
 }
 
 // ============================================
+// User Onboarding Types
+// ============================================
+
+/**
+ * Onboarding step identifiers
+ */
+export type OnboardingStep = 'invite_sent' | 'email_verified' | 'profile_completed' | 'first_login';
+
+/**
+ * Status of a single onboarding step
+ */
+export interface OnboardingStepStatus {
+  completed: boolean;
+  completedAt?: Date;
+}
+
+/**
+ * Full onboarding status for a user
+ */
+export interface OnboardingStatus {
+  userId: string;
+  inviteSent: boolean;
+  inviteSentAt?: Date;
+  emailVerified: boolean;
+  profileCompleted: boolean;
+  firstLoginAt?: Date;
+  completedAt?: Date;
+  currentStep?: OnboardingStep;
+  steps?: Record<OnboardingStep, OnboardingStepStatus>;
+}
+
+/**
+ * Onboarding checklist item for display
+ */
+export interface OnboardingChecklistItem {
+  id: OnboardingStep;
+  label: string;
+  description: string;
+  completed: boolean;
+  completedAt?: Date;
+  canTriggerManually: boolean;
+}
+
+/**
+ * User with onboarding status (for list displays)
+ */
+export interface UserWithOnboarding extends UserProfile {
+  onboardingStatus?: OnboardingStatus;
+  onboardingProgress?: number; // 0-100 percentage
+}
+
+// ============================================
 // Project Types
 // ============================================
 
@@ -7201,6 +7253,271 @@ export interface AIRateLimitStatus {
   reason?: string;
 }
 
+/**
+ * AI API Key authentication method
+ */
+export type AIKeyAuthMethod = 'oauth' | 'api_key';
+
+/**
+ * Validation status for an AI API key
+ */
+export type AIKeyValidationStatus = 'valid' | 'invalid' | 'not_set' | 'validating' | 'expired';
+
+/**
+ * Configuration for an AI provider's API key
+ * Note: Actual API keys are stored in GCP Secret Manager, NOT in Firestore.
+ * Firestore stores only metadata about the key status.
+ * Path: organizations/{orgId}/aiKeyConfigs/{provider}
+ */
+export interface AIKeyConfig {
+  provider: AIModelProvider;
+  keySet: boolean;
+  keyLastFour?: string;              // Last 4 characters for display (e.g., "sk-...7x9Z")
+  validatedAt?: Date;
+  validationStatus: AIKeyValidationStatus;
+  availableModels?: string[];        // Models available with this key
+  authMethod: AIKeyAuthMethod;       // How the user authenticated (OAuth vs API key)
+  errorMessage?: string;             // Last validation error, if any
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * Result of validating an AI provider API key
+ */
+export interface AIKeyValidationResult {
+  valid: boolean;
+  provider: AIModelProvider;
+  models?: string[];                 // Available models if valid
+  error?: string;                    // Error message if invalid
+  rateLimit?: {                      // Rate limit info if available
+    requestsPerMinute?: number;
+    tokensPerMinute?: number;
+  };
+}
+
+/**
+ * Request payload for setting an AI provider API key
+ * Note: This is sent to a Cloud Function, NOT stored in Firestore
+ */
+export interface AIKeySetRequest {
+  provider: AIModelProvider;
+  apiKey: string;                    // Raw key - only sent to Cloud Function for storage in Secret Manager
+  orgId: string;
+}
+
+/**
+ * Response from setting an AI provider API key
+ */
+export interface AIKeySetResponse {
+  success: boolean;
+  keyLastFour?: string;
+  availableModels?: string[];
+  error?: string;
+}
+
+// ============================================================================
+// AI Provider Priority & Fallback (Sprint 37)
+// ============================================================================
+
+/**
+ * AI feature types that can have custom model assignments
+ */
+export type AIFeatureType =
+  | 'assistant'        // General AI assistant chat
+  | 'estimates'        // Estimate analysis and suggestions
+  | 'photo_analysis'   // Photo tagging and safety analysis
+  | 'document_analysis'// Document parsing and extraction
+  | 'project_summary'  // Project status summaries
+  | 'nl_query';        // Natural language data queries
+
+/**
+ * Human-readable labels for AI feature types
+ */
+export const AI_FEATURE_LABELS: Record<AIFeatureType, string> = {
+  assistant: 'AI Assistant Chat',
+  estimates: 'Estimate Analysis',
+  photo_analysis: 'Photo Analysis',
+  document_analysis: 'Document Parsing',
+  project_summary: 'Project Summaries',
+  nl_query: 'Natural Language Queries',
+};
+
+/**
+ * Provider priority configuration for fallback chain
+ * Path: organizations/{orgId}/settings/aiProviders
+ */
+export interface AIProviderPriority {
+  providerId: string;            // e.g., 'gemini', 'claude', 'openai'
+  priority: number;              // Lower number = higher priority (1 = primary)
+  enabled: boolean;              // Whether this provider is active
+  isPrimary: boolean;            // Marked as the primary provider
+  costPer1kTokens: number;       // Blended cost estimate (input + output average)
+  hasApiKey: boolean;            // Whether API key is configured
+  lastUsed?: Date;               // Last successful use timestamp
+  failureCount?: number;         // Recent failure count for health tracking
+  lastFailure?: Date;            // Most recent failure timestamp
+}
+
+/**
+ * Per-feature model assignment
+ */
+export interface AIFeatureModelAssignment {
+  feature: AIFeatureType;
+  modelKey: string;              // e.g., 'gemini-2.0-flash', 'claude-sonnet'
+  fallbackModelKey?: string;     // Optional fallback for this specific feature
+}
+
+/**
+ * Organization AI provider settings
+ * Path: organizations/{orgId}/settings/aiProviders
+ */
+export interface OrganizationAIProviderSettings {
+  orgId: string;
+
+  // Provider priority chain
+  providerPriorities: AIProviderPriority[];
+
+  // Per-feature model assignments
+  featureAssignments: AIFeatureModelAssignment[];
+
+  // Global fallback behavior
+  enableAutomaticFallback: boolean;  // Auto-fallback to next provider on failure
+  fallbackDelayMs: number;           // Delay before trying fallback (default: 0)
+  maxFallbackAttempts: number;       // Max providers to try (default: 3)
+
+  // Cost controls
+  monthlyBudget?: number;            // Optional monthly spending limit in USD
+  alertThresholdPercent?: number;    // Alert when reaching % of budget (default: 80)
+
+  // Metadata
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * Default provider settings for new organizations
+ */
+export const DEFAULT_AI_PROVIDER_SETTINGS: Omit<OrganizationAIProviderSettings, 'orgId' | 'createdAt' | 'updatedAt'> = {
+  providerPriorities: [
+    {
+      providerId: 'gemini',
+      priority: 1,
+      enabled: true,
+      isPrimary: true,
+      costPer1kTokens: 0,
+      hasApiKey: true, // Free tier default
+    },
+    {
+      providerId: 'claude',
+      priority: 2,
+      enabled: false,
+      isPrimary: false,
+      costPer1kTokens: 0.009, // (0.003 + 0.015) / 2 average
+      hasApiKey: false,
+    },
+    {
+      providerId: 'openai',
+      priority: 3,
+      enabled: false,
+      isPrimary: false,
+      costPer1kTokens: 0.01, // (0.005 + 0.015) / 2 average
+      hasApiKey: false,
+    },
+  ],
+  featureAssignments: [
+    { feature: 'assistant', modelKey: 'gemini-2.0-flash' },
+    { feature: 'estimates', modelKey: 'gemini-2.0-flash' },
+    { feature: 'photo_analysis', modelKey: 'gemini-2.0-flash' },
+    { feature: 'document_analysis', modelKey: 'gemini-2.0-flash' },
+    { feature: 'project_summary', modelKey: 'gemini-2.0-flash' },
+    { feature: 'nl_query', modelKey: 'gemini-2.0-flash' },
+  ],
+  enableAutomaticFallback: true,
+  fallbackDelayMs: 0,
+  maxFallbackAttempts: 3,
+  alertThresholdPercent: 80,
+};
+
+/**
+ * AI usage statistics per provider
+ */
+export interface AIProviderUsageStats {
+  provider: string;              // Provider ID
+  period: string;                // 'daily' | 'weekly' | 'monthly' or date string
+  periodStart: Date;
+  periodEnd: Date;
+
+  // Token usage
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+
+  // Request counts
+  requestCount: number;
+  successCount: number;
+  failureCount: number;
+
+  // Cost tracking
+  estimatedCost: number;         // In USD
+
+  // Performance
+  averageLatencyMs: number;
+  p95LatencyMs?: number;
+}
+
+/**
+ * Monthly usage summary across all providers
+ * Path: organizations/{orgId}/aiUsageSummary/{YYYY-MM}
+ */
+export interface AIMonthlyUsageSummary {
+  orgId: string;
+  month: string;                 // YYYY-MM format
+
+  // Aggregated stats
+  totalCost: number;
+  totalTokens: number;
+  totalRequests: number;
+
+  // Per-provider breakdown
+  providerStats: AIProviderUsageStats[];
+
+  // Per-feature breakdown
+  featureStats: Record<AIFeatureType, {
+    requests: number;
+    tokens: number;
+    cost: number;
+  }>;
+
+  // Budget tracking
+  budgetUsedPercent?: number;
+  budgetRemaining?: number;
+
+  // Metadata
+  updatedAt: Date;
+}
+
+/**
+ * Result of an AI operation with provider tracking
+ */
+export interface AIOperationResult<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
+
+  // Provider tracking
+  providerId: string;
+  modelKey: string;
+  wasFallback: boolean;          // True if not the primary provider
+  fallbackAttempts: number;      // Number of providers tried
+
+  // Usage
+  inputTokens: number;
+  outputTokens: number;
+  estimatedCost: number;
+  latencyMs: number;
+}
+
 // ============================================================================
 // Email Templates
 // ============================================================================
@@ -8004,4 +8321,666 @@ export interface MetricCardDefinition {
   description: string;
   category: 'kpi' | 'chart' | 'table';
   defaultVisible: boolean;
+}
+
+// ============================================================================
+// Custom Report Builder Types (F4, #67)
+// ============================================================================
+
+/**
+ * Visualization type for custom reports
+ */
+export type CustomReportVisualization = 'table' | 'bar' | 'line' | 'pie';
+
+/**
+ * Aggregation type for report fields
+ */
+export type CustomReportAggregation = 'sum' | 'avg' | 'count' | 'min' | 'max' | 'none';
+
+/**
+ * Filter operator types
+ */
+export type CustomReportFilterOperator =
+  | 'equals'
+  | 'notEquals'
+  | 'contains'
+  | 'greaterThan'
+  | 'lessThan'
+  | 'between'
+  | 'in'
+  | 'isNull'
+  | 'isNotNull';
+
+/**
+ * Data source types available for custom reports
+ */
+export type CustomReportDataSource =
+  | 'projects'
+  | 'tasks'
+  | 'expenses'
+  | 'invoices'
+  | 'timeEntries'
+  | 'clients'
+  | 'subcontractors'
+  | 'materials';
+
+/**
+ * Field type for custom report fields
+ */
+export type CustomReportFieldType = 'string' | 'number' | 'date' | 'boolean' | 'currency';
+
+/**
+ * Field definition for custom reports
+ */
+export interface CustomReportField {
+  id: string;
+  source: string;
+  label: string;
+  type: CustomReportFieldType;
+  aggregation?: CustomReportAggregation;
+  format?: string;
+}
+
+/**
+ * Filter definition for custom reports
+ */
+export interface CustomReportFilter {
+  id: string;
+  field: string;
+  operator: CustomReportFilterOperator;
+  value: unknown;
+  value2?: unknown;
+}
+
+/**
+ * Custom report configuration
+ * Path: organizations/{orgId}/customReports/{reportId}
+ */
+export interface CustomReportConfig {
+  id: string;
+  name: string;
+  description?: string;
+  dataSource: CustomReportDataSource;
+  fields: CustomReportField[];
+  filters: CustomReportFilter[];
+  visualization: CustomReportVisualization;
+  groupBy?: string;
+  sortBy?: string;
+  sortDirection?: 'asc' | 'desc';
+  createdAt?: Date;
+  updatedAt?: Date;
+  createdBy?: string;
+  isShared?: boolean;
+  sharedWith?: string[];
+}
+
+// ============================================================================
+// AI Provider Configuration Types (F2, #90)
+// ============================================================================
+
+/**
+ * Supported AI provider types
+ */
+export type AIProviderType = 'openai' | 'anthropic' | 'google' | 'ollama';
+
+/**
+ * OAuth connection status
+ */
+export type AIProviderConnectionStatus = 'connected' | 'disconnected' | 'pending' | 'error';
+
+/**
+ * Individual AI provider configuration
+ * Path: organizations/{orgId}/aiProviders/{provider}
+ */
+export interface AIProviderConfig {
+  id: string;
+  orgId: string;
+  provider: AIProviderType;
+  connected: boolean;
+  connectionStatus: AIProviderConnectionStatus;
+  connectionDate?: Date;
+  lastUsedAt?: Date;
+
+  // For cloud providers (OpenAI, Anthropic, Google)
+  // API keys stored encrypted or reference to secret manager
+  hasApiKey: boolean;
+  apiKeyLastFour?: string;  // Last 4 characters for display
+
+  // For local providers (Ollama)
+  localUrl?: string;        // e.g., 'http://localhost:11434'
+  isLocalProvider: boolean;
+
+  // Model selection
+  defaultModelId?: string;
+  availableModels?: string[];
+
+  // Usage tracking
+  totalRequests?: number;
+  totalTokens?: number;
+  lastError?: string;
+  lastErrorAt?: Date;
+
+  // Metadata
+  createdAt: Date;
+  updatedAt: Date;
+  createdBy: string;
+  updatedBy: string;
+}
+
+/**
+ * OAuth state for tracking authorization flow
+ */
+export interface AIProviderOAuthState {
+  provider: AIProviderType;
+  state: string;           // CSRF protection token
+  codeVerifier?: string;   // PKCE code verifier
+  redirectUri: string;
+  createdAt: Date;
+  expiresAt: Date;
+}
+
+/**
+ * Display configuration for provider cards
+ */
+export interface AIProviderDisplayInfo {
+  provider: AIProviderType;
+  name: string;
+  description: string;
+  iconColor: string;
+  bgColor: string;
+  borderColor: string;
+  website: string;
+  documentationUrl: string;
+  supportsOAuth: boolean;
+  features: string[];
+}
+
+/**
+ * Provider validation result
+ */
+export interface AIProviderValidationResult {
+  valid: boolean;
+  provider: AIProviderType;
+  message: string;
+  models?: string[];
+  error?: string;
+}
+
+/**
+ * Constants for AI provider display information
+ */
+export const AI_PROVIDER_INFO: Record<AIProviderType, AIProviderDisplayInfo> = {
+  openai: {
+    provider: 'openai',
+    name: 'OpenAI',
+    description: 'GPT-4o and GPT-4o Mini for advanced language understanding and generation.',
+    iconColor: 'text-green-600',
+    bgColor: 'bg-green-50',
+    borderColor: 'border-green-200',
+    website: 'https://openai.com',
+    documentationUrl: 'https://platform.openai.com/docs',
+    supportsOAuth: false,
+    features: ['GPT-4o', 'GPT-4o Mini', 'Vision', 'Function calling'],
+  },
+  anthropic: {
+    provider: 'anthropic',
+    name: 'Anthropic Claude',
+    description: 'Claude Sonnet for thoughtful, nuanced responses with strong reasoning.',
+    iconColor: 'text-amber-600',
+    bgColor: 'bg-amber-50',
+    borderColor: 'border-amber-200',
+    website: 'https://anthropic.com',
+    documentationUrl: 'https://docs.anthropic.com',
+    supportsOAuth: false,
+    features: ['Claude Sonnet', 'Long context', 'Vision', 'Safe outputs'],
+  },
+  google: {
+    provider: 'google',
+    name: 'Google Gemini',
+    description: 'Gemini 2.0 Flash for fast, multimodal AI with 1M token context.',
+    iconColor: 'text-blue-600',
+    bgColor: 'bg-blue-50',
+    borderColor: 'border-blue-200',
+    website: 'https://ai.google.dev',
+    documentationUrl: 'https://ai.google.dev/docs',
+    supportsOAuth: false,
+    features: ['Gemini 2.0 Flash', 'Gemini 1.5 Pro', '1M context', 'Vision'],
+  },
+  ollama: {
+    provider: 'ollama',
+    name: 'Ollama (Local)',
+    description: 'Run open-source models locally for complete data privacy.',
+    iconColor: 'text-gray-700',
+    bgColor: 'bg-gray-50',
+    borderColor: 'border-gray-200',
+    website: 'https://ollama.ai',
+    documentationUrl: 'https://github.com/ollama/ollama',
+    supportsOAuth: false,
+    features: ['Llama 3', 'Mistral', 'CodeLlama', 'Local & Private'],
+  },
+};
+
+// ============================================
+// User Offboarding Types (Sprint 37B)
+// ============================================
+
+/**
+ * Status of the offboarding process
+ */
+export type OffboardingStatus =
+  | 'pending'      // Offboarding initiated, not started
+  | 'in_progress'  // Currently processing
+  | 'completed'    // Successfully completed
+  | 'cancelled'    // Cancelled before completion
+  | 'failed';      // Failed during process
+
+/**
+ * Options for initiating user offboarding
+ */
+export interface OffboardingOptions {
+  /** User ID to reassign tasks to (optional - if not provided, tasks remain unassigned) */
+  reassignTasksTo?: string;
+  /** Whether to archive user data for compliance (default: true) */
+  archiveData: boolean;
+  /** Whether to send notification emails to affected parties */
+  sendNotification: boolean;
+  /** When the offboarding should take effect */
+  effectiveDate: Date;
+  /** Optional reason for offboarding */
+  reason?: string;
+  /** Whether to revoke all active sessions immediately */
+  revokeSessionsImmediately?: boolean;
+  /** Custom notes for the offboarding record */
+  notes?: string;
+}
+
+/**
+ * Summary report generated after offboarding completes
+ */
+export interface OffboardingReport {
+  /** The offboarded user's ID */
+  userId: string;
+  /** User's display name at time of offboarding */
+  userName: string;
+  /** User's email at time of offboarding */
+  userEmail: string;
+  /** Number of tasks reassigned to another user */
+  tasksReassigned: number;
+  /** Number of projects where ownership was transferred */
+  projectsTransferred: number;
+  /** Whether user data was archived */
+  dataArchived: boolean;
+  /** Whether access was revoked */
+  accessRevoked: boolean;
+  /** When the offboarding was completed */
+  completedAt: Date;
+  /** Who initiated the offboarding */
+  initiatedBy: string;
+  /** The effective date of the offboarding */
+  effectiveDate: Date;
+  /** Any errors encountered during offboarding */
+  errors?: string[];
+  /** Detailed action log */
+  actionLog: OffboardingAction[];
+}
+
+/**
+ * Individual action taken during offboarding
+ */
+export interface OffboardingAction {
+  /** Type of action performed */
+  action: 'revoke_access' | 'reassign_task' | 'transfer_project' | 'archive_data' | 'send_notification' | 'update_records';
+  /** Description of what was done */
+  description: string;
+  /** When the action was performed */
+  timestamp: Date;
+  /** Whether the action succeeded */
+  success: boolean;
+  /** Error message if failed */
+  error?: string;
+  /** Additional metadata */
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * Offboarding record stored in Firestore
+ */
+export interface OffboardingRecord {
+  id: string;
+  orgId: string;
+  /** The user being offboarded */
+  userId: string;
+  userName: string;
+  userEmail: string;
+  userRole: UserRole;
+  /** Current status of the offboarding */
+  status: OffboardingStatus;
+  /** Options used for this offboarding */
+  options: OffboardingOptions;
+  /** Who initiated the offboarding */
+  initiatedBy: string;
+  initiatedByName: string;
+  /** Timestamps */
+  createdAt: Date;
+  startedAt?: Date;
+  completedAt?: Date;
+  /** The final report (populated when completed) */
+  report?: OffboardingReport;
+  /** Can be restored until this date (30 days after completion) */
+  restorableUntil?: Date;
+  /** If restored, when and by whom */
+  restoredAt?: Date;
+  restoredBy?: string;
+}
+
+/**
+ * User data archive for compliance
+ */
+export interface UserDataArchive {
+  id: string;
+  orgId: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  /** Snapshot of user profile at time of archival */
+  profileSnapshot: Partial<UserProfile>;
+  /** Summary of user's activity */
+  activitySummary: {
+    totalTasks: number;
+    totalProjects: number;
+    totalTimeEntries: number;
+    totalExpenses: number;
+    totalPhotos: number;
+    lastActiveDate?: Date;
+  };
+  /** References to archived data collections */
+  archivedCollections: {
+    collection: string;
+    documentCount: number;
+  }[];
+  /** When the archive was created */
+  createdAt: Date;
+  /** Who created the archive */
+  createdBy: string;
+  /** Retention period end date */
+  retainUntil: Date;
+}
+
+/**
+ * Offboarding wizard step
+ */
+export type OffboardingWizardStep =
+  | 'confirm'        // Step 1: Confirm user to offboard
+  | 'reassign'       // Step 2: Reassign tasks/projects
+  | 'data_handling'  // Step 3: Archive vs delete data
+  | 'review'         // Step 4: Review and confirm
+  | 'processing'     // Processing state
+  | 'complete';      // Final: Show completion report
+
+/**
+ * State for the offboarding wizard
+ */
+export interface OffboardingWizardState {
+  currentStep: OffboardingWizardStep;
+  /** User being offboarded */
+  targetUser: {
+    id: string;
+    name: string;
+    email: string;
+    role: UserRole;
+  } | null;
+  /** Options being configured */
+  options: Partial<OffboardingOptions>;
+  /** User selected to receive reassigned items */
+  reassignToUser: {
+    id: string;
+    name: string;
+  } | null;
+  /** Preview of what will be affected */
+  impactPreview: {
+    taskCount: number;
+    projectCount: number;
+    timeEntryCount: number;
+    expenseCount: number;
+  } | null;
+  /** Processing status */
+  isProcessing: boolean;
+  /** Final report after completion */
+  report: OffboardingReport | null;
+  /** Any errors during the process */
+  error: string | null;
+}
+
+/**
+ * Status labels for offboarding
+ */
+export const OFFBOARDING_STATUS_LABELS: Record<OffboardingStatus, { label: string; color: string }> = {
+  pending: { label: 'Pending', color: 'bg-yellow-100 text-yellow-800' },
+  in_progress: { label: 'In Progress', color: 'bg-blue-100 text-blue-800' },
+  completed: { label: 'Completed', color: 'bg-green-100 text-green-800' },
+  cancelled: { label: 'Cancelled', color: 'bg-gray-100 text-gray-800' },
+  failed: { label: 'Failed', color: 'bg-red-100 text-red-800' },
+};
+
+// ===========================================
+// AI INSIGHTS & ANOMALY DETECTION TYPES
+// ===========================================
+
+/**
+ * Severity level for AI insights
+ */
+export type AIInsightSeverity = 'info' | 'warning' | 'critical';
+
+/**
+ * Type of AI insight
+ */
+export type AIInsightType = 'anomaly' | 'trend' | 'recommendation' | 'summary';
+
+/**
+ * Category of insight for filtering/grouping
+ */
+export type AIInsightCategory =
+  | 'financial'
+  | 'operational'
+  | 'project_health'
+  | 'productivity'
+  | 'risk'
+  | 'opportunity';
+
+/**
+ * Trend direction indicator
+ */
+export type TrendDirection = 'improving' | 'declining' | 'stable' | 'volatile';
+
+/**
+ * Action that can be taken from an insight
+ */
+export interface AIInsightAction {
+  label: string;
+  url?: string;
+  type: 'navigate' | 'action' | 'external';
+  actionId?: string;  // For programmatic actions
+}
+
+/**
+ * Core AI Insight interface
+ */
+export interface AIInsight {
+  id: string;
+  type: AIInsightType;
+  severity: AIInsightSeverity;
+  category: AIInsightCategory;
+  title: string;
+  description: string;
+
+  // Optional metric details
+  metric?: string;
+  value?: number;
+  expectedValue?: number;
+  deviation?: number;  // Percentage deviation from expected
+
+  // Trend information
+  trend?: TrendDirection;
+  trendPeriod?: string;  // e.g., "last 30 days"
+
+  // Comparison context
+  comparisonType?: 'historical' | 'peer' | 'benchmark' | 'target';
+  comparisonLabel?: string;
+  comparisonValue?: number;
+
+  // Actionable items
+  action?: AIInsightAction;
+  relatedEntityType?: string;
+  relatedEntityId?: string;
+  relatedEntityName?: string;
+
+  // Metadata
+  confidence: number;  // 0-1
+  generatedAt: Date;
+  expiresAt?: Date;
+  source: 'statistical' | 'ml' | 'rule_based' | 'hybrid';
+}
+
+/**
+ * Anomaly detection result
+ */
+export interface AnomalyDetectionResult {
+  isAnomaly: boolean;
+  value: number;
+  expectedValue: number;
+  deviation: number;  // Standard deviations from mean
+  percentageDeviation: number;
+  direction: 'above' | 'below';
+  severity: AIInsightSeverity;
+  method: 'zscore' | 'iqr' | 'percentage' | 'threshold';
+}
+
+/**
+ * Trend analysis result
+ */
+export interface TrendAnalysisResult {
+  direction: TrendDirection;
+  changePercentage: number;
+  slope: number;  // Rate of change
+  rSquared: number;  // Goodness of fit
+  forecastValue?: number;
+  forecastPeriod?: string;
+  dataPoints: number;
+  periodLabel: string;
+}
+
+/**
+ * Statistical summary for a metric
+ */
+export interface MetricStatistics {
+  current: number;
+  mean: number;
+  median: number;
+  stdDev: number;
+  min: number;
+  max: number;
+  q1: number;  // 25th percentile
+  q3: number;  // 75th percentile
+  iqr: number; // Interquartile range
+  count: number;
+}
+
+/**
+ * Project health score breakdown
+ */
+export interface ProjectHealthScore {
+  overall: number;  // 0-100
+  budgetHealth: number;
+  scheduleHealth: number;
+  taskHealth: number;
+  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+
+  // Component details
+  budgetVariance: number;
+  scheduleVariance: number;  // Days ahead (+) or behind (-)
+  taskCompletionRate: number;
+  overdueTaskCount: number;
+
+  // Flags
+  isAtRisk: boolean;
+  riskFactors: string[];
+}
+
+/**
+ * Financial insight data
+ */
+export interface FinancialInsightData {
+  totalRevenue: number;
+  totalExpenses: number;
+  profitMargin: number;
+  cashFlow: number;
+  outstandingInvoices: number;
+  overdueAmount: number;
+
+  // Period comparisons
+  revenueChange: number;
+  expenseChange: number;
+  marginChange: number;
+
+  // Anomalies
+  anomalies: {
+    metric: string;
+    result: AnomalyDetectionResult;
+  }[];
+}
+
+/**
+ * Operational insight data
+ */
+export interface OperationalInsightData {
+  activeProjects: number;
+  completedProjects: number;
+  averageProjectDuration: number;
+  onTimeCompletionRate: number;
+  resourceUtilization: number;
+
+  // Task metrics
+  openTasks: number;
+  completedTasks: number;
+  overdueTasksCount: number;
+  averageTaskCompletionTime: number;
+
+  // Team metrics
+  teamProductivity: number;
+  hoursLogged: number;
+}
+
+/**
+ * Natural language summary for reports
+ */
+export interface InsightSummary {
+  headline: string;
+  keyPoints: string[];
+  recommendations: string[];
+  outlook: 'positive' | 'neutral' | 'concerning';
+  confidence: number;
+  generatedAt: Date;
+}
+
+/**
+ * Configuration for insight generation
+ */
+export interface InsightGenerationConfig {
+  includeTrends: boolean;
+  includeAnomalies: boolean;
+  includeRecommendations: boolean;
+  lookbackDays: number;
+  sensitivityLevel: 'low' | 'medium' | 'high';  // Anomaly detection sensitivity
+  maxInsights: number;
+}
+
+/**
+ * Batch insight generation result
+ */
+export interface InsightGenerationResult {
+  insights: AIInsight[];
+  summary: InsightSummary;
+  generatedAt: Date;
+  processingTimeMs: number;
+  dataPointsAnalyzed: number;
 }

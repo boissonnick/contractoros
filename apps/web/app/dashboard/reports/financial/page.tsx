@@ -30,6 +30,13 @@ import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { cn } from '@/lib/utils';
 import { FinancialMetricId } from '@/types';
 import ReportCustomizePanel from '@/components/reports/ReportCustomizePanel';
+import AIInsightsPanel from '@/components/reports/AIInsightsPanel';
+import {
+  analyzeFinancialData,
+  generateInsightSummary,
+  explainInsight,
+  type FinancialDataInput,
+} from '@/lib/ai/insights-engine';
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat('en-US', {
@@ -423,6 +430,40 @@ export default function FinancialReportsPage() {
     ? (estimatedLaborBudget / totalLaborCost) * 100
     : 100;
 
+  // Calculate overdue invoices from aging data
+  const overdueAmount = invoiceAging
+    .filter(a => a.name !== 'Current')
+    .reduce((sum, a) => sum + a.amount, 0);
+
+  // Generate AI insights from financial data
+  const financialInsightsData: FinancialDataInput = useMemo(() => ({
+    revenue: summary.totalRevenue,
+    expenses: summary.totalSpent,
+    profitMargin: netProfitMarginPct,
+    laborCosts: summary.laborCosts,
+    materialCosts: summary.materialCosts,
+    overheadCosts: summary.overheadCosts,
+    outstandingInvoices: invoiceAging.reduce((sum, a) => sum + a.amount, 0),
+    overdueInvoices: overdueAmount,
+    cashFlow: summary.cashFlow,
+    revenueHistory: revenueByMonth.map(m => m.revenue),
+    expenseHistory: revenueByMonth.map(m => m.expenses),
+    marginHistory: revenueByMonth.map(m => m.revenue > 0 ? ((m.revenue - m.expenses) / m.revenue) * 100 : 0),
+    budgetedExpenses: summary.totalBudget,
+    targetMargin: 20, // Industry standard construction margin
+    previousPeriodRevenue: revenueByMonth.length > 1 ? revenueByMonth[revenueByMonth.length - 2]?.revenue : undefined,
+  }), [summary, netProfitMarginPct, invoiceAging, overdueAmount, revenueByMonth]);
+
+  const financialInsights = useMemo(
+    () => analyzeFinancialData(financialInsightsData, { maxInsights: 8 }),
+    [financialInsightsData]
+  );
+
+  const insightsSummary = useMemo(
+    () => generateInsightSummary(financialInsights, { periodLabel: 'this period', dataType: 'financial' }),
+    [financialInsights]
+  );
+
   return (
     <div className="space-y-6">
       {/* Page Header with Customize Button */}
@@ -492,6 +533,23 @@ export default function FinancialReportsPage() {
         />
         )}
       </div>
+      )}
+
+      {/* AI Insights Panel */}
+      {financialInsights.length > 0 && (
+        <AIInsightsPanel
+          insights={financialInsights}
+          summary={insightsSummary}
+          title="Financial Insights"
+          defaultCollapsed={false}
+          maxVisible={5}
+          getExplanation={explainInsight}
+          onAction={(insight) => {
+            if (insight.action?.url) {
+              window.location.href = insight.action.url;
+            }
+          }}
+        />
       )}
 
       {/* Profitability Analysis Section */}

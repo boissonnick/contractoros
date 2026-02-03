@@ -107,6 +107,7 @@ const SETTINGS_NAV: NavSection[] = [
       { key: 'data-import', label: 'Data Import', href: '/dashboard/settings/import' },
       { key: 'intelligence', label: 'AI Intelligence', href: '/dashboard/settings/intelligence' },
       { key: 'assistant', label: 'AI Assistant', href: '/dashboard/settings/assistant' },
+      { key: 'ai-providers', label: 'AI Providers', href: '/dashboard/settings/ai-providers' },
     ],
   },
 ];
@@ -147,6 +148,7 @@ const SECTION_PATHS: Record<string, string[]> = {
     '/dashboard/settings/import',
     '/dashboard/settings/intelligence',
     '/dashboard/settings/assistant',
+    '/dashboard/settings/ai-providers',
   ],
 };
 

@@ -198,6 +198,20 @@ service cloud.firestore {
         allow write: if isAdmin() && getUserProfile().orgId == orgId;
       }
 
+      // Custom Reports subcollection (org-level)
+      // Stores user-created report configurations
+      match /customReports/{reportId} {
+        allow read: if isAuthenticated() && userProfileExists() && getUserProfile().orgId == orgId;
+        // All authenticated org members can create reports
+        allow create: if isAuthenticated() && userProfileExists() && getUserProfile().orgId == orgId;
+        // Users can update/delete their own reports, admins can update/delete any
+        allow update, delete: if isAuthenticated() && userProfileExists() &&
+          getUserProfile().orgId == orgId && (
+            isAdmin() ||
+            resource.data.createdBy == request.auth.uid
+          );
+      }
+
       // QuickBooks entity mappings (local ↔ QBO ID mappings)
       // Admin only - sensitive accounting linkage data
       match /qboEntityMappings/{mappingId} {
