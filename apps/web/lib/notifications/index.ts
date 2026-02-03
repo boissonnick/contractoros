@@ -30,3 +30,20 @@ export {
   type QuietHoursSettings,
   type NotificationPreferences,
 } from './browser-notifications';
+
+// Service Worker & Push
+export {
+  isServiceWorkerSupported,
+  isPushSupported,
+  registerServiceWorker,
+  getRegistration,
+  unregisterServiceWorker,
+  subscribeToPush,
+  unsubscribeFromPush,
+  getPushSubscription,
+  getServiceWorkerStatus,
+  postMessage,
+  showPushNotification,
+  onServiceWorkerMessage,
+  type ServiceWorkerStatus,
+} from './service-worker';
