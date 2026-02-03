@@ -1963,6 +1963,24 @@ service cloud.firestore {
     }
 
     // ==========================================
+    // Organization-Scoped Progress Updates Collection
+    // Client-facing progress reports for projects
+    // ==========================================
+    match /organizations/{orgId}/progressUpdates/{updateId} {
+      // Org members can read progress updates
+      allow read: if isSameOrg(orgId);
+
+      // Admins and PMs can create progress updates
+      allow create: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM', 'EMPLOYEE'];
+
+      // Admins can update progress updates
+      allow update: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can delete progress updates
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
     // Organization-Scoped Expenses Collection
     // ==========================================
     match /organizations/{orgId}/expenses/{expenseId} {
