@@ -4,6 +4,8 @@ export { default as EventFormModal } from './EventFormModal';
 export { default as CrewAvailabilityPanel } from './CrewAvailabilityPanel';
 export { default as WeatherWidget, WeatherIndicator } from './WeatherWidget';
 export { default as ConflictAlert, ConflictBadge } from './ConflictAlert';
+export { default as DayView } from './DayView';
+export { default as AssignmentModal } from './AssignmentModal';
 
 export type { EventCardProps } from './EventCard';
 export type { EventFormModalProps, EventFormData } from './EventFormModal';
