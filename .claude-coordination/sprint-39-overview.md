@@ -100,9 +100,9 @@ cat .claude-coordination/sprint-39-cli-4.md
 
 ### CLI 1 Status (Data)
 ```
-Quotes & Scopes: [ ] [ ] [ ]
-Schedule & Team: [ ] [ ] [ ] [ ]
-Finance & Payroll: [ ] [ ] [ ]
+Quotes & Scopes: [x] Scopes (7) [x] Submittals (54)
+Schedule & Team: [x] Schedule Events (93) [x] Change Orders (8) [x] Daily Logs (256) [x] Time Off (18)
+Finance & Payroll: [x] Payroll (6 runs) [x] Client Preferences (8)
 Reports Data: [ ] [ ]
 ```
 
@@ -124,8 +124,8 @@ Settings: [ ] [ ]
 
 ### CLI 4 Status (Backend)
 ```
-Notifications: [ ] [ ] [ ] [ ]
-Research Docs: [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ]
+Notifications: [x] Browser Permissions [x] Service Worker [x] Granular Control [x] Quiet Hours
+Research Docs: [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] (Running in separate session)
 ```
 
 ---
