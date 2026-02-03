@@ -67,6 +67,9 @@ export default function TeamPage() {
     return { utilization, hoursAssigned, totalHours: 40 };
   };
 
+  // Team roles - excludes SUB (subcontractors) and CLIENT (handled in separate modules)
+  const TEAM_ROLES: UserRole[] = ['OWNER', 'PM', 'EMPLOYEE', 'CONTRACTOR'];
+
   useEffect(() => {
     if (profile?.orgId) {
       loadTeamData();
@@ -78,7 +81,7 @@ export default function TeamPage() {
 
     setLoading(true);
     try {
-      // Load team members
+      // Load team members - only internal team roles (not SUB or CLIENT)
       const membersQuery = query(
         collection(db, 'users'),
         where('orgId', '==', profile.orgId),
@@ -89,10 +92,10 @@ export default function TeamPage() {
         ...doc.data(),
         uid: doc.id,
       })) as UserProfile[];
-      // Deduplicate by uid (in case of duplicate documents)
+      // Deduplicate by uid and filter to only team roles (exclude SUB and CLIENT)
       const uniqueMembers = Array.from(
         new Map(membersData.map(m => [m.uid, m])).values()
-      );
+      ).filter(m => TEAM_ROLES.includes(m.role as UserRole));
       setMembers(uniqueMembers);
 
       // Load pending invites
@@ -252,7 +255,7 @@ export default function TeamPage() {
             <EmptyState
               icon={<UserGroupIcon className="h-full w-full" />}
               title="No team members yet"
-              description="Start by inviting your employees, contractors, and subcontractors."
+              description="Start by inviting your employees and contractors. Subcontractors are managed separately."
               action={{
                 label: 'Invite Team Member',
                 href: '/dashboard/team/invite',

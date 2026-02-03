@@ -29,23 +29,47 @@ import {
   DocumentIcon,
   CurrencyDollarIcon,
   QuestionMarkCircleIcon,
+  WrenchScrewdriverIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
-// Full nav items for staff - will be filtered based on permissions
-const staffNavItems: (NavItem & { requiredPermission?: keyof RolePermissions })[] = [
+// Nav items for OWNER/PM roles - full management access
+const ownerPmNavItems: (NavItem & { requiredPermission?: keyof RolePermissions })[] = [
   { label: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { label: 'Projects', href: '/dashboard/projects', icon: FolderIcon },
   { label: 'Clients', href: '/dashboard/clients', icon: UserGroupIcon, requiredPermission: 'canViewClients' },
   { label: 'Team', href: '/dashboard/team', icon: UsersIcon, requiredPermission: 'canViewTeam' },
+  { label: 'Subcontractors', href: '/dashboard/subcontractors', icon: WrenchScrewdriverIcon, requiredPermission: 'canViewTeam' },
   { label: 'Schedule', href: '/dashboard/schedule', icon: CalendarIcon },
-  { label: 'Time Tracking', href: '/dashboard/time', icon: ClockIcon, requiredPermission: 'canClockInOut' },
+  { label: 'Time Tracking', href: '/dashboard/time', icon: ClockIcon },
   { label: 'Daily Logs', href: '/dashboard/logs', icon: DocumentTextIcon },
   { label: 'Finances', href: '/dashboard/finances', icon: BanknotesIcon, requiredPermission: 'canViewAllFinances' },
   { label: 'Payroll', href: '/dashboard/payroll', icon: CurrencyDollarIcon, requiredPermission: 'canViewAllFinances' },
   { label: 'Messaging', href: '/dashboard/messaging', icon: ChatBubbleLeftRightIcon },
   { label: 'Reports', href: '/dashboard/reports', icon: ClipboardDocumentListIcon, requiredPermission: 'canViewProjectReports' },
   { label: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon, requiredPermission: 'canViewSettings' },
+  { label: 'Help', href: '/dashboard/help', icon: QuestionMarkCircleIcon },
+];
+
+// Nav items for EMPLOYEE role - focused on their work
+const employeeNavItems: NavItem[] = [
+  { label: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+  { label: 'My Schedule', href: '/dashboard/schedule', icon: CalendarIcon },
+  { label: 'Time Tracking', href: '/dashboard/time', icon: ClockIcon },
+  { label: 'My Tasks', href: '/dashboard/projects', icon: FolderIcon },
+  { label: 'Daily Logs', href: '/dashboard/logs', icon: DocumentTextIcon },
+  { label: 'Messaging', href: '/dashboard/messaging', icon: ChatBubbleLeftRightIcon },
+  { label: 'Help', href: '/dashboard/help', icon: QuestionMarkCircleIcon },
+];
+
+// Nav items for CONTRACTOR role - similar to employee but with some differences
+const contractorNavItems: NavItem[] = [
+  { label: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+  { label: 'My Projects', href: '/dashboard/projects', icon: FolderIcon },
+  { label: 'Schedule', href: '/dashboard/schedule', icon: CalendarIcon },
+  { label: 'Time Tracking', href: '/dashboard/time', icon: ClockIcon },
+  { label: 'Daily Logs', href: '/dashboard/logs', icon: DocumentTextIcon },
+  { label: 'Messaging', href: '/dashboard/messaging', icon: ChatBubbleLeftRightIcon },
   { label: 'Help', href: '/dashboard/help', icon: QuestionMarkCircleIcon },
 ];
 
@@ -98,8 +122,18 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       return clientNavItems;
     }
 
-    // Staff roles get filtered based on permissions
-    return staffNavItems.filter((item) => {
+    // Employee view gets focused navigation
+    if (currentRole === 'employee') {
+      return employeeNavItems;
+    }
+
+    // Contractor view gets contractor-specific navigation
+    if (currentRole === 'contractor') {
+      return contractorNavItems;
+    }
+
+    // Owner/PM roles get full management access, filtered by permissions
+    return ownerPmNavItems.filter((item) => {
       // Always show items without permission requirements
       if (!item.requiredPermission) return true;
       // Check if user has the required permission
@@ -154,7 +188,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <AuthGuard allowedRoles={['OWNER', 'PM']}>
+    <AuthGuard allowedRoles={['OWNER', 'PM', 'EMPLOYEE', 'CONTRACTOR']}>
       <DashboardLayoutContent>{children}</DashboardLayoutContent>
     </AuthGuard>
   );
