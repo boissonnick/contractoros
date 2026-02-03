@@ -108,9 +108,10 @@ Reports Data: [ ] [ ]
 
 ### CLI 2 Status (UI)
 ```
-Layout Fixes: [ ] [ ] [ ] [ ] [ ] [ ] [ ]
-Animation Removal: [ ] [ ] [ ] [ ]
-Patterns & Pickers: [ ] [ ] [ ] [ ] [ ] [ ]
+Layout Fixes: [x] Search (moved to sidebar) [x] Active Projects (4 cards, 280px) [x] Project Cards (committed earlier)
+              [x] Sub-nav spacing (pt-2) [x] Dropdown arrows (committed earlier) [x] Client Prefs (3-col grid)
+Animation Removal: [x] Audit complete - animations are appropriate (bounce only for loading)
+Patterns & Pickers: [x] EmptyState already standardized [ ] Date Picker presets (TODO)
 ```
 
 ### CLI 3 Status (Features)
