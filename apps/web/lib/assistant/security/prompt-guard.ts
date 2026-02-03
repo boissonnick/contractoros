@@ -9,7 +9,7 @@
  * - System prompt leaks
  */
 
-import { logAuditEvent, type AuditEventType } from '@/lib/security/audit-logger';
+import { logAuditEvent, type AuditAction } from '@/lib/security/audit-logger';
 
 export type PromptThreat =
   | 'injection_attempt'
@@ -276,12 +276,12 @@ function sanitizePrompt(prompt: string): string {
 /**
  * Map prompt threats to audit event types
  */
-function mapThreatToAuditType(threats: PromptThreat[]): AuditEventType {
-  if (threats.includes('injection_attempt')) return 'prompt_injection';
-  if (threats.includes('jailbreak_attempt')) return 'jailbreak_attempt';
-  if (threats.includes('data_exfiltration')) return 'data_exfiltration';
-  if (threats.includes('pii_exposure')) return 'pii_exposure';
-  return 'security_threat';
+function mapThreatToAuditType(threats: PromptThreat[]): AuditAction {
+  if (threats.includes('injection_attempt')) return 'PROMPT_INJECTION';
+  if (threats.includes('jailbreak_attempt')) return 'JAILBREAK_ATTEMPT';
+  if (threats.includes('data_exfiltration')) return 'DATA_EXFILTRATION';
+  if (threats.includes('pii_exposure')) return 'PII_EXPOSURE';
+  return 'SECURITY_THREAT';
 }
 
 /**
@@ -304,11 +304,11 @@ export function logSecurityEvent(
     });
 
     // Write to Firestore security audit log
-    logAuditEvent({
-      type: mapThreatToAuditType(validation.threats),
-      orgId: context.orgId,
+    logAuditEvent(context.orgId, {
+      action: mapThreatToAuditType(validation.threats),
       userId: context.userId,
-      timestamp: new Date(),
+      userEmail: 'unknown', // Not available in this context
+      resource: 'system',
       details: {
         threats: validation.threats,
         riskScore: validation.riskScore,
@@ -316,6 +316,7 @@ export function logSecurityEvent(
         promptPreview: context.promptPreview?.slice(0, 100),
         blocked: !validation.isValid,
       },
+      severity: validation.riskScore >= 80 ? 'critical' : validation.riskScore >= 50 ? 'warning' : 'info',
     }).catch((err) => {
       // Don't let audit logging failures affect the main flow
       console.error('[SECURITY] Failed to write audit log:', err);

@@ -14,6 +14,7 @@
 5. [Hook Usage Patterns](#hook-usage-patterns)
 6. [Memoization Guidelines](#memoization-guidelines)
 7. [UI Component Library](#ui-component-library)
+8. [Pagination Patterns](#pagination-patterns)
 
 ---
 
@@ -1144,6 +1145,395 @@ const onSubmit = async (data: ClientFormData) => {
   }
 };
 ```
+
+---
+
+---
+
+## Pagination Patterns
+
+ContractorOS provides multiple approaches for handling large datasets:
+
+1. **usePagination Hook** - Generic cursor-based pagination for any collection
+2. **Pagination Component** - Full page-based navigation UI
+3. **LoadMore Component** - Infinite scroll / "Load More" button pattern
+4. **CompactPagination** - Minimal prev/next navigation
+
+### When to Use Each Pattern
+
+| Pattern | Best For | Example Use Case |
+|---------|----------|------------------|
+| `LoadMore` | Mobile-first lists, infinite scroll | Daily logs, activity feed |
+| `Pagination` | Desktop tables with known totals | Clients list, invoices |
+| `CompactPagination` | Cards, tight spaces | Project task list |
+
+### usePagination Hook
+
+**File:** `lib/hooks/usePagination.ts`
+
+Generic cursor-based pagination for any org-scoped Firestore collection.
+
+```typescript
+import { usePagination } from '@/lib/hooks/usePagination';
+import { where } from 'firebase/firestore';
+
+// Basic usage
+const {
+  items,
+  loading,
+  error,
+  hasMore,
+  hasPrevious,
+  loadMore,
+  loadPrevious,
+  refresh,
+  currentPage,
+  pageSize,
+  setPageSize,
+} = usePagination<Client>(orgId, 'clients', {
+  pageSize: 25,
+  orderByField: 'createdAt',
+  orderDirection: 'desc',
+});
+
+// With filters (wrap in useMemo!)
+const filters = useMemo(() => [
+  where('status', '==', 'active'),
+], []);
+
+const { items } = usePagination<Task>(orgId, 'tasks', {
+  filters,
+  pageSize: 50,
+});
+```
+
+#### usePagination Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `pageSize` | number | 25 | Items per page |
+| `orderByField` | string | 'createdAt' | Field to sort by |
+| `orderDirection` | 'asc' \| 'desc' | 'desc' | Sort direction |
+| `filters` | QueryConstraint[] | [] | Firestore query constraints |
+| `enabled` | boolean | true | Enable/disable query |
+| `converter` | function | default | Custom data converter |
+| `dateFields` | string[] | ['createdAt', 'updatedAt'] | Fields to convert from Timestamp |
+
+#### usePagination Return Values
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `items` | T[] | Current page items |
+| `loading` | boolean | Loading state |
+| `error` | Error \| null | Error if query failed |
+| `hasMore` | boolean | More pages available |
+| `hasPrevious` | boolean | Previous pages available |
+| `loadMore` | () => Promise | Load next page |
+| `loadPrevious` | () => Promise | Load previous page |
+| `refresh` | () => Promise | Reset to page 1, clear cache |
+| `currentPage` | number | Current page (1-indexed) |
+| `pageSize` | number | Current page size |
+| `setPageSize` | (n) => void | Update page size |
+| `initialized` | boolean | First fetch completed |
+
+### Building Domain-Specific Paginated Hooks
+
+Use `usePagination` as a building block for domain-specific hooks:
+
+```typescript
+// lib/hooks/useDailyLogs.ts
+import { usePagination } from './usePagination';
+import { where, QueryConstraint } from 'firebase/firestore';
+
+interface UsePaginatedDailyLogsOptions {
+  projectId?: string;
+  userId?: string;
+  category?: DailyLogCategory;
+  dateRange?: { start: Date; end: Date };
+  pageSize?: number;
+}
+
+export function usePaginatedDailyLogs(
+  orgId: string | undefined,
+  options: UsePaginatedDailyLogsOptions = {}
+) {
+  const { projectId, userId, category, dateRange, pageSize = 50 } = options;
+
+  // Build filters with useMemo to prevent infinite loops
+  const filters = useMemo(() => {
+    const constraints: QueryConstraint[] = [];
+
+    if (projectId) {
+      constraints.push(where('projectId', '==', projectId));
+    }
+
+    if (userId) {
+      constraints.push(where('userId', '==', userId));
+    }
+
+    if (category) {
+      constraints.push(where('category', '==', category));
+    }
+
+    if (dateRange?.start) {
+      const startStr = dateRange.start.toISOString().split('T')[0];
+      constraints.push(where('date', '>=', startStr));
+    }
+
+    if (dateRange?.end) {
+      const endStr = dateRange.end.toISOString().split('T')[0];
+      constraints.push(where('date', '<=', endStr));
+    }
+
+    return constraints;
+  }, [projectId, userId, category, dateRange?.start?.getTime(), dateRange?.end?.getTime()]);
+
+  const result = usePagination<DailyLogEntry>(orgId, 'dailyLogs', {
+    pageSize,
+    orderByField: 'date',
+    orderDirection: 'desc',
+    filters,
+    dateFields: ['createdAt', 'updatedAt', 'followUpDate'],
+  });
+
+  // Return with domain-specific alias
+  return {
+    ...result,
+    logs: result.items,
+  };
+}
+```
+
+### LoadMore Component
+
+**File:** `components/ui/LoadMore.tsx`
+
+Use for infinite scroll or "Load More" button patterns. Best for mobile-first interfaces.
+
+```typescript
+import { LoadMore } from '@/components/ui/LoadMore';
+import { usePaginatedDailyLogs } from '@/lib/hooks/useDailyLogs';
+
+function DailyLogsPage() {
+  const { profile } = useAuth();
+  const { logs, loading, hasMore, loadMore } = usePaginatedDailyLogs(
+    profile?.orgId,
+    { pageSize: 25 }
+  );
+
+  return (
+    <div className="space-y-4">
+      {/* Loading state for initial fetch */}
+      {loading && logs.length === 0 ? (
+        <SkeletonList count={5} />
+      ) : logs.length === 0 ? (
+        <EmptyState
+          icon={<DocumentTextIcon className="h-16 w-16" />}
+          title="No daily logs"
+          description="Start logging your daily progress"
+        />
+      ) : (
+        <>
+          {logs.map((log) => (
+            <DailyLogCard key={log.id} log={log} />
+          ))}
+
+          {/* LoadMore at the bottom */}
+          <LoadMore
+            hasMore={hasMore}
+            loading={loading}
+            onLoadMore={loadMore}
+            itemCount={logs.length}
+          />
+        </>
+      )}
+    </div>
+  );
+}
+```
+
+#### LoadMore Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `hasMore` | boolean | - | More items available |
+| `loading` | boolean | - | Loading state |
+| `onLoadMore` | () => void | - | Load more callback |
+| `itemCount` | number | - | Current item count |
+| `totalCount?` | number | - | Total items (optional) |
+| `autoLoad?` | boolean | false | Auto-load on scroll into view |
+| `autoLoadThreshold?` | number | 200 | Pixels from bottom to trigger auto-load |
+
+### InfiniteScroll Component
+
+Wrapper component that combines content with auto-loading LoadMore:
+
+```typescript
+import { InfiniteScroll } from '@/components/ui/LoadMore';
+
+function ActivityFeed() {
+  const { items, loading, hasMore, loadMore } = usePaginatedActivity(orgId);
+
+  return (
+    <InfiniteScroll
+      hasMore={hasMore}
+      loading={loading}
+      onLoadMore={loadMore}
+      itemCount={items.length}
+      autoLoadThreshold={300}
+    >
+      <div className="space-y-3">
+        {items.map((item) => (
+          <ActivityItem key={item.id} item={item} />
+        ))}
+      </div>
+    </InfiniteScroll>
+  );
+}
+```
+
+### Pagination Component
+
+**File:** `components/ui/Pagination.tsx`
+
+Full page navigation with page numbers, page size selector, and item count. Best for desktop tables.
+
+```typescript
+import { Pagination } from '@/components/ui/Pagination';
+
+function InvoicesPage() {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+
+  // For Pagination component, you often need total count
+  // This example assumes you have that information
+  const { invoices, totalCount, loading } = useInvoices({
+    orgId: profile?.orgId,
+    page: currentPage,
+    pageSize,
+  });
+
+  const totalPages = Math.ceil(totalCount / pageSize);
+
+  return (
+    <div>
+      <DataTable data={invoices} loading={loading} />
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        totalItems={totalCount}
+        onPageChange={setCurrentPage}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setCurrentPage(1); // Reset to page 1
+        }}
+        pageSizeOptions={[10, 25, 50, 100]}
+        showPageSizeSelector={true}
+        showItemCount={true}
+        loading={loading}
+      />
+    </div>
+  );
+}
+```
+
+### CompactPagination Component
+
+Minimal pagination for tight spaces (cards, sidebars):
+
+```typescript
+import { CompactPagination } from '@/components/ui/Pagination';
+
+function TaskList() {
+  const {
+    items: tasks,
+    loading,
+    currentPage,
+    hasMore,
+    hasPrevious,
+    loadMore,
+    loadPrevious,
+  } = usePagination<Task>(orgId, 'tasks', { pageSize: 10 });
+
+  // Calculate approximate total pages (cursor-based doesn't know exact total)
+  const totalPages = hasMore ? currentPage + 1 : currentPage;
+
+  return (
+    <Card>
+      <div className="divide-y">
+        {tasks.map((task) => (
+          <TaskRow key={task.id} task={task} />
+        ))}
+      </div>
+
+      <CompactPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        hasNextPage={hasMore}
+        hasPreviousPage={hasPrevious}
+        onNextPage={loadMore}
+        onPreviousPage={loadPrevious}
+        loading={loading}
+        className="px-4 py-3 border-t"
+      />
+    </Card>
+  );
+}
+```
+
+### Pagination Best Practices
+
+1. **Always memoize filters**
+   ```typescript
+   // Good - stable reference
+   const filters = useMemo(() => [
+     where('status', '==', status),
+   ], [status]);
+
+   // Bad - new array every render, causes infinite loops!
+   const { items } = usePagination(orgId, 'tasks', {
+     filters: [where('status', '==', status)],
+   });
+   ```
+
+2. **Handle loading states properly**
+   ```typescript
+   // Show skeleton only on initial load
+   if (loading && items.length === 0) {
+     return <SkeletonList count={5} />;
+   }
+
+   // Show inline loading for pagination
+   return (
+     <>
+       {items.map(item => <ItemCard key={item.id} item={item} />)}
+       <LoadMore loading={loading} {...props} />
+     </>
+   );
+   ```
+
+3. **Reset page on filter changes**
+   ```typescript
+   // The usePagination hook handles this automatically when filters change
+   // But if managing page state manually:
+   const handleFilterChange = (newFilter: string) => {
+     setFilter(newFilter);
+     setCurrentPage(1); // Reset to page 1
+   };
+   ```
+
+4. **Choose the right pattern for your use case**
+   - Mobile lists: `LoadMore` with auto-load
+   - Desktop tables: `Pagination` component
+   - Card layouts: `CompactPagination`
+   - Activity feeds: `InfiniteScroll`
+
+5. **Consider UX for cursor-based pagination**
+   - Cursor pagination doesn't know total count upfront
+   - Use "Load More" pattern when totals are unknown
+   - Use page-based when you can pre-fetch totals
 
 ---
 

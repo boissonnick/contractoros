@@ -4,11 +4,18 @@
  */
 
 import * as admin from "firebase-admin";
-import { getFirestore } from "firebase-admin/firestore";
+import { getFirestore, Firestore } from "firebase-admin/firestore";
 import { sendEmail } from "./sendEmail";
 
 // Firestore reference - use named database 'contractoros'
-const db = getFirestore(admin.app(), "contractoros");
+// Lazy initialization to avoid calling admin.app() before initializeApp()
+let _db: Firestore | null = null;
+function getDb(): Firestore {
+  if (!_db) {
+    _db = getFirestore(admin.app(), "contractoros");
+  }
+  return _db;
+}
 
 // Base URL for links
 const BASE_URL = process.env.APP_URL || "https://app.contractoros.com";
@@ -81,7 +88,7 @@ interface Payment {
 
 async function getOrganization(orgId: string): Promise<Organization | null> {
   try {
-    const doc = await db.collection("organizations").doc(orgId).get();
+    const doc = await getDb().collection("organizations").doc(orgId).get();
     return doc.exists ? (doc.data() as Organization) : null;
   } catch (error) {
     console.error("Error fetching organization:", error);
@@ -91,7 +98,7 @@ async function getOrganization(orgId: string): Promise<Organization | null> {
 
 async function getClient(clientId: string): Promise<Client | null> {
   try {
-    const doc = await db.collection("users").doc(clientId).get();
+    const doc = await getDb().collection("users").doc(clientId).get();
     if (!doc.exists) return null;
     const data = doc.data();
     return {
@@ -110,7 +117,7 @@ async function getEmailTemplate(
 ): Promise<{ subject: string; body: string } | null> {
   try {
     // First check for org-specific template
-    const orgTemplatesRef = db.collection("organizations").doc(orgId).collection("emailTemplates");
+    const orgTemplatesRef = getDb().collection("organizations").doc(orgId).collection("emailTemplates");
     const snapshot = await orgTemplatesRef.where("type", "==", type).where("isActive", "==", true).limit(1).get();
 
     if (!snapshot.empty) {
@@ -269,7 +276,7 @@ async function logEmail(
   }
 ): Promise<void> {
   try {
-    await db.collection("organizations").doc(orgId).collection("emailLogs").add({
+    await getDb().collection("organizations").doc(orgId).collection("emailLogs").add({
       ...data,
       orgId,
       sentAt: admin.firestore.Timestamp.now(),
@@ -598,14 +605,14 @@ export async function processInvoiceReminders(): Promise<void> {
   const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
 
   // Get all organizations
-  const orgsSnapshot = await db.collection("organizations").get();
+  const orgsSnapshot = await getDb().collection("organizations").get();
 
   for (const orgDoc of orgsSnapshot.docs) {
     const orgId = orgDoc.id;
 
     try {
       // Get invoices due in 3 days
-      const dueSoonSnapshot = await db
+      const dueSoonSnapshot = await getDb()
         .collection("invoices")
         .where("orgId", "==", orgId)
         .where("status", "in", ["sent", "viewed"])
@@ -620,7 +627,7 @@ export async function processInvoiceReminders(): Promise<void> {
       }
 
       // Get overdue invoices
-      const overdueSnapshot = await db
+      const overdueSnapshot = await getDb()
         .collection("invoices")
         .where("orgId", "==", orgId)
         .where("status", "in", ["sent", "viewed", "overdue"])

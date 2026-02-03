@@ -338,3 +338,99 @@ export const CONSTRUCTION_TRADES = [
 ] as const;
 
 export type ConstructionTrade = typeof CONSTRUCTION_TRADES[number];
+
+// ============================================
+// Subcontractor Invoice Types
+// Invoices submitted by subcontractors for work completed
+// ============================================
+
+export type SubInvoiceStatus = 'draft' | 'submitted' | 'under_review' | 'approved' | 'paid' | 'rejected';
+
+export interface SubInvoiceLineItem {
+  id: string;
+  description: string;
+  quantity: number;
+  unit: string;
+  unitPrice: number;
+  amount: number;
+  costCode?: string;
+}
+
+export interface SubInvoicePayment {
+  id: string;
+  amount: number;
+  date: Date;
+  method: 'check' | 'ach' | 'wire' | 'cash' | 'other';
+  reference?: string;
+  notes?: string;
+  recordedBy: string;
+  recordedAt: Date;
+}
+
+export interface SubInvoice {
+  id: string;
+  orgId: string;
+  subId: string;             // Subcontractor user ID
+  subName?: string;          // Cached subcontractor name
+  subCompanyName?: string;   // Cached company name
+
+  // Assignment/Project references
+  projectId?: string;
+  projectName?: string;
+  assignmentId?: string;     // Link to SubAssignment
+  bidId?: string;            // Link to original bid
+
+  // Invoice details
+  number: string;            // SUB-INV-001
+  status: SubInvoiceStatus;
+
+  // Billing period
+  periodStart?: Date;
+  periodEnd?: Date;
+
+  // Line items
+  lineItems: SubInvoiceLineItem[];
+
+  // Pricing
+  laborHours?: number;
+  laborRate?: number;
+  laborTotal?: number;
+  materialsTotal?: number;
+  subtotal: number;
+  retainage?: number;
+  retainageAmount?: number;
+  total: number;
+  amountPaid: number;
+  amountDue: number;
+
+  // Payment history
+  payments: SubInvoicePayment[];
+
+  // Documentation
+  notes?: string;
+  attachments?: string[];    // File URLs
+
+  // Workflow tracking
+  submittedAt?: Date;
+  reviewedAt?: Date;
+  reviewedBy?: string;
+  approvedAt?: Date;
+  approvedBy?: string;
+  rejectedAt?: Date;
+  rejectedBy?: string;
+  rejectionReason?: string;
+  paidAt?: Date;
+
+  // Audit
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+export const SUB_INVOICE_STATUS_LABELS: Record<SubInvoiceStatus, { label: string; color: string }> = {
+  draft: { label: 'Draft', color: 'bg-gray-100 text-gray-700' },
+  submitted: { label: 'Submitted', color: 'bg-blue-100 text-blue-700' },
+  under_review: { label: 'Under Review', color: 'bg-yellow-100 text-yellow-700' },
+  approved: { label: 'Approved', color: 'bg-green-100 text-green-700' },
+  paid: { label: 'Paid', color: 'bg-emerald-100 text-emerald-700' },
+  rejected: { label: 'Rejected', color: 'bg-red-100 text-red-700' },
+};

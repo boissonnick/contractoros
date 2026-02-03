@@ -65,6 +65,21 @@ service cloud.firestore {
         // Users can only access their own reminders
         allow read, write: if request.auth.uid == userId;
       }
+
+      // ==========================================
+      // User Sessions Subcollection (Security)
+      // Tracks active sessions for multi-device management
+      // ==========================================
+      match /sessions/{sessionId} {
+        // Users can read and manage their own sessions
+        allow read: if request.auth.uid == userId;
+        // Users can create sessions for themselves
+        allow create: if request.auth.uid == userId;
+        // Users can update their own sessions (activity updates, revocation)
+        allow update: if request.auth.uid == userId;
+        // Users can delete their own sessions
+        allow delete: if request.auth.uid == userId;
+      }
     }
 
     // Projects collection
@@ -569,6 +584,29 @@ service cloud.firestore {
         getUserProfile().role in ['OWNER', 'PM'];
       allow update: if isAuthenticated() && userProfileExists() &&
         resource.data.orgId == getUserProfile().orgId;
+      allow delete: if isAdmin() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId;
+    }
+
+    // Subcontractor invoices collection
+    // Invoices submitted by subcontractors for their work
+    match /sub_invoices/{invoiceId} {
+      // Org members and the subcontractor who created it can read
+      allow read: if isAuthenticated() && userProfileExists() && (
+        resource.data.orgId == getUserProfile().orgId ||
+        resource.data.subId == request.auth.uid
+      );
+      // Subcontractors can create invoices for their own work
+      allow create: if isAuthenticated() && userProfileExists() && (
+        request.resource.data.subId == request.auth.uid ||
+        (request.resource.data.orgId == getUserProfile().orgId && isAdmin())
+      );
+      // Subs can update their own drafts, admins can update any invoice in their org
+      allow update: if isAuthenticated() && userProfileExists() && (
+        (resource.data.subId == request.auth.uid && resource.data.status == 'draft') ||
+        (resource.data.orgId == getUserProfile().orgId && isAdmin())
+      );
+      // Only admins can delete invoices
       allow delete: if isAdmin() && userProfileExists() &&
         resource.data.orgId == getUserProfile().orgId;
     }

@@ -12,3 +12,6 @@ export type { SmsConversationListProps } from './SmsConversationList';
 
 export { default as SmsMessageThread } from './SmsMessageThread';
 export type { SmsMessageThreadProps } from './SmsMessageThread';
+
+export { default as SMSConversationView } from './SMSConversationView';
+export type { SMSConversationViewProps } from './SMSConversationView';

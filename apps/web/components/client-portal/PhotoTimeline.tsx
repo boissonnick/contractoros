@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { cn } from '@/lib/utils';
 import { Photo } from '@/types';
 import {
   PhotoIcon,
@@ -19,6 +20,83 @@ interface PhotoGroup {
 interface PhotoTimelineProps {
   photos: Photo[];
   onViewAll?: () => void;
+}
+
+/**
+ * LazyTimelinePhoto - Lazy loading photo item for timeline grid
+ */
+function LazyTimelinePhoto({
+  photo,
+  photoIndex,
+  totalPhotos,
+  onClick,
+}: {
+  photo: Photo;
+  photoIndex: number;
+  totalPhotos: number;
+  onClick: () => void;
+}) {
+  const [isVisible, setIsVisible] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const ref = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '100px' }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  const handleLoad = useCallback(() => {
+    setIsLoaded(true);
+  }, []);
+
+  return (
+    <button
+      ref={ref}
+      onClick={onClick}
+      className="relative aspect-square rounded-md overflow-hidden bg-gray-100 hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-blue-500"
+    >
+      {/* Placeholder */}
+      {(!isVisible || !isLoaded) && (
+        <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+      )}
+
+      {/* Image */}
+      {isVisible && (
+        <img
+          src={photo.thumbnailUrl || photo.url}
+          alt={photo.caption || `Photo ${photoIndex + 1}`}
+          loading="lazy"
+          onLoad={handleLoad}
+          className={cn(
+            'w-full h-full object-cover transition-opacity duration-300',
+            isLoaded ? 'opacity-100' : 'opacity-0'
+          )}
+        />
+      )}
+
+      {/* "More photos" overlay */}
+      {photoIndex === 7 && totalPhotos > 8 && (
+        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+          <span className="text-white font-medium">
+            +{totalPhotos - 8}
+          </span>
+        </div>
+      )}
+    </button>
+  );
 }
 
 export function PhotoTimeline({ photos, onViewAll }: PhotoTimelineProps) {
@@ -127,24 +205,13 @@ export function PhotoTimeline({ photos, onViewAll }: PhotoTimelineProps) {
                 {/* Thumbnail Grid */}
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                   {group.photos.slice(0, 8).map((photo, photoIndex) => (
-                    <button
+                    <LazyTimelinePhoto
                       key={photo.id}
+                      photo={photo}
+                      photoIndex={photoIndex}
+                      totalPhotos={group.photos.length}
                       onClick={() => openLightbox(group, photoIndex)}
-                      className="relative aspect-square rounded-md overflow-hidden bg-gray-100 hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <img
-                        src={photo.thumbnailUrl || photo.url}
-                        alt={photo.caption || `Photo ${photoIndex + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                      {photoIndex === 7 && group.photos.length > 8 && (
-                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                          <span className="text-white font-medium">
-                            +{group.photos.length - 8}
-                          </span>
-                        </div>
-                      )}
-                    </button>
+                    />
                   ))}
                 </div>
               </div>

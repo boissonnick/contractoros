@@ -66,7 +66,7 @@
 | **Client Portal** | 95% | Photo timeline, selections, progress, documents, notes |
 | **AI Assistant** | 95% | Doc analysis, photo AI, NL queries, suggestions |
 | **Reports** | 65% | Basic reports, needs custom builder |
-| **Integrations** | 60% | QBO connected, Twilio partial |
+| **Integrations** | 85% | QBO connected + scheduled sync, SMS (Twilio), Gusto/Stripe waitlist |
 | **Mobile UI** | 90% | Bottom nav, swipe gestures, pull-to-refresh |
 | **Offline Mode** | 90% | True offline for field portal |
 | **Voice Commands** | 85% | Time, daily log, task voice input |
@@ -80,6 +80,10 @@
 
 | Sprint | Focus | Status | Key Deliverables |
 |--------|-------|--------|------------------|
+| **Session D** | Integrations + Security | ✅ COMPLETE | SMS Cloud Functions (Twilio), QBO scheduled sync, Integration status dashboard, Gusto/Stripe waitlist pages, Field-level encryption (AES-256-GCM), Rate limiting, Audit logging system, Data retention policies, GDPR data export, Session management, Security checklist dashboard |
+| **Session C** | Coming Soon Features | ✅ COMPLETE | 15+ pages converted, client/sub/field portals complete, project messaging, crew grid, timeline view |
+| **Session B** | Testing + Pagination | ✅ COMPLETE | 472 unit tests, 9 test suites, usePagination hook, Pagination/LoadMore components, lazy loading, bundle analysis |
+| **Session A** | Critical Fixes + Refactoring | ✅ COMPLETE | Cloud Functions named DB fix, types splitting (12 files), formatters utility, security helpers |
 | **36** | Enhanced Client Portal | ✅ COMPLETE | Photo timeline, selection board, progress dashboard, document library, client notes |
 | **35** | Equipment Tracking | ✅ COMPLETE | Equipment CRUD, check-out system, maintenance logs, QR codes |
 | **34** | RFIs & Submittals | ✅ COMPLETE | RFI workflow, submittal tracking, response management |

@@ -21,6 +21,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { FirestoreError } from '@/components/ui';
 import { formatDate } from '@/lib/date-utils';
+import { OfflineProjectButton } from '@/components/offline/OfflineProjectButton';
 
 export default function FieldPage() {
   const { user, profile } = useAuth();
@@ -255,7 +256,7 @@ export default function FieldPage() {
           )}
 
           {!activeEntry && projects.length > 0 && (
-            <div className="mb-4 max-w-xs mx-auto">
+            <div className="mb-4 max-w-xs mx-auto space-y-2">
               <select
                 value={selectedProject}
                 onChange={(e) => setSelectedProject(e.target.value)}
@@ -266,6 +267,16 @@ export default function FieldPage() {
                   <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
               </select>
+              {selectedProject && (
+                <div className="bg-white/20 rounded-lg p-2">
+                  <OfflineProjectButton
+                    projectId={selectedProject}
+                    projectName={projects.find(p => p.id === selectedProject)?.name}
+                    variant="compact"
+                    className="justify-center text-white [&_span]:text-white [&_button]:text-white/80 [&_button:hover]:text-white"
+                  />
+                </div>
+              )}
             </div>
           )}
 
@@ -378,6 +389,15 @@ export default function FieldPage() {
           <p className="text-sm text-gray-500">Flag a blocker</p>
         </Link>
       </div>
+
+      {/* Offline Access Card - shown when a project is selected or user has an active entry */}
+      {(selectedProject || activeEntry?.projectId) && (
+        <OfflineProjectButton
+          projectId={selectedProject || activeEntry?.projectId || ''}
+          projectName={projects.find(p => p.id === (selectedProject || activeEntry?.projectId))?.name}
+          variant="card"
+        />
+      )}
     </div>
   );
 }

@@ -30,8 +30,6 @@ export {
 
 export { default as AppShell } from './AppShell';
 
-export { default as ComingSoon } from './ComingSoon';
-
 export { ToastProvider, Toaster, useToast, toast } from './Toast';
 
 export { default as FirestoreError } from './FirestoreError';
@@ -155,3 +153,7 @@ export { MobileStats, MobileKPI, MobileStatBar } from './MobileStats';
 // Network status indicators
 export { default as OnlineStatus, useOnlineStatus } from './OnlineStatus';
 export type { OnlineStatusProps } from './OnlineStatus';
+
+// Lazy loading components
+export { default as LazyImage, LazyImageGrid } from './LazyImage';
+export type { LazyImageProps, LazyImageGridProps } from './LazyImage';

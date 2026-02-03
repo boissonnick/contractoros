@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { ProjectPhoto, PhotoAnnotation } from '@/types';
 import { formatDate } from '@/lib/date-utils';
@@ -378,26 +378,90 @@ export default function PhotoLightbox({
       {photos.length > 1 && (
         <div className="flex gap-2 px-4 py-2 bg-black/50 overflow-x-auto">
           {photos.map((photo, index) => (
-            <button
+            <LazyThumbnail
               key={photo.id}
+              photo={photo}
+              index={index}
+              isActive={index === currentIndex}
               onClick={() => setCurrentIndex(index)}
-              className={cn(
-                'flex-shrink-0 w-16 h-12 rounded overflow-hidden transition-all',
-                index === currentIndex
-                  ? 'ring-2 ring-white ring-offset-2 ring-offset-black'
-                  : 'opacity-50 hover:opacity-75'
-              )}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={photo.thumbnailUrl || photo.url}
-                alt=""
-                className="w-full h-full object-cover"
-              />
-            </button>
+            />
           ))}
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * LazyThumbnail - Lazy loading thumbnail for lightbox strip
+ */
+function LazyThumbnail({
+  photo,
+  index,
+  isActive,
+  onClick,
+}: {
+  photo: ProjectPhoto;
+  index: number;
+  isActive: boolean;
+  onClick: () => void;
+}) {
+  const [isVisible, setIsVisible] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const ref = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '50px' }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  const handleLoad = useCallback(() => {
+    setIsLoaded(true);
+  }, []);
+
+  return (
+    <button
+      ref={ref}
+      onClick={onClick}
+      className={cn(
+        'flex-shrink-0 w-16 h-12 rounded overflow-hidden transition-all relative',
+        isActive
+          ? 'ring-2 ring-white ring-offset-2 ring-offset-black'
+          : 'opacity-50 hover:opacity-75'
+      )}
+    >
+      {/* Placeholder */}
+      {(!isVisible || !isLoaded) && (
+        <div className="absolute inset-0 bg-gray-600 animate-pulse" />
+      )}
+
+      {/* Image */}
+      {isVisible && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={photo.thumbnailUrl || photo.url}
+          alt=""
+          loading="lazy"
+          onLoad={handleLoad}
+          className={cn(
+            'w-full h-full object-cover transition-opacity duration-200',
+            isLoaded ? 'opacity-100' : 'opacity-0'
+          )}
+        />
+      )}
+    </button>
   );
 }

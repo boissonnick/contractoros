@@ -142,6 +142,7 @@ const ownerPmNavItems: (NavItem & { requiredPermission?: keyof RolePermissions; 
       { label: 'Operational', href: '/dashboard/reports/operational' },
       { label: 'Benchmarking', href: '/dashboard/reports/benchmarking' },
       { label: 'Detailed', href: '/dashboard/reports/detailed' },
+      { label: 'Report Builder', href: '/dashboard/reports/builder' },
     ],
   },
 
@@ -361,6 +362,7 @@ function createOwnerPmSections(permissions: RolePermissions): NavSection[] {
             { label: 'Operational', href: '/dashboard/reports/operational' },
             { label: 'Benchmarking', href: '/dashboard/reports/benchmarking' },
             { label: 'Detailed', href: '/dashboard/reports/detailed' },
+            { label: 'Report Builder', href: '/dashboard/reports/builder' },
           ],
         },
       ],

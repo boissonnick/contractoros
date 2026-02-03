@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import { cn } from '@/lib/utils';
 import {
   DocumentTextIcon,
@@ -9,13 +10,61 @@ import {
   Squares2X2Icon,
   RectangleStackIcon,
 } from '@heroicons/react/24/outline';
-import {
-  SowTemplatesTab,
-  QuoteTemplatesTab,
-  EmailTemplatesTab,
-  SmsTemplatesTab,
-  LineItemsTab,
-} from '@/components/settings/templates';
+import Skeleton from '@/components/ui/Skeleton';
+
+// Loading skeleton for template tabs
+function TabLoadingSkeleton() {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-6 w-48" />
+        <Skeleton className="h-9 w-32" />
+      </div>
+      <div className="space-y-3">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="bg-white border border-gray-200 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <Skeleton className="h-5 w-40" />
+                <Skeleton className="h-4 w-64" />
+              </div>
+              <div className="flex gap-2">
+                <Skeleton className="h-8 w-8" />
+                <Skeleton className="h-8 w-8" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Dynamic imports for heavy template tab components
+const QuoteTemplatesTab = dynamic(
+  () => import('@/components/settings/templates/QuoteTemplatesTab').then(mod => ({ default: mod.QuoteTemplatesTab })),
+  { loading: () => <TabLoadingSkeleton />, ssr: false }
+);
+
+const SowTemplatesTab = dynamic(
+  () => import('@/components/settings/templates/SowTemplatesTab').then(mod => ({ default: mod.SowTemplatesTab })),
+  { loading: () => <TabLoadingSkeleton />, ssr: false }
+);
+
+const EmailTemplatesTab = dynamic(
+  () => import('@/components/settings/templates/EmailTemplatesTab').then(mod => ({ default: mod.EmailTemplatesTab })),
+  { loading: () => <TabLoadingSkeleton />, ssr: false }
+);
+
+const SmsTemplatesTab = dynamic(
+  () => import('@/components/settings/templates/SmsTemplatesTab').then(mod => ({ default: mod.SmsTemplatesTab })),
+  { loading: () => <TabLoadingSkeleton />, ssr: false }
+);
+
+const LineItemsTab = dynamic(
+  () => import('@/components/settings/templates/LineItemsTab').then(mod => ({ default: mod.LineItemsTab })),
+  { loading: () => <TabLoadingSkeleton />, ssr: false }
+);
 
 type TabType = 'quotes' | 'sow' | 'email' | 'sms' | 'line-items';
 
@@ -57,14 +106,16 @@ export default function TemplatesPage() {
         </nav>
       </div>
 
-      {/* Tab Content */}
-      <div>
-        {activeTab === 'quotes' && <QuoteTemplatesTab />}
-        {activeTab === 'sow' && <SowTemplatesTab />}
-        {activeTab === 'email' && <EmailTemplatesTab />}
-        {activeTab === 'sms' && <SmsTemplatesTab />}
-        {activeTab === 'line-items' && <LineItemsTab />}
-      </div>
+      {/* Tab Content - Dynamically loaded */}
+      <Suspense fallback={<TabLoadingSkeleton />}>
+        <div>
+          {activeTab === 'quotes' && <QuoteTemplatesTab />}
+          {activeTab === 'sow' && <SowTemplatesTab />}
+          {activeTab === 'email' && <EmailTemplatesTab />}
+          {activeTab === 'sms' && <SmsTemplatesTab />}
+          {activeTab === 'line-items' && <LineItemsTab />}
+        </div>
+      </Suspense>
     </div>
   );
 }

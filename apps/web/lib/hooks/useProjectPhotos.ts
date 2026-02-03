@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
   collection,
   query,
@@ -14,6 +14,11 @@ import {
   Timestamp,
   getDocs,
   writeBatch,
+  limit,
+  startAfter,
+  QueryConstraint,
+  DocumentSnapshot,
+  DocumentData,
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase/config';
@@ -818,5 +823,306 @@ export function useProjectPhotos(projectId: string) {
     // Helpers
     getPhotosByAlbum,
     getPhotosByPhase,
+  };
+}
+
+/**
+ * Options for configuring the paginated photos hook
+ */
+export interface UsePaginatedPhotosOptions {
+  /**
+   * Filter by project ID
+   */
+  projectId?: string;
+
+  /**
+   * Filter by phase ID
+   */
+  phaseId?: string;
+
+  /**
+   * Filter by task ID
+   */
+  taskId?: string;
+
+  /**
+   * Filter by album ID
+   */
+  albumId?: string;
+
+  /**
+   * Filter by photo type
+   */
+  type?: ProjectPhoto['type'];
+
+  /**
+   * Number of photos per page (default: 30 for gallery loading)
+   */
+  pageSize?: number;
+
+  /**
+   * Whether to enable the query (default: true)
+   */
+  enabled?: boolean;
+}
+
+/**
+ * Result returned by the paginated photos hook
+ */
+export interface UsePaginatedPhotosResult {
+  /**
+   * All photos loaded so far (cumulative for infinite scroll)
+   */
+  photos: ProjectPhoto[];
+
+  /**
+   * Loading state (true during fetch operations)
+   */
+  loading: boolean;
+
+  /**
+   * Loading more photos (for infinite scroll indicator)
+   */
+  loadingMore: boolean;
+
+  /**
+   * Error if query failed
+   */
+  error: Error | null;
+
+  /**
+   * Whether there are more photos to load
+   */
+  hasMore: boolean;
+
+  /**
+   * Load more photos (for infinite scroll / load more button)
+   */
+  loadMore: () => Promise<void>;
+
+  /**
+   * Refresh data (resets to first page and clears loaded photos)
+   */
+  refresh: () => Promise<void>;
+
+  /**
+   * Total number of photos loaded
+   */
+  totalLoaded: number;
+
+  /**
+   * Current page size
+   */
+  pageSize: number;
+
+  /**
+   * Whether the hook has been initialized (first fetch completed)
+   */
+  initialized: boolean;
+}
+
+/**
+ * Paginated photos hook for gallery-style loading.
+ *
+ * Provides infinite scroll / "load more" pagination for photos.
+ * Photos accumulate as user scrolls (ideal for gallery UX).
+ *
+ * @example
+ * // Basic usage - all photos for a project
+ * const { photos, loading, hasMore, loadMore } = usePaginatedPhotos({
+ *   projectId: 'project-123',
+ * });
+ *
+ * @example
+ * // Filtered by phase
+ * const { photos, loadMore } = usePaginatedPhotos({
+ *   projectId: 'project-123',
+ *   phaseId: 'phase-456',
+ *   pageSize: 20,
+ * });
+ *
+ * @example
+ * // With intersection observer for infinite scroll
+ * useEffect(() => {
+ *   const observer = new IntersectionObserver((entries) => {
+ *     if (entries[0].isIntersecting && hasMore && !loadingMore) {
+ *       loadMore();
+ *     }
+ *   });
+ *   if (loadMoreRef.current) observer.observe(loadMoreRef.current);
+ *   return () => observer.disconnect();
+ * }, [hasMore, loadingMore, loadMore]);
+ */
+export function usePaginatedPhotos(
+  options: UsePaginatedPhotosOptions = {}
+): UsePaginatedPhotosResult {
+  const {
+    projectId,
+    phaseId,
+    taskId,
+    albumId,
+    type,
+    pageSize = 30,
+    enabled = true,
+  } = options;
+
+  // State
+  const [photos, setPhotos] = useState<ProjectPhoto[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [initialized, setInitialized] = useState(false);
+
+  // Refs for cursor management
+  const lastDocRef = useRef<DocumentSnapshot<DocumentData> | null>(null);
+  const fetchInProgressRef = useRef(false);
+
+  // Build filters array based on options
+  const filtersKey = useMemo(() => {
+    return JSON.stringify({ projectId, phaseId, taskId, albumId, type });
+  }, [projectId, phaseId, taskId, albumId, type]);
+
+  /**
+   * Fetch photos with pagination
+   */
+  const fetchPhotos = useCallback(
+    async (isLoadMore = false) => {
+      if (!enabled || fetchInProgressRef.current) {
+        return;
+      }
+
+      // Need at least a projectId to query
+      if (!projectId) {
+        setPhotos([]);
+        setLoading(false);
+        setInitialized(true);
+        return;
+      }
+
+      fetchInProgressRef.current = true;
+
+      if (isLoadMore) {
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
+      }
+      setError(null);
+
+      try {
+        // Build query constraints
+        const constraints: QueryConstraint[] = [
+          where('projectId', '==', projectId),
+        ];
+
+        // Add optional filters
+        if (phaseId) {
+          constraints.push(where('phaseId', '==', phaseId));
+        }
+        if (taskId) {
+          constraints.push(where('taskId', '==', taskId));
+        }
+        if (albumId) {
+          constraints.push(where('albumId', '==', albumId));
+        }
+        if (type) {
+          constraints.push(where('type', '==', type));
+        }
+
+        // Add ordering
+        constraints.push(orderBy('createdAt', 'desc'));
+
+        // Add pagination
+        if (isLoadMore && lastDocRef.current) {
+          constraints.push(startAfter(lastDocRef.current));
+        }
+        constraints.push(limit(pageSize + 1)); // Fetch one extra to check for more
+
+        // Execute query
+        const q = query(collection(db, 'photos'), ...constraints);
+        const snapshot = await getDocs(q);
+        const docs = snapshot.docs;
+
+        // Determine if there are more pages
+        const hasMoreItems = docs.length > pageSize;
+        const pageData = hasMoreItems ? docs.slice(0, pageSize) : docs;
+
+        // Store cursor for next page
+        if (pageData.length > 0) {
+          lastDocRef.current = pageData[pageData.length - 1];
+        }
+
+        // Convert documents to typed items
+        const newPhotos = pageData.map((docSnap) =>
+          photoFromFirestore(docSnap.id, docSnap.data())
+        );
+
+        if (isLoadMore) {
+          // Append to existing photos (infinite scroll)
+          setPhotos((prev) => [...prev, ...newPhotos]);
+        } else {
+          // Replace photos (initial load or refresh)
+          setPhotos(newPhotos);
+        }
+
+        setHasMore(hasMoreItems);
+        setInitialized(true);
+      } catch (err) {
+        console.error('Error fetching paginated photos:', err);
+        setError(err instanceof Error ? err : new Error('Failed to fetch photos'));
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
+        fetchInProgressRef.current = false;
+      }
+    },
+    [enabled, projectId, phaseId, taskId, albumId, type, pageSize]
+  );
+
+  // Initial fetch when dependencies change
+  useEffect(() => {
+    // Reset state when filters change
+    setPhotos([]);
+    lastDocRef.current = null;
+    setHasMore(true);
+    setInitialized(false);
+
+    if (enabled && projectId) {
+      fetchPhotos(false);
+    } else {
+      setLoading(false);
+      setInitialized(true);
+    }
+  }, [filtersKey, enabled, pageSize]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /**
+   * Load more photos (for infinite scroll / load more button)
+   */
+  const loadMore = useCallback(async () => {
+    if (!hasMore || loading || loadingMore) return;
+    await fetchPhotos(true);
+  }, [hasMore, loading, loadingMore, fetchPhotos]);
+
+  /**
+   * Refresh data (reset to first page and clear loaded photos)
+   */
+  const refresh = useCallback(async () => {
+    setPhotos([]);
+    lastDocRef.current = null;
+    setHasMore(true);
+    await fetchPhotos(false);
+  }, [fetchPhotos]);
+
+  return {
+    photos,
+    loading,
+    loadingMore,
+    error,
+    hasMore,
+    loadMore,
+    refresh,
+    totalLoaded: photos.length,
+    pageSize,
+    initialized,
   };
 }

@@ -78,5 +78,54 @@ export function formatRelative(dateValue: any): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
+/**
+ * Format the distance from now to a given date (e.g., "2 hours ago", "in 3 days")
+ * Similar to formatRelative but also handles future dates
+ */
+export function formatDistanceToNow(dateValue: any): string {
+  const date = toDate(dateValue);
+  if (!date) return '';
+
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const isPast = diffMs > 0;
+  const absDiffMs = Math.abs(diffMs);
+
+  const absDiffSecs = Math.floor(absDiffMs / 1000);
+  const absDiffMins = Math.floor(absDiffSecs / 60);
+  const absDiffHours = Math.floor(absDiffMins / 60);
+  const absDiffDays = Math.floor(absDiffHours / 24);
+
+  // Less than a minute
+  if (absDiffSecs < 60) {
+    return 'just now';
+  }
+
+  // Less than an hour
+  if (absDiffMins < 60) {
+    const unit = absDiffMins === 1 ? 'minute' : 'minutes';
+    return isPast ? `${absDiffMins} ${unit} ago` : `in ${absDiffMins} ${unit}`;
+  }
+
+  // Less than 24 hours
+  if (absDiffHours < 24) {
+    const unit = absDiffHours === 1 ? 'hour' : 'hours';
+    return isPast ? `${absDiffHours} ${unit} ago` : `in ${absDiffHours} ${unit}`;
+  }
+
+  // Less than 7 days
+  if (absDiffDays < 7) {
+    const unit = absDiffDays === 1 ? 'day' : 'days';
+    return isPast ? `${absDiffDays} ${unit} ago` : `in ${absDiffDays} ${unit}`;
+  }
+
+  // More than a week - show date
+  if (date.getFullYear() === now.getFullYear()) {
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
 // Re-export formatCurrency from centralized formatters for backwards compatibility
 export { formatCurrency } from './utils/formatters';

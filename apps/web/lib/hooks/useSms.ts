@@ -1,6 +1,20 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+/**
+ * @fileoverview SMS Hook for Conversation-based Messaging
+ *
+ * Provides hooks for SMS conversations and messaging with real-time updates.
+ * Integrates with Firestore for data and Cloud Functions for sending messages.
+ *
+ * Exports:
+ * - useSMS: Main hook with the standard interface
+ * - useSms: Legacy hook for backward compatibility
+ * - useSmsConversations: Hook for conversation list
+ * - useSmsTemplates: Hook for SMS templates
+ * - useSMSMessages: Hook for fetching messages for a specific conversation
+ */
+
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   collection,
   query,
@@ -14,6 +28,7 @@ import { db } from '@/lib/firebase/config';
 import { SmsMessage, SmsConversation, SmsTemplate, SmsTemplateType } from '@/types';
 import { useAuth } from '@/lib/auth';
 import { toast } from '@/components/ui/Toast';
+import { formatToE164 } from '@/lib/sms/phoneUtils';
 
 // Convert Firestore data to SmsMessage
 function messageFromFirestore(id: string, data: Record<string, unknown>): SmsMessage {
@@ -345,3 +360,405 @@ export function useSmsTemplates() {
     getDefault,
   };
 }
+
+// ============================================================================
+// New Interface Types (Per Specification)
+// ============================================================================
+
+/**
+ * Simplified SMS Conversation interface
+ */
+export interface SMSConversation {
+  id: string;
+  phoneNumber: string;
+  contactName?: string;
+  lastMessage?: string;
+  lastMessageAt?: Date;
+  unreadCount: number;
+  projectId?: string;
+  participantId?: string;
+  participantType?: 'user' | 'client' | 'subcontractor';
+}
+
+/**
+ * Simplified SMS Message interface
+ */
+export interface SMSMessage {
+  id: string;
+  body: string;
+  direction: 'inbound' | 'outbound';
+  status: string;
+  sentAt: Date;
+  twilioSid?: string;
+  recipientName?: string;
+  from?: string;
+  to?: string;
+  errorCode?: string;
+  errorMessage?: string;
+}
+
+/**
+ * Result interface for useSMS hook
+ */
+export interface UseSMSResult {
+  conversations: SMSConversation[];
+  loading: boolean;
+  error: Error | null;
+  sendMessage: (to: string, message: string, projectId?: string) => Promise<void>;
+  getMessages: (conversationId: string) => SMSMessage[];
+  getConversation: (conversationId: string) => SMSConversation | undefined;
+  markAsRead: (conversationId: string) => Promise<void>;
+  totalUnread: number;
+  refreshConversations: () => void;
+}
+
+/**
+ * Result interface for useSMSMessages hook
+ */
+export interface UseSMSMessagesResult {
+  messages: SMSMessage[];
+  loading: boolean;
+  error: Error | null;
+  refresh: () => void;
+}
+
+// ============================================================================
+// Helper Functions for New Interface
+// ============================================================================
+
+/**
+ * Convert SmsConversation to SMSConversation (simplified interface)
+ */
+function toSimplifiedConversation(conv: SmsConversation): SMSConversation {
+  return {
+    id: conv.id,
+    phoneNumber: conv.phoneNumber,
+    contactName: conv.participantName,
+    lastMessage: conv.lastMessagePreview,
+    lastMessageAt: conv.lastMessageAt,
+    unreadCount: conv.unreadCount,
+    projectId: conv.projectId,
+    participantId: conv.participantId,
+    participantType: conv.participantType,
+  };
+}
+
+/**
+ * Convert SmsMessage to SMSMessage (simplified interface)
+ */
+function toSimplifiedMessage(msg: SmsMessage): SMSMessage {
+  return {
+    id: msg.id,
+    body: msg.body,
+    direction: msg.direction,
+    status: msg.status,
+    sentAt: msg.sentAt || msg.createdAt,
+    twilioSid: msg.twilioMessageSid,
+    recipientName: msg.recipientName,
+    from: msg.from,
+    to: msg.to,
+    errorCode: msg.errorCode,
+    errorMessage: msg.errorMessage,
+  };
+}
+
+// ============================================================================
+// New Hooks (Per Specification)
+// ============================================================================
+
+/**
+ * Main SMS hook with simplified interface
+ *
+ * @param orgId - Organization ID to scope the SMS data
+ * @returns SMS data and operations
+ *
+ * @example
+ * const { conversations, loading, sendMessage, getMessages } = useSMS(orgId);
+ *
+ * // Send a message
+ * await sendMessage('+15551234567', 'Hello!', projectId);
+ */
+export function useSMS(orgId: string | undefined): UseSMSResult {
+  const { user } = useAuth();
+  const [conversations, setConversations] = useState<SMSConversation[]>([]);
+  const [messagesCache, setMessagesCache] = useState<Map<string, SMSMessage[]>>(
+    new Map()
+  );
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  // Subscribe to conversations
+  useEffect(() => {
+    if (!orgId) {
+      setLoading(false);
+      setConversations([]);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    const q = query(
+      collection(db, 'smsConversations'),
+      where('orgId', '==', orgId),
+      orderBy('lastMessageAt', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const convs = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          return toSimplifiedConversation(
+            conversationFromFirestore(doc.id, data as Record<string, unknown>)
+          );
+        });
+        setConversations(convs);
+        setLoading(false);
+      },
+      (err) => {
+        console.error('useSMS conversations error:', err);
+        setError(err as Error);
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [orgId, refreshKey]);
+
+  /**
+   * Send an SMS message
+   */
+  const sendMessage = useCallback(
+    async (to: string, message: string, projectId?: string) => {
+      if (!user || !orgId) {
+        toast.error('You must be logged in to send messages');
+        throw new Error('Not authenticated');
+      }
+
+      if (!to || !message.trim()) {
+        toast.error('Recipient and message are required');
+        throw new Error('Invalid parameters');
+      }
+
+      try {
+        const response = await fetch('/api/sms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: formatToE164(to),
+            message: message.trim(),
+            orgId,
+            projectId,
+            createdBy: user.uid,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to send message');
+        }
+
+        toast.success('Message sent');
+      } catch (err) {
+        console.error('Send SMS error:', err);
+        toast.error(err instanceof Error ? err.message : 'Failed to send message');
+        throw err;
+      }
+    },
+    [user, orgId]
+  );
+
+  /**
+   * Get messages for a specific conversation from cache
+   */
+  const getMessages = useCallback(
+    (conversationId: string): SMSMessage[] => {
+      return messagesCache.get(conversationId) || [];
+    },
+    [messagesCache]
+  );
+
+  /**
+   * Get a specific conversation
+   */
+  const getConversation = useCallback(
+    (conversationId: string): SMSConversation | undefined => {
+      return conversations.find((c) => c.id === conversationId);
+    },
+    [conversations]
+  );
+
+  /**
+   * Mark a conversation as read
+   */
+  const markAsRead = useCallback(
+    async (conversationId: string) => {
+      if (!orgId) return;
+
+      try {
+        const response = await fetch('/api/sms/mark-read', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            conversationId,
+            orgId,
+          }),
+        });
+
+        if (!response.ok) {
+          console.error('Failed to mark conversation as read');
+        }
+      } catch (err) {
+        console.error('Mark as read error:', err);
+      }
+    },
+    [orgId]
+  );
+
+  /**
+   * Calculate total unread count
+   */
+  const totalUnread = useMemo(() => {
+    return conversations.reduce((sum, c) => sum + c.unreadCount, 0);
+  }, [conversations]);
+
+  /**
+   * Force refresh conversations
+   */
+  const refreshConversations = useCallback(() => {
+    setRefreshKey((k) => k + 1);
+  }, []);
+
+  return {
+    conversations,
+    loading,
+    error,
+    sendMessage,
+    getMessages,
+    getConversation,
+    markAsRead,
+    totalUnread,
+    refreshConversations,
+  };
+}
+
+/**
+ * Hook for fetching messages for a specific conversation
+ *
+ * Provides real-time updates for messages in a conversation.
+ *
+ * @param phoneNumber - Phone number to fetch messages for
+ * @param orgId - Organization ID
+ * @returns Messages data and operations
+ *
+ * @example
+ * const { messages, loading } = useSMSMessages('+15551234567', orgId);
+ */
+export function useSMSMessages(
+  phoneNumber: string | undefined,
+  orgId: string | undefined
+): UseSMSMessagesResult {
+  const [messages, setMessages] = useState<SMSMessage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    if (!orgId || !phoneNumber) {
+      setLoading(false);
+      setMessages([]);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    // We need to query messages by phone number
+    // Since Firestore doesn't support OR queries easily,
+    // we'll use two listeners for inbound and outbound
+
+    let outboundMessages: SMSMessage[] = [];
+    let inboundMessages: SMSMessage[] = [];
+
+    // Query for outbound messages (to this phone)
+    const outboundQuery = query(
+      collection(db, 'smsMessages'),
+      where('orgId', '==', orgId),
+      where('to', '==', phoneNumber),
+      orderBy('createdAt', 'asc')
+    );
+
+    // Query for inbound messages (from this phone)
+    const inboundQuery = query(
+      collection(db, 'smsMessages'),
+      where('orgId', '==', orgId),
+      where('from', '==', phoneNumber),
+      orderBy('createdAt', 'asc')
+    );
+
+    const combineAndSort = () => {
+      const allMessages = [...outboundMessages, ...inboundMessages].sort(
+        (a, b) => a.sentAt.getTime() - b.sentAt.getTime()
+      );
+      setMessages(allMessages);
+      setLoading(false);
+    };
+
+    const unsubOutbound = onSnapshot(
+      outboundQuery,
+      (snapshot) => {
+        outboundMessages = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          return toSimplifiedMessage(
+            messageFromFirestore(doc.id, data as Record<string, unknown>)
+          );
+        });
+        combineAndSort();
+      },
+      (err) => {
+        console.error('useSMSMessages outbound error:', err);
+        setError(err as Error);
+        setLoading(false);
+      }
+    );
+
+    const unsubInbound = onSnapshot(
+      inboundQuery,
+      (snapshot) => {
+        inboundMessages = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          return toSimplifiedMessage(
+            messageFromFirestore(doc.id, data as Record<string, unknown>)
+          );
+        });
+        combineAndSort();
+      },
+      (err) => {
+        console.error('useSMSMessages inbound error:', err);
+        setError(err as Error);
+        setLoading(false);
+      }
+    );
+
+    return () => {
+      unsubOutbound();
+      unsubInbound();
+    };
+  }, [phoneNumber, orgId, refreshKey]);
+
+  const refresh = useCallback(() => {
+    setRefreshKey((k) => k + 1);
+  }, []);
+
+  return {
+    messages,
+    loading,
+    error,
+    refresh,
+  };
+}
+
+// Default export for convenience
+export default useSMS;

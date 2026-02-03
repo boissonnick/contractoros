@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Card, Badge, Button } from '@/components/ui';
-import { ChevronRightIcon } from '@heroicons/react/24/outline';
+import { ChevronRightIcon, SignalIcon } from '@heroicons/react/24/outline';
 import {
   QuickBooksLogo,
   XeroLogo,
@@ -90,6 +90,8 @@ export default function IntegrationsPage() {
       description: 'Accept online payments from clients via credit card, ACH, and more.',
       category: 'Payments',
       logo: <StripeLogo width={50} height={22} />,
+      comingSoon: true,
+      href: '/dashboard/settings/integrations/stripe',
     },
   ];
 
@@ -99,23 +101,33 @@ export default function IntegrationsPage() {
       description: 'Sync timesheets and manage payroll for your team.',
       category: 'Payroll & HR',
       logo: <GustoLogo width={70} height={24} />,
+      comingSoon: true,
+      href: '/dashboard/settings/integrations/gusto',
     },
     {
       name: 'ADP',
       description: 'Enterprise payroll integration for larger teams.',
       category: 'Payroll & HR',
       logo: <ADPLogo width={50} height={24} />,
+      comingSoon: true,
     },
   ];
 
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-1">Integrations</h2>
-        <p className="text-sm text-gray-500">
-          Connect ContractorOS with your favorite tools to streamline your workflow.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 mb-1">Integrations</h2>
+          <p className="text-sm text-gray-500">
+            Connect ContractorOS with your favorite tools to streamline your workflow.
+          </p>
+        </div>
+        <Link href="/dashboard/settings/integrations/status">
+          <Button variant="outline" size="sm" icon={<SignalIcon className="w-4 h-4" />}>
+            View Status
+          </Button>
+        </Link>
       </div>
 
       {/* Accounting Section */}

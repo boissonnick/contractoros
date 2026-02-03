@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { cn, getInitials } from '@/lib/utils';
 
 export interface AvatarProps {
@@ -55,17 +55,57 @@ export default function Avatar({
   const colorIndex = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
   const bgColor = colors[colorIndex];
 
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  // Reset state when src changes
+  useEffect(() => {
+    setIsLoaded(false);
+    setHasError(false);
+  }, [src]);
+
+  const handleLoad = useCallback(() => {
+    setIsLoaded(true);
+  }, []);
+
+  const handleError = useCallback(() => {
+    setHasError(true);
+  }, []);
+
+  // Show initials if no src, error loading, or still loading
+  const showInitials = !src || hasError;
+
   return (
     <div className={cn('relative inline-flex', className)}>
-      {src ? (
-        <img
-          src={src}
-          alt={name}
-          className={cn(
-            'rounded-full object-cover',
-            sizes[size]
+      {src && !hasError ? (
+        <div className="relative">
+          {/* Placeholder shown while loading */}
+          {!isLoaded && (
+            <div
+              className={cn(
+                'absolute inset-0 rounded-full flex items-center justify-center font-medium',
+                sizes[size],
+                bgColor
+              )}
+            >
+              {getInitials(name)}
+            </div>
           )}
-        />
+          <img
+            ref={imgRef}
+            src={src}
+            alt={name}
+            loading="lazy"
+            onLoad={handleLoad}
+            onError={handleError}
+            className={cn(
+              'rounded-full object-cover transition-opacity duration-200',
+              sizes[size],
+              isLoaded ? 'opacity-100' : 'opacity-0'
+            )}
+          />
+        </div>
       ) : (
         <div
           className={cn(

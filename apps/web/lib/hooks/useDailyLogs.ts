@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   collection,
   query,
@@ -14,6 +14,7 @@ import {
   Timestamp,
   QueryConstraint,
 } from 'firebase/firestore';
+import { usePagination, UsePaginationResult } from './usePagination';
 import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
 import { convertTimestampsDeep } from '@/lib/firebase/timestamp-converter';
@@ -335,4 +336,177 @@ export function useTodayLogs(projectId?: string) {
     startDate: today,
     endDate: today,
   });
+}
+
+// ============================================================================
+// Paginated Daily Logs Hook
+// ============================================================================
+
+/**
+ * Options for paginated daily logs query
+ */
+interface UsePaginatedDailyLogsOptions {
+  /** Filter by specific project */
+  projectId?: string;
+  /** Filter by specific user */
+  userId?: string;
+  /** Filter by category */
+  category?: DailyLogCategory;
+  /** Filter by date range */
+  dateRange?: {
+    start: Date;
+    end: Date;
+  };
+  /** Number of logs per page (default: 50) */
+  pageSize?: number;
+}
+
+/**
+ * Return type for paginated daily logs hook
+ */
+interface UsePaginatedDailyLogsReturn extends UsePaginationResult<DailyLogEntry> {
+  /** Alias for items - domain-specific name */
+  logs: DailyLogEntry[];
+}
+
+/**
+ * Paginated hook for daily logs - use when dealing with large datasets.
+ *
+ * Daily logs can accumulate quickly over time. Use this hook instead of
+ * useDailyLogs when:
+ * - Viewing all logs across an organization
+ * - Building reports with date range filters
+ * - Performance is degrading with useDailyLogs
+ *
+ * @example
+ * // Basic usage with LoadMore component
+ * function DailyLogsPage() {
+ *   const { logs, loading, hasMore, loadMore } = usePaginatedDailyLogs(orgId);
+ *
+ *   return (
+ *     <div>
+ *       {logs.map(log => <LogCard key={log.id} log={log} />)}
+ *       <LoadMore
+ *         hasMore={hasMore}
+ *         loading={loading}
+ *         onLoadMore={loadMore}
+ *         itemCount={logs.length}
+ *       />
+ *     </div>
+ *   );
+ * }
+ *
+ * @example
+ * // With filters
+ * const { logs, loading, hasMore, loadMore } = usePaginatedDailyLogs(orgId, {
+ *   projectId: 'project-123',
+ *   category: 'progress',
+ *   dateRange: { start: startOfMonth, end: endOfMonth },
+ *   pageSize: 25,
+ * });
+ *
+ * @example
+ * // With Pagination component (page-based navigation)
+ * function DailyLogsPage() {
+ *   const {
+ *     logs,
+ *     loading,
+ *     currentPage,
+ *     hasMore,
+ *     hasPrevious,
+ *     loadMore,
+ *     loadPrevious,
+ *     pageSize,
+ *     setPageSize,
+ *   } = usePaginatedDailyLogs(orgId);
+ *
+ *   return (
+ *     <div>
+ *       {logs.map(log => <LogCard key={log.id} log={log} />)}
+ *       <CompactPagination
+ *         currentPage={currentPage}
+ *         totalPages={0} // Unknown with cursor pagination
+ *         hasNextPage={hasMore}
+ *         hasPreviousPage={hasPrevious}
+ *         onNextPage={loadMore}
+ *         onPreviousPage={loadPrevious}
+ *         loading={loading}
+ *       />
+ *     </div>
+ *   );
+ * }
+ */
+export function usePaginatedDailyLogs(
+  orgId: string | undefined,
+  options: UsePaginatedDailyLogsOptions = {}
+): UsePaginatedDailyLogsReturn {
+  const {
+    projectId,
+    userId,
+    category,
+    dateRange,
+    pageSize = 50,
+  } = options;
+
+  // Build query filters with useMemo to prevent infinite loops
+  const filters = useMemo(() => {
+    const constraints: QueryConstraint[] = [];
+
+    if (projectId) {
+      constraints.push(where('projectId', '==', projectId));
+    }
+
+    if (userId) {
+      constraints.push(where('userId', '==', userId));
+    }
+
+    if (category) {
+      constraints.push(where('category', '==', category));
+    }
+
+    if (dateRange?.start) {
+      const startStr = dateRange.start.toISOString().split('T')[0];
+      constraints.push(where('date', '>=', startStr));
+    }
+
+    if (dateRange?.end) {
+      const endStr = dateRange.end.toISOString().split('T')[0];
+      constraints.push(where('date', '<=', endStr));
+    }
+
+    return constraints;
+  }, [projectId, userId, category, dateRange?.start?.getTime(), dateRange?.end?.getTime()]);
+
+  // Use the generic pagination hook
+  const paginationResult = usePagination<DailyLogEntry>(orgId, 'dailyLogs', {
+    pageSize,
+    orderByField: 'date',
+    orderDirection: 'desc',
+    filters,
+    dateFields: ['createdAt', 'updatedAt', 'followUpDate'],
+  });
+
+  // Return with domain-specific alias
+  return {
+    ...paginationResult,
+    logs: paginationResult.items,
+  };
+}
+
+/**
+ * Paginated hook for project-specific daily logs
+ *
+ * @example
+ * const { logs, loading, hasMore, loadMore } = usePaginatedProjectDailyLogs(
+ *   projectId,
+ *   orgId,
+ *   { pageSize: 25 }
+ * );
+ */
+export function usePaginatedProjectDailyLogs(
+  projectId: string,
+  orgId: string | undefined,
+  options: Omit<UsePaginatedDailyLogsOptions, 'projectId'> = {}
+) {
+  return usePaginatedDailyLogs(orgId, { ...options, projectId });
 }

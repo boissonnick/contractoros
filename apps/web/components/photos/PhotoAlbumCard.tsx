@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { PhotoAlbum, ProjectPhoto } from '@/types';
 import { formatDate } from '@/lib/date-utils';
@@ -86,11 +86,9 @@ export default function PhotoAlbumCard({
       {/* Cover Image */}
       <div className="aspect-video bg-gray-100 relative">
         {coverPhoto ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <LazyAlbumCover
             src={coverPhoto.thumbnailUrl || coverPhoto.url}
             alt={album.name}
-            className="w-full h-full object-cover"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
@@ -178,6 +176,61 @@ export default function PhotoAlbumCard({
           Created {formatDate(album.createdAt)}
         </p>
       </div>
+    </div>
+  );
+}
+
+/**
+ * LazyAlbumCover - Lazy loading album cover image with intersection observer
+ */
+function LazyAlbumCover({ src, alt }: { src: string; alt: string }) {
+  const [isVisible, setIsVisible] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '100px' }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  const handleLoad = useCallback(() => {
+    setIsLoaded(true);
+  }, []);
+
+  return (
+    <div ref={ref} className="w-full h-full relative">
+      {/* Placeholder */}
+      {(!isVisible || !isLoaded) && (
+        <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+      )}
+
+      {/* Image */}
+      {isVisible && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={src}
+          alt={alt}
+          loading="lazy"
+          onLoad={handleLoad}
+          className={cn(
+            'w-full h-full object-cover transition-opacity duration-300',
+            isLoaded ? 'opacity-100' : 'opacity-0'
+          )}
+        />
+      )}
     </div>
   );
 }

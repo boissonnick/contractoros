@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/lib/auth';
 import { Card, Button, Input } from '@/components/ui';
 import {
@@ -25,6 +25,8 @@ import {
   DocumentDuplicateIcon,
   CheckCircleIcon,
   ChatBubbleLeftRightIcon,
+  EyeIcon,
+  DevicePhoneMobileIcon,
 } from '@heroicons/react/24/outline';
 import BaseModal from '@/components/ui/BaseModal';
 import {
@@ -34,6 +36,137 @@ import {
   calculateSmsSegments,
   parseTemplateVariables,
 } from '@/lib/sms/smsUtils';
+import {
+  AVAILABLE_VARIABLES,
+  getSampleData,
+  renderTemplatePreview,
+} from '@/lib/hooks/useSMSTemplates';
+
+/**
+ * Template Preview Component
+ * Shows how a template will render with sample data
+ */
+function TemplatePreview({
+  body,
+  sampleData,
+}: {
+  body: string;
+  sampleData: Record<string, string>;
+}) {
+  const rendered = useMemo(() => {
+    if (!body) return '';
+    return renderTemplatePreview(body, sampleData);
+  }, [body, sampleData]);
+
+  if (!body) {
+    return (
+      <div className="bg-gray-100 rounded-xl p-4 text-center text-gray-500 text-sm">
+        Enter a message to see the preview
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative">
+      {/* Phone mockup */}
+      <div className="bg-gray-900 rounded-3xl p-2 max-w-xs mx-auto shadow-xl">
+        {/* Notch */}
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-5 bg-gray-900 rounded-full z-10" />
+
+        {/* Screen */}
+        <div className="bg-gray-100 rounded-2xl overflow-hidden">
+          {/* Status bar */}
+          <div className="bg-gray-200 px-4 py-2 flex justify-between items-center text-xs text-gray-600">
+            <span>9:41 AM</span>
+            <div className="flex gap-1 items-center">
+              <div className="w-4 h-2 border border-gray-500 rounded-sm">
+                <div className="w-3/4 h-full bg-gray-500 rounded-sm" />
+              </div>
+            </div>
+          </div>
+
+          {/* Message header */}
+          <div className="bg-white border-b border-gray-200 px-4 py-3">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-xs font-semibold">
+                  {sampleData.companyName?.charAt(0) || 'A'}
+                </span>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">{sampleData.companyName || 'Company'}</p>
+                <p className="text-xs text-gray-500">SMS</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Message bubble */}
+          <div className="p-4 min-h-[120px] bg-gray-100">
+            <div className="bg-gray-200 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%]">
+              <p className="text-sm text-gray-900 whitespace-pre-wrap break-words">
+                {rendered}
+              </p>
+            </div>
+            <p className="text-xs text-gray-400 mt-2 ml-1">Now</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Quick Variable Buttons for inserting common variables
+ */
+function QuickVariableButtons({
+  onInsert,
+  currentBody,
+}: {
+  onInsert: (variable: string) => void;
+  currentBody: string;
+}) {
+  // Show variables that haven't been used yet first
+  const sortedVariables = useMemo(() => {
+    const usedVars = parseTemplateVariables(currentBody);
+    return [...AVAILABLE_VARIABLES].sort((a, b) => {
+      const aUsed = usedVars.includes(a.key);
+      const bUsed = usedVars.includes(b.key);
+      if (aUsed && !bUsed) return 1;
+      if (!aUsed && bUsed) return -1;
+      return 0;
+    });
+  }, [currentBody]);
+
+  return (
+    <div className="space-y-2">
+      <p className="text-sm font-medium text-gray-700">Insert Variable</p>
+      <div className="flex flex-wrap gap-2">
+        {sortedVariables.map((v) => {
+          const isUsed = currentBody.includes(`{{${v.key}}}`);
+          return (
+            <button
+              key={v.key}
+              type="button"
+              onClick={() => onInsert(v.key)}
+              className={`px-3 py-1.5 border rounded-lg text-xs transition-colors ${
+                isUsed
+                  ? 'bg-green-50 border-green-200 text-green-700'
+                  : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+              }`}
+              title={`${v.label}: "${v.sample}"`}
+            >
+              <span className="font-mono">{`{{${v.key}}}`}</span>
+              <span className="ml-1 text-gray-400">({v.label})</span>
+            </button>
+          );
+        })}
+      </div>
+      <p className="text-xs text-gray-500">
+        Click to insert at cursor position. Variables will be replaced with actual data when sending.
+      </p>
+    </div>
+  );
+}
 
 const TEMPLATE_TYPES: { value: SmsTemplateType; label: string; description: string }[] = [
   { value: 'payment_reminder', label: 'Payment Reminder', description: 'Remind clients about upcoming or overdue payments' },
@@ -424,7 +557,7 @@ export default function SmsTemplatesPage() {
         open={modalOpen}
         onClose={handleCloseModal}
         title={editingTemplate ? 'Edit Template' : 'Create Template'}
-        size="lg"
+        size="xl"
         footer={
           <div className="flex justify-end gap-3">
             <Button variant="secondary" onClick={handleCloseModal}>
@@ -436,122 +569,155 @@ export default function SmsTemplatesPage() {
           </div>
         }
       >
-        <div className="space-y-4">
-          {/* Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Template Name *
-            </label>
-            <Input
-              value={formData.name}
-              onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
-              placeholder="e.g., Payment Reminder - Friendly"
-            />
-          </div>
-
-          {/* Description */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description
-            </label>
-            <Input
-              value={formData.description}
-              onChange={(e) => setFormData((p) => ({ ...p, description: e.target.value }))}
-              placeholder="When to use this template"
-            />
-          </div>
-
-          {/* Type */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Template Type
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              {TEMPLATE_TYPES.map(({ value, label, description }) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => handleTypeChange(value)}
-                  className={`text-left p-3 border rounded-lg transition-colors ${
-                    formData.type === value
-                      ? 'border-brand-primary bg-brand-primary/5'
-                      : 'border-gray-200 hover:bg-gray-50'
-                  }`}
-                >
-                  <span className="block font-medium text-sm">{label}</span>
-                  <span className="block text-xs text-gray-500 mt-0.5">{description}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Body */}
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="block text-sm font-medium text-gray-700">
-                Message Body *
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left column: Form */}
+          <div className="space-y-4">
+            {/* Name */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Template Name *
               </label>
-              <button
-                type="button"
-                onClick={handleUseDefaultTemplate}
-                className="text-xs text-brand-primary hover:underline"
+              <Input
+                value={formData.name}
+                onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
+                placeholder="e.g., Payment Reminder - Friendly"
+              />
+            </div>
+
+            {/* Description */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Description
+              </label>
+              <Input
+                value={formData.description}
+                onChange={(e) => setFormData((p) => ({ ...p, description: e.target.value }))}
+                placeholder="When to use this template"
+              />
+            </div>
+
+            {/* Category/Type selector - simplified */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Category
+              </label>
+              <select
+                value={formData.type}
+                onChange={(e) => handleTypeChange(e.target.value as SmsTemplateType)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
               >
-                Use default template
-              </button>
+                {TEMPLATE_TYPES.map(({ value, label }) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
             </div>
-            <textarea
-              value={formData.body}
-              onChange={(e) => setFormData((p) => ({ ...p, body: e.target.value }))}
-              rows={4}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
-              placeholder="Hi {{clientName}}, this is a reminder..."
-            />
-            <div className="flex items-center justify-between mt-1 text-xs text-gray-500">
-              <span>
-                {smsInfo.charactersUsed} characters / {smsInfo.segments} segment(s) ({smsInfo.encoding})
-              </span>
-              <span>
-                Variables: {detectedVariables.length > 0 ? detectedVariables.join(', ') : 'None'}
-              </span>
-            </div>
-          </div>
 
-          {/* Available variables */}
-          <div className="bg-gray-50 rounded-lg p-3">
-            <p className="text-sm font-medium text-gray-700 mb-2">Available Variables</p>
-            <div className="flex flex-wrap gap-2">
-              {getDefaultTemplateVariables(formData.type).map((v) => (
+            {/* Body */}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-sm font-medium text-gray-700">
+                  Message Body *
+                </label>
                 <button
-                  key={v.name}
                   type="button"
-                  onClick={() => {
-                    setFormData((p) => ({
-                      ...p,
-                      body: p.body + `{{${v.name}}}`,
-                    }));
-                  }}
-                  className="px-2 py-1 bg-white border border-gray-200 rounded text-xs hover:bg-gray-100"
-                  title={v.description}
+                  onClick={handleUseDefaultTemplate}
+                  className="text-xs text-brand-primary hover:underline"
                 >
-                  {`{{${v.name}}}`}
-                  {v.required && <span className="text-red-500 ml-0.5">*</span>}
+                  Use default template
                 </button>
-              ))}
+              </div>
+              <textarea
+                id="sms-body-textarea"
+                value={formData.body}
+                onChange={(e) => setFormData((p) => ({ ...p, body: e.target.value }))}
+                rows={5}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary font-mono"
+                placeholder="Hi {{clientName}}, this is a reminder about your {{projectName}} project..."
+              />
+              <div className="flex items-center justify-between mt-1 text-xs text-gray-500">
+                <span>
+                  {smsInfo.charactersUsed} characters / {smsInfo.segments} segment(s) ({smsInfo.encoding})
+                </span>
+                <span>
+                  Variables: {detectedVariables.length > 0 ? detectedVariables.join(', ') : 'None'}
+                </span>
+              </div>
             </div>
+
+            {/* Variable insertion buttons */}
+            <div className="bg-gray-50 rounded-lg p-3">
+              <QuickVariableButtons
+                currentBody={formData.body}
+                onInsert={(variable) => {
+                  const textarea = document.getElementById('sms-body-textarea') as HTMLTextAreaElement | null;
+                  if (textarea) {
+                    const start = textarea.selectionStart;
+                    const end = textarea.selectionEnd;
+                    const text = formData.body;
+                    const before = text.substring(0, start);
+                    const after = text.substring(end);
+                    const newText = `${before}{{${variable}}}${after}`;
+                    setFormData((p) => ({ ...p, body: newText }));
+                    // Restore cursor position after the inserted variable
+                    setTimeout(() => {
+                      textarea.focus();
+                      const newPos = start + variable.length + 4; // +4 for {{ and }}
+                      textarea.setSelectionRange(newPos, newPos);
+                    }, 0);
+                  } else {
+                    // Fallback: append to end
+                    setFormData((p) => ({ ...p, body: p.body + `{{${variable}}}` }));
+                  }
+                }}
+              />
+            </div>
+
+            {/* Default checkbox */}
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={formData.isDefault}
+                onChange={(e) => setFormData((p) => ({ ...p, isDefault: e.target.checked }))}
+                className="rounded border-gray-300 text-brand-primary focus:ring-brand-primary"
+              />
+              <span className="text-sm text-gray-700">
+                Set as default template for this type
+              </span>
+            </label>
           </div>
 
-          {/* Default checkbox */}
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={formData.isDefault}
-              onChange={(e) => setFormData((p) => ({ ...p, isDefault: e.target.checked }))}
-              className="rounded border-gray-300 text-brand-primary focus:ring-brand-primary"
-            />
-            <span className="text-sm text-gray-700">
-              Set as default template for this type
-            </span>
-          </label>
+          {/* Right column: Preview */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+              <EyeIcon className="h-4 w-4" />
+              <span>Live Preview</span>
+            </div>
+
+            <TemplatePreview body={formData.body} sampleData={getSampleData()} />
+
+            {/* Sample data legend */}
+            <div className="bg-blue-50 border border-blue-100 rounded-lg p-3">
+              <p className="text-xs font-medium text-blue-800 mb-2 flex items-center gap-1">
+                <DevicePhoneMobileIcon className="h-4 w-4" />
+                Preview Sample Data
+              </p>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                {AVAILABLE_VARIABLES.slice(0, 6).map((v) => (
+                  <div key={v.key} className="flex justify-between">
+                    <span className="text-blue-600 font-mono">{`{{${v.key}}}`}</span>
+                    <span className="text-blue-800">{v.sample}</span>
+                  </div>
+                ))}
+              </div>
+              {detectedVariables.length > 0 && (
+                <p className="text-xs text-blue-600 mt-2">
+                  Your template uses: {detectedVariables.map((v) => `{{${v}}}`).join(', ')}
+                </p>
+              )}
+            </div>
+          </div>
         </div>
       </BaseModal>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { ProjectPhoto } from '@/types';
 import PhotoLightbox from './PhotoLightbox';
@@ -36,6 +36,111 @@ const gapClasses = {
 };
 
 /**
+ * LazyPhotoItem - Individual photo item with lazy loading via Intersection Observer
+ */
+interface LazyPhotoItemProps {
+  photo: ProjectPhoto;
+  index: number;
+  isSelected: boolean;
+  selectable: boolean;
+  onClick: () => void;
+}
+
+function LazyPhotoItem({ photo, index, isSelected, selectable, onClick }: LazyPhotoItemProps) {
+  const [isVisible, setIsVisible] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const ref = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  const handleLoad = useCallback(() => {
+    setIsLoaded(true);
+  }, []);
+
+  return (
+    <button
+      ref={ref}
+      onClick={onClick}
+      className={cn(
+        'relative aspect-square rounded-lg overflow-hidden bg-gray-100 group transition-all',
+        selectable && isSelected
+          ? 'ring-2 ring-blue-500 ring-offset-2'
+          : 'hover:ring-2 hover:ring-blue-400'
+      )}
+    >
+      {/* Placeholder skeleton while loading */}
+      {(!isVisible || !isLoaded) && (
+        <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+      )}
+
+      {/* Image - only rendered when visible */}
+      {isVisible && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={photo.thumbnailUrl || photo.url}
+          alt={photo.caption || 'Photo'}
+          loading="lazy"
+          onLoad={handleLoad}
+          className={cn(
+            'w-full h-full object-cover transition-opacity duration-300',
+            isLoaded ? 'opacity-100' : 'opacity-0'
+          )}
+        />
+      )}
+
+      {/* Selection checkbox */}
+      {selectable && (
+        <div className={cn(
+          'absolute top-2 left-2 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors',
+          isSelected
+            ? 'bg-blue-500 border-blue-500 text-white'
+            : 'bg-white/80 border-gray-300 text-transparent group-hover:border-blue-400'
+        )}>
+          <CheckIcon className="h-4 w-4" />
+        </div>
+      )}
+
+      {/* Approval badge */}
+      {photo.approved && !selectable && (
+        <div className="absolute top-2 right-2 bg-green-500 text-white rounded-full p-0.5">
+          <CheckIcon className="h-3 w-3" />
+        </div>
+      )}
+
+      {/* Caption overlay */}
+      {photo.caption && !selectable && (
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <p className="text-white text-xs truncate">{photo.caption}</p>
+        </div>
+      )}
+
+      {/* Type indicator */}
+      {photo.type && photo.type !== 'progress' && !selectable && (
+        <div className="absolute bottom-2 left-2 px-1.5 py-0.5 bg-black/60 text-white text-xs rounded">
+          {photo.type}
+        </div>
+      )}
+    </button>
+  );
+}
+
+/**
  * PhotoGrid - Responsive grid layout for displaying photos
  *
  * Features:
@@ -44,6 +149,7 @@ const gapClasses = {
  * - Lightbox integration
  * - Approval badges
  * - Empty state
+ * - Lazy loading with Intersection Observer
  */
 export default function PhotoGrid({
   photos,
@@ -95,56 +201,14 @@ export default function PhotoGrid({
           const isSelected = selectedIds.includes(photo.id);
 
           return (
-            <button
+            <LazyPhotoItem
               key={photo.id}
+              photo={photo}
+              index={index}
+              isSelected={isSelected}
+              selectable={selectable}
               onClick={() => handlePhotoClick(photo, index)}
-              className={cn(
-                'relative aspect-square rounded-lg overflow-hidden bg-gray-100 group transition-all',
-                selectable && isSelected
-                  ? 'ring-2 ring-blue-500 ring-offset-2'
-                  : 'hover:ring-2 hover:ring-blue-400'
-              )}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={photo.thumbnailUrl || photo.url}
-                alt={photo.caption || 'Photo'}
-                className="w-full h-full object-cover"
-              />
-
-              {/* Selection checkbox */}
-              {selectable && (
-                <div className={cn(
-                  'absolute top-2 left-2 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors',
-                  isSelected
-                    ? 'bg-blue-500 border-blue-500 text-white'
-                    : 'bg-white/80 border-gray-300 text-transparent group-hover:border-blue-400'
-                )}>
-                  <CheckIcon className="h-4 w-4" />
-                </div>
-              )}
-
-              {/* Approval badge */}
-              {photo.approved && !selectable && (
-                <div className="absolute top-2 right-2 bg-green-500 text-white rounded-full p-0.5">
-                  <CheckIcon className="h-3 w-3" />
-                </div>
-              )}
-
-              {/* Caption overlay */}
-              {photo.caption && !selectable && (
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <p className="text-white text-xs truncate">{photo.caption}</p>
-                </div>
-              )}
-
-              {/* Type indicator */}
-              {photo.type && photo.type !== 'progress' && !selectable && (
-                <div className="absolute bottom-2 left-2 px-1.5 py-0.5 bg-black/60 text-white text-xs rounded">
-                  {photo.type}
-                </div>
-              )}
-            </button>
+            />
           );
         })}
       </div>

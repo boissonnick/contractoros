@@ -322,10 +322,11 @@ export default function PendingPhotosGrid({
                 isUploading && 'opacity-70'
               )}
             >
-              {/* Thumbnail */}
+              {/* Thumbnail with lazy loading */}
               <img
                 src={photo.thumbnail}
                 alt={photo.caption || 'Pending photo'}
+                loading="lazy"
                 className="w-full h-full object-cover"
               />
 
@@ -449,6 +450,7 @@ export default function PendingPhotosGrid({
                 <img
                   src={photos.find((p) => p.localId === editingPhoto)?.thumbnail}
                   alt="Preview"
+                  loading="lazy"
                   className="w-full h-40 object-cover rounded-lg"
                 />
               )}

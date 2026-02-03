@@ -43,12 +43,15 @@ interface NavSection {
 }
 
 const SETTINGS_NAV: NavSection[] = [
-  // Account - Personal settings
+  // Account - Personal settings & security
   {
     key: 'account',
     label: 'Account',
     icon: UserCircleIcon,
-    href: '/dashboard/settings/profile',
+    children: [
+      { key: 'profile', label: 'Profile', href: '/dashboard/settings/profile' },
+      { key: 'sessions', label: 'Active Sessions', href: '/dashboard/settings/sessions' },
+    ],
   },
   // Organization - Company & team management
   {
@@ -105,6 +108,9 @@ const SETTINGS_NAV: NavSection[] = [
     children: [
       { key: 'data-export', label: 'Data Export', href: '/dashboard/settings/data-export' },
       { key: 'data-import', label: 'Data Import', href: '/dashboard/settings/import' },
+      { key: 'data-retention', label: 'Data Retention', href: '/dashboard/settings/data-retention' },
+      { key: 'audit-logs', label: 'Audit Logs', href: '/dashboard/settings/audit-logs' },
+      { key: 'security', label: 'Security Checklist', href: '/dashboard/settings/security' },
       { key: 'intelligence', label: 'AI Intelligence', href: '/dashboard/settings/intelligence' },
       { key: 'assistant', label: 'AI Assistant', href: '/dashboard/settings/assistant' },
       { key: 'ai-providers', label: 'AI Providers', href: '/dashboard/settings/ai-providers' },
@@ -114,7 +120,7 @@ const SETTINGS_NAV: NavSection[] = [
 
 // Path mapping for section highlighting
 const SECTION_PATHS: Record<string, string[]> = {
-  account: ['/dashboard/settings/profile'],
+  account: ['/dashboard/settings/profile', '/dashboard/settings/sessions'],
   organization: [
     '/dashboard/settings/organization',
     '/dashboard/settings/team',
@@ -146,6 +152,9 @@ const SECTION_PATHS: Record<string, string[]> = {
   advanced: [
     '/dashboard/settings/data-export',
     '/dashboard/settings/import',
+    '/dashboard/settings/data-retention',
+    '/dashboard/settings/audit-logs',
+    '/dashboard/settings/security',
     '/dashboard/settings/intelligence',
     '/dashboard/settings/assistant',
     '/dashboard/settings/ai-providers',

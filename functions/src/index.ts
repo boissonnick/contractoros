@@ -28,6 +28,15 @@ export {
   fetchLaborRatesHttp,
 } from "./intelligence/fetchLaborRates";
 
+// SMS Cloud Functions
+export { sendSMS, smsWebhook } from "./sms";
+
+// QuickBooks Online Integration - Scheduled Sync
+export {
+  qboScheduledSync,
+  qboManualSync,
+} from "./integrations/qbo-scheduled-sync";
+
 // Initialize Firebase Admin SDK
 admin.initializeApp();
 

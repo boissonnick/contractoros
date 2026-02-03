@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   collection,
   query,
@@ -13,6 +13,11 @@ import {
   doc,
   Timestamp,
   writeBatch,
+  limit,
+  startAfter,
+  getDocs,
+  QueryConstraint,
+  DocumentSnapshot,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { Task, TaskStatus, TaskPriority, TaskDependency, TaskAttachment, TaskChecklistItem, RecurrenceConfig } from '@/types';
@@ -457,5 +462,327 @@ export function useTasks({ projectId, phaseId, parentTaskId }: UseTasksOptions):
     tasks, loading, error,
     addTask, updateTask, deleteTask, moveTask, reorderTasks,
     bulkUpdateStatus, bulkAssign, bulkDelete, bulkSetPriority,
+  };
+}
+
+// ============================================================================
+// Paginated Tasks Hook
+// ============================================================================
+
+/**
+ * Options for the paginated tasks hook
+ */
+export interface UsePaginatedTasksOptions {
+  /** Project ID to filter tasks (optional) */
+  projectId?: string;
+  /** Phase ID to filter tasks (optional) */
+  phaseId?: string;
+  /** Status to filter tasks (optional) */
+  status?: TaskStatus;
+  /** Assignee user ID to filter tasks (optional) */
+  assigneeId?: string;
+  /** Priority to filter tasks (optional) */
+  priority?: TaskPriority;
+  /** Number of items per page (default: 50) */
+  pageSize?: number;
+  /** Whether to enable the query (default: true) */
+  enabled?: boolean;
+}
+
+/**
+ * Result returned by the paginated tasks hook
+ */
+export interface UsePaginatedTasksResult {
+  /** Current page of tasks */
+  tasks: Task[];
+  /** Loading state */
+  loading: boolean;
+  /** Error if query failed */
+  error: string | null;
+  /** Whether there are more tasks to load */
+  hasMore: boolean;
+  /** Load the next page of tasks */
+  loadMore: () => Promise<void>;
+  /** Refresh data (reset to page 1) */
+  refresh: () => Promise<void>;
+  /** Total number of tasks loaded */
+  totalLoaded: number;
+  /** Current page size */
+  pageSize: number;
+  /** Whether initial fetch is complete */
+  initialized: boolean;
+  /** Update a single task */
+  updateTask: (taskId: string, updates: Partial<Task>) => Promise<void>;
+  /** Delete a single task */
+  deleteTask: (taskId: string) => Promise<void>;
+  /** Move a task to a new status */
+  moveTask: (taskId: string, newStatus: TaskStatus) => Promise<void>;
+}
+
+/**
+ * Paginated hook for fetching tasks with cursor-based pagination.
+ *
+ * Unlike useTasks which loads all tasks at once, this hook supports
+ * pagination to handle large task lists efficiently.
+ *
+ * @param orgId - Organization ID (required for org-scoped queries)
+ * @param options - Filtering and pagination options
+ *
+ * @example
+ * // Basic usage - all tasks for an org
+ * const { tasks, loading, hasMore, loadMore } = usePaginatedTasks(orgId);
+ *
+ * @example
+ * // Filter by project and status
+ * const { tasks, loadMore, hasMore } = usePaginatedTasks(orgId, {
+ *   projectId: 'proj123',
+ *   status: 'in_progress',
+ *   pageSize: 25,
+ * });
+ *
+ * @example
+ * // With LoadMore component
+ * <TaskList tasks={tasks} />
+ * <LoadMore
+ *   hasMore={hasMore}
+ *   loading={loading}
+ *   onLoadMore={loadMore}
+ *   itemCount={totalLoaded}
+ * />
+ */
+export function usePaginatedTasks(
+  orgId: string | undefined,
+  options: UsePaginatedTasksOptions = {}
+): UsePaginatedTasksResult {
+  const {
+    projectId,
+    phaseId,
+    status,
+    assigneeId,
+    priority,
+    pageSize: initialPageSize = 50,
+    enabled = true,
+  } = options;
+
+  // State
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [pageSize] = useState(initialPageSize);
+  const [initialized, setInitialized] = useState(false);
+
+  // Refs
+  const lastDocRef = useRef<DocumentSnapshot | null>(null);
+  const fetchInProgressRef = useRef(false);
+
+  // Memoize filters key for dependency tracking
+  const filtersKey = useMemo(
+    () => JSON.stringify({ projectId, phaseId, status, assigneeId, priority }),
+    [projectId, phaseId, status, assigneeId, priority]
+  );
+
+  /**
+   * Build query constraints based on options
+   */
+  const buildConstraints = useCallback((): QueryConstraint[] => {
+    const constraints: QueryConstraint[] = [];
+
+    // Org filter (required for security)
+    if (orgId) {
+      constraints.push(where('orgId', '==', orgId));
+    }
+
+    // Optional filters
+    if (projectId) {
+      constraints.push(where('projectId', '==', projectId));
+    }
+    if (phaseId) {
+      constraints.push(where('phaseId', '==', phaseId));
+    }
+    if (status) {
+      constraints.push(where('status', '==', status));
+    }
+    if (assigneeId) {
+      constraints.push(where('assignedTo', 'array-contains', assigneeId));
+    }
+    if (priority) {
+      constraints.push(where('priority', '==', priority));
+    }
+
+    // Ordering - createdAt desc for newest first
+    constraints.push(orderBy('createdAt', 'desc'));
+
+    return constraints;
+  }, [orgId, projectId, phaseId, status, assigneeId, priority]);
+
+  /**
+   * Fetch tasks with pagination
+   */
+  const fetchTasks = useCallback(
+    async (isLoadMore = false) => {
+      if (!orgId || !enabled || fetchInProgressRef.current) {
+        return;
+      }
+
+      fetchInProgressRef.current = true;
+      setLoading(true);
+      setError(null);
+
+      try {
+        const constraints = buildConstraints();
+
+        // Add pagination
+        if (isLoadMore && lastDocRef.current) {
+          constraints.push(startAfter(lastDocRef.current));
+        }
+        constraints.push(limit(pageSize + 1)); // Fetch one extra to check if there's more
+
+        const q = query(collection(db, 'tasks'), ...constraints);
+        const snapshot = await getDocs(q);
+        const docs = snapshot.docs;
+
+        // Determine if there are more pages
+        const hasMoreItems = docs.length > pageSize;
+        const pageData = hasMoreItems ? docs.slice(0, pageSize) : docs;
+
+        // Convert documents to typed items
+        const newTasks = pageData.map((docSnap) =>
+          fromFirestore(docSnap.id, docSnap.data())
+        );
+
+        // Store last document for cursor
+        lastDocRef.current = pageData[pageData.length - 1] || null;
+
+        // Update state
+        if (isLoadMore) {
+          setTasks((prev) => [...prev, ...newTasks]);
+        } else {
+          setTasks(newTasks);
+        }
+        setHasMore(hasMoreItems);
+        setInitialized(true);
+      } catch (err) {
+        console.error('Error fetching paginated tasks:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch tasks');
+      } finally {
+        setLoading(false);
+        fetchInProgressRef.current = false;
+      }
+    },
+    [orgId, enabled, buildConstraints, pageSize]
+  );
+
+  // Initial fetch when dependencies change
+  useEffect(() => {
+    if (!orgId || !enabled) {
+      setTasks([]);
+      setInitialized(false);
+      lastDocRef.current = null;
+      return;
+    }
+
+    // Reset on filter changes
+    lastDocRef.current = null;
+    setHasMore(true);
+    fetchTasks(false);
+  }, [orgId, filtersKey, enabled]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /**
+   * Load more tasks
+   */
+  const loadMore = useCallback(async () => {
+    if (!hasMore || loading) return;
+    await fetchTasks(true);
+  }, [hasMore, loading, fetchTasks]);
+
+  /**
+   * Refresh data (reset to first page)
+   */
+  const refresh = useCallback(async () => {
+    lastDocRef.current = null;
+    setHasMore(true);
+    await fetchTasks(false);
+  }, [fetchTasks]);
+
+  /**
+   * Update a single task
+   */
+  const updateTask = useCallback(async (taskId: string, updates: Partial<Task>) => {
+    try {
+      const data = toFirestore(updates);
+      await updateDoc(doc(db, 'tasks', taskId), data);
+      // Update local state optimistically
+      setTasks((prev) =>
+        prev.map((t) => (t.id === taskId ? { ...t, ...updates } : t))
+      );
+    } catch (err) {
+      console.error('Failed to update task:', err);
+      toast.error('Failed to update task');
+      throw err;
+    }
+  }, []);
+
+  /**
+   * Delete a single task
+   */
+  const deleteTask = useCallback(async (taskId: string) => {
+    try {
+      await deleteDoc(doc(db, 'tasks', taskId));
+      // Update local state optimistically
+      setTasks((prev) => prev.filter((t) => t.id !== taskId));
+      toast.success('Task deleted');
+    } catch (err) {
+      console.error('Failed to delete task:', err);
+      toast.error('Failed to delete task');
+      throw err;
+    }
+  }, []);
+
+  /**
+   * Move a task to a new status
+   */
+  const moveTask = useCallback(async (taskId: string, newStatus: TaskStatus) => {
+    try {
+      const updates: Record<string, unknown> = {
+        status: newStatus,
+        updatedAt: Timestamp.now(),
+      };
+      if (newStatus === 'completed') {
+        updates.completedAt = Timestamp.now();
+      }
+      await updateDoc(doc(db, 'tasks', taskId), updates);
+      // Update local state optimistically
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === taskId
+            ? {
+                ...t,
+                status: newStatus,
+                completedAt: newStatus === 'completed' ? new Date() : t.completedAt,
+              }
+            : t
+        )
+      );
+    } catch (err) {
+      console.error('Failed to move task:', err);
+      toast.error('Failed to update task status');
+      throw err;
+    }
+  }, []);
+
+  return {
+    tasks,
+    loading,
+    error,
+    hasMore,
+    loadMore,
+    refresh,
+    totalLoaded: tasks.length,
+    pageSize,
+    initialized,
+    updateTask,
+    deleteTask,
+    moveTask,
   };
 }
