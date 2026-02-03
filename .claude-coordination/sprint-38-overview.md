@@ -107,11 +107,16 @@ Update these as CLIs complete tasks:
 ### CLI 4 Status (Backend)
 ```
 Critical Bugs:
-[ ] Firebase Permissions (#13)
-[ ] Finances Error (#26)
-[ ] Comparison Testing (#27)
-[ ] Profit Margin Bug (#53)
-[ ] Payroll NaN Bug (#57)
+[x] Firebase Permissions (#13) - ✅ COMPLETE 2026-02-02
+[ ] Finances Error (#26) - Verify with seeded data
+[ ] Comparison Testing (#27) - Verify with demo bids
+[x] Profit Margin Bug (#53) - ✅ COMPLETE 2026-02-02
+[x] Payroll NaN Bug (#57) - ✅ COMPLETE 2026-02-02
+
+Data Seeded:
+[x] Job Costing - 87 items, 5 finance summaries
+[x] Punch Lists - 13 items
+[x] Quotes - 4 quotes, 26 line items
 
 Notifications: [ ] [ ] [ ] [ ]
 Research: [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ] [ ]
