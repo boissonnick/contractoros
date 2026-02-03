@@ -268,69 +268,18 @@ export default function IntelligenceSettingsPage() {
         </div>
       </Card>
 
-      {/* Data Contribution */}
-      <Card className="border-2 border-green-200 bg-green-50/50">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
-            <ShieldCheckIcon className="h-6 w-6 text-green-600" />
-          </div>
+      {/* Data Contribution - Now managed in Organization Settings */}
+      <Card className="bg-gray-50">
+        <div className="flex items-center gap-3">
+          <ShieldCheckIcon className="h-5 w-5 text-gray-400 flex-shrink-0" />
           <div className="flex-1">
-            <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-gray-900">Contribute Anonymized Data</h3>
-              <Toggle
-                enabled={settings?.contributionEnabled ?? true}
-                onChange={(v) => updateSetting('contributionEnabled', v)}
-                disabled={!settings?.enabled}
-              />
-            </div>
-            <p className="text-sm text-gray-600 mt-1">
-              Help improve AI suggestions by sharing anonymized estimate and pricing data.
-              Your company and client information is never shared.
+            <p className="text-sm text-gray-700">
+              <span className="font-medium">Data contribution settings</span> have moved to{' '}
+              <a href="/dashboard/settings/organization" className="text-blue-600 hover:underline">
+                Organization Settings
+              </a>{' '}
+              under &quot;Data &amp; Privacy&quot;.
             </p>
-            <div className="mt-4 p-3 bg-white/70 rounded-lg border border-green-200">
-              <h4 className="text-xs font-semibold text-green-800 uppercase tracking-wide mb-2">
-                What gets shared (anonymized):
-              </h4>
-              <ul className="text-sm text-green-700 space-y-1">
-                <li className="flex items-center gap-2">
-                  <CheckIcon className="h-4 w-4" />
-                  Line item costs by trade category
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckIcon className="h-4 w-4" />
-                  Project type and square footage
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckIcon className="h-4 w-4" />
-                  ZIP code prefix (first 3 digits only)
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckIcon className="h-4 w-4" />
-                  Labor hours by task type
-                </li>
-              </ul>
-              <h4 className="text-xs font-semibold text-red-700 uppercase tracking-wide mb-2 mt-3">
-                Never shared:
-              </h4>
-              <ul className="text-sm text-red-600 space-y-1">
-                <li className="flex items-center gap-2">
-                  <span className="h-4 w-4 flex items-center justify-center">×</span>
-                  Company name or contact info
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="h-4 w-4 flex items-center justify-center">×</span>
-                  Client names or addresses
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="h-4 w-4 flex items-center justify-center">×</span>
-                  Subcontractor identities
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="h-4 w-4 flex items-center justify-center">×</span>
-                  Full addresses or project names
-                </li>
-              </ul>
-            </div>
           </div>
         </div>
       </Card>

@@ -145,6 +145,12 @@ export interface Organization {
   fiscalYear?: FiscalYearConfig;
   payrollPeriod?: PayrollPeriodConfig;
   taxConfig?: TaxConfig;
+  // Corporate structure & compliance
+  corporateStructure?: CorporateStructure;
+  insuranceCompliance?: InsuranceCompliance;
+  // Data & Privacy (Sprint 37B) - AI data contribution setting
+  // Defaults to true (opt-out model) - helps improve AI suggestions for all contractors
+  aiContributionEnabled?: boolean;
 }
 
 export interface OrgSettings {
@@ -7883,6 +7889,35 @@ export interface TaxConfig {
   localTaxRate: number;
   state: string;
   taxIdEin?: string;  // Tax ID / EIN for display on invoices (optional)
+}
+
+// Business Type for Corporate Structure
+export type BusinessType = 'llc' | 's_corp' | 'c_corp' | 'sole_prop' | 'partnership';
+
+// Corporate Structure Configuration
+export interface CorporateStructure {
+  legalName?: string;           // Full legal name of the business
+  dba?: string;                 // Doing Business As (trade name)
+  ein?: string;                 // Employer Identification Number (XX-XXXXXXX)
+  businessAddress?: {
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+  };
+  businessType?: BusinessType;
+}
+
+// Insurance & Compliance Configuration
+export interface InsuranceCompliance {
+  stateUnemploymentRate?: number;  // SUTA rate (e.g., 2.7 for 2.7%)
+  futaRate?: number;               // FUTA rate (e.g., 6.0 for 6.0%)
+  workersCompRate?: number;        // Workers comp rate per $100 payroll
+  workersCompClass?: string;       // Classification code (e.g., "5403" for carpentry)
+  generalLiabilityProvider?: string;
+  generalLiabilityPolicyNumber?: string;
+  workersCompProvider?: string;
+  workersCompPolicyNumber?: string;
 }
 
 export interface OrganizationSettings {

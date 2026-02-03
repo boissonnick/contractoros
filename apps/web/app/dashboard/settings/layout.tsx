@@ -17,9 +17,23 @@ import {
   ChevronDownIcon,
   ShieldCheckIcon,
   SparklesIcon,
+  UserCircleIcon,
+  BanknotesIcon,
+  WrenchScrewdriverIcon,
 } from '@heroicons/react/24/outline';
 
-// Grouped navigation structure - reduced from 13 to 6 primary items
+// =============================================================================
+// SETTINGS NAVIGATION - Organized into 7 logical groups
+// =============================================================================
+// 1. Account - Personal profile settings
+// 2. Organization - Company info, team, roles
+// 3. Finance - Payroll, tax rates, billing
+// 4. Templates - All template types consolidated
+// 5. Notifications - Communication preferences
+// 6. Integrations - Third-party connections
+// 7. Advanced - Data import/export, AI features
+// =============================================================================
+
 interface NavSection {
   key: string;
   label: string;
@@ -29,107 +43,117 @@ interface NavSection {
 }
 
 const SETTINGS_NAV: NavSection[] = [
+  // Account - Personal settings
+  {
+    key: 'account',
+    label: 'Account',
+    icon: UserCircleIcon,
+    href: '/dashboard/settings/profile',
+  },
+  // Organization - Company & team management
+  {
+    key: 'organization',
+    label: 'Organization',
+    icon: BuildingOfficeIcon,
+    children: [
+      { key: 'company', label: 'Company Info', href: '/dashboard/settings/organization' },
+      { key: 'team', label: 'Team Members', href: '/dashboard/settings/team' },
+      { key: 'roles', label: 'Roles & Permissions', href: '/dashboard/settings/roles' },
+    ],
+  },
+  // Finance - Financial settings
+  {
+    key: 'finance',
+    label: 'Finance',
+    icon: BanknotesIcon,
+    children: [
+      { key: 'payroll', label: 'Payroll Settings', href: '/dashboard/settings/payroll' },
+      { key: 'tax-rates', label: 'Tax Rates', href: '/dashboard/settings/tax-rates' },
+      { key: 'billing', label: 'Billing & Plans', href: '/dashboard/settings/billing' },
+      { key: 'numbering', label: 'Numbering', href: '/dashboard/settings/numbering' },
+    ],
+  },
+  // Templates - All templates consolidated in one tabbed page
   {
     key: 'templates',
     label: 'Templates',
     icon: RectangleStackIcon,
     href: '/dashboard/settings/templates',
   },
+  // Notifications - Communication settings
   {
-    key: 'resources',
-    label: 'Resources',
-    icon: ArchiveBoxIcon,
+    key: 'notifications',
+    label: 'Notifications',
+    icon: BellIcon,
     children: [
-      { key: 'line-items', label: 'Line Items', href: '/dashboard/settings/line-items' },
-      { key: 'tax-rates', label: 'Tax Rates', href: '/dashboard/settings/tax-rates' },
-      { key: 'quote-templates', label: 'Quote Templates', href: '/dashboard/settings/quote-templates' },
+      { key: 'preferences', label: 'Preferences', href: '/dashboard/settings/notifications' },
+      { key: 'email-history', label: 'Email History', href: '/dashboard/settings/email-history' },
     ],
   },
-  {
-    key: 'organization',
-    label: 'Organization',
-    icon: BuildingOfficeIcon,
-    href: '/dashboard/settings/organization',
-  },
-  {
-    key: 'team',
-    label: 'Team',
-    icon: UserGroupIcon,
-    children: [
-      { key: 'members', label: 'Members', href: '/dashboard/settings/team' },
-      { key: 'roles', label: 'Roles & Permissions', href: '/dashboard/settings/roles' },
-    ],
-  },
-  {
-    key: 'ai',
-    label: 'AI',
-    icon: SparklesIcon,
-    children: [
-      { key: 'intelligence', label: 'AI Intelligence', href: '/dashboard/settings/intelligence' },
-      { key: 'assistant', label: 'AI Assistant', href: '/dashboard/settings/assistant' },
-    ],
-  },
+  // Integrations - Third-party apps
   {
     key: 'integrations',
     label: 'Integrations',
     icon: PuzzlePieceIcon,
     href: '/dashboard/settings/integrations',
   },
+  // Advanced - Power user features
   {
-    key: 'account',
-    label: 'Account',
-    icon: Cog6ToothIcon,
+    key: 'advanced',
+    label: 'Advanced',
+    icon: WrenchScrewdriverIcon,
     children: [
-      { key: 'billing', label: 'Billing', href: '/dashboard/settings/billing' },
       { key: 'data-export', label: 'Data Export', href: '/dashboard/settings/data-export' },
       { key: 'data-import', label: 'Data Import', href: '/dashboard/settings/import' },
-      { key: 'notifications', label: 'Notifications', href: '/dashboard/settings/notifications' },
+      { key: 'intelligence', label: 'AI Intelligence', href: '/dashboard/settings/intelligence' },
+      { key: 'assistant', label: 'AI Assistant', href: '/dashboard/settings/assistant' },
     ],
   },
 ];
 
-// Paths that should highlight the Templates tab
-const TEMPLATE_PATHS = [
-  '/dashboard/settings/templates',
-  '/dashboard/settings/sow-templates',
-  '/dashboard/settings/sms-templates',
-  '/dashboard/settings/email-templates',
-  '/dashboard/settings', // Phase templates (root settings page)
-];
-
-// Paths that should highlight the Resources section
-const RESOURCES_PATHS = [
-  '/dashboard/settings/line-items',
-  '/dashboard/settings/tax-rates',
-  '/dashboard/settings/quote-templates',
-];
-
-// Paths that should highlight the Team section
-const TEAM_PATHS = [
-  '/dashboard/settings/team',
-  '/dashboard/settings/roles',
-];
-
-// Paths that should highlight the Account section
-const ACCOUNT_PATHS = [
-  '/dashboard/settings/billing',
-  '/dashboard/settings/data-export',
-  '/dashboard/settings/notifications',
-];
-
-// Paths that should highlight the AI section
-const AI_PATHS = [
-  '/dashboard/settings/intelligence',
-  '/dashboard/settings/assistant',
-];
+// Path mapping for section highlighting
+const SECTION_PATHS: Record<string, string[]> = {
+  account: ['/dashboard/settings/profile'],
+  organization: [
+    '/dashboard/settings/organization',
+    '/dashboard/settings/team',
+    '/dashboard/settings/roles',
+  ],
+  finance: [
+    '/dashboard/settings/payroll',
+    '/dashboard/settings/tax-rates',
+    '/dashboard/settings/billing',
+    '/dashboard/settings/numbering',
+  ],
+  templates: [
+    '/dashboard/settings/templates',
+    '/dashboard/settings/line-items',
+    '/dashboard/settings/quote-templates',
+    '/dashboard/settings/sow-templates',
+    '/dashboard/settings/sms-templates',
+    '/dashboard/settings/email-templates',
+    '/dashboard/settings', // Phase templates (root settings page)
+  ],
+  notifications: [
+    '/dashboard/settings/notifications',
+    '/dashboard/settings/email-history',
+  ],
+  integrations: [
+    '/dashboard/settings/integrations',
+    '/dashboard/settings/integrations/quickbooks',
+  ],
+  advanced: [
+    '/dashboard/settings/data-export',
+    '/dashboard/settings/import',
+    '/dashboard/settings/intelligence',
+    '/dashboard/settings/assistant',
+  ],
+};
 
 function isPathInSection(pathname: string, section: NavSection): boolean {
   if (section.href && pathname === section.href) return true;
-  if (section.key === 'templates' && TEMPLATE_PATHS.includes(pathname)) return true;
-  if (section.key === 'resources' && RESOURCES_PATHS.includes(pathname)) return true;
-  if (section.key === 'team' && TEAM_PATHS.includes(pathname)) return true;
-  if (section.key === 'account' && ACCOUNT_PATHS.includes(pathname)) return true;
-  if (section.key === 'ai' && AI_PATHS.includes(pathname)) return true;
+  const paths = SECTION_PATHS[section.key];
+  if (paths && paths.includes(pathname)) return true;
   if (section.children) {
     return section.children.some((child) => pathname === child.href);
   }
@@ -214,7 +238,7 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
         <p className="text-gray-500 mt-1">Manage your organization and preferences</p>
       </div>
 
-      {/* Grouped tab bar - reduced from 13 items to 6 */}
+      {/* Grouped tab bar - 7 logical sections with collapsible dropdowns */}
       <div className="border-b border-gray-200 -mx-6 px-6 overflow-visible">
         <nav className="flex gap-1 overflow-visible" aria-label="Settings tabs">
           {SETTINGS_NAV.map((section) => {

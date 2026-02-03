@@ -7,7 +7,7 @@ import { db } from '@/lib/firebase/config';
 import { doc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
 import { uploadCompanyLogo } from '@/lib/firebase/storage-helpers';
 import { Button, Input, toast } from '@/components/ui';
-import { Organization, FiscalYearConfig, PayrollPeriodConfig, TaxConfig } from '@/types';
+import { Organization, FiscalYearConfig, PayrollPeriodConfig, TaxConfig, CorporateStructure, InsuranceCompliance, BusinessType } from '@/types';
 import {
   CloudArrowUpIcon,
   XMarkIcon,
@@ -57,6 +57,30 @@ export default function OrganizationSettingsPage() {
   const [taxState, setTaxState] = useState('');
   const [taxIdEin, setTaxIdEin] = useState('');
 
+  // Corporate Structure (Sprint 37B #84)
+  const [legalName, setLegalName] = useState('');
+  const [dba, setDba] = useState('');
+  const [ein, setEin] = useState('');
+  const [businessStreet, setBusinessStreet] = useState('');
+  const [businessCity, setBusinessCity] = useState('');
+  const [businessState, setBusinessState] = useState('');
+  const [businessZip, setBusinessZip] = useState('');
+  const [businessType, setBusinessType] = useState<BusinessType>('llc');
+
+  // Insurance & Compliance (Sprint 37B #85)
+  const [stateUnemploymentRate, setStateUnemploymentRate] = useState(0);
+  const [futaRate, setFutaRate] = useState(0.6); // Default FUTA rate is 0.6% after credit
+  const [workersCompRate, setWorkersCompRate] = useState(0);
+  const [workersCompClass, setWorkersCompClass] = useState('');
+  const [glProvider, setGlProvider] = useState('');
+  const [glPolicyNumber, setGlPolicyNumber] = useState('');
+  const [wcProvider, setWcProvider] = useState('');
+  const [wcPolicyNumber, setWcPolicyNumber] = useState('');
+
+  // Data & Privacy (Sprint 37B #87/#88)
+  // Default to true (opt-out model) - helps improve AI suggestions for all contractors
+  const [aiContributionEnabled, setAiContributionEnabled] = useState(true);
+
   // Load org data
   useEffect(() => {
     if (!profile?.orgId) return;
@@ -97,6 +121,32 @@ export default function OrganizationSettingsPage() {
           setTaxState(data.taxConfig.state || '');
           setTaxIdEin(data.taxConfig.taxIdEin || '');
         }
+        // Load corporate structure
+        if (data.corporateStructure) {
+          setLegalName(data.corporateStructure.legalName || '');
+          setDba(data.corporateStructure.dba || '');
+          setEin(data.corporateStructure.ein || '');
+          setBusinessType(data.corporateStructure.businessType || 'llc');
+          if (data.corporateStructure.businessAddress) {
+            setBusinessStreet(data.corporateStructure.businessAddress.street || '');
+            setBusinessCity(data.corporateStructure.businessAddress.city || '');
+            setBusinessState(data.corporateStructure.businessAddress.state || '');
+            setBusinessZip(data.corporateStructure.businessAddress.zip || '');
+          }
+        }
+        // Load insurance compliance
+        if (data.insuranceCompliance) {
+          setStateUnemploymentRate(data.insuranceCompliance.stateUnemploymentRate || 0);
+          setFutaRate(data.insuranceCompliance.futaRate || 0.6);
+          setWorkersCompRate(data.insuranceCompliance.workersCompRate || 0);
+          setWorkersCompClass(data.insuranceCompliance.workersCompClass || '');
+          setGlProvider(data.insuranceCompliance.generalLiabilityProvider || '');
+          setGlPolicyNumber(data.insuranceCompliance.generalLiabilityPolicyNumber || '');
+          setWcProvider(data.insuranceCompliance.workersCompProvider || '');
+          setWcPolicyNumber(data.insuranceCompliance.workersCompPolicyNumber || '');
+        }
+        // Load data & privacy settings - default to true if not set (opt-out model)
+        setAiContributionEnabled(data.aiContributionEnabled !== false);
       }
       setLoading(false);
     }
@@ -184,6 +234,32 @@ export default function OrganizationSettingsPage() {
           state: taxState,
           taxIdEin: taxIdEin.trim() || null,
         },
+        // Corporate structure
+        corporateStructure: {
+          legalName: legalName.trim() || null,
+          dba: dba.trim() || null,
+          ein: ein.trim() || null,
+          businessType: businessType,
+          businessAddress: businessStreet.trim() ? {
+            street: businessStreet.trim(),
+            city: businessCity.trim(),
+            state: businessState.trim().toUpperCase(),
+            zip: businessZip.trim(),
+          } : null,
+        },
+        // Insurance compliance
+        insuranceCompliance: {
+          stateUnemploymentRate: stateUnemploymentRate || null,
+          futaRate: futaRate || null,
+          workersCompRate: workersCompRate || null,
+          workersCompClass: workersCompClass.trim() || null,
+          generalLiabilityProvider: glProvider.trim() || null,
+          generalLiabilityPolicyNumber: glPolicyNumber.trim() || null,
+          workersCompProvider: wcProvider.trim() || null,
+          workersCompPolicyNumber: wcPolicyNumber.trim() || null,
+        },
+        // Data & Privacy
+        aiContributionEnabled: aiContributionEnabled,
         updatedAt: Timestamp.now(),
       });
 
@@ -529,6 +605,244 @@ export default function OrganizationSettingsPage() {
               <p className="text-xs text-gray-400 mt-1">Displayed on invoices</p>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Corporate Structure & Insurance Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Corporate Structure */}
+        <div className="bg-white border border-gray-200 rounded-xl p-5">
+          <h3 className="text-sm font-semibold text-gray-900 mb-4">Corporate Structure</h3>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Legal Name</label>
+              <input
+                type="text"
+                value={legalName}
+                onChange={(e) => setLegalName(e.target.value)}
+                placeholder="Full legal business name"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">DBA (Trade Name)</label>
+                <input
+                  type="text"
+                  value={dba}
+                  onChange={(e) => setDba(e.target.value)}
+                  placeholder="Doing Business As"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">EIN</label>
+                <input
+                  type="text"
+                  value={ein}
+                  onChange={(e) => setEin(e.target.value)}
+                  placeholder="XX-XXXXXXX"
+                  maxLength={10}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Business Type</label>
+              <select
+                value={businessType}
+                onChange={(e) => setBusinessType(e.target.value as BusinessType)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="sole_prop">Sole Proprietorship</option>
+                <option value="llc">LLC</option>
+                <option value="partnership">Partnership</option>
+                <option value="s_corp">S Corporation</option>
+                <option value="c_corp">C Corporation</option>
+              </select>
+            </div>
+            <div className="pt-2 border-t border-gray-100">
+              <label className="block text-xs font-medium text-gray-600 mb-2">Business Address</label>
+              <input
+                type="text"
+                value={businessStreet}
+                onChange={(e) => setBusinessStreet(e.target.value)}
+                placeholder="Street address"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-2"
+              />
+              <div className="grid grid-cols-3 gap-2">
+                <input
+                  type="text"
+                  value={businessCity}
+                  onChange={(e) => setBusinessCity(e.target.value)}
+                  placeholder="City"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+                <input
+                  type="text"
+                  value={businessState}
+                  onChange={(e) => setBusinessState(e.target.value)}
+                  placeholder="State"
+                  maxLength={2}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 uppercase"
+                />
+                <input
+                  type="text"
+                  value={businessZip}
+                  onChange={(e) => setBusinessZip(e.target.value)}
+                  placeholder="ZIP"
+                  maxLength={10}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Insurance & Compliance */}
+        <div className="bg-white border border-gray-200 rounded-xl p-5">
+          <h3 className="text-sm font-semibold text-gray-900 mb-4">Insurance & Compliance</h3>
+          <div className="space-y-3">
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">SUTA Rate %</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={15}
+                  step={0.01}
+                  value={stateUnemploymentRate}
+                  onChange={(e) => setStateUnemploymentRate(Number(e.target.value))}
+                  placeholder="e.g., 2.7"
+                  className="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">FUTA Rate %</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={6}
+                  step={0.1}
+                  value={futaRate}
+                  onChange={(e) => setFutaRate(Number(e.target.value))}
+                  placeholder="e.g., 0.6"
+                  className="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">WC Rate</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={50}
+                  step={0.01}
+                  value={workersCompRate}
+                  onChange={(e) => setWorkersCompRate(Number(e.target.value))}
+                  placeholder="Per $100"
+                  className="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
+            <p className="text-xs text-gray-400">SUTA = State Unemployment Tax, FUTA = Federal Unemployment Tax, WC = Workers Comp per $100 payroll</p>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Workers Comp Classification Code</label>
+              <input
+                type="text"
+                value={workersCompClass}
+                onChange={(e) => setWorkersCompClass(e.target.value)}
+                placeholder="e.g., 5403 (Carpentry)"
+                maxLength={10}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            <div className="pt-2 border-t border-gray-100">
+              <p className="text-xs font-medium text-gray-500 mb-2">Insurance Policies</p>
+              <div className="grid grid-cols-2 gap-3 mb-2">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">GL Provider</label>
+                  <input
+                    type="text"
+                    value={glProvider}
+                    onChange={(e) => setGlProvider(e.target.value)}
+                    placeholder="Insurance company"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">GL Policy #</label>
+                  <input
+                    type="text"
+                    value={glPolicyNumber}
+                    onChange={(e) => setGlPolicyNumber(e.target.value)}
+                    placeholder="Policy number"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">WC Provider</label>
+                  <input
+                    type="text"
+                    value={wcProvider}
+                    onChange={(e) => setWcProvider(e.target.value)}
+                    placeholder="Insurance company"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">WC Policy #</label>
+                  <input
+                    type="text"
+                    value={wcPolicyNumber}
+                    onChange={(e) => setWcPolicyNumber(e.target.value)}
+                    placeholder="Policy number"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Data & Privacy Section */}
+      <div className="bg-white border border-gray-200 rounded-xl p-5">
+        <h3 className="text-sm font-semibold text-gray-900 mb-4">Data & Privacy</h3>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium text-gray-700">Contribute anonymized data</p>
+              <span className="px-1.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded">Opt-out</span>
+            </div>
+            <p className="text-sm text-gray-500 mt-1">
+              Help improve AI suggestions for all contractors by sharing anonymized estimate and pricing data.
+              Your company name, client details, and project names are never shared.
+            </p>
+            <details className="mt-3 text-sm">
+              <summary className="text-gray-500 cursor-pointer hover:text-gray-700">What data is shared?</summary>
+              <div className="mt-2 pl-4 space-y-2 text-gray-600 border-l-2 border-gray-200">
+                <p><span className="text-green-600 font-medium">Shared (anonymized):</span> Line item costs by trade, project type, square footage, ZIP code prefix (first 3 digits), labor hours by task type.</p>
+                <p><span className="text-red-600 font-medium">Never shared:</span> Company name, contact info, client names, addresses, subcontractor identities, full project names.</p>
+              </div>
+            </details>
+          </div>
+          <button
+            type="button"
+            onClick={() => setAiContributionEnabled(!aiContributionEnabled)}
+            className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+              aiContributionEnabled ? 'bg-blue-600' : 'bg-gray-200'
+            }`}
+          >
+            <span
+              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                aiContributionEnabled ? 'translate-x-5' : 'translate-x-0'
+              }`}
+            />
+          </button>
         </div>
       </div>
 
