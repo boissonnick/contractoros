@@ -115,10 +115,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       {/* Offline Banner */}
       <OfflineBanner />
 
-      {/* Global Search - positioned in header area on desktop */}
-      <div className="hidden md:flex items-center gap-2 fixed top-4 right-4 lg:right-8 z-40">
-        <GlobalSearchBar />
-      </div>
+      {/* Global Search - integrated into sidebar header on desktop */}
+      {/* Search is now accessible via Cmd+K shortcut and sidebar placement */}
 
       {/* Main App Shell */}
       <div className="flex-1">

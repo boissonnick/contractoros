@@ -1,0 +1,5 @@
+
+17:24 - Task 1 complete: Dropdown arrow positioning fixed in FilterBar.tsx and Select.tsx
+17:28 - Task 2 complete: Empty states fixed in tools, messaging, and reports pages
+17:29 - Task 3 complete: Help menu moved from top bar to sidebar navigation
+17:31 - Task 4 complete: Crew Availability tab added with utilization %, workload viz, trades filter, and team summary

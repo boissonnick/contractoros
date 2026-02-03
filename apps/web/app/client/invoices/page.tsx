@@ -243,7 +243,7 @@ export default function ClientInvoicesPage() {
                       <Link
                         href={`/pay/${invoice.paymentToken}`}
                         onClick={(e) => e.stopPropagation()}
-                        className="inline-flex items-center gap-1 mt-2 px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                        className="inline-flex items-center gap-1 mt-2 px-3 py-1.5 bg-brand-primary text-white text-sm font-medium rounded-lg hover:opacity-90 transition-colors"
                       >
                         <CreditCardIcon className="h-4 w-4" />
                         Pay Now
@@ -350,7 +350,7 @@ export default function ClientInvoicesPage() {
                     selectedInvoice.paymentToken && (
                       <Link
                         href={`/pay/${selectedInvoice.paymentToken}`}
-                        className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                        className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-brand-primary text-white font-medium rounded-lg hover:opacity-90 transition-colors"
                       >
                         <CreditCardIcon className="h-4 w-4" />
                         Pay {formatCurrency(selectedInvoice.balance)}

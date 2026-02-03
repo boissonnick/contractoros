@@ -178,7 +178,7 @@ export function SchedulingSuggestionCard({
               <button
                 onClick={handleApply}
                 disabled={isApplying}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-primary text-white text-xs font-medium rounded-lg hover:opacity-90 disabled:opacity-50 transition-colors"
               >
                 {isApplying ? (
                   <>

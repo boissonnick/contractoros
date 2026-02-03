@@ -191,7 +191,7 @@ export default function PhoneAuthPage() {
                 <button
                   type="submit"
                   disabled={loading || phone.replace(/\D/g, '').length !== 10}
-                  className="w-full py-2.5 px-4 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="w-full py-2.5 px-4 bg-brand-primary text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {loading ? 'Sending...' : 'Send Verification Code'}
                 </button>

@@ -220,7 +220,7 @@ export function BulkProgressModal({
                       className={cn(
                         'w-full px-4 py-2 text-sm font-medium rounded-lg',
                         'transition-colors',
-                        'bg-blue-600 text-white hover:bg-blue-700'
+                        'bg-brand-primary text-white hover:opacity-90'
                       )}
                     >
                       Done

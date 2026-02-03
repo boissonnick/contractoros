@@ -197,7 +197,7 @@ export function BidRecommendationPanel({
         <div className="p-4">
           <button
             onClick={onCreateSolicitation}
-            className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            className="w-full px-4 py-2 bg-brand-primary text-white rounded-lg hover:opacity-90 transition-colors font-medium"
           >
             Create Bid Solicitation
           </button>

@@ -196,7 +196,7 @@ export function MaintenanceLog({
             <button
               type="submit"
               disabled={submitting}
-              className="px-3 py-1.5 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50"
+              className="px-3 py-1.5 text-sm text-white bg-brand-primary hover:opacity-90 rounded-md disabled:opacity-50"
             >
               {submitting ? 'Saving...' : 'Add Record'}
             </button>

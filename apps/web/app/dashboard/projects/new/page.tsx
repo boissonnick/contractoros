@@ -260,7 +260,7 @@ export default function NewProjectPage() {
                     className={cn(
                       'w-10 h-10 rounded-full flex items-center justify-center transition-colors',
                       isComplete ? 'bg-green-500 text-white' :
-                      isCurrent ? 'bg-blue-600 text-white' :
+                      isCurrent ? 'bg-brand-primary text-white' :
                       'bg-gray-200 text-gray-500'
                     )}
                   >

@@ -235,7 +235,7 @@ export function BulkConfirmDialog({
                       'disabled:opacity-50 disabled:cursor-not-allowed',
                       isDestructive
                         ? 'bg-red-600 text-white hover:bg-red-700'
-                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                        : 'bg-brand-primary text-white hover:opacity-90'
                     )}
                   >
                     {isLoading ? (

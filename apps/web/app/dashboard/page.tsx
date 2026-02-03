@@ -627,7 +627,7 @@ export default function DashboardPage() {
               </Link>
             </div>
             {activeProjectsList.length > 0 ? (
-              <div className="divide-y divide-gray-100 max-h-[450px] overflow-y-auto">
+              <div className="divide-y divide-gray-100 max-h-[320px] overflow-y-auto">
                 {activeProjectsList.map((project) => {
                   const percentUsed = project.budget && project.currentSpend !== undefined
                     ? calculateBudgetPercentage(project.currentSpend, project.budget)

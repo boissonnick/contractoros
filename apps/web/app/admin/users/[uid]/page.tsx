@@ -174,7 +174,7 @@ export default function AdminUserDetailPage() {
               disabled={changingRole || user.role === role}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                 user.role === role
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-brand-primary text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               } disabled:opacity-50`}
             >

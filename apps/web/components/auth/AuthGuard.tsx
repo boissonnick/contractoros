@@ -59,7 +59,7 @@ export default function AuthGuard({ children, allowedRoles, fallbackPath }: Auth
           <div className="space-y-3">
             <button
               onClick={() => window.location.reload()}
-              className="w-full px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              className="w-full px-4 py-2 bg-brand-primary text-white font-medium rounded-lg hover:opacity-90 transition-colors"
             >
               Retry
             </button>

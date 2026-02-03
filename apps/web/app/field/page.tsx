@@ -234,7 +234,7 @@ export default function FieldPage() {
       </div>
 
       {/* Time Clock Card */}
-      <div className={`rounded-2xl p-6 ${activeEntry ? 'bg-green-600' : 'bg-blue-600'} text-white`}>
+      <div className={`rounded-2xl p-6 ${activeEntry ? 'bg-green-600' : 'bg-brand-primary'} text-white`}>
         <div className="text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
             <ClockIcon className="h-5 w-5" />

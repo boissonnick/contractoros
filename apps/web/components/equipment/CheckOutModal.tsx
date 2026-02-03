@@ -213,7 +213,7 @@ export function CheckOutModal({
               <button
                 type="submit"
                 disabled={loading}
-                className="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors disabled:opacity-50"
+                className="px-4 py-2 text-sm text-white bg-brand-primary hover:opacity-90 rounded-md transition-colors disabled:opacity-50"
               >
                 {loading ? 'Processing...' : 'Check Out'}
               </button>

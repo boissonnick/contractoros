@@ -96,7 +96,7 @@ function ModelCard({ modelKey, config, isSelected, isAvailable, onSelect }: Mode
             <Badge className="bg-green-100 text-green-700 text-xs">Free</Badge>
           )}
           {isSelected && (
-            <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
+            <div className="w-6 h-6 bg-brand-primary rounded-full flex items-center justify-center">
               <CheckCircleIcon className="h-4 w-4 text-white" />
             </div>
           )}

@@ -105,7 +105,7 @@ export default function VerifyEmailPage() {
             <p className="text-gray-500 mb-6">{errorMessage}</p>
             <button
               onClick={() => router.push('/login')}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+              className="px-6 py-2 bg-brand-primary text-white rounded-lg text-sm font-medium hover:opacity-90"
             >
               Back to Login
             </button>

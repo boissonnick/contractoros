@@ -225,7 +225,7 @@ export default function MessagesPage() {
                           <div className={cn(
                             'px-3 py-2 rounded-xl text-sm inline-block',
                             isOwn
-                              ? 'bg-blue-600 text-white rounded-tr-sm'
+                              ? 'bg-brand-primary text-white rounded-tr-sm'
                               : 'bg-gray-100 text-gray-900 rounded-tl-sm'
                           )}>
                             {msg.text}

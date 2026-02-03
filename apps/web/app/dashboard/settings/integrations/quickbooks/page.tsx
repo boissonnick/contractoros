@@ -564,7 +564,7 @@ export default function QuickBooksSettingsPage() {
               <button
                 onClick={() => handleSync('all')}
                 disabled={syncing !== null}
-                className="col-span-2 flex items-center justify-center gap-2 p-4 bg-blue-600 text-white rounded-xl min-h-[48px] active:bg-blue-700 disabled:opacity-50 transition-colors"
+                className="col-span-2 flex items-center justify-center gap-2 p-4 bg-brand-primary text-white rounded-xl min-h-[48px] hover:opacity-90 disabled:opacity-50 transition-colors"
               >
                 {syncing === 'all' ? (
                   <ArrowPathIcon className="w-5 h-5 animate-spin" />

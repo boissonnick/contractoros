@@ -146,7 +146,7 @@ export function DocumentUpload({
   const getStatusIcon = (status: DocumentAnalysisStatus) => {
     switch (status) {
       case 'uploading':
-        return <ArrowUpTrayIcon className="h-5 w-5 text-blue-500 animate-bounce" />;
+        return <ArrowUpTrayIcon className="h-5 w-5 text-blue-500 animate-pulse" />;
       case 'analyzing':
         return (
           <div className="h-5 w-5 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />

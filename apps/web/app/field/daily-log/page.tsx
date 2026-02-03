@@ -287,7 +287,7 @@ export default function FieldDailyLogPage() {
       {!showForm && selectedProjectId && (
         <button
           onClick={() => setShowForm(true)}
-          className="fixed bottom-24 right-4 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-700 active:scale-95 transition-transform"
+          className="fixed bottom-24 right-4 w-14 h-14 bg-brand-primary text-white rounded-full shadow-lg flex items-center justify-center hover:opacity-90 active:scale-95 transition-transform"
         >
           <PlusIcon className="h-7 w-7" />
         </button>
@@ -296,7 +296,7 @@ export default function FieldDailyLogPage() {
       {/* Prompt to select project */}
       {!showForm && !selectedProjectId && projects.length > 0 && (
         <div className="fixed bottom-24 left-4 right-4">
-          <div className="bg-blue-600 text-white px-4 py-3 rounded-xl shadow-lg text-center">
+          <div className="bg-brand-primary text-white px-4 py-3 rounded-xl shadow-lg text-center">
             <p className="text-sm">Select a project to create a daily log</p>
           </div>
         </div>

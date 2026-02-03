@@ -688,11 +688,11 @@ export default function ProjectsPage() {
                   )}
                 </div>
 
-                <Link href={`/dashboard/projects/${project.id}`} prefetch={false} className="block p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <h3 className="font-semibold text-gray-900 truncate pr-8" title={project.name}>{project.name}</h3>
+                <Link href={`/dashboard/projects/${project.id}`} prefetch={false} className="block p-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="font-semibold text-gray-900 truncate pr-8 text-sm" title={project.name}>{project.name}</h3>
                   </div>
-                  <div className="flex items-center gap-2 mb-3">
+                  <div className="flex items-center gap-2 mb-2">
                     <Badge className={statusConfig[project.status].color}>
                       {statusConfig[project.status].label}
                     </Badge>
@@ -703,21 +703,21 @@ export default function ProjectsPage() {
                     )}
                   </div>
 
-                  <div className="space-y-2 text-sm text-gray-500">
-                    <div className="flex items-center gap-2">
-                      <MapPinIcon className="h-4 w-4" />
+                  <div className="space-y-1 text-xs text-gray-500">
+                    <div className="flex items-center gap-1.5">
+                      <MapPinIcon className="h-3.5 w-3.5" />
                       <span className="line-clamp-1">
                         {project.address.street}, {project.address.city}
                       </span>
                     </div>
                     {project.startDate && (
-                      <div className="flex items-center gap-2">
-                        <CalendarIcon className="h-4 w-4" />
+                      <div className="flex items-center gap-1.5">
+                        <CalendarIcon className="h-3.5 w-3.5" />
                         <span>Started {format(new Date(project.startDate), 'MMM d, yyyy')}</span>
                       </div>
                     )}
                     {project.budget && (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
                         <span className="font-medium text-gray-700">
                           {formatCurrency(project.budget)} budget
                         </span>
@@ -731,7 +731,7 @@ export default function ProjectsPage() {
                   </div>
 
                   {project.tags && project.tags.length > 0 && (
-                    <div className="flex items-center gap-1 mt-3 flex-wrap">
+                    <div className="flex items-center gap-1 mt-2 flex-wrap">
                       {project.tags.slice(0, 3).map(tag => (
                         <span key={tag} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">
                           {tag}

@@ -180,7 +180,7 @@ export default function ClientPreferencesPage() {
           {/* Budget & Timeline */}
           <Card>
             <h2 className="font-semibold text-gray-900 mb-4">Budget & Timeline</h2>
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
                 label="Budget Range"
                 placeholder="e.g., $30,000 - $50,000"
@@ -189,7 +189,7 @@ export default function ClientPreferencesPage() {
               />
               <Input
                 label="Timeline Preference"
-                placeholder="e.g., Complete by June 2026, flexible on dates"
+                placeholder="e.g., Complete by June 2026"
                 value={prefs.timelinePreference || ''}
                 onChange={(e) => setPrefs(prev => ({ ...prev, timelinePreference: e.target.value }))}
               />

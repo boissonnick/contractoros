@@ -7,6 +7,7 @@ import { NavItem, UserRole } from '@/types';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { MobileHeader, MobileDrawer, MobileBottomNav } from './MobileNav';
 import { useNetworkStatus } from '@/lib/offline/network-status';
+import { GlobalSearchBar } from '@/components/search';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -37,7 +38,12 @@ export default function AppShell({
           </Link>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+        {/* Global Search - integrated into sidebar */}
+        <div className="px-4 py-3 border-b border-gray-100">
+          <GlobalSearchBar className="w-full" />
+        </div>
+
+        <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
           {navItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
             return (
@@ -110,8 +116,8 @@ export default function AppShell({
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto pb-20 md:pb-0">
-        {/* Added pr-40 on md screens to prevent overlap with fixed search bar */}
-        <div className="max-w-7xl mx-auto p-4 md:p-8 md:pr-40 lg:pr-8">
+        {/* Consistent padding - search bar is ~180px from right edge on desktop */}
+        <div className="max-w-7xl mx-auto p-4 md:p-6 lg:p-8">
           {children}
         </div>
       </main>
