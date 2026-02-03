@@ -2520,6 +2520,114 @@ service cloud.firestore {
       allow write: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
     }
 
+    // ==========================================
+    // Solicitations Collection (Sprint 38)
+    // Bid solicitations sent to subcontractors
+    // ==========================================
+    match /organizations/{orgId}/solicitations/{solicitationId} {
+      // Org members can read solicitations
+      allow read: if isSameOrg(orgId);
+
+      // Admins can create solicitations
+      allow create: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can update solicitations
+      allow update: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Only admins can delete solicitations
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // Finances Collection (Sprint 38)
+    // Project financial summaries and tracking
+    // ==========================================
+    match /organizations/{orgId}/finances/{financeId} {
+      // Org members can read finances
+      allow read: if isSameOrg(orgId);
+
+      // Admins can create finance records
+      allow create: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can update finance records
+      allow update: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Only admins can delete finance records
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // Job Costing Data Collection (Sprint 38)
+    // Detailed job cost tracking and analysis
+    // ==========================================
+    match /organizations/{orgId}/jobCostingData/{costId} {
+      // Org members can read job costing data
+      allow read: if isSameOrg(orgId);
+
+      // Admins can create job costing data
+      allow create: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can update job costing data
+      allow update: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Only admins can delete job costing data
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // Punch List Collection (Sprint 38)
+    // Project punch list items for completion
+    // ==========================================
+    match /organizations/{orgId}/punchList/{punchId} {
+      // Org members can read punch list items
+      allow read: if isSameOrg(orgId);
+
+      // Org members can create punch list items (field workers can add items)
+      allow create: if isSameOrg(orgId);
+
+      // Org members can update punch list items (mark complete, add notes)
+      allow update: if isSameOrg(orgId);
+
+      // Only admins can delete punch list items
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // Quotes Collection (Sprint 38)
+    // Project quotes/estimates
+    // ==========================================
+    match /organizations/{orgId}/quotes/{quoteId} {
+      // Org members can read quotes
+      allow read: if isSameOrg(orgId);
+
+      // Admins can create quotes
+      allow create: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can update quotes
+      allow update: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Only admins can delete quotes
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // Quote Line Items Collection (Sprint 38)
+    // Individual line items within quotes
+    // ==========================================
+    match /organizations/{orgId}/quoteLineItems/{lineItemId} {
+      // Org members can read quote line items
+      allow read: if isSameOrg(orgId);
+
+      // Admins can create quote line items
+      allow create: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Admins can update quote line items
+      allow update: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Only admins can delete quote line items
+      allow delete: if isAdmin();
+    }
+
     // Default deny all other access
     match /{document=**} {
       allow read, write: if false;

@@ -225,7 +225,11 @@ export function calculateProfitSummary(
   const allExpenses = calculateTotalSpent(expenses);
 
   const grossProfit = revenue.totalPaid - approvedExpenses;
-  const profitMargin = revenue.totalPaid > 0 ? (grossProfit / revenue.totalPaid) * 100 : 0;
+  // Fix: Allow negative profit margins when revenue exists but profit is negative
+  // If no revenue but expenses exist, show -100% to indicate complete loss
+  const profitMargin = revenue.totalPaid > 0
+    ? (grossProfit / revenue.totalPaid) * 100
+    : (approvedExpenses > 0 ? -100 : 0);
   const netProfit = revenue.totalPaid - allExpenses;
   const projectedProfit = revenue.contractValue - budget;
 

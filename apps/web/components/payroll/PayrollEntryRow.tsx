@@ -83,7 +83,12 @@ export function PayrollEntryRow({
               <div className="font-medium text-gray-900">{entry.employeeName}</div>
               <div className="text-sm text-gray-500">
                 {entry.employeeType === 'salaried' ? 'Salaried' : 'Hourly'} •{' '}
-                {(entry.regularHours || 0) + (entry.overtimeHours || 0) + (entry.ptoHours || 0) + (entry.sickHours || 0)}h total
+                {(() => {
+                  // Fix: Safely calculate total hours, handling NaN values
+                  const safeNum = (n: number | undefined | null) => (typeof n === 'number' && !isNaN(n) ? n : 0);
+                  const total = safeNum(entry.regularHours) + safeNum(entry.overtimeHours) + safeNum(entry.ptoHours) + safeNum(entry.sickHours);
+                  return total.toFixed(1);
+                })()}h total
               </div>
             </div>
           </div>

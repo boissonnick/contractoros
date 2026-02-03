@@ -373,7 +373,10 @@ export function useDashboardReports(orgId?: string) {
         averageProjectValue: projects.length > 0 ? totalProjectValue / projects.length : 0,
         totalRevenue,
         totalExpenses,
-        profitMargin: totalRevenue > 0 ? ((totalRevenue - totalExpenses) / totalRevenue) * 100 : 0,
+        // Fix: Allow negative profit margins; show -100% if no revenue but expenses exist
+        profitMargin: totalRevenue > 0
+          ? ((totalRevenue - totalExpenses) / totalRevenue) * 100
+          : (totalExpenses > 0 ? -100 : 0),
         outstandingInvoices,
         activeTeamMembers,
         hoursLoggedThisMonth,
@@ -657,7 +660,10 @@ export function useFinancialReports(orgId?: string) {
         totalSpent,
         totalRevenue,
         grossProfit,
-        profitMargin: totalRevenue > 0 ? (grossProfit / totalRevenue) * 100 : 0,
+        // Fix: Allow negative profit margins; show -100% if no revenue but spent exists
+        profitMargin: totalRevenue > 0
+          ? (grossProfit / totalRevenue) * 100
+          : (totalSpent > 0 ? -100 : 0),
         cashFlow: totalRevenue - totalSpent,
       });
 
