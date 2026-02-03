@@ -324,11 +324,11 @@ export default function DashboardPage() {
     };
   }, [projects, tasks, invoices, estimates, teamCount]);
 
-  // Get active projects for display
+  // Get active projects for display (limit to 4 to keep Material Prices visible)
   const activeProjectsList = useMemo(() => {
     return projects
       .filter(p => p.status === 'active')
-      .slice(0, 5);
+      .slice(0, 4);
   }, [projects]);
 
   // Get overdue tasks
@@ -627,7 +627,7 @@ export default function DashboardPage() {
               </Link>
             </div>
             {activeProjectsList.length > 0 ? (
-              <div className="divide-y divide-gray-100 max-h-[320px] overflow-y-auto">
+              <div className="divide-y divide-gray-100 max-h-[280px] overflow-y-auto">
                 {activeProjectsList.map((project) => {
                   const percentUsed = project.budget && project.currentSpend !== undefined
                     ? calculateBudgetPercentage(project.currentSpend, project.budget)

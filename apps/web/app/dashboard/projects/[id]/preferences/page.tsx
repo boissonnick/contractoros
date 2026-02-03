@@ -161,60 +161,54 @@ export default function ClientPreferencesPage() {
         </div>
       </div>
 
-      {/* Main content - responsive grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left column */}
-        <div className="space-y-6">
-          {/* General Notes */}
-          <Card>
-            <h2 className="font-semibold text-gray-900 mb-4">General Notes</h2>
-            <Textarea
-              label="Notes from client"
-              placeholder="Any special requests, considerations, or requirements..."
-              value={prefs.notes || ''}
-              onChange={(e) => setPrefs(prev => ({ ...prev, notes: e.target.value }))}
-              rows={4}
+      {/* Main content - responsive 3-column grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* General Notes */}
+        <Card>
+          <h2 className="font-semibold text-gray-900 mb-4">General Notes</h2>
+          <Textarea
+            label="Notes from client"
+            placeholder="Any special requests, considerations, or requirements..."
+            value={prefs.notes || ''}
+            onChange={(e) => setPrefs(prev => ({ ...prev, notes: e.target.value }))}
+            rows={4}
+          />
+        </Card>
+
+        {/* Budget & Timeline */}
+        <Card>
+          <h2 className="font-semibold text-gray-900 mb-4">Budget & Timeline</h2>
+          <div className="space-y-4">
+            <Input
+              label="Budget Range"
+              placeholder="e.g., $30,000 - $50,000"
+              value={prefs.budgetRange || ''}
+              onChange={(e) => setPrefs(prev => ({ ...prev, budgetRange: e.target.value }))}
             />
-          </Card>
+            <Input
+              label="Timeline Preference"
+              placeholder="e.g., Complete by June 2026"
+              value={prefs.timelinePreference || ''}
+              onChange={(e) => setPrefs(prev => ({ ...prev, timelinePreference: e.target.value }))}
+            />
+          </div>
+        </Card>
 
-          {/* Budget & Timeline */}
-          <Card>
-            <h2 className="font-semibold text-gray-900 mb-4">Budget & Timeline</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Finish Preferences */}
+        <Card className="md:col-span-2 lg:col-span-1">
+          <h2 className="font-semibold text-gray-900 mb-4">Design & Finishes</h2>
+          <div className="space-y-3">
+            {FINISH_FIELDS.map(({ key, label, placeholder }) => (
               <Input
-                label="Budget Range"
-                placeholder="e.g., $30,000 - $50,000"
-                value={prefs.budgetRange || ''}
-                onChange={(e) => setPrefs(prev => ({ ...prev, budgetRange: e.target.value }))}
+                key={key}
+                label={label}
+                placeholder={placeholder}
+                value={prefs.finishes?.[key] || ''}
+                onChange={(e) => updateFinish(key, e.target.value)}
               />
-              <Input
-                label="Timeline Preference"
-                placeholder="e.g., Complete by June 2026"
-                value={prefs.timelinePreference || ''}
-                onChange={(e) => setPrefs(prev => ({ ...prev, timelinePreference: e.target.value }))}
-              />
-            </div>
-          </Card>
-        </div>
-
-        {/* Right column */}
-        <div className="space-y-6">
-          {/* Finish Preferences */}
-          <Card>
-            <h2 className="font-semibold text-gray-900 mb-4">Design & Finishes</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4">
-              {FINISH_FIELDS.map(({ key, label, placeholder }) => (
-                <Input
-                  key={key}
-                  label={label}
-                  placeholder={placeholder}
-                  value={prefs.finishes?.[key] || ''}
-                  onChange={(e) => updateFinish(key, e.target.value)}
-                />
-              ))}
-            </div>
-          </Card>
-        </div>
+            ))}
+          </div>
+        </Card>
       </div>
 
       {/* Inspiration Images - full width */}

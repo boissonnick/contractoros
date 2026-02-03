@@ -189,8 +189,8 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
 
   return (
     <div className="space-y-0">
-      {/* Compact header */}
-      <div className="flex items-center gap-3 mb-1">
+      {/* Compact header with breathing room from main nav */}
+      <div className="flex items-center gap-3 pt-2 mb-3">
         <button
           onClick={() => router.push('/dashboard/projects')}
           className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
