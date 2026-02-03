@@ -21,6 +21,7 @@ import {
   WrenchScrewdriverIcon,
   ChartBarIcon,
   FunnelIcon,
+  ChevronDownIcon,
 } from '@heroicons/react/24/outline';
 import { UserProfile, UserRole } from '@/types';
 import Link from 'next/link';
@@ -52,7 +53,14 @@ export default function TeamPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'members' | 'invites' | 'availability'>('members');
   const [selectedTrade, setSelectedTrade] = useState<string>('all');
+  const [selectedTimeRange, setSelectedTimeRange] = useState<'this_week' | 'next_week' | 'this_month'>('this_week');
   const { confirm, DialogComponent } = useConfirmDialog();
+
+  const timeRangeLabels = {
+    this_week: 'This Week',
+    next_week: 'Next Week',
+    this_month: 'This Month',
+  };
 
   // Get unique trades from team members
   const trades = Array.from(new Set(members.filter(m => m.trade).map(m => m.trade as string)));
@@ -326,9 +334,17 @@ export default function TeamPage() {
                   ))}
                 </select>
               </div>
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <CalendarDaysIcon className="h-5 w-5" />
-                <span>This Week</span>
+              <div className="flex items-center gap-2">
+                <CalendarDaysIcon className="h-5 w-5 text-gray-400" />
+                <select
+                  value={selectedTimeRange}
+                  onChange={(e) => setSelectedTimeRange(e.target.value as typeof selectedTimeRange)}
+                  className="pl-3 pr-8 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="this_week">This Week</option>
+                  <option value="next_week">Next Week</option>
+                  <option value="this_month">This Month</option>
+                </select>
               </div>
             </div>
 
