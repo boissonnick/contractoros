@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { useAuth } from '@/lib/auth';
 import { useDashboardReports, useFinancialReports } from '@/lib/hooks/useReports';
 import { PageHeader, EmptyState } from '@/components/ui';
+import { SkeletonReports } from '@/components/ui/Skeleton';
 import { ReportCard } from '@/components/reports/ReportCard';
 import { RevenueChart } from '@/components/reports/RevenueChart';
 import { DateRangePicker } from '@/components/reports/DateRangePicker';

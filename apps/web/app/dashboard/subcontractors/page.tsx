@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Subcontractor } from '@/types';
 import { useSubcontractors } from '@/lib/hooks/useSubcontractors';
 import { Button } from '@/components/ui';
+import { SkeletonSubcontractorsList } from '@/components/ui/Skeleton';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import SubList from '@/components/subcontractors/SubList';
 import SubForm from '@/components/subcontractors/SubForm';
@@ -27,11 +28,7 @@ export default function SubcontractorsPage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <SkeletonSubcontractorsList />;
   }
 
   return (

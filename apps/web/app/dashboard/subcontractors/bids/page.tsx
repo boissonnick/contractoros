@@ -7,6 +7,7 @@ import { db } from '@/lib/firebase/config';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { Bid, BidStatus, Subcontractor, Project } from '@/types';
 import { PageHeader, Card, Badge, Button, EmptyState } from '@/components/ui';
+import { SkeletonBidsList } from '@/components/ui/Skeleton';
 import { cn, formatCurrency } from '@/lib/utils';
 import { format } from 'date-fns';
 import {
@@ -132,11 +133,7 @@ export default function SubcontractorBidsPage() {
   }, [filteredBids]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <SkeletonBidsList />;
   }
 
   return (

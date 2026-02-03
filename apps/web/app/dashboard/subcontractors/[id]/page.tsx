@@ -7,6 +7,7 @@ import { useSubcontractor, LinkedProject } from '@/lib/hooks/useSubcontractor';
 import { useSubcontractors } from '@/lib/hooks/useSubcontractors';
 import { Subcontractor } from '@/types';
 import { Card, Button, Badge } from '@/components/ui';
+import { SkeletonSubcontractorDetail } from '@/components/ui/Skeleton';
 import { toast } from '@/components/ui/Toast';
 import { cn } from '@/lib/utils';
 import { format, differenceInDays } from 'date-fns';
@@ -67,11 +68,7 @@ export default function SubcontractorDetailPage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <SkeletonSubcontractorDetail />;
   }
 
   if (error || !sub) {
