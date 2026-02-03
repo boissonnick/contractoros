@@ -281,7 +281,7 @@ function createHistoryEntry(
     action,
     userId,
     userName,
-    details,
+    details: details || null,
     timestamp,
   };
 }
@@ -397,8 +397,8 @@ async function seedRFIs(): Promise<number> {
         number: `RFI-${String(rfiCounter).padStart(3, '0')}`,
         subject: template.subject,
         question: template.question,
-        answer: hasAnswer ? template.answer : undefined,
-        officialResponse: hasAnswer ? template.answer : undefined,
+        answer: hasAnswer ? template.answer : null,
+        officialResponse: hasAnswer ? template.answer : null,
         status,
         priority,
 
@@ -412,14 +412,14 @@ async function seedRFIs(): Promise<number> {
         submittedByName: submitter.name,
         createdBy: submitter.id,
         createdByName: submitter.name,
-        assignedTo: status !== 'draft' ? DEMO_USERS.owner.uid : undefined,
-        assignedToName: status !== 'draft' ? DEMO_USERS.owner.displayName : undefined,
-        answeredBy: hasAnswer ? DEMO_USERS.owner.uid : undefined,
-        answeredByName: hasAnswer ? DEMO_USERS.owner.displayName : undefined,
+        assignedTo: status !== 'draft' ? DEMO_USERS.owner.uid : null,
+        assignedToName: status !== 'draft' ? DEMO_USERS.owner.displayName : null,
+        answeredBy: hasAnswer ? DEMO_USERS.owner.uid : null,
+        answeredByName: hasAnswer ? DEMO_USERS.owner.displayName : null,
 
         // Dates
         dueDate,
-        submittedAt: status !== 'draft' ? submittedAt : undefined,
+        submittedAt: status !== 'draft' ? submittedAt : null,
         answeredAt,
         respondedAt: answeredAt,
         closedAt,
@@ -428,8 +428,8 @@ async function seedRFIs(): Promise<number> {
         attachments: [],
 
         // Impact
-        costImpact: hasCostImpact ? randomInt(200, 5000) : undefined,
-        scheduleImpact: hasScheduleImpact ? randomInt(1, 7) : undefined, // days
+        costImpact: hasCostImpact ? randomInt(200, 5000) : null,
+        scheduleImpact: hasScheduleImpact ? randomInt(1, 7) : null, // days
 
         // History
         history,
