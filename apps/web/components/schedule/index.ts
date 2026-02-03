@@ -8,6 +8,7 @@ export { default as DayView } from './DayView';
 export { default as AssignmentModal } from './AssignmentModal';
 
 export type { EventCardProps } from './EventCard';
+export type { DayViewProps } from './DayView';
 export type { EventFormModalProps, EventFormData } from './EventFormModal';
 export type { CrewAvailabilityPanelProps, TimeOffRequestData } from './CrewAvailabilityPanel';
 export type { WeatherWidgetProps } from './WeatherWidget';

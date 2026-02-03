@@ -109,7 +109,7 @@ export function generateProfitabilityForecast(data: ProjectData): ProfitabilityF
   // Calculate current totals
   const estimatedRevenue = project.quoteTotal || project.budget || 0;
   const currentExpenses = expenses
-    .filter(e => e.status === 'approved' || e.status === 'reimbursed')
+    .filter(e => e.status === 'approved' || e.status === 'paid')
     .reduce((sum, e) => sum + e.amount, 0);
 
   // Estimate labor costs from time entries

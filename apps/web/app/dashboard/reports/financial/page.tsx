@@ -1,12 +1,13 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/lib/auth';
-import { useFinancialReports } from '@/lib/hooks/useReports';
+import { useFinancialReports, RevenueByProject } from '@/lib/hooks/useReports';
 import { Card } from '@/components/ui';
 import {
   BarChartCard,
   PieChartCard,
+  LineChartCard,
 } from '@/components/charts';
 import {
   CurrencyDollarIcon,
@@ -16,6 +17,12 @@ import {
   ExclamationCircleIcon,
   ReceiptPercentIcon,
   ChartBarIcon,
+  UserGroupIcon,
+  BuildingOfficeIcon,
+  WrenchScrewdriverIcon,
+  TruckIcon,
+  DocumentTextIcon,
+  ChevronDownIcon,
 } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
 
@@ -106,6 +113,109 @@ function LoadingState() {
   );
 }
 
+// P&L Line Item component
+interface PLLineItemProps {
+  label: string;
+  amount: number;
+  icon?: React.ComponentType<{ className?: string }>;
+  indent?: boolean;
+  isBold?: boolean;
+  isSubtotal?: boolean;
+  isTotal?: boolean;
+  showPercent?: boolean;
+  percentOf?: number;
+  color?: 'default' | 'green' | 'red';
+}
+
+function PLLineItem({
+  label,
+  amount,
+  icon: Icon,
+  indent = false,
+  isBold = false,
+  isSubtotal = false,
+  isTotal = false,
+  showPercent = false,
+  percentOf = 0,
+  color = 'default',
+}: PLLineItemProps) {
+  const percent = percentOf > 0 ? (amount / percentOf) * 100 : 0;
+
+  return (
+    <div className={cn(
+      'flex items-center justify-between py-2',
+      indent && 'pl-6',
+      isSubtotal && 'border-t border-gray-200 bg-gray-50 -mx-4 px-4',
+      isTotal && 'border-t-2 border-gray-300 bg-gray-100 -mx-4 px-4 font-bold',
+    )}>
+      <div className="flex items-center gap-2">
+        {Icon && <Icon className="h-4 w-4 text-gray-400" />}
+        <span className={cn(
+          'text-sm',
+          isBold || isSubtotal || isTotal ? 'font-semibold text-gray-900' : 'text-gray-600',
+        )}>
+          {label}
+        </span>
+      </div>
+      <div className="flex items-center gap-4">
+        {showPercent && percentOf > 0 && (
+          <span className="text-xs text-gray-400 w-12 text-right">
+            {percent.toFixed(1)}%
+          </span>
+        )}
+        <span className={cn(
+          'text-sm font-medium w-28 text-right',
+          color === 'green' && 'text-green-600',
+          color === 'red' && 'text-red-600',
+          color === 'default' && (isBold || isSubtotal || isTotal ? 'text-gray-900' : 'text-gray-700'),
+        )}>
+          {formatCurrency(amount)}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// Project P&L Modal/Detail component
+interface ProjectPLDetailProps {
+  project: RevenueByProject;
+  onClose: () => void;
+}
+
+function ProjectPLDetail({ project, onClose }: ProjectPLDetailProps) {
+  return (
+    <Card className="p-4 border-2 border-blue-200 bg-blue-50/30">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h4 className="text-sm font-semibold text-gray-900">{project.projectName}</h4>
+          <p className="text-xs text-gray-500">Project P&L Detail</p>
+        </div>
+        <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <ChevronDownIcon className="h-5 w-5" />
+        </button>
+      </div>
+      <div className="space-y-1">
+        <PLLineItem label="Revenue" amount={project.revenue} isBold color="green" />
+        <PLLineItem label="Total Costs" amount={project.costs} isBold color="red" />
+        <PLLineItem
+          label="Profit"
+          amount={project.profit}
+          isSubtotal
+          color={project.profit >= 0 ? 'green' : 'red'}
+        />
+        <div className="pt-2 text-center">
+          <span className={cn(
+            'text-lg font-bold',
+            project.margin >= 20 ? 'text-green-600' : project.margin >= 0 ? 'text-amber-600' : 'text-red-600'
+          )}>
+            {formatPercent(project.margin)} margin
+          </span>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 export default function FinancialReportsPage() {
   const { profile } = useAuth();
   const {
@@ -115,7 +225,13 @@ export default function FinancialReportsPage() {
     expensesByCategory,
     invoiceAging,
     projectProfitability,
+    revenueByProject,
+    revenueByClient,
+    revenueByMonth,
+    costBreakdown,
   } = useFinancialReports(profile?.orgId);
+
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
   if (loading) {
     return <LoadingState />;
@@ -146,6 +262,10 @@ export default function FinancialReportsPage() {
   const overBudgetProjects = sortedProjects.filter(p => p.variance < 0);
   const underBudgetProjects = sortedProjects.filter(p => p.variance >= 0);
 
+  const selectedProject = selectedProjectId
+    ? revenueByProject.find(p => p.projectId === selectedProjectId)
+    : null;
+
   return (
     <div className="space-y-6">
       {/* Financial Summary KPIs */}
@@ -163,17 +283,259 @@ export default function FinancialReportsPage() {
           color="red"
         />
         <StatCard
-          title="Gross Profit"
-          value={formatCurrency(summary.grossProfit)}
+          title="Net Profit"
+          value={formatCurrency(summary.netProfit)}
           icon={ArrowTrendingUpIcon}
-          color={summary.grossProfit >= 0 ? 'green' : 'red'}
+          color={summary.netProfit >= 0 ? 'green' : 'red'}
         />
         <StatCard
-          title="Profit Margin"
-          value={formatPercent(summary.profitMargin)}
+          title="Net Margin"
+          value={formatPercent(summary.netMargin)}
           icon={ReceiptPercentIcon}
-          color={summary.profitMargin >= 20 ? 'green' : summary.profitMargin >= 10 ? 'amber' : 'red'}
+          color={summary.netMargin >= 20 ? 'green' : summary.netMargin >= 10 ? 'amber' : 'red'}
         />
+      </div>
+
+      {/* Detailed P&L Statement */}
+      <Card className="p-4">
+        <div className="mb-4">
+          <h3 className="text-sm font-semibold text-gray-900">Profit & Loss Statement</h3>
+          <p className="text-xs text-gray-500 mt-0.5">Detailed breakdown of revenue and costs</p>
+        </div>
+
+        <div className="divide-y divide-gray-100">
+          {/* Revenue Section */}
+          <div className="pb-4">
+            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Revenue</h4>
+            <PLLineItem
+              label="Total Revenue (Paid Invoices)"
+              amount={summary.totalRevenue}
+              icon={CurrencyDollarIcon}
+              isBold
+              color="green"
+            />
+          </div>
+
+          {/* Cost Section */}
+          <div className="py-4">
+            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Cost of Goods Sold (Direct Costs)</h4>
+            <PLLineItem
+              label="Labor Costs"
+              amount={summary.laborCosts}
+              icon={UserGroupIcon}
+              indent
+              showPercent
+              percentOf={summary.totalRevenue}
+            />
+            <PLLineItem
+              label="Material Costs"
+              amount={summary.materialCosts}
+              icon={WrenchScrewdriverIcon}
+              indent
+              showPercent
+              percentOf={summary.totalRevenue}
+            />
+            <PLLineItem
+              label="Subcontractor Costs"
+              amount={summary.subcontractorCosts}
+              icon={BuildingOfficeIcon}
+              indent
+              showPercent
+              percentOf={summary.totalRevenue}
+            />
+            <PLLineItem
+              label="Equipment Costs"
+              amount={summary.equipmentCosts}
+              icon={TruckIcon}
+              indent
+              showPercent
+              percentOf={summary.totalRevenue}
+            />
+            <PLLineItem
+              label="Total Direct Costs"
+              amount={summary.directCosts}
+              isSubtotal
+              color="red"
+            />
+          </div>
+
+          {/* Gross Profit */}
+          <div className="py-4">
+            <PLLineItem
+              label="Gross Profit"
+              amount={summary.grossProfit}
+              isBold
+              color={summary.grossProfit >= 0 ? 'green' : 'red'}
+            />
+            <div className="flex items-center justify-end mt-1">
+              <span className={cn(
+                'text-xs font-medium px-2 py-0.5 rounded',
+                summary.profitMargin >= 20 ? 'bg-green-100 text-green-700' :
+                summary.profitMargin >= 10 ? 'bg-amber-100 text-amber-700' :
+                'bg-red-100 text-red-700'
+              )}>
+                {formatPercent(summary.profitMargin)} Gross Margin
+              </span>
+            </div>
+          </div>
+
+          {/* Overhead Section */}
+          <div className="py-4">
+            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Operating Expenses (Overhead)</h4>
+            <PLLineItem
+              label="Overhead & Other Expenses"
+              amount={summary.overheadCosts}
+              icon={DocumentTextIcon}
+              indent
+              showPercent
+              percentOf={summary.totalRevenue}
+            />
+          </div>
+
+          {/* Net Profit */}
+          <div className="pt-4">
+            <PLLineItem
+              label="Net Profit"
+              amount={summary.netProfit}
+              isTotal
+              color={summary.netProfit >= 0 ? 'green' : 'red'}
+            />
+            <div className="flex items-center justify-end mt-2">
+              <span className={cn(
+                'text-sm font-semibold px-3 py-1 rounded-lg',
+                summary.netMargin >= 15 ? 'bg-green-100 text-green-700' :
+                summary.netMargin >= 5 ? 'bg-amber-100 text-amber-700' :
+                'bg-red-100 text-red-700'
+              )}>
+                {formatPercent(summary.netMargin)} Net Margin
+              </span>
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {/* Revenue Trend & Cost Breakdown Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {revenueByMonth.length > 0 && (
+          <LineChartCard
+            title="Revenue & Profit Trend"
+            subtitle="Monthly revenue, expenses, and profit (last 12 months)"
+            data={revenueByMonth as unknown as Record<string, unknown>[]}
+            dataKeys={['revenue', 'expenses', 'profit']}
+            xAxisKey="month"
+            valueFormatter={formatCurrency}
+            config={{ colors: ['#10B981', '#EF4444', '#3B82F6'] }}
+          />
+        )}
+        {costBreakdown.length > 0 && (
+          <PieChartCard
+            title="Cost Breakdown"
+            subtitle="Distribution of all costs"
+            data={costBreakdown.map(c => ({ name: c.category, value: c.amount, color: c.color }))}
+            dataKey="value"
+            nameKey="name"
+            showLabels
+            valueFormatter={formatCurrency}
+          />
+        )}
+      </div>
+
+      {/* Revenue by Client & Project */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Revenue by Client */}
+        {revenueByClient.length > 0 && (
+          <Card className="p-4">
+            <div className="mb-4">
+              <h3 className="text-sm font-semibold text-gray-900">Revenue by Client</h3>
+              <p className="text-xs text-gray-500 mt-0.5">Top clients by paid invoices</p>
+            </div>
+            <div className="space-y-3">
+              {revenueByClient.slice(0, 8).map((client, index) => {
+                const maxRevenue = revenueByClient[0]?.revenue || 1;
+                const widthPercent = (client.revenue / maxRevenue) * 100;
+                return (
+                  <div key={client.clientId}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm text-gray-700 truncate flex-1 mr-4">
+                        {client.clientName}
+                      </span>
+                      <span className="text-sm font-medium text-gray-900">
+                        {formatCurrency(client.revenue)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-green-500 rounded-full"
+                          style={{ width: `${widthPercent}%` }}
+                        />
+                      </div>
+                      <span className="text-xs text-gray-400 w-16">
+                        {client.invoiceCount} inv.
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+        )}
+
+        {/* Revenue by Project with P&L */}
+        {revenueByProject.length > 0 && (
+          <Card className="p-4">
+            <div className="mb-4">
+              <h3 className="text-sm font-semibold text-gray-900">Revenue by Project</h3>
+              <p className="text-xs text-gray-500 mt-0.5">Click a project to see P&L detail</p>
+            </div>
+
+            {selectedProject && (
+              <div className="mb-4">
+                <ProjectPLDetail
+                  project={selectedProject}
+                  onClose={() => setSelectedProjectId(null)}
+                />
+              </div>
+            )}
+
+            <div className="space-y-2">
+              {revenueByProject.slice(0, 8).map((project) => {
+                const isSelected = project.projectId === selectedProjectId;
+                return (
+                  <button
+                    key={project.projectId}
+                    onClick={() => setSelectedProjectId(isSelected ? null : project.projectId)}
+                    className={cn(
+                      'w-full text-left p-2 rounded-lg border transition-colors',
+                      isSelected
+                        ? 'border-blue-300 bg-blue-50'
+                        : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50'
+                    )}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-900 truncate flex-1 mr-4">
+                        {project.projectName}
+                      </span>
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-gray-600">
+                          {formatCurrency(project.revenue)}
+                        </span>
+                        <span className={cn(
+                          'text-xs font-medium px-2 py-0.5 rounded',
+                          project.margin >= 20 ? 'bg-green-100 text-green-700' :
+                          project.margin >= 0 ? 'bg-amber-100 text-amber-700' :
+                          'bg-red-100 text-red-700'
+                        )}>
+                          {formatPercent(project.margin)}
+                        </span>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </Card>
+        )}
       </div>
 
       {/* Budget Summary */}
@@ -194,7 +556,7 @@ export default function FinancialReportsPage() {
         />
       </div>
 
-      {/* Charts Row */}
+      {/* Existing Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {expensesByCategory.length > 0 && (
           <PieChartCard

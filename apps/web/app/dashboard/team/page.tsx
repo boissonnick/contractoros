@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
 import { collection, query, where, getDocs, doc, updateDoc, deleteDoc, Timestamp } from 'firebase/firestore';
@@ -22,9 +22,16 @@ import {
   ChartBarIcon,
   FunnelIcon,
   ChevronDownIcon,
+  ExclamationTriangleIcon,
+  CheckBadgeIcon,
+  ArrowRightIcon,
+  BriefcaseIcon,
+  PlusIcon,
 } from '@heroicons/react/24/outline';
-import { UserProfile, UserRole } from '@/types';
+import { UserProfile, UserRole, ScheduleEvent, ScheduleAssignment } from '@/types';
 import Link from 'next/link';
+import { useScheduleEvents } from '@/lib/hooks/useSchedule';
+import { useScheduleAssignments } from '@/lib/hooks/useScheduleAssignments';
 
 interface Invite {
   id: string;
@@ -65,15 +72,162 @@ export default function TeamPage() {
   // Get unique trades from team members
   const trades = Array.from(new Set(members.filter(m => m.trade).map(m => m.trade as string)));
 
-  // Calculate utilization (mock data for now - would connect to time entries/schedule)
+  // Calculate date ranges based on selected time range
+  const dateRanges = useMemo(() => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const dayOfWeek = today.getDay();
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1)); // Monday
+
+    const ranges = {
+      this_week: {
+        start: startOfWeek,
+        end: new Date(startOfWeek.getTime() + 6 * 24 * 60 * 60 * 1000),
+        workHours: 40,
+      },
+      next_week: {
+        start: new Date(startOfWeek.getTime() + 7 * 24 * 60 * 60 * 1000),
+        end: new Date(startOfWeek.getTime() + 13 * 24 * 60 * 60 * 1000),
+        workHours: 40,
+      },
+      this_month: {
+        start: new Date(now.getFullYear(), now.getMonth(), 1),
+        end: new Date(now.getFullYear(), now.getMonth() + 1, 0),
+        workHours: Math.ceil((new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate() / 7) * 40),
+      },
+    };
+    return ranges[selectedTimeRange];
+  }, [selectedTimeRange]);
+
+  // Fetch schedule events for selected time range
+  const { events: scheduleEvents, loading: eventsLoading } = useScheduleEvents({
+    startDate: dateRanges.start,
+    endDate: dateRanges.end,
+  });
+
+  // Fetch schedule assignments for selected time range
+  const { assignments: scheduleAssignments, loading: assignmentsLoading } = useScheduleAssignments({
+    startDate: dateRanges.start,
+    endDate: dateRanges.end,
+  });
+
+  // Calculate utilization from real schedule data
   const getMemberUtilization = (member: UserProfile) => {
-    // This would typically calculate from actual schedule/time data
-    // For demo, using random but consistent values based on member ID
-    const hash = member.uid?.charCodeAt(0) || 50;
-    const utilization = (hash % 60) + 40; // 40-100%
-    const hoursAssigned = Math.floor((utilization / 100) * 40);
-    return { utilization, hoursAssigned, totalHours: 40 };
+    const userId = member.uid;
+    const totalAvailableHours = dateRanges.workHours;
+
+    // Calculate hours from schedule events (where user is assigned)
+    let hoursFromEvents = 0;
+    scheduleEvents.forEach(event => {
+      if (event.assignedUserIds?.includes(userId)) {
+        if (event.estimatedHours) {
+          hoursFromEvents += event.estimatedHours;
+        } else if (!event.allDay && event.startDate && event.endDate) {
+          // Calculate hours from start/end time
+          const start = event.startDate instanceof Date ? event.startDate : new Date(event.startDate);
+          const end = event.endDate instanceof Date ? event.endDate : new Date(event.endDate);
+          hoursFromEvents += (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+        } else if (event.allDay) {
+          hoursFromEvents += 8; // Assume 8 hours for all-day events
+        }
+      }
+    });
+
+    // Calculate hours from assignments
+    let hoursFromAssignments = 0;
+    scheduleAssignments.forEach(assignment => {
+      if (assignment.userId === userId) {
+        // Parse time strings and calculate hours
+        const [startHour, startMin] = (assignment.startTime || '09:00').split(':').map(Number);
+        const [endHour, endMin] = (assignment.endTime || '17:00').split(':').map(Number);
+        const hours = (endHour + endMin / 60) - (startHour + startMin / 60);
+        hoursFromAssignments += hours;
+      }
+    });
+
+    const totalHoursAssigned = hoursFromEvents + hoursFromAssignments;
+    const utilization = totalAvailableHours > 0
+      ? Math.round((totalHoursAssigned / totalAvailableHours) * 100)
+      : 0;
+
+    return {
+      utilization: Math.min(utilization, 150), // Cap at 150% for display
+      hoursAssigned: Math.round(totalHoursAssigned * 10) / 10,
+      totalHours: totalAvailableHours
+    };
   };
+
+  // Get upcoming assignments for a member
+  const getMemberAssignments = (member: UserProfile) => {
+    const userId = member.uid;
+    const assignments: Array<{
+      id: string;
+      title: string;
+      date: Date;
+      hours: number;
+      projectName?: string;
+      type: 'event' | 'assignment';
+    }> = [];
+
+    // From schedule events
+    scheduleEvents.forEach(event => {
+      if (event.assignedUserIds?.includes(userId)) {
+        let hours = event.estimatedHours || 8;
+        if (!event.allDay && event.startDate && event.endDate) {
+          const start = event.startDate instanceof Date ? event.startDate : new Date(event.startDate);
+          const end = event.endDate instanceof Date ? event.endDate : new Date(event.endDate);
+          hours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+        }
+        assignments.push({
+          id: event.id,
+          title: event.title,
+          date: event.startDate instanceof Date ? event.startDate : new Date(event.startDate),
+          hours: Math.round(hours * 10) / 10,
+          projectName: event.projectName,
+          type: 'event',
+        });
+      }
+    });
+
+    // From assignments
+    scheduleAssignments.forEach(assignment => {
+      if (assignment.userId === userId) {
+        const [startHour, startMin] = (assignment.startTime || '09:00').split(':').map(Number);
+        const [endHour, endMin] = (assignment.endTime || '17:00').split(':').map(Number);
+        const hours = (endHour + endMin / 60) - (startHour + startMin / 60);
+        assignments.push({
+          id: assignment.id,
+          title: assignment.notes || assignment.projectName || 'Scheduled Work',
+          date: assignment.date instanceof Date ? assignment.date : new Date(assignment.date),
+          hours: Math.round(hours * 10) / 10,
+          projectName: assignment.projectName,
+          type: 'assignment',
+        });
+      }
+    });
+
+    // Sort by date
+    return assignments.sort((a, b) => a.date.getTime() - b.date.getTime()).slice(0, 5);
+  };
+
+  // Get team utilization stats
+  const teamStats = useMemo(() => {
+    if (members.length === 0) return { available: 0, busy: 0, overloaded: 0, total: 0 };
+
+    let available = 0;
+    let busy = 0;
+    let overloaded = 0;
+
+    members.forEach(member => {
+      const { utilization } = getMemberUtilization(member);
+      if (utilization < 70) available++;
+      else if (utilization < 90) busy++;
+      else overloaded++;
+    });
+
+    return { available, busy, overloaded, total: members.length };
+  }, [members, scheduleEvents, scheduleAssignments, dateRanges]);
 
   // Team roles - excludes SUB (subcontractors) and CLIENT (handled in separate modules)
   const TEAM_ROLES: UserRole[] = ['OWNER', 'PM', 'EMPLOYEE', 'CONTRACTOR'];
@@ -319,34 +473,97 @@ export default function TeamPage() {
         ) : activeTab === 'availability' ? (
           /* Availability Tab */
           <div className="space-y-6">
-            {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex items-center gap-2">
-                <FunnelIcon className="h-5 w-5 text-gray-400" />
-                <select
-                  value={selectedTrade}
-                  onChange={(e) => setSelectedTrade(e.target.value)}
-                  className="pl-3 pr-8 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="all">All Trades</option>
-                  {trades.map((trade) => (
-                    <option key={trade} value={trade}>{trade}</option>
-                  ))}
-                </select>
+            {/* Filters and Quick Actions */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex items-center gap-2">
+                  <FunnelIcon className="h-5 w-5 text-gray-400" />
+                  <select
+                    value={selectedTrade}
+                    onChange={(e) => setSelectedTrade(e.target.value)}
+                    className="pl-3 pr-8 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="all">All Trades</option>
+                    {trades.map((trade) => (
+                      <option key={trade} value={trade}>{trade}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CalendarDaysIcon className="h-5 w-5 text-gray-400" />
+                  <select
+                    value={selectedTimeRange}
+                    onChange={(e) => setSelectedTimeRange(e.target.value as typeof selectedTimeRange)}
+                    className="pl-3 pr-8 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="this_week">This Week</option>
+                    <option value="next_week">Next Week</option>
+                    <option value="this_month">This Month</option>
+                  </select>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <CalendarDaysIcon className="h-5 w-5 text-gray-400" />
-                <select
-                  value={selectedTimeRange}
-                  onChange={(e) => setSelectedTimeRange(e.target.value as typeof selectedTimeRange)}
-                  className="pl-3 pr-8 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="this_week">This Week</option>
-                  <option value="next_week">Next Week</option>
-                  <option value="this_month">This Month</option>
-                </select>
-              </div>
+              <Link href="/dashboard/schedule">
+                <Button variant="outline" size="sm" icon={<CalendarDaysIcon className="h-4 w-4" />}>
+                  View Schedule
+                </Button>
+              </Link>
             </div>
+
+            {/* Team Summary Stats - Horizontal Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <Card className="bg-white border-l-4 border-l-blue-500">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-50 rounded-lg">
+                    <UserGroupIcon className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-gray-900">{teamStats.total}</p>
+                    <p className="text-xs text-gray-500">Team Members</p>
+                  </div>
+                </div>
+              </Card>
+              <Card className="bg-white border-l-4 border-l-green-500">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-50 rounded-lg">
+                    <CheckBadgeIcon className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-green-600">{teamStats.available}</p>
+                    <p className="text-xs text-gray-500">Available (&lt;70%)</p>
+                  </div>
+                </div>
+              </Card>
+              <Card className="bg-white border-l-4 border-l-yellow-500">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-yellow-50 rounded-lg">
+                    <BriefcaseIcon className="h-5 w-5 text-yellow-600" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-yellow-600">{teamStats.busy}</p>
+                    <p className="text-xs text-gray-500">Busy (70-90%)</p>
+                  </div>
+                </div>
+              </Card>
+              <Card className="bg-white border-l-4 border-l-red-500">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-red-50 rounded-lg">
+                    <ExclamationTriangleIcon className="h-5 w-5 text-red-600" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-red-600">{teamStats.overloaded}</p>
+                    <p className="text-xs text-gray-500">Overloaded (&gt;90%)</p>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            {/* Loading state for schedule data */}
+            {(eventsLoading || assignmentsLoading) && (
+              <div className="flex items-center justify-center py-4">
+                <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2" />
+                <span className="text-sm text-gray-500">Loading schedule data...</span>
+              </div>
+            )}
 
             {/* Team Availability Grid */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -354,100 +571,161 @@ export default function TeamPage() {
                 .filter(m => selectedTrade === 'all' || m.trade === selectedTrade)
                 .map((member) => {
                   const { utilization, hoursAssigned, totalHours } = getMemberUtilization(member);
+                  const assignments = getMemberAssignments(member);
                   const utilizationColor = utilization >= 90 ? 'bg-red-500' : utilization >= 70 ? 'bg-yellow-500' : 'bg-green-500';
                   const utilizationBgColor = utilization >= 90 ? 'bg-red-100' : utilization >= 70 ? 'bg-yellow-100' : 'bg-green-100';
+                  const statusLabel = utilization >= 90 ? 'Overloaded' : utilization >= 70 ? 'Busy' : 'Available';
 
                   return (
                     <Card key={member.uid} className="hover:shadow-md transition-shadow">
                       <div className="flex items-start gap-4">
-                        <Avatar name={member.displayName || ''} size="lg" />
+                        <div className="relative">
+                          <Avatar name={member.displayName || ''} size="lg" />
+                          {/* Status indicator dot */}
+                          <div className={cn(
+                            'absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white',
+                            utilization >= 90 ? 'bg-red-500' : utilization >= 70 ? 'bg-yellow-500' : 'bg-green-500'
+                          )} />
+                        </div>
                         <div className="flex-1 min-w-0">
                           <h3 className="font-semibold text-gray-900 truncate">
                             {member.displayName}
                           </h3>
-                          {member.trade && (
-                            <div className="flex items-center gap-1 text-sm text-gray-500 mt-0.5">
-                              <WrenchScrewdriverIcon className="h-3.5 w-3.5" />
-                              <span>{member.trade}</span>
-                            </div>
-                          )}
-                        </div>
-                        <div className={cn(
-                          'px-2 py-1 rounded-full text-xs font-medium',
-                          utilizationBgColor,
-                          utilization >= 90 ? 'text-red-700' : utilization >= 70 ? 'text-yellow-700' : 'text-green-700'
-                        )}>
-                          {utilization}%
+                          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                            {member.trade && (
+                              <div className="flex items-center gap-1 text-xs text-gray-500">
+                                <WrenchScrewdriverIcon className="h-3 w-3" />
+                                <span>{member.trade}</span>
+                              </div>
+                            )}
+                            {member.role && (
+                              <span className={cn(
+                                'inline-block px-1.5 py-0.5 rounded text-xs font-medium',
+                                roleLabels[member.role || 'EMPLOYEE'].color
+                              )}>
+                                {roleLabels[member.role || 'EMPLOYEE'].label}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
 
-                      {/* Utilization Bar */}
+                      {/* Utilization Section */}
                       <div className="mt-4">
-                        <div className="flex items-center justify-between text-sm mb-1">
-                          <span className="text-gray-500">Utilization</span>
-                          <span className="font-medium">{hoursAssigned}h / {totalHours}h</span>
+                        <div className="flex items-center justify-between text-sm mb-1.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-500">Utilization</span>
+                            <span className={cn(
+                              'px-1.5 py-0.5 rounded text-xs font-medium',
+                              utilizationBgColor,
+                              utilization >= 90 ? 'text-red-700' : utilization >= 70 ? 'text-yellow-700' : 'text-green-700'
+                            )}>
+                              {statusLabel}
+                            </span>
+                          </div>
+                          <span className="font-semibold text-gray-900">{utilization}%</span>
                         </div>
-                        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                        {/* Progress bar */}
+                        <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
                           <div
-                            className={cn('h-full rounded-full transition-all', utilizationColor)}
+                            className={cn('h-full rounded-full transition-all duration-300', utilizationColor)}
                             style={{ width: `${Math.min(utilization, 100)}%` }}
                           />
                         </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {hoursAssigned}h scheduled / {totalHours}h available
+                        </p>
                       </div>
 
-                      {/* Current Assignments (placeholder) */}
+                      {/* Upcoming Assignments */}
                       <div className="mt-4 pt-3 border-t border-gray-100">
-                        <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Current Assignments</p>
-                        <div className="space-y-1.5">
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-gray-700 truncate">Project Task</span>
-                            <span className="text-gray-400">{Math.floor(hoursAssigned * 0.6)}h</span>
-                          </div>
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-gray-700 truncate">Other Work</span>
-                            <span className="text-gray-400">{Math.floor(hoursAssigned * 0.4)}h</span>
-                          </div>
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">
+                            Upcoming ({timeRangeLabels[selectedTimeRange]})
+                          </p>
+                          {assignments.length > 0 && (
+                            <span className="text-xs text-gray-400">{assignments.length} tasks</span>
+                          )}
                         </div>
+                        {assignments.length === 0 ? (
+                          <p className="text-sm text-gray-400 italic">No assignments scheduled</p>
+                        ) : (
+                          <div className="space-y-2">
+                            {assignments.slice(0, 3).map((assignment) => (
+                              <div
+                                key={assignment.id}
+                                className="flex items-center justify-between text-sm bg-gray-50 rounded px-2 py-1.5"
+                              >
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-gray-700 truncate font-medium">{assignment.title}</p>
+                                  <p className="text-xs text-gray-400">
+                                    {assignment.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                                    {assignment.projectName && ` - ${assignment.projectName}`}
+                                  </p>
+                                </div>
+                                <span className="text-xs font-medium text-gray-500 ml-2 whitespace-nowrap">
+                                  {assignment.hours}h
+                                </span>
+                              </div>
+                            ))}
+                            {assignments.length > 3 && (
+                              <p className="text-xs text-gray-400 text-center">
+                                +{assignments.length - 3} more
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Quick Actions */}
+                      <div className="mt-3 pt-3 border-t border-gray-100 flex gap-2">
+                        <Link
+                          href={`/dashboard/schedule?assignUser=${member.uid}`}
+                          className="flex-1"
+                        >
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full"
+                            icon={<PlusIcon className="h-3.5 w-3.5" />}
+                          >
+                            Assign Work
+                          </Button>
+                        </Link>
+                        <Link
+                          href={`/dashboard/schedule?userId=${member.uid}`}
+                          className="flex-1"
+                        >
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="w-full"
+                            icon={<ArrowRightIcon className="h-3.5 w-3.5" />}
+                          >
+                            View Schedule
+                          </Button>
+                        </Link>
                       </div>
                     </Card>
                   );
                 })}
             </div>
 
-            {/* Summary Stats */}
-            <Card className="bg-gray-50">
-              <div className="flex items-center gap-2 mb-4">
-                <ChartBarIcon className="h-5 w-5 text-gray-500" />
-                <h3 className="font-semibold text-gray-900">Team Summary</h3>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">{members.length}</p>
-                  <p className="text-sm text-gray-500">Team Members</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-green-600">
-                    {members.filter(m => getMemberUtilization(m).utilization < 70).length}
-                  </p>
-                  <p className="text-sm text-gray-500">Available</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-yellow-600">
-                    {members.filter(m => {
-                      const u = getMemberUtilization(m).utilization;
-                      return u >= 70 && u < 90;
-                    }).length}
-                  </p>
-                  <p className="text-sm text-gray-500">Busy</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-red-600">
-                    {members.filter(m => getMemberUtilization(m).utilization >= 90).length}
-                  </p>
-                  <p className="text-sm text-gray-500">Overloaded</p>
-                </div>
-              </div>
-            </Card>
+            {/* Empty state if no members after filter */}
+            {members.filter(m => selectedTrade === 'all' || m.trade === selectedTrade).length === 0 && (
+              <EmptyState
+                icon={<WrenchScrewdriverIcon className="h-full w-full" />}
+                title={selectedTrade === 'all' ? 'No team members' : `No ${selectedTrade} workers`}
+                description={selectedTrade === 'all'
+                  ? 'Invite team members to see their availability'
+                  : `No team members with the ${selectedTrade} trade`
+                }
+                action={selectedTrade !== 'all' ? {
+                  label: 'Clear Filter',
+                  onClick: () => setSelectedTrade('all'),
+                } : undefined}
+              />
+            )}
           </div>
         ) : (
           filteredInvites.length === 0 ? (

@@ -94,7 +94,7 @@ export function calculateTotalSpent(
       if (includeRejected) return true;
       if (expense.status === 'rejected') return false;
       if (includeApprovedOnly) {
-        return expense.status === 'approved' || expense.status === 'reimbursed';
+        return expense.status === 'approved' || expense.status === 'paid';
       }
       return true;
     })

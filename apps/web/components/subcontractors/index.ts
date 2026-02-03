@@ -1,4 +1,6 @@
 export { default as SubCard } from './SubCard';
+export { default as SubcontractorCard } from './SubcontractorCard';
+export type { SubcontractorCardProps, SubcontractorStatus } from './SubcontractorCard';
 export { default as SubList } from './SubList';
 export { default as SubForm } from './SubForm';
 export { default as SubDetailModal } from './SubDetailModal';

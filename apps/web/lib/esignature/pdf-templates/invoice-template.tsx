@@ -297,6 +297,9 @@ export default function InvoicePdf({ invoice, organization }: InvoicePdfProps) {
             {organization.email && (
               <Text style={styles.companyDetail}>{organization.email}</Text>
             )}
+            {organization.taxConfig?.taxIdEin && (
+              <Text style={styles.companyDetail}>Tax ID: {organization.taxConfig.taxIdEin}</Text>
+            )}
           </View>
         </View>
 

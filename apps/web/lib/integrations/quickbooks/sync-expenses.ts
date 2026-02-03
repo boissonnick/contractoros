@@ -121,9 +121,9 @@ export async function pushExpenseToQBO(
   accountMappings?: AccountMappingRule[]
 ): Promise<{ qboId: string; created: boolean }> {
   // Only sync approved expenses
-  if (expense.status !== 'approved' && expense.status !== 'reimbursed') {
+  if (expense.status !== 'approved' && expense.status !== 'paid') {
     throw new QBOClientError(
-      'Only approved or reimbursed expenses can be synced',
+      'Only approved or paid expenses can be synced',
       'VALIDATION_ERROR'
     );
   }
@@ -237,7 +237,7 @@ export async function syncExpensesToQBO(
     } else {
       // Sync all approved expenses not yet synced
       snapshot = await expensesCollection
-        .where('status', 'in', ['approved', 'reimbursed'])
+        .where('status', 'in', ['approved', 'paid'])
         .get();
     }
 
@@ -245,7 +245,7 @@ export async function syncExpensesToQBO(
       const expense = { id: doc.id, ...doc.data() } as Expense;
 
       // Skip if not approved
-      if (expense.status !== 'approved' && expense.status !== 'reimbursed') {
+      if (expense.status !== 'approved' && expense.status !== 'paid') {
         skipped++;
         continue;
       }
@@ -297,7 +297,7 @@ export async function syncExpenseOnApproval(
 
   const expense = { id: doc.id, ...doc.data() } as Expense;
 
-  if (expense.status !== 'approved' && expense.status !== 'reimbursed') {
+  if (expense.status !== 'approved' && expense.status !== 'paid') {
     return null;
   }
 

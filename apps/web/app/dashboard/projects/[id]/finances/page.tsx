@@ -373,10 +373,11 @@ export default function ProjectFinancesPage() {
                     expense.status === 'approved' ? 'bg-green-100 text-green-700' :
                     expense.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
                     expense.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                    expense.status === 'reimbursed' ? 'bg-blue-100 text-blue-700' :
+                    expense.status === 'paid' ? 'bg-blue-100 text-blue-700' :
+                    expense.status === 'under_review' ? 'bg-purple-100 text-purple-700' :
                     'bg-gray-100 text-gray-600'
                   )}>
-                    {expense.status}
+                    {expense.status === 'under_review' ? 'Under Review' : expense.status}
                   </Badge>
                 </div>
               </div>

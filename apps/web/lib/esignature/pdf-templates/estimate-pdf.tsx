@@ -392,6 +392,9 @@ function PdfHeader({
             {header.showEmail && organization.email && (
               <Text style={styles.companyDetailBanner}>{organization.email}</Text>
             )}
+            {organization.taxConfig?.taxIdEin && (
+              <Text style={styles.companyDetailBanner}>Tax ID: {organization.taxConfig.taxIdEin}</Text>
+            )}
           </View>
         </View>
         {header.customTagline && (
@@ -428,6 +431,9 @@ function PdfHeader({
               <Text style={styles.companyDetail}>{organization.email}</Text>
             )}
           </View>
+          {organization.taxConfig?.taxIdEin && (
+            <Text style={[styles.companyDetail, { marginTop: 2 }]}>Tax ID: {organization.taxConfig.taxIdEin}</Text>
+          )}
         </View>
       </View>
     );
@@ -460,6 +466,9 @@ function PdfHeader({
         )}
         {header.showEmail && organization.email && (
           <Text style={styles.companyDetail}>{organization.email}</Text>
+        )}
+        {organization.taxConfig?.taxIdEin && (
+          <Text style={styles.companyDetail}>Tax ID: {organization.taxConfig.taxIdEin}</Text>
         )}
       </View>
     </View>

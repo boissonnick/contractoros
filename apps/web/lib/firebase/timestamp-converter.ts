@@ -112,7 +112,7 @@ export const DATE_FIELDS = {
   taskActivity: ['timestamp'],
 
   // Financial module
-  expense: ['createdAt', 'updatedAt', 'date', 'approvedAt', 'reimbursedAt'],
+  expense: ['createdAt', 'updatedAt', 'date', 'approvedAt', 'paidAt'],
   invoice: ['createdAt', 'updatedAt', 'dueDate', 'sentAt', 'paidAt'],
   estimate: ['createdAt', 'updatedAt', 'sentAt', 'acceptedAt', 'expiresAt'],
   payment: ['createdAt', 'processedAt', 'refundedAt'],

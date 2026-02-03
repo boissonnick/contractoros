@@ -55,6 +55,7 @@ export default function OrganizationSettingsPage() {
   const [stateTaxRate, setStateTaxRate] = useState(0);
   const [localTaxRate, setLocalTaxRate] = useState(0);
   const [taxState, setTaxState] = useState('');
+  const [taxIdEin, setTaxIdEin] = useState('');
 
   // Load org data
   useEffect(() => {
@@ -94,6 +95,7 @@ export default function OrganizationSettingsPage() {
           setStateTaxRate(data.taxConfig.stateTaxRate || 0);
           setLocalTaxRate(data.taxConfig.localTaxRate || 0);
           setTaxState(data.taxConfig.state || '');
+          setTaxIdEin(data.taxConfig.taxIdEin || '');
         }
       }
       setLoading(false);
@@ -180,6 +182,7 @@ export default function OrganizationSettingsPage() {
           stateTaxRate: stateTaxRate,
           localTaxRate: localTaxRate,
           state: taxState,
+          taxIdEin: taxIdEin.trim() || null,
         },
         updatedAt: Timestamp.now(),
       });
@@ -512,6 +515,18 @@ export default function OrganizationSettingsPage() {
                   className="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Tax ID / EIN</label>
+              <input
+                type="text"
+                value={taxIdEin}
+                onChange={(e) => setTaxIdEin(e.target.value)}
+                placeholder="XX-XXXXXXX (optional)"
+                maxLength={20}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <p className="text-xs text-gray-400 mt-1">Displayed on invoices</p>
             </div>
           </div>
         </div>

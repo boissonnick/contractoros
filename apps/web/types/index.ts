@@ -141,6 +141,10 @@ export interface Organization {
   onboardingCompleted: boolean;
   createdAt: Date;
   updatedAt?: Date;
+  // Financial configuration (Sprint 37B)
+  fiscalYear?: FiscalYearConfig;
+  payrollPeriod?: PayrollPeriodConfig;
+  taxConfig?: TaxConfig;
 }
 
 export interface OrgSettings {
@@ -1819,7 +1823,7 @@ export type ExpenseCategory =
   | 'marketing'
   | 'other';
 
-export type ExpenseStatus = 'pending' | 'approved' | 'rejected' | 'reimbursed';
+export type ExpenseStatus = 'pending' | 'under_review' | 'approved' | 'rejected' | 'paid';
 
 export type ExpensePaymentMethod = 'cash' | 'credit_card' | 'debit_card' | 'check' | 'company_card' | 'other';
 
@@ -1867,10 +1871,14 @@ export interface Expense {
   // Approval workflow
   status: ExpenseStatus;
   approvedBy?: string;
+  approvedByName?: string;
   approvedAt?: Date;
   rejectionReason?: string;
-  reimbursedAt?: Date;
-  reimbursementMethod?: string;
+  reviewNote?: string; // Note from manager during review
+  paidAt?: Date;
+  paidBy?: string;
+  paidByName?: string;
+  reimbursementMethod?: string; // check, direct_deposit, cash, payroll
 
   // Tags for filtering
   tags?: string[];
@@ -1888,8 +1896,16 @@ export interface ExpenseSummary {
   totalReimbursable: number;
   totalBillable: number;
   totalPending: number;
+  totalUnderReview: number;
   totalApproved: number;
-  totalReimbursed: number;
+  totalRejected: number;
+  totalPaid: number;
+  // Status counts (number of items)
+  countPending: number;
+  countUnderReview: number;
+  countApproved: number;
+  countRejected: number;
+  countPaid: number;
   byCategory: Record<ExpenseCategory, number>;
   byProject: { projectId: string; projectName: string; amount: number }[];
   byUser: { userId: string; userName: string; amount: number }[];
@@ -1915,11 +1931,12 @@ export const EXPENSE_CATEGORIES: { value: ExpenseCategory; label: string; icon: 
   { value: 'other', label: 'Other', icon: 'ellipsis', color: '#6b7280' },
 ];
 
-export const EXPENSE_STATUSES: { value: ExpenseStatus; label: string; color: string }[] = [
-  { value: 'pending', label: 'Pending', color: '#f59e0b' },
-  { value: 'approved', label: 'Approved', color: '#10b981' },
-  { value: 'rejected', label: 'Rejected', color: '#ef4444' },
-  { value: 'reimbursed', label: 'Reimbursed', color: '#3b82f6' },
+export const EXPENSE_STATUSES: { value: ExpenseStatus; label: string; color: string; description: string }[] = [
+  { value: 'pending', label: 'Pending', color: '#f59e0b', description: 'Awaiting manager review' },
+  { value: 'under_review', label: 'Under Review', color: '#8b5cf6', description: 'Manager is reviewing' },
+  { value: 'approved', label: 'Approved', color: '#10b981', description: 'Ready for payment' },
+  { value: 'rejected', label: 'Rejected', color: '#ef4444', description: 'Expense was rejected' },
+  { value: 'paid', label: 'Paid', color: '#3b82f6', description: 'Reimbursement completed' },
 ];
 
 export const EXPENSE_PAYMENT_METHODS: { value: ExpensePaymentMethod; label: string }[] = [
@@ -7865,6 +7882,7 @@ export interface TaxConfig {
   stateTaxRate: number;
   localTaxRate: number;
   state: string;
+  taxIdEin?: string;  // Tax ID / EIN for display on invoices (optional)
 }
 
 export interface OrganizationSettings {

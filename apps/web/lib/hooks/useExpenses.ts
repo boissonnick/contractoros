@@ -52,9 +52,12 @@ interface UseExpensesReturn {
   removeReceipt: (expenseId: string, receiptId: string) => Promise<void>;
 
   // Approval operations
-  approveExpense: (expenseId: string) => Promise<void>;
+  startReview: (expenseId: string) => Promise<void>;
+  approveExpense: (expenseId: string, note?: string) => Promise<void>;
   rejectExpense: (expenseId: string, reason: string) => Promise<void>;
-  markReimbursed: (expenseId: string, method?: string) => Promise<void>;
+  requestMoreInfo: (expenseId: string, note: string) => Promise<void>;
+  markPaid: (expenseId: string, method?: string) => Promise<void>;
+  cancelExpense: (expenseId: string) => Promise<void>;
 
   // Summaries
   getSummary: (startDate: string, endDate: string, projectId?: string) => ExpenseSummary;
@@ -216,8 +219,8 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
       if (updates.approvedAt) {
         updateData.approvedAt = Timestamp.fromDate(updates.approvedAt);
       }
-      if (updates.reimbursedAt) {
-        updateData.reimbursedAt = Timestamp.fromDate(updates.reimbursedAt);
+      if (updates.paidAt) {
+        updateData.paidAt = Timestamp.fromDate(updates.paidAt);
       }
 
       // Convert receipts
@@ -296,8 +299,27 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
     }
   }, [orgId, expenses, updateExpense]);
 
+  // Start review (manager begins reviewing)
+  const startReview = useCallback(async (expenseId: string): Promise<void> => {
+    if (!orgId || !currentUserId) throw new Error('Not authenticated');
+    if (!isManager) throw new Error('Only managers can review expenses');
+
+    try {
+      await updateExpense(expenseId, {
+        status: 'under_review',
+        approvedBy: currentUserId,
+        approvedByName: currentUserName,
+      });
+      toast.success('Expense marked as under review');
+    } catch (err) {
+      console.error('Start review error:', err);
+      toast.error('Failed to start review');
+      throw err;
+    }
+  }, [orgId, currentUserId, currentUserName, isManager, updateExpense]);
+
   // Approve expense
-  const approveExpense = useCallback(async (expenseId: string): Promise<void> => {
+  const approveExpense = useCallback(async (expenseId: string, note?: string): Promise<void> => {
     if (!orgId || !currentUserId) throw new Error('Not authenticated');
     if (!isManager) throw new Error('Only managers can approve expenses');
 
@@ -305,7 +327,9 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
       await updateExpense(expenseId, {
         status: 'approved',
         approvedBy: currentUserId,
+        approvedByName: currentUserName,
         approvedAt: new Date(),
+        reviewNote: note,
       });
       toast.success('Expense approved');
     } catch (err) {
@@ -313,7 +337,7 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
       toast.error('Failed to approve expense');
       throw err;
     }
-  }, [orgId, currentUserId, isManager, updateExpense]);
+  }, [orgId, currentUserId, currentUserName, isManager, updateExpense]);
 
   // Reject expense
   const rejectExpense = useCallback(async (expenseId: string, reason: string): Promise<void> => {
@@ -324,6 +348,7 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
       await updateExpense(expenseId, {
         status: 'rejected',
         approvedBy: currentUserId,
+        approvedByName: currentUserName,
         rejectionReason: reason,
       });
       toast.success('Expense rejected');
@@ -332,26 +357,73 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
       toast.error('Failed to reject expense');
       throw err;
     }
-  }, [orgId, currentUserId, isManager, updateExpense]);
+  }, [orgId, currentUserId, currentUserName, isManager, updateExpense]);
 
-  // Mark as reimbursed
-  const markReimbursed = useCallback(async (expenseId: string, method?: string): Promise<void> => {
-    if (!orgId) throw new Error('Not authenticated');
-    if (!isManager) throw new Error('Only managers can mark as reimbursed');
+  // Request more info (sends back to pending with a note)
+  const requestMoreInfo = useCallback(async (expenseId: string, note: string): Promise<void> => {
+    if (!orgId || !currentUserId) throw new Error('Not authenticated');
+    if (!isManager) throw new Error('Only managers can request more info');
 
     try {
       await updateExpense(expenseId, {
-        status: 'reimbursed',
-        reimbursedAt: new Date(),
-        reimbursementMethod: method,
+        status: 'pending',
+        reviewNote: note,
+        approvedBy: currentUserId,
+        approvedByName: currentUserName,
       });
-      toast.success('Expense marked as reimbursed');
+      toast.success('Requested more information from employee');
     } catch (err) {
-      console.error('Mark reimbursed error:', err);
-      toast.error('Failed to mark expense as reimbursed');
+      console.error('Request more info error:', err);
+      toast.error('Failed to request more info');
       throw err;
     }
-  }, [orgId, isManager, updateExpense]);
+  }, [orgId, currentUserId, currentUserName, isManager, updateExpense]);
+
+  // Mark as paid (finance role)
+  const markPaid = useCallback(async (expenseId: string, method?: string): Promise<void> => {
+    if (!orgId || !currentUserId) throw new Error('Not authenticated');
+    if (!isManager) throw new Error('Only managers can mark as paid');
+
+    try {
+      await updateExpense(expenseId, {
+        status: 'paid',
+        paidAt: new Date(),
+        paidBy: currentUserId,
+        paidByName: currentUserName,
+        reimbursementMethod: method,
+      });
+      toast.success('Expense marked as paid');
+    } catch (err) {
+      console.error('Mark paid error:', err);
+      toast.error('Failed to mark expense as paid');
+      throw err;
+    }
+  }, [orgId, currentUserId, currentUserName, isManager, updateExpense]);
+
+  // Cancel expense (employee can cancel their pending expenses)
+  const cancelExpense = useCallback(async (expenseId: string): Promise<void> => {
+    if (!orgId || !currentUserId) throw new Error('Not authenticated');
+
+    const expense = expenses.find(e => e.id === expenseId);
+    if (!expense) throw new Error('Expense not found');
+
+    // Only allow canceling pending expenses by the owner
+    if (expense.userId !== currentUserId && !isManager) {
+      throw new Error('You can only cancel your own expenses');
+    }
+    if (expense.status !== 'pending') {
+      throw new Error('Only pending expenses can be cancelled');
+    }
+
+    try {
+      await deleteExpense(expenseId);
+      toast.success('Expense cancelled');
+    } catch (err) {
+      console.error('Cancel expense error:', err);
+      toast.error('Failed to cancel expense');
+      throw err;
+    }
+  }, [orgId, currentUserId, isManager, expenses, deleteExpense]);
 
   // Get summary
   const getSummary = useCallback((startDate: string, endDate: string, projectId?: string): ExpenseSummary => {
@@ -361,7 +433,7 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
       return true;
     });
 
-    // Calculate totals
+    // Calculate totals by amount
     const totalExpenses = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
     const totalReimbursable = filteredExpenses
       .filter(e => e.reimbursable)
@@ -372,12 +444,25 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
     const totalPending = filteredExpenses
       .filter(e => e.status === 'pending')
       .reduce((sum, e) => sum + e.amount, 0);
+    const totalUnderReview = filteredExpenses
+      .filter(e => e.status === 'under_review')
+      .reduce((sum, e) => sum + e.amount, 0);
     const totalApproved = filteredExpenses
       .filter(e => e.status === 'approved')
       .reduce((sum, e) => sum + e.amount, 0);
-    const totalReimbursed = filteredExpenses
-      .filter(e => e.status === 'reimbursed')
+    const totalRejected = filteredExpenses
+      .filter(e => e.status === 'rejected')
       .reduce((sum, e) => sum + e.amount, 0);
+    const totalPaid = filteredExpenses
+      .filter(e => e.status === 'paid')
+      .reduce((sum, e) => sum + e.amount, 0);
+
+    // Calculate counts
+    const countPending = filteredExpenses.filter(e => e.status === 'pending').length;
+    const countUnderReview = filteredExpenses.filter(e => e.status === 'under_review').length;
+    const countApproved = filteredExpenses.filter(e => e.status === 'approved').length;
+    const countRejected = filteredExpenses.filter(e => e.status === 'rejected').length;
+    const countPaid = filteredExpenses.filter(e => e.status === 'paid').length;
 
     // Group by category
     const byCategory = {} as Record<ExpenseCategory, number>;
@@ -427,8 +512,15 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
       totalReimbursable,
       totalBillable,
       totalPending,
+      totalUnderReview,
       totalApproved,
-      totalReimbursed,
+      totalRejected,
+      totalPaid,
+      countPending,
+      countUnderReview,
+      countApproved,
+      countRejected,
+      countPaid,
       byCategory,
       byProject,
       byUser,
@@ -450,9 +542,12 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
     deleteExpense,
     addReceipt,
     removeReceipt,
+    startReview,
     approveExpense,
     rejectExpense,
-    markReimbursed,
+    requestMoreInfo,
+    markPaid,
+    cancelExpense,
     getSummary,
     refresh,
   };

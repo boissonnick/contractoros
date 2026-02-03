@@ -488,6 +488,45 @@ export interface FinancialSummary {
   grossProfit: number;
   profitMargin: number;
   cashFlow: number;
+  // Enhanced P&L fields
+  laborCosts: number;
+  materialCosts: number;
+  subcontractorCosts: number;
+  equipmentCosts: number;
+  overheadCosts: number;
+  directCosts: number;
+  netProfit: number;
+  netMargin: number;
+}
+
+export interface RevenueByProject {
+  projectId: string;
+  projectName: string;
+  revenue: number;
+  costs: number;
+  profit: number;
+  margin: number;
+}
+
+export interface RevenueByClient {
+  clientId: string;
+  clientName: string;
+  revenue: number;
+  invoiceCount: number;
+}
+
+export interface RevenueByMonthData {
+  month: string;
+  revenue: number;
+  expenses: number;
+  profit: number;
+}
+
+export interface CostBreakdown {
+  category: string;
+  amount: number;
+  percentage: number;
+  color: string;
 }
 
 export interface ExpenseByCategory {
@@ -508,14 +547,23 @@ export function useFinancialReports(orgId?: string) {
   const [expensesByCategory, setExpensesByCategory] = useState<ExpenseByCategory[]>([]);
   const [invoiceAging, setInvoiceAging] = useState<InvoiceAging[]>([]);
   const [projectProfitability, setProjectProfitability] = useState<ProjectPnLData[]>([]);
+  const [revenueByProject, setRevenueByProject] = useState<RevenueByProject[]>([]);
+  const [revenueByClient, setRevenueByClient] = useState<RevenueByClient[]>([]);
+  const [revenueByMonth, setRevenueByMonth] = useState<RevenueByMonthData[]>([]);
+  const [costBreakdown, setCostBreakdown] = useState<CostBreakdown[]>([]);
   const [error, setError] = useState<Error | null>(null);
 
   const CATEGORY_COLORS: Record<string, string> = {
     materials: '#3B82F6',
     labor: '#10B981',
     equipment: '#F59E0B',
+    equipment_rental: '#F59E0B',
     subcontractor: '#8B5CF6',
     permits: '#EC4899',
+    fuel: '#EF4444',
+    vehicle: '#06B6D4',
+    office: '#6366F1',
+    travel: '#D946EF',
     other: '#6B7280',
   };
 
@@ -526,13 +574,22 @@ export function useFinancialReports(orgId?: string) {
 
     try {
       // NOTE: All collections are top-level with orgId field, not subcollections
-      const [projectsSnap, expensesSnap, invoicesSnap, timeEntriesSnap, usersSnap] = await Promise.all([
+      const [projectsSnap, expensesSnap, invoicesSnap, timeEntriesSnap, usersSnap, clientsSnap, subAssignmentsSnap] = await Promise.all([
         getDocs(query(collection(db, 'projects'), where('orgId', '==', orgId))),
         getDocs(query(collection(db, 'expenses'), where('orgId', '==', orgId))),
         getDocs(query(collection(db, 'invoices'), where('orgId', '==', orgId))),
         getDocs(query(collection(db, 'timeEntries'), where('orgId', '==', orgId))),
         getDocs(query(collection(db, 'users'), where('orgId', '==', orgId))),
+        getDocs(query(collection(db, 'clients'), where('orgId', '==', orgId))),
+        getDocs(query(collection(db, 'subAssignments'), where('orgId', '==', orgId))),
       ]);
+
+      // Build client name map
+      const clientNameMap = new Map<string, string>();
+      clientsSnap.docs.forEach(d => {
+        const data = d.data();
+        clientNameMap.set(d.id, data.name || data.displayName || 'Unknown');
+      });
 
       // Process user rates for labor cost calculation
       const userRates = new Map<string, number>();
@@ -543,15 +600,35 @@ export function useFinancialReports(orgId?: string) {
 
       // Calculate labor costs by project
       const laborByProject = new Map<string, number>();
+      let totalLaborCosts = 0;
       timeEntriesSnap.docs.forEach(d => {
         const data = d.data();
         const cost = ((data.totalMinutes || 0) / 60) * (userRates.get(data.userId) || 0);
         laborByProject.set(data.projectId, (laborByProject.get(data.projectId) || 0) + cost);
+        totalLaborCosts += cost;
+      });
+
+      // Process subcontractor payments
+      let totalSubcontractorCosts = 0;
+      const subCostsByProject = new Map<string, number>();
+      subAssignmentsSnap.docs.forEach(d => {
+        const data = d.data();
+        const paidAmount = (data.paidAmount as number) || 0;
+        totalSubcontractorCosts += paidAmount;
+        const projectId = data.projectId as string;
+        if (projectId) {
+          subCostsByProject.set(projectId, (subCostsByProject.get(projectId) || 0) + paidAmount);
+        }
       });
 
       // Process expenses
       const expenses = expensesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
       const approvedExpenses = expenses.filter(e => (e as { status?: string }).status === 'approved');
+
+      // Categorize expenses for P&L
+      let materialCosts = 0;
+      let equipmentCosts = 0;
+      let overheadCosts = 0;
 
       // Expenses by category
       const categoryTotals: Record<string, number> = {};
@@ -559,22 +636,112 @@ export function useFinancialReports(orgId?: string) {
         const category = (e as { category?: string }).category || 'other';
         const amount = (e as { amount?: number }).amount || 0;
         categoryTotals[category] = (categoryTotals[category] || 0) + amount;
+
+        // Categorize for P&L breakdown
+        if (category === 'materials' || category === 'tools') {
+          materialCosts += amount;
+        } else if (category === 'equipment_rental' || category === 'equipment') {
+          equipmentCosts += amount;
+        } else if (['office', 'travel', 'permits', 'fuel', 'vehicle', 'other'].includes(category)) {
+          overheadCosts += amount;
+        }
       });
-      const categoryData: ExpenseByCategory[] = Object.entries(categoryTotals).map(([name, value]) => ({
-        name: name.charAt(0).toUpperCase() + name.slice(1),
-        value,
-        color: CATEGORY_COLORS[name] || '#6B7280',
-      }));
+
+      const categoryData: ExpenseByCategory[] = Object.entries(categoryTotals)
+        .map(([name, value]) => ({
+          name: name.replace('_', ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+          value,
+          color: CATEGORY_COLORS[name] || '#6B7280',
+        }))
+        .sort((a, b) => b.value - a.value);
       setExpensesByCategory(categoryData);
 
       // Process invoices
       const invoices = invoicesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-      const totalRevenue = invoices
-        .filter(i => (i as { status?: string }).status === 'paid')
-        .reduce((sum, i) => sum + ((i as { total?: number }).total || 0), 0);
+      const paidInvoices = invoices.filter(i => (i as { status?: string }).status === 'paid');
+      const totalRevenue = paidInvoices.reduce((sum, i) => sum + ((i as { total?: number }).total || 0), 0);
+
+      // Revenue by project
+      const revenueByProjectMap = new Map<string, { revenue: number; projectName: string }>();
+      paidInvoices.forEach(inv => {
+        const projectId = (inv as { projectId?: string }).projectId;
+        const amount = (inv as { total?: number }).total || 0;
+        if (projectId) {
+          const existing = revenueByProjectMap.get(projectId);
+          if (existing) {
+            existing.revenue += amount;
+          } else {
+            revenueByProjectMap.set(projectId, { revenue: amount, projectName: '' });
+          }
+        }
+      });
+
+      // Revenue by client
+      const revenueByClientMap = new Map<string, { revenue: number; clientName: string; invoiceCount: number }>();
+      paidInvoices.forEach(inv => {
+        const clientId = (inv as { clientId?: string }).clientId;
+        const amount = (inv as { total?: number }).total || 0;
+        if (clientId) {
+          const existing = revenueByClientMap.get(clientId);
+          if (existing) {
+            existing.revenue += amount;
+            existing.invoiceCount += 1;
+          } else {
+            revenueByClientMap.set(clientId, {
+              revenue: amount,
+              clientName: clientNameMap.get(clientId) || 'Unknown',
+              invoiceCount: 1,
+            });
+          }
+        }
+      });
+
+      const revenueByClientData: RevenueByClient[] = Array.from(revenueByClientMap.entries())
+        .map(([clientId, data]) => ({
+          clientId,
+          clientName: data.clientName,
+          revenue: data.revenue,
+          invoiceCount: data.invoiceCount,
+        }))
+        .sort((a, b) => b.revenue - a.revenue);
+      setRevenueByClient(revenueByClientData);
+
+      // Revenue by month (last 12 months)
+      const now = new Date();
+      const monthlyData: RevenueByMonthData[] = [];
+      for (let i = 11; i >= 0; i--) {
+        const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59);
+        const monthName = monthDate.toLocaleString('default', { month: 'short', year: '2-digit' });
+
+        const monthRevenue = paidInvoices
+          .filter(inv => {
+            const paidAt = (inv as { paidAt?: { toDate: () => Date } }).paidAt;
+            if (!paidAt) return false;
+            const date = paidAt.toDate();
+            return date >= monthDate && date <= monthEnd;
+          })
+          .reduce((sum, inv) => sum + ((inv as { total?: number }).total || 0), 0);
+
+        const monthExpenses = approvedExpenses
+          .filter(exp => {
+            const createdAt = (exp as { createdAt?: { toDate: () => Date } }).createdAt;
+            if (!createdAt) return false;
+            const date = createdAt.toDate();
+            return date >= monthDate && date <= monthEnd;
+          })
+          .reduce((sum, exp) => sum + ((exp as { amount?: number }).amount || 0), 0);
+
+        monthlyData.push({
+          month: monthName,
+          revenue: monthRevenue,
+          expenses: monthExpenses,
+          profit: monthRevenue - monthExpenses,
+        });
+      }
+      setRevenueByMonth(monthlyData);
 
       // Invoice aging
-      const now = new Date();
       const aging: Record<string, { amount: number; count: number }> = {
         'Current': { amount: 0, count: 0 },
         '1-30 Days': { amount: 0, count: 0 },
@@ -619,23 +786,50 @@ export function useFinancialReports(orgId?: string) {
       }));
       setInvoiceAging(agingData);
 
-      // Project profitability
+      // Project profitability with revenue
       const projects = projectsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-      const expensesByProject = new Map<string, number>();
+      const expensesByProjectMap = new Map<string, number>();
       approvedExpenses.forEach(e => {
         const projectId = (e as { projectId?: string }).projectId;
         const amount = (e as { amount?: number }).amount || 0;
         if (projectId) {
-          expensesByProject.set(projectId, (expensesByProject.get(projectId) || 0) + amount);
+          expensesByProjectMap.set(projectId, (expensesByProjectMap.get(projectId) || 0) + amount);
         }
       });
+
+      // Build project name map
+      const projectNameMap = new Map<string, string>();
+      projects.forEach(p => {
+        projectNameMap.set((p as { id: string }).id, (p as { name?: string }).name || 'Unknown');
+      });
+
+      // Update revenue by project with project names
+      const revenueByProjectData: RevenueByProject[] = Array.from(revenueByProjectMap.entries())
+        .map(([projectId, data]) => {
+          const laborCost = laborByProject.get(projectId) || 0;
+          const expenseCost = expensesByProjectMap.get(projectId) || 0;
+          const subCost = subCostsByProject.get(projectId) || 0;
+          const totalCosts = laborCost + expenseCost + subCost;
+          const profit = data.revenue - totalCosts;
+          return {
+            projectId,
+            projectName: projectNameMap.get(projectId) || 'Unknown',
+            revenue: data.revenue,
+            costs: totalCosts,
+            profit,
+            margin: data.revenue > 0 ? (profit / data.revenue) * 100 : 0,
+          };
+        })
+        .sort((a, b) => b.revenue - a.revenue);
+      setRevenueByProject(revenueByProjectData);
 
       const profitability: ProjectPnLData[] = projects.map(p => {
         const projectId = (p as { id: string }).id;
         const budget = (p as { budget?: number }).budget || 0;
         const laborCost = laborByProject.get(projectId) || 0;
-        const expenseCost = expensesByProject.get(projectId) || 0;
-        const actualSpend = laborCost + expenseCost;
+        const expenseCost = expensesByProjectMap.get(projectId) || 0;
+        const subCost = subCostsByProject.get(projectId) || 0;
+        const actualSpend = laborCost + expenseCost + subCost;
 
         return {
           projectId,
@@ -648,23 +842,45 @@ export function useFinancialReports(orgId?: string) {
       });
       setProjectProfitability(profitability);
 
-      // Financial summary
+      // Cost breakdown for P&L
+      const directCosts = totalLaborCosts + materialCosts + totalSubcontractorCosts + equipmentCosts;
+      const totalCosts = directCosts + overheadCosts;
+      const costBreakdownData: CostBreakdown[] = [
+        { category: 'Labor', amount: totalLaborCosts, percentage: totalCosts > 0 ? (totalLaborCosts / totalCosts) * 100 : 0, color: '#10B981' },
+        { category: 'Materials', amount: materialCosts, percentage: totalCosts > 0 ? (materialCosts / totalCosts) * 100 : 0, color: '#3B82F6' },
+        { category: 'Subcontractors', amount: totalSubcontractorCosts, percentage: totalCosts > 0 ? (totalSubcontractorCosts / totalCosts) * 100 : 0, color: '#8B5CF6' },
+        { category: 'Equipment', amount: equipmentCosts, percentage: totalCosts > 0 ? (equipmentCosts / totalCosts) * 100 : 0, color: '#F59E0B' },
+        { category: 'Overhead', amount: overheadCosts, percentage: totalCosts > 0 ? (overheadCosts / totalCosts) * 100 : 0, color: '#6B7280' },
+      ].filter(c => c.amount > 0);
+      setCostBreakdown(costBreakdownData);
+
+      // Financial summary with enhanced P&L
       const totalBudget = projects.reduce((sum, p) => sum + ((p as { budget?: number }).budget || 0), 0);
-      const totalLabor = Array.from(laborByProject.values()).reduce((sum, v) => sum + v, 0);
       const totalMaterialExpenses = approvedExpenses.reduce((sum, e) => sum + ((e as { amount?: number }).amount || 0), 0);
-      const totalSpent = totalLabor + totalMaterialExpenses;
-      const grossProfit = totalRevenue - totalSpent;
+      const totalSpent = totalLaborCosts + totalMaterialExpenses + totalSubcontractorCosts;
+      const grossProfit = totalRevenue - directCosts;
+      const netProfit = totalRevenue - totalSpent;
 
       setSummary({
         totalBudget,
         totalSpent,
         totalRevenue,
         grossProfit,
-        // Fix: Allow negative profit margins; show -100% if no revenue but spent exists
         profitMargin: totalRevenue > 0
           ? (grossProfit / totalRevenue) * 100
           : (totalSpent > 0 ? -100 : 0),
         cashFlow: totalRevenue - totalSpent,
+        // Enhanced P&L fields
+        laborCosts: totalLaborCosts,
+        materialCosts,
+        subcontractorCosts: totalSubcontractorCosts,
+        equipmentCosts,
+        overheadCosts,
+        directCosts,
+        netProfit,
+        netMargin: totalRevenue > 0
+          ? (netProfit / totalRevenue) * 100
+          : (totalSpent > 0 ? -100 : 0),
       });
 
     } catch (err) {
@@ -686,6 +902,10 @@ export function useFinancialReports(orgId?: string) {
     expensesByCategory,
     invoiceAging,
     projectProfitability,
+    revenueByProject,
+    revenueByClient,
+    revenueByMonth,
+    costBreakdown,
     refetch: fetchFinancialData,
   };
 }

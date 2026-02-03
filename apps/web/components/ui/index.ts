@@ -111,6 +111,19 @@ export type { SelectProps as SelectNewProps, SelectOption } from './Select';
 export { default as DatePicker, DateRangePicker } from './DatePicker';
 export type { DatePickerProps, DateRangePickerProps } from './DatePicker';
 
+export {
+  default as DateRangePresets,
+  InlineDateRangePresets,
+  getDateRangeFromPresetValue,
+  DATE_PRESET_CONFIGS,
+  PRESET_GROUPS,
+} from './DateRangePresets';
+export type {
+  DateRangePresetsProps,
+  DatePresetValue,
+  DatePresetConfig,
+} from './DateRangePresets';
+
 export { default as TagInput } from './TagInput';
 export type { TagInputProps } from './TagInput';
 
@@ -138,3 +151,7 @@ export {
   MobilePullToRefresh,
 } from './MobileNav';
 export { MobileStats, MobileKPI, MobileStatBar } from './MobileStats';
+
+// Network status indicators
+export { default as OnlineStatus, useOnlineStatus } from './OnlineStatus';
+export type { OnlineStatusProps } from './OnlineStatus';

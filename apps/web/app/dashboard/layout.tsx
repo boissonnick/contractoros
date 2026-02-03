@@ -30,14 +30,68 @@ import {
   CurrencyDollarIcon,
   QuestionMarkCircleIcon,
   WrenchScrewdriverIcon,
+  CalculatorIcon,
+  PencilSquareIcon,
+  CreditCardIcon,
+  TruckIcon,
+  InboxIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
-// Nav items for OWNER/PM roles - full management access
-const ownerPmNavItems: (NavItem & { requiredPermission?: keyof RolePermissions })[] = [
+// =============================================================================
+// OWNER/PM Navigation - Organized by "Jobs to be Done"
+// =============================================================================
+// Navigation is organized into logical groups to help users find what they need:
+// 1. Project Management - Core project work
+// 2. Sales & Clients - Customer relationship & sales pipeline
+// 3. Finance - All money-related functions (collapsible)
+// 4. Operations - Team, subs, equipment, materials
+// 5. Communication - Messages and documents
+// 6. Settings & Help - Configuration and support (at bottom)
+// =============================================================================
+
+const ownerPmNavItems: (NavItem & { requiredPermission?: keyof RolePermissions; section?: string })[] = [
+  // ---------------------------------------------
+  // PROJECT MANAGEMENT
+  // Core project work and scheduling
+  // ---------------------------------------------
   { label: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { label: 'Projects', href: '/dashboard/projects', icon: FolderIcon },
+  { label: 'Schedule', href: '/dashboard/schedule', icon: CalendarIcon },
+  { label: 'Daily Logs', href: '/dashboard/logs', icon: DocumentTextIcon },
+
+  // ---------------------------------------------
+  // SALES & CLIENTS
+  // Customer relationships and sales pipeline
+  // Roles: OWNER, PM (not EMPLOYEE/CONTRACTOR)
+  // ---------------------------------------------
   { label: 'Clients', href: '/dashboard/clients', icon: UserGroupIcon, requiredPermission: 'canViewClients' },
+  { label: 'Estimates', href: '/dashboard/estimates', icon: CalculatorIcon, requiredPermission: 'canViewClients' },
+  { label: 'E-Signatures', href: '/dashboard/signatures', icon: PencilSquareIcon, requiredPermission: 'canViewClients' },
+
+  // ---------------------------------------------
+  // FINANCE (Collapsible Section)
+  // All financial operations grouped together
+  // Roles: OWNER, PM with finance permissions
+  // ---------------------------------------------
+  {
+    label: 'Finance',
+    href: '/dashboard/finances',
+    icon: BanknotesIcon,
+    requiredPermission: 'canViewAllFinances',
+    children: [
+      { label: 'Overview', href: '/dashboard/finances' },
+      { label: 'Invoices', href: '/dashboard/invoices' },
+      { label: 'Expenses', href: '/dashboard/expenses' },
+      { label: 'Payroll', href: '/dashboard/payroll' },
+      { label: 'Reports', href: '/dashboard/reports/financial' },
+    ],
+  },
+
+  // ---------------------------------------------
+  // OPERATIONS
+  // Team management, subcontractors, resources
+  // ---------------------------------------------
   {
     label: 'Team',
     href: '/dashboard/team',
@@ -45,6 +99,7 @@ const ownerPmNavItems: (NavItem & { requiredPermission?: keyof RolePermissions }
     requiredPermission: 'canViewTeam',
     children: [
       { label: 'Directory', href: '/dashboard/team' },
+      { label: 'Time Tracking', href: '/dashboard/time' },
       { label: 'Availability', href: '/dashboard/team/availability' },
       { label: 'Time Off', href: '/dashboard/team/time-off' },
     ],
@@ -60,37 +115,109 @@ const ownerPmNavItems: (NavItem & { requiredPermission?: keyof RolePermissions }
       { label: 'Compare', href: '/dashboard/subcontractors/compare' },
     ],
   },
-  { label: 'Schedule', href: '/dashboard/schedule', icon: CalendarIcon },
-  { label: 'Time Tracking', href: '/dashboard/time', icon: ClockIcon },
-  { label: 'Daily Logs', href: '/dashboard/logs', icon: DocumentTextIcon },
-  { label: 'Finances', href: '/dashboard/finances', icon: BanknotesIcon, requiredPermission: 'canViewAllFinances' },
-  { label: 'Payroll', href: '/dashboard/payroll', icon: CurrencyDollarIcon, requiredPermission: 'canViewAllFinances' },
-  { label: 'Messaging', href: '/dashboard/messaging', icon: ChatBubbleLeftRightIcon },
-  { label: 'Reports', href: '/dashboard/reports', icon: ClipboardDocumentListIcon, requiredPermission: 'canViewProjectReports' },
+  { label: 'Equipment', href: '/dashboard/equipment', icon: TruckIcon },
+  { label: 'Materials', href: '/dashboard/materials', icon: InboxIcon },
+
+  // ---------------------------------------------
+  // COMMUNICATION
+  // Messages and document management
+  // ---------------------------------------------
+  { label: 'Messages', href: '/dashboard/messaging', icon: ChatBubbleLeftRightIcon },
+  { label: 'Documents', href: '/dashboard/documents', icon: DocumentIcon },
+
+  // ---------------------------------------------
+  // REPORTS (Full reports for management)
+  // Collapsible section with report types
+  // Roles: OWNER, PM with reporting permissions
+  // ---------------------------------------------
+  {
+    label: 'Reports',
+    href: '/dashboard/reports',
+    icon: ClipboardDocumentListIcon,
+    requiredPermission: 'canViewProjectReports',
+    children: [
+      { label: 'Overview', href: '/dashboard/reports' },
+      { label: 'Financial', href: '/dashboard/reports/financial' },
+      { label: 'Operational', href: '/dashboard/reports/operational' },
+      { label: 'Detailed', href: '/dashboard/reports/detailed' },
+    ],
+  },
+
+  // ---------------------------------------------
+  // SETTINGS & HELP (Bottom of sidebar)
+  // Configuration and support resources
+  // ---------------------------------------------
   { label: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon, requiredPermission: 'canViewSettings' },
-  { label: 'Help', href: '/dashboard/help', icon: QuestionMarkCircleIcon },
+  {
+    label: 'Help & Support',
+    href: '/dashboard/help',
+    icon: QuestionMarkCircleIcon,
+    children: [
+      { label: 'Getting Started', href: '/dashboard/help' },
+      { label: 'Keyboard Shortcuts', href: '/dashboard/help/shortcuts' },
+      { label: 'Contact Support', href: '/dashboard/help/contact' },
+      { label: "What's New", href: '/dashboard/help/changelog' },
+    ],
+  },
 ];
 
-// Nav items for EMPLOYEE role - focused on their work
+// =============================================================================
+// EMPLOYEE Navigation - Focused on daily field work
+// =============================================================================
 const employeeNavItems: NavItem[] = [
+  // Project Management (their assigned work)
   { label: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+  { label: 'My Projects', href: '/dashboard/projects', icon: FolderIcon },
   { label: 'My Schedule', href: '/dashboard/schedule', icon: CalendarIcon },
-  { label: 'Time Tracking', href: '/dashboard/time', icon: ClockIcon },
-  { label: 'My Tasks', href: '/dashboard/projects', icon: FolderIcon },
   { label: 'Daily Logs', href: '/dashboard/logs', icon: DocumentTextIcon },
-  { label: 'Messaging', href: '/dashboard/messaging', icon: ChatBubbleLeftRightIcon },
-  { label: 'Help', href: '/dashboard/help', icon: QuestionMarkCircleIcon },
+
+  // Time & Operations
+  { label: 'Time Tracking', href: '/dashboard/time', icon: ClockIcon },
+
+  // Communication
+  { label: 'Messages', href: '/dashboard/messaging', icon: ChatBubbleLeftRightIcon },
+
+  // Help (bottom)
+  {
+    label: 'Help & Support',
+    href: '/dashboard/help',
+    icon: QuestionMarkCircleIcon,
+    children: [
+      { label: 'Getting Started', href: '/dashboard/help' },
+      { label: 'Keyboard Shortcuts', href: '/dashboard/help/shortcuts' },
+      { label: 'Contact Support', href: '/dashboard/help/contact' },
+    ],
+  },
 ];
 
-// Nav items for CONTRACTOR role - similar to employee but with some differences
+// =============================================================================
+// CONTRACTOR Navigation - Subcontractor view with bid management
+// =============================================================================
 const contractorNavItems: NavItem[] = [
+  // Project Management (assigned projects)
   { label: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { label: 'My Projects', href: '/dashboard/projects', icon: FolderIcon },
   { label: 'Schedule', href: '/dashboard/schedule', icon: CalendarIcon },
-  { label: 'Time Tracking', href: '/dashboard/time', icon: ClockIcon },
   { label: 'Daily Logs', href: '/dashboard/logs', icon: DocumentTextIcon },
-  { label: 'Messaging', href: '/dashboard/messaging', icon: ChatBubbleLeftRightIcon },
-  { label: 'Help', href: '/dashboard/help', icon: QuestionMarkCircleIcon },
+
+  // Time & Operations
+  { label: 'Time Tracking', href: '/dashboard/time', icon: ClockIcon },
+
+  // Communication
+  { label: 'Messages', href: '/dashboard/messaging', icon: ChatBubbleLeftRightIcon },
+  { label: 'Documents', href: '/dashboard/documents', icon: DocumentIcon },
+
+  // Help (bottom)
+  {
+    label: 'Help & Support',
+    href: '/dashboard/help',
+    icon: QuestionMarkCircleIcon,
+    children: [
+      { label: 'Getting Started', href: '/dashboard/help' },
+      { label: 'Keyboard Shortcuts', href: '/dashboard/help/shortcuts' },
+      { label: 'Contact Support', href: '/dashboard/help/contact' },
+    ],
+  },
 ];
 
 // Simplified nav for CLIENT view - only what clients should see

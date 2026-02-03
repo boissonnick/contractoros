@@ -8,19 +8,28 @@ import EventCard from './EventCard';
 import {
   PlusIcon,
   CalendarDaysIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  MapPinIcon,
+  UserGroupIcon,
 } from '@heroicons/react/24/outline';
 import {
   getWeatherEmoji,
   WeatherData,
 } from '@/lib/services/weather';
 
-interface DayViewProps {
+export interface DayViewProps {
   date: Date;
   events: ScheduleEvent[];
   onEventClick?: (event: ScheduleEvent) => void;
   onSlotClick?: (date: Date, hour: number) => void;
   weather?: WeatherData;
   className?: string;
+  /** Show navigation controls (Previous/Today/Next buttons) */
+  showNavigation?: boolean;
+  onNavigatePrev?: () => void;
+  onNavigateNext?: () => void;
+  onNavigateToday?: () => void;
 }
 
 // Work hours: 6 AM to 8 PM (20:00)
@@ -62,6 +71,24 @@ function getEventPosition(event: ScheduleEvent, hour: number): { top: number; he
   return { top, height: Math.max(height, 20) }; // Minimum 20px height
 }
 
+// Get color based on event type (matching mobile view)
+function getEventTypeColor(type: string): { bg: string; border: string; text: string } {
+  switch (type) {
+    case 'job':
+      return { bg: 'bg-blue-100', border: 'border-blue-500', text: 'text-blue-700' };
+    case 'inspection':
+      return { bg: 'bg-amber-100', border: 'border-amber-500', text: 'text-amber-700' };
+    case 'delivery':
+      return { bg: 'bg-green-100', border: 'border-green-500', text: 'text-green-700' };
+    case 'meeting':
+      return { bg: 'bg-purple-100', border: 'border-purple-500', text: 'text-purple-700' };
+    case 'maintenance':
+      return { bg: 'bg-orange-100', border: 'border-orange-500', text: 'text-orange-700' };
+    default:
+      return { bg: 'bg-gray-100', border: 'border-gray-400', text: 'text-gray-700' };
+  }
+}
+
 export function DayView({
   date,
   events,
@@ -69,6 +96,10 @@ export function DayView({
   onSlotClick,
   weather,
   className,
+  showNavigation = false,
+  onNavigatePrev,
+  onNavigateNext,
+  onNavigateToday,
 }: DayViewProps) {
   const dayEvents = useMemo(() => {
     return events.filter((e) => {
@@ -91,18 +122,48 @@ export function DayView({
     <Card className={cn('overflow-hidden', className)}>
       {/* Header */}
       <div className="bg-gray-50 px-4 py-3 border-b flex items-center justify-between">
-        <div>
-          <h3 className="font-semibold text-gray-900">
-            {date.toLocaleDateString('en-US', {
-              weekday: 'long',
-              month: 'long',
-              day: 'numeric',
-              year: 'numeric',
-            })}
-          </h3>
-          <p className="text-sm text-gray-500">
-            {dayEvents.length} event{dayEvents.length !== 1 ? 's' : ''} scheduled
-          </p>
+        <div className="flex items-center gap-3">
+          {/* Navigation controls (optional) */}
+          {showNavigation && (
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onNavigatePrev}
+                title="Previous Day"
+              >
+                <ChevronLeftIcon className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={onNavigateToday}
+              >
+                Today
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onNavigateNext}
+                title="Next Day"
+              >
+                <ChevronRightIcon className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+          <div>
+            <h3 className="font-semibold text-gray-900">
+              {date.toLocaleDateString('en-US', {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric',
+              })}
+            </h3>
+            <p className="text-sm text-gray-500">
+              {dayEvents.length} event{dayEvents.length !== 1 ? 's' : ''} scheduled
+            </p>
+          </div>
         </div>
         {weather && (
           <div className="flex items-center gap-2 text-sm">
@@ -167,11 +228,16 @@ export function DayView({
                     : new Date(event.startDate)
                   ).getHours();
                   if (startHour !== hour && pos.top === 0) {
-                    // This is a continuation, show a connector
+                    // This is a continuation, show a connector with type-based colors
+                    const contTypeColors = getEventTypeColor(event.type || 'job');
                     return (
                       <div
                         key={`${event.id}-cont`}
-                        className="absolute left-1 right-1 bg-blue-100 border-l-4 border-blue-500 opacity-50"
+                        className={cn(
+                          'absolute left-1 right-1 border-l-4 opacity-50',
+                          contTypeColors.bg,
+                          contTypeColors.border
+                        )}
                         style={{
                           top: `${pos.top}px`,
                           height: `${pos.height}px`,
@@ -180,10 +246,16 @@ export function DayView({
                     );
                   }
 
+                  const typeColors = getEventTypeColor(event.type || 'job');
+
                   return (
                     <div
                       key={event.id}
-                      className="absolute left-1 right-1 bg-blue-100 border-l-4 border-blue-500 rounded-r p-2 cursor-pointer hover:bg-blue-200 transition-colors overflow-hidden"
+                      className={cn(
+                        'absolute left-1 right-1 border-l-4 rounded-r p-2 cursor-pointer hover:opacity-90 transition-all overflow-hidden shadow-sm',
+                        typeColors.bg,
+                        typeColors.border
+                      )}
                       style={{
                         top: `${pos.top}px`,
                         height: `${Math.max(pos.height, 40)}px`,
@@ -194,16 +266,33 @@ export function DayView({
                         onEventClick?.(event);
                       }}
                     >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="font-medium text-sm text-gray-900 truncate">
+                      <div className="flex items-start justify-between gap-2 h-full">
+                        <div className="min-w-0 flex-1">
+                          <p className={cn('font-medium text-sm truncate', typeColors.text)}>
                             {event.title}
                           </p>
                           {pos.height >= 50 && (
-                            <p className="text-xs text-gray-500 truncate">
+                            <p className="text-xs text-gray-600 truncate">
                               {getEventTime(event)}
                               {event.projectName && ` • ${event.projectName}`}
                             </p>
+                          )}
+                          {/* Location - show if height allows */}
+                          {pos.height >= 70 && event.location && (
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <MapPinIcon className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                              <p className="text-xs text-gray-500 truncate">{event.location}</p>
+                            </div>
+                          )}
+                          {/* Crew - show if height allows */}
+                          {pos.height >= 90 && event.assignedUsers && event.assignedUsers.length > 0 && (
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <UserGroupIcon className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                              <p className="text-xs text-gray-500 truncate">
+                                {event.assignedUsers.slice(0, 2).map(u => u.name).join(', ')}
+                                {event.assignedUsers.length > 2 && ` +${event.assignedUsers.length - 2}`}
+                              </p>
+                            </div>
                           )}
                         </div>
                         {event.assignedUserIds && event.assignedUserIds.length > 0 && (
@@ -211,13 +300,13 @@ export function DayView({
                             {event.assignedUserIds.slice(0, 3).map((userId: string, idx: number) => (
                               <div
                                 key={userId}
-                                className="w-5 h-5 rounded-full bg-gray-300 border-2 border-white flex items-center justify-center text-[10px] font-medium"
+                                className="w-5 h-5 rounded-full bg-white/80 border border-gray-200 flex items-center justify-center text-[10px] font-medium text-gray-600"
                               >
                                 {idx + 1}
                               </div>
                             ))}
                             {event.assignedUserIds.length > 3 && (
-                              <div className="w-5 h-5 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-[10px]">
+                              <div className="w-5 h-5 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-[10px] text-gray-500">
                                 +{event.assignedUserIds.length - 3}
                               </div>
                             )}
