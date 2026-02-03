@@ -484,9 +484,12 @@ Notification System:
     - useBrowserNotifications.ts: React hook
     - NotificationSettings.tsx: Full settings UI
     - Quiet hours / DND support included
-[ ] Task 4: OS-Level Notification Pass-Through
-[ ] Task 5: Granular Notification Type Control - Included in Task 3
-[ ] Task 6: Do Not Disturb & Quiet Hours - Included in Task 3
+[x] Task 4: OS-Level Notification Pass-Through - ✅ COMPLETE 2026-02-02
+    - service-worker.ts: Registration, push subscription
+    - public/sw.js already had push notification support
+    - showPushNotification(), onServiceWorkerMessage()
+[x] Task 5: Granular Notification Type Control - Included in Task 3
+[x] Task 6: Do Not Disturb & Quiet Hours - Included in Task 3
 
 Research Documents:
 [ ] Task 7: Microanimation Sprint Planning
