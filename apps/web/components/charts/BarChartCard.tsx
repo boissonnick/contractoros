@@ -21,7 +21,7 @@ import { ChartLegend } from './ChartLegend';
 type ChartData = Record<string, any>[];
 
 interface BarChartCardProps {
-  title: string;
+  title: string | React.ReactNode;
   subtitle?: string;
   data: ChartData;
   dataKeys: string[];

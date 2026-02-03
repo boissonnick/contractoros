@@ -190,6 +190,14 @@ service cloud.firestore {
         allow read, write: if isAuthenticated() && userProfileExists() && getUserProfile().orgId == orgId;
       }
 
+      // Report preferences subcollection (org-level)
+      // Stores customization settings for financial and operational reports
+      match /reportPreferences/{prefsId} {
+        allow read: if isAuthenticated() && userProfileExists() && getUserProfile().orgId == orgId;
+        // Only admins (OWNER/PM) can modify report preferences
+        allow write: if isAdmin() && getUserProfile().orgId == orgId;
+      }
+
       // QuickBooks entity mappings (local ↔ QBO ID mappings)
       // Admin only - sensitive accounting linkage data
       match /qboEntityMappings/{mappingId} {

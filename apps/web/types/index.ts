@@ -7925,3 +7925,60 @@ export interface OrganizationSettings {
   payrollPeriod?: PayrollPeriodConfig;
   taxConfig?: TaxConfig;
 }
+
+// ============================================
+// Financial Report Preferences (Sprint 66)
+// ============================================
+
+/**
+ * Available metric card IDs for financial reports
+ */
+export type FinancialMetricId =
+  | 'total-revenue'
+  | 'total-expenses'
+  | 'net-profit'
+  | 'net-margin'
+  | 'pnl-statement'
+  | 'revenue-trend'
+  | 'cost-breakdown'
+  | 'revenue-by-client'
+  | 'revenue-by-project'
+  | 'budget-summary'
+  | 'expenses-by-category'
+  | 'invoice-aging'
+  | 'project-profitability'
+  | 'invoice-aging-detail';
+
+/**
+ * Report preferences stored per organization
+ * Path: organizations/{orgId}/reportPreferences/financial
+ */
+export interface ReportPreferences {
+  id: string;
+  orgId: string;
+  userId: string; // User who last modified
+
+  // Visible metrics (IDs of cards to show)
+  visibleMetrics: FinancialMetricId[];
+
+  // Order of metrics (first = top of page)
+  metricOrder: FinancialMetricId[];
+
+  // Favorite metrics (shown with star indicator)
+  favoriteMetrics: FinancialMetricId[];
+
+  // Timestamps
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * Metric card definition for the customize panel
+ */
+export interface MetricCardDefinition {
+  id: FinancialMetricId;
+  title: string;
+  description: string;
+  category: 'kpi' | 'chart' | 'table';
+  defaultVisible: boolean;
+}

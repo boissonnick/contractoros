@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
-import { useDashboardReports, useFinancialReports } from '@/lib/hooks/useReports';
+import { useDashboardReports, useFinancialReports, useOperationalReports } from '@/lib/hooks/useReports';
 import { PageHeader, EmptyState } from '@/components/ui';
 import { SkeletonReports } from '@/components/ui/Skeleton';
 import { ReportCard } from '@/components/reports/ReportCard';
@@ -12,12 +13,29 @@ import {
   DateRange,
   getDateRangeFromPreset,
 } from '@/lib/reports/types';
+import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
+import { db } from '@/lib/firebase/config';
+import { cn } from '@/lib/utils';
 import {
   CurrencyDollarIcon,
   ChartBarIcon,
   ClockIcon,
   FolderIcon,
   ExclamationCircleIcon,
+  ExclamationTriangleIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
+  BanknotesIcon,
+  DocumentTextIcon,
+  CalendarDaysIcon,
+  CheckCircleIcon,
+  ArrowRightIcon,
+  ShieldExclamationIcon,
+  BoltIcon,
+  ScaleIcon,
+  ClipboardDocumentListIcon,
+  PresentationChartBarIcon,
+  WrenchScrewdriverIcon,
 } from '@heroicons/react/24/outline';
 
 function formatCurrency(value: number): string {
@@ -31,6 +49,281 @@ function formatCurrency(value: number): string {
 
 function formatPercent(value: number): string {
   return `${value >= 0 ? '+' : ''}${value.toFixed(1)}%`;
+}
+
+// Alert types for the at-risk metrics section
+interface BusinessAlert {
+  id: string;
+  type: 'critical' | 'warning' | 'info';
+  category: 'invoice' | 'project' | 'task' | 'cash';
+  title: string;
+  description: string;
+  value?: string;
+  href?: string;
+}
+
+// Forecast data types
+interface CashFlowForecast {
+  period: string;
+  days: number;
+  projectedInflow: number;
+  projectedOutflow: number;
+  netCashFlow: number;
+  endingBalance: number;
+}
+
+// Custom hook to fetch alert data (overdue invoices, at-risk projects, late tasks)
+function useBusinessAlerts(orgId?: string) {
+  const [alerts, setAlerts] = useState<BusinessAlert[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [overdueInvoicesTotal, setOverdueInvoicesTotal] = useState(0);
+  const [overdueInvoicesCount, setOverdueInvoicesCount] = useState(0);
+  const [overBudgetProjectsCount, setOverBudgetProjectsCount] = useState(0);
+  const [lateTasksCount, setLateTasksCount] = useState(0);
+
+  const fetchAlerts = useCallback(async () => {
+    if (!orgId) return;
+    setLoading(true);
+
+    try {
+      const now = new Date();
+      const alertsList: BusinessAlert[] = [];
+
+      // Fetch overdue invoices
+      const invoicesSnap = await getDocs(
+        query(collection(db, 'invoices'), where('orgId', '==', orgId))
+      );
+      let overdueTotal = 0;
+      let overdueCount = 0;
+      invoicesSnap.docs.forEach(doc => {
+        const data = doc.data();
+        const status = data.status as string;
+        const dueDate = data.dueDate?.toDate?.();
+        if (['sent', 'viewed', 'overdue'].includes(status) && dueDate && dueDate < now) {
+          overdueTotal += (data.total as number) || 0;
+          overdueCount++;
+        }
+      });
+      setOverdueInvoicesTotal(overdueTotal);
+      setOverdueInvoicesCount(overdueCount);
+
+      if (overdueCount > 0) {
+        alertsList.push({
+          id: 'overdue-invoices',
+          type: overdueTotal > 10000 ? 'critical' : 'warning',
+          category: 'invoice',
+          title: `${overdueCount} Overdue Invoice${overdueCount > 1 ? 's' : ''}`,
+          description: `${formatCurrency(overdueTotal)} past due`,
+          value: formatCurrency(overdueTotal),
+          href: '/dashboard/invoices?status=overdue',
+        });
+      }
+
+      // Fetch projects over budget
+      const projectsSnap = await getDocs(
+        query(collection(db, 'projects'), where('orgId', '==', orgId))
+      );
+      const expensesSnap = await getDocs(
+        query(collection(db, 'expenses'), where('orgId', '==', orgId), where('status', '==', 'approved'))
+      );
+
+      // Sum expenses by project
+      const expensesByProject = new Map<string, number>();
+      expensesSnap.docs.forEach(doc => {
+        const data = doc.data();
+        const projectId = data.projectId as string;
+        const amount = (data.amount as number) || 0;
+        if (projectId) {
+          expensesByProject.set(projectId, (expensesByProject.get(projectId) || 0) + amount);
+        }
+      });
+
+      let overBudgetCount = 0;
+      projectsSnap.docs.forEach(doc => {
+        const data = doc.data();
+        const budget = (data.budget as number) || 0;
+        const status = data.status as string;
+        if (status === 'active' && budget > 0) {
+          const spent = expensesByProject.get(doc.id) || 0;
+          if (spent > budget) {
+            overBudgetCount++;
+          }
+        }
+      });
+      setOverBudgetProjectsCount(overBudgetCount);
+
+      if (overBudgetCount > 0) {
+        alertsList.push({
+          id: 'over-budget-projects',
+          type: overBudgetCount > 3 ? 'critical' : 'warning',
+          category: 'project',
+          title: `${overBudgetCount} Project${overBudgetCount > 1 ? 's' : ''} Over Budget`,
+          description: 'Immediate attention required',
+          href: '/dashboard/reports/financial',
+        });
+      }
+
+      // Fetch late tasks
+      const tasksSnap = await getDocs(
+        query(collection(db, 'tasks'), where('orgId', '==', orgId))
+      );
+      let lateCount = 0;
+      tasksSnap.docs.forEach(doc => {
+        const data = doc.data();
+        const status = data.status as string;
+        const dueDate = data.dueDate?.toDate?.();
+        if (!['completed', 'cancelled'].includes(status) && dueDate && dueDate < now) {
+          lateCount++;
+        }
+      });
+      setLateTasksCount(lateCount);
+
+      if (lateCount > 0) {
+        alertsList.push({
+          id: 'late-tasks',
+          type: lateCount > 10 ? 'critical' : 'warning',
+          category: 'task',
+          title: `${lateCount} Overdue Task${lateCount > 1 ? 's' : ''}`,
+          description: 'Tasks past their due date',
+          href: '/dashboard/tasks?filter=overdue',
+        });
+      }
+
+      setAlerts(alertsList);
+    } catch (err) {
+      console.error('Failed to fetch alerts:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [orgId]);
+
+  useEffect(() => {
+    fetchAlerts();
+  }, [fetchAlerts]);
+
+  return {
+    alerts,
+    loading,
+    overdueInvoicesTotal,
+    overdueInvoicesCount,
+    overBudgetProjectsCount,
+    lateTasksCount,
+  };
+}
+
+// Custom hook for cash flow forecasting
+function useCashFlowForecast(orgId?: string, currentCashPosition?: number) {
+  const [forecast, setForecast] = useState<CashFlowForecast[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [projectedRevenue, setProjectedRevenue] = useState(0);
+  const [projectedExpenses, setProjectedExpenses] = useState(0);
+
+  const fetchForecast = useCallback(async () => {
+    if (!orgId) return;
+    setLoading(true);
+
+    try {
+      const now = new Date();
+
+      // Fetch pending/outstanding invoices for projected inflow
+      const invoicesSnap = await getDocs(
+        query(collection(db, 'invoices'), where('orgId', '==', orgId))
+      );
+
+      // Calculate projected inflows by period (30/60/90 days)
+      const inflows = { 30: 0, 60: 0, 90: 0 };
+      invoicesSnap.docs.forEach(doc => {
+        const data = doc.data();
+        const status = data.status as string;
+        const dueDate = data.dueDate?.toDate?.();
+        const total = (data.total as number) || 0;
+
+        if (['sent', 'viewed', 'overdue', 'draft'].includes(status)) {
+          // Estimate when payment will come in based on due date or age
+          const expectedDate = dueDate || new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+          const daysFromNow = Math.ceil((expectedDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+          if (daysFromNow <= 30) inflows[30] += total;
+          else if (daysFromNow <= 60) inflows[60] += total;
+          else if (daysFromNow <= 90) inflows[90] += total;
+        }
+      });
+
+      // Fetch scheduled work / active projects for projected outflows
+      const projectsSnap = await getDocs(
+        query(collection(db, 'projects'), where('orgId', '==', orgId))
+      );
+
+      // Estimate monthly burn rate from active projects
+      let totalActiveBudget = 0;
+      let activeProjectCount = 0;
+      let avgProjectDuration = 90; // default 90 days
+
+      projectsSnap.docs.forEach(doc => {
+        const data = doc.data();
+        if (data.status === 'active') {
+          totalActiveBudget += (data.budget as number) || 0;
+          activeProjectCount++;
+          const startDate = data.startDate?.toDate?.();
+          const endDate = data.plannedEndDate?.toDate?.() || data.endDate?.toDate?.();
+          if (startDate && endDate) {
+            const duration = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+            avgProjectDuration = (avgProjectDuration + duration) / 2;
+          }
+        }
+      });
+
+      // Estimate monthly outflow based on active budgets spread over duration
+      const monthlyBurnRate = activeProjectCount > 0
+        ? (totalActiveBudget / avgProjectDuration) * 30
+        : 0;
+
+      const outflows = {
+        30: monthlyBurnRate,
+        60: monthlyBurnRate,
+        90: monthlyBurnRate,
+      };
+
+      setProjectedRevenue(inflows[30] + inflows[60] + inflows[90]);
+      setProjectedExpenses(outflows[30] + outflows[60] + outflows[90]);
+
+      // Build forecast periods
+      let runningBalance = currentCashPosition || 0;
+      const forecastData: CashFlowForecast[] = [];
+
+      [
+        { period: 'Next 30 Days', days: 30 },
+        { period: '31-60 Days', days: 60 },
+        { period: '61-90 Days', days: 90 },
+      ].forEach(({ period, days }) => {
+        const inflow = inflows[days as 30 | 60 | 90];
+        const outflow = outflows[days as 30 | 60 | 90];
+        const netCashFlow = inflow - outflow;
+        runningBalance += netCashFlow;
+
+        forecastData.push({
+          period,
+          days,
+          projectedInflow: inflow,
+          projectedOutflow: outflow,
+          netCashFlow,
+          endingBalance: runningBalance,
+        });
+      });
+
+      setForecast(forecastData);
+    } catch (err) {
+      console.error('Failed to fetch forecast:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [orgId, currentCashPosition]);
+
+  useEffect(() => {
+    fetchForecast();
+  }, [fetchForecast]);
+
+  return { forecast, loading, projectedRevenue, projectedExpenses };
 }
 
 export default function ReportsPage() {
@@ -57,7 +350,35 @@ export default function ReportsPage() {
     loading: financialLoading,
     summary: financialSummary,
     projectProfitability,
+    invoiceAging,
   } = useFinancialReports(orgId);
+
+  // Fetch operational metrics
+  const {
+    loading: operationalLoading,
+    metrics: operationalMetrics,
+  } = useOperationalReports(orgId);
+
+  // Fetch business alerts
+  const {
+    alerts,
+    loading: alertsLoading,
+    overdueInvoicesTotal,
+    overdueInvoicesCount,
+    overBudgetProjectsCount,
+    lateTasksCount,
+  } = useBusinessAlerts(orgId);
+
+  // Current cash position for forecasting
+  const currentCashPosition = financialSummary?.cashFlow || 0;
+
+  // Fetch cash flow forecast
+  const {
+    forecast,
+    loading: forecastLoading,
+    projectedRevenue,
+    projectedExpenses,
+  } = useCashFlowForecast(orgId, currentCashPosition);
 
   const loading = dashboardLoading || financialLoading;
 
@@ -110,11 +431,43 @@ export default function ReportsPage() {
     );
   }
 
+  // Calculate business health score
+  const healthScore = useMemo(() => {
+    if (!financialSummary || !kpis) return null;
+    let score = 100;
+
+    // Deduct points for issues
+    if (overdueInvoicesCount > 0) score -= Math.min(overdueInvoicesCount * 5, 20);
+    if (overBudgetProjectsCount > 0) score -= Math.min(overBudgetProjectsCount * 10, 30);
+    if (lateTasksCount > 10) score -= 15;
+    else if (lateTasksCount > 0) score -= Math.min(lateTasksCount * 2, 10);
+    if (financialSummary.profitMargin < 10) score -= 20;
+    else if (financialSummary.profitMargin < 20) score -= 10;
+
+    return Math.max(0, Math.min(100, score));
+  }, [financialSummary, kpis, overdueInvoicesCount, overBudgetProjectsCount, lateTasksCount]);
+
+  const healthScoreLabel = useMemo(() => {
+    if (healthScore === null) return 'Loading...';
+    if (healthScore >= 80) return 'Excellent';
+    if (healthScore >= 60) return 'Good';
+    if (healthScore >= 40) return 'Needs Attention';
+    return 'Critical';
+  }, [healthScore]);
+
+  const healthScoreColor = useMemo(() => {
+    if (healthScore === null) return 'gray';
+    if (healthScore >= 80) return 'green';
+    if (healthScore >= 60) return 'blue';
+    if (healthScore >= 40) return 'amber';
+    return 'red';
+  }, [healthScore]);
+
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Reports"
-        description="Business insights and analytics"
+        title="Business Command Center"
+        description="Executive overview of your business health and performance"
         actions={
           <DateRangePicker
             value={dateRange}
@@ -123,57 +476,355 @@ export default function ReportsPage() {
         }
       />
 
-      {/* Report Cards Grid */}
+      {/* Executive Summary Section */}
+      <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-xl p-6 text-white">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          {/* Health Score */}
+          <div className="flex items-center gap-6">
+            <div className="relative">
+              <div className={cn(
+                'w-24 h-24 rounded-full flex items-center justify-center border-4',
+                healthScoreColor === 'green' && 'border-green-400 bg-green-400/20',
+                healthScoreColor === 'blue' && 'border-blue-400 bg-blue-400/20',
+                healthScoreColor === 'amber' && 'border-amber-400 bg-amber-400/20',
+                healthScoreColor === 'red' && 'border-red-400 bg-red-400/20',
+                healthScoreColor === 'gray' && 'border-gray-400 bg-gray-400/20',
+              )}>
+                <div className="text-center">
+                  <div className="text-2xl font-bold">{healthScore ?? '--'}</div>
+                  <div className="text-xs opacity-80">Score</div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold mb-1">Business Health</h2>
+              <p className={cn(
+                'text-sm font-medium',
+                healthScoreColor === 'green' && 'text-green-400',
+                healthScoreColor === 'blue' && 'text-blue-400',
+                healthScoreColor === 'amber' && 'text-amber-400',
+                healthScoreColor === 'red' && 'text-red-400',
+              )}>
+                {healthScoreLabel}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                Based on finances, projects, and task performance
+              </p>
+            </div>
+          </div>
+
+          {/* Quick Stats */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-8">
+            <div>
+              <p className="text-xs text-gray-400 uppercase tracking-wider">Revenue</p>
+              <p className="text-xl font-semibold mt-1">
+                {kpis ? formatCurrency(kpis.totalRevenue) : '$0'}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-400 uppercase tracking-wider">Profit</p>
+              <p className={cn(
+                'text-xl font-semibold mt-1',
+                financialSummary && financialSummary.netProfit >= 0 ? 'text-green-400' : 'text-red-400'
+              )}>
+                {financialSummary ? formatCurrency(financialSummary.netProfit) : '$0'}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-400 uppercase tracking-wider">Cash Position</p>
+              <p className={cn(
+                'text-xl font-semibold mt-1',
+                currentCashPosition >= 0 ? 'text-green-400' : 'text-red-400'
+              )}>
+                {formatCurrency(currentCashPosition)}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-400 uppercase tracking-wider">Outstanding</p>
+              <p className="text-xl font-semibold mt-1 text-amber-400">
+                {kpis ? formatCurrency(kpis.outstandingInvoices) : '$0'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Alerts Section */}
+      {alerts.length > 0 && (
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <div className="flex items-center gap-2 mb-4">
+            <ShieldExclamationIcon className="h-5 w-5 text-amber-500" />
+            <h3 className="text-sm font-semibold text-gray-900">Attention Required</h3>
+            <span className="ml-auto text-xs text-gray-500">{alerts.length} alert{alerts.length > 1 ? 's' : ''}</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {alerts.map((alert) => (
+              <Link
+                key={alert.id}
+                href={alert.href || '#'}
+                className={cn(
+                  'flex items-start gap-3 p-3 rounded-lg border transition-all hover:shadow-sm',
+                  alert.type === 'critical' && 'border-red-200 bg-red-50 hover:border-red-300',
+                  alert.type === 'warning' && 'border-amber-200 bg-amber-50 hover:border-amber-300',
+                  alert.type === 'info' && 'border-blue-200 bg-blue-50 hover:border-blue-300',
+                )}
+              >
+                <div className={cn(
+                  'p-1.5 rounded-full',
+                  alert.type === 'critical' && 'bg-red-100',
+                  alert.type === 'warning' && 'bg-amber-100',
+                  alert.type === 'info' && 'bg-blue-100',
+                )}>
+                  {alert.category === 'invoice' && (
+                    <DocumentTextIcon className={cn('h-4 w-4', alert.type === 'critical' ? 'text-red-600' : 'text-amber-600')} />
+                  )}
+                  {alert.category === 'project' && (
+                    <FolderIcon className={cn('h-4 w-4', alert.type === 'critical' ? 'text-red-600' : 'text-amber-600')} />
+                  )}
+                  {alert.category === 'task' && (
+                    <ClockIcon className={cn('h-4 w-4', alert.type === 'critical' ? 'text-red-600' : 'text-amber-600')} />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className={cn(
+                    'text-sm font-medium',
+                    alert.type === 'critical' ? 'text-red-800' : alert.type === 'warning' ? 'text-amber-800' : 'text-blue-800',
+                  )}>
+                    {alert.title}
+                  </p>
+                  <p className={cn(
+                    'text-xs mt-0.5',
+                    alert.type === 'critical' ? 'text-red-600' : alert.type === 'warning' ? 'text-amber-600' : 'text-blue-600',
+                  )}>
+                    {alert.description}
+                  </p>
+                </div>
+                <ArrowRightIcon className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" />
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Key Metrics with Drill-down Links */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Revenue Card */}
-        <ReportCard
-          title="Revenue"
-          value={kpis ? formatCurrency(kpis.totalRevenue) : '$0'}
-          subtitle={kpis ? `${formatPercent(kpis.profitMargin)} margin` : 'No data'}
-          chartData={revenueChartMini}
-          icon={CurrencyDollarIcon}
-          iconColor="green"
-          loading={loading}
-        />
+        {/* Revenue Card - Links to Financial Reports */}
+        <Link href="/dashboard/reports/financial" className="block group">
+          <ReportCard
+            title="Revenue"
+            value={kpis ? formatCurrency(kpis.totalRevenue) : '$0'}
+            subtitle={kpis ? `${formatPercent(kpis.profitMargin)} margin` : 'No data'}
+            chartData={revenueChartMini}
+            icon={CurrencyDollarIcon}
+            iconColor="green"
+            loading={loading}
+            className="group-hover:shadow-md group-hover:border-green-200 transition-all"
+          />
+        </Link>
 
-        {/* Profitability Card */}
-        <ReportCard
-          title="Profitability"
-          value={financialSummary ? formatPercent(financialSummary.profitMargin) : '0%'}
-          subtitle={financialSummary ? `${formatCurrency(financialSummary.grossProfit)} profit` : 'No data'}
-          chartData={profitChartMini}
-          icon={ChartBarIcon}
-          iconColor={
-            financialSummary && financialSummary.profitMargin >= 20
-              ? 'green'
-              : financialSummary && financialSummary.profitMargin >= 10
-              ? 'amber'
-              : 'red'
-          }
-          loading={loading}
-        />
+        {/* Profitability Card - Links to Financial Reports */}
+        <Link href="/dashboard/reports/financial" className="block group">
+          <ReportCard
+            title="Profitability"
+            value={financialSummary ? formatPercent(financialSummary.profitMargin) : '0%'}
+            subtitle={financialSummary ? `${formatCurrency(financialSummary.grossProfit)} profit` : 'No data'}
+            chartData={profitChartMini}
+            icon={ChartBarIcon}
+            iconColor={
+              financialSummary && financialSummary.profitMargin >= 20
+                ? 'green'
+                : financialSummary && financialSummary.profitMargin >= 10
+                ? 'amber'
+                : 'red'
+            }
+            loading={loading}
+            className="group-hover:shadow-md group-hover:border-blue-200 transition-all"
+          />
+        </Link>
 
-        {/* Hours Card */}
-        <ReportCard
-          title="Hours Logged"
-          value={kpis ? `${Math.round(kpis.hoursLoggedThisMonth)} hrs` : '0 hrs'}
-          subtitle={kpis ? `${kpis.activeTeamMembers} team members` : 'No data'}
-          chartData={hoursChartMini}
-          icon={ClockIcon}
-          iconColor="purple"
-          loading={loading}
-        />
+        {/* Hours Card - Links to Operational Reports */}
+        <Link href="/dashboard/reports/operational" className="block group">
+          <ReportCard
+            title="Hours Logged"
+            value={kpis ? `${Math.round(kpis.hoursLoggedThisMonth)} hrs` : '0 hrs'}
+            subtitle={kpis ? `${kpis.activeTeamMembers} team members` : 'No data'}
+            chartData={hoursChartMini}
+            icon={ClockIcon}
+            iconColor="purple"
+            loading={loading}
+            className="group-hover:shadow-md group-hover:border-purple-200 transition-all"
+          />
+        </Link>
 
-        {/* Projects Card */}
-        <ReportCard
-          title="Projects"
-          value={kpis?.activeProjects ?? 0}
-          subtitle={kpis ? `${kpis.completedProjects} completed` : 'No data'}
-          chartData={projectsChartMini}
-          icon={FolderIcon}
-          iconColor="blue"
-          loading={loading}
-        />
+        {/* Projects Card - Links to Projects */}
+        <Link href="/dashboard/projects" className="block group">
+          <ReportCard
+            title="Projects"
+            value={kpis?.activeProjects ?? 0}
+            subtitle={kpis ? `${kpis.completedProjects} completed` : 'No data'}
+            chartData={projectsChartMini}
+            icon={FolderIcon}
+            iconColor="blue"
+            loading={loading}
+            className="group-hover:shadow-md group-hover:border-blue-200 transition-all"
+          />
+        </Link>
+      </div>
+
+      {/* Cash Flow Forecast Section */}
+      <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+              <BoltIcon className="h-4 w-4 text-blue-500" />
+              Cash Flow Forecast
+            </h3>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Projected cash flow based on pending invoices and scheduled work
+            </p>
+          </div>
+          <Link
+            href="/dashboard/reports/financial"
+            className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+          >
+            View Details <ArrowRightIcon className="h-3 w-3" />
+          </Link>
+        </div>
+
+        {forecastLoading ? (
+          <div className="animate-pulse space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-16 bg-gray-100 rounded-lg" />
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {/* Summary Row */}
+            <div className="grid grid-cols-3 gap-4 p-3 bg-gray-50 rounded-lg">
+              <div className="text-center">
+                <p className="text-xs text-gray-500 mb-1">Projected Inflow (90d)</p>
+                <p className="text-lg font-semibold text-green-600">
+                  {formatCurrency(projectedRevenue)}
+                </p>
+              </div>
+              <div className="text-center border-x border-gray-200">
+                <p className="text-xs text-gray-500 mb-1">Projected Outflow (90d)</p>
+                <p className="text-lg font-semibold text-red-600">
+                  {formatCurrency(projectedExpenses)}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-xs text-gray-500 mb-1">Net Cash Flow (90d)</p>
+                <p className={cn(
+                  'text-lg font-semibold',
+                  projectedRevenue - projectedExpenses >= 0 ? 'text-green-600' : 'text-red-600'
+                )}>
+                  {formatCurrency(projectedRevenue - projectedExpenses)}
+                </p>
+              </div>
+            </div>
+
+            {/* Forecast Periods */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {forecast.map((period) => (
+                <div
+                  key={period.period}
+                  className={cn(
+                    'p-3 rounded-lg border',
+                    period.netCashFlow >= 0 ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'
+                  )}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-gray-700">{period.period}</span>
+                    <CalendarDaysIcon className="h-4 w-4 text-gray-400" />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-500">Inflow:</span>
+                      <span className="font-medium text-green-600">
+                        +{formatCurrency(period.projectedInflow)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-500">Outflow:</span>
+                      <span className="font-medium text-red-600">
+                        -{formatCurrency(period.projectedOutflow)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs pt-1 border-t border-gray-200">
+                      <span className="text-gray-600 font-medium">Net:</span>
+                      <span className={cn(
+                        'font-semibold',
+                        period.netCashFlow >= 0 ? 'text-green-700' : 'text-red-700'
+                      )}>
+                        {period.netCashFlow >= 0 ? '+' : ''}{formatCurrency(period.netCashFlow)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Quick Links to Report Sections */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <Link
+          href="/dashboard/reports/financial"
+          className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-colors group"
+        >
+          <div className="p-2 bg-green-100 rounded-lg group-hover:bg-green-200 transition-colors">
+            <BanknotesIcon className="h-5 w-5 text-green-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-gray-900">Financial</p>
+            <p className="text-xs text-gray-500 truncate">P&L, budgets, cash flow</p>
+          </div>
+          <ArrowRightIcon className="h-4 w-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+        </Link>
+
+        <Link
+          href="/dashboard/reports/operational"
+          className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-colors group"
+        >
+          <div className="p-2 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
+            <WrenchScrewdriverIcon className="h-5 w-5 text-purple-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-gray-900">Operational</p>
+            <p className="text-xs text-gray-500 truncate">Tasks, hours, timelines</p>
+          </div>
+          <ArrowRightIcon className="h-4 w-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+        </Link>
+
+        <Link
+          href="/dashboard/reports/benchmarking"
+          className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-colors group"
+        >
+          <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
+            <ScaleIcon className="h-5 w-5 text-blue-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-gray-900">Benchmarking</p>
+            <p className="text-xs text-gray-500 truncate">Compare projects</p>
+          </div>
+          <ArrowRightIcon className="h-4 w-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+        </Link>
+
+        <Link
+          href="/dashboard/reports/detailed"
+          className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-colors group"
+        >
+          <div className="p-2 bg-amber-100 rounded-lg group-hover:bg-amber-200 transition-colors">
+            <ClipboardDocumentListIcon className="h-5 w-5 text-amber-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-gray-900">Detailed</p>
+            <p className="text-xs text-gray-500 truncate">Export & drill down</p>
+          </div>
+          <ArrowRightIcon className="h-4 w-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+        </Link>
       </div>
 
       {/* Revenue Chart */}

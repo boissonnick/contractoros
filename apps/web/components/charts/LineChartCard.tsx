@@ -17,7 +17,7 @@ import { ChartTooltip } from './ChartTooltip';
 import { ChartLegend } from './ChartLegend';
 
 interface LineChartCardProps {
-  title: string;
+  title: string | React.ReactNode;
   subtitle?: string;
   data: Record<string, unknown>[];
   dataKeys: string[];

@@ -139,6 +139,7 @@ const ownerPmNavItems: (NavItem & { requiredPermission?: keyof RolePermissions; 
       { label: 'Overview', href: '/dashboard/reports' },
       { label: 'Financial', href: '/dashboard/reports/financial' },
       { label: 'Operational', href: '/dashboard/reports/operational' },
+      { label: 'Benchmarking', href: '/dashboard/reports/benchmarking' },
       { label: 'Detailed', href: '/dashboard/reports/detailed' },
     ],
   },

@@ -17,7 +17,7 @@ import { ChartTooltip } from './ChartTooltip';
 type PieChartData = Array<{ name: string; value: number; color?: string; [key: string]: any }>;
 
 interface PieChartCardProps {
-  title: string;
+  title: string | React.ReactNode;
   subtitle?: string;
   data: PieChartData;
   dataKey?: string;
