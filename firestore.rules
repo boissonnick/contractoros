@@ -847,6 +847,22 @@ service cloud.firestore {
         resource.data.orgId == getUserProfile().orgId;
     }
 
+    // Integration Waitlist collection (Gusto, Stripe waitlist signups)
+    match /integrationWaitlist/{entryId} {
+      // Authenticated users can create waitlist entries
+      allow create: if isAuthenticated();
+
+      // Users can read their own entries, admins can read all in their org
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        (userProfileExists() && resource.data.orgId == getUserProfile().orgId && isAdmin())
+      );
+
+      // Admins can update/delete waitlist entries
+      allow update, delete: if isAdmin() && userProfileExists() &&
+        resource.data.orgId == getUserProfile().orgId;
+    }
+
     // Service Tickets collection (maintenance/support requests)
     match /serviceTickets/{ticketId} {
       // Org members can read service tickets in their org
