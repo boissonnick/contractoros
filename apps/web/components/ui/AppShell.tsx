@@ -4,10 +4,72 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { NavItem, UserRole } from '@/types';
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon, XMarkIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import { MobileHeader, MobileDrawer, MobileBottomNav } from './MobileNav';
 import { useNetworkStatus } from '@/lib/offline/network-status';
 import { GlobalSearchBar } from '@/components/search';
+import { cn } from '@/lib/utils';
+
+// Collapsible nav item component for sections with children
+function CollapsibleNavItem({
+  item,
+  isActive,
+  pathname,
+}: {
+  item: NavItem;
+  isActive: boolean;
+  pathname: string;
+}) {
+  const [isExpanded, setIsExpanded] = useState(isActive);
+  const Icon = item.icon;
+
+  return (
+    <div>
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className={cn(
+          'w-full flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors',
+          isActive
+            ? 'bg-brand-primary-light text-brand-primary'
+            : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+        )}
+      >
+        <div className="flex items-center">
+          <Icon className={cn('mr-3 h-5 w-5', isActive ? 'text-brand-primary' : 'text-gray-400')} />
+          {item.label}
+        </div>
+        <ChevronDownIcon
+          className={cn(
+            'h-4 w-4 transition-transform duration-200',
+            isExpanded && 'rotate-180',
+            isActive ? 'text-brand-primary' : 'text-gray-400'
+          )}
+        />
+      </button>
+      {isExpanded && item.children && (
+        <div className="ml-8 mt-1 space-y-0.5">
+          {item.children.map((child) => {
+            const isChildActive = pathname === child.href || pathname.startsWith(child.href + '/');
+            return (
+              <Link
+                key={child.href}
+                href={child.href}
+                className={cn(
+                  'block px-3 py-1.5 text-sm rounded-md transition-colors',
+                  isChildActive
+                    ? 'text-brand-primary font-medium bg-brand-primary-light/50'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                )}
+              >
+                {child.label}
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -43,20 +105,39 @@ export default function AppShell({
           <GlobalSearchBar className="w-full" />
         </div>
 
-        <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+            const hasChildren = item.children && item.children.length > 0;
+            const isChildActive = hasChildren && item.children?.some(
+              child => pathname === child.href || pathname.startsWith(child.href + '/')
+            );
+
+            // For items with children, render collapsible section
+            if (hasChildren) {
+              return (
+                <CollapsibleNavItem
+                  key={item.href}
+                  item={item}
+                  isActive={isActive || !!isChildActive}
+                  pathname={pathname}
+                />
+              );
+            }
+
+            // For regular items, render simple link
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                className={cn(
+                  'flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors',
                   isActive
                     ? 'bg-brand-primary-light text-brand-primary'
                     : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                }`}
+                )}
               >
-                <item.icon className={`mr-3 h-5 w-5 ${isActive ? 'text-brand-primary' : 'text-gray-400'}`} />
+                <item.icon className={cn('mr-3 h-5 w-5', isActive ? 'text-brand-primary' : 'text-gray-400')} />
                 {item.label}
               </Link>
             );

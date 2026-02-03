@@ -2249,12 +2249,18 @@ export interface DailyLog {
 // Navigation Types
 // ============================================
 
+export interface NavItemChild {
+  label: string;
+  href: string;
+}
+
 export interface NavItem {
   label: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   roles?: UserRole[];       // Which roles can see this
   badge?: number;           // Notification count
+  children?: NavItemChild[]; // Sub-navigation items for collapsible sections
 }
 
 // ============================================
