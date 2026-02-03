@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useBrowserNotifications } from '@/lib/hooks/useBrowserNotifications';
+import { useServiceWorker } from '@/lib/hooks/useServiceWorker';
 import { AppNotificationType } from '@/lib/notifications/browser-notifications';
 import {
   BellIcon,
@@ -11,6 +12,8 @@ import {
   MoonIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
+  CpuChipIcon,
+  ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 
 const NOTIFICATION_TYPE_LABELS: Record<AppNotificationType, { label: string; description: string }> = {
@@ -53,12 +56,37 @@ export function NotificationSettings() {
     isQuietHours,
   } = useBrowserNotifications();
 
+  const {
+    isSupported: isSwSupported,
+    notificationSwStatus,
+    sendNotification,
+  } = useServiceWorker();
+
   const [requesting, setRequesting] = useState(false);
+  const [testingNotification, setTestingNotification] = useState(false);
 
   const handleRequestPermission = async () => {
     setRequesting(true);
     await requestPermission();
     setRequesting(false);
+  };
+
+  const handleTestNotification = async () => {
+    setTestingNotification(true);
+    try {
+      await sendNotification({
+        title: 'Test Notification',
+        body: 'This is a test notification from ContractorOS. If you see this in your OS notification center, everything is working correctly!',
+        tag: 'test-notification',
+        data: {
+          url: '/dashboard/settings/notifications',
+          type: 'test',
+        },
+      });
+    } catch (error) {
+      console.error('Failed to send test notification:', error);
+    }
+    setTestingNotification(false);
   };
 
   const handleQuietHoursToggle = () => {
@@ -102,6 +130,68 @@ export function NotificationSettings() {
 
   return (
     <div className="space-y-6">
+      {/* Service Worker Status */}
+      <div className="bg-white border border-gray-200 rounded-lg p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <CpuChipIcon className="h-5 w-5 text-gray-600" />
+          <h3 className="text-sm font-semibold text-gray-900">OS Notification Center</h3>
+        </div>
+
+        {!isSwSupported ? (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+            <p className="text-sm text-yellow-800">
+              Service workers are not supported in your browser. OS-level notifications will not work.
+            </p>
+          </div>
+        ) : notificationSwStatus.isActive ? (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <CheckCircleIcon className="h-5 w-5 text-green-600" />
+              <span className="text-sm text-gray-700">Service worker active</span>
+              <span className="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded-full">
+                Ready
+              </span>
+            </div>
+            <p className="text-xs text-gray-500">
+              Notifications will appear in your Windows/Mac notification center, even when the browser tab is closed.
+            </p>
+            {isGranted && (
+              <button
+                onClick={handleTestNotification}
+                disabled={testingNotification}
+                className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 disabled:opacity-50"
+              >
+                {testingNotification ? (
+                  <>
+                    <ArrowPathIcon className="h-4 w-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  'Send Test Notification'
+                )}
+              </button>
+            )}
+          </div>
+        ) : notificationSwStatus.isRegistered ? (
+          <div className="flex items-center gap-2">
+            <ArrowPathIcon className="h-5 w-5 text-yellow-600 animate-spin" />
+            <span className="text-sm text-gray-700">Service worker activating...</span>
+          </div>
+        ) : (
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+            <p className="text-sm text-gray-600">
+              Service worker not registered. OS notifications require page reload.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-2 text-sm text-blue-600 hover:underline"
+            >
+              Reload page
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* Permission Status */}
       <div className="bg-white border border-gray-200 rounded-lg p-4">
         <h3 className="text-sm font-semibold text-gray-900 mb-3">Browser Notifications</h3>

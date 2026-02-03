@@ -15,7 +15,7 @@ import {
   limit as firestoreLimit,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import { AppNotification, NotificationPreferences } from '@/types';
+import { AppNotification, NotificationPreferences, NotificationProjectSettings, QuietHoursConfig, DayOfWeek } from '@/types';
 import { useAuth } from '@/lib/auth';
 
 function fromFirestore(id: string, data: Record<string, unknown>): AppNotification {
@@ -82,6 +82,42 @@ export function useNotifications() {
   return { notifications, loading, unreadCount, markAsRead, markAllAsRead };
 }
 
+const DEFAULT_QUIET_HOURS: QuietHoursConfig = {
+  enabled: false,
+  startTime: '22:00',
+  endTime: '07:00',
+  days: ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],
+  allowHighPriority: true,
+};
+
+/**
+ * Check if quiet hours are currently active based on config
+ */
+export function isQuietHoursActive(config: QuietHoursConfig | undefined): boolean {
+  if (!config?.enabled) return false;
+
+  const now = new Date();
+  const currentDay = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][now.getDay()] as DayOfWeek;
+
+  // Check if today is in the scheduled days
+  if (!config.days.includes(currentDay)) return false;
+
+  const currentTime = now.getHours() * 60 + now.getMinutes();
+  const [startHour, startMin] = config.startTime.split(':').map(Number);
+  const [endHour, endMin] = config.endTime.split(':').map(Number);
+  const startMinutes = startHour * 60 + startMin;
+  const endMinutes = endHour * 60 + endMin;
+
+  // Handle overnight quiet hours (e.g., 22:00 - 07:00)
+  if (startMinutes > endMinutes) {
+    // Quiet hours span midnight
+    return currentTime >= startMinutes || currentTime < endMinutes;
+  } else {
+    // Same-day quiet hours (e.g., 13:00 - 14:00)
+    return currentTime >= startMinutes && currentTime < endMinutes;
+  }
+}
+
 export function useNotificationPreferences() {
   const { user, profile } = useAuth();
   const [preferences, setPreferences] = useState<NotificationPreferences | null>(null);
@@ -125,10 +161,18 @@ export function useNotificationPreferences() {
             messages: true,
             mentions: true,
           },
+          quietHours: DEFAULT_QUIET_HOURS,
+          projectSettings: [],
         });
       } else {
         const d = snapshot.docs[0];
-        setPreferences({ id: d.id, ...d.data() } as NotificationPreferences);
+        const data = d.data() as Omit<NotificationPreferences, 'id'>;
+        setPreferences({
+          id: d.id,
+          ...data,
+          quietHours: data.quietHours || DEFAULT_QUIET_HOURS,
+          projectSettings: data.projectSettings || [],
+        });
       }
       setLoading(false);
     });
@@ -166,6 +210,7 @@ export function useNotificationPreferences() {
             orgId: profile.orgId,
             email: updatedPreferences.email,
             push: updatedPreferences.push,
+            quietHours: updatedPreferences.quietHours,
           });
         }
 
@@ -178,5 +223,53 @@ export function useNotificationPreferences() {
     [user?.uid, profile?.orgId, preferences]
   );
 
-  return { preferences, loading, updatePreference };
+  const updateQuietHours = useCallback(
+    async (quietHours: QuietHoursConfig): Promise<boolean> => {
+      if (!user?.uid || !profile?.orgId || !preferences) return false;
+
+      try {
+        if (preferences.id) {
+          await updateDoc(doc(db, 'notificationPreferences', preferences.id), {
+            quietHours,
+          });
+        } else {
+          const newDocRef = doc(collection(db, 'notificationPreferences'));
+          await setDoc(newDocRef, {
+            userId: user.uid,
+            orgId: profile.orgId,
+            email: preferences.email,
+            push: preferences.push,
+            quietHours,
+          });
+        }
+        return true;
+      } catch (error) {
+        console.error('Failed to update quiet hours:', error);
+        return false;
+      }
+    },
+    [user?.uid, profile?.orgId, preferences]
+  );
+
+  const quietHoursActive = isQuietHoursActive(preferences?.quietHours);
+
+  // Expose the preferences ID separately for project settings component
+  const preferencesId = preferences?.id || null;
+
+  // Force a refresh of preferences (useful after project settings are updated)
+  const refetch = useCallback(() => {
+    // The onSnapshot listener will automatically update, but this triggers a re-render
+    setLoading(true);
+    setTimeout(() => setLoading(false), 100);
+  }, []);
+
+  return {
+    preferences,
+    loading,
+    updatePreference,
+    updateQuietHours,
+    quietHoursActive,
+    preferencesId,
+    refetch,
+  };
 }

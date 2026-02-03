@@ -3592,6 +3592,16 @@ export interface AppNotification {
   createdAt: Date;
 }
 
+export type DayOfWeek = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
+
+export interface QuietHoursConfig {
+  enabled: boolean;
+  startTime: string; // "22:00" format
+  endTime: string;   // "07:00" format
+  days: DayOfWeek[];
+  allowHighPriority: boolean;
+}
+
 export interface NotificationPreferences {
   id: string;
   userId: string;
@@ -3616,6 +3626,19 @@ export interface NotificationPreferences {
     messages: boolean;
     mentions: boolean;
   };
+  quietHours?: QuietHoursConfig;
+  projectSettings?: NotificationProjectSettings[];
+}
+
+// Per-project notification settings
+export interface NotificationProjectSettings {
+  projectId: string;
+  projectName?: string; // Cached for display purposes
+  muted: boolean; // Mute all notifications from this project
+  taskNotifications: boolean;
+  rfiNotifications: boolean;
+  expenseNotifications: boolean;
+  updatedAt?: Date;
 }
 
 // ============================================

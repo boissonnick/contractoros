@@ -4,6 +4,32 @@
 
 import { Timestamp } from 'firebase/firestore';
 
+/**
+ * Payload for OS-level push notifications via service worker
+ * Used with useServiceWorker.sendNotification()
+ */
+export interface NotificationPayload {
+  title: string;
+  body: string;
+  icon?: string;
+  badge?: string;
+  tag?: string;
+  data?: {
+    url?: string;
+    type?: string;
+    [key: string]: unknown;
+  };
+  actions?: Array<{
+    action: string;
+    title: string;
+    icon?: string;
+  }>;
+  image?: string;
+  requireInteraction?: boolean;
+  renotify?: boolean;
+  silent?: boolean;
+}
+
 export type NotificationType =
   | 'invoice_paid'
   | 'task_assigned'
