@@ -250,6 +250,64 @@ service cloud.firestore {
             .hasOnly(['isAcknowledged', 'acknowledgedBy', 'acknowledgedAt']);
         allow create, delete: if false; // Admin SDK only
       }
+
+      // ==========================================
+      // Subcontractors Module (Sprint 40)
+      // Org-scoped subcollections for subcontractor management
+      // ==========================================
+
+      // Subcontractors subcollection (org-scoped)
+      // Used by seed scripts and can be used for multi-tenant isolation
+      match /subcontractors/{subId} {
+        allow read: if isAuthenticated() && userProfileExists() && getUserProfile().orgId == orgId;
+        allow create: if isAuthenticated() &&
+          userProfileExists() &&
+          getUserProfile().orgId == orgId &&
+          getUserProfile().role in ['OWNER', 'PM'];
+        allow update: if isAuthenticated() &&
+          userProfileExists() &&
+          getUserProfile().orgId == orgId &&
+          getUserProfile().role in ['OWNER', 'PM'];
+        allow delete: if isAdmin() && getUserProfile().orgId == orgId;
+      }
+
+      // Sub Assignments subcollection (org-scoped)
+      // Links subcontractors to projects with scope/budget details
+      match /subAssignments/{assignmentId} {
+        allow read: if isAuthenticated() && userProfileExists() && getUserProfile().orgId == orgId;
+        allow create: if isAuthenticated() &&
+          userProfileExists() &&
+          getUserProfile().orgId == orgId &&
+          getUserProfile().role in ['OWNER', 'PM'];
+        allow update: if isAuthenticated() && userProfileExists() && getUserProfile().orgId == orgId;
+        allow delete: if isAdmin() && getUserProfile().orgId == orgId;
+      }
+
+      // Bids subcollection (org-scoped)
+      // Subcontractor bid submissions for projects
+      match /bids/{bidId} {
+        allow read: if isAuthenticated() && userProfileExists() && getUserProfile().orgId == orgId;
+        // Subs can create bids, admins can manage
+        allow create: if isAuthenticated() && userProfileExists() && getUserProfile().orgId == orgId;
+        allow update, delete: if isAuthenticated() && userProfileExists() &&
+          getUserProfile().orgId == orgId && (
+          resource.data.subcontractorId == request.auth.uid || isAdmin()
+        );
+      }
+
+      // Solicitations subcollection (org-scoped)
+      // Bid requests sent to subcontractors
+      match /solicitations/{solicitationId} {
+        allow read: if isAuthenticated() && userProfileExists() && getUserProfile().orgId == orgId;
+        allow create: if isAuthenticated() &&
+          userProfileExists() &&
+          getUserProfile().orgId == orgId &&
+          getUserProfile().role in ['OWNER', 'PM'];
+        allow update: if isAuthenticated() && userProfileExists() &&
+          getUserProfile().orgId == orgId &&
+          getUserProfile().role in ['OWNER', 'PM'];
+        allow delete: if isAdmin() && getUserProfile().orgId == orgId;
+      }
     }
 
     // Invites collection

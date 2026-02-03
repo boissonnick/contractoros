@@ -74,6 +74,49 @@
       ]
     },
     {
+      "collectionGroup": "bids",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "orgId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "bids",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "orgId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "subcontractors",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "orgId", "order": "ASCENDING" },
+        { "fieldPath": "companyName", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "subcontractors",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "orgId", "order": "ASCENDING" },
+        { "fieldPath": "trade", "order": "ASCENDING" },
+        { "fieldPath": "companyName", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "subcontractors",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "orgId", "order": "ASCENDING" },
+        { "fieldPath": "isActive", "order": "ASCENDING" },
+        { "fieldPath": "companyName", "order": "ASCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "timeEntries",
       "queryScope": "COLLECTION",
       "fields": [
