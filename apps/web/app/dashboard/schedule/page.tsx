@@ -12,7 +12,10 @@ import {
   CrewAvailabilityPanel,
   WeatherWidget,
   ConflictAlert,
+  DayView,
+  AssignmentModal,
 } from '@/components/schedule';
+import { getWeatherForecast, WeatherData } from '@/lib/services/weather';
 import { Card, Button, Badge, PageHeader } from '@/components/ui';
 import BaseModal from '@/components/ui/BaseModal';
 import {
@@ -53,6 +56,13 @@ export default function SchedulePage() {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const mobileDateScrollRef = useRef<HTMLDivElement>(null);
 
+  // Weather state
+  const [weatherData, setWeatherData] = useState<WeatherData[]>([]);
+
+  // Assignment modal state
+  const [showAssignmentModal, setShowAssignmentModal] = useState(false);
+  const [eventToAssign, setEventToAssign] = useState<ScheduleEvent | null>(null);
+
   // Hooks
   const {
     events,
@@ -81,6 +91,12 @@ export default function SchedulePage() {
   // Team and projects
   const [team, setTeam] = useState<{ id: string; name: string; role?: string }[]>([]);
   const [projects, setProjects] = useState<{ id: string; name: string; phases?: { id: string; name: string }[] }[]>([]);
+
+  // Fetch weather data
+  useEffect(() => {
+    // Default to San Francisco coordinates (can be updated based on project location)
+    getWeatherForecast(37.7749, -122.4194, 7).then(setWeatherData);
+  }, []);
 
   useEffect(() => {
     if (!profile?.orgId) return;
@@ -269,6 +285,34 @@ export default function SchedulePage() {
   // Conflicts
   const allConflicts = events.flatMap((event) => checkConflicts(event));
 
+  // Get weather for a specific date
+  const getWeatherForDate = (date: Date): WeatherData | undefined => {
+    const dateStr = date.toISOString().split('T')[0];
+    return weatherData.find((w) => w.date === dateStr);
+  };
+
+  // Handle crew assignment
+  const handleAssignCrew = (event: ScheduleEvent) => {
+    setEventToAssign(event);
+    setShowAssignmentModal(true);
+  };
+
+  const handleSaveAssignment = async (userIds: string[]) => {
+    if (!eventToAssign) return;
+    await updateEvent(eventToAssign.id, { assignedUserIds: userIds });
+    setShowAssignmentModal(false);
+    setEventToAssign(null);
+  };
+
+  // Handle slot click for DayView
+  const handleDayViewSlotClick = (date: Date, hour: number) => {
+    const start = new Date(date);
+    start.setHours(hour, 0, 0, 0);
+    setSelectedDate(start);
+    setSelectedEvent(null);
+    setShowEventModal(true);
+  };
+
   return (
     <div className="flex flex-col h-full min-h-[calc(100vh-200px)] space-y-4 md:space-y-6">
       {/* Desktop Header */}
@@ -453,6 +497,27 @@ export default function SchedulePage() {
               </div>
 
               <div className="flex items-center gap-3">
+                {/* Weather Widget (compact) */}
+                {weatherData.length > 0 && (
+                  <div className="flex items-center gap-1 px-3 py-1.5 bg-gray-50 rounded-lg">
+                    {weatherData.slice(0, 5).map((day) => (
+                      <button
+                        key={day.date}
+                        onClick={() => {
+                          setSelectedDate(new Date(day.date));
+                          setView('day');
+                        }}
+                        className="flex flex-col items-center px-2 py-1 rounded hover:bg-gray-100 transition-colors"
+                        title={`${day.dayOfWeek}: ${day.high}°/${day.low}°`}
+                      >
+                        <span className="text-[10px] text-gray-500">{day.dayOfWeek}</span>
+                        <span className="text-sm">{day.conditions === 'sunny' ? '☀️' : day.conditions === 'rain' ? '🌧️' : day.conditions === 'cloudy' ? '☁️' : '⛅'}</span>
+                        <span className="text-[10px] font-medium">{day.high}°</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
                 {/* Filters */}
                 <div className="flex items-center gap-2">
                   <FunnelIcon className="h-4 w-4 text-gray-400" />
@@ -628,41 +693,15 @@ export default function SchedulePage() {
                 })}
               </div>
             ) : view === 'day' ? (
-              /* Day view */
-              <div className="p-4 space-y-3">
-                <h3 className="font-semibold">
-                  {selectedDate.toLocaleDateString('en-US', {
-                    weekday: 'long',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                </h3>
-                {getEventsForDate(selectedDate).length === 0 ? (
-                  <div className="text-center py-12 text-gray-500">
-                    <CalendarDaysIcon className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                    <p>No events scheduled for this day</p>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      className="mt-4"
-                      onClick={() => handleSlotClick(selectedDate)}
-                    >
-                      <PlusIcon className="h-4 w-4 mr-1" />
-                      Add Event
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {getEventsForDate(selectedDate).map((event) => (
-                      <EventCard
-                        key={event.id}
-                        event={event}
-                        onClick={() => handleEventClick(event)}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
+              /* Day view with hourly grid */
+              <DayView
+                date={selectedDate}
+                events={filteredEvents}
+                onEventClick={handleEventClick}
+                onSlotClick={handleDayViewSlotClick}
+                weather={getWeatherForDate(selectedDate)}
+                className="border-0 shadow-none"
+              />
             ) : (
               /* Month view - flex-1 to expand */
               <div className="flex flex-col flex-1">
@@ -977,6 +1016,16 @@ export default function SchedulePage() {
               <div className="flex gap-2">
                 <Button
                   variant="secondary"
+                  onClick={() => {
+                    setShowEventDetail(false);
+                    handleAssignCrew(selectedEvent);
+                  }}
+                >
+                  <UsersIcon className="h-4 w-4 mr-1" />
+                  Assign Crew
+                </Button>
+                <Button
+                  variant="secondary"
                   onClick={() => setShowEventDetail(false)}
                 >
                   Close
@@ -987,6 +1036,19 @@ export default function SchedulePage() {
           </div>
         )}
       </BaseModal>
+
+      {/* Assignment Modal */}
+      {eventToAssign && (
+        <AssignmentModal
+          event={eventToAssign}
+          open={showAssignmentModal}
+          onClose={() => {
+            setShowAssignmentModal(false);
+            setEventToAssign(null);
+          }}
+          onAssign={handleSaveAssignment}
+        />
+      )}
 
       {/* Mobile FAB for Add Event */}
       <button
