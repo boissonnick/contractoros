@@ -153,14 +153,14 @@ export function PaymentSummary({
                           href={invoice.paymentUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition-colors"
+                          className="block w-full text-center bg-brand-primary hover:opacity-90 text-white font-medium py-2.5 rounded-lg transition-colors"
                         >
                           Pay Now
                         </a>
                       ) : onPayNow ? (
                         <button
                           onClick={() => onPayNow(invoice.id)}
-                          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition-colors"
+                          className="w-full bg-brand-primary hover:opacity-90 text-white font-medium py-2.5 rounded-lg transition-colors"
                         >
                           Pay Now
                         </button>

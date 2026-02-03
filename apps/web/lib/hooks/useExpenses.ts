@@ -82,6 +82,12 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
       return;
     }
 
+    // Wait for user profile to determine if they're a manager
+    if (!isManager && !currentUserId) {
+      setLoading(false);
+      return;
+    }
+
     const constraints: QueryConstraint[] = [];
 
     // Filter by project
@@ -147,7 +153,13 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
       },
       (err) => {
         console.error('Error fetching expenses:', err);
-        setError(err.message);
+        if (err.message?.includes('requires an index')) {
+          setError('Database index required. Please deploy Firestore indexes.');
+        } else if (err.message?.includes('permission-denied')) {
+          setError('Permission denied. Please check Firestore security rules.');
+        } else {
+          setError(err.message || 'Failed to load expenses');
+        }
         setLoading(false);
       }
     );

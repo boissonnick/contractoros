@@ -35,7 +35,8 @@ if (!admin.apps.length) {
   });
 }
 
-const db = admin.firestore();
+import { getDb } from "./db";
+const db = getDb();
 
 // ============================================
 // Subcontractor Definitions

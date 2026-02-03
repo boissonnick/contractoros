@@ -193,7 +193,7 @@ export default function TimeTrackingPage() {
             className={cn(
               'flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors min-h-[40px]',
               viewMode === key
-                ? 'bg-blue-600 text-white'
+                ? 'bg-brand-primary text-white'
                 : 'bg-gray-100 text-gray-600 active:bg-gray-200'
             )}
           >
@@ -426,7 +426,7 @@ export default function TimeTrackingPage() {
                 <p className="text-gray-500 mb-4">No time entries</p>
                 <button
                   onClick={() => setShowAddModal(true)}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium active:scale-95 transition-transform"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary text-white rounded-lg font-medium hover:opacity-90 active:scale-95 transition-transform"
                 >
                   <PlusIcon className="h-5 w-5" />
                   Add Entry
@@ -545,7 +545,7 @@ export default function TimeTrackingPage() {
       {/* Mobile FAB for Add Entry */}
       <button
         onClick={() => setShowAddModal(true)}
-        className="md:hidden fixed right-4 bottom-20 w-14 h-14 rounded-full bg-blue-600 text-white shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center transition-all z-30"
+        className="md:hidden fixed right-4 bottom-20 w-14 h-14 rounded-full bg-brand-primary text-white shadow-lg hover:shadow-xl hover:opacity-90 active:scale-95 flex items-center justify-center transition-all z-30"
         aria-label="Add Time Entry"
       >
         <PlusIcon className="h-6 w-6" />

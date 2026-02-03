@@ -279,10 +279,12 @@ async function staleWhileRevalidate(request) {
 
   // Start network fetch in background
   const networkPromise = fetch(request)
-    .then((response) => {
+    .then(async (response) => {
       if (response.ok) {
-        const cache = caches.open(RUNTIME_CACHE);
-        cache.then((c) => c.put(request, response.clone()));
+        // Clone BEFORE using the response
+        const responseToCache = response.clone();
+        const cache = await caches.open(RUNTIME_CACHE);
+        cache.put(request, responseToCache);
       }
       return response;
     })

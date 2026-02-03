@@ -613,7 +613,8 @@ async function seedTasks(): Promise<void> {
     admin.initializeApp({ projectId: 'contractoros-483812' });
   }
 
-  const db = admin.firestore();
+  import { getDb } from "./db";
+const db = getDb();
   const orgId = DEMO_ORG_ID;
 
   logSection('Seeding Tasks');

@@ -63,10 +63,10 @@ export function PayrollRunCard({ run, onClick }: PayrollRunCardProps) {
             <div className="flex items-center gap-2 text-sm">
               <ClockIcon className="h-4 w-4 text-gray-400" />
               <span className="text-gray-600">
-                {run.totalRegularHours.toFixed(1)} hrs
-                {run.totalOvertimeHours > 0 && (
+                {(run.totalRegularHours || 0).toFixed(1)} hrs
+                {(run.totalOvertimeHours || 0) > 0 && (
                   <span className="text-amber-600 ml-1">
-                    (+{run.totalOvertimeHours.toFixed(1)} OT)
+                    (+{(run.totalOvertimeHours || 0).toFixed(1)} OT)
                   </span>
                 )}
               </span>

@@ -129,15 +129,22 @@ export default function ClientPreferencesPage() {
   if (!project) return null;
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Client Preferences</h1>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Client Preferences</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Capture and manage client design and budget preferences
+          </p>
+        </div>
         <Button
           variant="outline"
           size="sm"
           onClick={handleGenerateClientLink}
           loading={generatingLink}
           icon={<LinkIcon className="h-4 w-4" />}
+          className="w-full sm:w-auto"
         >
           Send to Client
         </Button>
@@ -149,59 +156,68 @@ export default function ClientPreferencesPage() {
         <div className="text-sm text-blue-700">
           <p className="font-medium">Collect preferences from your client</p>
           <p className="mt-1">
-            Click &quot;Send to Client&quot; to generate a link your client can use to fill out their preferences directly. The link is valid for 7 days.
+            Generate a link your client can use to fill out their preferences directly. Valid for 7 days.
           </p>
         </div>
       </div>
 
-      {/* Notes */}
-      <Card>
-        <h2 className="font-semibold text-gray-900 mb-4">General Notes</h2>
-        <Textarea
-          label="Notes from client"
-          placeholder="Any special requests, considerations, or requirements..."
-          value={prefs.notes || ''}
-          onChange={(e) => setPrefs(prev => ({ ...prev, notes: e.target.value }))}
-          rows={4}
-        />
-      </Card>
-
-      {/* Finish Preferences */}
-      <Card>
-        <h2 className="font-semibold text-gray-900 mb-4">Finish Preferences</h2>
-        <div className="space-y-4">
-          {FINISH_FIELDS.map(({ key, label, placeholder }) => (
-            <Input
-              key={key}
-              label={label}
-              placeholder={placeholder}
-              value={prefs.finishes?.[key] || ''}
-              onChange={(e) => updateFinish(key, e.target.value)}
+      {/* Main content - responsive grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left column */}
+        <div className="space-y-6">
+          {/* General Notes */}
+          <Card>
+            <h2 className="font-semibold text-gray-900 mb-4">General Notes</h2>
+            <Textarea
+              label="Notes from client"
+              placeholder="Any special requests, considerations, or requirements..."
+              value={prefs.notes || ''}
+              onChange={(e) => setPrefs(prev => ({ ...prev, notes: e.target.value }))}
+              rows={4}
             />
-          ))}
-        </div>
-      </Card>
+          </Card>
 
-      {/* Budget & Timeline */}
-      <Card>
-        <h2 className="font-semibold text-gray-900 mb-4">Budget & Timeline</h2>
-        <div className="space-y-4">
-          <Input
-            label="Budget Range"
-            placeholder="e.g., $30,000 - $50,000"
-            value={prefs.budgetRange || ''}
-            onChange={(e) => setPrefs(prev => ({ ...prev, budgetRange: e.target.value }))}
-          />
-          <Input
-            label="Timeline Preference"
-            placeholder="e.g., Complete by June 2026, flexible on dates"
-            value={prefs.timelinePreference || ''}
-            onChange={(e) => setPrefs(prev => ({ ...prev, timelinePreference: e.target.value }))}
-          />
+          {/* Budget & Timeline */}
+          <Card>
+            <h2 className="font-semibold text-gray-900 mb-4">Budget & Timeline</h2>
+            <div className="space-y-4">
+              <Input
+                label="Budget Range"
+                placeholder="e.g., $30,000 - $50,000"
+                value={prefs.budgetRange || ''}
+                onChange={(e) => setPrefs(prev => ({ ...prev, budgetRange: e.target.value }))}
+              />
+              <Input
+                label="Timeline Preference"
+                placeholder="e.g., Complete by June 2026, flexible on dates"
+                value={prefs.timelinePreference || ''}
+                onChange={(e) => setPrefs(prev => ({ ...prev, timelinePreference: e.target.value }))}
+              />
+            </div>
+          </Card>
         </div>
-      </Card>
 
-      {/* Inspiration Images */}
+        {/* Right column */}
+        <div className="space-y-6">
+          {/* Finish Preferences */}
+          <Card>
+            <h2 className="font-semibold text-gray-900 mb-4">Design & Finishes</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4">
+              {FINISH_FIELDS.map(({ key, label, placeholder }) => (
+                <Input
+                  key={key}
+                  label={label}
+                  placeholder={placeholder}
+                  value={prefs.finishes?.[key] || ''}
+                  onChange={(e) => updateFinish(key, e.target.value)}
+                />
+              ))}
+            </div>
+          </Card>
+        </div>
+      </div>
+
+      {/* Inspiration Images - full width */}
       <Card>
         <h2 className="font-semibold text-gray-900 mb-4">Inspiration Images</h2>
         <ImageUploader
@@ -211,9 +227,9 @@ export default function ClientPreferencesPage() {
         />
       </Card>
 
-      {/* Save */}
-      <div className="flex justify-end">
-        <Button variant="primary" onClick={handleSave} loading={saving}>
+      {/* Save - sticky on mobile */}
+      <div className="flex justify-end sticky bottom-20 sm:static bg-gray-50 sm:bg-transparent -mx-4 px-4 py-4 sm:py-0 sm:mx-0 border-t sm:border-t-0 border-gray-200">
+        <Button variant="primary" onClick={handleSave} loading={saving} className="w-full sm:w-auto">
           Save Preferences
         </Button>
       </div>

@@ -298,7 +298,7 @@ export function FloatingSyncIndicator({
                   e.stopPropagation();
                   handleRetry();
                 }}
-                className="mt-3 w-full py-2 px-3 rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                className="mt-3 w-full py-2 px-3 rounded-lg text-sm font-medium bg-brand-primary text-white hover:opacity-90 transition-colors"
               >
                 Sync Now
               </button>
@@ -456,7 +456,7 @@ export function SyncStatusDetails() {
       {state.pendingCount > 0 && state.isOnline && (
         <button
           onClick={() => syncNow()}
-          className="mt-4 w-full rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+          className="mt-4 w-full rounded-md bg-brand-primary px-3 py-2 text-sm font-medium text-white hover:opacity-90 transition-colors"
         >
           Sync Now
         </button>

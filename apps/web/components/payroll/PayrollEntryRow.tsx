@@ -115,30 +115,30 @@ export function PayrollEntryRow({
               <dl className="space-y-1 text-sm">
                 <div className="flex justify-between">
                   <dt className="text-gray-500">Regular</dt>
-                  <dd className="text-gray-900">{entry.regularHours.toFixed(2)}h</dd>
+                  <dd className="text-gray-900">{(entry.regularHours || 0).toFixed(2)}h</dd>
                 </div>
-                {entry.overtimeHours > 0 && (
+                {(entry.overtimeHours || 0) > 0 && (
                   <div className="flex justify-between">
                     <dt className="text-amber-600">Overtime</dt>
-                    <dd className="text-amber-600">{entry.overtimeHours.toFixed(2)}h</dd>
+                    <dd className="text-amber-600">{(entry.overtimeHours || 0).toFixed(2)}h</dd>
                   </div>
                 )}
-                {entry.doubleTimeHours > 0 && (
+                {(entry.doubleTimeHours || 0) > 0 && (
                   <div className="flex justify-between">
                     <dt className="text-orange-600">Double Time</dt>
-                    <dd className="text-orange-600">{entry.doubleTimeHours.toFixed(2)}h</dd>
+                    <dd className="text-orange-600">{(entry.doubleTimeHours || 0).toFixed(2)}h</dd>
                   </div>
                 )}
-                {entry.ptoHours > 0 && (
+                {(entry.ptoHours || 0) > 0 && (
                   <div className="flex justify-between">
                     <dt className="text-blue-600">PTO</dt>
-                    <dd className="text-blue-600">{entry.ptoHours.toFixed(2)}h</dd>
+                    <dd className="text-blue-600">{(entry.ptoHours || 0).toFixed(2)}h</dd>
                   </div>
                 )}
-                {entry.sickHours > 0 && (
+                {(entry.sickHours || 0) > 0 && (
                   <div className="flex justify-between">
                     <dt className="text-purple-600">Sick</dt>
-                    <dd className="text-purple-600">{entry.sickHours.toFixed(2)}h</dd>
+                    <dd className="text-purple-600">{(entry.sickHours || 0).toFixed(2)}h</dd>
                   </div>
                 )}
               </dl>

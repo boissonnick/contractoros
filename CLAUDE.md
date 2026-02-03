@@ -74,12 +74,46 @@ functions/         → Firebase Cloud Functions Gen 2 (us-east1)
 | Layer | Technology |
 |-------|-----------|
 | Auth | Firebase Authentication |
-| Database | Firestore (NoSQL) |
+| Database | Firestore (NoSQL) — **Named database: `contractoros`** |
 | Styling | Tailwind CSS + CSS variables |
 | Forms | React Hook Form + Zod |
 | State | Custom Firestore hooks (no Redux/Zustand) |
 | PDF | @react-pdf/renderer |
 | Icons | Heroicons (outline) |
+
+---
+
+## ⚠️ CRITICAL: Named Firestore Database
+
+**This project uses a NAMED Firestore database called `contractoros`, NOT the default database.**
+
+### App Configuration (lib/firebase/config.ts)
+```typescript
+// CORRECT - uses named database
+export const db = getFirestore(app, "contractoros");
+
+// WRONG - uses default database (data won't be visible in app!)
+export const db = getFirestore(app);
+```
+
+### Scripts & Cloud Functions (firebase-admin)
+```typescript
+// CORRECT - uses named database
+import { getFirestore } from 'firebase-admin/firestore';
+const db = getFirestore(app, 'contractoros');
+
+// WRONG - uses default database
+const db = getFirestore(app);
+const db = admin.firestore();
+```
+
+### Why This Matters
+- Data written to the default database will NOT appear in the app
+- Data written to the `contractoros` database will NOT appear in Firebase Console's default view
+- Always verify you're using the correct database when writing scripts, seeds, or Cloud Functions
+
+### Firebase Console
+To view data in Firebase Console, select the `contractoros` database from the database dropdown (not `(default)`).
 
 ---
 
@@ -163,6 +197,8 @@ grep -n "export interface PayrollRun" apps/web/types/index.ts
 | `requires an index` | Missing composite index | Add to `firestore.indexes.json`, deploy |
 | `Cannot find module '@/types'` | Wrong import | Use `from '@/types'` not `from '@/types/index'` |
 | `auth/invalid-api-key` | Docker build without env vars | Use `./docker-build-local.sh` not `docker build` |
+| Data seeded but not visible in app | Used default database instead of named | Use `getFirestore(app, 'contractoros')` — see "Named Firestore Database" section |
+| Data visible in Firebase Console but not app | Viewing wrong database in Console | Select `contractoros` database in Console dropdown |
 | Container exists error | Old container not removed | `docker stop contractoros-web; docker rm contractoros-web` |
 
 ---
@@ -304,21 +340,30 @@ Location: `apps/web/e2e/`
 
 ## Demo Seed Scripts
 
-Location: `scripts/`
+Location: `scripts/seed-demo/`
 
-To seed demo data for "Horizon Construction Co.":
+**IMPORTANT:** All seed scripts use the named `contractoros` database via `db.ts`.
+Never use `admin.firestore()` or `getFirestore(app)` directly — always import from `db.ts`.
+
+To seed demo data:
 
 ```bash
-cd scripts
-npx ts-node seed-demo-org.ts           # Create org & users
-npx ts-node seed-demo-projects.ts      # Projects & estimates
-npx ts-node seed-demo-financial.ts     # Invoices, payments, expenses
-npx ts-node seed-demo-activities.ts    # Time entries, communications
+cd scripts/seed-demo
+
+# Quick seed (recommended for testing)
+npx ts-node seed-to-named-db.ts        # Creates user, org, clients, projects, tasks
+
+# Full seed (all data)
+npx ts-node index.ts                   # Main seeder - org, users, clients, financials
+
+# Individual seeders
+npx ts-node seed-projects.ts           # Projects
+npx ts-node seed-tasks.ts              # Tasks
+npx ts-node seed-rfis.ts               # RFIs
+npx ts-node seed-subcontractors.ts     # Subcontractors & bids
 ```
 
-Demo credentials:
-- Owner: `owner@demo.contractoros.com`
-- Password: (set in seed script)
+Demo org: "Horizon Construction Co." with orgId matching your user's orgId (set in `utils.ts`).
 
 ---
 

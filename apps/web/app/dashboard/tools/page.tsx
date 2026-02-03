@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useTools } from '@/lib/hooks/useTools';
-import { Card, Button, Badge } from '@/components/ui';
+import { Card, Button, Badge, EmptyState } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import { toast } from '@/components/ui/Toast';
 import { Tool, ToolStatus } from '@/types';
@@ -289,19 +289,12 @@ export default function ToolsPage() {
 
       {/* Equipment Display */}
       {filtered.length === 0 ? (
-        <Card className="p-8 text-center">
-          <WrenchScrewdriverIcon className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500">No equipment found</p>
-          <Button
-            variant="outline"
-            size="sm"
-            className="mt-4"
-            onClick={() => setShowAddModal(true)}
-          >
-            <PlusIcon className="h-4 w-4 mr-1" />
-            Add First Equipment
-          </Button>
-        </Card>
+        <EmptyState
+          icon={<WrenchScrewdriverIcon className="h-full w-full" />}
+          title="No equipment found"
+          description="Track your tools and equipment to manage checkouts and maintenance."
+          action={{ label: 'Add Equipment', onClick: () => setShowAddModal(true) }}
+        />
       ) : viewMode === 'grid' ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filtered.map((tool) => (

@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { useAuth } from '@/lib/auth';
 import { useDashboardReports, useFinancialReports } from '@/lib/hooks/useReports';
-import { PageHeader } from '@/components/ui';
+import { PageHeader, EmptyState } from '@/components/ui';
 import { ReportCard } from '@/components/reports/ReportCard';
 import { RevenueChart } from '@/components/reports/RevenueChart';
 import { DateRangePicker } from '@/components/reports/DateRangePicker';
@@ -318,13 +318,12 @@ export default function ReportsPage() {
 
       {/* Empty state */}
       {!loading && !kpis && (
-        <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
-          <FolderIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900">No data yet</h3>
-          <p className="text-gray-500 mt-1">
-            Start creating projects and invoices to see your reports.
-          </p>
-        </div>
+        <EmptyState
+          icon={<FolderIcon className="h-full w-full" />}
+          title="No data yet"
+          description="Start creating projects and invoices to see your reports."
+          action={{ label: 'Create Project', href: '/dashboard/projects/new' }}
+        />
       )}
     </div>
   );

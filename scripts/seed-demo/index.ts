@@ -69,7 +69,8 @@ async function initializeFirebase(): Promise<FirebaseFirestore.Firestore> {
     projectId: CONFIG.projectId,
   });
 
-  const db = getFirestore(app);
+  // Use named database "contractoros" to match the app's configuration
+  const db = getFirestore(app, 'contractoros');
 
   // Verify connection
   try {

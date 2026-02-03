@@ -323,7 +323,7 @@ export default function SchedulePage() {
                 className={cn(
                   'flex flex-col items-center justify-center min-w-[52px] h-[68px] rounded-xl transition-all',
                   isSelected
-                    ? 'bg-blue-600 text-white shadow-md'
+                    ? 'bg-brand-primary text-white shadow-md'
                     : isToday
                     ? 'bg-blue-50 text-blue-600 border border-blue-200'
                     : 'bg-gray-50 text-gray-700 active:bg-gray-100'
@@ -402,7 +402,7 @@ export default function SchedulePage() {
             className={cn(
               'flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors min-h-[40px]',
               tab === key
-                ? 'bg-blue-600 text-white'
+                ? 'bg-brand-primary text-white'
                 : 'bg-gray-100 text-gray-600 active:bg-gray-200'
             )}
           >
@@ -501,7 +501,7 @@ export default function SchedulePage() {
                 <p className="text-gray-500 mb-4">No events scheduled</p>
                 <button
                   onClick={() => handleSlotClick(selectedDate)}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium active:scale-95 transition-transform"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary text-white rounded-lg font-medium hover:opacity-90 active:scale-95 transition-transform"
                 >
                   <PlusIcon className="h-5 w-5" />
                   Add Event
@@ -731,7 +731,7 @@ export default function SchedulePage() {
                                 <div
                                   className={cn(
                                     'text-sm mb-1 w-7 h-7 flex items-center justify-center rounded-full',
-                                    isToday && 'bg-blue-600 text-white'
+                                    isToday && 'bg-brand-primary text-white'
                                   )}
                                 >
                                   {date.getDate()}
@@ -799,8 +799,8 @@ export default function SchedulePage() {
                       onClick={() => setSelectedDate(date)}
                       className={cn(
                         'p-2 text-center rounded transition-colors',
-                        isSelected && 'bg-blue-600 text-white',
-                        !isSelected && isToday && 'bg-blue-100',
+                        isSelected && 'bg-brand-primary text-white',
+                        !isSelected && isToday && 'bg-brand-primary-light',
                         !isSelected && !isToday && 'hover:bg-gray-100'
                       )}
                     >
@@ -991,7 +991,7 @@ export default function SchedulePage() {
       {/* Mobile FAB for Add Event */}
       <button
         onClick={() => { setSelectedEvent(null); setShowEventModal(true); }}
-        className="md:hidden fixed right-4 bottom-20 w-14 h-14 rounded-full bg-blue-600 text-white shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center transition-all z-30"
+        className="md:hidden fixed right-4 bottom-20 w-14 h-14 rounded-full bg-brand-primary text-white shadow-lg hover:shadow-xl hover:opacity-90 active:scale-95 flex items-center justify-center transition-all z-30"
         aria-label="Add Event"
       >
         <PlusIcon className="h-6 w-6" />

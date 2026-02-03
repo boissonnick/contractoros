@@ -82,9 +82,9 @@ export interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectE
 }
 
 const sizeClasses = {
-  sm: 'px-2.5 py-1.5 text-sm',
-  md: 'px-3 py-2 text-sm',
-  lg: 'px-4 py-2.5 text-base',
+  sm: 'pl-2.5 py-1.5 text-sm',
+  md: 'pl-3 py-2 text-sm',
+  lg: 'pl-4 py-2.5 text-base',
 };
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(

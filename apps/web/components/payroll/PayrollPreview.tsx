@@ -143,11 +143,11 @@ export function PayrollPreview({
         <Card className="p-4">
           <div className="text-sm text-gray-500">Total Hours</div>
           <div className="text-2xl font-semibold text-gray-900">
-            {(run.totalRegularHours + run.totalOvertimeHours).toFixed(1)}
+            {((run.totalRegularHours || 0) + (run.totalOvertimeHours || 0)).toFixed(1)}
           </div>
-          {run.totalOvertimeHours > 0 && (
+          {(run.totalOvertimeHours || 0) > 0 && (
             <div className="text-xs text-amber-600">
-              incl. {run.totalOvertimeHours.toFixed(1)}h OT
+              incl. {(run.totalOvertimeHours || 0).toFixed(1)}h OT
             </div>
           )}
         </Card>

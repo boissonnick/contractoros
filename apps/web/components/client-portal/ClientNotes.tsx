@@ -118,7 +118,7 @@ export function ClientNotes({
           <button
             type="submit"
             disabled={!newNote.trim() || submitting}
-            className="flex items-center gap-1 px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-1 px-4 py-2 text-sm text-white bg-brand-primary hover:opacity-90 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <PaperAirplaneIcon className="h-4 w-4" />
             {submitting ? 'Sending...' : 'Send'}
@@ -232,7 +232,7 @@ export function ClientNotes({
                         <button
                           onClick={() => handleEdit(note.id)}
                           disabled={!editContent.trim() || submitting}
-                          className="px-3 py-1.5 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded disabled:opacity-50"
+                          className="px-3 py-1.5 text-sm text-white bg-brand-primary hover:opacity-90 rounded disabled:opacity-50"
                         >
                           Save
                         </button>

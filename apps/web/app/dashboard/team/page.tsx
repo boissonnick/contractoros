@@ -17,6 +17,10 @@ import {
   XMarkIcon,
   ArrowPathIcon,
   UserGroupIcon,
+  CalendarDaysIcon,
+  WrenchScrewdriverIcon,
+  ChartBarIcon,
+  FunnelIcon,
 } from '@heroicons/react/24/outline';
 import { UserProfile, UserRole } from '@/types';
 import Link from 'next/link';
@@ -46,8 +50,22 @@ export default function TeamPage() {
   const [invites, setInvites] = useState<Invite[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'members' | 'invites'>('members');
+  const [activeTab, setActiveTab] = useState<'members' | 'invites' | 'availability'>('members');
+  const [selectedTrade, setSelectedTrade] = useState<string>('all');
   const { confirm, DialogComponent } = useConfirmDialog();
+
+  // Get unique trades from team members
+  const trades = Array.from(new Set(members.filter(m => m.trade).map(m => m.trade as string)));
+
+  // Calculate utilization (mock data for now - would connect to time entries/schedule)
+  const getMemberUtilization = (member: UserProfile) => {
+    // This would typically calculate from actual schedule/time data
+    // For demo, using random but consistent values based on member ID
+    const hash = member.uid?.charCodeAt(0) || 50;
+    const utilization = (hash % 60) + 40; // 40-100%
+    const hoursAssigned = Math.floor((utilization / 100) * 40);
+    return { utilization, hoursAssigned, totalHours: 40 };
+  };
 
   useEffect(() => {
     if (profile?.orgId) {
@@ -197,6 +215,17 @@ export default function TeamPage() {
                 Members ({members.length})
               </button>
               <button
+                onClick={() => setActiveTab('availability')}
+                className={cn(
+                  'px-4 py-2 rounded-md text-sm font-medium transition-colors',
+                  activeTab === 'availability'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                )}
+              >
+                Availability
+              </button>
+              <button
                 onClick={() => setActiveTab('invites')}
                 className={cn(
                   'px-4 py-2 rounded-md text-sm font-medium transition-colors',
@@ -276,6 +305,131 @@ export default function TeamPage() {
               ))}
             </div>
           )
+        ) : activeTab === 'availability' ? (
+          /* Availability Tab */
+          <div className="space-y-6">
+            {/* Filters */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex items-center gap-2">
+                <FunnelIcon className="h-5 w-5 text-gray-400" />
+                <select
+                  value={selectedTrade}
+                  onChange={(e) => setSelectedTrade(e.target.value)}
+                  className="pl-3 pr-8 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">All Trades</option>
+                  {trades.map((trade) => (
+                    <option key={trade} value={trade}>{trade}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <CalendarDaysIcon className="h-5 w-5" />
+                <span>This Week</span>
+              </div>
+            </div>
+
+            {/* Team Availability Grid */}
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {members
+                .filter(m => selectedTrade === 'all' || m.trade === selectedTrade)
+                .map((member) => {
+                  const { utilization, hoursAssigned, totalHours } = getMemberUtilization(member);
+                  const utilizationColor = utilization >= 90 ? 'bg-red-500' : utilization >= 70 ? 'bg-yellow-500' : 'bg-green-500';
+                  const utilizationBgColor = utilization >= 90 ? 'bg-red-100' : utilization >= 70 ? 'bg-yellow-100' : 'bg-green-100';
+
+                  return (
+                    <Card key={member.uid} className="hover:shadow-md transition-shadow">
+                      <div className="flex items-start gap-4">
+                        <Avatar name={member.displayName || ''} size="lg" />
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-gray-900 truncate">
+                            {member.displayName}
+                          </h3>
+                          {member.trade && (
+                            <div className="flex items-center gap-1 text-sm text-gray-500 mt-0.5">
+                              <WrenchScrewdriverIcon className="h-3.5 w-3.5" />
+                              <span>{member.trade}</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className={cn(
+                          'px-2 py-1 rounded-full text-xs font-medium',
+                          utilizationBgColor,
+                          utilization >= 90 ? 'text-red-700' : utilization >= 70 ? 'text-yellow-700' : 'text-green-700'
+                        )}>
+                          {utilization}%
+                        </div>
+                      </div>
+
+                      {/* Utilization Bar */}
+                      <div className="mt-4">
+                        <div className="flex items-center justify-between text-sm mb-1">
+                          <span className="text-gray-500">Utilization</span>
+                          <span className="font-medium">{hoursAssigned}h / {totalHours}h</span>
+                        </div>
+                        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                          <div
+                            className={cn('h-full rounded-full transition-all', utilizationColor)}
+                            style={{ width: `${Math.min(utilization, 100)}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Current Assignments (placeholder) */}
+                      <div className="mt-4 pt-3 border-t border-gray-100">
+                        <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Current Assignments</p>
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-700 truncate">Project Task</span>
+                            <span className="text-gray-400">{Math.floor(hoursAssigned * 0.6)}h</span>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-700 truncate">Other Work</span>
+                            <span className="text-gray-400">{Math.floor(hoursAssigned * 0.4)}h</span>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  );
+                })}
+            </div>
+
+            {/* Summary Stats */}
+            <Card className="bg-gray-50">
+              <div className="flex items-center gap-2 mb-4">
+                <ChartBarIcon className="h-5 w-5 text-gray-500" />
+                <h3 className="font-semibold text-gray-900">Team Summary</h3>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div>
+                  <p className="text-2xl font-bold text-gray-900">{members.length}</p>
+                  <p className="text-sm text-gray-500">Team Members</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-green-600">
+                    {members.filter(m => getMemberUtilization(m).utilization < 70).length}
+                  </p>
+                  <p className="text-sm text-gray-500">Available</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-yellow-600">
+                    {members.filter(m => {
+                      const u = getMemberUtilization(m).utilization;
+                      return u >= 70 && u < 90;
+                    }).length}
+                  </p>
+                  <p className="text-sm text-gray-500">Busy</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-red-600">
+                    {members.filter(m => getMemberUtilization(m).utilization >= 90).length}
+                  </p>
+                  <p className="text-sm text-gray-500">Overloaded</p>
+                </div>
+              </div>
+            </Card>
+          </div>
         ) : (
           filteredInvites.length === 0 ? (
             <EmptyState

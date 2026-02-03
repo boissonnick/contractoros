@@ -5,8 +5,8 @@
  * Creates 5-10 RFIs per project with realistic questions and answers
  */
 
-import * as admin from 'firebase-admin';
-import { Timestamp } from 'firebase-admin/firestore';
+import { initializeApp, getApps, applicationDefault } from 'firebase-admin/app';
+import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import {
   DEMO_ORG_ID,
   DEMO_USERS,
@@ -23,13 +23,12 @@ import {
 } from './utils';
 
 // Initialize Firebase Admin
-if (!admin.apps.length) {
-  admin.initializeApp({
-    projectId: 'contractoros-483812',
-  });
-}
+const app = getApps().length === 0
+  ? initializeApp({ credential: applicationDefault(), projectId: 'contractoros-483812' })
+  : getApps()[0];
 
-const db = admin.firestore();
+// IMPORTANT: Use named database "contractoros" - NOT the default database!
+const db = getFirestore(app, 'contractoros');
 
 // ============================================
 // RFI Templates by Category

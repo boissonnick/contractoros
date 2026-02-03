@@ -9,7 +9,7 @@ import { Timestamp } from 'firebase-admin/firestore';
 // Demo Organization Constants
 // ============================================
 
-export const DEMO_ORG_ID = 'demo-horizon-construction';
+export const DEMO_ORG_ID = 'u8hwVPLEv4YL9D71ymBwCOrmKta2';
 export const DEMO_ORG_NAME = 'Horizon Construction Co.';
 
 // ============================================

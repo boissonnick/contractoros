@@ -86,9 +86,14 @@ export default function FinancesPage() {
 
     const grossProfit = totalRevenue - totalExpenses;
     // Use totalInvoiced as basis if no payments yet received (more accurate for active projects)
-    // Fall back to 0 only if both revenue and invoiced amounts are 0
     const revenueBase = totalRevenue > 0 ? totalRevenue : totalInvoiced;
-    const profitMargin = revenueBase > 0 ? (grossProfit / revenueBase) * 100 : 0;
+    // Calculate profit margin - handle edge cases:
+    // - If we have revenue/invoiced, calculate normally (can be negative)
+    // - If no revenue but have expenses, show as -100% (complete loss)
+    // - If neither, show 0%
+    const profitMargin = revenueBase > 0
+      ? (grossProfit / revenueBase) * 100
+      : (totalExpenses > 0 ? -100 : 0);
 
     return {
       totalRevenue, totalInvoiced, outstandingAmount, overdueAmount,

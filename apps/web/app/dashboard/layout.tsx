@@ -46,6 +46,7 @@ const staffNavItems: (NavItem & { requiredPermission?: keyof RolePermissions })[
   { label: 'Messaging', href: '/dashboard/messaging', icon: ChatBubbleLeftRightIcon },
   { label: 'Reports', href: '/dashboard/reports', icon: ClipboardDocumentListIcon, requiredPermission: 'canViewProjectReports' },
   { label: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon, requiredPermission: 'canViewSettings' },
+  { label: 'Help', href: '/dashboard/help', icon: QuestionMarkCircleIcon },
 ];
 
 // Simplified nav for CLIENT view - only what clients should see
@@ -114,16 +115,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       {/* Offline Banner */}
       <OfflineBanner />
 
-      {/* Global Search and Help - positioned in header area on desktop */}
+      {/* Global Search - positioned in header area on desktop */}
       <div className="hidden md:flex items-center gap-2 fixed top-4 right-4 lg:right-8 z-40">
         <GlobalSearchBar />
-        <Link
-          href="/dashboard/help"
-          className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-          title="Help & Support"
-        >
-          <QuestionMarkCircleIcon className="h-5 w-5" />
-        </Link>
       </div>
 
       {/* Main App Shell */}

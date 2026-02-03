@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
-import { Card, Button, Input } from '@/components/ui';
+import { Card, Button, Input, EmptyState } from '@/components/ui';
 import { useSms, useSmsConversations, useSmsTemplates } from '@/lib/hooks/useSms';
 import { SmsComposer, SmsConversationList, SmsMessageThread } from '@/components/sms';
 import { SmsConversation, SmsMessage } from '@/types';
@@ -216,12 +216,13 @@ export default function MessagingPage() {
               ))}
             </div>
           ) : filteredConversations.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
-              <ChatBubbleLeftRightIcon className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-              <p className="text-sm">
-                {searchQuery ? 'No conversations found' : 'No messages yet'}
-              </p>
-            </div>
+            <EmptyState
+              icon={<ChatBubbleLeftRightIcon className="h-full w-full" />}
+              title={searchQuery ? 'No conversations found' : 'No messages yet'}
+              description={searchQuery ? 'Try a different search term' : 'Start a conversation to communicate with clients'}
+              size="sm"
+              className="py-8"
+            />
           ) : (
             <SmsConversationList
               conversations={filteredConversations}
@@ -314,7 +315,7 @@ export default function MessagingPage() {
               {/* Welcome banner */}
               <Card className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
                 <div className="flex items-start gap-4">
-                  <div className="p-3 bg-blue-600 rounded-xl text-white">
+                  <div className="p-3 bg-brand-primary rounded-xl text-white">
                     <ChatBubbleLeftRightIcon className="h-8 w-8" />
                   </div>
                   <div className="flex-1">

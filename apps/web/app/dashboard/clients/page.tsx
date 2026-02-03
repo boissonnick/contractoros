@@ -222,7 +222,7 @@ export default function ClientsPage() {
               className={cn(
                 'px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors min-h-[40px]',
                 statusFilter === filter.value
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-brand-primary text-white'
                   : 'bg-gray-100 text-gray-600 active:bg-gray-200'
               )}
             >
@@ -287,7 +287,7 @@ export default function ClientsPage() {
           {!searchQuery && statusFilter === 'all' && (
             <button
               onClick={() => setShowAddModal(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium active:scale-95 transition-transform"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary text-white rounded-lg font-medium hover:opacity-90 active:scale-95 transition-all"
             >
               <PlusIcon className="h-5 w-5" />
               Add Client
@@ -318,7 +318,7 @@ export default function ClientsPage() {
       {/* Mobile FAB for Add Client */}
       <button
         onClick={() => setShowAddModal(true)}
-        className="md:hidden fixed right-4 bottom-20 w-14 h-14 rounded-full bg-blue-600 text-white shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center transition-all z-30"
+        className="md:hidden fixed right-4 bottom-20 w-14 h-14 rounded-full bg-brand-primary text-white shadow-lg hover:shadow-xl hover:opacity-90 active:scale-95 flex items-center justify-center transition-all z-30"
         aria-label="Add Client"
       >
         <PlusIcon className="h-6 w-6" />

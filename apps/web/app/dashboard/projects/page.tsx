@@ -933,7 +933,7 @@ export default function ProjectsPage() {
       {/* Mobile FAB for New Project */}
       <Link
         href="/dashboard/projects/new"
-        className="md:hidden fixed right-4 bottom-20 w-14 h-14 rounded-full bg-blue-600 text-white shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center transition-all z-30"
+        className="md:hidden fixed right-4 bottom-20 w-14 h-14 rounded-full bg-brand-primary text-white shadow-lg hover:shadow-xl hover:opacity-90 active:scale-95 flex items-center justify-center transition-all z-30"
         aria-label="New Project"
       >
         <PlusIcon className="h-6 w-6" />

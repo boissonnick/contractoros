@@ -183,7 +183,7 @@ export function WidgetGrid({ layout, onLayoutChange, onAddWidget }: WidgetGridPr
               inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition-colors
               ${
                 isEditing
-                  ? 'text-white bg-blue-600 hover:bg-blue-700'
+                  ? 'text-white bg-brand-primary hover:opacity-90'
                   : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
               }
             `}
@@ -234,7 +234,7 @@ export function WidgetGrid({ layout, onLayoutChange, onAddWidget }: WidgetGridPr
           <p className="text-gray-500 mb-4">No widgets added yet</p>
           <button
             onClick={onAddWidget}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-brand-primary rounded-md hover:opacity-90 transition-colors"
           >
             <PlusIcon className="h-4 w-4" />
             Add Your First Widget
