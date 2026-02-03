@@ -473,13 +473,20 @@ AI provider configuration and security.
 ```
 Sprint 38 Remaining:
 [ ] Task 1: Verify Finances Page
-[ ] Task 2: Test Comparison Functionality
+[x] Task 2: Test Comparison Functionality - ✅ COMPLETE 2026-02-02
+    - Fixed bids missing subId field (120 bids updated)
+    - BidComparison component works with demo data
+    - Tested on demo-proj-mainst-retail (4+ bids)
 
 Notification System:
-[ ] Task 3: Browser Notification Permissions
+[x] Task 3: Browser Notification Permissions - ✅ COMPLETE 2026-02-02
+    - browser-notifications.ts: Permission API, showNotification
+    - useBrowserNotifications.ts: React hook
+    - NotificationSettings.tsx: Full settings UI
+    - Quiet hours / DND support included
 [ ] Task 4: OS-Level Notification Pass-Through
-[ ] Task 5: Granular Notification Type Control
-[ ] Task 6: Do Not Disturb & Quiet Hours
+[ ] Task 5: Granular Notification Type Control - Included in Task 3
+[ ] Task 6: Do Not Disturb & Quiet Hours - Included in Task 3
 
 Research Documents:
 [ ] Task 7: Microanimation Sprint Planning
