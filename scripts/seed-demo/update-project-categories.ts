@@ -50,13 +50,14 @@ const PROJECT_CATEGORIES: Record<string, string[]> = {
 async function updateProjectCategories(): Promise<number> {
   logSection('Updating Project Categories');
 
-  const projectsRef = db
-    .collection('organizations')
-    .doc(DEMO_ORG_ID)
-    .collection('projects');
+  // NOTE: Projects are stored in top-level 'projects' collection, NOT subcollection
+  const projectsRef = db.collection('projects');
 
-  // Get all demo projects
-  const snapshot = await projectsRef.where('isDemoData', '==', true).get();
+  // Get all demo projects for this org
+  const snapshot = await projectsRef
+    .where('orgId', '==', DEMO_ORG_ID)
+    .where('isDemoData', '==', true)
+    .get();
 
   if (snapshot.empty) {
     logProgress('No demo projects found');

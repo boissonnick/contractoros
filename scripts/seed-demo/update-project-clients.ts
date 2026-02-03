@@ -23,27 +23,33 @@ if (!admin.apps.length) {
 import { getDb } from "./db";
 const db = getDb();
 
-// Client to project mappings
+// Client to project mappings (must match DEMO_CLIENTS in utils.ts)
 const PROJECT_CLIENT_MAP: Record<string, { clientId: string; clientName: string }> = {
-  'demo-proj-smith-kitchen': { clientId: 'demo-client-chen', clientName: 'Michael Chen' },
-  'demo-proj-garcia-bath': { clientId: 'demo-client-martinez', clientName: 'Robert Martinez' },
-  'demo-proj-mainst-retail': { clientId: 'demo-client-techcorp', clientName: 'TechCorp Inc' },
-  'demo-proj-cafe-ti': { clientId: 'demo-client-property-group', clientName: 'Property Group LLC' },
-  'demo-proj-thompson-deck': { clientId: 'demo-client-heritage', clientName: 'Heritage Trust' },
-  'demo-proj-office-park': { clientId: 'demo-client-techcorp', clientName: 'TechCorp Inc' },
-  'demo-proj-garcia-basement': { clientId: 'demo-client-martinez', clientName: 'Robert Martinez' },
+  'demo-proj-smith-kitchen': { clientId: 'demo-client-smith', clientName: 'Robert Smith' },
+  'demo-proj-smith-bathroom': { clientId: 'demo-client-smith', clientName: 'Robert Smith' },
+  'demo-proj-garcia-bath': { clientId: 'demo-client-garcia', clientName: 'Maria Garcia' },
+  'demo-proj-garcia-basement': { clientId: 'demo-client-garcia', clientName: 'Maria Garcia' },
+  'demo-proj-thompson-deck': { clientId: 'demo-client-thompson', clientName: 'James Thompson' },
+  'demo-proj-thompson-garage': { clientId: 'demo-client-thompson', clientName: 'James Thompson' },
+  'demo-proj-wilson-fence': { clientId: 'demo-client-wilson', clientName: 'Jennifer Wilson' },
+  'demo-proj-wilson-pool': { clientId: 'demo-client-wilson', clientName: 'Jennifer Wilson' },
+  'demo-proj-brown-kitchen': { clientId: 'demo-client-brown', clientName: 'Michael Brown' },
+  'demo-proj-mainst-retail': { clientId: 'demo-client-main-st-retail', clientName: 'Main Street Retail Group' },
+  'demo-proj-cafe-ti': { clientId: 'demo-client-downtown-cafe', clientName: 'Downtown Cafe LLC' },
+  'demo-proj-office-park': { clientId: 'demo-client-office-park', clientName: 'Office Park LLC' },
 };
 
 async function updateProjectClients(): Promise<number> {
   logSection('Updating Project Clients');
 
-  const projectsRef = db
-    .collection('organizations')
-    .doc(DEMO_ORG_ID)
-    .collection('projects');
+  // NOTE: Projects are stored in top-level 'projects' collection, NOT subcollection
+  const projectsRef = db.collection('projects');
 
-  // Get all demo projects
-  const snapshot = await projectsRef.where('isDemoData', '==', true).get();
+  // Get all demo projects for this org
+  const snapshot = await projectsRef
+    .where('orgId', '==', DEMO_ORG_ID)
+    .where('isDemoData', '==', true)
+    .get();
 
   if (snapshot.empty) {
     logProgress('No demo projects found');
