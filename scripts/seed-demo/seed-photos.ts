@@ -408,9 +408,23 @@ export function generatePhotos(orgId: string): ProjectPhotoSeed[] {
 // Export for seeding
 export { DEMO_DATA_PREFIX };
 
+// Helper to remove undefined values recursively
+function removeUndefined(obj: Record<string, unknown>): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value === undefined) continue;
+    if (value !== null && typeof value === 'object' && !Array.isArray(value) && !(value instanceof Timestamp)) {
+      result[key] = removeUndefined(value as Record<string, unknown>);
+    } else {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
 // Conversion function for Firestore
 export function convertToFirestore(photo: ProjectPhotoSeed): Record<string, unknown> {
-  return {
+  const data = {
     ...photo,
     createdAt: Timestamp.fromDate(photo.createdAt),
     updatedAt: photo.updatedAt ? Timestamp.fromDate(photo.updatedAt) : Timestamp.now(),
@@ -425,6 +439,62 @@ export function convertToFirestore(photo: ProjectPhotoSeed): Record<string, unkn
     annotations: photo.annotations?.map(a => ({
       ...a,
       createdAt: Timestamp.fromDate(a.createdAt),
-    })),
+    })) || [],
   };
+  return removeUndefined(data);
+}
+
+// ============================================
+// Seed Photos to Firestore
+// ============================================
+
+async function seedPhotos(): Promise<void> {
+  const admin = await import('firebase-admin');
+
+  if (!admin.apps.length) {
+    admin.initializeApp({ projectId: 'contractoros-483812' });
+  }
+
+  const { getDb } = await import('./db');
+  const { executeBatchWrites } = await import('./utils');
+  const db = getDb();
+
+  logSection('Seeding Photos');
+
+  const photos = generatePhotos(DEMO_ORG_ID);
+
+  logProgress(`Writing ${photos.length} photos to Firestore...`);
+
+  await executeBatchWrites(
+    db,
+    photos,
+    (batch, photo) => {
+      // Photos stored in organizations/{orgId}/photos
+      const ref = db
+        .collection('organizations')
+        .doc(DEMO_ORG_ID)
+        .collection('photos')
+        .doc(photo.id);
+      batch.set(ref, convertToFirestore(photo));
+    },
+    'Photos'
+  );
+
+  logSuccess(`Seeded ${photos.length} photos`);
+}
+
+// ============================================
+// Run if executed directly
+// ============================================
+
+if (require.main === module) {
+  seedPhotos()
+    .then(() => {
+      console.log('\n✅ Photos seeded successfully!');
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error('\n❌ Error seeding photos:', error);
+      process.exit(1);
+    });
 }
