@@ -103,7 +103,7 @@ export function CollapsibleNavSection({
       <button
         onClick={handleToggle}
         className={cn(
-          'flex items-center w-full px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-md transition-colors',
+          'flex items-center w-full px-3 py-3 text-xs font-semibold uppercase tracking-wider rounded-md transition-colors',
           'text-gray-500 hover:text-gray-700 hover:bg-gray-50',
           hasActiveItem && 'text-gray-700'
         )}
@@ -128,7 +128,7 @@ export function CollapsibleNavSection({
           isOpen ? 'opacity-100 max-h-[1000px]' : 'opacity-0 max-h-0'
         )}
       >
-        <div className="mt-1 space-y-0.5">
+        <div className="mt-2 space-y-1">
           {items.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
             const isChildActive = item.children?.some(

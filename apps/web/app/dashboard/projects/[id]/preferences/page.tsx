@@ -161,8 +161,8 @@ export default function ClientPreferencesPage() {
         </div>
       </div>
 
-      {/* Main content - responsive 3-column grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Main content - responsive 2-column grid for better balance */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* General Notes */}
         <Card>
           <h2 className="font-semibold text-gray-900 mb-4">General Notes</h2>
@@ -194,10 +194,10 @@ export default function ClientPreferencesPage() {
           </div>
         </Card>
 
-        {/* Finish Preferences */}
-        <Card className="md:col-span-2 lg:col-span-1">
+        {/* Finish Preferences - full width with internal 2-column layout */}
+        <Card className="lg:col-span-2">
           <h2 className="font-semibold text-gray-900 mb-4">Design & Finishes</h2>
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FINISH_FIELDS.map(({ key, label, placeholder }) => (
               <Input
                 key={key}
@@ -221,8 +221,8 @@ export default function ClientPreferencesPage() {
         />
       </Card>
 
-      {/* Save - sticky on mobile */}
-      <div className="flex justify-end sticky bottom-20 sm:static bg-gray-50 sm:bg-transparent -mx-4 px-4 py-4 sm:py-0 sm:mx-0 border-t sm:border-t-0 border-gray-200">
+      {/* Save - sticky on mobile (bottom-16 = 64px for bottom nav) */}
+      <div className="flex justify-end sticky bottom-16 sm:static bg-gray-50 sm:bg-transparent -mx-4 px-4 py-4 sm:py-0 sm:mx-0 border-t sm:border-t-0 border-gray-200">
         <Button variant="primary" onClick={handleSave} loading={saving} className="w-full sm:w-auto">
           Save Preferences
         </Button>

@@ -11,12 +11,14 @@ import React from 'react';
 import Link from 'next/link';
 import { Project, ProjectStatus } from '@/types';
 import { Badge } from '@/components/ui';
+import EmptyState from '@/components/ui/EmptyState';
 import {
   MapPinIcon,
   CalendarIcon,
   ChevronRightIcon,
   CurrencyDollarIcon,
   UserGroupIcon,
+  FolderIcon,
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 
@@ -175,8 +177,12 @@ export function MobileProjectList({
 }: MobileProjectListProps) {
   if (projects.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
-        <p className="text-gray-500">{emptyMessage}</p>
+      <div className="bg-white rounded-xl border border-gray-200">
+        <EmptyState
+          icon={<FolderIcon className="h-full w-full" />}
+          title={emptyMessage}
+          size="sm"
+        />
       </div>
     );
   }

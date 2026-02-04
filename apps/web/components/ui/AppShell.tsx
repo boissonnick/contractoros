@@ -180,9 +180,9 @@ export default function AppShell({
               <div className="h-8 w-8 rounded-full bg-brand-primary-light flex items-center justify-center text-brand-primary font-bold">
                 {userDisplayName ? userDisplayName.charAt(0) : 'U'}
               </div>
-              {/* Online status indicator */}
+              {/* Online status indicator - increased size for visibility */}
               <span
-                className={`absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white ${
+                className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white ${
                   isOnline ? 'bg-green-500' : 'bg-gray-400'
                 }`}
                 title={isOnline ? 'Online' : 'Offline'}
@@ -190,6 +190,9 @@ export default function AppShell({
             </div>
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-700 truncate w-32">{userDisplayName}</p>
+              <p className={`text-xs ${isOnline ? 'text-green-600' : 'text-gray-500'}`}>
+                {isOnline ? 'Online' : 'Offline'}
+              </p>
             </div>
           </div>
           <button

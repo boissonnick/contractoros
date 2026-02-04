@@ -274,26 +274,20 @@ export default function ClientsPage() {
           <p className="text-gray-500">{error.message}</p>
         </Card>
       ) : clients.length === 0 ? (
-        <div className="text-center py-12">
-          <UserGroupIcon className="h-16 w-16 mx-auto mb-4 text-gray-200" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            {searchQuery || statusFilter !== 'all' ? "No matching clients" : "No clients yet"}
-          </h3>
-          <p className="text-gray-500 mb-4">
-            {searchQuery || statusFilter !== 'all'
+        <EmptyState
+          icon={<UserGroupIcon className="h-full w-full" />}
+          title={searchQuery || statusFilter !== 'all' ? "No matching clients" : "No clients yet"}
+          description={
+            searchQuery || statusFilter !== 'all'
               ? "Try adjusting your search or filter."
-              : "Add your first client to get started."}
-          </p>
-          {!searchQuery && statusFilter === 'all' && (
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary text-white rounded-lg font-medium hover:opacity-90 active:scale-95 transition-all"
-            >
-              <PlusIcon className="h-5 w-5" />
-              Add Client
-            </button>
-          )}
-        </div>
+              : "Add your first client to get started."
+          }
+          action={
+            !searchQuery && statusFilter === 'all'
+              ? { label: 'Add Client', onClick: () => setShowAddModal(true) }
+              : undefined
+          }
+        />
       ) : (
         <div className="space-y-3">
           {clients.map((client) => (

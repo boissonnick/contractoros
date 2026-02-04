@@ -596,10 +596,10 @@ export default function DashboardPage() {
         </>
       )}
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Main Content Grid - 50/50 split for better balance */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Active Projects */}
-        <div className="lg:col-span-2">
+        <div>
           {/* Mobile: MobileProjectList with touch-optimized cards */}
           <div className="md:hidden">
             <div className="flex items-center justify-between mb-3">
@@ -635,7 +635,7 @@ export default function DashboardPage() {
               </Link>
             </div>
             {activeProjectsList.length > 0 ? (
-              <div className="divide-y divide-gray-100 max-h-[280px] overflow-y-auto">
+              <div className="divide-y divide-gray-100 max-h-[240px] overflow-y-auto">
                 {activeProjectsList.map((project) => {
                   const percentUsed = project.budget && project.currentSpend !== undefined
                     ? calculateBudgetPercentage(project.currentSpend, project.budget)
