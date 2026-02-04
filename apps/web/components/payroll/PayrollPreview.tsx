@@ -6,6 +6,7 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import { PayrollEntryRow } from './PayrollEntryRow';
+import { PayrollApprovalStatus } from './PayrollApprovalStatus';
 import {
   CheckCircleIcon,
   XCircleIcon,
@@ -17,7 +18,8 @@ import {
 interface PayrollPreviewProps {
   run: PayrollRun;
   onApprove?: () => void;
-  onReject?: () => void;
+  onReject?: (reason?: string) => void;
+  onSubmitForApproval?: () => void;
   onExportCSV?: () => void;
   onGeneratePayStubs?: () => void;
   onEditEntry?: (entryId: string, updates: Record<string, unknown>) => void;
@@ -28,17 +30,22 @@ interface PayrollPreviewProps {
     taxable: boolean;
   }) => void;
   isLoading?: boolean;
+  currentUserRole?: 'owner' | 'finance' | 'pm' | 'employee';
+  showApprovalWorkflow?: boolean;
 }
 
 export function PayrollPreview({
   run,
   onApprove,
   onReject,
+  onSubmitForApproval,
   onExportCSV,
   onGeneratePayStubs,
   onEditEntry,
   onAddAdjustment,
   isLoading = false,
+  currentUserRole = 'owner',
+  showApprovalWorkflow = true,
 }: PayrollPreviewProps) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -84,27 +91,6 @@ export function PayrollPreview({
         </div>
 
         <div className="flex items-center gap-2">
-          {canEdit && onReject && (
-            <Button
-              variant="outline"
-              onClick={onReject}
-              disabled={isLoading}
-              className="text-red-600 border-red-200 hover:bg-red-50"
-            >
-              <XCircleIcon className="h-4 w-4 mr-2" />
-              Cancel
-            </Button>
-          )}
-          {canApprove && onApprove && (
-            <Button
-              onClick={onApprove}
-              disabled={isLoading}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              <CheckCircleIcon className="h-4 w-4 mr-2" />
-              Approve Payroll
-            </Button>
-          )}
           {canExport && (
             <>
               {onExportCSV && (
@@ -131,6 +117,18 @@ export function PayrollPreview({
           )}
         </div>
       </div>
+
+      {/* Approval Workflow Status */}
+      {showApprovalWorkflow && (
+        <PayrollApprovalStatus
+          run={run}
+          onApprove={onApprove}
+          onReject={onReject}
+          onSubmitForApproval={onSubmitForApproval}
+          isLoading={isLoading}
+          currentUserRole={currentUserRole}
+        />
+      )}
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">

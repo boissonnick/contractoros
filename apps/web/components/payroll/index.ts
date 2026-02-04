@@ -2,3 +2,7 @@ export { PayrollRunCard } from './PayrollRunCard';
 export { PayrollEntryRow } from './PayrollEntryRow';
 export { PayrollPreview } from './PayrollPreview';
 export { CreatePayrollModal } from './CreatePayrollModal';
+export { PayrollApprovalStatus } from './PayrollApprovalStatus';
+export { EmployeeRateManager } from './EmployeeRateManager';
+export { PayrollSummaryWidget } from './PayrollSummaryWidget';
+export { PayrollRunPreviewCalculator } from './PayrollRunPreviewCalculator';

@@ -417,3 +417,174 @@ export function getCategoryColor(category: CostCategory): string {
   const colorName = COST_CATEGORY_LABELS[category]?.color || 'gray';
   return colors[colorName] || colors.gray;
 }
+
+/**
+ * Organization-wide job costing summary data
+ */
+export interface OrgJobCostingSummary {
+  totalBudget: number;
+  totalActualCosts: number;
+  totalVariance: number;
+  variancePercent: number;
+  projectsAtRisk: number;
+  projectsOverBudget: number;
+  projectsUnderBudget: number;
+  costsByCategory: Record<CostCategory, number>;
+  topOverBudgetProjects: Array<{
+    projectId: string;
+    projectName: string;
+    budget: number;
+    actual: number;
+    variance: number;
+    variancePercent: number;
+  }>;
+}
+
+interface UseOrgJobCostingReturn {
+  profitabilityData: ProjectProfitability[];
+  summary: OrgJobCostingSummary | null;
+  loading: boolean;
+  error: string | null;
+  refresh: () => void;
+}
+
+/**
+ * Hook for fetching organization-wide job costing/profitability data
+ */
+export function useOrgJobCosting(): UseOrgJobCostingReturn {
+  const { profile } = useAuth();
+  const [profitabilityData, setProfitabilityData] = useState<ProjectProfitability[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const orgId = profile?.orgId;
+
+  // Fetch all project profitability data
+  useEffect(() => {
+    if (!orgId) {
+      setLoading(false);
+      return;
+    }
+
+    const profitRef = collection(db, `organizations/${orgId}/projectProfitability`);
+    const q = query(profitRef, orderBy('lastUpdated', 'desc'));
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const data = snapshot.docs.map((doc) => ({
+          projectId: doc.id,
+          ...convertTimestamps(doc.data(), JOB_COST_DATE_FIELDS),
+        })) as ProjectProfitability[];
+
+        setProfitabilityData(data);
+        setLoading(false);
+        setError(null);
+      },
+      (err) => {
+        console.error('Error fetching org profitability:', err);
+        setError(err.message);
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [orgId, refreshTrigger]);
+
+  // Calculate summary statistics
+  const summary = useMemo((): OrgJobCostingSummary | null => {
+    if (profitabilityData.length === 0) return null;
+
+    let totalBudget = 0;
+    let totalActualCosts = 0;
+    let projectsAtRisk = 0;
+    let projectsOverBudget = 0;
+    let projectsUnderBudget = 0;
+
+    const costsByCategory: Record<CostCategory, number> = {
+      labor_internal: 0,
+      labor_subcontractor: 0,
+      materials: 0,
+      equipment_rental: 0,
+      permits_fees: 0,
+      overhead: 0,
+      other: 0,
+    };
+
+    const projectVariances: Array<{
+      projectId: string;
+      projectName: string;
+      budget: number;
+      actual: number;
+      variance: number;
+      variancePercent: number;
+    }> = [];
+
+    for (const project of profitabilityData) {
+      totalBudget += project.originalBudget || 0;
+      totalActualCosts += project.totalCosts || 0;
+
+      if (project.isAtRisk) projectsAtRisk++;
+      if (project.isOverBudget) projectsOverBudget++;
+      if (project.budgetVariance > 0) projectsUnderBudget++;
+
+      // Aggregate costs by category
+      if (project.costsByCategory) {
+        for (const [cat, amount] of Object.entries(project.costsByCategory)) {
+          if (cat in costsByCategory) {
+            costsByCategory[cat as CostCategory] += amount;
+          }
+        }
+      }
+
+      // Track variance for top over-budget projects
+      const variance = (project.originalBudget || 0) - (project.totalCosts || 0);
+      const variancePercent = project.originalBudget
+        ? (variance / project.originalBudget) * 100
+        : 0;
+
+      projectVariances.push({
+        projectId: project.projectId,
+        projectName: project.projectId, // Will be replaced with actual name if available
+        budget: project.originalBudget || 0,
+        actual: project.totalCosts || 0,
+        variance,
+        variancePercent,
+      });
+    }
+
+    const totalVariance = totalBudget - totalActualCosts;
+    const variancePercent = totalBudget > 0 ? (totalVariance / totalBudget) * 100 : 0;
+
+    // Get top 5 over-budget projects (negative variance)
+    const topOverBudgetProjects = projectVariances
+      .filter((p) => p.variance < 0)
+      .sort((a, b) => a.variance - b.variance) // Most negative first
+      .slice(0, 5);
+
+    return {
+      totalBudget,
+      totalActualCosts,
+      totalVariance,
+      variancePercent,
+      projectsAtRisk,
+      projectsOverBudget,
+      projectsUnderBudget,
+      costsByCategory,
+      topOverBudgetProjects,
+    };
+  }, [profitabilityData]);
+
+  const refresh = useCallback(() => {
+    setRefreshTrigger((t) => t + 1);
+  }, []);
+
+  return {
+    profitabilityData,
+    summary,
+    loading,
+    error,
+    refresh,
+  };
+}

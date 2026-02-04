@@ -9,6 +9,8 @@ import { db } from '@/lib/firebase/config';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { Card, StatsGrid, PageHeader, Skeleton } from '@/components/ui';
 import { PieChartCard, BarChartCard } from '@/components/charts';
+import { JobCostingSummary } from '@/components/finances';
+import { ExpenseDetailsModal, ExpenseDetailsFilter } from '@/components/expenses';
 import { cn } from '@/lib/utils';
 import { Invoice, Estimate, Project, Client, ExpenseCategory, EXPENSE_CATEGORIES } from '@/types';
 import {
@@ -24,6 +26,7 @@ import {
   BuildingOfficeIcon,
   FolderIcon,
   UserGroupIcon,
+  CursorArrowRaysIcon,
 } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui';
 
@@ -54,6 +57,18 @@ export default function FinancesPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Expense drilldown modal state
+  const [expenseModalOpen, setExpenseModalOpen] = useState(false);
+  const [expenseModalFilter, setExpenseModalFilter] = useState<ExpenseDetailsFilter>({});
+  const [expenseModalTitle, setExpenseModalTitle] = useState('Expense Details');
+
+  // Helper to open expense details modal with filter
+  const openExpenseModal = (title: string, filter: ExpenseDetailsFilter = {}) => {
+    setExpenseModalTitle(title);
+    setExpenseModalFilter(filter);
+    setExpenseModalOpen(true);
+  };
 
   useEffect(() => {
     async function loadFinancials() {
@@ -342,13 +357,19 @@ export default function FinancesPage() {
           </div>
         </Card>
 
-        <Card className="p-5">
+        <Card
+          className="p-5 cursor-pointer hover:shadow-md transition-shadow group"
+          onClick={() => openExpenseModal('All Expenses (YTD)', {})}
+        >
           <div className="flex items-center gap-3 mb-3">
             <div className="p-2 bg-red-100 rounded-lg">
               <ArrowTrendingDownIcon className="h-5 w-5 text-red-600" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-gray-500 uppercase tracking-wide">Total Expenses (YTD)</p>
+              <p className="text-xs text-gray-500 uppercase tracking-wide flex items-center gap-1">
+                Total Expenses (YTD)
+                <CursorArrowRaysIcon className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </p>
               <p className="text-2xl font-bold text-gray-900 tabular-nums">{formatCurrency(stats.totalExpenses)}</p>
             </div>
           </div>
@@ -418,8 +439,14 @@ export default function FinancesPage() {
               <p className="text-xs text-red-600 mt-1">{formatCurrency(stats.overdueAmount)} overdue</p>
             )}
           </div>
-          <div className="p-4 bg-orange-50 rounded-lg">
-            <p className="text-xs text-gray-500 mb-1">Accounts Payable</p>
+          <div
+            className="p-4 bg-orange-50 rounded-lg cursor-pointer hover:bg-orange-100 transition-colors group"
+            onClick={() => openExpenseModal('Accounts Payable', { status: 'pending' })}
+          >
+            <p className="text-xs text-gray-500 mb-1 flex items-center gap-1">
+              Accounts Payable
+              <CursorArrowRaysIcon className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </p>
             <p className="text-lg font-bold text-orange-700 tabular-nums">{formatCurrency(stats.accountsPayable)}</p>
             {stats.pendingExpenses > 0 && (
               <p className="text-xs text-gray-500 mt-1">{formatCurrency(stats.pendingExpenses)} pending</p>
@@ -440,19 +467,59 @@ export default function FinancesPage() {
         </div>
       </Card>
 
+      {/* Job Costing Section */}
+      <JobCostingSummary
+        onProjectClick={(projectId) => router.push(`/dashboard/projects/${projectId}/finances`)}
+      />
+
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Expense Breakdown */}
         {expenseChartData.length > 0 ? (
-          <PieChartCard
-            title="Expense Breakdown (YTD)"
-            subtitle="Distribution by category"
-            data={expenseChartData}
-            dataKey="value"
-            nameKey="name"
-            showLabels
-            valueFormatter={formatCurrency}
-          />
+          <Card className="p-5">
+            <div className="mb-4">
+              <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                Expense Breakdown (YTD)
+                <span className="text-xs font-normal text-gray-500">(click to drill down)</span>
+              </h3>
+              <p className="text-xs text-gray-500 mt-0.5">Distribution by category</p>
+            </div>
+            {/* Category List - Clickable */}
+            <div className="space-y-2">
+              {expenseChartData.map((item) => {
+                const categoryValue = EXPENSE_CATEGORIES.find(c => c.label === item.name)?.value;
+                const percentage = stats.totalExpenses > 0 ? ((item.value / stats.totalExpenses) * 100).toFixed(1) : '0';
+                return (
+                  <div
+                    key={item.name}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors group"
+                    onClick={() => categoryValue && openExpenseModal(`${item.name} Expenses`, { category: categoryValue })}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: item.color }}
+                      />
+                      <span className="text-sm font-medium text-gray-900">{item.name}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-gray-500">{percentage}%</span>
+                      <span className="text-sm font-semibold text-gray-900">{formatCurrency(item.value)}</span>
+                      <CursorArrowRaysIcon className="h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="mt-4 pt-3 border-t border-gray-100">
+              <button
+                onClick={() => openExpenseModal('All Expenses', {})}
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+              >
+                View all expenses
+              </button>
+            </div>
+          </Card>
         ) : (
           <Card className="p-5">
             <h3 className="font-semibold text-gray-900 mb-4">Expense Breakdown (YTD)</h3>
@@ -671,6 +738,14 @@ export default function FinancesPage() {
           </div>
         )}
       </Card>
+
+      {/* Expense Details Modal */}
+      <ExpenseDetailsModal
+        isOpen={expenseModalOpen}
+        onClose={() => setExpenseModalOpen(false)}
+        filter={expenseModalFilter}
+        title={expenseModalTitle}
+      />
     </div>
   );
 }

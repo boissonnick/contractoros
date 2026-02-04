@@ -1,14 +1,17 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { PayPeriod, PaySchedule, PAY_SCHEDULE_LABELS, UserProfile, TimeEntry } from '@/types';
 import BaseModal from '@/components/ui/BaseModal';
 import Button from '@/components/ui/Button';
+import { PayrollRunPreviewCalculator } from './PayrollRunPreviewCalculator';
 import {
   CalendarDaysIcon,
   UserGroupIcon,
   ClockIcon,
   ExclamationTriangleIcon,
+  ChevronRightIcon,
+  CheckIcon,
 } from '@heroicons/react/24/outline';
 
 interface CreatePayrollModalProps {
@@ -238,46 +241,51 @@ export function CreatePayrollModal({
           </>
         )}
 
-        {/* Step 3: Review */}
+        {/* Step 3: Review with Preview Calculator */}
         {step === 'review' && payPeriod && (
           <>
-            <div className="bg-gray-50 rounded-lg p-4 space-y-4">
+            {/* Pay Period Summary */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
               <div className="flex items-center gap-3">
-                <CalendarDaysIcon className="h-5 w-5 text-gray-400" />
+                <CalendarDaysIcon className="h-5 w-5 text-blue-600" />
                 <div>
-                  <div className="text-sm text-gray-500">Pay Period</div>
-                  <div className="font-medium">{payPeriod.label}</div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <UserGroupIcon className="h-5 w-5 text-gray-400" />
-                <div>
-                  <div className="text-sm text-gray-500">Employees</div>
-                  <div className="font-medium">{selectedEmployees.size} employees</div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <ClockIcon className="h-5 w-5 text-gray-400" />
-                <div>
-                  <div className="text-sm text-gray-500">Total Hours</div>
-                  <div className="font-medium">
-                    {Array.from(selectedEmployees)
-                      .reduce((sum, id) => sum + getEmployeeHours(id), 0)
-                      .toFixed(1)} hours
+                  <div className="text-sm text-blue-800 font-medium">Pay Period</div>
+                  <div className="text-blue-900 font-semibold">{payPeriod.label}</div>
+                  <div className="text-xs text-blue-700 mt-1">
+                    Pay Date: {payPeriod.payDate.toLocaleDateString('en-US', {
+                      weekday: 'long',
+                      month: 'long',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-blue-50 rounded-lg p-4 text-sm text-blue-800">
-              <strong>What happens next:</strong>
-              <ul className="mt-2 list-disc list-inside space-y-1">
-                <li>A draft payroll run will be created</li>
-                <li>Hours will be calculated from time entries</li>
-                <li>Tax estimates will be computed for each employee</li>
-                <li>You can review and adjust before approving</li>
+            {/* Payroll Preview Calculator */}
+            <PayrollRunPreviewCalculator
+              payPeriod={payPeriod}
+              selectedEmployees={employees.filter(e => selectedEmployees.has(e.uid))}
+              timeEntries={timeEntries}
+            />
+
+            {/* What happens next */}
+            <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-700 mt-4">
+              <strong className="text-gray-900">What happens next:</strong>
+              <ul className="mt-2 space-y-1">
+                <li className="flex items-start gap-2">
+                  <CheckIcon className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  A draft payroll run will be created with calculated entries
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckIcon className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  Final tax calculations will be computed for each employee
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckIcon className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  You can review, adjust, and approve before processing
+                </li>
               </ul>
             </div>
           </>
