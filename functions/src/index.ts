@@ -31,6 +31,9 @@ export {
 // SMS Cloud Functions
 export { sendSMS, smsWebhook } from "./sms";
 
+// Receipt OCR Cloud Function
+export { processReceiptOCR } from "./expenses/processReceiptOCR";
+
 // QuickBooks Online Integration - Scheduled Sync
 export {
   qboScheduledSync,

@@ -2780,6 +2780,32 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ==========================================
+    // OCR Logs Collection (AI Receipt Scanning)
+    // Logs OCR processing requests for analytics
+    // ==========================================
+    match /ocrLogs/{logId} {
+      // Admins can read OCR logs for analytics
+      allow read: if isAuthenticated() && userProfileExists() &&
+        getUserProfile().role in ['OWNER', 'PM'] &&
+        resource.data.orgId == getUserProfile().orgId;
+
+      // Only Cloud Functions create OCR logs
+      allow create: if false;
+
+      // Logs are immutable
+      allow update, delete: if false;
+    }
+
+    // ==========================================
+    // Rate Limits Collection (Internal)
+    // Used by Cloud Functions for rate limiting
+    // ==========================================
+    match /_rateLimits/{limitId} {
+      // Only Cloud Functions access rate limits
+      allow read, write: if false;
+    }
+
     // Default deny all other access
     match /{document=**} {
       allow read, write: if false;
