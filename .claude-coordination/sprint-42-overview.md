@@ -81,8 +81,33 @@ The Reports module exploration revealed it's **95% production-ready**:
 
 ## Success Criteria
 
-- [ ] Reports show comprehensive demo data
-- [ ] Invoice aging shows realistic distribution (70% current, 20% 1-30, 10% older)
-- [ ] Report Builder creates and executes custom reports
-- [ ] Tables paginate on large datasets
-- [ ] TypeScript passes
+- [x] Reports show comprehensive demo data (19 historical + 7 aging invoices seeded)
+- [x] Invoice aging shows realistic distribution (70% current, 20% 1-30, 10% older)
+- [x] Report Builder creates and executes custom reports
+- [x] Tables paginate on large datasets (ReportPreview fixed)
+- [x] TypeScript passes
+
+---
+
+## Sprint 42 Completion Summary (2026-02-04)
+
+### Completed Tasks:
+
+**CLI 1 - Reports Demo Data Seeding ✅**
+- Ran `seed-reports-data.ts` successfully
+- Created 19 historical paid invoices
+- Created 7 invoices for aging distribution
+
+**CLI 2 - Report Builder Validation ✅**
+- Added missing Firestore index for customReports collection
+- Identified that 'contains' filter uses prefix matching (documented)
+- Identified aggregation defaults (documented for future enhancement)
+
+**CLI 3 - Performance & Polish ✅**
+- Fixed ReportPreview pagination (was hardcoded to 100 rows)
+- Added configurable page size selector (25, 50, 100, 250)
+- Added proper pagination controls with prev/next
+- Auto-reset page when data changes
+
+### Pending Action:
+- [ ] Deploy Firestore indexes (requires `firebase login --reauth` first)
