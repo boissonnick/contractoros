@@ -1,12 +1,12 @@
 # ---------- Dependencies ----------
-FROM node:20-slim AS deps
+FROM node:22-slim AS deps
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
 RUN npm install
 
 # ---------- Build ----------
-FROM node:20-slim AS builder
+FROM node:22-slim AS builder
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
@@ -38,7 +38,7 @@ ENV NEXT_PUBLIC_BUILD_TIME=$NEXT_PUBLIC_BUILD_TIME
 RUN npm run build
 
 # ---------- Runtime ----------
-FROM node:20-slim AS runner
+FROM node:22-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production

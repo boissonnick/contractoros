@@ -1,47 +1,64 @@
 # ContractorOS Sprint Status
 
 > **Purpose:** Track current progress and enable seamless session handoffs.
-> **Last Updated:** 2026-02-04 by Demo Mode Sprint Planning
-> **Current Phase:** Phase 10 - Platform Hardening & Bug Fixes
+> **Last Updated:** 2026-02-04 - Reprioritized: Bugs → Stability → Features
+> **Current Phase:** Phase 11 - Infrastructure Upgrades & Bug Resolution
 
 ---
 
-## 🎯 Upcoming Sprint: Sprint 41 - Demo Mode
+## ✅ Sprint 47 - Node.js 22 + Firebase SDK Updates - COMPLETE
 
-**Focus:** Toggleable Demo Mode for platform exploration and sales demos
-**See:** `.claude-coordination/sprint-41-overview.md` for full sprint plan
+**Priority:** P0 - CRITICAL ⚠️
+**Completed:** 2026-02-04
+**See:** `.claude-coordination/sprint-47-overview.md`
 
-| Phase | Focus | Status |
-|-------|-------|--------|
-| Phase 1 | Core Infrastructure (Context, Hook, Constants) | ⏳ Pending |
-| Phase 2 | UI Components (Banner, Selector, Toggle) | ⏳ Pending |
-| Phase 3 | Integration & Firestore Rules | ⏳ Pending |
-| Phase 4 | Testing & Polish | ⏳ Pending |
+**What Was Done:**
+- ✅ Node.js 20 → 22 (Docker, Cloud Functions)
+- ✅ Firebase Admin SDK 12 → 13.6.0
+- ✅ Firebase Functions SDK 5 → 7.0.5
+- ✅ .nvmrc file for version consistency
+- ✅ Updated CLAUDE.md documentation
+- ✅ Fixed deprecated `functions.config()` usage in sendEmail.ts
+- ✅ TypeScript compiles without errors
 
-**Key Deliverables:**
-- DemoModeContext for state management
-- useEffectiveOrg hook for org switching
-- Purple demo mode banner + sidebar toggle
-- Firestore rules for demo org access
-- Auto-expiry after 4 hours
+**Next Sprint:** Sprint 48 - Next.js 14 → 16 + React 19
 
 ---
 
-## 🔄 Current Sprint: Sprint 40
+## 📋 NEW SPRINT ORDER (Reprioritized: Bugs → Stability → Features)
 
-**Focus:** Demo data completeness, navigation restructure, schedule enhancements
-**See:** `.claude-coordination/sprint-40-overview.md` for full sprint plan
+**Full Plan:** `docs/REPRIORITIZED_SPRINT_PLAN.md`
+**Rationale:** Address bugs/stability before new features
 
-| CLI | Focus | Status |
-|-----|-------|--------|
-| CLI 1 | Demo data completeness (tasks, categories, clients) | 🔄 In Progress |
-| CLI 2 | UI polish (date pickers, help menu, online status) | 🔄 In Progress |
-| CLI 3 | Navigation & Subcontractors module | 🔄 In Progress |
-| CLI 4 | Schedule & Weather integration | 🔄 In Progress |
+### Phase 1: Infrastructure (3-4 days)
+- **Sprint 47:** Node.js 22 + Firebase SDKs (1 day) ✅ COMPLETE
+- **Sprint 48:** Next.js 14→16 + React 18→19 (2-3 days) ← NEXT
+- **Sprint 49A:** Critical bug sweep if needed (0.5-1 day)
+
+### Phase 2: High-Priority Bugs (4-6 days)
+- **Sprint 49:** Data Quality & Demo Data (1-2 days)
+- **Sprint 50:** UI/UX Bug Fixes (1-2 days)
+- **Sprint 51:** Navigation Bugs (1-2 days)
+- **Sprint 52:** Reports Bugs (1-2 days)
+
+### Phase 3: Stability & Functionality (4-6 days)
+- **Sprint 53:** Settings Consolidation (1 day)
+- **Sprint 54:** Schedule Stability (1-2 days)
+- **Sprint 55:** Mobile UX Bugs (1 day)
+- **Sprint 56:** Performance Optimization (1-2 days)
+
+### Phase 4: Enhancements (Optional, 4-6 days)
+- **Sprint 57-60:** Reporting, Notifications, Package Updates, Tailwind 4
+
+**Total Critical Path:** 11-16 days
 
 ---
 
-## ✅ Completed Sprints (37-39, 42-43)
+## 🗂️ ARCHIVED SPRINTS (Completed)
+
+**Location:** `.claude-coordination/archive/`
+
+Archived to reduce context:
 
 | Sprint | Focus | Status |
 |--------|-------|--------|
@@ -106,9 +123,9 @@
 
 | Metric | Value |
 |--------|-------|
-| **Current Sprint** | Sprint 40 - Demo Data + Navigation + Schedule 🚀 |
-| **Next Sprint** | Sprint 41 - Demo Mode Feature ⏳ |
-| **Sprint Status** | 🏃 IN PROGRESS |
+| **Current Sprint** | Sprint 47 - Node.js 22 + Firebase SDKs ✅ COMPLETE |
+| **Next Sprint** | Sprint 48 - Next.js 14→16 + React 19 ⏳ |
+| **Sprint Status** | ✅ COMPLETE |
 | **Platform Completion** | ~90% (adjusted per audit) |
 | **Audit Issues** | 101 total (0 critical ✅, 47 high, 40 medium, 8 low) |
 | **TypeScript Status** | ✅ Passing |

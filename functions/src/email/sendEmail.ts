@@ -1,5 +1,3 @@
-import * as functions from "firebase-functions";
-
 interface EmailOptions {
   to: string;
   subject: string;
@@ -16,14 +14,11 @@ interface EmailOptions {
  *
  * Optional:
  * - MAILGUN_REGION: 'us' (default) or 'eu' for EU region
- *
- * Can also be set via Firebase config:
- * firebase functions:config:set mailgun.api_key="key-xxx" mailgun.domain="mg.example.com"
  */
 export async function sendEmail(options: EmailOptions): Promise<boolean> {
-  const apiKey = process.env.MAILGUN_API_KEY || functions.config()?.mailgun?.api_key;
-  const domain = process.env.MAILGUN_DOMAIN || functions.config()?.mailgun?.domain;
-  const region = process.env.MAILGUN_REGION || functions.config()?.mailgun?.region || "us";
+  const apiKey = process.env.MAILGUN_API_KEY;
+  const domain = process.env.MAILGUN_DOMAIN;
+  const region = process.env.MAILGUN_REGION || "us";
 
   if (!apiKey) {
     console.warn("MAILGUN_API_KEY not configured. Email not sent:", options.subject);

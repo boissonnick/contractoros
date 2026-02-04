@@ -433,11 +433,13 @@ All in `components/ui/`:
 
 | Tool | Version | Path |
 |------|---------|------|
-| Node | v20 | `/opt/homebrew/opt/node@20/bin/` |
-| npm | v10.8.2 | - |
+| Node | v22 | `/opt/homebrew/opt/node@22/bin/` |
+| npm | v10.x | - |
 | Firebase CLI | v15.4.0 | `/opt/homebrew/bin/firebase` |
 | Docker | Desktop for Mac | - |
 | gcloud | SDK | `/opt/homebrew/bin/gcloud` |
+
+**Note:** Use `.nvmrc` for automatic version switching: `nvm use`
 
 ---
 
