@@ -11,12 +11,20 @@
  * - Rate limiting (10 requests per minute per user)
  */
 
-import { onCall, HttpsError } from "firebase-functions/v2/https";
+import { onRequest, HttpsError } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import * as admin from "firebase-admin";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
 import Anthropic from "@anthropic-ai/sdk";
 import { FirestoreRateLimiter } from "../security/rate-limiter";
+
+// CORS configuration
+const CORS_ORIGINS = [
+  "http://localhost:3000",
+  "https://contractoros-483812.web.app",
+  "https://contractoros.com",
+  "https://www.contractoros.com",
+];
 
 // Define the Anthropic API key secret
 const anthropicApiKey = defineSecret("ANTHROPIC_API_KEY");
@@ -128,14 +136,7 @@ export interface ReceiptOCRResult {
   processingTimeMs: number;
 }
 
-/**
- * Response returned to client
- */
-interface ProcessReceiptResponse {
-  success: boolean;
-  data: ReceiptOCRResult | null;
-  error?: string;
-}
+// Response structure is { success: boolean, data: ReceiptOCRResult | null, error?: string }
 
 // ============================================
 // Extraction Prompt
@@ -469,7 +470,47 @@ async function logOCRRequest(
 // ============================================
 
 /**
- * processReceiptOCR - Callable function for AI receipt scanning
+ * Set CORS headers for response
+ */
+function setCorsHeaders(
+  req: { headers: { origin?: string } },
+  res: { set: (name: string, value: string) => void }
+): boolean {
+  const origin = req.headers.origin || "";
+
+  // Check if origin is allowed
+  if (CORS_ORIGINS.includes(origin)) {
+    res.set("Access-Control-Allow-Origin", origin);
+  } else {
+    res.set("Access-Control-Allow-Origin", CORS_ORIGINS[0]);
+  }
+
+  res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.set("Access-Control-Max-Age", "3600");
+
+  return CORS_ORIGINS.includes(origin);
+}
+
+/**
+ * Verify Firebase ID token and return user ID
+ */
+async function verifyAuth(authHeader?: string): Promise<string> {
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    throw new HttpsError("unauthenticated", "Missing or invalid Authorization header");
+  }
+
+  const idToken = authHeader.split("Bearer ")[1];
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    return decodedToken.uid;
+  } catch (error) {
+    throw new HttpsError("unauthenticated", "Invalid authentication token");
+  }
+}
+
+/**
+ * processReceiptOCR - HTTP function for AI receipt scanning
  *
  * Accepts a base64-encoded receipt image and extracts expense data
  * using Claude vision models. Uses Haiku for speed/cost, with Sonnet
@@ -486,73 +527,91 @@ async function logOCRRequest(
  * - data: ReceiptOCRResult or null
  * - error: Error message if failed
  */
-export const processReceiptOCR = onCall(
+export const processReceiptOCR = onRequest(
   {
     region: REGION,
     secrets: [anthropicApiKey],
-    // Increase timeout for image processing
     timeoutSeconds: 60,
-    // Increase memory for image handling
     memory: "512MiB",
   },
-  async (request): Promise<ProcessReceiptResponse> => {
+  async (req, res): Promise<void> => {
+    // Handle CORS
+    setCorsHeaders(req, res);
+
+    // Handle preflight OPTIONS request
+    if (req.method === "OPTIONS") {
+      res.status(204).send("");
+      return;
+    }
+
+    // Only allow POST
+    if (req.method !== "POST") {
+      res.status(405).json({ success: false, error: "Method not allowed" });
+      return;
+    }
+
     const startTime = Date.now();
 
-    // Verify authentication
-    if (!request.auth) {
-      throw new HttpsError("unauthenticated", "Authentication required");
-    }
-
-    const userId = request.auth.uid;
-    const data = request.data as ProcessReceiptRequest;
-    const { imageBase64, mimeType, orgId } = data;
-    // Note: data.projectId is available but not used in this function
-    // It will be passed to the frontend for expense creation
-
-    // Validate required fields
-    if (!imageBase64 || !mimeType || !orgId) {
-      throw new HttpsError(
-        "invalid-argument",
-        "Missing required fields: imageBase64, mimeType, orgId"
-      );
-    }
-
-    // Rate limiting
-    const rateLimiter = new FirestoreRateLimiter(OCR_RATE_LIMIT);
-    const rateLimitKey = `ocr:${userId}`;
-    const rateLimitResult = await rateLimiter.check(rateLimitKey);
-
-    if (!rateLimitResult.success) {
-      const retryAfter = Math.ceil(
-        (rateLimitResult.resetTime.getTime() - Date.now()) / 1000
-      );
-      throw new HttpsError(
-        "resource-exhausted",
-        `Rate limit exceeded. Maximum 10 receipt scans per minute. Retry after ${Math.max(1, retryAfter)} seconds.`
-      );
-    }
-
-    // Verify user belongs to organization
-    const userDoc = await getDb().collection("users").doc(userId).get();
-    if (!userDoc.exists) {
-      throw new HttpsError("permission-denied", "User not found");
-    }
-
-    const userData = userDoc.data();
-    if (userData?.orgId !== orgId) {
-      throw new HttpsError(
-        "permission-denied",
-        "User does not belong to this organization"
-      );
-    }
-
-    // Validate image data
-    const validation = validateImageData(imageBase64, mimeType);
-    if (!validation.valid) {
-      throw new HttpsError("invalid-argument", validation.error!);
-    }
-
     try {
+      // Verify authentication
+      const userId = await verifyAuth(req.headers.authorization);
+
+      const data = req.body as ProcessReceiptRequest;
+      const { imageBase64, mimeType, orgId } = data;
+      // Note: data.projectId is available but not used in this function
+      // It will be passed to the frontend for expense creation
+
+      // Validate required fields
+      if (!imageBase64 || !mimeType || !orgId) {
+        res.status(400).json({
+          success: false,
+          data: null,
+          error: "Missing required fields: imageBase64, mimeType, orgId",
+        });
+        return;
+      }
+
+      // Rate limiting
+      const rateLimiter = new FirestoreRateLimiter(OCR_RATE_LIMIT);
+      const rateLimitKey = `ocr:${userId}`;
+      const rateLimitResult = await rateLimiter.check(rateLimitKey);
+
+      if (!rateLimitResult.success) {
+        const retryAfter = Math.ceil(
+          (rateLimitResult.resetTime.getTime() - Date.now()) / 1000
+        );
+        res.status(429).json({
+          success: false,
+          data: null,
+          error: `Rate limit exceeded. Maximum 10 receipt scans per minute. Retry after ${Math.max(1, retryAfter)} seconds.`,
+        });
+        return;
+      }
+
+      // Verify user belongs to organization
+      const userDoc = await getDb().collection("users").doc(userId).get();
+      if (!userDoc.exists) {
+        res.status(403).json({ success: false, data: null, error: "User not found" });
+        return;
+      }
+
+      const userData = userDoc.data();
+      if (userData?.orgId !== orgId) {
+        res.status(403).json({
+          success: false,
+          data: null,
+          error: "User does not belong to this organization",
+        });
+        return;
+      }
+
+      // Validate image data
+      const validation = validateImageData(imageBase64, mimeType);
+      if (!validation.valid) {
+        res.status(400).json({ success: false, data: null, error: validation.error });
+        return;
+      }
+
       // Create Anthropic client
       const client = createAnthropicClient(anthropicApiKey.value());
 
@@ -587,13 +646,23 @@ export const processReceiptOCR = onCall(
         `[OCR] Success: ${result.vendor}, $${result.total}, confidence: ${result.confidence}, model: ${result.modelUsed}`
       );
 
-      return {
+      res.status(200).json({
         success: true,
         data: result,
-      };
+      });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
       console.error("[OCR] Processing failed:", errorMessage);
+
+      // Determine if we have user context for logging
+      let userId = "unknown";
+      let orgId = "unknown";
+      try {
+        userId = await verifyAuth(req.headers.authorization);
+        orgId = req.body?.orgId || "unknown";
+      } catch {
+        // Ignore auth errors during error logging
+      }
 
       // Log failed request
       await logOCRRequest(
@@ -618,22 +687,39 @@ export const processReceiptOCR = onCall(
         errorMessage
       );
 
-      // Check for specific Anthropic errors
+      // Check for specific errors
       if (errorMessage.includes("rate_limit")) {
-        throw new HttpsError(
-          "resource-exhausted",
-          "AI service rate limit reached. Please try again in a moment."
-        );
+        res.status(429).json({
+          success: false,
+          data: null,
+          error: "AI service rate limit reached. Please try again in a moment.",
+        });
+        return;
       }
 
       if (errorMessage.includes("invalid_api_key")) {
-        throw new HttpsError(
-          "internal",
-          "AI service configuration error. Please contact support."
-        );
+        res.status(500).json({
+          success: false,
+          data: null,
+          error: "AI service configuration error. Please contact support.",
+        });
+        return;
       }
 
-      throw new HttpsError("internal", `Failed to process receipt: ${errorMessage}`);
+      if (errorMessage.includes("unauthenticated") || errorMessage.includes("authentication")) {
+        res.status(401).json({
+          success: false,
+          data: null,
+          error: errorMessage,
+        });
+        return;
+      }
+
+      res.status(500).json({
+        success: false,
+        data: null,
+        error: `Failed to process receipt: ${errorMessage}`,
+      });
     }
   }
 );

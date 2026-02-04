@@ -1,7 +1,6 @@
 'use client';
 
-import { getFunctions, httpsCallable } from 'firebase/functions';
-import { getApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
 
 /**
  * OCR result from the processReceiptOCR Cloud Function
@@ -62,6 +61,8 @@ interface ProcessReceiptRequest {
   projectId?: string;
 }
 
+const FUNCTION_URL = 'https://us-east1-contractoros-483812.cloudfunctions.net/processReceiptOCR';
+
 /**
  * Call the processReceiptOCR Cloud Function to extract expense data from a receipt image
  *
@@ -78,26 +79,37 @@ export async function scanReceipt(
   orgId: string,
   projectId?: string
 ): Promise<ReceiptOCRResult> {
-  const app = getApp();
-  const functions = getFunctions(app, 'us-east1');
+  // Get the current user's ID token for authentication
+  const auth = getAuth();
+  const user = auth.currentUser;
 
-  const processReceiptOCR = httpsCallable<ProcessReceiptRequest, ProcessReceiptResponse>(
-    functions,
-    'processReceiptOCR'
-  );
-
-  const response = await processReceiptOCR({
-    imageBase64,
-    mimeType,
-    orgId,
-    projectId,
-  });
-
-  if (!response.data.success || !response.data.data) {
-    throw new Error(response.data.error || 'Failed to process receipt');
+  if (!user) {
+    throw new Error('User must be authenticated to scan receipts');
   }
 
-  return response.data.data;
+  const idToken = await user.getIdToken();
+
+  const response = await fetch(FUNCTION_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${idToken}`,
+    },
+    body: JSON.stringify({
+      imageBase64,
+      mimeType,
+      orgId,
+      projectId,
+    } as ProcessReceiptRequest),
+  });
+
+  const data: ProcessReceiptResponse = await response.json();
+
+  if (!response.ok || !data.success || !data.data) {
+    throw new Error(data.error || 'Failed to process receipt');
+  }
+
+  return data.data;
 }
 
 /**
