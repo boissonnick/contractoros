@@ -20,7 +20,7 @@ export function GlobalSearchBar({ className = '' }: GlobalSearchBarProps) {
   const [loading, setLoading] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
-  const debounceRef = useRef<NodeJS.Timeout>();
+  const debounceRef = useRef<NodeJS.Timeout>(undefined);
 
   const orgId = profile?.orgId;
 
