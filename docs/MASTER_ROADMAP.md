@@ -21,11 +21,24 @@ New sessions should read this document to understand all pending work.
 
 ---
 
-## 🎯 CURRENT SPRINT: Sprint 51
+## 🎯 CURRENT SPRINT: Sprint 52
+
+**Focus:** Reports Bugs & Configuration
+
+**See:** `docs/REPRIORITIZED_SPRINT_PLAN.md` for full sprint plan
+
+---
+
+## ✅ Sprint 51 Complete (2026-02-04)
 
 **Focus:** Navigation Bugs & Structure
 
-**See:** `docs/REPRIORITIZED_SPRINT_PLAN.md` for full sprint plan
+| Task | Status |
+|------|--------|
+| #33: Separate Team from Subcontractors | ✅ |
+| #59: Sidebar reorganization | ✅ |
+| #62: Remove Reports redundancy from Finance | ✅ |
+| #34: Subcontractor directory enhancements | ✅ |
 
 ---
 
