@@ -9,6 +9,7 @@ import {
   ChatBubbleLeftRightIcon,
   Squares2X2Icon,
   RectangleStackIcon,
+  ListBulletIcon,
 } from '@heroicons/react/24/outline';
 import Skeleton from '@/components/ui/Skeleton';
 
@@ -66,11 +67,17 @@ const LineItemsTab = dynamic(
   { loading: () => <TabLoadingSkeleton />, ssr: false }
 );
 
-type TabType = 'quotes' | 'sow' | 'email' | 'sms' | 'line-items';
+const PhaseTemplatesTab = dynamic(
+  () => import('@/components/settings/templates/PhaseTemplatesTab').then(mod => ({ default: mod.PhaseTemplatesTab })),
+  { loading: () => <TabLoadingSkeleton />, ssr: false }
+);
+
+type TabType = 'quotes' | 'sow' | 'email' | 'sms' | 'line-items' | 'phases';
 
 const TABS: { id: TabType; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: 'quotes', label: 'Quote PDF', icon: DocumentTextIcon },
   { id: 'sow', label: 'SOW', icon: RectangleStackIcon },
+  { id: 'phases', label: 'Phases', icon: ListBulletIcon },
   { id: 'email', label: 'Email', icon: EnvelopeIcon },
   { id: 'sms', label: 'SMS', icon: ChatBubbleLeftRightIcon },
   { id: 'line-items', label: 'Line Items', icon: Squares2X2Icon },
@@ -111,6 +118,7 @@ export default function TemplatesPage() {
         <div>
           {activeTab === 'quotes' && <QuoteTemplatesTab />}
           {activeTab === 'sow' && <SowTemplatesTab />}
+          {activeTab === 'phases' && <PhaseTemplatesTab />}
           {activeTab === 'email' && <EmailTemplatesTab />}
           {activeTab === 'sms' && <SmsTemplatesTab />}
           {activeTab === 'line-items' && <LineItemsTab />}

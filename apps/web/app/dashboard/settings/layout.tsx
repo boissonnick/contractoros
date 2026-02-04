@@ -25,13 +25,13 @@ import {
 // =============================================================================
 // SETTINGS NAVIGATION - Organized into 7 logical groups
 // =============================================================================
-// 1. Account - Personal profile settings
+// 1. Account - Personal profile settings & security
 // 2. Organization - Company info, team, roles
-// 3. Finance - Payroll, tax rates, billing
-// 4. Templates - All template types consolidated
+// 3. Finance - Payroll, tax rates, billing, numbering
+// 4. Templates - All template types consolidated (Quote PDF, SOW, Email, SMS, Line Items, Phases)
 // 5. Notifications - Communication preferences
 // 6. Integrations - Third-party connections
-// 7. Advanced - Data import/export, AI features
+// 7. Advanced - Data management, security, AI features
 // =============================================================================
 
 interface NavSection {
@@ -100,7 +100,7 @@ const SETTINGS_NAV: NavSection[] = [
     icon: PuzzlePieceIcon,
     href: '/dashboard/settings/integrations',
   },
-  // Advanced - Power user features
+  // Advanced - Power user features (consolidated AI section)
   {
     key: 'advanced',
     label: 'Advanced',
@@ -111,9 +111,7 @@ const SETTINGS_NAV: NavSection[] = [
       { key: 'data-retention', label: 'Data Retention', href: '/dashboard/settings/data-retention' },
       { key: 'audit-logs', label: 'Audit Logs', href: '/dashboard/settings/audit-logs' },
       { key: 'security', label: 'Security Checklist', href: '/dashboard/settings/security' },
-      { key: 'intelligence', label: 'AI Intelligence', href: '/dashboard/settings/intelligence' },
       { key: 'assistant', label: 'AI Assistant', href: '/dashboard/settings/assistant' },
-      { key: 'ai-providers', label: 'AI Providers', href: '/dashboard/settings/ai-providers' },
     ],
   },
 ];
@@ -139,7 +137,7 @@ const SECTION_PATHS: Record<string, string[]> = {
     '/dashboard/settings/sow-templates',
     '/dashboard/settings/sms-templates',
     '/dashboard/settings/email-templates',
-    '/dashboard/settings', // Phase templates (root settings page)
+    '/dashboard/settings', // Phase templates (root settings page - redirects to templates)
   ],
   notifications: [
     '/dashboard/settings/notifications',
@@ -148,6 +146,9 @@ const SECTION_PATHS: Record<string, string[]> = {
   integrations: [
     '/dashboard/settings/integrations',
     '/dashboard/settings/integrations/quickbooks',
+    '/dashboard/settings/integrations/stripe',
+    '/dashboard/settings/integrations/gusto',
+    '/dashboard/settings/integrations/status',
   ],
   advanced: [
     '/dashboard/settings/data-export',
@@ -155,8 +156,9 @@ const SECTION_PATHS: Record<string, string[]> = {
     '/dashboard/settings/data-retention',
     '/dashboard/settings/audit-logs',
     '/dashboard/settings/security',
-    '/dashboard/settings/intelligence',
     '/dashboard/settings/assistant',
+    // Legacy paths redirect to assistant
+    '/dashboard/settings/intelligence',
     '/dashboard/settings/ai-providers',
   ],
 };
