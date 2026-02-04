@@ -4,7 +4,7 @@ import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 import { useDashboardReports, useFinancialReports, useOperationalReports } from '@/lib/hooks/useReports';
-import { PageHeader, EmptyState } from '@/components/ui';
+import { PageHeader, EmptyState, CompactPagination } from '@/components/ui';
 import { SkeletonReports } from '@/components/ui/Skeleton';
 import { ReportCard } from '@/components/reports/ReportCard';
 import { RevenueChart } from '@/components/reports/RevenueChart';
@@ -327,6 +327,8 @@ function useCashFlowForecast(orgId?: string, currentCashPosition?: number) {
   return { forecast, loading, projectedRevenue, projectedExpenses };
 }
 
+const ITEMS_PER_PAGE = 10;
+
 export default function ReportsPage() {
   const { profile } = useAuth();
   const orgId = profile?.orgId;
@@ -336,6 +338,10 @@ export default function ReportsPage() {
     getDateRangeFromPreset('this_month')
   );
   const [selectedPreset, setSelectedPreset] = useState<DatePresetValue | null>('this_month');
+
+  // Pagination state for tables
+  const [profitabilityPage, setProfitabilityPage] = useState(1);
+  const [teamPage, setTeamPage] = useState(1);
 
   // Handle date range preset selection
   const handlePresetSelect = (range: { start: Date; end: Date; label: string }) => {
@@ -881,137 +887,191 @@ export default function ReportsPage() {
       />
 
       {/* Profitability Table */}
-      {projectProfitability && projectProfitability.length > 0 && (
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <h3 className="text-sm font-semibold text-gray-900 mb-4">
-            Project Profitability
-          </h3>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Project
-                  </th>
-                  <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Budget
-                  </th>
-                  <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actual Spend
-                  </th>
-                  <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Variance
-                  </th>
-                  <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {projectProfitability.slice(0, 10).map((project, idx) => {
-                  const marginPercent = project.budget > 0
-                    ? (project.variance / project.budget) * 100
-                    : 0;
-                  return (
+      {projectProfitability && projectProfitability.length > 0 && (() => {
+        const totalProfitabilityPages = Math.ceil(projectProfitability.length / ITEMS_PER_PAGE);
+        const profitabilityStartIdx = (profitabilityPage - 1) * ITEMS_PER_PAGE;
+        const profitabilityEndIdx = profitabilityStartIdx + ITEMS_PER_PAGE;
+        const paginatedProfitability = projectProfitability.slice(profitabilityStartIdx, profitabilityEndIdx);
+        const showProfitabilityPagination = projectProfitability.length > ITEMS_PER_PAGE;
+
+        return (
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-gray-900">
+                Project Profitability
+              </h3>
+              {showProfitabilityPagination && (
+                <span className="text-xs text-gray-500">
+                  {profitabilityStartIdx + 1}-{Math.min(profitabilityEndIdx, projectProfitability.length)} of {projectProfitability.length}
+                </span>
+              )}
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead>
+                  <tr>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Project
+                    </th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Budget
+                    </th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actual Spend
+                    </th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Variance
+                    </th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {paginatedProfitability.map((project, idx) => {
+                    const marginPercent = project.budget > 0
+                      ? (project.variance / project.budget) * 100
+                      : 0;
+                    return (
+                      <tr key={idx} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                          {project.projectName}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600 text-right">
+                          {formatCurrency(project.budget)}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600 text-right">
+                          {formatCurrency(project.actualSpend)}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-right">
+                          <span
+                            className={
+                              project.variance >= 0
+                                ? 'text-green-600'
+                                : 'text-red-600'
+                            }
+                          >
+                            {formatCurrency(project.variance)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <span
+                            className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                              marginPercent >= 20
+                                ? 'bg-green-100 text-green-800'
+                                : marginPercent >= 0
+                                ? 'bg-amber-100 text-amber-800'
+                                : 'bg-red-100 text-red-800'
+                            }`}
+                          >
+                            {marginPercent >= 0 ? 'On Budget' : 'Over Budget'}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            {showProfitabilityPagination && (
+              <div className="mt-4 pt-3 border-t border-gray-100">
+                <CompactPagination
+                  currentPage={profitabilityPage}
+                  totalPages={totalProfitabilityPages}
+                  hasNextPage={profitabilityPage < totalProfitabilityPages}
+                  hasPreviousPage={profitabilityPage > 1}
+                  onNextPage={() => setProfitabilityPage(p => Math.min(p + 1, totalProfitabilityPages))}
+                  onPreviousPage={() => setProfitabilityPage(p => Math.max(p - 1, 1))}
+                />
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
+      {/* Team Performance Table */}
+      {teamPerformance && teamPerformance.length > 0 && (() => {
+        const totalTeamPages = Math.ceil(teamPerformance.length / ITEMS_PER_PAGE);
+        const teamStartIdx = (teamPage - 1) * ITEMS_PER_PAGE;
+        const teamEndIdx = teamStartIdx + ITEMS_PER_PAGE;
+        const paginatedTeam = teamPerformance.slice(teamStartIdx, teamEndIdx);
+        const showTeamPagination = teamPerformance.length > ITEMS_PER_PAGE;
+
+        return (
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-gray-900">
+                Team Performance
+              </h3>
+              {showTeamPagination && (
+                <span className="text-xs text-gray-500">
+                  {teamStartIdx + 1}-{Math.min(teamEndIdx, teamPerformance.length)} of {teamPerformance.length}
+                </span>
+              )}
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead>
+                  <tr>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Team Member
+                    </th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Hours Logged
+                    </th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Tasks Completed
+                    </th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Efficiency
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {paginatedTeam.map((member, idx) => (
                     <tr key={idx} className="hover:bg-gray-50">
                       <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                        {project.projectName}
+                        {member.name}
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-600 text-right">
-                        {formatCurrency(project.budget)}
+                        {member.hoursLogged} hrs
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-600 text-right">
-                        {formatCurrency(project.actualSpend)}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-right">
-                        <span
-                          className={
-                            project.variance >= 0
-                              ? 'text-green-600'
-                              : 'text-red-600'
-                          }
-                        >
-                          {formatCurrency(project.variance)}
-                        </span>
+                        {member.tasksCompleted}
                       </td>
                       <td className="px-4 py-3 text-right">
                         <span
                           className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                            marginPercent >= 20
+                            member.efficiency >= 80
                               ? 'bg-green-100 text-green-800'
-                              : marginPercent >= 0
+                              : member.efficiency >= 50
                               ? 'bg-amber-100 text-amber-800'
-                              : 'bg-red-100 text-red-800'
+                              : 'bg-gray-100 text-gray-800'
                           }`}
                         >
-                          {marginPercent >= 0 ? 'On Budget' : 'Over Budget'}
+                          {member.efficiency}%
                         </span>
                       </td>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {showTeamPagination && (
+              <div className="mt-4 pt-3 border-t border-gray-100">
+                <CompactPagination
+                  currentPage={teamPage}
+                  totalPages={totalTeamPages}
+                  hasNextPage={teamPage < totalTeamPages}
+                  hasPreviousPage={teamPage > 1}
+                  onNextPage={() => setTeamPage(p => Math.min(p + 1, totalTeamPages))}
+                  onPreviousPage={() => setTeamPage(p => Math.max(p - 1, 1))}
+                />
+              </div>
+            )}
           </div>
-        </div>
-      )}
-
-      {/* Team Performance Table */}
-      {teamPerformance && teamPerformance.length > 0 && (
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <h3 className="text-sm font-semibold text-gray-900 mb-4">
-            Team Performance
-          </h3>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Team Member
-                  </th>
-                  <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Hours Logged
-                  </th>
-                  <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Tasks Completed
-                  </th>
-                  <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Efficiency
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {teamPerformance.map((member, idx) => (
-                  <tr key={idx} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                      {member.name}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-600 text-right">
-                      {member.hoursLogged} hrs
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-600 text-right">
-                      {member.tasksCompleted}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                          member.efficiency >= 80
-                            ? 'bg-green-100 text-green-800'
-                            : member.efficiency >= 50
-                            ? 'bg-amber-100 text-amber-800'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}
-                      >
-                        {member.efficiency}%
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Empty state */}
       {!loading && !kpis && (

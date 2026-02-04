@@ -26,6 +26,7 @@ import {
   ChevronDownIcon,
   AdjustmentsHorizontalIcon,
 } from '@heroicons/react/24/outline';
+import { CompactPagination } from '@/components/ui';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { cn } from '@/lib/utils';
 import { FinancialMetricId } from '@/types';
@@ -354,6 +355,9 @@ export default function FinancialReportsPage() {
 
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [isCustomizePanelOpen, setIsCustomizePanelOpen] = useState(false);
+  const [profitabilityPage, setProfitabilityPage] = useState(1);
+
+  const ITEMS_PER_PAGE = 10;
 
   // Get ordered visible metrics for rendering
   const orderedMetrics = useMemo(() => getOrderedVisibleMetrics(), [getOrderedVisibleMetrics]);
@@ -1035,124 +1039,149 @@ export default function FinancialReportsPage() {
       </div>
 
       {/* Project Profitability Table */}
-      {shouldShowMetric('project-profitability') && (
-      <Card className="p-4">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h3 className="text-sm font-semibold text-gray-900 flex items-center">
-              Project Profitability{renderFavoriteIndicator('project-profitability')}
-            </h3>
-            <p className="text-xs text-gray-500 mt-0.5">Budget vs actual spend by project</p>
-          </div>
-          <div className="flex gap-4 text-xs">
-            <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-red-500" />
-              {overBudgetProjects.length} over budget
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-green-500" />
-              {underBudgetProjects.length} on/under budget
-            </span>
-          </div>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead>
-              <tr>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Project
-                </th>
-                <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Budget
-                </th>
-                <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Labor Cost
-                </th>
-                <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Total Spent
-                </th>
-                <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Variance
-                </th>
-                <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Variance %
-                </th>
-                <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {sortedProjects.slice(0, 15).map((project) => {
-                const percentUsed = project.budget > 0 ? (project.actualSpend / project.budget) * 100 : 0;
-                const isOverBudget = project.variance < 0;
-                // Cost Variance % = (Actual - Budget) / Budget * 100
-                const projectVariancePct = project.budget > 0
-                  ? ((project.actualSpend - project.budget) / project.budget) * 100
-                  : 0;
+      {shouldShowMetric('project-profitability') && (() => {
+        const totalPages = Math.ceil(sortedProjects.length / ITEMS_PER_PAGE);
+        const startIdx = (profitabilityPage - 1) * ITEMS_PER_PAGE;
+        const endIdx = startIdx + ITEMS_PER_PAGE;
+        const paginatedProjects = sortedProjects.slice(startIdx, endIdx);
+        const showPagination = sortedProjects.length > ITEMS_PER_PAGE;
 
-                return (
-                  <tr key={project.projectId} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                      {project.projectName}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-600 text-right">
-                      {formatCurrency(project.budget)}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-600 text-right">
-                      {formatCurrency(project.laborCost)}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-600 text-right">
-                      {formatCurrency(project.actualSpend)}
-                    </td>
-                    <td className={cn(
-                      'px-4 py-3 text-sm text-right font-medium',
-                      isOverBudget ? 'text-red-600' : 'text-green-600'
-                    )}>
-                      {isOverBudget ? '-' : '+'}{formatCurrency(Math.abs(project.variance))}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <span className={cn(
-                        'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium',
-                        projectVariancePct <= -10 ? 'bg-green-100 text-green-800' :
-                        projectVariancePct <= 0 ? 'bg-green-50 text-green-700' :
-                        projectVariancePct <= 10 ? 'bg-amber-50 text-amber-700' :
-                        'bg-red-100 text-red-800'
-                      )}>
-                        {projectVariancePct > 0 ? '+' : ''}{formatPercent(projectVariancePct)}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div
-                            className={cn(
-                              'h-full rounded-full',
-                              percentUsed > 100 ? 'bg-red-500' : percentUsed > 80 ? 'bg-amber-500' : 'bg-green-500'
-                            )}
-                            style={{ width: `${Math.min(percentUsed, 100)}%` }}
-                          />
-                        </div>
-                        <span className="text-xs text-gray-500 w-12 text-right">
-                          {percentUsed.toFixed(0)}%
-                        </span>
-                      </div>
-                    </td>
+        return (
+          <Card className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 flex items-center">
+                  Project Profitability{renderFavoriteIndicator('project-profitability')}
+                </h3>
+                <p className="text-xs text-gray-500 mt-0.5">Budget vs actual spend by project</p>
+              </div>
+              <div className="flex gap-4 text-xs">
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-red-500" />
+                  {overBudgetProjects.length} over budget
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-green-500" />
+                  {underBudgetProjects.length} on/under budget
+                </span>
+                {showPagination && (
+                  <span className="text-gray-400">
+                    {startIdx + 1}-{Math.min(endIdx, sortedProjects.length)} of {sortedProjects.length}
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead>
+                  <tr>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Project
+                    </th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Budget
+                    </th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Labor Cost
+                    </th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Total Spent
+                    </th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Variance
+                    </th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Variance %
+                    </th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
                   </tr>
-                );
-              })}
-              {projectProfitability.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
-                    No projects with budget data found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </Card>
-      )}
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {paginatedProjects.map((project) => {
+                    const percentUsed = project.budget > 0 ? (project.actualSpend / project.budget) * 100 : 0;
+                    const isOverBudget = project.variance < 0;
+                    // Cost Variance % = (Actual - Budget) / Budget * 100
+                    const projectVariancePct = project.budget > 0
+                      ? ((project.actualSpend - project.budget) / project.budget) * 100
+                      : 0;
+
+                    return (
+                      <tr key={project.projectId} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                          {project.projectName}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600 text-right">
+                          {formatCurrency(project.budget)}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600 text-right">
+                          {formatCurrency(project.laborCost)}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600 text-right">
+                          {formatCurrency(project.actualSpend)}
+                        </td>
+                        <td className={cn(
+                          'px-4 py-3 text-sm text-right font-medium',
+                          isOverBudget ? 'text-red-600' : 'text-green-600'
+                        )}>
+                          {isOverBudget ? '-' : '+'}{formatCurrency(Math.abs(project.variance))}
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <span className={cn(
+                            'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium',
+                            projectVariancePct <= -10 ? 'bg-green-100 text-green-800' :
+                            projectVariancePct <= 0 ? 'bg-green-50 text-green-700' :
+                            projectVariancePct <= 10 ? 'bg-amber-50 text-amber-700' :
+                            'bg-red-100 text-red-800'
+                          )}>
+                            {projectVariancePct > 0 ? '+' : ''}{formatPercent(projectVariancePct)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                              <div
+                                className={cn(
+                                  'h-full rounded-full',
+                                  percentUsed > 100 ? 'bg-red-500' : percentUsed > 80 ? 'bg-amber-500' : 'bg-green-500'
+                                )}
+                                style={{ width: `${Math.min(percentUsed, 100)}%` }}
+                              />
+                            </div>
+                            <span className="text-xs text-gray-500 w-12 text-right">
+                              {percentUsed.toFixed(0)}%
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {projectProfitability.length === 0 && (
+                    <tr>
+                      <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
+                        No projects with budget data found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            {showPagination && (
+              <div className="mt-4 pt-3 border-t border-gray-100">
+                <CompactPagination
+                  currentPage={profitabilityPage}
+                  totalPages={totalPages}
+                  hasNextPage={profitabilityPage < totalPages}
+                  hasPreviousPage={profitabilityPage > 1}
+                  onNextPage={() => setProfitabilityPage(p => Math.min(p + 1, totalPages))}
+                  onPreviousPage={() => setProfitabilityPage(p => Math.max(p - 1, 1))}
+                />
+              </div>
+            )}
+          </Card>
+        );
+      })()}
 
       {/* Invoice Aging Detail */}
       {shouldShowMetric('invoice-aging-detail') && (

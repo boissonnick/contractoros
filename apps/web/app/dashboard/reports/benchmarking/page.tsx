@@ -16,6 +16,7 @@ import {
   XCircleIcon,
   MinusIcon,
 } from '@heroicons/react/24/outline';
+import { CompactPagination } from '@/components/ui';
 import { cn } from '@/lib/utils';
 
 // ============================================
@@ -266,6 +267,10 @@ export default function BenchmarkingPage() {
   } = useFinancialReports(profile?.orgId);
 
   const [sortBy, setSortBy] = useState<'margin' | 'revenue' | 'variance'>('margin');
+  const [budgetPage, setBudgetPage] = useState(1);
+  const [comparisonPage, setComparisonPage] = useState(1);
+
+  const ITEMS_PER_PAGE = 10;
 
   // Calculate benchmarking data
   const benchmarkData = useMemo(() => {
@@ -532,138 +537,195 @@ export default function BenchmarkingPage() {
       )}
 
       {/* Budget Accuracy Trending Table */}
-      <Card className="p-4">
-        <div className="mb-4">
-          <h3 className="text-sm font-semibold text-gray-900">Budget Accuracy by Project</h3>
-          <p className="text-xs text-gray-500 mt-0.5">
-            Variance shows how much under/over budget each project is running
-          </p>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead>
-              <tr>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Project
-                </th>
-                <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Budget
-                </th>
-                <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actual Spend
-                </th>
-                <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Variance
-                </th>
-                <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  % Used
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {projectProfitability
-                .filter(p => p.budget > 0)
-                .sort((a, b) => a.variance - b.variance)
-                .slice(0, 15)
-                .map((project) => (
-                  <BudgetAccuracyRow
-                    key={project.projectId}
-                    project={project}
-                    maxVariance={maxVariance}
-                  />
-                ))}
-              {projectProfitability.filter(p => p.budget > 0).length === 0 && (
-                <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
-                    No projects with budget data found.
-                  </td>
-                </tr>
+      {(() => {
+        const budgetProjects = projectProfitability.filter(p => p.budget > 0).sort((a, b) => a.variance - b.variance);
+        const totalBudgetPages = Math.ceil(budgetProjects.length / ITEMS_PER_PAGE);
+        const budgetStartIdx = (budgetPage - 1) * ITEMS_PER_PAGE;
+        const budgetEndIdx = budgetStartIdx + ITEMS_PER_PAGE;
+        const paginatedBudgetProjects = budgetProjects.slice(budgetStartIdx, budgetEndIdx);
+        const showBudgetPagination = budgetProjects.length > ITEMS_PER_PAGE;
+
+        return (
+          <Card className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900">Budget Accuracy by Project</h3>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Variance shows how much under/over budget each project is running
+                </p>
+              </div>
+              {showBudgetPagination && (
+                <span className="text-xs text-gray-500">
+                  {budgetStartIdx + 1}-{Math.min(budgetEndIdx, budgetProjects.length)} of {budgetProjects.length}
+                </span>
               )}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead>
+                  <tr>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Project
+                    </th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Budget
+                    </th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actual Spend
+                    </th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Variance
+                    </th>
+                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      % Used
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {paginatedBudgetProjects.map((project) => (
+                    <BudgetAccuracyRow
+                      key={project.projectId}
+                      project={project}
+                      maxVariance={maxVariance}
+                    />
+                  ))}
+                  {budgetProjects.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
+                        No projects with budget data found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            {showBudgetPagination && (
+              <div className="mt-4 pt-3 border-t border-gray-100">
+                <CompactPagination
+                  currentPage={budgetPage}
+                  totalPages={totalBudgetPages}
+                  hasNextPage={budgetPage < totalBudgetPages}
+                  hasPreviousPage={budgetPage > 1}
+                  onNextPage={() => setBudgetPage(p => Math.min(p + 1, totalBudgetPages))}
+                  onPreviousPage={() => setBudgetPage(p => Math.max(p - 1, 1))}
+                />
+              </div>
+            )}
+          </Card>
+        );
+      })()}
 
       {/* Project Comparison Table */}
-      <Card className="p-4">
-        <div className="mb-4">
-          <h3 className="text-sm font-semibold text-gray-900">Full Project Comparison</h3>
-          <p className="text-xs text-gray-500 mt-0.5">
-            Side-by-side metrics for all projects with financial data
-          </p>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead>
-              <tr>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Project
-                </th>
-                <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Revenue
-                </th>
-                <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Costs
-                </th>
-                <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Profit
-                </th>
-                <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Margin
-                </th>
-                <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Rank
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {benchmarkData.projects
-                .sort((a, b) => b.margin - a.margin)
-                .map((project, index) => (
-                  <tr key={project.projectId} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm font-medium text-gray-900 max-w-[200px] truncate">
-                      {project.name}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-600 text-right">
-                      {formatCurrency(project.revenue)}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-600 text-right">
-                      {formatCurrency(project.costs)}
-                    </td>
-                    <td className={cn(
-                      'px-4 py-3 text-sm font-medium text-right',
-                      project.profit >= 0 ? 'text-green-600' : 'text-red-600'
-                    )}>
-                      {formatCurrency(project.profit)}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <span className={cn(
-                        'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium',
-                        project.margin >= 20
-                          ? 'bg-green-100 text-green-800'
-                          : project.margin >= 10
-                          ? 'bg-amber-100 text-amber-800'
-                          : 'bg-red-100 text-red-800'
-                      )}>
-                        {formatPercentNoSign(project.margin)}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <span className={cn(
-                        'inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold',
-                        index < 3 ? 'bg-green-100 text-green-800' :
-                        index >= benchmarkData.projects.length - 3 ? 'bg-red-100 text-red-800' :
-                        'bg-gray-100 text-gray-600'
-                      )}>
-                        {index + 1}
-                      </span>
-                    </td>
+      {(() => {
+        const sortedComparisonProjects = [...benchmarkData.projects].sort((a, b) => b.margin - a.margin);
+        const totalComparisonPages = Math.ceil(sortedComparisonProjects.length / ITEMS_PER_PAGE);
+        const comparisonStartIdx = (comparisonPage - 1) * ITEMS_PER_PAGE;
+        const comparisonEndIdx = comparisonStartIdx + ITEMS_PER_PAGE;
+        const paginatedComparisonProjects = sortedComparisonProjects.slice(comparisonStartIdx, comparisonEndIdx);
+        const showComparisonPagination = sortedComparisonProjects.length > ITEMS_PER_PAGE;
+
+        return (
+          <Card className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900">Full Project Comparison</h3>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Side-by-side metrics for all projects with financial data
+                </p>
+              </div>
+              {showComparisonPagination && (
+                <span className="text-xs text-gray-500">
+                  {comparisonStartIdx + 1}-{Math.min(comparisonEndIdx, sortedComparisonProjects.length)} of {sortedComparisonProjects.length}
+                </span>
+              )}
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead>
+                  <tr>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Project
+                    </th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Revenue
+                    </th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Costs
+                    </th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Profit
+                    </th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Margin
+                    </th>
+                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Rank
+                    </th>
                   </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {paginatedComparisonProjects.map((project, idx) => {
+                    const globalIndex = comparisonStartIdx + idx;
+                    return (
+                      <tr key={project.projectId} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900 max-w-[200px] truncate">
+                          {project.name}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600 text-right">
+                          {formatCurrency(project.revenue)}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600 text-right">
+                          {formatCurrency(project.costs)}
+                        </td>
+                        <td className={cn(
+                          'px-4 py-3 text-sm font-medium text-right',
+                          project.profit >= 0 ? 'text-green-600' : 'text-red-600'
+                        )}>
+                          {formatCurrency(project.profit)}
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <span className={cn(
+                            'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium',
+                            project.margin >= 20
+                              ? 'bg-green-100 text-green-800'
+                              : project.margin >= 10
+                              ? 'bg-amber-100 text-amber-800'
+                              : 'bg-red-100 text-red-800'
+                          )}>
+                            {formatPercentNoSign(project.margin)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <span className={cn(
+                            'inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold',
+                            globalIndex < 3 ? 'bg-green-100 text-green-800' :
+                            globalIndex >= sortedComparisonProjects.length - 3 ? 'bg-red-100 text-red-800' :
+                            'bg-gray-100 text-gray-600'
+                          )}>
+                            {globalIndex + 1}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            {showComparisonPagination && (
+              <div className="mt-4 pt-3 border-t border-gray-100">
+                <CompactPagination
+                  currentPage={comparisonPage}
+                  totalPages={totalComparisonPages}
+                  hasNextPage={comparisonPage < totalComparisonPages}
+                  hasPreviousPage={comparisonPage > 1}
+                  onNextPage={() => setComparisonPage(p => Math.min(p + 1, totalComparisonPages))}
+                  onPreviousPage={() => setComparisonPage(p => Math.max(p - 1, 1))}
+                />
+              </div>
+            )}
+          </Card>
+        );
+      })()}
     </div>
   );
 }

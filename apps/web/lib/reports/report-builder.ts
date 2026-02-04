@@ -202,28 +202,57 @@ export const DATA_SOURCES: Record<DataSourceType, DataSourceConfig> = {
 // Query Builder
 // ============================================================================
 
-export function buildQueryConstraints(filters: ReportFilter[]): QueryConstraint[] {
+/**
+ * Converts a date string (YYYY-MM-DD) to a Firestore Timestamp.
+ * Returns the original value if it's not a valid date string.
+ */
+function convertDateValue(value: unknown): unknown {
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const date = new Date(value + 'T00:00:00');
+    if (!isNaN(date.getTime())) {
+      return Timestamp.fromDate(date);
+    }
+  }
+  return value;
+}
+
+/**
+ * Gets the field type from the data source fields.
+ */
+function getFieldType(fieldSource: string, fields: DataSourceField[]): FieldType | undefined {
+  return fields.find((f) => f.source === fieldSource)?.type;
+}
+
+export function buildQueryConstraints(
+  filters: ReportFilter[],
+  dataSourceFields: DataSourceField[] = []
+): QueryConstraint[] {
   const constraints: QueryConstraint[] = [];
 
   for (const filter of filters) {
     const { field, operator, value, value2 } = filter;
+    const fieldType = getFieldType(field, dataSourceFields);
+
+    // Convert date string values to Timestamps for date fields
+    const convertedValue = fieldType === 'date' ? convertDateValue(value) : value;
+    const convertedValue2 = fieldType === 'date' ? convertDateValue(value2) : value2;
 
     switch (operator) {
       case 'equals':
-        constraints.push(where(field, '==', value));
+        constraints.push(where(field, '==', convertedValue));
         break;
       case 'notEquals':
-        constraints.push(where(field, '!=', value));
+        constraints.push(where(field, '!=', convertedValue));
         break;
       case 'greaterThan':
-        constraints.push(where(field, '>', value));
+        constraints.push(where(field, '>', convertedValue));
         break;
       case 'lessThan':
-        constraints.push(where(field, '<', value));
+        constraints.push(where(field, '<', convertedValue));
         break;
       case 'between':
-        if (value !== undefined) constraints.push(where(field, '>=', value));
-        if (value2 !== undefined) constraints.push(where(field, '<=', value2));
+        if (convertedValue !== undefined) constraints.push(where(field, '>=', convertedValue));
+        if (convertedValue2 !== undefined) constraints.push(where(field, '<=', convertedValue2));
         break;
       case 'in':
         if (Array.isArray(value) && value.length > 0) {
@@ -259,7 +288,7 @@ export async function executeReportQuery(
   }
 
   const collectionPath = dataSource.collectionPath(orgId);
-  const constraints = buildQueryConstraints(config.filters);
+  const constraints = buildQueryConstraints(config.filters, dataSource.fields);
 
   // Add sorting if specified
   if (config.sortBy) {
@@ -285,6 +314,22 @@ export async function executeReportQuery(
       result[field.id] = value;
     }
 
+    // If groupBy is specified but not in the selected fields, include it
+    if (config.groupBy) {
+      const groupByInFields = config.fields.some((f) => f.source === config.groupBy);
+      if (!groupByInFields) {
+        // Find the field definition from the data source
+        const groupByField = dataSource.fields.find((f) => f.source === config.groupBy);
+        if (groupByField) {
+          let value = data[config.groupBy];
+          if (value instanceof Timestamp) {
+            value = value.toDate();
+          }
+          result[groupByField.id] = value;
+        }
+      }
+    }
+
     return result;
   });
 
@@ -306,11 +351,20 @@ function aggregateResults(
 ): Record<string, unknown>[] {
   if (!config.groupBy) return results;
 
+  // Find the field that matches groupBy source - groupBy stores the field.source value
+  // First check in selected fields, then check in data source fields
+  const groupByFieldFromSelected = config.fields.find((f) => f.source === config.groupBy);
+  const dataSourceConfig = DATA_SOURCES[config.dataSource];
+  const groupByFieldFromSource = dataSourceConfig?.fields.find((f) => f.source === config.groupBy);
+
+  // Use the field id for accessing results
+  const groupByKey = groupByFieldFromSelected?.id || groupByFieldFromSource?.id || config.groupBy;
+
   const groups = new Map<string, Record<string, unknown>[]>();
 
   // Group results
   for (const result of results) {
-    const groupKey = String(result[config.groupBy] || 'Unknown');
+    const groupKey = String(result[groupByKey] || 'Unknown');
     const group = groups.get(groupKey) || [];
     group.push(result);
     groups.set(groupKey, group);
@@ -321,7 +375,7 @@ function aggregateResults(
 
   groups.forEach((groupResults, groupKey) => {
     const row: Record<string, unknown> = {
-      [config.groupBy as string]: groupKey,
+      [groupByKey]: groupKey,
       _count: groupResults.length,
     };
 
