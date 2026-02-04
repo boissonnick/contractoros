@@ -21,18 +21,32 @@ New sessions should read this document to understand all pending work.
 
 ---
 
-## 🎯 CURRENT SPRINT: Sprint 40
+## 🎯 CURRENT SPRINT: Sprint 48
 
-**Focus:** Demo data completeness, navigation restructure, schedule enhancements
+**Focus:** Next.js 14→16 + React 18→19 upgrade
 
-**See:** `.claude-coordination/sprint-40-overview.md` for full sprint plan
+**See:** `docs/REPRIORITIZED_SPRINT_PLAN.md` for full sprint plan
 
-| CLI | Focus | Status |
-|-----|-------|--------|
-| CLI 1 | Demo data completeness (tasks, categories, clients) | Ready |
-| CLI 2 | UI polish (date pickers, help menu, online status) | Ready |
-| CLI 3 | Navigation & Subcontractors module | Ready |
-| CLI 4 | Schedule & Weather integration | Ready |
+---
+
+## ✅ Sprint 47 Complete (2026-02-04)
+
+**Focus:** Node.js 22 + Firebase SDK Updates
+
+| Task | Status |
+|------|--------|
+| Node.js 20 → 22 (Docker, Cloud Functions) | ✅ |
+| Firebase Admin SDK 12 → 13.6.0 | ✅ |
+| Firebase Functions SDK 5 → 7.0.5 | ✅ |
+| .nvmrc for version consistency | ✅ |
+| Fixed deprecated functions.config() | ✅ |
+| Cloud Functions deployed | ✅ |
+
+---
+
+## ✅ Sprint 40-46 Archived
+
+See `.claude-coordination/archive/` for historical sprint files.
 
 ---
 
