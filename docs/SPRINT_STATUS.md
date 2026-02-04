@@ -1,19 +1,69 @@
 # ContractorOS Sprint Status
 
 > **Purpose:** Track current progress and enable seamless session handoffs.
-> **Last Updated:** 2026-02-02 23:30 by CLI 1 (Controller)
+> **Last Updated:** 2026-02-04 by Research Integration Session
 > **Current Phase:** Phase 10 - Platform Hardening & Bug Fixes
 
 ---
 
-## ⚠️ PRIORITY: February 2026 Platform Audit
+## 🎯 Current Sprint: Sprint 40
 
-**101 total issues identified** across 2 audit phases:
+**Focus:** Demo data completeness, navigation restructure, schedule enhancements
+**See:** `.claude-coordination/sprint-40-overview.md` for full sprint plan
+
+| CLI | Focus | Status |
+|-----|-------|--------|
+| CLI 1 | Demo data completeness (tasks, categories, clients) | 🔄 In Progress |
+| CLI 2 | UI polish (date pickers, help menu, online status) | 🔄 In Progress |
+| CLI 3 | Navigation & Subcontractors module | 🔄 In Progress |
+| CLI 4 | Schedule & Weather integration | 🔄 In Progress |
+
+---
+
+## ✅ Completed Sprints (37-39)
+
+| Sprint | Focus | Status |
+|--------|-------|--------|
+| 37A | Critical Bugs | ✅ COMPLETE |
+| 37B | UI/Layout + Animations | ✅ COMPLETE |
+| 37C | Security Fixes | ✅ COMPLETE |
+| 38 | Demo Data (Core) | ✅ COMPLETE |
+| 39 | Demo Data (Extended) + Notifications | ✅ COMPLETE |
+
+---
+
+## 📚 Research Integration Complete (2026-02-04)
+
+9 overnight research tasks completed and integrated:
+- **Research Summary:** `docs/research/RESEARCH_SUMMARY.md`
+- **Sprint Plan:** `docs/SPRINT_PLAN_RESEARCH_INTEGRATION.md`
+- **Individual Reports:** `docs/research/RS-01-*.md` through `RS-09-*.md`
+
+### Research → Sprint Mapping
+
+| Research | Topic | Sprint |
+|----------|-------|--------|
+| RS-01 | Navigation Architecture | Sprint 40 (current) |
+| RS-02 | Payroll Integration | Sprint 59-60 (existing roadmap) |
+| RS-03 | BI Analytics | Sprint 69 (new) |
+| RS-04 | File Storage | Sprint 52 (existing roadmap) |
+| RS-05 | Subcontractor Invoices | Sprint 70 (new) |
+| RS-06 | Lead Generation | Sprint 71-72 (new) |
+| RS-07 | Expense OCR + Banking | Sprint 61-63, 73 |
+| RS-08 | Pricing Catalogs | Sprint 74 (new) |
+| RS-09 | Review Management | Sprint 75-76 (new) |
+
+---
+
+## ⚠️ Platform Audit Status
+
+**136 total issues identified** across 3 audit phases:
 - **Phase 1:** 60 issues (`docs/PLATFORM_AUDIT_ISSUES.md`)
 - **Phase 2:** 41 issues (`docs/PLATFORM_AUDIT_ISSUES_PHASE2.md`)
-- **Combined Effort:** 512-730 hours (~13-18 weeks for 2-3 developers)
+- **Phase 3:** 35 issues (`docs/PRODUCTION_TESTING_SPRINT_PLAN.md`)
+- **Combined Effort:** 600-850 hours (~15-21 weeks for 2-3 developers)
 
-### Critical Blockers - Sprint 37A Status
+### Critical Blockers - ALL RESOLVED ✅
 | ID | Issue | Status |
 |----|-------|--------|
 | FEB-011 | Category filter breaks project list | `[x]` ✅ |
@@ -22,8 +72,8 @@
 | FEB-057 | Payroll showing "NaNh total" | `[x]` ✅ |
 | #69 | Operational Reports Load Error | `[x]` ✅ |
 | #76 | Payroll Reports Load Error | `[x]` ✅ |
-
-**All Critical Bugs Fixed:** 6/6 complete. Ready for Sprint 37B (UI/Layout) or coordinated 4-CLI development.
+| PROD-001 | Create Client button error | `[x]` ✅ |
+| PROD-002 | Finance Reports page error | `[x]` ✅ |
 
 ---
 
@@ -31,8 +81,8 @@
 
 | Metric | Value |
 |--------|-------|
-| **Current Sprint** | Sprint 37B - UI/Layout + Animations 🎨 |
-| **Sprint Status** | 🏃 IN PROGRESS (Started 2026-02-02) |
+| **Current Sprint** | Sprint 40 - Demo Data + Navigation + Schedule 🚀 |
+| **Sprint Status** | 🏃 IN PROGRESS |
 | **Platform Completion** | ~90% (adjusted per audit) |
 | **Audit Issues** | 101 total (0 critical ✅, 47 high, 40 medium, 8 low) |
 | **TypeScript Status** | ✅ Passing |
@@ -127,9 +177,10 @@
 | **45** | Reporting Enhancements | 2 weeks | 28-38h |
 | **46** | Notification System | 1-2 weeks | 15-22h |
 
-#### Future Sprints (Strategic)
+#### Feature Sprints (Value-Add)
 | Sprint | Focus | Duration | Est. Hours |
 |--------|-------|----------|------------|
+| **F0** | **AI Receipt OCR** ⭐ NEW | 2-3 days | 15-20h |
 | **F1** | Messaging Research (#61) | 2-3 weeks | 40-60h |
 | **F2** | AI Model Integration (#90-93) | 2 weeks | 22-30h |
 | **F3** | Directory Integration (#94-97) | 3-4 weeks | 40-54h |
@@ -172,6 +223,36 @@
 | FEB-029 | Client Preferences layout | 3-4h |
 | FEB-044 | Empty state pattern consistency | 2-3h |
 | FEB-045 | Daily Logs animated icon | 1h |
+
+### Sprint F0: AI Receipt OCR ⭐ NEW
+
+**Duration:** 2-3 days
+**Effort:** 15-20 hours
+**Goal:** Auto-extract expense data from receipt photos using AI vision
+**Document:** `docs/SPRINT_AI_RECEIPT_OCR.md`
+
+| Task | Description | Effort | Status |
+|------|-------------|--------|--------|
+| OCR-01 | Create `processReceiptOCR` Cloud Function | 1h | `[ ]` |
+| OCR-02 | Add Anthropic SDK, configure API key | 0.5h | `[ ]` |
+| OCR-03 | Build extraction prompt with category taxonomy | 1.5h | `[ ]` |
+| OCR-04 | Implement Haiku processing with JSON parsing | 2h | `[ ]` |
+| OCR-05 | Add Sonnet fallback for low-confidence | 1h | `[ ]` |
+| OCR-06 | Rate limiting and error handling | 1h | `[ ]` |
+| OCR-07 | Deploy and test Cloud Function | 1h | `[ ]` |
+| OCR-08 | Add receipt upload to ExpenseFormModal | 1.5h | `[ ]` |
+| OCR-09 | Create ReceiptCaptureButton component | 1.5h | `[ ]` |
+| OCR-10 | Image preview with crop (optional) | 1h | `[ ]` |
+| OCR-11 | Wire up Cloud Function call | 1h | `[ ]` |
+| OCR-12 | Auto-fill form from OCR response | 1h | `[ ]` |
+| OCR-13 | Confidence indicator UI | 1h | `[ ]` |
+| OCR-14 | Mobile camera optimization | 1h | `[ ]` |
+| OCR-15 | Test various receipt types | 1.5h | `[ ]` |
+| OCR-16 | Handle edge cases | 1h | `[ ]` |
+
+**Cost Advantage:** ~$1/month for 1,000 receipts vs $10-100 with dedicated OCR services (10-100x cheaper)
+
+---
 
 ### Sprint 38: Demo Data (Core)
 
