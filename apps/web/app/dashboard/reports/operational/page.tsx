@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useAuth } from '@/lib/auth';
 import { useOperationalReports } from '@/lib/hooks/useReports';
 import { Card } from '@/components/ui';
@@ -16,10 +16,12 @@ import {
   DocumentTextIcon,
   CalendarDaysIcon,
   ChartBarIcon,
+  ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
 import AIInsightsPanel from '@/components/reports/AIInsightsPanel';
 import { generateInsightSummary, explainInsight } from '@/lib/ai/insights-engine';
+import { exportToPDF, exportToExcel, exportToCSV } from '@/lib/exports';
 import type { AIInsight } from '@/types';
 
 function formatNumber(value: number): string {
@@ -98,6 +100,210 @@ export default function OperationalReportsPage() {
     tasksByStatus,
     hoursbyProject,
   } = useOperationalReports(profile?.orgId);
+
+  const [exportMenuOpen, setExportMenuOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+
+  const reportDate = new Date().toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
+  const handleExportPDF = async () => {
+    if (!metrics) return;
+    setExporting(true);
+    setExportMenuOpen(false);
+    try {
+      await exportToPDF({
+        title: 'Operational Report',
+        subtitle: reportDate,
+        metadata: {
+          'Report Type': 'Operational',
+          'Generated': reportDate,
+        },
+        sections: [
+          {
+            heading: 'Key Performance Indicators',
+            type: 'table',
+            content: '',
+            tableData: {
+              headers: ['Metric', 'Value'],
+              rows: [
+                ['Avg Project Duration', `${Math.round(metrics.averageProjectDuration)} days`],
+                ['On-Time Completion Rate', `${metrics.onTimeCompletionRate.toFixed(1)}%`],
+                ['Active Subcontractors', String(metrics.activeSubcontractors)],
+                ['Pending Change Orders', String(metrics.pendingChangeOrders)],
+                ['Avg Tasks Per Project', String(Math.round(metrics.averageTasksPerProject))],
+                ['Resource Utilization', metrics.resourceUtilization > 0 ? `${metrics.resourceUtilization.toFixed(1)}%` : 'N/A'],
+              ],
+            },
+          },
+          ...(projectTimelines.length > 0 ? [{
+            heading: 'Project Timelines',
+            type: 'table' as const,
+            content: '',
+            tableData: {
+              headers: ['Project', 'Planned (days)', 'Actual (days)', 'Status'],
+              rows: projectTimelines.map(p => [
+                p.name,
+                p.planned > 0 ? String(p.planned) : 'TBD',
+                String(p.actual),
+                p.actual > p.planned && p.planned > 0 ? 'Overdue' : 'On Track',
+              ]),
+            },
+          }] : []),
+          ...(tasksByStatus.length > 0 ? [{
+            heading: 'Task Status Breakdown',
+            type: 'table' as const,
+            content: '',
+            tableData: {
+              headers: ['Status', 'Count', 'Percentage'],
+              rows: tasksByStatus.map(s => {
+                const total = tasksByStatus.reduce((sum, t) => sum + t.value, 0);
+                return [
+                  s.name,
+                  String(s.value),
+                  total > 0 ? `${((s.value / total) * 100).toFixed(0)}%` : '0%',
+                ];
+              }),
+            },
+          }] : []),
+          ...(hoursbyProject.length > 0 ? [{
+            heading: 'Hours by Project',
+            type: 'table' as const,
+            content: '',
+            tableData: {
+              headers: ['Project', 'Hours Logged'],
+              rows: hoursbyProject.map(p => [p.name, String(p.hours)]),
+            },
+          }] : []),
+        ],
+        filename: `operational-report-${new Date().toISOString().split('T')[0]}`,
+      });
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleExportExcel = async () => {
+    if (!metrics) return;
+    setExporting(true);
+    setExportMenuOpen(false);
+    try {
+      const sheets: Array<{
+        name: string;
+        columns: Array<{ header: string; key: string; width?: number }>;
+        data: Record<string, any>[];
+      }> = [
+        {
+          name: 'KPIs',
+          columns: [
+            { header: 'Metric', key: 'metric', width: 30 },
+            { header: 'Value', key: 'value', width: 20 },
+          ],
+          data: [
+            { metric: 'Avg Project Duration', value: `${Math.round(metrics.averageProjectDuration)} days` },
+            { metric: 'On-Time Completion Rate', value: `${metrics.onTimeCompletionRate.toFixed(1)}%` },
+            { metric: 'Active Subcontractors', value: metrics.activeSubcontractors },
+            { metric: 'Pending Change Orders', value: metrics.pendingChangeOrders },
+            { metric: 'Avg Tasks Per Project', value: Math.round(metrics.averageTasksPerProject) },
+            { metric: 'Resource Utilization', value: metrics.resourceUtilization > 0 ? `${metrics.resourceUtilization.toFixed(1)}%` : 'N/A' },
+          ],
+        },
+      ];
+
+      if (projectTimelines.length > 0) {
+        sheets.push({
+          name: 'Project Timelines',
+          columns: [
+            { header: 'Project', key: 'name', width: 30 },
+            { header: 'Planned (days)', key: 'planned', width: 15 },
+            { header: 'Actual (days)', key: 'actual', width: 15 },
+            { header: 'Status', key: 'status', width: 15 },
+          ],
+          data: projectTimelines.map(p => ({
+            name: p.name,
+            planned: p.planned > 0 ? p.planned : 'TBD',
+            actual: p.actual,
+            status: p.actual > p.planned && p.planned > 0 ? 'Overdue' : 'On Track',
+          })),
+        });
+      }
+
+      if (tasksByStatus.length > 0) {
+        const total = tasksByStatus.reduce((sum, t) => sum + t.value, 0);
+        sheets.push({
+          name: 'Task Status',
+          columns: [
+            { header: 'Status', key: 'status', width: 20 },
+            { header: 'Count', key: 'count', width: 10 },
+            { header: 'Percentage', key: 'percentage', width: 15 },
+          ],
+          data: tasksByStatus.map(s => ({
+            status: s.name,
+            count: s.value,
+            percentage: total > 0 ? `${((s.value / total) * 100).toFixed(0)}%` : '0%',
+          })),
+        });
+      }
+
+      if (hoursbyProject.length > 0) {
+        sheets.push({
+          name: 'Hours by Project',
+          columns: [
+            { header: 'Project', key: 'name', width: 30 },
+            { header: 'Hours Logged', key: 'hours', width: 15 },
+          ],
+          data: hoursbyProject.map(p => ({
+            name: p.name,
+            hours: p.hours,
+          })),
+        });
+      }
+
+      await exportToExcel({
+        filename: `operational-report-${new Date().toISOString().split('T')[0]}`,
+        sheets,
+      });
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleExportCSV = () => {
+    if (!metrics) return;
+    setExportMenuOpen(false);
+
+    // Export KPIs and summary data as CSV
+    const headers = ['Category', 'Metric', 'Value'];
+    const rows: (string | number)[][] = [
+      ['KPI', 'Avg Project Duration', `${Math.round(metrics.averageProjectDuration)} days`],
+      ['KPI', 'On-Time Completion Rate', `${metrics.onTimeCompletionRate.toFixed(1)}%`],
+      ['KPI', 'Active Subcontractors', metrics.activeSubcontractors],
+      ['KPI', 'Pending Change Orders', metrics.pendingChangeOrders],
+      ['KPI', 'Avg Tasks Per Project', Math.round(metrics.averageTasksPerProject)],
+      ['KPI', 'Resource Utilization', metrics.resourceUtilization > 0 ? `${metrics.resourceUtilization.toFixed(1)}%` : 'N/A'],
+    ];
+
+    projectTimelines.forEach(p => {
+      rows.push(['Project Timeline', p.name, `${p.actual}/${p.planned > 0 ? p.planned : '?'} days`]);
+    });
+
+    tasksByStatus.forEach(s => {
+      rows.push(['Task Status', s.name, s.value]);
+    });
+
+    hoursbyProject.forEach(p => {
+      rows.push(['Hours by Project', p.name, `${p.hours} hours`]);
+    });
+
+    exportToCSV({
+      filename: `operational-report-${new Date().toISOString().split('T')[0]}`,
+      headers,
+      rows,
+    });
+  };
 
   if (loading) {
     return <LoadingState />;
@@ -234,6 +440,60 @@ export default function OperationalReportsPage() {
 
   return (
     <div className="space-y-6">
+      {/* Page Header with Export */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Operational Report</h1>
+          <p className="text-sm text-gray-500 mt-1">{reportDate}</p>
+        </div>
+        <div className="relative">
+          <button
+            onClick={() => setExportMenuOpen(!exportMenuOpen)}
+            disabled={exporting}
+            className={cn(
+              'inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border transition-colors',
+              exporting
+                ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400'
+            )}
+          >
+            <ArrowDownTrayIcon className="h-4 w-4" />
+            {exporting ? 'Exporting...' : 'Export'}
+          </button>
+          {exportMenuOpen && (
+            <>
+              <div
+                className="fixed inset-0 z-10"
+                onClick={() => setExportMenuOpen(false)}
+              />
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
+                <button
+                  onClick={handleExportPDF}
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                >
+                  <DocumentTextIcon className="h-4 w-4 text-red-500" />
+                  Export as PDF
+                </button>
+                <button
+                  onClick={handleExportExcel}
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                >
+                  <DocumentTextIcon className="h-4 w-4 text-green-600" />
+                  Export as Excel
+                </button>
+                <button
+                  onClick={handleExportCSV}
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                >
+                  <DocumentTextIcon className="h-4 w-4 text-blue-500" />
+                  Export as CSV
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
       {/* Operational KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard

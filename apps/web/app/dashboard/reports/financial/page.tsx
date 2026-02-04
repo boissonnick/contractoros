@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import { useFinancialReports, RevenueByProject } from '@/lib/hooks/useReports';
 import { useReportPreferences } from '@/lib/hooks/useReportPreferences';
 import { Card } from '@/components/ui';
+import { toast } from '@/components/ui/Toast';
+import { exportToPDF, exportToExcel, exportToCSV } from '@/lib/exports';
 import {
   BarChartCard,
   PieChartCard,
@@ -25,6 +27,9 @@ import {
   DocumentTextIcon,
   ChevronDownIcon,
   AdjustmentsHorizontalIcon,
+  ArrowDownTrayIcon,
+  DocumentArrowDownIcon,
+  TableCellsIcon,
 } from '@heroicons/react/24/outline';
 import { CompactPagination } from '@/components/ui';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
@@ -356,8 +361,22 @@ export default function FinancialReportsPage() {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [isCustomizePanelOpen, setIsCustomizePanelOpen] = useState(false);
   const [profitabilityPage, setProfitabilityPage] = useState(1);
+  const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
 
   const ITEMS_PER_PAGE = 10;
+
+  // Close export menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(event.target as Node)) {
+        setIsExportMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Get ordered visible metrics for rendering
   const orderedMetrics = useMemo(() => getOrderedVisibleMetrics(), [getOrderedVisibleMetrics]);
@@ -372,6 +391,218 @@ export default function FinancialReportsPage() {
     if (!isMetricFavorite(metricId)) return null;
     return <StarIconSolid className="h-4 w-4 text-amber-400 ml-2" />;
   }, [isMetricFavorite]);
+
+  // Export handlers
+  const handleExportPDF = useCallback(async () => {
+    if (!summary) return;
+    setIsExporting(true);
+    setIsExportMenuOpen(false);
+    try {
+      const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+      await exportToPDF({
+        title: 'Financial Report',
+        subtitle: `Generated on ${dateStr}`,
+        metadata: {
+          'Total Revenue': formatCurrency(summary.totalRevenue),
+          'Total Expenses': formatCurrency(summary.totalSpent),
+          'Net Profit': formatCurrency(summary.netProfit),
+          'Net Margin': formatPercent(summary.netMargin),
+        },
+        sections: [
+          {
+            heading: 'Key Metrics',
+            content: '',
+            type: 'table',
+            tableData: {
+              headers: ['Metric', 'Value'],
+              rows: [
+                ['Total Revenue', formatCurrency(summary.totalRevenue)],
+                ['Total Expenses', formatCurrency(summary.totalSpent)],
+                ['Gross Profit', formatCurrency(summary.grossProfit)],
+                ['Gross Margin', formatPercent(summary.profitMargin)],
+                ['Net Profit', formatCurrency(summary.netProfit)],
+                ['Net Margin', formatPercent(summary.netMargin)],
+                ['Total Budget', formatCurrency(summary.totalBudget)],
+                ['Cash Flow', formatCurrency(summary.cashFlow)],
+              ],
+            },
+          },
+          {
+            heading: 'Cost Breakdown',
+            content: '',
+            type: 'table',
+            tableData: {
+              headers: ['Category', 'Amount'],
+              rows: [
+                ['Labor Costs', formatCurrency(summary.laborCosts)],
+                ['Material Costs', formatCurrency(summary.materialCosts)],
+                ['Subcontractor Costs', formatCurrency(summary.subcontractorCosts)],
+                ['Equipment Costs', formatCurrency(summary.equipmentCosts)],
+                ['Overhead Costs', formatCurrency(summary.overheadCosts)],
+              ],
+            },
+          },
+          ...(projectProfitability.length > 0 ? [{
+            heading: 'Project Profitability',
+            content: '',
+            type: 'table' as const,
+            tableData: {
+              headers: ['Project', 'Budget', 'Actual Spend', 'Variance', 'Status'],
+              rows: projectProfitability.slice(0, 20).map(p => [
+                p.projectName,
+                formatCurrency(p.budget),
+                formatCurrency(p.actualSpend),
+                `${p.variance >= 0 ? '+' : ''}${formatCurrency(p.variance)}`,
+                p.variance >= 0 ? 'On/Under Budget' : 'Over Budget',
+              ]),
+            },
+          }] : []),
+        ],
+        filename: `financial-report-${new Date().toISOString().split('T')[0]}`,
+      });
+      toast.success('PDF exported successfully');
+    } catch (err) {
+      console.error('PDF export error:', err);
+      toast.error('Failed to export PDF');
+    } finally {
+      setIsExporting(false);
+    }
+  }, [summary, projectProfitability]);
+
+  const handleExportExcel = useCallback(async () => {
+    if (!summary) return;
+    setIsExporting(true);
+    setIsExportMenuOpen(false);
+    try {
+      const dateStr = new Date().toISOString().split('T')[0];
+
+      await exportToExcel({
+        filename: `financial-report-${dateStr}`,
+        sheets: [
+          {
+            name: 'Summary',
+            columns: [
+              { header: 'Metric', key: 'metric', width: 25 },
+              { header: 'Value', key: 'value', width: 20 },
+            ],
+            data: [
+              { metric: 'Total Revenue', value: summary.totalRevenue },
+              { metric: 'Total Expenses', value: summary.totalSpent },
+              { metric: 'Gross Profit', value: summary.grossProfit },
+              { metric: 'Gross Margin %', value: `${summary.profitMargin.toFixed(1)}%` },
+              { metric: 'Net Profit', value: summary.netProfit },
+              { metric: 'Net Margin %', value: `${summary.netMargin.toFixed(1)}%` },
+              { metric: 'Total Budget', value: summary.totalBudget },
+              { metric: 'Cash Flow', value: summary.cashFlow },
+              { metric: '', value: '' },
+              { metric: 'Cost Breakdown', value: '' },
+              { metric: 'Labor Costs', value: summary.laborCosts },
+              { metric: 'Material Costs', value: summary.materialCosts },
+              { metric: 'Subcontractor Costs', value: summary.subcontractorCosts },
+              { metric: 'Equipment Costs', value: summary.equipmentCosts },
+              { metric: 'Overhead Costs', value: summary.overheadCosts },
+            ],
+          },
+          ...(projectProfitability.length > 0 ? [{
+            name: 'Project Profitability',
+            columns: [
+              { header: 'Project', key: 'projectName', width: 30 },
+              { header: 'Budget', key: 'budget', width: 15 },
+              { header: 'Labor Cost', key: 'laborCost', width: 15 },
+              { header: 'Actual Spend', key: 'actualSpend', width: 15 },
+              { header: 'Variance', key: 'variance', width: 15 },
+              { header: 'Variance %', key: 'variancePct', width: 12 },
+            ],
+            data: projectProfitability.map(p => ({
+              projectName: p.projectName,
+              budget: p.budget,
+              laborCost: p.laborCost,
+              actualSpend: p.actualSpend,
+              variance: p.variance,
+              variancePct: p.budget > 0 ? `${(((p.actualSpend - p.budget) / p.budget) * 100).toFixed(1)}%` : 'N/A',
+            })),
+          }] : []),
+          ...(revenueByMonth.length > 0 ? [{
+            name: 'Monthly Trend',
+            columns: [
+              { header: 'Month', key: 'month', width: 15 },
+              { header: 'Revenue', key: 'revenue', width: 15 },
+              { header: 'Expenses', key: 'expenses', width: 15 },
+              { header: 'Profit', key: 'profit', width: 15 },
+            ],
+            data: revenueByMonth.map(m => ({
+              month: m.month,
+              revenue: m.revenue,
+              expenses: m.expenses,
+              profit: m.profit,
+            })),
+          }] : []),
+        ],
+      });
+      toast.success('Excel exported successfully');
+    } catch (err) {
+      console.error('Excel export error:', err);
+      toast.error('Failed to export Excel');
+    } finally {
+      setIsExporting(false);
+    }
+  }, [summary, projectProfitability, revenueByMonth]);
+
+  const handleExportCSV = useCallback(() => {
+    if (!summary) return;
+    setIsExporting(true);
+    setIsExportMenuOpen(false);
+    try {
+      const dateStr = new Date().toISOString().split('T')[0];
+
+      // Combine all data into a single CSV
+      const rows: (string | number)[][] = [
+        // Summary section
+        ['Financial Summary', ''],
+        ['Total Revenue', summary.totalRevenue],
+        ['Total Expenses', summary.totalSpent],
+        ['Gross Profit', summary.grossProfit],
+        ['Gross Margin %', `${summary.profitMargin.toFixed(1)}%`],
+        ['Net Profit', summary.netProfit],
+        ['Net Margin %', `${summary.netMargin.toFixed(1)}%`],
+        ['Total Budget', summary.totalBudget],
+        ['Cash Flow', summary.cashFlow],
+        ['', ''],
+        ['Cost Breakdown', ''],
+        ['Labor Costs', summary.laborCosts],
+        ['Material Costs', summary.materialCosts],
+        ['Subcontractor Costs', summary.subcontractorCosts],
+        ['Equipment Costs', summary.equipmentCosts],
+        ['Overhead Costs', summary.overheadCosts],
+      ];
+
+      if (projectProfitability.length > 0) {
+        rows.push(['', ''], ['Project Profitability', ''], ['Project', 'Budget', 'Actual Spend', 'Variance', 'Status']);
+        projectProfitability.forEach(p => {
+          rows.push([
+            p.projectName,
+            p.budget,
+            p.actualSpend,
+            p.variance,
+            p.variance >= 0 ? 'On/Under Budget' : 'Over Budget',
+          ]);
+        });
+      }
+
+      exportToCSV({
+        filename: `financial-report-${dateStr}`,
+        headers: ['Metric', 'Value', '', '', ''],
+        rows,
+      });
+      toast.success('CSV exported successfully');
+    } catch (err) {
+      console.error('CSV export error:', err);
+      toast.error('Failed to export CSV');
+    } finally {
+      setIsExporting(false);
+    }
+  }, [summary, projectProfitability]);
 
   if (loading || prefsLoading) {
     return <LoadingState />;
@@ -470,7 +701,7 @@ export default function FinancialReportsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Page Header with Customize Button */}
+      {/* Page Header with Customize and Export Buttons */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-semibold text-gray-900">Financial Reports</h1>
@@ -478,13 +709,60 @@ export default function FinancialReportsPage() {
             {orderedMetrics.length} of {metricDefinitions.length} metrics visible
           </p>
         </div>
-        <button
-          onClick={() => setIsCustomizePanelOpen(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-        >
-          <AdjustmentsHorizontalIcon className="h-5 w-5" />
-          Customize
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Export Dropdown */}
+          <div className="relative" ref={exportMenuRef}>
+            <button
+              onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
+              disabled={isExporting || !summary}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isExporting ? (
+                <div className="h-5 w-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <ArrowDownTrayIcon className="h-5 w-5" />
+              )}
+              Export
+              <ChevronDownIcon className={cn('h-4 w-4 transition-transform', isExportMenuOpen && 'rotate-180')} />
+            </button>
+
+            {/* Dropdown Menu */}
+            {isExportMenuOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                <button
+                  onClick={handleExportPDF}
+                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <DocumentArrowDownIcon className="h-5 w-5 text-red-500" />
+                  Export PDF
+                </button>
+                <button
+                  onClick={handleExportExcel}
+                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <TableCellsIcon className="h-5 w-5 text-green-600" />
+                  Export Excel
+                </button>
+                <button
+                  onClick={handleExportCSV}
+                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <DocumentTextIcon className="h-5 w-5 text-blue-500" />
+                  Export CSV
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Customize Button */}
+          <button
+            onClick={() => setIsCustomizePanelOpen(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <AdjustmentsHorizontalIcon className="h-5 w-5" />
+            Customize
+          </button>
+        </div>
       </div>
 
       {/* Customize Panel */}

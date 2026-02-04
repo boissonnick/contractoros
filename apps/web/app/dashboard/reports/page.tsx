@@ -328,6 +328,7 @@ function useCashFlowForecast(orgId?: string, currentCashPosition?: number) {
 }
 
 const ITEMS_PER_PAGE = 10;
+const DATE_RANGE_STORAGE_KEY = 'contractoros-reports-dateRange';
 
 export default function ReportsPage() {
   const { profile } = useAuth();
@@ -338,6 +339,61 @@ export default function ReportsPage() {
     getDateRangeFromPreset('this_month')
   );
   const [selectedPreset, setSelectedPreset] = useState<DatePresetValue | null>('this_month');
+
+  // Load date range from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(DATE_RANGE_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const startDate = new Date(parsed.startDate);
+        const endDate = new Date(parsed.endDate);
+
+        // Validate dates are valid and not too old (within last 2 years)
+        const twoYearsAgo = new Date();
+        twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+
+        if (
+          !isNaN(startDate.getTime()) &&
+          !isNaN(endDate.getTime()) &&
+          startDate >= twoYearsAgo &&
+          startDate <= endDate
+        ) {
+          setDateRange({
+            startDate,
+            endDate,
+            label: parsed.label || 'Custom',
+          });
+          // Restore preset if it was saved
+          if (parsed.preset) {
+            setSelectedPreset(parsed.preset as DatePresetValue);
+          } else {
+            setSelectedPreset(null);
+          }
+        }
+      }
+    } catch (e) {
+      // Invalid data in localStorage, use default
+      console.warn('Failed to load saved date range:', e);
+    }
+  }, []);
+
+  // Save date range to localStorage when it changes
+  useEffect(() => {
+    if (dateRange?.startDate && dateRange?.endDate) {
+      try {
+        localStorage.setItem(DATE_RANGE_STORAGE_KEY, JSON.stringify({
+          startDate: dateRange.startDate.toISOString(),
+          endDate: dateRange.endDate.toISOString(),
+          label: dateRange.label,
+          preset: selectedPreset,
+        }));
+      } catch (e) {
+        // localStorage might be full or unavailable
+        console.warn('Failed to save date range:', e);
+      }
+    }
+  }, [dateRange, selectedPreset]);
 
   // Pagination state for tables
   const [profitabilityPage, setProfitabilityPage] = useState(1);
