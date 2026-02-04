@@ -494,8 +494,22 @@ function setCorsHeaders(
 
 /**
  * Verify Firebase ID token and return user ID
+ * Accepts token from Authorization header or X-User-Token header (for proxied requests)
  */
-async function verifyAuth(authHeader?: string): Promise<string> {
+async function verifyAuth(req: { headers: { authorization?: string; "x-user-token"?: string } }): Promise<string> {
+  // Check for proxied user token first (from API route)
+  const userToken = req.headers["x-user-token"];
+  if (userToken) {
+    try {
+      const decodedToken = await admin.auth().verifyIdToken(userToken);
+      return decodedToken.uid;
+    } catch (error) {
+      throw new HttpsError("unauthenticated", "Invalid user token");
+    }
+  }
+
+  // Fall back to Authorization header (direct calls)
+  const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     throw new HttpsError("unauthenticated", "Missing or invalid Authorization header");
   }
@@ -554,7 +568,7 @@ export const processReceiptOCR = onRequest(
 
     try {
       // Verify authentication
-      const userId = await verifyAuth(req.headers.authorization);
+      const userId = await verifyAuth(req);
 
       const data = req.body as ProcessReceiptRequest;
       const { imageBase64, mimeType, orgId } = data;
@@ -655,19 +669,18 @@ export const processReceiptOCR = onRequest(
       console.error("[OCR] Processing failed:", errorMessage);
 
       // Determine if we have user context for logging
-      let userId = "unknown";
-      let orgId = "unknown";
+      let logUserId = "unknown";
+      let logOrgId = req.body?.orgId || "unknown";
       try {
-        userId = await verifyAuth(req.headers.authorization);
-        orgId = req.body?.orgId || "unknown";
+        logUserId = await verifyAuth(req);
       } catch {
         // Ignore auth errors during error logging
       }
 
       // Log failed request
       await logOCRRequest(
-        orgId,
-        userId,
+        logOrgId,
+        logUserId,
         {
           vendor: null,
           date: null,

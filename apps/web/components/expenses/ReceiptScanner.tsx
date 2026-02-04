@@ -61,7 +61,8 @@ interface ProcessReceiptRequest {
   projectId?: string;
 }
 
-const FUNCTION_URL = 'https://us-east1-contractoros-483812.cloudfunctions.net/processReceiptOCR';
+// Use local API route to proxy to Cloud Function (avoids CORS issues)
+const API_URL = '/api/receipt-ocr';
 
 /**
  * Call the processReceiptOCR Cloud Function to extract expense data from a receipt image
@@ -89,7 +90,7 @@ export async function scanReceipt(
 
   const idToken = await user.getIdToken();
 
-  const response = await fetch(FUNCTION_URL, {
+  const response = await fetch(API_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

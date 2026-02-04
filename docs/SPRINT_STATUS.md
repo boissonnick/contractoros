@@ -1,12 +1,33 @@
 # ContractorOS Sprint Status
 
 > **Purpose:** Track current progress and enable seamless session handoffs.
-> **Last Updated:** 2026-02-04 by Research Integration Session
+> **Last Updated:** 2026-02-04 by Demo Mode Sprint Planning
 > **Current Phase:** Phase 10 - Platform Hardening & Bug Fixes
 
 ---
 
-## 🎯 Current Sprint: Sprint 40
+## 🎯 Upcoming Sprint: Sprint 41 - Demo Mode
+
+**Focus:** Toggleable Demo Mode for platform exploration and sales demos
+**See:** `.claude-coordination/sprint-41-overview.md` for full sprint plan
+
+| Phase | Focus | Status |
+|-------|-------|--------|
+| Phase 1 | Core Infrastructure (Context, Hook, Constants) | ⏳ Pending |
+| Phase 2 | UI Components (Banner, Selector, Toggle) | ⏳ Pending |
+| Phase 3 | Integration & Firestore Rules | ⏳ Pending |
+| Phase 4 | Testing & Polish | ⏳ Pending |
+
+**Key Deliverables:**
+- DemoModeContext for state management
+- useEffectiveOrg hook for org switching
+- Purple demo mode banner + sidebar toggle
+- Firestore rules for demo org access
+- Auto-expiry after 4 hours
+
+---
+
+## 🔄 Current Sprint: Sprint 40
 
 **Focus:** Demo data completeness, navigation restructure, schedule enhancements
 **See:** `.claude-coordination/sprint-40-overview.md` for full sprint plan
@@ -20,7 +41,7 @@
 
 ---
 
-## ✅ Completed Sprints (37-39)
+## ✅ Completed Sprints (37-39, 42-43)
 
 | Sprint | Focus | Status |
 |--------|-------|--------|
@@ -29,6 +50,10 @@
 | 37C | Security Fixes | ✅ COMPLETE |
 | 38 | Demo Data (Core) | ✅ COMPLETE |
 | 39 | Demo Data (Extended) + Notifications | ✅ COMPLETE |
+| 42 | Finance Module Completion | ✅ COMPLETE |
+| 43 | Reports & Configuration | ✅ COMPLETE |
+
+> **Note:** Sprint 41 (Demo Mode) inserted between Sprint 40 and previously-numbered Sprint 41-42. Old Sprint 41 → Sprint 42, Old Sprint 42 → Sprint 43.
 
 ---
 
@@ -82,6 +107,7 @@
 | Metric | Value |
 |--------|-------|
 | **Current Sprint** | Sprint 40 - Demo Data + Navigation + Schedule 🚀 |
+| **Next Sprint** | Sprint 41 - Demo Mode Feature ⏳ |
 | **Sprint Status** | 🏃 IN PROGRESS |
 | **Platform Completion** | ~90% (adjusted per audit) |
 | **Audit Issues** | 101 total (0 critical ✅, 47 high, 40 medium, 8 low) |

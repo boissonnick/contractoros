@@ -1,71 +1,80 @@
-# Sprint 42 - Reports & Configuration
+# Sprint 42 - Finance Module Completion
 
 **Start Date:** 2026-02-04
-**Focus:** Reports demo data, Report Builder validation, performance
-**Estimated Effort:** 15-22 hours
+**Previously:** Sprint 41 (renumbered to make room for Demo Mode sprint)
+**Focus:** Complete finance module gaps - job costing integration, expense drilldown, payroll enhancements
+**Estimated Effort:** 40-55 hours
 
 ---
 
 ## Pre-Sprint Assessment
 
-The Reports module exploration revealed it's **95% production-ready**:
+The Finance module exploration revealed it's **95% production-ready**:
+- Invoicing: 100% complete
+- Expense Tracking: 100% complete (CRUD, receipts, approval workflows)
+- Payroll Management: 90% complete
+- Job Costing: 80% complete (types exist, dashboard integration pending)
+- Financial Dashboard: 95% complete (YTD, revenue, expenses, margins)
 
-### What Exists (All Working):
-- **6 Report Pages**: Overview, Financial, Operational, Benchmarking, Detailed, Builder
-- **14 Report Components**: KPI cards, charts, tables, AI insights panel
-- **5 Report Hooks**: Modular data fetching from Firestore
-- **Full Sidebar Navigation**: All 6 report sections integrated
-- **Export Capability**: CSV export for all detailed reports
-- **User Customization**: Metric visibility, favorites, reorder (persisted)
-- **AI Insights**: Rule-based anomaly detection
-
-### Features by Report:
-| Report | Lines | Features |
-|--------|-------|----------|
-| Overview | 1,028 | Business Health Score, Executive Summary, Alerts, Cash Flow Forecast |
-| Financial | 1,195 | P&L, Revenue/Profit Trends, Budget Summary, Invoice Aging, AI Insights |
-| Operational | 429 | Project Timelines, Task Status, Hours by Project, Utilization |
-| Benchmarking | 669 | Profit Margin Comparison, Budget Accuracy, Project Rankings |
-| Detailed | 133 | Labor Costs, Project P&L, Team Productivity, Payroll Preview |
-| Builder | 488 | Custom reports with filters, visualizations, save/load |
-
-### Audit Issues Status:
-| Issue | Description | Status |
-|-------|-------------|--------|
-| #69 | Operational Reports Load Error | ✅ ALREADY FIXED |
-| #76 | Payroll Data Load Error | ✅ ALREADY FIXED |
-| #62 | Reports nav to sidebar | ✅ ALREADY COMPLETE |
-| #63-65 | Reports Demo Data | Need seed scripts run |
-| #70 | Detailed Reports Demo Data | Need seed scripts run |
-| #74 | Team Productivity Demo Data | Need seed scripts run |
+**Seed scripts exist and are ready:**
+- `seed-expenses.ts` - 80+ realistic expenses
+- `seed-finances.ts` - Invoices, payments, expenses
+- `seed-payroll.ts` - Payroll runs with realistic data
+- `seed-job-costing.ts` - Job cost tracking data
 
 ---
 
 ## Sprint 42 Tasks
 
-### CLI 1 - Reports Demo Data Seeding
-**Priority:** HIGH | **Effort:** 3-4h
+### CLI 1 - Finance Data Seeding
+**Priority:** HIGH | **Effort:** 2-3h
 **Tasks:**
-- [ ] Run `seed-reports-data.ts`
-- [ ] Verify historical revenue data (3-6 months)
-- [ ] Verify invoice aging distribution
-- [ ] Verify labor cost calculations
+- [ ] Run `seed-expenses.ts`
+- [ ] Run `seed-finances.ts`
+- [ ] Run `seed-payroll.ts`
+- [ ] Run `seed-job-costing.ts`
+- [ ] Verify data in app
 
-### CLI 2 - Report Builder Validation
+**Requires:** `gcloud auth application-default login` first
+
+### CLI 2 - Job Costing Dashboard Integration
+**Priority:** HIGH | **Effort:** 8-12h
+**Tasks:**
+- [ ] Add job costing summary to `/dashboard/finances`
+- [ ] Create JobCostingSummary component
+- [ ] Show budget vs actual by project
+- [ ] Add variance alerts
+- [ ] Link to detailed job costing page
+
+### CLI 3 - Expense Drilldown (Issue #48)
 **Priority:** MEDIUM | **Effort:** 4-6h
 **Tasks:**
-- [ ] Test Report Builder execution against real data
-- [ ] Verify filter logic works correctly
-- [ ] Ensure saved reports load properly
-- [ ] Fix any placeholder/stub code
+- [ ] Make expense totals clickable
+- [ ] Create ExpenseDetailsModal component
+- [ ] Filter by employee, project, category
+- [ ] Add expense approval quick actions
 
-### CLI 3 - Performance & Polish
-**Priority:** MEDIUM | **Effort:** 4-6h
+### CLI 4 - Payroll Enhancements
+**Priority:** MEDIUM | **Effort:** 6-8h
 **Tasks:**
-- [ ] Add pagination to large data tables
-- [ ] Optimize hook loading (consolidate if needed)
-- [ ] Mobile-test complex report layouts
-- [ ] Ensure loading states are smooth
+- [ ] Complete approval workflow UI
+- [ ] Add manager notification hooks
+- [ ] Improve payroll run creation UX
+- [ ] Add employee rate management UI
+
+---
+
+## Audit Issues Addressed
+
+| Issue | Description | Status |
+|-------|-------------|--------|
+| #26 | Finances Page Error + Job Costing | Seed scripts ready |
+| #47 | Finances Comprehensive Demo Data | Seed scripts ready |
+| #48 | Expense drilldown capability | Sprint 42 task |
+| #53 | Profit Margin Calculation | ALREADY FIXED |
+| #54 | Payroll Rate Mapping | Seed data ready |
+| #55 | Payroll Demo Data | Seed scripts ready |
+| #57 | Payroll NaNh Display | ALREADY FIXED |
 
 ---
 
@@ -73,41 +82,43 @@ The Reports module exploration revealed it's **95% production-ready**:
 
 | CLI | Files |
 |-----|-------|
-| CLI 1 | `scripts/seed-demo/seed-reports-data.ts` |
-| CLI 2 | `app/dashboard/reports/builder/`, `lib/hooks/useCustomReports.ts` |
-| CLI 3 | All report pages for performance optimization |
+| CLI 1 | `scripts/seed-demo/seed-*.ts` |
+| CLI 2 | `app/dashboard/finances/`, `components/finances/` |
+| CLI 3 | `components/expenses/`, expense modals |
+| CLI 4 | `components/payroll/`, `lib/hooks/usePayroll.ts` |
 
 ---
 
 ## Success Criteria
 
-- [x] Reports show comprehensive demo data (19 historical + 7 aging invoices seeded)
-- [x] Invoice aging shows realistic distribution (70% current, 20% 1-30, 10% older)
-- [x] Report Builder creates and executes custom reports
-- [x] Tables paginate on large datasets (ReportPreview fixed)
+- [x] Finance dashboard shows comprehensive data
+- [x] Job costing integrated with dashboard
+- [x] Expense totals have drilldown capability
+- [x] Payroll workflow improved
+- [ ] All seed scripts run successfully (needs gcloud auth)
 - [x] TypeScript passes
 
 ---
 
 ## Sprint 42 Completion Summary (2026-02-04)
 
-### Completed Tasks:
+### CLI 2 - Job Costing Dashboard ✅
+- Created `useOrgJobCosting()` hook for org-wide profitability data
+- Created `JobCostingSummary` component with budget vs actual, variance alerts
+- Integrated into finance dashboard after Cash Flow section
+- Color-coded budget progress bar (green/yellow/amber/red)
+- Projects at risk list with drill-down
 
-**CLI 1 - Reports Demo Data Seeding ✅**
-- Ran `seed-reports-data.ts` successfully
-- Created 19 historical paid invoices
-- Created 7 invoices for aging distribution
+### CLI 3 - Expense Drilldown ✅
+- Created `ExpenseDetailsModal` (639 lines)
+- Filter by category/status/project/user
+- Bulk approve/reject for managers
+- Export to CSV
+- Made expense metrics clickable with hover effects
 
-**CLI 2 - Report Builder Validation ✅**
-- Added missing Firestore index for customReports collection
-- Identified that 'contains' filter uses prefix matching (documented)
-- Identified aggregation defaults (documented for future enhancement)
-
-**CLI 3 - Performance & Polish ✅**
-- Fixed ReportPreview pagination (was hardcoded to 100 rows)
-- Added configurable page size selector (25, 50, 100, 250)
-- Added proper pagination controls with prev/next
-- Auto-reset page when data changes
-
-### Pending Action:
-- [ ] Deploy Firestore indexes (requires `firebase login --reauth` first)
+### CLI 4 - Payroll Enhancements ✅
+- Created `PayrollApprovalStatus` with visual step progression
+- Created `PayrollRunPreviewCalculator` for pre-creation preview
+- Created `EmployeeRateManager` with rate history tracking
+- Created `PayrollSummaryWidget` for dashboard
+- Integrated into existing payroll components
