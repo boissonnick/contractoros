@@ -2125,6 +2125,22 @@ apps/web/lib/assistant/
 | LEAD-032 | Two-Way Messaging Hub | P1 | M | Backlog |
 | LEAD-040 | Zapier App | P2 | M | Backlog |
 
+### Expense Module UX Improvements (Backlog)
+
+> **Added:** 2026-02-04 | **Context:** Receipt OCR feature shipped, identified UX improvements needed
+
+| ID | Title | Priority | Size | Status | Notes |
+|----|-------|----------|------|--------|-------|
+| EXP-001 | Multi-Line Receipt Breakdown | P1 | M | Backlog | When receipt has many items, allow splitting into multiple expense lines. Requires new layout/workflow beyond modal. |
+| EXP-002 | Quick Project Assignment for Expenses | P1 | M | Backlog | Succinct UX for assigning expenses to active projects. Modal likely not ideal - explore inline assignment, swipe actions, or dedicated expense review screen. |
+| EXP-003 | Expense Review Workflow | P2 | L | Backlog | Dedicated screen/flow for reviewing unassigned expenses, bulk project assignment, and multi-line item editing. |
+
+**Design Considerations:**
+- Current modal-based expense entry is good for single items
+- Multi-item receipts (e.g., Home Depot with 20 line items) need a different approach
+- Project assignment should be fast for field users processing multiple receipts
+- Consider: batch processing view, swipe-to-assign, project picker flyout
+
 ### Sprint 9 Completed Features
 
 | ID | Title | Status |

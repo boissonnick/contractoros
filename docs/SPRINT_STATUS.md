@@ -1,8 +1,30 @@
 # ContractorOS Sprint Status
 
 > **Purpose:** Track current progress and enable seamless session handoffs.
-> **Last Updated:** 2026-02-04 - Reprioritized: Bugs → Stability → Features
+> **Last Updated:** 2026-02-04 - Receipt OCR shipped, UX backlog added
 > **Current Phase:** Phase 11 - Infrastructure Upgrades & Bug Resolution
+
+---
+
+## ✅ Sprint F0 - AI Receipt OCR - COMPLETE
+
+**Priority:** P1 - Feature
+**Completed:** 2026-02-04
+
+**What Was Done:**
+- ✅ Receipt OCR API route using Google Gemini (gemini-2.0-flash + gemini-1.5-pro fallback)
+- ✅ ReceiptCaptureButton component with camera/gallery upload
+- ✅ Auto-fill expense form from OCR results
+- ✅ Confidence scoring with visual indicators
+- ✅ Firebase auth token verification
+- ✅ Integrated into ExpenseFormModal
+
+**UX Improvements Added to Backlog:**
+- EXP-001: Multi-line receipt breakdown (for receipts with many items)
+- EXP-002: Quick project assignment (non-modal workflow)
+- EXP-003: Expense review workflow (batch processing)
+
+**See:** `docs/MASTER_ROADMAP.md` → "Expense Module UX Improvements (Backlog)"
 
 ---
 
