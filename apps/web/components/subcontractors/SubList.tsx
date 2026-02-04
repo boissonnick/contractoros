@@ -155,7 +155,32 @@ export default function SubList({
       {/* Grid */}
       {filteredAndSorted.length === 0 ? (
         <div className="border border-gray-200 rounded-xl p-12 text-center bg-gray-50">
-          <p className="text-sm text-gray-400">No subcontractors found.</p>
+          <p className="text-base font-medium text-gray-600 mb-1">No matching subcontractors</p>
+          <p className="text-sm text-gray-400">
+            {search && tradeFilter ? (
+              <>No subcontractors match &quot;{search}&quot; in {tradeFilter}. Try adjusting your filters.</>
+            ) : search ? (
+              <>No subcontractors match &quot;{search}&quot;. Try a different search term.</>
+            ) : tradeFilter ? (
+              <>No subcontractors in {tradeFilter}. Try selecting a different trade.</>
+            ) : statusFilter !== 'all' ? (
+              <>No {statusFilter} subcontractors found.</>
+            ) : (
+              <>No subcontractors found. Add your first subcontractor to get started.</>
+            )}
+          </p>
+          {(search || tradeFilter || statusFilter !== 'all') && (
+            <button
+              onClick={() => {
+                setSearch('');
+                setTradeFilter('');
+                setStatusFilter('all');
+              }}
+              className="mt-3 text-sm text-brand-primary hover:text-brand-primary/80 font-medium"
+            >
+              Clear all filters
+            </button>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

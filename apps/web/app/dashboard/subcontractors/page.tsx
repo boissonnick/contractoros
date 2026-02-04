@@ -4,7 +4,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Subcontractor } from '@/types';
 import { useSubcontractors } from '@/lib/hooks/useSubcontractors';
-import { Button } from '@/components/ui';
+import { Button, PageHeader, EmptyState } from '@/components/ui';
 import { StatsGrid } from '@/components/ui/StatsGrid';
 import { SkeletonSubcontractorsList } from '@/components/ui/Skeleton';
 import {
@@ -13,8 +13,8 @@ import {
   CheckCircleIcon,
   StarIcon,
   ExclamationTriangleIcon,
-  ChatBubbleLeftRightIcon,
   XCircleIcon,
+  UserGroupIcon,
 } from '@heroicons/react/24/outline';
 import SubList from '@/components/subcontractors/SubList';
 import SubForm from '@/components/subcontractors/SubForm';
@@ -115,16 +115,73 @@ export default function SubcontractorsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-gray-900">Subcontractors</h1>
-          <p className="text-sm text-gray-500">Manage your subcontractor network</p>
-        </div>
-        <div className="flex items-center gap-2">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+      {/* Desktop Header */}
+      <div className="hidden md:block">
+        <PageHeader
+          title="Subcontractors"
+          description="Manage your subcontractor network and track performance"
+          actions={
+            selectionMode ? (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCancelSelection}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  icon={<CheckCircleIcon className="h-4 w-4" />}
+                  onClick={handleBulkActivate}
+                  disabled={selectedIds.length === 0}
+                >
+                  Activate ({selectedIds.length})
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  icon={<XCircleIcon className="h-4 w-4" />}
+                  onClick={handleBulkDeactivate}
+                  disabled={selectedIds.length === 0}
+                >
+                  Deactivate
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectionMode(true)}
+                >
+                  Select
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon={<PlusIcon className="h-4 w-4" />}
+                  onClick={() => setShowAdd(true)}
+                >
+                  Add Subcontractor
+                </Button>
+              </div>
+            )
+          }
+        />
+      </div>
+
+      {/* Mobile Header */}
+      <div className="md:hidden">
+        <div className="flex items-center justify-between mb-2">
+          <div>
+            <h1 className="text-xl font-bold text-gray-900">Subcontractors</h1>
+            <p className="text-xs text-gray-500">Manage your network</p>
+          </div>
           {selectionMode ? (
-            <>
+            <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="sm"
@@ -132,45 +189,39 @@ export default function SubcontractorsPage() {
               >
                 Cancel
               </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                icon={<CheckCircleIcon className="h-4 w-4" />}
-                onClick={handleBulkActivate}
-                disabled={selectedIds.length === 0}
-              >
-                Activate
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                icon={<XCircleIcon className="h-4 w-4" />}
-                onClick={handleBulkDeactivate}
-                disabled={selectedIds.length === 0}
-              >
-                Deactivate
-              </Button>
-            </>
+            </div>
           ) : (
-            <>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSelectionMode(true)}
-              >
-                Select
-              </Button>
-              <Button
-                variant="primary"
-                size="sm"
-                icon={<PlusIcon className="h-4 w-4" />}
-                onClick={() => setShowAdd(true)}
-              >
-                Add Subcontractor
-              </Button>
-            </>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSelectionMode(true)}
+            >
+              Select
+            </Button>
           )}
         </div>
+        {selectionMode && selectedIds.length > 0 && (
+          <div className="flex items-center gap-2 mt-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<CheckCircleIcon className="h-4 w-4" />}
+              onClick={handleBulkActivate}
+              className="flex-1"
+            >
+              Activate ({selectedIds.length})
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<XCircleIcon className="h-4 w-4" />}
+              onClick={handleBulkDeactivate}
+              className="flex-1"
+            >
+              Deactivate
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Performance Dashboard Stats */}
@@ -229,13 +280,29 @@ export default function SubcontractorsPage() {
       )}
 
       {/* Subcontractor List */}
-      <SubList
-        subs={subs}
-        onSubClick={handleSubClick}
-        selectionMode={selectionMode}
-        selectedIds={selectedIds}
-        onSelectionChange={setSelectedIds}
-      />
+      {subs.length === 0 ? (
+        <EmptyState
+          icon={<WrenchScrewdriverIcon className="h-full w-full" />}
+          title="No subcontractors yet"
+          description="Build your network by adding subcontractors. Track their performance, manage insurance, and invite them to bid on projects."
+          action={{
+            label: 'Add Subcontractor',
+            onClick: () => setShowAdd(true),
+          }}
+          secondaryAction={{
+            label: 'Learn More',
+            href: '/help/subcontractors',
+          }}
+        />
+      ) : (
+        <SubList
+          subs={subs}
+          onSubClick={handleSubClick}
+          selectionMode={selectionMode}
+          selectedIds={selectedIds}
+          onSelectionChange={setSelectedIds}
+        />
+      )}
 
       {/* Add Modal */}
       {showAdd && (
@@ -246,6 +313,15 @@ export default function SubcontractorsPage() {
           </div>
         </div>
       )}
+
+      {/* Mobile FAB for Add Subcontractor */}
+      <button
+        onClick={() => setShowAdd(true)}
+        className="md:hidden fixed right-4 bottom-20 w-14 h-14 rounded-full bg-brand-primary text-white shadow-lg hover:shadow-xl hover:opacity-90 active:scale-95 flex items-center justify-center transition-all z-30"
+        aria-label="Add Subcontractor"
+      >
+        <PlusIcon className="h-6 w-6" />
+      </button>
     </div>
   );
 }

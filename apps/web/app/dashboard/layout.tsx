@@ -74,6 +74,7 @@ const ownerPmNavItems: (NavItem & { requiredPermission?: keyof RolePermissions; 
   // FINANCE (Collapsible Section)
   // All financial operations grouped together
   // Roles: OWNER, PM with finance permissions
+  // Note: Reports link removed - use dedicated Reports section
   // ---------------------------------------------
   {
     label: 'Finance',
@@ -85,13 +86,12 @@ const ownerPmNavItems: (NavItem & { requiredPermission?: keyof RolePermissions; 
       { label: 'Invoices', href: '/dashboard/invoices' },
       { label: 'Expenses', href: '/dashboard/expenses' },
       { label: 'Payroll', href: '/dashboard/payroll' },
-      { label: 'Reports', href: '/dashboard/reports/financial' },
     ],
   },
 
   // ---------------------------------------------
-  // OPERATIONS
-  // Team management, subcontractors, resources
+  // TEAM (Top-level section)
+  // Internal team management
   // ---------------------------------------------
   {
     label: 'Team',
@@ -105,6 +105,11 @@ const ownerPmNavItems: (NavItem & { requiredPermission?: keyof RolePermissions; 
       { label: 'Time Off', href: '/dashboard/team/time-off' },
     ],
   },
+
+  // ---------------------------------------------
+  // SUBCONTRACTORS (Top-level section)
+  // External subcontractor management
+  // ---------------------------------------------
   {
     label: 'Subcontractors',
     href: '/dashboard/subcontractors',
@@ -116,6 +121,10 @@ const ownerPmNavItems: (NavItem & { requiredPermission?: keyof RolePermissions; 
       { label: 'Compare', href: '/dashboard/subcontractors/compare' },
     ],
   },
+
+  // ---------------------------------------------
+  // OPERATIONS (Equipment & Materials)
+  // ---------------------------------------------
   { label: 'Equipment', href: '/dashboard/equipment', icon: TruckIcon },
   { label: 'Materials', href: '/dashboard/materials', icon: InboxIcon },
 
@@ -268,6 +277,7 @@ function createOwnerPmSections(permissions: RolePermissions): NavSection[] {
   }
 
   // Finance section - requires finance permissions
+  // Note: Reports link removed here - use dedicated Reports section instead
   if (permissions.canViewAllFinances) {
     sections.push({
       id: 'finance',
@@ -284,51 +294,68 @@ function createOwnerPmSections(permissions: RolePermissions): NavSection[] {
             { label: 'Invoices', href: '/dashboard/invoices' },
             { label: 'Expenses', href: '/dashboard/expenses' },
             { label: 'Payroll', href: '/dashboard/payroll' },
-            { label: 'Reports', href: '/dashboard/reports/financial' },
           ],
         },
       ],
     });
   }
 
-  // Operations section - requires team permissions
-  const operationsItems: NavItem[] = [];
+  // Team section - separate top-level for better organization
   if (permissions.canViewTeam) {
-    operationsItems.push({
-      label: 'Team',
-      href: '/dashboard/team',
+    sections.push({
+      id: 'team',
+      title: 'Team',
       icon: UsersIcon,
-      children: [
-        { label: 'Directory', href: '/dashboard/team' },
-        { label: 'Time Tracking', href: '/dashboard/time' },
-        { label: 'Availability', href: '/dashboard/team/availability' },
-        { label: 'Time Off', href: '/dashboard/team/time-off' },
-      ],
-    });
-    operationsItems.push({
-      label: 'Subcontractors',
-      href: '/dashboard/subcontractors',
-      icon: WrenchScrewdriverIcon,
-      children: [
-        { label: 'Directory', href: '/dashboard/subcontractors' },
-        { label: 'Bids', href: '/dashboard/subcontractors/bids' },
-        { label: 'Compare', href: '/dashboard/subcontractors/compare' },
+      defaultOpen: true,
+      items: [
+        {
+          label: 'Team',
+          href: '/dashboard/team',
+          icon: UsersIcon,
+          children: [
+            { label: 'Directory', href: '/dashboard/team' },
+            { label: 'Time Tracking', href: '/dashboard/time' },
+            { label: 'Availability', href: '/dashboard/team/availability' },
+            { label: 'Time Off', href: '/dashboard/team/time-off' },
+          ],
+        },
       ],
     });
   }
-  // Equipment and Materials - always visible
-  operationsItems.push({ label: 'Equipment', href: '/dashboard/equipment', icon: TruckIcon });
-  operationsItems.push({ label: 'Materials', href: '/dashboard/materials', icon: InboxIcon });
 
-  if (operationsItems.length > 0) {
+  // Subcontractors section - separate top-level for better organization
+  if (permissions.canViewTeam) {
     sections.push({
-      id: 'operations',
-      title: 'Operations',
+      id: 'subcontractors',
+      title: 'Subcontractors',
       icon: WrenchScrewdriverIcon,
       defaultOpen: true,
-      items: operationsItems,
+      items: [
+        {
+          label: 'Subcontractors',
+          href: '/dashboard/subcontractors',
+          icon: WrenchScrewdriverIcon,
+          children: [
+            { label: 'Directory', href: '/dashboard/subcontractors' },
+            { label: 'Bids', href: '/dashboard/subcontractors/bids' },
+            { label: 'Compare', href: '/dashboard/subcontractors/compare' },
+          ],
+        },
+      ],
     });
   }
+
+  // Operations section - Equipment and Materials
+  sections.push({
+    id: 'operations',
+    title: 'Operations',
+    icon: TruckIcon,
+    defaultOpen: true,
+    items: [
+      { label: 'Equipment', href: '/dashboard/equipment', icon: TruckIcon },
+      { label: 'Materials', href: '/dashboard/materials', icon: InboxIcon },
+    ],
+  });
 
   // Documents & Communication section
   const docsItems: NavItem[] = [
