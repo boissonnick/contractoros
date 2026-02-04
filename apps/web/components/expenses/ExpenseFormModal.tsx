@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -16,6 +16,9 @@ import {
   EXPENSE_PAYMENT_METHODS,
   Project,
 } from '@/types';
+import { ReceiptCaptureButton } from './ReceiptCaptureButton';
+import { ReceiptOCRResult } from './ReceiptScanner';
+import { SparklesIcon } from '@heroicons/react/24/outline';
 
 const expenseSchema = z.object({
   description: z.string().min(1, 'Description is required').max(200, 'Description too long'),
@@ -54,6 +57,8 @@ export function ExpenseFormModal({
 }: ExpenseFormModalProps) {
   const { data: projects = [] } = useProjects();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [wasAutoFilled, setWasAutoFilled] = useState(false);
+  const [scanError, setScanError] = useState<string | null>(null);
 
   const getDefaultValues = (): Partial<ExpenseFormData> => {
     if (expense) {
@@ -97,6 +102,7 @@ export function ExpenseFormModal({
     formState: { errors },
     reset,
     watch,
+    setValue,
   } = useForm<ExpenseFormData>({
     resolver: zodResolver(expenseSchema),
     defaultValues: getDefaultValues(),
@@ -108,8 +114,85 @@ export function ExpenseFormModal({
   useEffect(() => {
     if (open) {
       reset(getDefaultValues());
+      setWasAutoFilled(false);
+      setScanError(null);
     }
   }, [open, expense, reset]);
+
+  // Handle OCR scan completion - auto-fill form fields
+  const handleScanComplete = useCallback(
+    (result: ReceiptOCRResult) => {
+      setScanError(null);
+
+      // Auto-fill vendor name
+      if (result.vendor) {
+        setValue('vendorName', result.vendor, { shouldValidate: true });
+      }
+
+      // Auto-fill amount
+      if (result.total != null) {
+        setValue('amount', result.total, { shouldValidate: true });
+      }
+
+      // Auto-fill date
+      if (result.date) {
+        setValue('date', result.date, { shouldValidate: true });
+      }
+
+      // Auto-fill category
+      if (result.category) {
+        setValue('category', result.category, { shouldValidate: true });
+      }
+
+      // Auto-fill tax amount
+      if (result.tax != null) {
+        setValue('taxAmount', result.tax, { shouldValidate: true });
+      }
+
+      // Auto-fill payment method (map from OCR result to form values)
+      if (result.paymentMethod) {
+        const paymentMethodMap: Record<string, string> = {
+          cash: 'cash',
+          card: 'credit_card',
+          check: 'check',
+          other: 'other',
+        };
+        const mappedMethod = paymentMethodMap[result.paymentMethod];
+        if (mappedMethod) {
+          setValue('paymentMethod', mappedMethod, { shouldValidate: true });
+        }
+      }
+
+      // Generate description from vendor and line items
+      let description = '';
+      if (result.vendor) {
+        description = `Purchase at ${result.vendor}`;
+      }
+      if (result.lineItems && result.lineItems.length > 0) {
+        const itemDescriptions = result.lineItems
+          .slice(0, 3)
+          .map((item) => item.description)
+          .filter(Boolean)
+          .join(', ');
+        if (itemDescriptions) {
+          description = description
+            ? `${description}: ${itemDescriptions}`
+            : itemDescriptions;
+        }
+      }
+      if (description) {
+        setValue('description', description.slice(0, 200), { shouldValidate: true });
+      }
+
+      setWasAutoFilled(true);
+    },
+    [setValue]
+  );
+
+  // Handle OCR scan error
+  const handleScanError = useCallback((error: string) => {
+    setScanError(error);
+  }, []);
 
   const handleFormSubmit = async (data: ExpenseFormData) => {
     setIsSubmitting(true);
@@ -153,10 +236,41 @@ export function ExpenseFormModal({
       size="lg"
     >
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+        {/* Receipt Scanner - only show in create mode */}
+        {mode === 'create' && (
+          <div className="pb-4 border-b border-gray-200">
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Scan Receipt (optional)
+              </label>
+              {wasAutoFilled && (
+                <span className="inline-flex items-center gap-1 text-xs text-purple-600 bg-purple-50 px-2 py-1 rounded-full">
+                  <SparklesIcon className="h-3 w-3" />
+                  Auto-filled from receipt
+                </span>
+              )}
+            </div>
+            <ReceiptCaptureButton
+              onScanComplete={handleScanComplete}
+              onScanError={handleScanError}
+              projectId={watch('projectId') || undefined}
+            />
+            {scanError && (
+              <p className="mt-2 text-sm text-red-600">{scanError}</p>
+            )}
+            <p className="mt-2 text-xs text-gray-500">
+              Take a photo or upload a receipt image to auto-fill expense details using AI.
+            </p>
+          </div>
+        )}
+
         {/* Description */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Description <span className="text-red-500">*</span>
+            {wasAutoFilled && (
+              <span className="ml-2 text-xs text-purple-500 font-normal">(scanned)</span>
+            )}
           </label>
           <Input
             {...register('description')}
@@ -170,6 +284,9 @@ export function ExpenseFormModal({
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Amount <span className="text-red-500">*</span>
+              {wasAutoFilled && (
+                <span className="ml-2 text-xs text-purple-500 font-normal">(scanned)</span>
+              )}
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
@@ -187,6 +304,9 @@ export function ExpenseFormModal({
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Date <span className="text-red-500">*</span>
+              {wasAutoFilled && (
+                <span className="ml-2 text-xs text-purple-500 font-normal">(scanned)</span>
+              )}
             </label>
             <Input
               type="date"
@@ -200,6 +320,9 @@ export function ExpenseFormModal({
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Category <span className="text-red-500">*</span>
+            {wasAutoFilled && (
+              <span className="ml-2 text-xs text-purple-500 font-normal">(scanned)</span>
+            )}
           </label>
           <select
             {...register('category')}
@@ -241,6 +364,9 @@ export function ExpenseFormModal({
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Vendor/Store
+              {wasAutoFilled && (
+                <span className="ml-2 text-xs text-purple-500 font-normal">(scanned)</span>
+              )}
             </label>
             <Input
               {...register('vendorName')}
@@ -250,6 +376,9 @@ export function ExpenseFormModal({
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Payment Method
+              {wasAutoFilled && (
+                <span className="ml-2 text-xs text-purple-500 font-normal">(scanned)</span>
+              )}
             </label>
             <select
               {...register('paymentMethod')}
@@ -270,6 +399,9 @@ export function ExpenseFormModal({
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Tax Amount
+              {wasAutoFilled && (
+                <span className="ml-2 text-xs text-purple-500 font-normal">(scanned)</span>
+              )}
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
@@ -337,13 +469,6 @@ export function ExpenseFormModal({
             {...register('tags')}
             placeholder="Enter tags separated by commas"
           />
-        </div>
-
-        {/* Receipt Note */}
-        <div className="bg-gray-50 p-3 rounded-md">
-          <p className="text-sm text-gray-600">
-            📷 You can add receipt photos after saving this expense.
-          </p>
         </div>
 
         {/* Actions */}

@@ -122,3 +122,66 @@ export async function deleteInspirationImage(
     console.error('Error deleting image:', error);
   }
 }
+
+/**
+ * Upload a receipt image for an expense
+ * @param orgId - Organization ID
+ * @param expenseId - Expense ID (use 'temp' for new expenses before saving)
+ * @param file - Image file to upload
+ * @param onProgress - Optional progress callback (0-100)
+ * @returns Download URL of uploaded image
+ */
+export async function uploadReceiptImage(
+  orgId: string,
+  expenseId: string,
+  file: File,
+  onProgress?: (percent: number) => void
+): Promise<string> {
+  validateImageFile(file);
+
+  const compressed = await compressImage(file);
+  const id = crypto.randomUUID();
+  const storageRef = ref(
+    storage,
+    `organizations/${orgId}/expenses/${expenseId}/receipts/${id}.jpg`
+  );
+  const task = uploadBytesResumable(storageRef, compressed, {
+    contentType: 'image/jpeg',
+  });
+
+  return new Promise((resolve, reject) => {
+    task.on(
+      'state_changed',
+      (snapshot) => {
+        const percent = Math.round(
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+        );
+        onProgress?.(percent);
+      },
+      reject,
+      async () => {
+        const url = await getDownloadURL(task.snapshot.ref);
+        resolve(url);
+      }
+    );
+  });
+}
+
+/**
+ * Convert a File to base64 string for API calls
+ * @param file - Image file to convert
+ * @returns Promise with base64 string (without data URI prefix)
+ */
+export async function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      // Remove the data URI prefix (e.g., "data:image/jpeg;base64,")
+      const base64 = result.split(',')[1];
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
