@@ -1,10 +1,12 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   TableCellsIcon,
   ExclamationCircleIcon,
   ArrowPathIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from '@heroicons/react/24/outline';
 import {
   CustomReportConfig,
@@ -15,6 +17,8 @@ import { BarChartCard } from '@/components/charts/BarChartCard';
 import { LineChartCard } from '@/components/charts/LineChartCard';
 import { PieChartCard } from '@/components/charts/PieChartCard';
 import { cn } from '@/lib/utils';
+
+const PAGE_SIZE_OPTIONS = [25, 50, 100, 250];
 
 interface ReportPreviewProps {
   config: CustomReportConfig;
@@ -31,6 +35,20 @@ export function ReportPreview({
   error = null,
   onRefresh,
 }: ReportPreviewProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
+
+  // Reset page when data changes
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [data]);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(data.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, data.length);
+  const paginatedData = data.slice(startIndex, endIndex);
+
   // Prepare chart data
   const chartData = useMemo(() => {
     if (data.length === 0) return [];
@@ -185,9 +203,30 @@ export function ReportPreview({
     default:
       return (
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
-            <h3 className="text-sm font-semibold text-gray-900">{config.name}</h3>
-            <p className="text-xs text-gray-500">{data.length} records</p>
+          <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900">{config.name}</h3>
+              <p className="text-xs text-gray-500">{data.length} records</p>
+            </div>
+            {data.length > 25 && (
+              <div className="flex items-center gap-2">
+                <label className="text-xs text-gray-500">Rows:</label>
+                <select
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="text-xs border-gray-300 rounded-md focus:ring-brand-primary focus:border-brand-primary"
+                >
+                  {PAGE_SIZE_OPTIONS.map((size) => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
           <div className="overflow-x-auto max-h-96">
             <table className="min-w-full divide-y divide-gray-200">
@@ -210,8 +249,8 @@ export function ReportPreview({
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {data.slice(0, 100).map((row, rowIndex) => (
-                  <tr key={rowIndex} className="hover:bg-gray-50">
+                {paginatedData.map((row, rowIndex) => (
+                  <tr key={startIndex + rowIndex} className="hover:bg-gray-50">
                     {config.fields.map((field) => (
                       <td
                         key={field.id}
@@ -229,12 +268,35 @@ export function ReportPreview({
                 ))}
               </tbody>
             </table>
-            {data.length > 100 && (
-              <div className="px-4 py-2 text-center text-xs text-gray-500 bg-gray-50 border-t">
-                Showing 100 of {data.length} records
-              </div>
-            )}
           </div>
+          {totalPages > 1 && (
+            <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+              <p className="text-xs text-gray-500">
+                Showing {startIndex + 1}-{endIndex} of {data.length} records
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="p-1 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeftIcon className="h-4 w-4" />
+                </button>
+                <span className="text-xs text-gray-600">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="p-1 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronRightIcon className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       );
   }
