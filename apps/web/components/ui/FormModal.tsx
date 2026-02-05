@@ -175,7 +175,7 @@ export function FormModal({
       <form onSubmit={handleSubmit}>
         {/* Header */}
         <div className="p-4 md:p-6 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+          <h2 className="text-lg font-semibold text-gray-900 font-heading tracking-tight">{title}</h2>
           {description && (
             <p className="mt-1 text-sm text-gray-500">{description}</p>
           )}
@@ -193,7 +193,7 @@ export function FormModal({
 
         {/* Footer */}
         {!hideFooter && (
-          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 p-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 p-4 border-t border-gray-200 bg-gray-50/80 rounded-b-2xl">
             {footer ?? (
               <>
                 <Button

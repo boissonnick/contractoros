@@ -6,7 +6,6 @@
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
 // Lazy-load @react-pdf/renderer to reduce initial bundle size (~3MB)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function renderPdfToBlob(document: any): Promise<Blob> {
   const { pdf } = await import('@react-pdf/renderer');
   return pdf(document).toBlob();
@@ -416,7 +415,7 @@ export async function generateSignedPdf(
     // Get the last page (where signatures typically go)
     const pages = pdfDoc.getPages();
     const lastPage = pages[pages.length - 1];
-    const { width, height } = lastPage.getSize();
+    const { width: _width, height: _height } = lastPage.getSize();
 
     // Embed the signature image
     let signatureImage;

@@ -17,7 +17,7 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import { Notification, CreateNotificationData } from './types';
+import { CreateNotificationData } from './types';
 
 /**
  * Create a new notification for a user

@@ -88,7 +88,7 @@ export class VoiceLogSyncManager {
         // @ts-expect-error - SyncManager types may not be complete
         await registration.sync.register(SYNC_TAG);
         console.log('Background sync registered');
-      } catch (error) {
+      } catch {
         // Background sync not available, fall back to manual sync
         console.log('Background sync not available, using manual sync');
       }

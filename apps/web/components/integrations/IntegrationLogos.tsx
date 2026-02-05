@@ -165,7 +165,7 @@ export function GenericIntegrationIcon({ className, width = 40, height = 40 }: L
   );
 }
 
-export default {
+const IntegrationLogos = {
   QuickBooksLogo,
   XeroLogo,
   StripeLogo,
@@ -173,3 +173,5 @@ export default {
   ADPLogo,
   GenericIntegrationIcon,
 };
+
+export default IntegrationLogos;

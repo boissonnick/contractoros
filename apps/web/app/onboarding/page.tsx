@@ -4,9 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
-import { doc, updateDoc, setDoc, Timestamp } from 'firebase/firestore';
+import { doc, setDoc, Timestamp } from 'firebase/firestore';
 import { Button, Input, Card, toast } from '@/components/ui';
-import { cn } from '@/lib/utils';
 import {
   CheckCircleIcon,
   ArrowRightIcon,
@@ -102,18 +101,18 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-brand-900 to-brand-950 flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
         {/* Logo */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white">ContractorOS</h1>
-          <p className="text-blue-200 mt-2">Let&apos;s get you set up</p>
+          <h1 className="text-3xl font-bold text-white font-heading tracking-tight">ContractorOS</h1>
+          <p className="text-brand-200 mt-2">Let&apos;s get you set up</p>
         </div>
 
         <Card className="animate-fade-in">
           {currentStep === 'profile' && (
             <div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">Your Profile</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2 font-heading tracking-tight">Your Profile</h2>
               <p className="text-gray-500 mb-6">
                 {profile?.role
                   ? `You're joining as ${profile.role === 'PM' ? 'a Project Manager' : profile.role === 'SUB' ? 'a Subcontractor' : profile.role === 'CLIENT' ? 'a Client' : profile.role === 'EMPLOYEE' ? 'an Employee' : profile.role === 'CONTRACTOR' ? 'a Contractor' : 'an Owner'}.`
@@ -165,10 +164,10 @@ export default function OnboardingPage() {
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-scale-in">
                 <CheckCircleIcon className="h-8 w-8 text-green-600" />
               </div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">You&apos;re all set!</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2 font-heading tracking-tight">You&apos;re all set!</h2>
               <p className="text-gray-500">Redirecting to your dashboard...</p>
               <div className="mt-4">
-                <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto" />
+                <div className="w-8 h-8 border-4 border-brand-600 border-t-transparent rounded-full animate-spin mx-auto" />
               </div>
             </div>
           )}

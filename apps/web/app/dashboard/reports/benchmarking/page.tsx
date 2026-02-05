@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { useAuth } from '@/lib/auth';
-import { useFinancialReports, RevenueByProject, ProjectPnLData } from '@/lib/hooks/useReports';
+import { useFinancialReports, ProjectPnLData } from '@/lib/hooks/useReports';
 import { Card, PageHeader, EmptyState } from '@/components/ui';
 import { BarChartCard } from '@/components/charts';
 import {

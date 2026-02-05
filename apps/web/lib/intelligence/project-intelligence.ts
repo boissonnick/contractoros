@@ -17,11 +17,9 @@ import {
   ProfitabilityForecast,
   ProfitabilityFactor,
   ProjectRiskIndicator,
-  ProjectRiskType,
   RiskLevel,
   ProjectVarianceAnalysis,
   ProjectRecommendation,
-  RISK_TYPE_LABELS,
 } from '@/types';
 
 // Average margins by project category (from industry data)
@@ -197,7 +195,7 @@ export function generateProfitabilityForecast(data: ProjectData): ProfitabilityF
  */
 export function detectRiskIndicators(data: ProjectData): ProjectRiskIndicator[] {
   const risks: ProjectRiskIndicator[] = [];
-  const { project, phases = [], tasks = [], expenses = [], changeOrders = [] } = data;
+  const { project, phases: _phases = [], tasks = [], expenses: _expenses = [], changeOrders = [] } = data;
 
   // 1. Thin margin risk
   const revenue = project.quoteTotal || project.budget || 0;

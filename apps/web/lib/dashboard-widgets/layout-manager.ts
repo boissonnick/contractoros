@@ -43,7 +43,7 @@ export async function saveDashboardLayout(
  */
 export async function loadDashboardLayout(
   userId: string,
-  orgId: string
+  _orgId: string
 ): Promise<DashboardLayout | null> {
   const docRef = doc(db, COLLECTION_PATH, userId, SUBCOLLECTION, DOC_ID);
   const snapshot = await getDoc(docRef);

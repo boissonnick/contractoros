@@ -63,7 +63,7 @@ export function useSubcontractorInvoices(
 
   const orgId = profile?.orgId;
   const currentUserId = profile?.uid;
-  const currentUserName = profile?.displayName || user?.email || 'Unknown';
+  const _currentUserName = profile?.displayName || user?.email || 'Unknown';
   const isManager = profile?.role === 'OWNER' || profile?.role === 'PM';
 
   // Fetch invoices with real-time updates

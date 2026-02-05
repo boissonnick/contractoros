@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { Equipment, EquipmentStatus, EquipmentCategory } from '@/types';
 import {
   WrenchScrewdriverIcon,
@@ -64,11 +65,12 @@ export function EquipmentCard({ equipment, onCheckOut, onReturn, onView }: Equip
 
       {/* Photo or placeholder */}
       {equipment.photoUrl ? (
-        <div className="w-full h-32 mb-3 rounded-md overflow-hidden bg-gray-100">
-          <img
+        <div className="relative w-full h-32 mb-3 rounded-md overflow-hidden bg-gray-100">
+          <Image
             src={equipment.photoUrl}
             alt={equipment.name}
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
           />
         </div>
       ) : (

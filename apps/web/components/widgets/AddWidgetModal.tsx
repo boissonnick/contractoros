@@ -10,7 +10,7 @@ import {
   BoltIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
-import { WidgetType, WidgetDefinition } from '@/lib/dashboard-widgets/types';
+import { WidgetType } from '@/lib/dashboard-widgets/types';
 import { getAvailableWidgets } from '@/lib/dashboard-widgets/widget-registry';
 
 interface AddWidgetModalProps {

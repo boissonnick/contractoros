@@ -117,7 +117,7 @@ export default function EstimatesPage() {
     return { total, drafts, sent, accepted, declined, totalValue, wonValue, winRate };
   }, [estimates]);
 
-  const handleDelete = async (estimateId: string) => {
+  const _handleDelete = async (estimateId: string) => {
     if (!confirm('Are you sure you want to delete this estimate?')) return;
 
     try {
@@ -160,7 +160,7 @@ export default function EstimatesPage() {
 
       {/* Mobile Header */}
       <div className="md:hidden">
-        <h1 className="text-xl font-bold text-gray-900">Estimates</h1>
+        <h1 className="text-xl font-heading font-bold tracking-tight text-gray-900">Estimates</h1>
         <p className="text-xs text-gray-500">Create and manage proposals</p>
       </div>
 
@@ -168,44 +168,44 @@ export default function EstimatesPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-gray-100 rounded-lg">
+            <div className="p-2 bg-gray-100 rounded-xl">
               <DocumentTextIcon className="h-5 w-5 text-gray-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+              <p className="text-2xl font-heading font-bold tracking-tight text-gray-900">{stats.total}</p>
               <p className="text-xs text-gray-500">Total Estimates</p>
             </div>
           </div>
         </Card>
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
+            <div className="p-2 bg-blue-100 rounded-xl">
               <EnvelopeIcon className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{stats.sent}</p>
+              <p className="text-2xl font-heading font-bold tracking-tight text-gray-900">{stats.sent}</p>
               <p className="text-xs text-gray-500">Pending Response</p>
             </div>
           </div>
         </Card>
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 rounded-lg">
+            <div className="p-2 bg-green-100 rounded-xl">
               <CurrencyDollarIcon className="h-5 w-5 text-green-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.wonValue)}</p>
+              <p className="text-2xl font-heading font-bold tracking-tight text-gray-900">{formatCurrency(stats.wonValue)}</p>
               <p className="text-xs text-gray-500">Won Value</p>
             </div>
           </div>
         </Card>
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
+            <div className="p-2 bg-purple-100 rounded-xl">
               <ArrowTrendingUpIcon className="h-5 w-5 text-purple-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{stats.winRate}%</p>
+              <p className="text-2xl font-heading font-bold tracking-tight text-gray-900">{stats.winRate}%</p>
               <p className="text-xs text-gray-500">Win Rate</p>
             </div>
           </div>
@@ -284,7 +284,7 @@ export default function EstimatesPage() {
                         </Badge>
                       )}
                     </div>
-                    <h3 className="font-medium text-gray-900">{estimate.name}</h3>
+                    <h3 className="font-heading font-medium text-gray-900">{estimate.name}</h3>
                     <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
                       <span>{estimate.clientName}</span>
                       <span>Created {format(new Date(estimate.createdAt), 'MMM d, yyyy')}</span>

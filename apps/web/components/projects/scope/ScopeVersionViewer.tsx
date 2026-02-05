@@ -292,7 +292,7 @@ export default function ScopeVersionViewer({ scopes, currentScopeId, onRestore }
           </div>
 
           <div className="space-y-2">
-            {diff.map((d, i) => {
+            {diff.map((d) => {
               if (d.type === 'unchanged') return null;
 
               const isExpanded = expandedItems.has(d.item.id);

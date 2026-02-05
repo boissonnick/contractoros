@@ -28,7 +28,6 @@ import {
   limit as firestoreLimit,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import { format } from 'date-fns';
 
 // ============================================
 // Types
@@ -555,7 +554,7 @@ async function collectProfileData(userId: string): Promise<Record<string, unknow
 
   const data = userDoc.data();
   // Remove sensitive fields
-  const { bankInfo, ...safeData } = data;
+  const { bankInfo: _bankInfo, ...safeData } = data;
 
   // Convert timestamps
   return {

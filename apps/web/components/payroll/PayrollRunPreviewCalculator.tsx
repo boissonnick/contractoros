@@ -2,7 +2,6 @@
 
 import React, { useMemo } from 'react';
 import { PayPeriod, TimeEntry, UserProfile } from '@/types';
-import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import {
   UserGroupIcon,

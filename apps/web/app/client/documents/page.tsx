@@ -38,7 +38,7 @@ const TYPE_CONFIG: Record<string, { label: string; icon: typeof DocumentTextIcon
 };
 
 export default function ClientDocumentsPage() {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const [documents, setDocuments] = useState<ClientDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -108,7 +108,7 @@ export default function ClientDocumentsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -116,7 +116,7 @@ export default function ClientDocumentsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Documents</h1>
+        <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">Documents</h1>
         <p className="text-gray-500 mt-1">Access contracts, invoices, change orders, and other project documents</p>
       </div>
 
@@ -139,7 +139,7 @@ export default function ClientDocumentsPage() {
               onClick={() => setTypeFilter(t)}
               className={cn(
                 'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
-                typeFilter === t ? 'bg-blue-50 text-blue-600' : 'text-gray-500 hover:bg-gray-100'
+                typeFilter === t ? 'bg-brand-primary/10 text-brand-primary' : 'text-gray-500 hover:bg-gray-100'
               )}
             >
               {t === 'all' ? 'All' : TYPE_CONFIG[t]?.label || t}
@@ -168,7 +168,7 @@ export default function ClientDocumentsPage() {
               <Card key={doc.id} className="p-4 hover:bg-gray-50 transition-colors">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className={cn('p-2 rounded-lg flex-shrink-0', config.color)}>
+                    <div className={cn('p-2 rounded-xl flex-shrink-0', config.color)}>
                       <Icon className="h-5 w-5" />
                     </div>
                     <div className="min-w-0">

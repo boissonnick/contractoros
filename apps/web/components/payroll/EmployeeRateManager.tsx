@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { UserProfile, EmployeeType } from '@/types';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -14,7 +14,6 @@ import {
   ChartBarIcon,
   ExclamationTriangleIcon,
   CheckIcon,
-  XMarkIcon,
 } from '@heroicons/react/24/outline';
 
 // Rate history entry
@@ -108,7 +107,7 @@ export function EmployeeRateManager({
     }
   };
 
-  const handleUpdateOvertimeMultiplier = async () => {
+  const _handleUpdateOvertimeMultiplier = async () => {
     if (!onUpdateOvertimeMultiplier) return;
     try {
       await onUpdateOvertimeMultiplier(parseFloat(overtimeMultiplier));

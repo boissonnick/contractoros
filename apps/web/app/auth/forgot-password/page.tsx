@@ -18,7 +18,7 @@ import {
 import Link from 'next/link';
 
 export default function ForgotPasswordPage() {
-  const router = useRouter();
+  const _router = useRouter();
   const [emailSent, setEmailSent] = useState(false);
   const [sentEmail, setSentEmail] = useState('');
 

@@ -29,9 +29,9 @@ export default function Card({
   };
 
   const baseStyles = cn(
-    'bg-white rounded-xl border border-gray-200',
+    'bg-white rounded-2xl border border-gray-100 shadow-[var(--shadow-card)]',
     paddingStyles[padding],
-    hover && 'hover:shadow-md hover:border-gray-300 transition-all duration-200 cursor-pointer',
+    hover && 'hover:shadow-[var(--shadow-soft)] hover:border-gray-200 transition-all duration-200 cursor-pointer',
     className
   );
 
@@ -81,7 +81,7 @@ export function CardTitle({
   className?: string;
 }) {
   return (
-    <h3 className={cn('text-lg font-semibold text-gray-900', className)}>
+    <h3 className={cn('text-lg font-semibold text-gray-900 font-heading tracking-tight', className)}>
       {children}
     </h3>
   );
@@ -149,39 +149,50 @@ export function StatCard({
   href,
   color = 'blue',
 }: StatCardProps) {
-  const colorStyles = {
-    blue: 'bg-blue-50 text-blue-600',
-    green: 'bg-green-50 text-green-600',
-    yellow: 'bg-yellow-50 text-yellow-600',
-    red: 'bg-red-50 text-red-600',
-    purple: 'bg-purple-50 text-purple-600',
-    gray: 'bg-gray-50 text-gray-600',
+  const iconColorOnly = {
+    blue: 'text-blue-600',
+    green: 'text-green-600',
+    yellow: 'text-yellow-600',
+    red: 'text-red-600',
+    purple: 'text-purple-600',
+    gray: 'text-gray-600',
+  };
+
+  const gradientStyles = {
+    blue: 'bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-200/50',
+    green: 'bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-200/50',
+    yellow: 'bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-amber-200/50',
+    red: 'bg-gradient-to-br from-red-500/10 to-red-600/5 border-red-200/50',
+    purple: 'bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-200/50',
+    gray: 'bg-gradient-to-br from-gray-500/10 to-gray-600/5 border-gray-200/50',
   };
 
   const content = (
-    <Card hover={!!href} className="relative overflow-hidden">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-500">{title}</p>
-          <p className="mt-2 text-3xl font-bold text-gray-900">{value}</p>
-          {trend && (
-            <p
-              className={cn(
-                'mt-2 text-sm font-medium',
-                trend.positive ? 'text-green-600' : 'text-red-600'
-              )}
-            >
-              {trend.positive ? '↑' : '↓'} {trend.value}
-            </p>
+    <div className="group transition-all duration-300 hover:shadow-lg hover:shadow-brand-500/5">
+      <Card hover={!!href} className={cn("relative overflow-hidden", gradientStyles[color])}>
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-gray-400 font-heading">{title}</p>
+            <p className="mt-2 text-3xl font-bold text-gray-900 font-heading tracking-tight">{value}</p>
+            {trend && (
+              <p
+                className={cn(
+                  'mt-2 text-sm font-medium',
+                  trend.positive ? 'text-green-600' : 'text-red-600'
+                )}
+              >
+                {trend.positive ? '↑' : '↓'} {trend.value}
+              </p>
+            )}
+          </div>
+          {icon && (
+            <div className={cn('p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-black/5', iconColorOnly[color])}>
+              {icon}
+            </div>
           )}
         </div>
-        {icon && (
-          <div className={cn('p-3 rounded-xl', colorStyles[color])}>
-            {icon}
-          </div>
-        )}
-      </div>
-    </Card>
+      </Card>
+    </div>
   );
 
   if (href) {

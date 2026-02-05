@@ -16,7 +16,7 @@ interface ChangeOrderApprovalPanelProps {
 
 const ROLE_ORDER: ('pm' | 'owner' | 'client')[] = ['pm', 'owner', 'client'];
 const ROLE_LABELS: Record<string, string> = { pm: 'Project Manager', owner: 'Owner', client: 'Client' };
-const STATUS_DOT: Record<string, string> = { pending: 'bg-yellow-400', approved: 'bg-green-500', rejected: 'bg-red-500' };
+const _STATUS_DOT: Record<string, string> = { pending: 'bg-yellow-400', approved: 'bg-green-500', rejected: 'bg-red-500' };
 
 export default function ChangeOrderApprovalPanel({ co, currentRole, onApprove, onReject, onSubmitForApproval }: ChangeOrderApprovalPanelProps) {
   const [comments, setComments] = useState('');

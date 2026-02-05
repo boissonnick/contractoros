@@ -20,7 +20,6 @@ import {
   CheckCircleIcon,
   ExclamationCircleIcon,
   XCircleIcon,
-  UserIcon,
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 import { useGDPRExport, DataCategory, DATA_CATEGORY_LABELS, DATA_CATEGORY_DESCRIPTIONS, ALL_DATA_CATEGORIES, EXPORT_STATUS_CONFIG, formatFileSize, getExpirationMessage, isExportExpired } from '@/lib/hooks/useGDPRExport';

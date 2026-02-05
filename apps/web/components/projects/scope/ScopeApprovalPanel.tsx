@@ -21,7 +21,7 @@ interface ScopeApprovalPanelProps {
   onReviseScope?: () => void;
 }
 
-export default function ScopeApprovalPanel({ scope, clientId, clientName, onSubmitForApproval, onRecallSubmission, onApprove, onReject, onReviseScope }: ScopeApprovalPanelProps) {
+export default function ScopeApprovalPanel({ scope, clientId, clientName: _clientName, onSubmitForApproval, onRecallSubmission, onApprove, onReject, onReviseScope }: ScopeApprovalPanelProps) {
   const [comments, setComments] = useState('');
 
   const myApproval = clientId ? scope.approvals.find(a => a.clientId === clientId) : null;

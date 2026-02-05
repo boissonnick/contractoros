@@ -88,7 +88,7 @@ interface UsePhasesOptions {
 }
 
 export function usePhases({ projectId }: UsePhasesOptions) {
-  const { profile } = useAuth();
+  const { profile: _profile } = useAuth();
   const [phases, setPhases] = useState<ProjectPhase[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

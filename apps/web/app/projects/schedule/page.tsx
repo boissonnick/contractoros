@@ -202,8 +202,8 @@ export default function ProjectsSchedulePage() {
     const totalVisibleDays = differenceInDays(viewEndDate, viewStartDate) + 1;
 
     // Calculate project position relative to view
-    const daysFromStart = Math.max(0, differenceInDays(projectStart, viewStartDate));
-    const projectDuration = Math.max(1, differenceInDays(projectEnd, projectStart) + 1);
+    const _daysFromStart = Math.max(0, differenceInDays(projectStart, viewStartDate));
+    const _projectDuration = Math.max(1, differenceInDays(projectEnd, projectStart) + 1);
 
     // Calculate if project extends beyond view
     const visibleStart = isBefore(projectStart, viewStartDate) ? viewStartDate : projectStart;

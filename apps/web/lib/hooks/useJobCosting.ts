@@ -12,8 +12,6 @@ import {
   deleteDoc,
   doc,
   Timestamp,
-  getDoc,
-  setDoc,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
@@ -71,7 +69,7 @@ export function useJobCosts(options: UseJobCostsOptions): UseJobCostsReturn {
 
   const orgId = profile?.orgId;
   const currentUserId = profile?.uid;
-  const currentUserName = profile?.displayName || 'Unknown';
+  const _currentUserName = profile?.displayName || 'Unknown';
   const isAdmin = profile?.role === 'OWNER' || profile?.role === 'PM';
 
   const { projectId, category, source, phaseId, startDate, endDate } = options;
@@ -290,7 +288,7 @@ export function useProjectProfitability(projectId: string): UseProjectProfitabil
 
     // This would typically be done by a Cloud Function, but we can do a simple calculation here
     const costsRef = collection(db, `organizations/${orgId}/jobCosts`);
-    const q = query(costsRef, where('projectId', '==', projectId));
+    const _q = query(costsRef, where('projectId', '==', projectId));
 
     // Note: In production, this should be a Cloud Function that runs server-side
     console.log('Profitability recalculation should be triggered via Cloud Function');

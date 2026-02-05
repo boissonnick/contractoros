@@ -13,6 +13,8 @@ const eslintConfig = [
       '@typescript-eslint/no-unused-vars': ['warn', {
         argsIgnorePattern: '^_',
         varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_',
+        destructuredArrayIgnorePattern: '^_',
       }],
       // Allow any type (too many existing usages to fix now)
       '@typescript-eslint/no-explicit-any': 'off',
@@ -50,6 +52,7 @@ const eslintConfig = [
       'out/',
       'public/',
       'scripts/',
+      'coverage/',
     ],
   },
 ];

@@ -205,7 +205,7 @@ export function FilterBar({
               onChange={handleSearchChange}
               placeholder={searchPlaceholder}
               className="
-                w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg
+                w-full pl-10 pr-10 py-2 border border-gray-200 rounded-xl
                 text-sm placeholder-gray-400
                 focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary
                 transition-colors
@@ -240,7 +240,7 @@ export function FilterBar({
                 onChange={(e) => onFilterChange?.(filter.key, e.target.value)}
                 className={`
                   ${filter.width || 'w-32 sm:w-40'}
-                  pl-3 pr-8 py-2 border border-gray-300 rounded-lg
+                  pl-3 pr-8 py-2 border border-gray-200 rounded-xl
                   text-sm text-gray-700 bg-white
                   focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary
                   transition-colors cursor-pointer appearance-none

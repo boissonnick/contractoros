@@ -2,11 +2,9 @@
 
 import React, { useState, useCallback } from 'react';
 import { FormModal } from '@/components/ui/FormModal';
-import { FormInput, FormSelect, FormSection } from '@/components/ui/FormField';
+import { FormSection } from '@/components/ui/FormField';
 import {
-  ClockIcon,
   EnvelopeIcon,
-  CalendarDaysIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 

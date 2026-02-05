@@ -28,7 +28,7 @@ export default function BidComparison({ bids, subs, onAccept }: BidComparisonPro
     <div className="space-y-4">
       <h4 className="text-sm font-semibold text-gray-900">Bid Comparison</h4>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {sortedByAmount.map((bid, index) => {
+        {sortedByAmount.map((bid) => {
           const sub = subs.find(s => s.id === bid.subId);
           const isLowest = bid.amount === lowestAmount;
           const isAccepted = bid.status === 'accepted';

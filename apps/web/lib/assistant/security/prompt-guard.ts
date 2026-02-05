@@ -172,7 +172,7 @@ const CODE_EXECUTION_PATTERNS = [
  */
 export function validatePrompt(
   prompt: string,
-  context?: { orgId?: string; userId?: string }
+  _context?: { orgId?: string; userId?: string }
 ): PromptValidationResult {
   const threats: PromptThreat[] = [];
   const details: string[] = [];

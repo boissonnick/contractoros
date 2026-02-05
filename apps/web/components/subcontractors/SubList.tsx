@@ -2,7 +2,6 @@
 
 import React, { useState, useMemo } from 'react';
 import { Subcontractor } from '@/types';
-import { Input } from '@/components/ui';
 import { MagnifyingGlassIcon, ArrowsUpDownIcon } from '@heroicons/react/24/outline';
 import SubCard from './SubCard';
 

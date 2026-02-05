@@ -40,7 +40,6 @@ import {
   DocumentTextIcon,
   ClockIcon,
   CheckCircleIcon,
-  ExclamationCircleIcon,
   BanknotesIcon,
   EyeIcon,
   TrashIcon,
@@ -48,7 +47,6 @@ import {
   ChevronRightIcon,
   XCircleIcon,
 } from '@heroicons/react/24/outline';
-import { format } from 'date-fns';
 
 // Status configuration with icons
 const statusConfig: Record<SubInvoiceStatus, { label: string; color: string; icon: React.ReactNode }> = {
@@ -453,7 +451,7 @@ function InvoiceDetailModal({ invoice, isOpen, onClose, onSubmit }: InvoiceDetai
 
         {/* Line Items */}
         <div>
-          <h4 className="font-medium text-gray-900 mb-2">Line Items</h4>
+          <h4 className="font-medium font-heading tracking-tight text-gray-900 mb-2">Line Items</h4>
           <div className="border rounded-lg overflow-hidden">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -505,7 +503,7 @@ function InvoiceDetailModal({ invoice, isOpen, onClose, onSubmit }: InvoiceDetai
         {/* Payment History */}
         {invoice.payments.length > 0 && (
           <div>
-            <h4 className="font-medium text-gray-900 mb-2">Payment History</h4>
+            <h4 className="font-medium font-heading tracking-tight text-gray-900 mb-2">Payment History</h4>
             <div className="space-y-2">
               {invoice.payments.map((payment, index) => (
                 <div key={index} className="flex justify-between p-3 bg-green-50 rounded-lg">
@@ -528,7 +526,7 @@ function InvoiceDetailModal({ invoice, isOpen, onClose, onSubmit }: InvoiceDetai
         {/* Notes */}
         {invoice.notes && (
           <div>
-            <h4 className="font-medium text-gray-900 mb-2">Notes</h4>
+            <h4 className="font-medium font-heading tracking-tight text-gray-900 mb-2">Notes</h4>
             <p className="text-gray-600 text-sm">{invoice.notes}</p>
           </div>
         )}
@@ -543,7 +541,7 @@ function InvoiceDetailModal({ invoice, isOpen, onClose, onSubmit }: InvoiceDetai
 
         {/* Status Timeline */}
         <div>
-          <h4 className="font-medium text-gray-900 mb-2">Timeline</h4>
+          <h4 className="font-medium font-heading tracking-tight text-gray-900 mb-2">Timeline</h4>
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2 text-gray-600">
               <DocumentTextIcon className="h-4 w-4" />
@@ -726,7 +724,7 @@ export default function SubInvoicesPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-gray-100 rounded-lg">
+            <div className="p-2 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
               <DocumentTextIcon className="h-5 w-5 text-gray-600" />
             </div>
             <div>
@@ -737,8 +735,8 @@ export default function SubInvoicesPage() {
         </Card>
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <ClockIcon className="h-5 w-5 text-blue-600" />
+            <div className="p-2 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
+              <ClockIcon className="h-5 w-5 text-brand-primary" />
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900">{stats.pending}</p>
@@ -748,7 +746,7 @@ export default function SubInvoicesPage() {
         </Card>
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-yellow-100 rounded-lg">
+            <div className="p-2 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
               <BanknotesIcon className="h-5 w-5 text-yellow-600" />
             </div>
             <div>
@@ -759,7 +757,7 @@ export default function SubInvoicesPage() {
         </Card>
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 rounded-lg">
+            <div className="p-2 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
               <CheckCircleIcon className="h-5 w-5 text-green-600" />
             </div>
             <div>
@@ -782,7 +780,7 @@ export default function SubInvoicesPage() {
               className={cn(
                 'px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors',
                 isActive
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-brand-primary text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               )}
             >
@@ -839,7 +837,7 @@ export default function SubInvoicesPage() {
                     </Badge>
                   </div>
                   {invoice.projectName && (
-                    <h3 className="font-medium text-gray-900">{invoice.projectName}</h3>
+                    <h3 className="font-medium font-heading tracking-tight text-gray-900">{invoice.projectName}</h3>
                   )}
                   <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
                     <span>{invoice.lineItems.length} line item{invoice.lineItems.length !== 1 ? 's' : ''}</span>

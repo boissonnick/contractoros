@@ -7,7 +7,6 @@ import {
   BanknotesIcon,
   ClockIcon,
   ExclamationCircleIcon,
-  ArrowTrendingUpIcon,
   ChartBarIcon,
 } from '@heroicons/react/24/outline';
 import { db } from '@/lib/firebase/config';

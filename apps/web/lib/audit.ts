@@ -7,7 +7,7 @@
 
 import { collection, addDoc, Timestamp, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import { UserRole, RolePermissions } from '@/types';
+import { UserRole } from '@/types';
 
 // ============================================
 // Types

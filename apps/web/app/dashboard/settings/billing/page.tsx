@@ -112,7 +112,7 @@ interface Usage {
 
 export default function BillingSettingsPage() {
   const { profile } = useAuth();
-  const [org, setOrg] = useState<Partial<Organization> | null>(null);
+  const [, setOrg] = useState<Partial<Organization> | null>(null);
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<SubscriptionStatus>({
     plan: 'free',

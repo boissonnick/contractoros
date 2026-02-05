@@ -5,7 +5,6 @@ import Link from 'next/link';
 import {
   DocumentTextIcon,
   MagnifyingGlassIcon,
-  FolderIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';

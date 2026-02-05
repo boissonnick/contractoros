@@ -15,7 +15,7 @@ import {
   getDoc,
   Timestamp
 } from 'firebase/firestore';
-import { Button, Card, Input, Avatar, Badge, toast } from '@/components/ui';
+import { Button, Card, Input, toast } from '@/components/ui';
 import { cn, formatDate } from '@/lib/utils';
 import {
   PlusIcon,
@@ -23,10 +23,8 @@ import {
   CloudIcon,
   BoltIcon,
   CalendarIcon,
-  ClockIcon,
   UserGroupIcon,
   DocumentTextIcon,
-  CameraIcon,
   ChevronDownIcon,
   ChevronRightIcon,
 } from '@heroicons/react/24/outline';
@@ -53,10 +51,10 @@ const weatherOptions = [
 export default function ProjectLogsPage() {
   const params = useParams();
   const projectId = params.id as string;
-  const router = useRouter();
+  const _router = useRouter();
   const { user, profile } = useAuth();
 
-  const [project, setProject] = useState<Project | null>(null);
+  const [, setProject] = useState<Project | null>(null);
   const [logs, setLogs] = useState<DailyLogWithId[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNewLog, setShowNewLog] = useState(false);

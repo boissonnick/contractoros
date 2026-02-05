@@ -21,12 +21,12 @@ export default function FieldPortalError({
           <ExclamationTriangleIcon className="h-7 w-7 text-red-400" />
         </div>
 
-        <h2 className="text-xl font-bold text-white mb-2">
+        <h2 className="text-xl font-bold font-heading tracking-tight text-white mb-2">
           Something Went Wrong
         </h2>
 
         <p className="text-gray-400 mb-6">
-          We couldn't load this page. Check your connection and try again.
+          We couldn&apos;t load this page. Check your connection and try again.
         </p>
 
         <div className="flex flex-col gap-3">

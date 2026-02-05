@@ -1,10 +1,9 @@
 "use client";
 
 import React, { useCallback, useRef, useState } from 'react';
+import Image from 'next/image';
 import { uploadInspirationImage } from '@/lib/firebase/upload-helpers';
-import { Button } from '@/components/ui';
 import {
-  PhotoIcon,
   XMarkIcon,
   ArrowUpTrayIcon,
 } from '@heroicons/react/24/outline';
@@ -165,10 +164,11 @@ export default function ImageUploader({
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
           {images.map((img, i) => (
             <div key={i} className="relative group aspect-square rounded-lg overflow-hidden bg-gray-100">
-              <img
+              <Image
                 src={img.url}
                 alt={`Inspiration ${i + 1}`}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />
               <button
                 onClick={(e) => {

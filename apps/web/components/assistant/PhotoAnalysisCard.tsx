@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import {
   PhotoIcon,
   PlusIcon,
@@ -118,9 +119,11 @@ export function PhotoAnalysisCard({
         {/* Thumbnail */}
         <div className="flex-shrink-0 w-16 h-16 rounded-lg bg-gray-100 overflow-hidden">
           {analysis.thumbnailUrl ? (
-            <img
+            <Image
               src={analysis.thumbnailUrl}
               alt={analysis.fileName}
+              width={64}
+              height={64}
               className="w-full h-full object-cover"
             />
           ) : (

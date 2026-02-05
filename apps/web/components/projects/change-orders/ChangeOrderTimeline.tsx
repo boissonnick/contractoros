@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { ChangeOrder } from '@/types';
-import { cn } from '@/lib/utils';
 import { formatDateTime } from '@/lib/date-utils';
 
 interface ChangeOrderTimelineProps {

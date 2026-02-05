@@ -211,6 +211,7 @@ export default function ScopeOfWorkPdf({ scopeOfWork, organization }: ScopeOfWor
         <View style={styles.header}>
           <View>
             {organization.logoURL ? (
+              /* eslint-disable-next-line jsx-a11y/alt-text */
               <Image src={organization.logoURL} style={styles.logo} />
             ) : (
               <Text style={styles.companyName}>{organization.name}</Text>

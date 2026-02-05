@@ -8,8 +8,8 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-    const status = searchParams.get('status') || 'active';
+    const _userId = searchParams.get('userId');
+    const _status = searchParams.get('status') || 'active';
 
     // TODO: Fetch user's reminders from Firestore
     // TODO: Filter by status (active, snoozed, completed)

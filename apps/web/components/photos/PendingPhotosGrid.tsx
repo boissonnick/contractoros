@@ -309,7 +309,7 @@ export default function PendingPhotosGrid({
       {/* Photo grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
         {photos.map((photo) => {
-          const isEditing = editingPhoto === photo.localId;
+          const _isEditing = editingPhoto === photo.localId;
           const isUploading = photo.syncStatus === 'uploading';
           const hasFailed = photo.syncStatus === 'failed';
 
@@ -323,6 +323,7 @@ export default function PendingPhotosGrid({
               )}
             >
               {/* Thumbnail with lazy loading */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={photo.thumbnail}
                 alt={photo.caption || 'Pending photo'}
@@ -447,6 +448,7 @@ export default function PendingPhotosGrid({
             <div className="p-4 space-y-4">
               {/* Preview thumbnail */}
               {photos.find((p) => p.localId === editingPhoto) && (
+                /* eslint-disable-next-line @next/next/no-img-element */
                 <img
                   src={photos.find((p) => p.localId === editingPhoto)?.thumbnail}
                   alt="Preview"

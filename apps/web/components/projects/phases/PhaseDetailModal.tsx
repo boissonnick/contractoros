@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { ProjectPhase, PhaseDocument, PhaseMilestone } from '@/types';
+import { ProjectPhase } from '@/types';
 import { Button } from '@/components/ui';
 import { XMarkIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';

@@ -9,8 +9,6 @@ import {
   ExclamationTriangleIcon,
   PlusIcon,
   MagnifyingGlassIcon,
-  FunnelIcon,
-  ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 import {
   useMaterials,
@@ -33,8 +31,7 @@ import {
 } from '@/components/materials';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
-import Badge, { BadgeProps } from '@/components/ui/Badge';
+import Badge from '@/components/ui/Badge';
 import EmptyState from '@/components/ui/EmptyState';
 import Skeleton from '@/components/ui/Skeleton';
 import PageHeader from '@/components/ui/PageHeader';
@@ -47,13 +44,10 @@ import {
   EquipmentCheckoutStatus,
   Supplier,
   MaterialPurchaseOrder,
-  MaterialPurchaseOrderStatus,
   MATERIAL_CATEGORIES,
   MATERIAL_CATEGORY_GROUPS,
-  getMaterialCategoriesByGroup,
   MATERIAL_STATUSES,
   EQUIPMENT_STATUSES,
-  MATERIAL_PURCHASE_ORDER_STATUSES,
 } from '@/types';
 
 type TabType = 'inventory' | 'equipment' | 'orders' | 'suppliers' | 'alerts';
@@ -89,7 +83,6 @@ export default function MaterialsPage() {
     stats: materialStats,
     createMaterial,
     updateMaterial,
-    deleteMaterial,
   } = useMaterials({
     searchTerm: activeTab === 'inventory' ? searchTerm : undefined,
     category: activeTab === 'inventory' && categoryFilter ? categoryFilter : undefined,
@@ -114,7 +107,6 @@ export default function MaterialsPage() {
     loading: suppliersLoading,
     createSupplier,
     updateSupplier,
-    deleteSupplier,
   } = useSuppliers();
 
   const {
@@ -123,15 +115,12 @@ export default function MaterialsPage() {
     stats: orderStats,
     createPurchaseOrder,
     updatePurchaseOrder,
-    approvePurchaseOrder,
-    receiveItems,
   } = usePurchaseOrders();
 
   const {
     alerts,
     loading: alertsLoading,
     acknowledgeAlert,
-    resolveAlert,
   } = useLowStockAlerts();
 
   // Projects for equipment checkout and purchase orders

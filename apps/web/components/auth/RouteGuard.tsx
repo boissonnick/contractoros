@@ -148,7 +148,7 @@ export function RouteGuard({
  * Default Access Denied page component
  * BUG #7 FIXED: Now shows actual role from useAuth, plus impersonated role when in demo mode
  */
-function AccessDeniedPage({ pathname }: { pathname: string }) {
+function AccessDeniedPage({ pathname: _pathname }: { pathname: string }) {
   const router = useRouter();
   const { profile } = useAuth();
   const { currentRole, isImpersonating } = useImpersonation();

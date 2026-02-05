@@ -490,7 +490,7 @@ function cacheWeather(cacheKey: string, data: ExtendedWeatherData): void {
 /**
  * Map internal condition to simplified condition type
  */
-function mapToSimpleCondition(condition: WeatherCondition): CurrentWeatherCondition['condition'] {
+function _mapToSimpleCondition(condition: WeatherCondition): CurrentWeatherCondition['condition'] {
   const mapping: Record<WeatherCondition, CurrentWeatherCondition['condition']> = {
     sunny: 'sunny',
     partly_cloudy: 'cloudy',
@@ -1633,7 +1633,7 @@ export function assessProjectWeatherRisk(
 
   if (uniqueTrades.length > 0) {
     uniqueTrades.forEach(trade => {
-      const { riskLevel, factors } = assessTradeWeatherRisk(
+      const { riskLevel: _riskLevel, factors } = assessTradeWeatherRisk(
         trade,
         forecast.tempHigh,
         forecast.precipitation,

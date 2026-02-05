@@ -511,7 +511,6 @@ describe('getEntityTaxLabel', () => {
   });
 
   it('returns fallback for unknown entity type', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(getEntityTaxLabel('unknown_type' as any)).toBe('Business Tax');
   });
 });

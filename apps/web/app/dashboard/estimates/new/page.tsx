@@ -7,7 +7,7 @@ import { db } from '@/lib/firebase/config';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { Button, Card } from '@/components/ui';
 import { toast } from '@/components/ui/Toast';
-import { Estimate, EstimateLineItem, EstimateSection } from '@/types';
+import { Estimate, EstimateLineItem } from '@/types';
 import {
   ArrowLeftIcon,
   PlusIcon,

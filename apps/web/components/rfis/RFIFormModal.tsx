@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import {
@@ -10,7 +10,6 @@ import {
   TrashIcon,
   LinkIcon,
 } from '@heroicons/react/24/outline';
-import { RFIStatus } from './RFICard';
 
 export interface RFIFormData {
   title: string;
@@ -53,7 +52,7 @@ export function RFIFormModal({
   initialData,
   teamMembers,
   drawings = [],
-  projectId,
+  projectId: _projectId,
   editMode = false,
 }: RFIFormModalProps) {
   const [formData, setFormData] = useState<RFIFormData>({

@@ -45,12 +45,6 @@ import {
   getUserDataForExport,
   downloadExportFile,
   isExportExpired,
-  EXPORT_STATUS_LABELS,
-  EXPORT_STATUS_CONFIG,
-  DATA_CATEGORY_LABELS,
-  DATA_CATEGORY_DESCRIPTIONS,
-  ALL_DATA_CATEGORIES,
-  DEFAULT_USER_CATEGORIES,
 } from '@/lib/security/gdpr-export';
 import { logAuditEvent } from '@/lib/security/audit-logger';
 

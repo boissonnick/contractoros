@@ -22,7 +22,6 @@ import {
   RETENTION_RESOURCE_LABELS,
   RETENTION_ACTION_LABELS,
   RETENTION_ACTION_DESCRIPTIONS,
-  DEFAULT_RETENTION_CONFIG,
 } from '@/lib/hooks/useDataRetention';
 import {
   ShieldCheckIcon,
@@ -33,7 +32,6 @@ import {
   ArrowPathIcon,
   ExclamationTriangleIcon,
   InformationCircleIcon,
-  CheckCircleIcon,
   ChevronDownIcon,
   ChevronUpIcon,
   DocumentTextIcon,

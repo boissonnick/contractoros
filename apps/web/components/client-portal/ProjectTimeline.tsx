@@ -37,7 +37,7 @@ export function ProjectTimeline({ phases, className }: ProjectTimelineProps) {
       <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200" />
 
       <div className="space-y-6">
-        {phases.map((phase, index) => {
+        {phases.map((phase) => {
           const isCompleted = phase.status === 'completed';
           const isCurrent = phase.status === 'current';
           const isUpcoming = phase.status === 'upcoming';

@@ -13,7 +13,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   doc,
-  getDoc,
   setDoc,
   onSnapshot,
   Timestamp,
@@ -25,11 +24,9 @@ import type {
   AIProviderPriority,
   AIFeatureModelAssignment,
   AIMonthlyUsageSummary,
-  AIFeatureType,
-  DEFAULT_AI_PROVIDER_SETTINGS,
 } from '@/types';
 import { AVAILABLE_MODELS } from '@/lib/assistant/models/types';
-import { getProviderBlendedCost, PROVIDERS } from '@/lib/ai/provider-manager';
+import { getProviderBlendedCost } from '@/lib/ai/provider-manager';
 
 // Default settings factory
 function createDefaultSettings(orgId: string): OrganizationAIProviderSettings {

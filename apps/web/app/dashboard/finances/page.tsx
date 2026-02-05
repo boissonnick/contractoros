@@ -7,8 +7,8 @@ import { useAuth } from '@/lib/auth';
 import { useExpenses } from '@/lib/hooks/useExpenses';
 import { db } from '@/lib/firebase/config';
 import { collection, query, where, getDocs } from 'firebase/firestore';
-import { Card, StatsGrid, PageHeader, Skeleton } from '@/components/ui';
-import { PieChartCard, BarChartCard } from '@/components/charts';
+import { Card, PageHeader, Skeleton } from '@/components/ui';
+import { BarChartCard } from '@/components/charts';
 import { JobCostingSummary } from '@/components/finances';
 import { ExpenseDetailsModal, ExpenseDetailsFilter } from '@/components/expenses';
 import { cn } from '@/lib/utils';
@@ -18,12 +18,10 @@ import {
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
   ExclamationTriangleIcon,
-  BanknotesIcon,
   ChartBarIcon,
   ReceiptPercentIcon,
   WalletIcon,
   DocumentTextIcon,
-  BuildingOfficeIcon,
   FolderIcon,
   UserGroupIcon,
   CursorArrowRaysIcon,

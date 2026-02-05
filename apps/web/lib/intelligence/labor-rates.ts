@@ -10,7 +10,6 @@
 import {
   LaborTradeCategory,
   LaborRateData,
-  LaborRateSource,
   PriceRegion,
   BLS_OCCUPATION_CODES,
   TRADE_DISPLAY_NAMES,
@@ -129,7 +128,7 @@ interface BlsDataPoint {
  * Build BLS series ID for occupation wage data
  * Format: OEUM + area + industry + occupation + datatype
  */
-function buildSeriesId(
+function _buildSeriesId(
   areaCode: string,
   occupationCode: string,
   dataType: 'mean' | 'pct10' | 'pct25' | 'pct50' | 'pct75' | 'pct90'
@@ -153,7 +152,7 @@ function buildSeriesId(
 /**
  * Fetch wage data from BLS API
  */
-async function fetchBlsData(seriesIds: string[]): Promise<Map<string, number>> {
+async function _fetchBlsData(seriesIds: string[]): Promise<Map<string, number>> {
   const apiKey = getBlsApiKey();
 
   if (!apiKey) {
@@ -282,7 +281,7 @@ function calculatePercentileRank(rate: number, trade: LaborTradeCategory): numbe
   const allRates: number[] = [];
 
   // Calculate rates for all regions
-  for (const [region, adj] of Object.entries(REGIONAL_ADJUSTMENTS)) {
+  for (const [_region, adj] of Object.entries(REGIONAL_ADJUSTMENTS)) {
     allRates.push(nationalAvg.median * adj);
   }
 
@@ -372,7 +371,7 @@ export function getRegionDisplayName(region: PriceRegion): string {
  */
 export function getStateFromZipPrefix(zipPrefix: string): string | null {
   // First digit gives general region
-  const firstDigit = zipPrefix.charAt(0);
+  const _firstDigit = zipPrefix.charAt(0);
 
   // This is a simplified mapping - real implementation would use a ZIP database
   const prefixToState: Record<string, string> = {

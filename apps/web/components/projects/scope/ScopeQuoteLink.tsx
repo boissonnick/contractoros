@@ -18,7 +18,7 @@ function fmt(n: number): string {
 
 export default function ScopeQuoteLink({ items, quoteSections, scopeStatus, onGenerateQuote }: ScopeQuoteLinkProps) {
   const [showHelp, setShowHelp] = useState(false);
-  const linked = items.filter(item => item.quoteSectionId);
+  const _linked = items.filter(item => item.quoteSectionId);
   const unlinked = items.filter(item => !item.quoteSectionId);
 
   if (quoteSections.length === 0) {

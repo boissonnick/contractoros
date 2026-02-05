@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { doc, getDoc, collection, query, where, orderBy, getDocs } from 'firebase/firestore';
+import { doc, getDoc, collection, query, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { PortalNav, ProjectTimeline, TimelinePhase } from '@/components/client-portal';
 import { SkeletonList } from '@/components/ui/Skeleton';
@@ -118,7 +118,7 @@ export default function TimelinePage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="text-center">
-          <h1 className="text-xl font-semibold text-gray-900 mb-2">
+          <h1 className="text-xl font-semibold font-heading tracking-tight text-gray-900 mb-2">
             {error || 'Something went wrong'}
           </h1>
           <p className="text-gray-500">Please contact your contractor for assistance.</p>
@@ -136,7 +136,7 @@ export default function TimelinePage() {
       />
 
       <main className="max-w-2xl mx-auto p-4">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Project Timeline</h2>
+        <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">Project Timeline</h2>
         <ProjectTimeline phases={phases} />
       </main>
     </div>

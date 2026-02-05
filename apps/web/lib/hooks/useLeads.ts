@@ -14,7 +14,7 @@ import {
   orderBy,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import { Lead, LeadStatus, ServiceTicket, ServiceTicketStatus } from '@/types';
+import { Lead, ServiceTicket } from '@/types';
 import { useAuth } from '@/lib/auth';
 
 export function useLeads() {

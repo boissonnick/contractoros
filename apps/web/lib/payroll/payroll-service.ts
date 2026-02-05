@@ -17,7 +17,6 @@ import {
   orderBy,
   limit,
   Timestamp,
-  writeBatch,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import {
@@ -29,7 +28,6 @@ import {
   PayrollAdjustment,
   TimeEntry,
   UserProfile,
-  EmployeeType,
 } from '@/types';
 import { calculateTaxes } from './tax-calculator';
 import { TaxCalculationInput } from '@/types';

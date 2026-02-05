@@ -10,7 +10,7 @@
  * - Cost per 1K tokens display
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import {
   ChevronUpIcon,

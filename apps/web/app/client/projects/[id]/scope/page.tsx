@@ -9,8 +9,6 @@ import { useScopes } from '@/lib/hooks/useScopes';
 import { useAuth } from '@/lib/auth';
 import ScopePhaseGroup from '@/components/projects/scope/ScopePhaseGroup';
 import ScopeApprovalPanel from '@/components/projects/scope/ScopeApprovalPanel';
-import ScopeVersionHistory from '@/components/projects/scope/ScopeVersionHistory';
-import { cn } from '@/lib/utils';
 
 function fmt(n: number): string {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
@@ -21,9 +19,9 @@ export default function ClientScopePage() {
   const projectId = params.id as string;
   const { user, profile } = useAuth();
 
-  const { scopes, currentScope, loading, approveScope, rejectScope } = useScopes({ projectId });
+  const { currentScope, loading, approveScope, rejectScope } = useScopes({ projectId });
   const [phases, setPhases] = useState<ProjectPhase[]>([]);
-  const [quoteSections, setQuoteSections] = useState<QuoteSection[]>([]);
+  const [, setQuoteSections] = useState<QuoteSection[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
@@ -73,7 +71,7 @@ export default function ClientScopePage() {
   if (loading || dataLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -105,7 +103,7 @@ export default function ClientScopePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-gray-900">Scope of Work — v{scope.version}</h2>
+        <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900">Scope of Work — v{scope.version}</h2>
         <p className="text-sm text-gray-500">{scope.items.length} items · {fmt(totalCost)}</p>
       </div>
 

@@ -4,9 +4,9 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ClientSource, ClientStatus } from '@/types';
+import { ClientStatus } from '@/types';
 import { createClient, CLIENT_STATUS_LABELS } from '@/lib/hooks/useClients';
-import { ClientSourceSelect, ClientSourceDropdown } from './ClientSourceSelect';
+import { ClientSourceSelect } from './ClientSourceSelect';
 import { Button, Card } from '@/components/ui';
 import { toast } from '@/components/ui/Toast';
 import {

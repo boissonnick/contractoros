@@ -49,7 +49,7 @@ const QUICK_FILTERS: {
 export default function APInvoicingPage() {
   const { profile } = useAuth();
   const { data: projects = [] } = useProjects();
-  const { subs, loading: subsLoading } = useSubcontractors();
+  const { subs } = useSubcontractors();
 
   // State
   const [quickFilter, setQuickFilter] = useState<QuickFilter>('all');
@@ -193,7 +193,7 @@ export default function APInvoicingPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">AP Invoicing</h1>
+          <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">AP Invoicing</h1>
           <p className="text-sm text-gray-500 mt-1">
             Manage subcontractor invoices and payments
           </p>
@@ -217,7 +217,7 @@ export default function APInvoicingPage() {
                 {formatCurrency(stats.pendingAmount)}
               </div>
             </div>
-            <div className="p-2 rounded-lg bg-yellow-50">
+            <div className="p-2 rounded-xl bg-gradient-to-br from-yellow-50 to-amber-100">
               <ClockIcon className="h-5 w-5 text-yellow-600" />
             </div>
           </div>
@@ -234,7 +234,7 @@ export default function APInvoicingPage() {
                 {formatCurrency(stats.approvedAmount)} awaiting payment
               </div>
             </div>
-            <div className="p-2 rounded-lg bg-green-50">
+            <div className="p-2 rounded-xl bg-gradient-to-br from-green-50 to-emerald-100">
               <CheckIcon className="h-5 w-5 text-green-600" />
             </div>
           </div>
@@ -249,7 +249,7 @@ export default function APInvoicingPage() {
               </div>
               <div className="text-xs text-gray-400 mt-1">this period</div>
             </div>
-            <div className="p-2 rounded-lg bg-blue-50">
+            <div className="p-2 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100">
               <BanknotesIcon className="h-5 w-5 text-blue-600" />
             </div>
           </div>
@@ -264,7 +264,7 @@ export default function APInvoicingPage() {
               </div>
               <div className="text-xs text-gray-400 mt-1">awaiting signature</div>
             </div>
-            <div className="p-2 rounded-lg bg-purple-50">
+            <div className="p-2 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100">
               <ClipboardDocumentCheckIcon className="h-5 w-5 text-purple-600" />
             </div>
           </div>
@@ -283,10 +283,10 @@ export default function APInvoicingPage() {
               key={filter.value}
               onClick={() => setQuickFilter(filter.value)}
               className={`
-                flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors
                 ${
                   isActive
-                    ? 'bg-blue-100 text-blue-700 border-2 border-blue-300'
+                    ? 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 border-2 border-blue-300 shadow-sm'
                     : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
                 }
               `}

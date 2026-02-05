@@ -19,15 +19,12 @@ import {
   saveSecurityChecks,
   saveSecurityHistory,
   getSecurityHistory,
-  updateSecurityCheck,
   groupChecksByCategory,
   getFailedChecksBySeverity,
   getScoreGrade,
   SecurityCheckItem,
-  SecurityScore,
   SecurityCheckHistory,
   SecurityCategory,
-  SecurityCheckStatus,
   SECURITY_CATEGORY_LABELS,
   SECURITY_CATEGORY_DESCRIPTIONS,
   SECURITY_STATUS_CONFIG,
@@ -231,7 +228,7 @@ interface SecurityCheckRowProps {
   showCategory?: boolean;
 }
 
-function SecurityCheckRow({ check, showCategory = false }: SecurityCheckRowProps) {
+function SecurityCheckRow({ check, showCategory: _showCategory = false }: SecurityCheckRowProps) {
   const [showDetails, setShowDetails] = useState(false);
   const statusConfig = SECURITY_STATUS_CONFIG[check.status];
   const severityConfig = SECURITY_SEVERITY_CONFIG[check.severity];
@@ -354,7 +351,7 @@ function HistoryChart({ history }: HistoryChartProps) {
   return (
     <div className="h-48">
       <div className="flex items-end justify-between h-full gap-1">
-        {sortedHistory.map((entry, index) => {
+        {sortedHistory.map((entry) => {
           const height = `${(entry.score / maxScore) * 100}%`;
           const getBarColor = () => {
             if (entry.score >= 80) return 'bg-green-500';
@@ -616,7 +613,7 @@ export default function SecurityChecklistPage() {
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
                   {(Object.keys(SECURITY_CATEGORY_LABELS) as SecurityCategory[]).map((category) => {
                     const categoryScore = score.byCategory[category];
-                    const grade = getScoreGrade(categoryScore);
+                    const _grade = getScoreGrade(categoryScore);
                     return (
                       <div
                         key={category}

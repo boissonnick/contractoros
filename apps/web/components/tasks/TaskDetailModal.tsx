@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { Task, TaskStatus, ProjectPhase, TaskChecklistItem } from '@/types';
-import { Button, Badge, toast } from '@/components/ui';
+import { Button, toast } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import {
   XMarkIcon,

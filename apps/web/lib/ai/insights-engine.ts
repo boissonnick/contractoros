@@ -12,23 +12,15 @@ import type {
   AIInsight,
   AIInsightSeverity,
   AIInsightCategory,
-  AIInsightType,
-  TrendDirection,
   ProjectHealthScore,
   InsightSummary,
   InsightGenerationConfig,
   InsightGenerationResult,
-  FinancialInsightData,
-  OperationalInsightData,
 } from '@/types';
 
 import {
-  detectAnomalyZScore,
   detectAnomalyPercentage,
-  detectAnomalyThreshold,
   analyzeTrend,
-  calculateStatistics,
-  compareToPeers,
 } from './anomaly-detection';
 
 // ===========================================
@@ -222,7 +214,7 @@ export function analyzeFinancialData(
   const totalCosts = data.laborCosts + data.materialCosts + data.overheadCosts;
   if (totalCosts > 0) {
     const laborRatio = data.laborCosts / totalCosts;
-    const materialRatio = data.materialCosts / totalCosts;
+    const _materialRatio = data.materialCosts / totalCosts;
 
     // Alert if labor costs exceed 60% of total
     if (laborRatio > 0.6) {

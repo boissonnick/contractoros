@@ -30,7 +30,7 @@ const bidStatusConfig: Record<BidStatus, { label: string; color: string; icon: R
 export default function SubDashboard() {
   const { user, profile } = useAuth();
   const [bids, setBids] = useState<Bid[]>([]);
-  const [upcomingWork, setUpcomingWork] = useState<ScheduleAssignment[]>([]);
+  const [upcomingWork] = useState<ScheduleAssignment[]>([]);
   const [stats, setStats] = useState({
     activeBids: 0,
     acceptedBids: 0,
@@ -85,7 +85,7 @@ export default function SubDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -94,14 +94,14 @@ export default function SubDashboard() {
     return <FirestoreError message={fetchError} onRetry={fetchData} />;
   }
 
-  const recentBids = bids.slice(0, 5);
+  const _recentBids = bids.slice(0, 5);
   const pendingBids = bids.filter(b => ['submitted', 'under_review'].includes(b.status));
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">
           Welcome, {profile?.displayName?.split(' ')[0]}
         </h1>
         <p className="text-gray-500 mt-1">
@@ -114,8 +114,8 @@ export default function SubDashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl border p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <DocumentTextIcon className="h-5 w-5 text-blue-600" />
+            <div className="p-2 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
+              <DocumentTextIcon className="h-5 w-5 text-brand-primary" />
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900">{stats.activeBids}</p>
@@ -126,7 +126,7 @@ export default function SubDashboard() {
 
         <div className="bg-white rounded-xl border p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 rounded-lg">
+            <div className="p-2 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
               <CheckCircleIcon className="h-5 w-5 text-green-600" />
             </div>
             <div>
@@ -138,7 +138,7 @@ export default function SubDashboard() {
 
         <div className="bg-white rounded-xl border p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-yellow-100 rounded-lg">
+            <div className="p-2 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
               <ClockIcon className="h-5 w-5 text-yellow-600" />
             </div>
             <div>
@@ -150,7 +150,7 @@ export default function SubDashboard() {
 
         <div className="bg-white rounded-xl border p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
+            <div className="p-2 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
               <BanknotesIcon className="h-5 w-5 text-purple-600" />
             </div>
             <div>
@@ -165,7 +165,7 @@ export default function SubDashboard() {
         {/* Pending Bids */}
         <div className="bg-white rounded-xl border p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Pending Bids</h2>
+            <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900">Pending Bids</h2>
             <Link href="/sub/bids" className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
               View all <ArrowRightIcon className="h-4 w-4" />
             </Link>
@@ -182,7 +182,7 @@ export default function SubDashboard() {
                     className="flex items-center justify-between p-3 rounded-lg border hover:bg-gray-50 transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-lg ${config.color}`}>
+                      <div className={`p-2 rounded-xl ${config.color}`}>
                         <config.icon className="h-4 w-4" />
                       </div>
                       <div>
@@ -209,7 +209,7 @@ export default function SubDashboard() {
         {/* Upcoming Schedule */}
         <div className="bg-white rounded-xl border p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Upcoming Work</h2>
+            <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900">Upcoming Work</h2>
             <Link href="/sub/schedule" className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
               Full schedule <ArrowRightIcon className="h-4 w-4" />
             </Link>
@@ -222,8 +222,8 @@ export default function SubDashboard() {
                   key={assignment.id}
                   className="flex items-center gap-3 p-3 rounded-lg border"
                 >
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <CalendarDaysIcon className="h-4 w-4 text-blue-600" />
+                  <div className="p-2 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
+                    <CalendarDaysIcon className="h-4 w-4 text-brand-primary" />
                   </div>
                   <div>
                     <p className="font-medium text-gray-900">
@@ -247,8 +247,8 @@ export default function SubDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6 text-white">
-        <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
+      <div className="bg-gradient-to-r from-brand-primary to-brand-primary-dark rounded-xl p-6 text-white">
+        <h3 className="text-lg font-semibold font-heading tracking-tight mb-4">Quick Actions</h3>
         <div className="flex flex-wrap gap-3">
           <Link
             href="/sub/availability"

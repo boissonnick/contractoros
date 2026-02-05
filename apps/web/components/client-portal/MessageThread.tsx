@@ -6,7 +6,6 @@ import {
   Message,
   UploadProgressInfo,
 } from '@/components/messaging';
-import { cn } from '@/lib/utils';
 
 // ============================================================================
 // Types - Maintaining backward compatibility

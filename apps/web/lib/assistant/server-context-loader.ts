@@ -126,7 +126,7 @@ export interface InventoryData {
  */
 export async function loadServerContext(
   orgId: string,
-  userId: string
+  _userId: string
 ): Promise<ServerContext> {
   // Dynamic import to avoid bundling firebase-admin in client
   const { getFirestore } = await import('firebase-admin/firestore');

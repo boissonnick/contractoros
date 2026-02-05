@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { usePermits, PERMIT_STATUS_LABELS, PERMIT_TYPE_LABELS } from '@/lib/hooks/usePermits';
-import { Permit, PermitStatus, PermitType } from '@/types';
+import { usePermits, PERMIT_TYPE_LABELS } from '@/lib/hooks/usePermits';
+import { Permit, PermitStatus } from '@/types';
 import PageHeader from '@/components/ui/PageHeader';
 import StatsGrid from '@/components/ui/StatsGrid';
 import FilterBar from '@/components/ui/FilterBar';
@@ -20,8 +20,6 @@ import {
   DocumentTextIcon,
   CalendarIcon,
   BuildingOfficeIcon,
-  PhoneIcon,
-  EnvelopeIcon,
   PencilIcon,
   TrashIcon,
   ClipboardDocumentListIcon,

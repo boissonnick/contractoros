@@ -5,7 +5,6 @@ import { useBrowserNotifications } from '@/lib/hooks/useBrowserNotifications';
 import { useServiceWorker } from '@/lib/hooks/useServiceWorker';
 import { AppNotificationType } from '@/lib/notifications/browser-notifications';
 import {
-  BellIcon,
   BellSlashIcon,
   SpeakerWaveIcon,
   SpeakerXMarkIcon,
@@ -44,7 +43,7 @@ const DAYS_OF_WEEK = [
 export function NotificationSettings() {
   const {
     isSupported,
-    permission,
+    permission: _permission,
     isGranted,
     isDenied,
     requestPermission,
@@ -203,7 +202,7 @@ export function NotificationSettings() {
               <p className="text-sm font-medium">Notifications are blocked</p>
             </div>
             <p className="mt-1 text-sm text-red-700">
-              You have blocked notifications for this site. To enable them, click the lock icon in your browser's address bar and allow notifications.
+              You have blocked notifications for this site. To enable them, click the lock icon in your browser&apos;s address bar and allow notifications.
             </p>
           </div>
         )}

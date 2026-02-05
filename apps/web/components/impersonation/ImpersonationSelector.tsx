@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useImpersonation } from '@/lib/contexts/ImpersonationContext';
-import { ImpersonationRole, IMPERSONATION_ROLE_INFO } from '@/types';
+import { ImpersonationRole } from '@/types';
 import { cn } from '@/lib/utils';
 import { ChevronUpIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
 

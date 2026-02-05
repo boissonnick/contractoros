@@ -3,12 +3,10 @@
 import React from 'react';
 import { ProjectPhase } from '@/types';
 import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui';
 import {
   CalendarDaysIcon,
   CurrencyDollarIcon,
   CheckCircleIcon,
-  ClockIcon,
   UsersIcon,
 } from '@heroicons/react/24/outline';
 
@@ -34,7 +32,7 @@ function formatCurrency(n?: number): string {
 export default function PhaseCard({ phase, onClick }: PhaseCardProps) {
   const style = STATUS_STYLES[phase.status] || STATUS_STYLES.upcoming;
   const taskPct = phase.tasksTotal > 0 ? Math.round((phase.tasksCompleted / phase.tasksTotal) * 100) : 0;
-  const budgetPct = phase.budgetAmount ? Math.round(((phase.actualCost || 0) / phase.budgetAmount) * 100) : 0;
+  const _budgetPct = phase.budgetAmount ? Math.round(((phase.actualCost || 0) / phase.budgetAmount) * 100) : 0;
   const teamCount = phase.assignedTeamMembers.length + phase.assignedSubcontractors.length;
 
   return (

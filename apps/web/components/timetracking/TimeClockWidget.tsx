@@ -36,7 +36,7 @@ export function TimeClockWidget({
   const [isLoading, setIsLoading] = useState(false);
   const [showBreakMenu, setShowBreakMenu] = useState(false);
   const [locationEnabled, setLocationEnabled] = useState(false);
-  const [currentLocation, setCurrentLocation] = useState<TimeEntryLocation | null>(null);
+  const [, _setCurrentLocation] = useState<TimeEntryLocation | null>(null);
 
   // Format elapsed time
   const formatElapsed = useCallback((startTime: Date, breaks: TimeEntry['breaks'] = []): string => {

@@ -16,7 +16,6 @@ import {
   CreateAlbumCard,
   CreateAlbumModal,
   BeforeAfterSlider,
-  BeforeAfterSliderCompact,
 } from '@/components/photos';
 import {
   PhotoIcon,
@@ -47,7 +46,6 @@ export default function ProjectPhotosPage() {
     albums,
     beforeAfterPairs,
     loading,
-    uploadPhoto,
     uploadPhotos,
     approvePhoto,
     deletePhoto,
@@ -82,7 +80,7 @@ export default function ProjectPhotosPage() {
   // Before/after creation
   const [selectingBeforeAfter, setSelectingBeforeAfter] = useState<'before' | 'after' | null>(null);
   const [beforePhoto, setBeforePhoto] = useState<ProjectPhoto | null>(null);
-  const [selectedBeforeAfterPair, setSelectedBeforeAfterPair] = useState<{
+  const [_selectedBeforeAfterPair, _setSelectedBeforeAfterPair] = useState<{
     before: ProjectPhoto;
     after: ProjectPhoto;
     title?: string;

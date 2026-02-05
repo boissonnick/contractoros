@@ -23,7 +23,7 @@ export default function SubPaymentTracker({ assignment, onUpdate }: SubPaymentTr
   const [amount, setAmount] = useState('');
   const [dueDate, setDueDate] = useState('');
 
-  const totalScheduled = assignment.paymentSchedule.reduce((sum, p) => sum + p.amount, 0);
+  const _totalScheduled = assignment.paymentSchedule.reduce((sum, p) => sum + p.amount, 0);
   const totalPaid = assignment.paymentSchedule.filter(p => p.status === 'paid').reduce((sum, p) => sum + p.amount, 0);
 
   const addPayment = () => {

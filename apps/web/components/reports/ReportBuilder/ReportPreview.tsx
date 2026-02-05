@@ -10,7 +10,6 @@ import {
 } from '@heroicons/react/24/outline';
 import {
   CustomReportConfig,
-  ReportField,
   formatFieldValue,
 } from '@/lib/reports/report-builder';
 import { BarChartCard } from '@/components/charts/BarChartCard';

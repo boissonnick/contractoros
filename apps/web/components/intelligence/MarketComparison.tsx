@@ -50,7 +50,7 @@ export function MarketComparison({
 
   // Determine assessment
   const getAssessment = (): { text: string; color: string } => {
-    const diffFromMedian = ((current - median) / median) * 100;
+    const _diffFromMedian = ((current - median) / median) * 100;
 
     if (current < low) {
       return { text: 'Below market', color: 'text-blue-600' };

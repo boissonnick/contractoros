@@ -130,7 +130,7 @@ function normalizeText(text: string): string {
 /**
  * Extract numbers from text (both digits and words)
  */
-function extractNumber(text: string): number | null {
+function _extractNumber(text: string): number | null {
   const normalized = normalizeText(text);
 
   // Try digit pattern first

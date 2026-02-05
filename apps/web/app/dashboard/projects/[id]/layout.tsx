@@ -23,7 +23,6 @@ import {
   CheckBadgeIcon,
   ChevronDownIcon,
   Cog6ToothIcon,
-  WrenchScrewdriverIcon,
 } from '@heroicons/react/24/outline';
 
 // Tab structure with groups for better organization

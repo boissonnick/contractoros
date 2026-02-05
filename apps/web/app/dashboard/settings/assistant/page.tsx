@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import { Card, Button, Badge, toast } from '@/components/ui';
 import { useOrganizationAISettings } from '@/lib/hooks/useOrganizationAISettings';
-import { AVAILABLE_MODELS, getDefaultModelKey } from '@/lib/assistant/models';
+import { AVAILABLE_MODELS } from '@/lib/assistant/models';
 import { RATE_LIMITS } from '@/lib/assistant/models/types';
 import { OrganizationAISettings, AIUsageRecord, AIResponseStyle } from '@/types';
 import { cn } from '@/lib/utils';
@@ -13,13 +13,9 @@ import {
   SparklesIcon,
   CpuChipIcon,
   ShieldCheckIcon,
-  BanknotesIcon,
-  ChartBarIcon,
   CheckCircleIcon,
-  ExclamationTriangleIcon,
   InformationCircleIcon,
   CubeIcon,
-  ClockIcon,
   BoltIcon,
   CurrencyDollarIcon,
   ArrowPathIcon,
@@ -70,7 +66,7 @@ interface ModelCardProps {
   onSelect: () => void;
 }
 
-function ModelCard({ modelKey, config, isSelected, isAvailable, onSelect }: ModelCardProps) {
+function ModelCard({ modelKey: _modelKey, config, isSelected, isAvailable, onSelect }: ModelCardProps) {
   const providerColors: Record<string, { bg: string; text: string; icon: string }> = {
     gemini: { bg: 'bg-blue-100', text: 'text-blue-700', icon: 'text-blue-600' },
     claude: { bg: 'bg-orange-100', text: 'text-orange-700', icon: 'text-orange-600' },

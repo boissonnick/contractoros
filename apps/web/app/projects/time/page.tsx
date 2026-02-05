@@ -17,7 +17,6 @@ import {
   UserGroupIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  FunnelIcon,
   CalendarDaysIcon,
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
@@ -101,7 +100,7 @@ function groupByProject(entries: TimeEntryWithSyncStatus[]): ProjectTimeSummary[
 }
 
 export default function ProjectsTimePage() {
-  const { profile } = useAuth();
+  useAuth();
   const [datePreset, setDatePreset] = useState<DateRangePreset>('this_week');
   const [customDateRange, setCustomDateRange] = useState({
     start: startOfWeek(new Date(), { weekStartsOn: 1 }),
@@ -150,13 +149,13 @@ export default function ProjectsTimePage() {
   // Navigation for custom date ranges
   const navigateRange = (direction: 'prev' | 'next') => {
     if (datePreset === 'this_week' || datePreset === 'last_week') {
-      setCustomDateRange(prev => ({
+      setCustomDateRange(() => ({
         start: direction === 'prev' ? subWeeks(dateRange.start, 1) : addWeeks(dateRange.start, 1),
         end: direction === 'prev' ? subWeeks(dateRange.end, 1) : addWeeks(dateRange.end, 1),
       }));
       setDatePreset('custom');
     } else if (datePreset === 'this_month' || datePreset === 'last_month') {
-      setCustomDateRange(prev => ({
+      setCustomDateRange(() => ({
         start: direction === 'prev' ? startOfMonth(subMonths(dateRange.start, 1)) : startOfMonth(addMonths(dateRange.start, 1)),
         end: direction === 'prev' ? endOfMonth(subMonths(dateRange.start, 1)) : endOfMonth(addMonths(dateRange.start, 1)),
       }));
@@ -171,7 +170,7 @@ export default function ProjectsTimePage() {
   });
 
   // Fetch projects for linking
-  const { data: projects } = useProjects();
+  const { data: _projects } = useProjects();
 
   // Get unique crew members for filter
   const crewMembers = useMemo(() => {

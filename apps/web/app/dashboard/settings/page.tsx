@@ -88,7 +88,7 @@ export default function SettingsPage() {
     <div className="space-y-6">
       {/* Welcome banner */}
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-100">
-        <h2 className="text-lg font-semibold text-gray-900">
+        <h2 className="text-lg font-heading font-semibold tracking-tight text-gray-900">
           Welcome, {profile?.displayName?.split(' ')[0] || 'there'}
         </h2>
         <p className="text-sm text-gray-600 mt-1">
@@ -104,12 +104,12 @@ export default function SettingsPage() {
             <Link key={section.key} href={section.href}>
               <Card hover className="h-full">
                 <div className="flex items-start gap-3">
-                  <div className={`p-2.5 rounded-lg ${section.color} flex-shrink-0`}>
+                  <div className={`p-2.5 rounded-xl ${section.color} flex-shrink-0`}>
                     <Icon className="h-5 w-5" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <h3 className="font-semibold text-gray-900">{section.label}</h3>
+                      <h3 className="font-heading font-semibold text-gray-900">{section.label}</h3>
                       <ChevronRightIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
                     </div>
                     <p className="text-sm text-gray-500 mt-0.5">{section.description}</p>

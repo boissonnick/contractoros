@@ -55,7 +55,7 @@ export function SubmittalFormModal({
   onSubmit,
   initialData,
   reviewers,
-  projectId,
+  projectId: _projectId,
   editMode = false,
   isRevision = false,
 }: SubmittalFormModalProps) {

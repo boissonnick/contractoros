@@ -72,7 +72,7 @@ export function decodeAuthState(stateString: string): QBOAuthState {
   try {
     const decoded = Buffer.from(stateString, 'base64url').toString('utf-8');
     return JSON.parse(decoded) as QBOAuthState;
-  } catch (error) {
+  } catch {
     throw new Error('Invalid OAuth state parameter');
   }
 }

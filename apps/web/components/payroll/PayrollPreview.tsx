@@ -8,10 +8,7 @@ import Badge from '@/components/ui/Badge';
 import { PayrollEntryRow } from './PayrollEntryRow';
 import { PayrollApprovalStatus } from './PayrollApprovalStatus';
 import {
-  CheckCircleIcon,
-  XCircleIcon,
   ArrowDownTrayIcon,
-  PrinterIcon,
   DocumentTextIcon,
 } from '@heroicons/react/24/outline';
 
@@ -69,7 +66,7 @@ export function PayrollPreview({
   };
 
   const canEdit = run.status === 'draft' || run.status === 'pending_approval';
-  const canApprove = run.status === 'pending_approval';
+  const _canApprove = run.status === 'pending_approval';
   const canExport = run.status === 'approved' || run.status === 'completed';
 
   return (

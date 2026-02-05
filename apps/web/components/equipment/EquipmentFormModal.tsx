@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Equipment, EquipmentCategory, EquipmentStatus } from '@/types';
+import { Equipment, EquipmentCategory } from '@/types';
 import { XMarkIcon, PhotoIcon } from '@heroicons/react/24/outline';
 
 const CATEGORY_OPTIONS: { value: EquipmentCategory; label: string }[] = [
@@ -128,6 +128,7 @@ export function EquipmentFormModal({
                 className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-gray-400 transition-colors"
               >
                 {photoPreview ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
                   <img
                     src={photoPreview}
                     alt="Preview"

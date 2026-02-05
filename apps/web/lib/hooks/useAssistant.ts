@@ -185,7 +185,7 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
   const [error, setError] = useState<string | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [conversations] = useState<Conversation[]>([]);
   const [showTimeEntryModal, setShowTimeEntryModal] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const streamingMessageIdRef = useRef<string | null>(null);
@@ -268,7 +268,7 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
   }, [profile?.orgId, profile?.uid]);
 
   // Save message to Firestore
-  const persistMessage = useCallback(
+  const _persistMessage = useCallback(
     async (message: ChatMessage) => {
       if (!profile?.orgId || !conversationId) return;
 

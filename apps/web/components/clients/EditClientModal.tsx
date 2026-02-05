@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Client, ClientSource, ClientStatus } from '@/types';
+import { Client, ClientStatus } from '@/types';
 import { CLIENT_STATUS_LABELS } from '@/lib/hooks/useClients';
 import { ClientSourceSelect } from './ClientSourceSelect';
 import { Button, Card } from '@/components/ui';

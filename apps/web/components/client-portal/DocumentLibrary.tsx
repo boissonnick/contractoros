@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import Image from 'next/image';
 
 interface Document {
   id: string;
@@ -237,9 +238,11 @@ export function DocumentLibrary({ documents, onDownload }: DocumentLibraryProps)
                   title={previewDoc.name}
                 />
               ) : previewDoc.fileType?.includes('image') ? (
-                <img
-                  src={previewDoc.url}
+                <Image
+                  src={previewDoc.url || ''}
                   alt={previewDoc.name}
+                  width={800}
+                  height={600}
                   className="max-w-full max-h-[70vh] mx-auto rounded"
                 />
               ) : (

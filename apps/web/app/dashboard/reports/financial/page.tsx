@@ -124,7 +124,7 @@ interface ProfitabilityBadgeProps {
   showTrend?: boolean;
 }
 
-function ProfitabilityBadge({ value, type, label, showTrend = false }: ProfitabilityBadgeProps) {
+function _ProfitabilityBadge({ value, type, label, showTrend = false }: ProfitabilityBadgeProps) {
   const colorClass = getMarginColorClass(value, type);
   const bgClass = getMarginBgClass(value, type);
 
@@ -656,7 +656,7 @@ export default function FinancialReportsPage() {
   // Calculate totals for labor efficiency (from project data)
   const totalLaborCost = projectProfitability.reduce((sum, p) => sum + p.laborCost, 0);
   const totalProjectBudget = projectProfitability.reduce((sum, p) => sum + p.budget, 0);
-  const totalActualSpend = projectProfitability.reduce((sum, p) => sum + p.actualSpend, 0);
+  const _totalActualSpend = projectProfitability.reduce((sum, p) => sum + p.actualSpend, 0);
 
   // Labor Efficiency % = Budget Labor / Actual Labor * 100
   // Assuming labor was ~40% of budget (industry standard for construction)
@@ -1180,7 +1180,7 @@ export default function FinancialReportsPage() {
               <p className="text-xs text-gray-500 mt-0.5">Top clients by paid invoices</p>
             </div>
             <div className="space-y-3">
-              {revenueByClient.slice(0, 8).map((client, index) => {
+              {revenueByClient.slice(0, 8).map((client) => {
                 const maxRevenue = revenueByClient[0]?.revenue || 1;
                 const widthPercent = (client.revenue / maxRevenue) * 100;
                 return (

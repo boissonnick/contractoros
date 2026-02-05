@@ -11,7 +11,6 @@ import Card from '@/components/ui/Card';
 import { Skeleton } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import { useOrgJobCosting } from '@/lib/hooks/useJobCosting';
-import type { ProjectProfitability } from '@/types';
 
 interface ProjectProfitabilityLeaderboardProps {
   className?: string;

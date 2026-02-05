@@ -30,7 +30,7 @@ import {
   ExclamationTriangleIcon,
   LinkIcon,
 } from '@heroicons/react/24/outline';
-import { format, formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow } from 'date-fns';
 
 const statusFilters: { value: SignatureRequestStatus | 'all'; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -223,7 +223,7 @@ export default function SignaturesDashboard() {
       ) : (
         <div className="space-y-3">
           {filteredRequests.map((request) => {
-            const pendingSigners = request.signers.filter(
+            const _pendingSigners = request.signers.filter(
               (s) => s.status === 'pending' || s.status === 'sent' || s.status === 'viewed'
             );
             const signedSigners = request.signers.filter((s) => s.status === 'signed');

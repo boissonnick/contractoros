@@ -13,8 +13,6 @@ import {
   MaterialCategory,
   MaterialStatus,
   LineItemUnit,
-  MATERIAL_CATEGORIES,
-  MATERIAL_STATUSES,
   LINE_ITEM_UNITS,
   Supplier,
 } from '@/types';

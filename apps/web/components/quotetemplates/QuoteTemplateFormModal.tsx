@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import BaseModal from '@/components/ui/BaseModal';
@@ -15,7 +15,6 @@ import {
   QUOTE_PDF_LAYOUTS,
   QUOTE_PDF_FONTS,
   QUOTE_PDF_HEADER_STYLES,
-  createDefaultQuotePdfTemplate,
 } from '@/types';
 import {
   DocumentTextIcon,
@@ -186,7 +185,7 @@ export function QuoteTemplateFormModal({
   const {
     register,
     handleSubmit,
-    control,
+    control: _control,
     watch,
     reset,
     formState: { errors },
@@ -552,7 +551,7 @@ export function QuoteTemplateFormModal({
                   </label>
                   <label className="flex items-center gap-2">
                     <input type="checkbox" {...register('tableShowOptionalBadge')} className="rounded" />
-                    <span className="text-sm">Show "Optional" Badge</span>
+                    <span className="text-sm">Show &quot;Optional&quot; Badge</span>
                   </label>
                   <label className="flex items-center gap-2">
                     <input type="checkbox" {...register('tableGroupBySection')} className="rounded" />

@@ -185,7 +185,7 @@ function calculateSimilarity(str1: string, str2: string): number {
 /**
  * Check if words match (allowing for common speech recognition errors)
  */
-function wordsMatch(word1: string, word2: string): boolean {
+function _wordsMatch(word1: string, word2: string): boolean {
   const w1 = normalizeText(word1);
   const w2 = normalizeText(word2);
 

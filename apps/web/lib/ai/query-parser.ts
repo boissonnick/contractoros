@@ -173,7 +173,7 @@ function parseAmount(text: string): number | null {
  * Detect amount filter with comparison operator
  */
 function detectAmountFilter(query: string, entity: QueryEntityType): QueryFilter | null {
-  const lowerQuery = query.toLowerCase();
+  const _lowerQuery = query.toLowerCase();
 
   // Check if this entity has an amount field
   const amountEntities = ['invoices', 'expenses', 'estimates', 'projects'];
@@ -392,7 +392,7 @@ function detectDateFilter(query: string, entity: QueryEntityType): {
  * Detect name/text search filters
  */
 function detectNameFilter(query: string, entity: QueryEntityType): QueryFilter | null {
-  const lowerQuery = query.toLowerCase();
+  const _lowerQuery = query.toLowerCase();
 
   // Patterns: "for Smith", "from Smith", "client Smith", "named Smith"
   const forMatch = query.match(/(?:for|from|client|named|by)\s+["']?([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)["']?/i);

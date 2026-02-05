@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ProjectPhase, PhaseStatus } from '@/types';
 import { cn } from '@/lib/utils';
-import { CheckCircleIcon, PlayIcon, ClockIcon, XCircleIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
+import { CheckCircleIcon, PlayIcon, ClockIcon, XCircleIcon } from '@heroicons/react/24/solid';
 import { EllipsisVerticalIcon } from '@heroicons/react/24/outline';
 import { db } from '@/lib/firebase/config';
 import { doc, updateDoc, Timestamp } from 'firebase/firestore';

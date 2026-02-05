@@ -202,7 +202,7 @@ export default function ScopeTemplateSelector({ onSelect, onClose, phases = [] }
                 </div>
                 {autoAssignPhases && (
                   <p className="text-xs text-blue-600 mt-1">
-                    Items will be matched to phases based on task type. Unmatched items go to "Unassigned".
+                    Items will be matched to phases based on task type. Unmatched items go to &quot;Unassigned&quot;.
                   </p>
                 )}
               </div>

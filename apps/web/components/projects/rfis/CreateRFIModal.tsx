@@ -40,7 +40,7 @@ export default function CreateRFIModal({
   isOpen,
   onClose,
   onSubmit,
-  projectId,
+  projectId: _projectId,
 }: CreateRFIModalProps) {
   const {
     register,

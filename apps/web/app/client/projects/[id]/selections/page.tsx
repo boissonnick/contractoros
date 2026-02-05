@@ -68,7 +68,7 @@ export default function ClientSelectionsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -76,7 +76,7 @@ export default function ClientSelectionsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Selections</h1>
+        <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">Selections</h1>
         <p className="text-gray-500 mt-1">Choose your finishes, fixtures, and materials</p>
       </div>
 
@@ -102,7 +102,7 @@ export default function ClientSelectionsPage() {
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="text-lg font-semibold text-gray-900">{sel.categoryName}</h3>
+                      <h3 className="text-lg font-semibold font-heading tracking-tight text-gray-900">{sel.categoryName}</h3>
                       <Badge className={STATUS_COLORS[sel.status]}>
                         {STATUS_LABELS[sel.status]}
                       </Badge>

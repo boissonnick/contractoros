@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Selection, SelectionOption } from '@/types';
+import Image from 'next/image';
+import { Selection } from '@/types';
 import {
-  CheckCircleIcon,
   ArrowsRightLeftIcon,
   CheckIcon,
   XMarkIcon,
@@ -159,9 +159,11 @@ export function SelectionBoard({
                   {selectedOption && (
                     <>
                       {selectedOption.imageURL && (
-                        <img
+                        <Image
                           src={selectedOption.imageURL}
                           alt={selectedOption.name}
+                          width={400}
+                          height={128}
                           className="w-full h-32 object-cover rounded mb-2"
                         />
                       )}
@@ -199,10 +201,11 @@ export function SelectionBoard({
                 {/* Image */}
                 {selectedOption?.imageURL ? (
                   <div className="relative aspect-video bg-gray-100">
-                    <img
+                    <Image
                       src={selectedOption.imageURL}
                       alt={selectedOption.name}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
                     />
                     {selection.status === 'approved' && (
                       <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded text-xs font-medium flex items-center gap-1">

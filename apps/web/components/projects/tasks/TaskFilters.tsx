@@ -3,7 +3,7 @@
 import React from 'react';
 import { TaskStatus, TaskPriority } from '@/types';
 import { cn } from '@/lib/utils';
-import { FunnelIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 
 export interface TaskFilterState {
   status: TaskStatus[];

@@ -23,7 +23,6 @@ import {
   SignatureAuditEntry,
   SendForSignatureRequest,
   SendForSignatureResponse,
-  SignatureDocumentType,
 } from './types';
 import { Estimate, Organization } from '@/types';
 import { generateAndUploadEstimatePdf } from './pdf-service';

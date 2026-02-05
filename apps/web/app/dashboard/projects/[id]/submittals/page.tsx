@@ -30,12 +30,11 @@ import {
   query,
   orderBy,
   serverTimestamp,
-  Timestamp,
 } from 'firebase/firestore';
 import { toast } from '@/components/ui/Toast';
 
 // Mock data for development
-const mockSubmittals: Submittal[] = [
+const _mockSubmittals: Submittal[] = [
   {
     id: '1',
     projectId: 'proj-1',
@@ -126,7 +125,7 @@ export default function SubmittalsPage() {
   const { profile } = useAuth();
 
   const [submittals, setSubmittals] = useState<Submittal[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<SubmittalStatus | 'all'>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);

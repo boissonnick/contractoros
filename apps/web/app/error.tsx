@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from 'react';
+import Link from 'next/link';
 import { ExclamationTriangleIcon, ArrowPathIcon, HomeIcon } from '@heroicons/react/24/outline';
 
 export default function Error({
@@ -52,13 +53,13 @@ export default function Error({
             <ArrowPathIcon className="h-4 w-4" />
             Try Again
           </button>
-          <a
+          <Link
             href="/"
             className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
           >
             <HomeIcon className="h-4 w-4" />
             Go Home
-          </a>
+          </Link>
         </div>
       </div>
     </div>

@@ -211,7 +211,7 @@ async function handleIncomingMessage(
       deliveredAt: Timestamp.now(),
     };
 
-    const docRef = await adminDb.collection('smsMessages').add(incomingData);
+    const _docRef = await adminDb.collection('smsMessages').add(incomingData);
 
     // Handle opt-out/opt-in requests
     if (isOptOutRequest(body)) {
@@ -279,7 +279,7 @@ async function handleOptOut(phoneNumber: string, orgId: string | null) {
 /**
  * Handle opt-in request
  */
-async function handleOptIn(phoneNumber: string, orgId: string | null) {
+async function handleOptIn(phoneNumber: string, _orgId: string | null) {
   try {
     // Find and delete opt-out record
     const snapshot = await adminDb

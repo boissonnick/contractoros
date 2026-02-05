@@ -4,7 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { useServiceTickets } from '@/lib/hooks/useLeads';
 import { Card, Button, Badge } from '@/components/ui';
 import { cn } from '@/lib/utils';
-import { ServiceTicket, ServiceTicketStatus } from '@/types';
+import { ServiceTicketStatus } from '@/types';
 import {
   TicketIcon,
   PlusIcon,
@@ -30,7 +30,7 @@ const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
 };
 
 export default function ServiceTicketsPage() {
-  const { tickets, loading, updateTicket } = useServiceTickets();
+  const { tickets, loading } = useServiceTickets();
   const [statusFilter, setStatusFilter] = useState<ServiceTicketStatus | 'all'>('all');
 
   const filtered = useMemo(() => {

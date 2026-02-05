@@ -20,12 +20,11 @@ import {
 import { cacheTeamForOffline } from '@/lib/offline/cache-team';
 import { OfflineDailyLogForm } from '@/components/field/OfflineDailyLogForm';
 import { useProjects } from '@/lib/hooks/useQueryHooks';
-import Button from '@/components/ui/Button';
 import { Project } from '@/types';
 
 export default function FieldDailyLogPage() {
   const { user, profile, loading: authLoading } = useAuth();
-  const { isOnline, wasOffline } = useNetworkStatus();
+  const { isOnline } = useNetworkStatus();
   const router = useRouter();
 
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
@@ -35,7 +34,7 @@ export default function FieldDailyLogPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Fetch projects
-  const { data: projectsData = [], isLoading: projectsLoading } = useProjects();
+  const { data: projectsData = [] } = useProjects();
   const projects = projectsData as Project[];
 
   const orgId = profile?.orgId || '';
@@ -69,7 +68,7 @@ export default function FieldDailyLogPage() {
   }, [isOnline, orgId]);
 
   // Handle form save
-  const handleSave = async (localId: string) => {
+  const handleSave = async (_localId: string) => {
     setShowForm(false);
     // Refresh the list
     const service = getOfflineDailyLogService();
@@ -98,7 +97,7 @@ export default function FieldDailyLogPage() {
   if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-primary"></div>
       </div>
     );
   }
@@ -114,7 +113,7 @@ export default function FieldDailyLogPage() {
           >
             <ChevronLeftIcon className="h-6 w-6" />
           </button>
-          <h1 className="text-lg font-semibold">Daily Logs</h1>
+          <h1 className="text-lg font-semibold font-heading tracking-tight">Daily Logs</h1>
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
@@ -157,7 +156,7 @@ export default function FieldDailyLogPage() {
           <select
             value={selectedProjectId}
             onChange={(e) => setSelectedProjectId(e.target.value)}
-            className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-primary"
           >
             <option value="">All Projects</option>
             {projects.map((project) => (
@@ -188,7 +187,7 @@ export default function FieldDailyLogPage() {
           <div className="p-4">
             <div className="bg-white rounded-xl border shadow-sm p-4">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="font-medium text-gray-900">
+                <h2 className="font-medium font-heading tracking-tight text-gray-900">
                   {new Date().toLocaleDateString('en-US', {
                     weekday: 'long',
                     month: 'long',
@@ -239,7 +238,7 @@ export default function FieldDailyLogPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-medium text-gray-900">
+                        <h3 className="font-medium font-heading tracking-tight text-gray-900">
                           {log.title}
                         </h3>
                         {log.syncStatus === 'pending' && (

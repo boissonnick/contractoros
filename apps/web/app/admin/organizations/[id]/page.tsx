@@ -32,7 +32,7 @@ interface UserRow {
 
 export default function AdminOrgDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const router = useRouter();
+  const _router = useRouter();
   const [org, setOrg] = useState<OrgDetail | null>(null);
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);

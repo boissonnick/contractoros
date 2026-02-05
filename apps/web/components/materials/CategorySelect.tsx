@@ -3,12 +3,10 @@
 import React, { useState, useMemo } from 'react';
 import {
   MaterialCategory,
-  MaterialCategoryGroup,
   MATERIAL_CATEGORIES,
   MATERIAL_CATEGORY_GROUPS,
   getMaterialCategoriesByGroup,
 } from '@/types';
-import { ChevronDownIcon, PlusIcon } from '@heroicons/react/24/outline';
 
 interface CategorySelectProps {
   value: MaterialCategory | string;
@@ -44,7 +42,7 @@ export default function CategorySelect({
     }
   };
 
-  const getSelectedLabel = () => {
+  const _getSelectedLabel = () => {
     if (value === 'custom' && customCategory) {
       return customCategory;
     }

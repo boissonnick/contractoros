@@ -20,10 +20,9 @@ import {
   getDocs,
   Timestamp,
   orderBy,
-  collectionGroup,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import { addDays, differenceInDays, startOfDay, isAfter, isBefore } from 'date-fns';
+import { addDays, differenceInDays, startOfDay, isAfter } from 'date-fns';
 
 // ============================================
 // Types

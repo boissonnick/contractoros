@@ -17,7 +17,7 @@ import {
   getCategoryColor,
   OrgJobCostingSummary,
 } from '@/lib/hooks/useJobCosting';
-import { COST_CATEGORY_LABELS, CostCategory, ProjectProfitability } from '@/types';
+import { COST_CATEGORY_LABELS, CostCategory } from '@/types';
 
 export interface JobCostingSummaryProps {
   /** Optional: Show data for a specific project. If omitted, shows all projects */

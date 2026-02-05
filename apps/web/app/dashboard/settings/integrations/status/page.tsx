@@ -18,9 +18,7 @@ import {
   TableHeader,
   TableCell,
   TableEmpty,
-  TableLoading,
   Skeleton,
-  SkeletonText,
 } from '@/components/ui';
 import {
   ArrowPathIcon,
@@ -45,7 +43,6 @@ import {
   IntegrationType,
   IntegrationStatus,
   SyncLogEntry,
-  SyncStatus,
   INTEGRATION_LABELS,
   INTEGRATION_DESCRIPTIONS,
   SYNC_STATUS_LABELS,
@@ -64,7 +61,7 @@ interface IntegrationCardProps {
 }
 
 function IntegrationCard({ integration, onSync, syncing }: IntegrationCardProps) {
-  const statusColors = getSyncStatusColor(integration.syncStatus);
+  const _statusColors = getSyncStatusColor(integration.syncStatus);
 
   const getLogo = () => {
     switch (integration.type) {

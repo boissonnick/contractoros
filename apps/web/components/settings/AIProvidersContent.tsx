@@ -441,7 +441,7 @@ interface ProviderPriorityTabProps {
   connectedProviders: string[];
 }
 
-function ProviderPriorityTab({ connectedProviders }: ProviderPriorityTabProps) {
+function ProviderPriorityTab({ connectedProviders: _connectedProviders }: ProviderPriorityTabProps) {
   const {
     settings,
     monthlyUsage,

@@ -12,8 +12,6 @@ import {
   QueryConstraint,
   DocumentData,
   QueryDocumentSnapshot,
-  Firestore,
-  where,
   Query,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';

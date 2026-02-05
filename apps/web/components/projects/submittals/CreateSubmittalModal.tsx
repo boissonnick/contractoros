@@ -38,7 +38,7 @@ export default function CreateSubmittalModal({
   isOpen,
   onClose,
   onSubmit,
-  projectId,
+  projectId: _projectId,
 }: CreateSubmittalModalProps) {
   const {
     register,

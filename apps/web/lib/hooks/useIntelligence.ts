@@ -17,18 +17,15 @@ import {
   MarketBenchmark,
   BenchmarkProjectType,
   SuggestionConfidence,
-  CONFIDENCE_THRESHOLDS,
   MIN_SAMPLE_SIZE,
 } from '@/lib/intelligence/types';
 import {
   getAllMaterialPrices,
-  getMaterialPrice,
   getTopMovers,
   checkPriceAlerts,
 } from '@/lib/intelligence/material-prices';
 import {
   getAllLaborRates,
-  getLaborRate,
   getStateFromZipPrefix,
 } from '@/lib/intelligence/labor-rates';
 
@@ -375,7 +372,7 @@ export function useMarketBenchmark(
       try {
         // In production, this would fetch from Firestore
         // For now, generate sample data
-        const state = zipCodePrefix
+        const _state = zipCodePrefix
           ? getStateFromZipPrefix(zipCodePrefix)
           : null;
 

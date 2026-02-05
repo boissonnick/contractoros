@@ -4,15 +4,12 @@ import React, { useState, useMemo } from 'react';
 import { useSafetyInspections, useSafetyIncidents, useToolboxTalks } from '@/lib/hooks/useSafety';
 import { Card, Button, Badge } from '@/components/ui';
 import { cn } from '@/lib/utils';
-import { toast } from '@/components/ui/Toast';
 import {
   ShieldCheckIcon,
   ExclamationTriangleIcon,
   MegaphoneIcon,
   PlusIcon,
   CheckCircleIcon,
-  XCircleIcon,
-  ClockIcon,
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 

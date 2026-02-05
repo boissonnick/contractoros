@@ -21,7 +21,7 @@ import {
   Timestamp,
   writeBatch,
 } from 'firebase/firestore';
-import { UserProfile, UserRole, OnboardingStatus, OnboardingStep, Project } from '@/types';
+import { UserProfile, UserRole, OnboardingStatus, OnboardingStep } from '@/types';
 
 // Onboarding step definitions
 export const ONBOARDING_STEPS: { id: OnboardingStep; label: string; description: string }[] = [
@@ -536,7 +536,7 @@ export async function bulkInitiateOnboarding(
  */
 export async function resendWelcomeEmail(
   userId: string,
-  orgId: string
+  _orgId: string
 ): Promise<boolean> {
   try {
     const userDoc = await getDoc(doc(db, 'users', userId));
@@ -574,7 +574,7 @@ function getNextStep(currentStep: OnboardingStep): OnboardingStep | null {
   return stepOrder[currentIndex + 1];
 }
 
-export default {
+const userOnboarding = {
   initiateOnboarding,
   sendWelcomeEmail,
   setupUserDefaults,
@@ -586,3 +586,5 @@ export default {
   resendWelcomeEmail,
   ONBOARDING_STEPS,
 };
+
+export default userOnboarding;

@@ -131,7 +131,7 @@ export function StatsGrid({
           <Card key={i} className="animate-pulse">
             <div className="p-5">
               <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-lg bg-gray-200" />
+                <div className="h-12 w-12 rounded-xl bg-gray-200" />
                 <div className="flex-1">
                   <div className="h-4 w-20 bg-gray-200 rounded mb-2" />
                   <div className="h-6 w-16 bg-gray-200 rounded" />
@@ -157,7 +157,7 @@ function StatCard({
   label,
   value,
   icon: Icon,
-  iconBg = 'bg-brand-primary/10',
+  iconBg: _iconBg = 'bg-brand-primary/10',
   iconColor = 'text-brand-primary',
   change,
   description,
@@ -173,14 +173,14 @@ function StatCard({
       <div className="p-5">
         <div className="flex items-center gap-4">
           {Icon && (
-            <div className={`p-3 rounded-lg ${iconBg}`}>
+            <div className={`p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-black/5 ${iconColor}`}>
               <Icon className={`h-6 w-6 ${iconColor}`} />
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-500 truncate">{label}</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-gray-400 font-heading truncate">{label}</p>
             <div className="flex items-baseline gap-2 mt-1">
-              <p className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900 tabular-nums truncate">
+              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 tabular-nums truncate font-heading tracking-tight">
                 {typeof value === 'number' ? value.toLocaleString() : value}
               </p>
               {change && (

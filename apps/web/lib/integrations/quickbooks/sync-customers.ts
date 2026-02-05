@@ -7,14 +7,13 @@
 import { adminDb, Timestamp } from '@/lib/firebase/admin';
 import { Client, ClientAddress } from '@/types';
 import { qboCreate, qboUpdate, qboQuery, QBOClientError } from './client';
-import { QBOCustomer, QBOAddress, QBOEntityMapping } from './types';
+import { QBOCustomer, QBOAddress } from './types';
 import {
   getMapping,
   getMappingByQboId,
   upsertMapping,
-  markMappingError,
 } from './entity-mapping';
-import { startSyncLog, completeSyncLog, failSyncLog, SyncResult } from './sync-logger';
+import { startSyncLog, completeSyncLog, failSyncLog } from './sync-logger';
 
 // ============================================
 // Field Mapping: ContractorOS Client → QBO Customer
@@ -125,7 +124,7 @@ export function qboCustomerToClientUpdate(customer: QBOCustomer): Partial<Client
 /**
  * Convert QBO address to ContractorOS address format
  */
-function qboToAddress(qboAddr: QBOAddress, type: 'billing' | 'property' = 'billing'): ClientAddress {
+function _qboToAddress(qboAddr: QBOAddress, type: 'billing' | 'property' = 'billing'): ClientAddress {
   return {
     id: crypto.randomUUID(),
     type,

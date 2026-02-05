@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
 import {
@@ -620,7 +621,7 @@ export default function TeamContent() {
                     <div className="col-span-4 flex items-center gap-3">
                       <div className="h-9 w-9 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
                         {member.photoURL ? (
-                          <img src={member.photoURL} alt="" className="h-full w-full object-cover" />
+                          <Image src={member.photoURL} alt="" width={36} height={36} className="h-full w-full object-cover" />
                         ) : (
                           <UserIcon className="h-5 w-5 text-gray-500" />
                         )}
@@ -750,7 +751,7 @@ export default function TeamContent() {
                         <div className="col-span-4 flex items-center gap-3">
                           <div className="h-9 w-9 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
                             {member.photoURL ? (
-                              <img src={member.photoURL} alt="" className="h-full w-full object-cover grayscale" />
+                              <Image src={member.photoURL} alt="" width={36} height={36} className="h-full w-full object-cover grayscale" />
                             ) : (
                               <UserIcon className="h-5 w-5 text-gray-400" />
                             )}

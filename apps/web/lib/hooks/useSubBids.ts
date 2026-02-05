@@ -14,7 +14,7 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import { Bid, BidStatus, BidSolicitation, Project } from '@/types';
+import { Bid, BidStatus, BidSolicitation } from '@/types';
 import { useAuth } from '@/lib/auth';
 
 // Helper to convert Firestore data to Bid
@@ -99,7 +99,7 @@ export interface BidSubmissionData {
  * Fetches bids where subId matches current user
  */
 export function useSubBids() {
-  const { user, profile } = useAuth();
+  const { user, profile: _profile } = useAuth();
   const [bids, setBids] = useState<BidWithProject[]>([]);
   const [solicitations, setSolicitations] = useState<BidSolicitation[]>([]);
   const [projectsCache, setProjectsCache] = useState<Map<string, { name: string; address?: string }>>(new Map());

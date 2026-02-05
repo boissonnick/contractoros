@@ -5,17 +5,15 @@ import { useParams } from 'next/navigation';
 import { Tab } from '@headlessui/react';
 import {
   PlusIcon,
-  FunnelIcon,
   MagnifyingGlassIcon,
   ArrowDownTrayIcon,
   DocumentTextIcon,
   ClipboardDocumentListIcon,
 } from '@heroicons/react/24/outline';
-import { Card, Button, EmptyState } from '@/components/ui';
-import { FilterBar } from '@/components/ui/FilterBar';
-import { RFICard, RFI, RFIStatus } from '@/components/rfis/RFICard';
+import { Button, EmptyState } from '@/components/ui';
+import { RFICard, RFI } from '@/components/rfis/RFICard';
 import { RFIFormModal } from '@/components/rfis/RFIFormModal';
-import { SubmittalCard, Submittal, SubmittalStatus } from '@/components/submittals/SubmittalCard';
+import { SubmittalCard, Submittal } from '@/components/submittals/SubmittalCard';
 import { SubmittalFormModal } from '@/components/submittals/SubmittalFormModal';
 import { cn } from '@/lib/utils';
 
@@ -64,7 +62,7 @@ export default function RFILogPage() {
   // TODO: Replace with actual data hooks
   const rfis = MOCK_RFIS;
   const submittals = MOCK_SUBMITTALS;
-  const loading = false;
+  const _loading = false;
 
   // Filter RFIs
   const filteredRFIs = useMemo(() => {

@@ -16,7 +16,6 @@ import {
 import {
   fetchWeatherForecast,
   generateMockWeatherForecast,
-  assessProjectWeatherRisk,
   assessPhaseWeatherRisk,
   createProjectWeatherForecast,
   getWeatherSummary,

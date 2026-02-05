@@ -157,7 +157,7 @@ export default function LoginPage() {
 
   if (checkingAuth) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-brand-900 to-brand-950 flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -165,10 +165,10 @@ export default function LoginPage() {
 
   if (magicLinkSent) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center">
-          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <EnvelopeIcon className="h-8 w-8 text-blue-600" />
+      <div className="min-h-screen bg-gradient-to-br from-brand-900 to-brand-950 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 text-center">
+          <div className="w-16 h-16 bg-brand-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <EnvelopeIcon className="h-8 w-8 text-brand-600" />
           </div>
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Check your email</h2>
           <p className="text-gray-500 mb-2">
@@ -179,7 +179,7 @@ export default function LoginPage() {
           </p>
           <button
             onClick={() => { setMagicLinkSent(false); setEmail(''); }}
-            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+            className="text-sm text-brand-600 hover:text-brand-700 font-medium"
           >
             Use a different email
           </button>
@@ -189,15 +189,15 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-brand-900 to-brand-950 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white">ContractorOS</h1>
-          <p className="text-blue-200 mt-2">Field-first operations system</p>
+          <h1 className="text-3xl font-bold text-white font-heading tracking-tight">ContractorOS</h1>
+          <p className="text-brand-200 mt-2">Field-first operations system</p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-8">
+        <div className="bg-white rounded-2xl shadow-lg p-8">
           {/* Social Login Buttons */}
           <div className="space-y-3 mb-6">
             <button
@@ -245,7 +245,7 @@ export default function LoginPage() {
           <div className="flex bg-gray-100 rounded-lg p-1 mb-6">
             <button
               onClick={() => { setLoginMode('password'); setError(''); }}
-              className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${
+              className={`flex-1 py-1.5 text-sm font-medium rounded-lg transition-colors ${
                 loginMode === 'password'
                   ? 'bg-white text-gray-900 shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
@@ -255,7 +255,7 @@ export default function LoginPage() {
             </button>
             <button
               onClick={() => { setLoginMode('magic-link'); setError(''); }}
-              className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${
+              className={`flex-1 py-1.5 text-sm font-medium rounded-lg transition-colors ${
                 loginMode === 'magic-link'
                   ? 'bg-white text-gray-900 shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
@@ -282,7 +282,7 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => { setEmail(e.target.value); setError(''); }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-gray-900 placeholder-gray-400"
                 placeholder="you@company.com"
               />
             </div>
@@ -293,7 +293,7 @@ export default function LoginPage() {
                   <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                     Password
                   </label>
-                  <a href="/auth/forgot-password" className="text-sm text-blue-600 hover:text-blue-700">
+                  <a href="/auth/forgot-password" className="text-sm text-brand-600 hover:text-brand-700">
                     Forgot password?
                   </a>
                 </div>
@@ -305,7 +305,7 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => { setPassword(e.target.value); setError(''); }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-gray-900 placeholder-gray-400"
                   placeholder="Your password"
                 />
               </div>
@@ -334,7 +334,7 @@ export default function LoginPage() {
           <div className="mt-6 pt-6 border-t border-gray-200 text-center">
             <p className="text-sm text-gray-600">
               Don&apos;t have an account?{' '}
-              <a href="/register" className="font-medium text-blue-600 hover:text-blue-700">
+              <a href="/register" className="font-medium text-brand-600 hover:text-brand-700">
                 Create one
               </a>
             </p>

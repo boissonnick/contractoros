@@ -2,7 +2,6 @@
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui';
 import { SignatureData, SignatureMethod } from '@/lib/esignature/types';
 import {
   PencilIcon,
@@ -347,6 +346,7 @@ export default function SignaturePad({
                   className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex items-center justify-center bg-white"
                   style={{ minHeight: height }}
                 >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={uploadedImage}
                     alt="Uploaded signature"

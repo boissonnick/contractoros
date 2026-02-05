@@ -16,10 +16,7 @@ import { Button, Input, EmptyState, Skeleton } from '@/components/ui';
 import { SMSConversation, SMSMessage, useSMSMessages } from '@/lib/hooks/useSms';
 import { formatPhoneForDisplay } from '@/lib/sms/phoneUtils';
 import { formatRelative } from '@/lib/date-utils';
-import { getSmsStatusColor, getSmsStatusLabel } from '@/lib/sms/smsUtils';
-import { SmsStatus } from '@/types';
 import {
-  UserIcon,
   PhoneIcon,
   PaperAirplaneIcon,
   ExclamationTriangleIcon,

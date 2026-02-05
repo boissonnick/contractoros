@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import {
   ClipboardDocumentIcon,
   ArrowTrendingUpIcon,
@@ -188,9 +189,11 @@ export function DailyLogCard({
                 key={photo.id}
                 className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100"
               >
-                <img
+                <Image
                   src={photo.thumbnailUrl || photo.url}
                   alt={photo.caption || 'Log photo'}
+                  width={64}
+                  height={64}
                   className="w-full h-full object-cover"
                 />
               </div>

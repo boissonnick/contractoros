@@ -18,7 +18,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import Button from '@/components/ui/Button';
 import { FormModal } from '@/components/ui/FormModal';
 import PhotoGrid, { PhotoGridSkeleton } from '@/components/photos/PhotoGrid';
-import { ProjectPhoto, Bid, Project } from '@/types';
+import { ProjectPhoto } from '@/types';
 import { cn } from '@/lib/utils';
 import {
   processImage,
@@ -376,7 +376,7 @@ export default function SubPhotosPage() {
           onClick={() => fileInputRef.current?.click()}
         >
           <PhotoIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-1">No photos yet</h3>
+          <h3 className="text-lg font-medium font-heading tracking-tight text-gray-900 mb-1">No photos yet</h3>
           <p className="text-sm text-gray-500 mb-4">
             {projects.length === 0
               ? 'Get assigned to projects to start uploading photos'

@@ -588,11 +588,9 @@ class SyncManagerClass {
     if (typeof window === 'undefined') return;
 
     // Background Sync API - experimental, no TypeScript types available
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ('serviceWorker' in navigator && 'sync' in (window as any).SyncManager?.prototype) {
       try {
         const registration = await navigator.serviceWorker.ready;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (registration as any).sync.register('sync-pending-data');
       } catch (error) {
         console.warn('Background sync registration failed:', error);

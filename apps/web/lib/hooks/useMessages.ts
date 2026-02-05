@@ -12,7 +12,6 @@ import {
   doc,
   Timestamp,
   limit as firestoreLimit,
-  serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { Message, MessageChannel, MessageChannelType } from '@/types';

@@ -5,7 +5,6 @@ import { useParams } from 'next/navigation';
 import { doc, getDoc, collection, query, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { PortalNav, PhotoGallery, GalleryPhoto } from '@/components/client-portal';
-import { SkeletonList } from '@/components/ui/Skeleton';
 
 interface ClientPortalData {
   projectId: string;
@@ -127,7 +126,7 @@ export default function GalleryPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="text-center">
-          <h1 className="text-xl font-semibold text-gray-900 mb-2">
+          <h1 className="text-xl font-semibold font-heading tracking-tight text-gray-900 mb-2">
             {error || 'Something went wrong'}
           </h1>
           <p className="text-gray-500">Please contact your contractor for assistance.</p>
@@ -145,7 +144,7 @@ export default function GalleryPage() {
       />
 
       <main className="max-w-4xl mx-auto p-4">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">
           Project Photos ({photos.length})
         </h2>
         <PhotoGallery photos={photos} phases={phases} />

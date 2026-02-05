@@ -367,6 +367,7 @@ function PdfHeader({
       <View style={styles.headerBanner}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
           {header.showLogo && organization.logoURL ? (
+            /* eslint-disable-next-line jsx-a11y/alt-text */
             <Image src={organization.logoURL} style={styles.logo} />
           ) : (
             header.showCompanyName && (
@@ -405,6 +406,7 @@ function PdfHeader({
     return (
       <View style={styles.headerCentered}>
         {header.showLogo && organization.logoURL && (
+          /* eslint-disable-next-line jsx-a11y/alt-text */
           <Image src={organization.logoURL} style={styles.logo} />
         )}
         <View style={styles.companyInfoCentered}>
@@ -438,6 +440,7 @@ function PdfHeader({
     <View style={styles.header}>
       <View>
         {header.showLogo && organization.logoURL ? (
+          /* eslint-disable-next-line jsx-a11y/alt-text */
           <Image src={organization.logoURL} style={styles.logo} />
         ) : (
           header.showCompanyName && (

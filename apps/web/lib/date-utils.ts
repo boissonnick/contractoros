@@ -1,4 +1,3 @@
-import { Timestamp } from 'firebase/firestore';
 
 export function toDate(dateValue: any): Date | null {
   if (!dateValue) return null;

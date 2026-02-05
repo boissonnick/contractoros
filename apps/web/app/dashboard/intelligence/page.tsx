@@ -31,7 +31,7 @@ export default function IntelligencePage() {
       <div className="p-6">
         <div className="text-center py-16">
           <ChartBarSquareIcon className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-          <h2 className="text-lg font-semibold text-gray-900 mb-1">
+          <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-1">
             Access Restricted
           </h2>
           <p className="text-sm text-gray-500">
@@ -47,7 +47,7 @@ export default function IntelligencePage() {
     <div className="p-6 space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">
           Financial Intelligence
         </h1>
         <p className="text-gray-500 mt-1">

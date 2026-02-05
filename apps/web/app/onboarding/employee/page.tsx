@@ -9,7 +9,6 @@ import { Button, Input, toast } from '@/components/ui';
 import { EmployeeType, EmergencyContact, Certification } from '@/types';
 import {
   CheckCircleIcon,
-  ArrowRightIcon,
   ArrowLeftIcon,
   UserIcon,
 } from '@heroicons/react/24/outline';
@@ -104,7 +103,7 @@ export default function EmployeeOnboardingPage() {
               <button
                 key={t.id}
                 onClick={() => { setEmployeeType(t.id); setStep('trades'); }}
-                className="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-all text-left"
+                className="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-gray-200 hover:border-brand-500 hover:bg-brand-50 transition-all text-left"
               >
                 <div className="p-3 bg-gray-100 rounded-lg">
                   <UserIcon className="h-6 w-6 text-gray-600" />
@@ -164,7 +163,7 @@ export default function EmployeeOnboardingPage() {
             <CheckCircleIcon className="h-8 w-8 text-green-600" />
           </div>
           <p className="text-gray-500">Redirecting to your dashboard...</p>
-          <div className="mt-4"><div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto" /></div>
+          <div className="mt-4"><div className="w-8 h-8 border-4 border-brand-600 border-t-transparent rounded-full animate-spin mx-auto" /></div>
         </div>
       )}
     </OnboardingStepLayout>

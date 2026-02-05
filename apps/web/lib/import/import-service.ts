@@ -413,10 +413,10 @@ export async function rollbackImport(
   const BATCH_SIZE = 500;
 
   for (let i = 0; i < job.createdRecordIds.length; i += BATCH_SIZE) {
-    const batch = writeBatch(db);
+    const _batch = writeBatch(db);
     const batchIds = job.createdRecordIds.slice(i, i + BATCH_SIZE);
 
-    for (const recordId of batchIds) {
+    for (const _recordId of batchIds) {
       // We'd need to store the full path with each record ID
       // For now, this is a simplified version
       // In production, createdRecordIds should store full paths

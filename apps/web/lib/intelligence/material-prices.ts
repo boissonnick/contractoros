@@ -12,7 +12,6 @@ import {
   MaterialPriceIndex,
   MaterialPricePoint,
   MaterialCategory,
-  PriceRegion,
   FRED_SERIES_CODES,
   MATERIAL_DISPLAY_NAMES,
 } from './types';

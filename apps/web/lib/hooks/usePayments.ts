@@ -11,7 +11,6 @@ import {
   updateDoc,
   doc,
   Timestamp,
-  getDocs,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { StripePayment, PaymentLink, SavedPaymentMethod, PaymentStatus } from '@/types';

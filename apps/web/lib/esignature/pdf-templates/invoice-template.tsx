@@ -273,6 +273,7 @@ export default function InvoicePdf({ invoice, organization }: InvoicePdfProps) {
         <View style={styles.header}>
           <View>
             {organization.logoURL ? (
+              /* eslint-disable-next-line jsx-a11y/alt-text */
               <Image src={organization.logoURL} style={styles.logo} />
             ) : (
               <Text style={styles.companyName}>{organization.name}</Text>

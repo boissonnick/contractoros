@@ -14,7 +14,7 @@ import {
   orderBy,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import { Tool, ToolCheckout, ToolStatus } from '@/types';
+import { Tool, ToolStatus } from '@/types';
 import { useAuth } from '@/lib/auth';
 
 export function useTools() {
@@ -112,7 +112,7 @@ export function useTools() {
   );
 
   const returnTool = useCallback(
-    async (toolId: string, condition?: string, notes?: string) => {
+    async (toolId: string, _condition?: string, _notes?: string) => {
       await updateDoc(doc(db, 'tools', toolId), {
         status: 'available' as ToolStatus,
         assignedTo: null,

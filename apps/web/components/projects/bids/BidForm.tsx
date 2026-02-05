@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Bid, BidStatus, ProjectPhase } from '@/types';
+import { Bid, ProjectPhase } from '@/types';
 import { Button, Input, Textarea } from '@/components/ui';
 
 interface BidFormProps {

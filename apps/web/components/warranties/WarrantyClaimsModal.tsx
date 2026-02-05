@@ -258,7 +258,7 @@ export default function WarrantyClaimsModal({ isOpen, onClose, warranty }: Warra
             <DocumentTextIcon className="h-12 w-12 text-gray-300 mx-auto mb-3" />
             <p className="text-gray-500">No claims filed yet</p>
             <p className="text-sm text-gray-400 mt-1">
-              Click "File New Claim" to submit a warranty claim
+              Click &quot;File New Claim&quot; to submit a warranty claim
             </p>
           </div>
         )}

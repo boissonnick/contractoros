@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
+import Image from 'next/image';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
 import {
@@ -8,19 +9,16 @@ import {
   query,
   where,
   onSnapshot,
-  getDocs,
 } from 'firebase/firestore';
 import { Card, Button, Badge, toast, EmptyState, BaseModal, Checkbox } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import {
   UserProfile,
-  UserRole,
   OnboardingStatus,
   OnboardingStep,
 } from '@/types';
 import {
   CheckCircleIcon,
-  ClockIcon,
   EnvelopeIcon,
   UserIcon,
   ShieldCheckIcon,
@@ -34,7 +32,7 @@ import {
   ExclamationCircleIcon,
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckCircleSolidIcon } from '@heroicons/react/24/solid';
-import { formatDistanceToNow, format } from 'date-fns';
+import { formatDistanceToNow } from 'date-fns';
 import {
   initiateOnboarding,
   resendWelcomeEmail,
@@ -424,7 +422,7 @@ export default function OnboardingChecklist({
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="h-9 w-9 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
                       {user.photoURL ? (
-                        <img src={user.photoURL} alt="" className="h-full w-full object-cover" />
+                        <Image src={user.photoURL} alt="" width={36} height={36} className="h-full w-full object-cover" />
                       ) : (
                         <UserIcon className="h-5 w-5 text-gray-500" />
                       )}

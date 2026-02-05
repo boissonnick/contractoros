@@ -12,7 +12,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { buildSystemPrompt, buildSystemPromptWithServerContext } from '@/lib/assistant/prompts';
 import { AssistantContext, DataSource, QuickAction } from '@/lib/assistant/types';
 import { isPricingQuery, isSchedulingQuery, isProjectQuery } from '@/lib/assistant/claude-client';
-import { ModelRouter, AVAILABLE_MODELS, getDefaultModelKey } from '@/lib/assistant/models';
+import { ModelRouter, getDefaultModelKey } from '@/lib/assistant/models';
 import {
   validatePrompt,
   logSecurityEvent,
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
         if (!verifiedOrgId && verifiedUserId) {
           verifiedOrgId = await getOrgIdFromUser(verifiedUserId);
         }
-      } catch (authError) {
+      } catch {
         console.warn('[Assistant API] Auth verification failed, proceeding without server context');
       }
     }
@@ -325,7 +325,7 @@ function generateFallbackResponse(
   message: string,
   context: AssistantContext
 ): { message: string; sources?: DataSource[]; suggestedActions?: QuickAction[] } {
-  const lowerMessage = message.toLowerCase();
+  const _lowerMessage = message.toLowerCase();
 
   // Pricing query fallback
   if (isPricingQuery(message)) {

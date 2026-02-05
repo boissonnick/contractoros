@@ -68,7 +68,7 @@ export function NotificationDropdown({ isOpen, onClose }: NotificationDropdownPr
               <BellSlashIcon className="w-10 h-10 text-gray-300 mx-auto mb-3" />
               <p className="text-sm text-gray-500">No notifications yet</p>
               <p className="text-xs text-gray-400 mt-1">
-                We'll notify you when something happens
+                We&apos;ll notify you when something happens
               </p>
             </div>
           ) : (

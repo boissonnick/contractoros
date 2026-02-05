@@ -7,7 +7,6 @@ import { z } from 'zod';
 import {
   PlusIcon,
   XMarkIcon,
-  PhotoIcon,
 } from '@heroicons/react/24/outline';
 import BaseModal from '@/components/ui/BaseModal';
 import Button from '@/components/ui/Button';
@@ -128,7 +127,7 @@ export function DailyLogFormModal({
     name: 'issues',
   });
 
-  const selectedProjectId = watch('projectId');
+  const _selectedProjectId = watch('projectId');
   const requiresFollowUp = watch('requiresFollowUp');
 
   // Reset form when log changes

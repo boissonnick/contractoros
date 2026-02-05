@@ -13,7 +13,6 @@ import { Card } from '@/components/ui';
 import { ChartConfig, CHART_DEFAULTS, DEFAULT_COLORS } from './types';
 import { ChartTooltip } from './ChartTooltip';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type PieChartData = Array<{ name: string; value: number; color?: string; [key: string]: any }>;
 
 interface PieChartCardProps {
@@ -134,7 +133,7 @@ export function PieChartCard({
                     value: Number(p.value),
                     color: String(p.payload?.fill),
                   }))}
-                  formatter={(value, name) => {
+                  formatter={(value, _name) => {
                     const pct = ((value / total) * 100).toFixed(1);
                     const formatted = valueFormatter ? valueFormatter(value) : value.toLocaleString();
                     return `${formatted} (${pct}%)`;

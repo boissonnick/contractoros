@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
+import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
@@ -10,18 +11,16 @@ import {
   where,
   orderBy,
   getDocs,
-  getDoc,
   addDoc,
   updateDoc,
   deleteDoc,
   doc,
   Timestamp,
 } from 'firebase/firestore';
-import { Button, Card, Badge, EmptyState, Avatar } from '@/components/ui';
+import { Button, Card, Badge, EmptyState } from '@/components/ui';
 import { toast } from '@/components/ui/Toast';
 import { SkeletonList } from '@/components/ui/Skeleton';
-import { cn } from '@/lib/utils';
-import { PunchList, PunchItem, PunchItemStatus, PunchItemPriority } from '@/types';
+import { PunchItem, PunchItemStatus, PunchItemPriority } from '@/types';
 import {
   PlusIcon,
   MagnifyingGlassIcon,
@@ -33,7 +32,6 @@ import {
   XCircleIcon,
   MapPinIcon,
   UserCircleIcon,
-  CameraIcon,
   ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
@@ -411,9 +409,11 @@ export default function PunchListPage() {
                           key={idx}
                           className="w-10 h-10 rounded border-2 border-white bg-gray-200 overflow-hidden"
                         >
-                          <img
+                          <Image
                             src={photo.url}
                             alt=""
+                            width={40}
+                            height={40}
                             className="w-full h-full object-cover"
                           />
                         </div>

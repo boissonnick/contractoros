@@ -121,7 +121,7 @@ function simulateDocSnapshot(exists: boolean, id: string, data: Record<string, u
   });
 }
 
-function simulateSnapshotError(errorMessage: string) {
+function _simulateSnapshotError(errorMessage: string) {
   mockOnSnapshot.mockImplementation((_query: unknown, _onNext: Function, onError?: Function) => {
     if (onError) onError(new Error(errorMessage));
     return jest.fn();

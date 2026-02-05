@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { Task, TaskPriority } from '@/types';
-import { Badge } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import {
   CalendarIcon,

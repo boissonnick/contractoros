@@ -24,7 +24,7 @@ export function ValidationReport({
 
   const errorCount = errors.filter(e => e.severity === 'error').length;
   const warningCount = errors.filter(e => e.severity === 'warning').length;
-  const invalidRowCount = totalRows - validRows;
+  const _invalidRowCount = totalRows - validRows;
 
   // Group errors by type
   const errorsByType = errors.reduce((acc, error) => {

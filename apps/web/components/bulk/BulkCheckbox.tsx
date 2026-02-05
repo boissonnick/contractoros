@@ -29,7 +29,7 @@ export function BulkCheckbox({
     (e: React.MouseEvent<HTMLInputElement>) => {
       // Prevent the change event from firing, we'll handle it manually
       e.stopPropagation();
-      const target = e.target as HTMLInputElement;
+      const _target = e.target as HTMLInputElement;
       onChange(id, !checked, e.shiftKey);
     },
     [id, checked, onChange]

@@ -5,10 +5,10 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
-import { Bid, BidStatus, Subcontractor, Project } from '@/types';
-import { PageHeader, Card, Badge, Button, EmptyState } from '@/components/ui';
+import { Bid, Subcontractor, Project } from '@/types';
+import { PageHeader, Card, Badge, EmptyState } from '@/components/ui';
 import { SkeletonBidsList } from '@/components/ui/Skeleton';
-import { cn, formatCurrency } from '@/lib/utils';
+import { formatCurrency } from '@/lib/utils';
 import { format } from 'date-fns';
 import {
   DocumentTextIcon,

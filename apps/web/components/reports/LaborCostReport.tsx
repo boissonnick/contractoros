@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { LaborCostData } from '@/lib/hooks/useReports';
 import { CompactPagination } from '@/components/ui';
 

@@ -6,8 +6,8 @@ import Link from 'next/link';
 import { doc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
-import { Bid, BidStatus, Project } from '@/types';
-import { formatDate, formatDistanceToNow } from '@/lib/date-utils';
+import { Bid, BidStatus } from '@/types';
+import { formatDate } from '@/lib/date-utils';
 import { formatCurrency } from '@/lib/utils/formatters';
 import {
   PageHeader,
@@ -22,9 +22,6 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   ArrowLeftIcon,
-  CalendarDaysIcon,
-  BanknotesIcon,
-  MapPinIcon,
   PencilIcon,
   PaperAirplaneIcon,
   ArchiveBoxXMarkIcon,
@@ -82,7 +79,7 @@ function bidFromFirestore(id: string, data: Record<string, unknown>): Bid {
 
 export default function SubBidDetailPage() {
   const params = useParams();
-  const router = useRouter();
+  const _router = useRouter();
   const { user } = useAuth();
   const bidId = params.id as string;
 
@@ -349,7 +346,7 @@ export default function SubBidDetailPage() {
           {/* Pricing */}
           <Card>
             <CardContent className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Pricing</h3>
+              <h3 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">Pricing</h3>
 
               {isEditing ? (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -432,7 +429,7 @@ export default function SubBidDetailPage() {
           {/* Timeline */}
           <Card>
             <CardContent className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Timeline</h3>
+              <h3 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">Timeline</h3>
 
               {isEditing ? (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -501,7 +498,7 @@ export default function SubBidDetailPage() {
           {/* Description */}
           <Card>
             <CardContent className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Description</h3>
+              <h3 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">Description</h3>
 
               {isEditing ? (
                 <textarea
@@ -555,7 +552,7 @@ export default function SubBidDetailPage() {
           {bid.responseNotes && (
             <Card className={bid.status === 'accepted' ? 'border-green-200 bg-green-50' : bid.status === 'rejected' ? 'border-red-200 bg-red-50' : ''}>
               <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Contractor Response</h3>
+                <h3 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-2">Contractor Response</h3>
                 <p className={`${bid.status === 'accepted' ? 'text-green-700' : bid.status === 'rejected' ? 'text-red-700' : 'text-gray-700'}`}>
                   {bid.responseNotes}
                 </p>
@@ -574,7 +571,7 @@ export default function SubBidDetailPage() {
           {/* Project Info */}
           <Card>
             <CardContent className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <h3 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4 flex items-center gap-2">
                 <BuildingOfficeIcon className="h-5 w-5 text-gray-400" />
                 Project
               </h3>
@@ -596,7 +593,7 @@ export default function SubBidDetailPage() {
           {/* Bid Activity */}
           <Card>
             <CardContent className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Activity</h3>
+              <h3 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">Activity</h3>
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
                   <div className="p-1.5 bg-gray-100 rounded-full">
@@ -657,7 +654,7 @@ export default function SubBidDetailPage() {
           {bid.status === 'accepted' && (
             <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white">
               <CheckCircleIcon className="h-8 w-8 mb-3" />
-              <h3 className="text-lg font-semibold mb-1">Bid Accepted!</h3>
+              <h3 className="text-lg font-semibold font-heading tracking-tight mb-1">Bid Accepted!</h3>
               <p className="text-green-100 text-sm">
                 Congratulations! Your bid has been selected. The contractor will be in touch with next steps.
               </p>

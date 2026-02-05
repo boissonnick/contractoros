@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import {
   CalendarDaysIcon,
   UserGroupIcon,
@@ -126,9 +127,11 @@ export function SchedulingSuggestionCard({
                     title={crew.name}
                   >
                     {crew.avatarUrl ? (
-                      <img
+                      <Image
                         src={crew.avatarUrl}
                         alt={crew.name}
+                        width={28}
+                        height={28}
                         className="w-full h-full rounded-full object-cover"
                       />
                     ) : (

@@ -149,7 +149,7 @@ export function PageHeader({
       <div className="flex flex-col sm:flex-row sm:items-start md:items-center sm:justify-between gap-3 sm:gap-4">
         {/* Title section - allows shrinking with proper min-width */}
         <div className="min-w-0 flex-1 sm:max-w-[calc(100%-180px)] md:max-w-none">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">{title}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate font-heading tracking-tight">{title}</h1>
           {description && (
             <p className="mt-1 text-sm text-gray-500 line-clamp-2 sm:line-clamp-1">{description}</p>
           )}

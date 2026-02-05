@@ -16,7 +16,6 @@ import {
   MapPinIcon,
   CalendarIcon,
   ChevronRightIcon,
-  CurrencyDollarIcon,
   UserGroupIcon,
   FolderIcon,
 } from '@heroicons/react/24/outline';

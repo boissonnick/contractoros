@@ -13,7 +13,6 @@ import { FloatingSyncIndicator } from '@/components/offline/SyncStatusIndicator'
 import SidebarDevTools from '@/components/ui/SidebarDevTools';
 import { AssistantPanel, AssistantTrigger } from '@/components/assistant';
 import { useAssistant } from '@/lib/hooks/useAssistant';
-import { GlobalSearchBar } from '@/components/search';
 import {
   HomeIcon,
   FolderIcon,
@@ -28,17 +27,14 @@ import {
   UserGroupIcon,
   PhotoIcon,
   DocumentIcon,
-  CurrencyDollarIcon,
   QuestionMarkCircleIcon,
   WrenchScrewdriverIcon,
   CalculatorIcon,
   PencilSquareIcon,
-  CreditCardIcon,
   TruckIcon,
   InboxIcon,
   ChartBarSquareIcon,
 } from '@heroicons/react/24/outline';
-import Link from 'next/link';
 
 // =============================================================================
 // OWNER/PM Navigation - Organized by "Jobs to be Done"

@@ -481,7 +481,7 @@ function toSimplifiedMessage(msg: SmsMessage): SMSMessage {
 export function useSMS(orgId: string | undefined): UseSMSResult {
   const { user } = useAuth();
   const [conversations, setConversations] = useState<SMSConversation[]>([]);
-  const [messagesCache, setMessagesCache] = useState<Map<string, SMSMessage[]>>(
+  const [messagesCache] = useState<Map<string, SMSMessage[]>>(
     new Map()
   );
   const [loading, setLoading] = useState(true);

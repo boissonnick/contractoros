@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Equipment, EquipmentCheckout, Project } from '@/types';
 import { XMarkIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
 
@@ -109,9 +110,11 @@ export function CheckOutModal({
           <div className="p-4 bg-gray-50 border-b">
             <div className="flex items-center gap-3">
               {equipment.photoUrl ? (
-                <img
+                <Image
                   src={equipment.photoUrl}
                   alt={equipment.name}
+                  width={48}
+                  height={48}
                   className="w-12 h-12 object-cover rounded"
                 />
               ) : (

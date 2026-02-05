@@ -8,14 +8,13 @@
  * - Automatic fallback on provider failures
  */
 
-import { AVAILABLE_MODELS, ModelConfig, ModelProvider } from '@/lib/assistant/models/types';
+import { AVAILABLE_MODELS, ModelConfig } from '@/lib/assistant/models/types';
 import type {
   AIProviderPriority,
   AIFeatureType,
   AIFeatureModelAssignment,
   OrganizationAIProviderSettings,
   AIOperationResult,
-  DEFAULT_AI_PROVIDER_SETTINGS,
 } from '@/types';
 
 // ============================================================================

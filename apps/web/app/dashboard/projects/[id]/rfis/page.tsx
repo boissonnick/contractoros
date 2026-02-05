@@ -16,7 +16,7 @@ import {
   doc,
   Timestamp,
 } from 'firebase/firestore';
-import { Button, Card, Badge, EmptyState, Avatar } from '@/components/ui';
+import { Button, Card, EmptyState, Avatar } from '@/components/ui';
 import { toast } from '@/components/ui/Toast';
 import { SkeletonList } from '@/components/ui/Skeleton';
 import { cn, formatRelativeTime } from '@/lib/utils';
@@ -24,7 +24,6 @@ import { RFI, RFIStatus, RFIPriority } from '@/types';
 import {
   PlusIcon,
   MagnifyingGlassIcon,
-  FunnelIcon,
   DocumentTextIcon,
   ClockIcon,
   ExclamationTriangleIcon,

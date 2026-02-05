@@ -6,7 +6,7 @@ import {
   CheckCircleIcon,
   ClockIcon,
 } from '@heroicons/react/24/outline';
-import { WeatherRiskAssessment, TRADE_WEATHER_THRESHOLDS } from '@/types';
+import { WeatherRiskAssessment } from '@/types';
 import { WeatherRiskBadge } from './WeatherRiskBadge';
 import { cn } from '@/lib/utils';
 

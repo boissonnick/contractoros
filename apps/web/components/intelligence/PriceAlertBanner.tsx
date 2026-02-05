@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import {
   BellAlertIcon,
@@ -226,7 +225,7 @@ function AlertRow({ alert, onDismiss }: AlertRowProps) {
  * Compact inline price alert for use in forms
  */
 export function InlinePriceAlert({
-  material,
+  material: _material,
   displayName,
   change,
   direction,

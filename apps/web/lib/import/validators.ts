@@ -8,11 +8,10 @@ import {
   ColumnMapping,
   ParsedRow,
   ImportValidationError,
-  ColumnDataType,
 } from './types';
 
 // Phone number regex (flexible)
-const PHONE_REGEX = /^[\d\s\-\(\)\+\.]+$/;
+const _PHONE_REGEX = /^[\d\s\-\(\)\+\.]+$/;
 
 // Email regex
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

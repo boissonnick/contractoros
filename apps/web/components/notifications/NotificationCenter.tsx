@@ -8,10 +8,8 @@ import { formatDistanceToNow } from 'date-fns';
 import {
   BanknotesIcon,
   ClipboardDocumentCheckIcon,
-  FolderIcon,
   AtSymbolIcon,
   CheckCircleIcon,
-  PencilSquareIcon,
   DocumentTextIcon,
   ExclamationTriangleIcon,
   ChatBubbleLeftIcon,
@@ -19,12 +17,11 @@ import {
   CalendarIcon,
   CurrencyDollarIcon,
   XCircleIcon,
-  InformationCircleIcon,
 } from '@heroicons/react/24/outline';
 import { useNotifications } from '@/lib/hooks/useNotifications';
 import { AppNotification, NotificationType } from '@/types';
 import { cn } from '@/lib/utils';
-import { writeBatch, doc, deleteDoc } from 'firebase/firestore';
+import { writeBatch, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 
 // Extended props interface for full control
@@ -273,7 +270,7 @@ export function NotificationCenter({
                   <BellSlashIcon className="w-10 h-10 text-gray-300 mx-auto mb-3" />
                   <p className="text-sm text-gray-500">No notifications</p>
                   <p className="text-xs text-gray-400 mt-1">
-                    We'll notify you when something happens
+                    We&apos;ll notify you when something happens
                   </p>
                 </div>
               ) : (

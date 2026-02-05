@@ -111,7 +111,7 @@ export function ExpenseFormModal({
     defaultValues: getDefaultValues(),
   });
 
-  const selectedProjectId = watch('projectId');
+  const _selectedProjectId = watch('projectId');
 
   // Reset form when expense changes
   useEffect(() => {

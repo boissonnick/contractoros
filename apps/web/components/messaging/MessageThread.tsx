@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import {
   PaperAirplaneIcon,
   PhotoIcon,
@@ -13,7 +14,7 @@ import {
   CheckCircleIcon,
 } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
-import { format, isToday, isYesterday, isSameDay } from 'date-fns';
+import { format, isToday, isYesterday } from 'date-fns';
 
 // ============================================================================
 // Types
@@ -138,9 +139,11 @@ function Avatar({ src, name, size = 'md' }: AvatarProps) {
 
   if (src) {
     return (
-      <img
+      <Image
         src={src}
         alt={name}
+        width={size === 'sm' ? 24 : 32}
+        height={size === 'sm' ? 24 : 32}
         className={cn('rounded-full object-cover flex-shrink-0', sizeClasses)}
       />
     );
@@ -250,9 +253,11 @@ function MessageBubble({
                 )}
               >
                 {attachment.type === 'image' ? (
-                  <img
+                  <Image
                     src={attachment.url}
                     alt={attachment.name}
+                    width={400}
+                    height={192}
                     className="max-w-full max-h-48 object-cover rounded-lg"
                   />
                 ) : (
@@ -425,6 +430,7 @@ function MessageInput({
               className="relative flex-shrink-0 w-16 h-16 rounded-lg bg-white border border-gray-200 overflow-hidden group"
             >
               {file.type.startsWith('image/') ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
                 <img
                   src={URL.createObjectURL(file)}
                   alt={file.name}
@@ -510,7 +516,7 @@ function MessageInput({
 export function MessageThread({
   messages,
   currentUserId,
-  currentUserName,
+  currentUserName: _currentUserName,
   onSendMessage,
   onLoadMore,
   hasMore = false,

@@ -101,7 +101,7 @@ interface OpenAIModel {
 /**
  * Anthropic model information
  */
-interface AnthropicModel {
+interface _AnthropicModel {
   id: string;
   name: string;
   description?: string;

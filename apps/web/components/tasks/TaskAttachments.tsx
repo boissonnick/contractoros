@@ -5,7 +5,6 @@ import { TaskAttachment } from '@/types';
 import { storage } from '@/lib/firebase/config';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { useAuth } from '@/lib/auth';
-import { Button } from '@/components/ui';
 import {
   PaperClipIcon,
   ArrowDownTrayIcon,

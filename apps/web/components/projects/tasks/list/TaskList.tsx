@@ -2,7 +2,6 @@
 
 import React, { useMemo, useState } from 'react';
 import { Task, TaskStatus, ProjectPhase } from '@/types';
-import { cn } from '@/lib/utils';
 import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import TaskListRow from './TaskListRow';
 

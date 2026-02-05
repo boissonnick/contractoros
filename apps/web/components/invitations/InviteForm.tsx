@@ -92,7 +92,7 @@ export default function InviteForm({ onSuccess }: { onSuccess?: () => void }) {
 
   return (
     <div className="space-y-4">
-      {invites.map((invite, i) => (
+      {invites.map((invite) => (
         <div key={invite.id} className="border border-gray-200 rounded-lg p-3 space-y-3">
           <div className="flex gap-2">
             <div className="flex-1">

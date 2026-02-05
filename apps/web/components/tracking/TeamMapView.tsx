@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Card, Badge, EmptyState } from '@/components/ui';
 import { useTeamLocations, useVehicles } from '@/lib/hooks/useTeamLocations';
 import { TeamMemberLocation, VehicleLocation, VEHICLE_TYPES } from '@/types';
@@ -8,7 +8,6 @@ import {
   MapPinIcon,
   UserCircleIcon,
   TruckIcon,
-  ClockIcon,
   SignalIcon,
   SignalSlashIcon,
   ChevronRightIcon,

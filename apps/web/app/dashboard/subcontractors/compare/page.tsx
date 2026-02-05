@@ -3,7 +3,6 @@
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useSubcontractors } from '@/lib/hooks/useSubcontractors';
-import { Subcontractor } from '@/types';
 import { PageHeader, Card, Badge, Button, EmptyState } from '@/components/ui';
 import { cn, formatCurrency } from '@/lib/utils';
 import {

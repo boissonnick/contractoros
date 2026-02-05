@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { doc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
 import { PaymentLink } from '@/types';
 import PaymentForm from '@/components/payments/PaymentForm';
 import { formatCurrency, isPaymentLinkExpired } from '@/lib/payments/paymentUtils';
@@ -18,7 +16,7 @@ type PageStatus = 'loading' | 'valid' | 'expired' | 'used' | 'cancelled' | 'not_
 
 export default function PublicPaymentPage() {
   const params = useParams();
-  const router = useRouter();
+  const _router = useRouter();
   const token = params.token as string;
 
   const [status, setStatus] = useState<PageStatus>('loading');

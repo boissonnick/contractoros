@@ -7,10 +7,9 @@ import {
   doc, getDoc, collection, getDocs, addDoc, updateDoc, deleteDoc, Timestamp,
 } from 'firebase/firestore';
 import { Project, ProjectPhase, QuoteSection } from '@/types';
-import { Button, Card, Input, toast } from '@/components/ui';
+import { Button, Card, toast } from '@/components/ui';
 import { cn, formatCurrency } from '@/lib/utils';
 import {
-  ArrowLeftIcon,
   PlusIcon,
   TrashIcon,
   ChevronDownIcon,

@@ -16,7 +16,7 @@ import {
   DEFAULT_AI_SETTINGS,
   AIModelDisplayConfig,
 } from '@/types';
-import { AVAILABLE_MODELS, getModelsForTier } from '@/lib/assistant/models/types';
+import { getModelsForTier } from '@/lib/assistant/models/types';
 
 export interface UseOrganizationAISettingsReturn {
   settings: OrganizationAISettings | null;

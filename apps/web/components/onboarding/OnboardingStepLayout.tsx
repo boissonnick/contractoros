@@ -13,11 +13,11 @@ interface OnboardingStepLayoutProps {
 
 export default function OnboardingStepLayout({ title, subtitle, currentStep, totalSteps, children }: OnboardingStepLayoutProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-brand-900 to-brand-950 flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white">ContractorOS</h1>
-          <p className="text-blue-200 mt-2">{subtitle}</p>
+          <h1 className="text-3xl font-bold text-white font-heading tracking-tight">ContractorOS</h1>
+          <p className="text-brand-200 mt-2">{subtitle}</p>
         </div>
 
         {/* Step indicator */}
@@ -26,14 +26,14 @@ export default function OnboardingStepLayout({ title, subtitle, currentStep, tot
             <div
               key={i}
               className={`h-2 rounded-full transition-all ${
-                i < currentStep ? 'w-8 bg-white' : i === currentStep ? 'w-8 bg-blue-300' : 'w-2 bg-blue-400/50'
+                i < currentStep ? 'w-8 bg-white' : i === currentStep ? 'w-8 bg-brand-300' : 'w-2 bg-brand-400/50'
               }`}
             />
           ))}
         </div>
 
         <Card>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">{title}</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2 font-heading tracking-tight">{title}</h2>
           {children}
         </Card>
       </div>

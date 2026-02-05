@@ -14,7 +14,6 @@ import {
   StarIcon,
   ExclamationTriangleIcon,
   XCircleIcon,
-  UserGroupIcon,
 } from '@heroicons/react/24/outline';
 import SubList from '@/components/subcontractors/SubList';
 import SubForm from '@/components/subcontractors/SubForm';
@@ -177,7 +176,7 @@ export default function SubcontractorsPage() {
       <div className="md:hidden">
         <div className="flex items-center justify-between mb-2">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Subcontractors</h1>
+            <h1 className="text-xl font-bold text-gray-900 font-heading tracking-tight">Subcontractors</h1>
             <p className="text-xs text-gray-500">Manage your network</p>
           </div>
           {selectionMode ? (
@@ -265,11 +264,11 @@ export default function SubcontractorsPage() {
 
       {/* Insurance Alert Banner */}
       {stats.expiringInsurance > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
           <div className="flex items-start gap-3">
             <ExclamationTriangleIcon className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
             <div>
-              <h3 className="text-sm font-medium text-amber-800">Insurance Expiring Soon</h3>
+              <h3 className="text-sm font-medium text-amber-800 font-heading">Insurance Expiring Soon</h3>
               <p className="text-sm text-amber-700 mt-1">
                 The following subcontractors have insurance expiring within 30 days:{' '}
                 <span className="font-medium">{stats.expiringSubNames.join(', ')}</span>
@@ -307,8 +306,8 @@ export default function SubcontractorsPage() {
       {/* Add Modal */}
       {showAdd && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-5">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">New Subcontractor</h3>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-5">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 font-heading tracking-tight">New Subcontractor</h3>
             <SubForm onSubmit={handleAdd} onCancel={() => setShowAdd(false)} />
           </div>
         </div>
@@ -317,7 +316,7 @@ export default function SubcontractorsPage() {
       {/* Mobile FAB for Add Subcontractor */}
       <button
         onClick={() => setShowAdd(true)}
-        className="md:hidden fixed right-4 bottom-20 w-14 h-14 rounded-full bg-brand-primary text-white shadow-lg hover:shadow-xl hover:opacity-90 active:scale-95 flex items-center justify-center transition-all z-30"
+        className="md:hidden fixed right-4 bottom-20 w-14 h-14 rounded-full bg-brand-primary text-white shadow-lg hover:shadow-xl hover:opacity-90 active:scale-95 flex items-center justify-center transition-all z-30 ring-1 ring-black/5"
         aria-label="Add Subcontractor"
       >
         <PlusIcon className="h-6 w-6" />

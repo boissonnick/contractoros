@@ -120,7 +120,7 @@ export default function SignatureRequestList({
     <div className={cn('space-y-3', className)}>
       {displayRequests.map((request) => {
         const isExpanded = expandedId === request.id;
-        const pendingSigners = request.signers.filter(
+        const _pendingSigners = request.signers.filter(
           (s) => s.status === 'pending' || s.status === 'sent' || s.status === 'viewed'
         );
         const signedSigners = request.signers.filter((s) => s.status === 'signed');

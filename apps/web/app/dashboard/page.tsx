@@ -8,12 +8,11 @@ import { useImpersonation } from '@/lib/contexts/ImpersonationContext';
 import { PermissionGuard } from '@/components/auth/PermissionGuard';
 import { db } from '@/lib/firebase/config';
 import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
-import { Project, Task, Invoice, Estimate, RFI, PunchItem } from '@/types';
-import { Card, Badge, Button, EmptyState } from '@/components/ui';
+import { Project, Task, Invoice, Estimate } from '@/types';
+import { Badge, Button, EmptyState } from '@/components/ui';
 import { FirestoreError } from '@/components/ui';
 import { SkeletonList } from '@/components/ui/Skeleton';
 import { MobileStats } from '@/components/ui/MobileStats';
-import { MobileProjectList } from '@/components/projects/MobileProjectCard';
 import { cn, formatCurrency } from '@/lib/utils';
 import { useActivityLog } from '@/lib/hooks/useActivityLog';
 import { useMaterialPrices } from '@/lib/hooks/useIntelligence';
@@ -30,13 +29,10 @@ import {
 } from '@/lib/budget-utils';
 import {
   FolderIcon,
-  ClockIcon,
-  ExclamationTriangleIcon,
   BanknotesIcon,
   UserGroupIcon,
   PlusIcon,
   ChartBarIcon,
-  CheckCircleIcon,
   DocumentTextIcon,
   MapPinIcon,
   ClipboardDocumentCheckIcon,
@@ -45,7 +41,7 @@ import {
   ExclamationCircleIcon,
   SparklesIcon,
 } from '@heroicons/react/24/outline';
-import { format, differenceInDays, isAfter, isBefore, addDays } from 'date-fns';
+import { format, isAfter, isBefore, addDays } from 'date-fns';
 
 // ===========================================
 // PREMIUM STAT CARD COMPONENT
@@ -152,7 +148,7 @@ const statusConfig: Record<string, { label: string; color: string }> = {
 
 export default function DashboardPage() {
   const { user, profile, loading: authLoading } = useAuth();
-  const { currentRole, permissions } = useImpersonation();
+  const { currentRole } = useImpersonation();
   const { activities } = useActivityLog(profile?.orgId);
   const { prices: materialPrices, loading: materialPricesLoading } = useMaterialPrices();
 
@@ -363,7 +359,7 @@ export default function DashboardPage() {
   }, [tasks]);
 
   // Pending estimates list
-  const pendingEstimatesList = useMemo(() => {
+  const _pendingEstimatesList = useMemo(() => {
     return estimates
       .filter(e => ['sent', 'viewed'].includes(e.status))
       .slice(0, 5);
@@ -371,7 +367,7 @@ export default function DashboardPage() {
 
   // Mobile stats
   type StatColor = 'blue' | 'green' | 'yellow' | 'red' | 'purple' | 'orange' | 'gray';
-  const mobileStatsData = useMemo(() => {
+  const _mobileStatsData = useMemo(() => {
     // ... (Existing Mobile Stats logic kept for compatibility but not primary)
     const mobileStats: Array<{
       label: string;

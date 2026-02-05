@@ -28,7 +28,7 @@ const DEFAULT_OPTIONS: Required<TTSOptions> = {
 // Speech queue for managing long responses
 let speechQueue: string[] = [];
 let isProcessingQueue = false;
-let currentUtterance: SpeechSynthesisUtterance | null = null;
+let _currentUtterance: SpeechSynthesisUtterance | null = null;
 
 /**
  * Check if TTS is supported in the current browser
@@ -180,7 +180,7 @@ function processQueue(options: TTSOptions): void {
   const text = speechQueue.shift()!;
 
   const utterance = new SpeechSynthesisUtterance(text);
-  currentUtterance = utterance;
+  _currentUtterance = utterance;
 
   const mergedOptions = { ...DEFAULT_OPTIONS, ...options };
   const voice = findVoice(mergedOptions.voiceURI);
@@ -195,14 +195,14 @@ function processQueue(options: TTSOptions): void {
 
   utterance.onend = () => {
     isProcessingQueue = false;
-    currentUtterance = null;
+    _currentUtterance = null;
     processQueue(options);
   };
 
   utterance.onerror = (event) => {
     console.error('[TTS] Speech error:', event.error);
     isProcessingQueue = false;
-    currentUtterance = null;
+    _currentUtterance = null;
     // Continue with next chunk on error
     processQueue(options);
   };
@@ -256,7 +256,7 @@ export function stop(): void {
 
   speechQueue = [];
   isProcessingQueue = false;
-  currentUtterance = null;
+  _currentUtterance = null;
   window.speechSynthesis.cancel();
 }
 

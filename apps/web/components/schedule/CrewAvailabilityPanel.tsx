@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Button, Card, Badge } from '@/components/ui';
+import { Button, Card } from '@/components/ui';
 import BaseModal from '@/components/ui/BaseModal';
 import {
   CrewAvailability,
@@ -10,12 +10,10 @@ import {
   TIME_OFF_TYPES,
 } from '@/types';
 import {
-  UserIcon,
   CheckCircleIcon,
   XCircleIcon,
   ClockIcon,
   CalendarDaysIcon,
-  PlusIcon,
 } from '@heroicons/react/24/outline';
 
 export interface CrewAvailabilityPanelProps {
@@ -50,11 +48,11 @@ export default function CrewAvailabilityPanel({
   onRequestTimeOff,
   onApproveTimeOff,
   onDenyTimeOff,
-  loading = false,
+  loading: _loading = false,
   className,
 }: CrewAvailabilityPanelProps) {
   const [showTimeOffModal, setShowTimeOffModal] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<string>('');
+  const [, _setSelectedUser] = useState<string>('');
   const [showDenyModal, setShowDenyModal] = useState(false);
   const [denyRequestId, setDenyRequestId] = useState<string>('');
   const [denyReason, setDenyReason] = useState('');

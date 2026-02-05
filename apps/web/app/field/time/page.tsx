@@ -15,7 +15,6 @@ import {
   CloudArrowUpIcon,
   PlusIcon,
   ClockIcon,
-  CheckCircleIcon,
 } from '@heroicons/react/24/outline';
 
 function getWeekStart(date: Date): Date {
@@ -95,7 +94,7 @@ export default function TimeTrackingPage() {
   if (loading) {
     return (
       <div className="p-6 flex justify-center">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -105,7 +104,7 @@ export default function TimeTrackingPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Time Tracking</h1>
+          <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">Time Tracking</h1>
           <p className="text-sm text-gray-500 mt-1">View your time entries and submit weekly timesheets.</p>
         </div>
         <Button
@@ -149,7 +148,7 @@ export default function TimeTrackingPage() {
           onClick={() => setTab('entries')}
           className={cn(
             'px-4 py-2.5 text-sm font-medium border-b-2 -mb-px flex items-center gap-2',
-            tab === 'entries' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500'
+            tab === 'entries' ? 'border-brand-primary text-brand-primary' : 'border-transparent text-gray-500'
           )}
         >
           <ClockIcon className="w-4 h-4" />
@@ -164,7 +163,7 @@ export default function TimeTrackingPage() {
           onClick={() => setTab('weekly')}
           className={cn(
             'px-4 py-2.5 text-sm font-medium border-b-2 -mb-px',
-            tab === 'weekly' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500'
+            tab === 'weekly' ? 'border-brand-primary text-brand-primary' : 'border-transparent text-gray-500'
           )}
         >
           Weekly View
@@ -173,7 +172,7 @@ export default function TimeTrackingPage() {
           onClick={() => setTab('add')}
           className={cn(
             'px-4 py-2.5 text-sm font-medium border-b-2 -mb-px flex items-center gap-2',
-            tab === 'add' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500'
+            tab === 'add' ? 'border-brand-primary text-brand-primary' : 'border-transparent text-gray-500'
           )}
         >
           <PlusIcon className="w-4 h-4" />
@@ -187,7 +186,7 @@ export default function TimeTrackingPage() {
           {/* Pending entries section */}
           {pendingEntries.length > 0 && (
             <div className="bg-amber-50 border-b border-amber-200 p-4">
-              <h3 className="font-medium text-amber-800 mb-2 flex items-center gap-2">
+              <h3 className="font-medium font-heading tracking-tight text-amber-800 mb-2 flex items-center gap-2">
                 <CloudArrowUpIcon className="w-4 h-4" />
                 Pending Sync ({pendingEntries.length})
               </h3>

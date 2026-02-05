@@ -220,7 +220,7 @@ describe('useClients', () => {
 
   describe('filtering', () => {
     it('filters by status (active)', () => {
-      const allClients = [mockClient1, mockClient2, mockClient3];
+      const _allClients = [mockClient1, mockClient2, mockClient3];
       // When status filter is applied, useFirestoreCollection should return filtered results
       mockedUseFirestoreCollection.mockReturnValue({
         items: [mockClient1], // Only active client

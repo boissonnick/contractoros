@@ -30,7 +30,7 @@ interface UsePunchListReturn {
 }
 
 export function usePunchList({ projectId, status }: UsePunchListOptions): UsePunchListReturn {
-  const { user } = useAuth();
+  const { user: _user } = useAuth();
   const [items, setItems] = useState<PunchItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

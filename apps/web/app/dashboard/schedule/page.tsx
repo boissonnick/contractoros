@@ -5,12 +5,11 @@ import { useAuth } from '@/lib/auth';
 import { useScheduleEvents, useCrewAvailability, useTimeOffRequests } from '@/lib/hooks/useSchedule';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import { UserProfile, Project, ScheduleEvent } from '@/types';
+import { ScheduleEvent } from '@/types';
 import {
   EventCard,
   EventFormModal,
   CrewAvailabilityPanel,
-  WeatherWidget,
   SimpleWeatherWidget,
   ConflictAlert,
   DayView,
@@ -18,19 +17,15 @@ import {
 } from '@/components/schedule';
 import { getWeatherForecast, WeatherData } from '@/lib/services/weather';
 import { Card, Button, Badge, PageHeader } from '@/components/ui';
-import { SkeletonSchedule } from '@/components/ui/Skeleton';
 import BaseModal from '@/components/ui/BaseModal';
 import {
   PlusIcon,
   CalendarDaysIcon,
   UsersIcon,
   CloudIcon,
-  Squares2X2Icon,
-  ListBulletIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   FunnelIcon,
-  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
 
@@ -51,7 +46,7 @@ export default function SchedulePage() {
   const [showEventModal, setShowEventModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(null);
   const [showEventDetail, setShowEventDetail] = useState(false);
-  const [filterType, setFilterType] = useState<string>('');
+  const [filterType] = useState<string>('');
   const [filterProject, setFilterProject] = useState<string>('');
 
   // Mobile-specific state
@@ -72,19 +67,16 @@ export default function SchedulePage() {
     createEvent,
     updateEvent,
     deleteEvent,
-    updateStatus,
     checkConflicts,
   } = useScheduleEvents();
 
   const {
     availability,
-    loading: availLoading,
     setAvailability,
   } = useCrewAvailability();
 
   const {
     requests: timeOffRequests,
-    loading: timeOffLoading,
     submitRequest,
     approveRequest,
     denyRequest,
@@ -351,7 +343,7 @@ export default function SchedulePage() {
       <div className="md:hidden">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Schedule</h1>
+            <h1 className="text-xl font-heading font-bold tracking-tight text-gray-900">Schedule</h1>
             <p className="text-xs text-gray-500">
               {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
             </p>
@@ -529,7 +521,7 @@ export default function SchedulePage() {
           )}
 
           {/* Desktop Calendar toolbar */}
-          <Card className="p-4 hidden md:block">
+          <Card className="p-4 rounded-xl hidden md:block">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="flex items-center bg-gray-100 rounded-lg p-0.5 gap-0.5">
@@ -570,13 +562,13 @@ export default function SchedulePage() {
                     <ChevronRightIcon className="h-4 w-4" />
                   </Button>
                 </div>
-                <h2 className="text-lg font-semibold ml-2">{getHeaderText()}</h2>
+                <h2 className="text-lg font-heading font-semibold tracking-tight ml-2">{getHeaderText()}</h2>
               </div>
 
               <div className="flex items-center gap-3">
                 {/* Weather Widget (compact) */}
                 {weatherData.length > 0 && (
-                  <div className="flex items-center gap-1 px-3 py-1.5 bg-gray-50 rounded-lg">
+                  <div className="flex items-center gap-1 px-3 py-1.5 bg-gray-50 rounded-xl">
                     {weatherData.slice(0, 5).map((day) => (
                       <button
                         key={day.date}
@@ -681,7 +673,7 @@ export default function SchedulePage() {
                       )} />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
-                          <h3 className="font-semibold text-gray-900 truncate">{event.title}</h3>
+                          <h3 className="font-heading font-semibold tracking-tight text-gray-900 truncate">{event.title}</h3>
                           <Badge
                             variant={
                               event.status === 'completed' ? 'success' :
@@ -929,7 +921,7 @@ export default function SchedulePage() {
 
           <div>
             <Card className="p-4">
-              <h3 className="font-semibold mb-4">Quick Date Select</h3>
+              <h3 className="font-heading font-semibold tracking-tight mb-4">Quick Date Select</h3>
               <div className="grid grid-cols-7 gap-1">
                 {weekDates.map((date, idx) => {
                   const isSelected = date.toDateString() === selectedDate.toDateString();
@@ -960,7 +952,7 @@ export default function SchedulePage() {
       {/* Time Off Tab */}
       {tab === 'time-off' && (
         <Card className="p-4">
-          <h3 className="font-semibold mb-4 hidden md:block">Time Off Requests</h3>
+          <h3 className="font-heading font-semibold tracking-tight mb-4 hidden md:block">Time Off Requests</h3>
 
           {timeOffRequests.length === 0 ? (
             <div className="text-center py-8 text-gray-500">

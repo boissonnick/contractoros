@@ -59,12 +59,8 @@ export default function TimeTrackingPage() {
   const {
     entries,
     loading,
-    error,
     createManualEntry,
-    updateEntry,
     deleteEntry,
-    approveEntry,
-    rejectEntry,
     getWeeklySummary,
   } = useTimeEntries({
     startDate: dateRange.startDate,

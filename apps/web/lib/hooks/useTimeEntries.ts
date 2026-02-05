@@ -20,10 +20,8 @@ import { convertTimestampsDeep } from '@/lib/firebase/timestamp-converter';
 import { toast } from '@/components/ui/Toast';
 import { useNetworkStatus, checkNetworkStatus } from '@/lib/offline/network-status';
 import {
-  OfflineTimeEntryService,
   createManualEntryOffline,
   clockInOffline,
-  clockOutOffline,
   getOfflineTimeEntries,
   getPendingOfflineEntriesCount,
   getMergedTimeEntries,
@@ -808,7 +806,7 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
 
 // Hook for getting current user's active time entry
 export function useActiveTimeEntry() {
-  const { entries, activeEntry, loading, clockIn, clockOut, startBreak, endBreak } = useTimeEntries({
+  const { entries: _entries, activeEntry, loading, clockIn, clockOut, startBreak, endBreak } = useTimeEntries({
     status: ['active', 'paused'],
   });
 

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { Button, Input, Card } from '@/components/ui';
+import { Button, Input } from '@/components/ui';
 import BaseModal from '@/components/ui/BaseModal';
 import {
   ScheduleEvent,
@@ -14,7 +14,6 @@ import {
 } from '@/types';
 import {
   CalendarIcon,
-  ClockIcon,
   MapPinIcon,
   UserGroupIcon,
   FolderIcon,

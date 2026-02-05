@@ -13,7 +13,6 @@ import {
   Timestamp,
   getDocs,
   serverTimestamp,
-  writeBatch,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
@@ -504,7 +503,7 @@ export function useLocationTracking(options?: {
   projectId?: string;
   projectName?: string;
 }) {
-  const { profile } = useAuth();
+  const { profile: _profile } = useAuth();
   const { updateMyLocation, setOffline } = useTeamLocations();
   const [tracking, setTracking] = useState(false);
   const [lastPosition, setLastPosition] = useState<GeolocationPosition | null>(null);

@@ -11,7 +11,6 @@ import {
   deleteDoc,
   doc,
   Timestamp,
-  getDocs,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import {
@@ -48,7 +47,7 @@ function fromFirestore(id: string, data: Record<string, unknown>): AccountingCon
 }
 
 export function useAccountingConnection() {
-  const { user, profile } = useAuth();
+  const { profile } = useAuth();
   const [connection, setConnection] = useState<AccountingConnection | null>(null);
   const [mappingRules, setMappingRules] = useState<AccountMappingRule[]>([]);
   const [loading, setLoading] = useState(true);

@@ -7,9 +7,7 @@ import { db } from '@/lib/firebase/config';
 import {
   collection,
   query,
-  where,
   orderBy,
-  getDocs,
   addDoc,
   updateDoc,
   deleteDoc,

@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { PayrollRun, PayrollRunStatus, PAYROLL_RUN_STATUSES } from '@/types';
 import Button from '@/components/ui/Button';
-import Badge from '@/components/ui/Badge';
 import BaseModal from '@/components/ui/BaseModal';
 import {
   CheckCircleIcon,
@@ -129,7 +128,7 @@ export function PayrollApprovalStatus({
               {STATUS_FLOW.map((status, index) => {
                 const isPast = index < currentStatusIndex;
                 const isActive = index === currentStatusIndex;
-                const isFuture = index > currentStatusIndex;
+                const _isFuture = index > currentStatusIndex;
 
                 return (
                   <div key={status} className="flex flex-col items-center">

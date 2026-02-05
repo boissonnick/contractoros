@@ -8,13 +8,12 @@ import {
   onSnapshot,
   addDoc,
   updateDoc,
-  deleteDoc,
   doc,
   Timestamp,
   orderBy,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import { SafetyInspection, SafetyIncident, ToolboxTalk, SafetyChecklistItem } from '@/types';
+import { SafetyInspection, SafetyIncident, ToolboxTalk } from '@/types';
 import { useAuth } from '@/lib/auth';
 
 // SAFETY INSPECTIONS

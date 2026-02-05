@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { startDate, endDate, crewIds, projectId } = body;
+    const { startDate, endDate, crewIds: _crewIds, projectId: _projectId } = body;
 
     // TODO: Fetch existing schedule data
     // TODO: Analyze crew availability and skills

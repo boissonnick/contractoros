@@ -6,7 +6,7 @@
  */
 
 import { User } from 'firebase/auth';
-import { UserProfile, UserRole } from '@/types';
+import { UserRole } from '@/types';
 
 /**
  * Check if a user is authenticated

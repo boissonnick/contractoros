@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { TaskActivity, TaskActivityAction } from '@/types';
+import { TaskActivityAction } from '@/types';
 import { useTaskActivity } from '@/lib/hooks/useTaskActivity';
 import {
   PlusCircleIcon,

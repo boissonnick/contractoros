@@ -7,7 +7,6 @@ import {
   calculateBudgetPercentage,
   getBudgetStatus,
   getBudgetBarColor,
-  getBudgetStatusColor,
   formatBudgetCurrency,
   BUDGET_HELP_TEXT,
 } from '@/lib/budget-utils';
@@ -17,7 +16,7 @@ interface PhaseBudgetProps {
   onUpdate?: (data: { budgetAmount?: number; actualCost?: number }) => void;
 }
 
-export default function PhaseBudget({ phase, onUpdate }: PhaseBudgetProps) {
+export default function PhaseBudget({ phase, onUpdate: _onUpdate }: PhaseBudgetProps) {
   const budget = phase.budgetAmount || 0;
   const actual = phase.actualCost || 0;
   const remaining = budget - actual;

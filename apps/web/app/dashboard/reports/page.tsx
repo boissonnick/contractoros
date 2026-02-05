@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 import { useDashboardReports, useFinancialReports, useOperationalReports } from '@/lib/hooks/useReports';
 import { PageHeader, EmptyState, CompactPagination } from '@/components/ui';
-import { SkeletonReports } from '@/components/ui/Skeleton';
 import { ReportCard } from '@/components/reports/ReportCard';
 import { RevenueChart } from '@/components/reports/RevenueChart';
 import { DateRangePicker } from '@/components/reports/DateRangePicker';
@@ -14,7 +13,7 @@ import {
   DateRange,
   getDateRangeFromPreset,
 } from '@/lib/reports/types';
-import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { cn } from '@/lib/utils';
 import {
@@ -23,19 +22,14 @@ import {
   ClockIcon,
   FolderIcon,
   ExclamationCircleIcon,
-  ExclamationTriangleIcon,
-  ArrowTrendingUpIcon,
-  ArrowTrendingDownIcon,
   BanknotesIcon,
   DocumentTextIcon,
   CalendarDaysIcon,
-  CheckCircleIcon,
   ArrowRightIcon,
   ShieldExclamationIcon,
   BoltIcon,
   ScaleIcon,
   ClipboardDocumentListIcon,
-  PresentationChartBarIcon,
   WrenchScrewdriverIcon,
 } from '@heroicons/react/24/outline';
 
@@ -446,20 +440,14 @@ export default function ReportsPage() {
     loading: financialLoading,
     summary: financialSummary,
     projectProfitability,
-    invoiceAging,
   } = useFinancialReports(orgId);
 
   // Fetch operational metrics
-  const {
-    loading: operationalLoading,
-    metrics: operationalMetrics,
-  } = useOperationalReports(orgId);
+  useOperationalReports(orgId);
 
   // Fetch business alerts
   const {
     alerts,
-    loading: alertsLoading,
-    overdueInvoicesTotal,
     overdueInvoicesCount,
     overBudgetProjectsCount,
     lateTasksCount,
@@ -511,7 +499,7 @@ export default function ReportsPage() {
     return (
       <div className="p-8 text-center">
         <ExclamationCircleIcon className="h-12 w-12 text-red-400 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900">Not authenticated</h3>
+        <h3 className="text-lg font-heading font-medium tracking-tight text-gray-900">Not authenticated</h3>
         <p className="text-gray-500 mt-1">Please log in to view reports.</p>
       </div>
     );
@@ -521,7 +509,7 @@ export default function ReportsPage() {
     return (
       <div className="p-8 text-center">
         <ExclamationCircleIcon className="h-12 w-12 text-red-400 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900">Failed to load reports</h3>
+        <h3 className="text-lg font-heading font-medium tracking-tight text-gray-900">Failed to load reports</h3>
         <p className="text-gray-500 mt-1">{dashboardError.message}</p>
       </div>
     );
@@ -604,7 +592,7 @@ export default function ReportsPage() {
               </div>
             </div>
             <div>
-              <h2 className="text-lg font-semibold mb-1">Business Health</h2>
+              <h2 className="text-lg font-heading font-semibold tracking-tight mb-1">Business Health</h2>
               <p className={cn(
                 'text-sm font-medium',
                 healthScoreColor === 'green' && 'text-green-400',
@@ -658,10 +646,10 @@ export default function ReportsPage() {
 
       {/* Alerts Section */}
       {alerts.length > 0 && (
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
           <div className="flex items-center gap-2 mb-4">
             <ShieldExclamationIcon className="h-5 w-5 text-amber-500" />
-            <h3 className="text-sm font-semibold text-gray-900">Attention Required</h3>
+            <h3 className="text-sm font-heading font-semibold text-gray-900">Attention Required</h3>
             <span className="ml-auto text-xs text-gray-500">{alerts.length} alert{alerts.length > 1 ? 's' : ''}</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -670,7 +658,7 @@ export default function ReportsPage() {
                 key={alert.id}
                 href={alert.href || '#'}
                 className={cn(
-                  'flex items-start gap-3 p-3 rounded-lg border transition-all hover:shadow-sm',
+                  'flex items-start gap-3 p-3 rounded-xl border transition-all hover:shadow-sm',
                   alert.type === 'critical' && 'border-red-200 bg-red-50 hover:border-red-300',
                   alert.type === 'warning' && 'border-amber-200 bg-amber-50 hover:border-amber-300',
                   alert.type === 'info' && 'border-blue-200 bg-blue-50 hover:border-blue-300',
@@ -779,10 +767,10 @@ export default function ReportsPage() {
       </div>
 
       {/* Cash Flow Forecast Section */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
+      <div className="bg-white rounded-xl border border-gray-200 p-4">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+            <h3 className="text-sm font-heading font-semibold text-gray-900 flex items-center gap-2">
               <BoltIcon className="h-4 w-4 text-blue-500" />
               Cash Flow Forecast
             </h3>
@@ -807,7 +795,7 @@ export default function ReportsPage() {
         ) : (
           <div className="space-y-4">
             {/* Summary Row */}
-            <div className="grid grid-cols-3 gap-4 p-3 bg-gray-50 rounded-lg">
+            <div className="grid grid-cols-3 gap-4 p-3 bg-gray-50 rounded-xl">
               <div className="text-center">
                 <p className="text-xs text-gray-500 mb-1">Projected Inflow (90d)</p>
                 <p className="text-lg font-semibold text-green-600">
@@ -879,9 +867,9 @@ export default function ReportsPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Link
           href="/dashboard/reports/financial"
-          className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-colors group"
+          className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-colors group"
         >
-          <div className="p-2 bg-green-100 rounded-lg group-hover:bg-green-200 transition-colors">
+          <div className="p-2 bg-green-100 rounded-xl group-hover:bg-green-200 transition-colors">
             <BanknotesIcon className="h-5 w-5 text-green-600" />
           </div>
           <div className="flex-1 min-w-0">
@@ -893,9 +881,9 @@ export default function ReportsPage() {
 
         <Link
           href="/dashboard/reports/operational"
-          className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-colors group"
+          className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-colors group"
         >
-          <div className="p-2 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
+          <div className="p-2 bg-purple-100 rounded-xl group-hover:bg-purple-200 transition-colors">
             <WrenchScrewdriverIcon className="h-5 w-5 text-purple-600" />
           </div>
           <div className="flex-1 min-w-0">
@@ -907,9 +895,9 @@ export default function ReportsPage() {
 
         <Link
           href="/dashboard/reports/benchmarking"
-          className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-colors group"
+          className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-colors group"
         >
-          <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
+          <div className="p-2 bg-blue-100 rounded-xl group-hover:bg-blue-200 transition-colors">
             <ScaleIcon className="h-5 w-5 text-blue-600" />
           </div>
           <div className="flex-1 min-w-0">
@@ -921,9 +909,9 @@ export default function ReportsPage() {
 
         <Link
           href="/dashboard/reports/detailed"
-          className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-colors group"
+          className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-colors group"
         >
-          <div className="p-2 bg-amber-100 rounded-lg group-hover:bg-amber-200 transition-colors">
+          <div className="p-2 bg-amber-100 rounded-xl group-hover:bg-amber-200 transition-colors">
             <ClipboardDocumentListIcon className="h-5 w-5 text-amber-600" />
           </div>
           <div className="flex-1 min-w-0">
@@ -951,9 +939,9 @@ export default function ReportsPage() {
         const showProfitabilityPagination = projectProfitability.length > ITEMS_PER_PAGE;
 
         return (
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <div className="bg-white rounded-xl border border-gray-200 p-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-gray-900">
+              <h3 className="text-sm font-heading font-semibold text-gray-900">
                 Project Profitability
               </h3>
               {showProfitabilityPagination && (
@@ -1054,9 +1042,9 @@ export default function ReportsPage() {
         const showTeamPagination = teamPerformance.length > ITEMS_PER_PAGE;
 
         return (
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <div className="bg-white rounded-xl border border-gray-200 p-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-gray-900">
+              <h3 className="text-sm font-heading font-semibold text-gray-900">
                 Team Performance
               </h3>
               {showTeamPagination && (

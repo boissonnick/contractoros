@@ -119,7 +119,7 @@ export function VoiceActivationFAB({
     transcript,
     interimTranscript,
     error,
-    result,
+    result: _result,
     startListening,
     stopListening,
     cancel,

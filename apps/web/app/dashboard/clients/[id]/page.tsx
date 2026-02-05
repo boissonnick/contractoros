@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import {
@@ -10,7 +10,7 @@ import {
   CLIENT_STATUS_LABELS,
   CLIENT_SOURCE_LABELS,
 } from '@/lib/hooks/useClients';
-import { Client, ClientStatus, ClientSource, ClientNote, ClientCommunicationLog } from '@/types';
+import { ClientStatus, ClientSource, ClientNote, ClientCommunicationLog } from '@/types';
 import { Button, Card, Badge, EmptyState } from '@/components/ui';
 import { SkeletonCard } from '@/components/ui/Skeleton';
 import { toast } from '@/components/ui/Toast';
@@ -608,7 +608,7 @@ function NotesTab({
     try {
       await onDeleteNote(noteId);
       toast.success('Note deleted');
-    } catch (err) {
+    } catch {
       toast.error('Failed to delete note');
     }
   };

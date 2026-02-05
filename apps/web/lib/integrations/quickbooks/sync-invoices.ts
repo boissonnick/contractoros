@@ -8,7 +8,7 @@
 import { adminDb, Timestamp } from '@/lib/firebase/admin';
 import { Invoice, InvoiceLineItem } from '@/types';
 import { qboCreate, qboUpdate, qboQuery, QBOClientError } from './client';
-import { QBOInvoice, QBOInvoiceLine, QBORef } from './types';
+import { QBOInvoice, QBOInvoiceLine } from './types';
 import {
   getMapping,
   getMappingByQboId,

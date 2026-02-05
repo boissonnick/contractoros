@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { loadStripe, Stripe, StripeElements } from '@stripe/stripe-js';
+import React, { useState, useCallback } from 'react';
+import { loadStripe } from '@stripe/stripe-js';
 import {
   Elements,
   PaymentElement,

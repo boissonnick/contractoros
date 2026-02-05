@@ -4,7 +4,6 @@ import React, { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { ScheduleEvent } from '@/types';
 import { Card, Button } from '@/components/ui';
-import EventCard from './EventCard';
 import {
   PlusIcon,
   CalendarDaysIcon,
@@ -103,7 +102,7 @@ export function DayView({
   onEventClick,
   onSlotClick,
   onTimeSlotClick,
-  onEventDrop,
+  onEventDrop: _onEventDrop,
   weather,
   showWeather = true,
   className,

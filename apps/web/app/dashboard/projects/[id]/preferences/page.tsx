@@ -10,7 +10,6 @@ import { Button, Card, Input, Textarea, toast } from '@/components/ui';
 import ImageUploader from '@/components/projects/ImageUploader';
 import {
   LinkIcon,
-  ClipboardDocumentIcon,
   EnvelopeIcon,
 } from '@heroicons/react/24/outline';
 

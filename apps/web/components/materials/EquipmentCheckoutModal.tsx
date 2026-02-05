@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import BaseModal from '@/components/ui/BaseModal';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
-import { EquipmentItem, EquipmentCheckout } from '@/types';
+import { EquipmentItem } from '@/types';
 
 // Checkout schema
 const checkoutSchema = z.object({
@@ -109,9 +110,11 @@ export default function EquipmentCheckoutModal({
       <div className="mb-6 p-4 bg-gray-50 rounded-lg">
         <div className="flex items-center gap-4">
           {equipment.imageUrl ? (
-            <img
+            <Image
               src={equipment.imageUrl}
               alt={equipment.name}
+              width={64}
+              height={64}
               className="w-16 h-16 rounded-lg object-cover"
             />
           ) : (

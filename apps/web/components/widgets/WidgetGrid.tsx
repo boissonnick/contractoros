@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { PlusIcon, PencilIcon, CheckIcon } from '@heroicons/react/24/outline';
-import { Widget, DashboardLayout, DragState, SIZE_TO_GRID } from '@/lib/dashboard-widgets/types';
+import { Widget, DashboardLayout, DragState } from '@/lib/dashboard-widgets/types';
 import { WidgetContainer } from './WidgetContainer';
 import { RevenueWidget } from './widgets/RevenueWidget';
 import { ProjectStatusWidget } from './widgets/ProjectStatusWidget';

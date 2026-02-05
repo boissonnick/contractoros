@@ -23,7 +23,6 @@ import {
   updateDoc,
   Timestamp,
   limit,
-  getDocs,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';

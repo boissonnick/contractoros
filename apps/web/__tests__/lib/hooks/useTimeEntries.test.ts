@@ -29,8 +29,8 @@ const mockTimeEntryData = {
   updatedAt: new Date('2024-01-15T17:00:00'),
 };
 
-const mockEntry1 = { id: 'entry-1', ...mockTimeEntryData };
-const mockEntry2 = {
+const _mockEntry1 = { id: 'entry-1', ...mockTimeEntryData };
+const _mockEntry2 = {
   id: 'entry-2',
   ...mockTimeEntryData,
   clockIn: new Date('2024-01-16T09:00:00'),
@@ -39,7 +39,7 @@ const mockEntry2 = {
   projectId: 'project-1',
   projectName: 'Project Alpha',
 };
-const mockActiveEntry = {
+const _mockActiveEntry = {
   id: 'entry-active',
   ...mockTimeEntryData,
   status: 'active' as const,
@@ -157,7 +157,7 @@ describe('useTimeEntries', () => {
     );
 
     // Default onSnapshot mock
-    mockOnSnapshot.mockImplementation((q, onSuccess, onError) => {
+    mockOnSnapshot.mockImplementation((q, onSuccess, _onError) => {
       // Simulate empty results by default
       const mockSnapshot = {
         docs: [],
@@ -354,9 +354,8 @@ describe('useTimeEntries', () => {
         expect(result.current.loading).toBe(false);
       });
 
-      let entryId: string;
       await act(async () => {
-        entryId = await result.current.clockIn({
+        await result.current.clockIn({
           projectId: 'project-1',
           projectName: 'Test Project',
         });
@@ -450,9 +449,8 @@ describe('useTimeEntries', () => {
         expect(result.current.loading).toBe(false);
       });
 
-      let entryId: string;
       await act(async () => {
-        entryId = await result.current.clockIn();
+        await result.current.clockIn();
       });
 
       expect(mockClockInOffline).toHaveBeenCalled();
@@ -662,9 +660,8 @@ describe('useTimeEntries', () => {
         breaks: [],
       };
 
-      let entryId: string;
       await act(async () => {
-        entryId = await result.current.createManualEntry(manualEntryData);
+        await result.current.createManualEntry(manualEntryData);
       });
 
       expect(mockAddDoc).toHaveBeenCalled();

@@ -44,11 +44,9 @@ export default function DailyLogsPage() {
   const {
     logs,
     loading,
-    error,
     createLog,
     updateLog,
     deleteLog,
-    getDailySummary,
   } = useDailyLogs({
     projectId: filterProjectId || undefined,
     category: filterCategory || undefined,
@@ -128,7 +126,7 @@ export default function DailyLogsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Daily Logs</h1>
+          <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">Daily Logs</h1>
           <p className="text-sm text-gray-500 mt-1">
             Job site notes, progress reports, and field documentation
           </p>
@@ -232,8 +230,8 @@ export default function DailyLogsPage() {
               <div key={date}>
                 {/* Day Header */}
                 <div className={`flex items-center gap-3 mb-3 ${isToday ? 'text-blue-600' : 'text-gray-700'}`}>
-                  <div className={`w-10 h-10 rounded-lg flex flex-col items-center justify-center ${
-                    isToday ? 'bg-blue-100' : 'bg-gray-100'
+                  <div className={`w-10 h-10 rounded-xl flex flex-col items-center justify-center ${
+                    isToday ? 'bg-gradient-to-br from-blue-50 to-blue-100' : 'bg-gray-100'
                   }`}>
                     <span className="text-xs font-medium">
                       {dayDate.toLocaleDateString('en-US', { weekday: 'short' })}
@@ -243,7 +241,7 @@ export default function DailyLogsPage() {
                     </span>
                   </div>
                   <div>
-                    <h3 className="font-medium">
+                    <h3 className="font-medium font-heading">
                       {dayDate.toLocaleDateString('en-US', {
                         weekday: 'long',
                         month: 'long',

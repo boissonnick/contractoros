@@ -5,7 +5,6 @@ import { useChannels, useMessages } from '@/lib/hooks/useMessages';
 import { Card, Button } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import { toast } from '@/components/ui/Toast';
-import { MessageChannel } from '@/types';
 import { useAuth } from '@/lib/auth';
 import {
   PlusIcon,

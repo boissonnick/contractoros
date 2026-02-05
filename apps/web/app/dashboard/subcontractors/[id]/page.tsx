@@ -3,12 +3,11 @@
 import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useSubcontractor, LinkedProject } from '@/lib/hooks/useSubcontractor';
+import { useSubcontractor } from '@/lib/hooks/useSubcontractor';
 import { useSubcontractors } from '@/lib/hooks/useSubcontractors';
 import { Subcontractor } from '@/types';
 import { Card, Button, Badge } from '@/components/ui';
 import { SkeletonSubcontractorDetail } from '@/components/ui/Skeleton';
-import { toast } from '@/components/ui/Toast';
 import { cn } from '@/lib/utils';
 import { format, differenceInDays } from 'date-fns';
 import SubDetailModal from '@/components/subcontractors/SubDetailModal';

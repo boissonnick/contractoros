@@ -200,17 +200,15 @@ function SessionCard({
 // ============================================
 
 export default function SessionsPage() {
-  const { profile } = useAuth();
+  useAuth();
   const {
     sessions,
-    currentSession,
     loading,
     error,
     suspiciousSessions,
     refresh,
     revokeSessionById,
     revokeOtherSessions,
-    revokeAllUserSessions,
     formatDevice,
   } = useSessionManagement();
 
@@ -252,7 +250,7 @@ export default function SessionsPage() {
       try {
         await revokeSessionById(session.id, 'User initiated sign out');
         toast.success(`Signed out from ${formatDevice(session)}`);
-      } catch (err) {
+      } catch {
         toast.error('Failed to sign out from device');
       } finally {
         setRevokingSessionId(null);
@@ -276,7 +274,7 @@ export default function SessionsPage() {
       try {
         const count = await revokeOtherSessions('User signed out from all other devices');
         toast.success(`Signed out from ${count} other ${count === 1 ? 'device' : 'devices'}`);
-      } catch (err) {
+      } catch {
         toast.error('Failed to sign out from other devices');
       } finally {
         setRevokingAll(false);

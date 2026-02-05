@@ -11,7 +11,6 @@ import {
   deleteDoc,
   doc,
   Timestamp,
-  orderBy,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { Selection, SelectionOption, SelectionStatus } from '@/types';

@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
-import { collection, query, where, getDocs, addDoc, updateDoc, doc, Timestamp, orderBy, limit } from 'firebase/firestore';
+import { collection, query, where, getDocs, addDoc, updateDoc, doc, Timestamp } from 'firebase/firestore';
 import { TimeEntry, Task, ScheduleAssignment, Project, Geofence } from '@/types';
 import { isWithinGeofence } from '@/lib/geofence';
 import {
@@ -16,7 +16,6 @@ import {
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/solid';
 import {
-  CalendarDaysIcon,
   ClipboardDocumentCheckIcon,
 } from '@heroicons/react/24/outline';
 import { FirestoreError } from '@/components/ui';
@@ -27,7 +26,7 @@ export default function FieldPage() {
   const { user, profile } = useAuth();
   const [activeEntry, setActiveEntry] = useState<TimeEntry | null>(null);
   const [todaysTasks, setTodaysTasks] = useState<Task[]>([]);
-  const [todaysSchedule, setTodaysSchedule] = useState<ScheduleAssignment[]>([]);
+  const [, _setTodaysSchedule] = useState<ScheduleAssignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [clockingIn, setClockingIn] = useState(false);
@@ -210,7 +209,7 @@ export default function FieldPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -226,7 +225,7 @@ export default function FieldPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">
           {greeting}, {profile?.displayName?.split(' ')[0]}
         </h1>
         <p className="text-gray-500 mt-1">
@@ -292,7 +291,7 @@ export default function FieldPage() {
             className={`w-full max-w-xs mx-auto flex items-center justify-center gap-3 py-4 px-8 rounded-xl font-bold text-lg transition-all ${
               activeEntry
                 ? 'bg-white text-red-600 hover:bg-red-50'
-                : 'bg-white text-blue-600 hover:bg-blue-50'
+                : 'bg-white text-brand-primary hover:bg-blue-50'
             } disabled:opacity-50`}
           >
             {clockingIn ? (
@@ -315,8 +314,8 @@ export default function FieldPage() {
       {/* Today's Tasks */}
       <div className="bg-white rounded-xl border p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Today's Tasks</h2>
-          <Link href="/field/tasks" className="text-sm text-blue-600 hover:text-blue-700">
+          <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900">Today&apos;s Tasks</h2>
+          <Link href="/field/tasks" className="text-sm text-brand-primary hover:text-brand-primary-dark">
             View all
           </Link>
         </div>
@@ -329,10 +328,10 @@ export default function FieldPage() {
                 className="flex items-center gap-4 p-3 rounded-lg border hover:bg-gray-50 transition-colors"
               >
                 <div className={`p-2 rounded-full ${
-                  task.status === 'in_progress' ? 'bg-blue-100' : 'bg-gray-100'
+                  task.status === 'in_progress' ? 'bg-brand-primary/10' : 'bg-gray-100'
                 }`}>
                   {task.status === 'in_progress' ? (
-                    <ClockIcon className="h-5 w-5 text-blue-600" />
+                    <ClockIcon className="h-5 w-5 text-brand-primary" />
                   ) : (
                     <ClipboardDocumentCheckIcon className="h-5 w-5 text-gray-400" />
                   )}

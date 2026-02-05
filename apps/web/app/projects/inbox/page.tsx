@@ -311,7 +311,7 @@ export default function ProjectsInboxPage() {
   });
 
   // Fetch projects for filter dropdown
-  const { data: projects = [], isLoading: projectsLoading } = useProjects();
+  const { data: projects = [] } = useProjects();
 
   // Build activity log options
   const activityOptions: PaginatedActivityLogOptions = useMemo(() => ({

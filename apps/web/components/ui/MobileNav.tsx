@@ -17,7 +17,6 @@ import {
   Bars3Icon,
   XMarkIcon,
   ChevronRightIcon,
-  HomeIcon,
 } from '@heroicons/react/24/outline';
 import { useNetworkStatus } from '@/lib/offline/network-status';
 
@@ -409,7 +408,7 @@ export function MobilePullToRefresh({
 
   const threshold = 80;
 
-  const handleTouchStart = (e: React.TouchEvent) => {
+  const handleTouchStart = (_e: React.TouchEvent) => {
     if (window.scrollY === 0) {
       setIsPulling(true);
     }
@@ -490,7 +489,7 @@ export function MobilePullToRefresh({
   );
 }
 
-export default {
+const MobileNav = {
   MobileBottomNav,
   MobileHeader,
   MobileDrawer,
@@ -498,3 +497,5 @@ export default {
   MobileFAB,
   MobilePullToRefresh,
 };
+
+export default MobileNav;

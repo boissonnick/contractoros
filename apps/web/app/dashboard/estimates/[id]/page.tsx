@@ -26,7 +26,6 @@ import {
   DocumentTextIcon,
   UserIcon,
   BuildingOfficeIcon,
-  CalendarIcon,
   CurrencyDollarIcon,
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
@@ -48,7 +47,7 @@ export default function EstimateDetailPage() {
   const estimateId = params.id as string;
 
   const [estimate, setEstimate] = useState<Estimate | null>(null);
-  const [organization, setOrganization] = useState<Organization | null>(null);
+  const [, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
   const [showSignatureModal, setShowSignatureModal] = useState(false);
 
@@ -279,7 +278,7 @@ export default function EstimateDetailPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {estimate.lineItems.map((item, index) => (
+                  {estimate.lineItems.map((item) => (
                     <tr key={item.id} className={cn(
                       "border-b border-gray-100",
                       item.isOptional && "bg-gray-50"

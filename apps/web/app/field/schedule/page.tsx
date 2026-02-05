@@ -26,7 +26,7 @@ import {
 
 const WORK_HOURS = Array.from({ length: 15 }, (_, i) => i + 6); // 6 AM to 8 PM
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const FULL_DAY_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const _FULL_DAY_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 // Project colors for assignments (cycled based on project ID)
 const PROJECT_COLORS = [
@@ -196,7 +196,7 @@ function DayView({ date, items, projectColorMap, onItemClick }: DayViewProps) {
     <Card className="overflow-hidden" padding="none">
       {/* Header */}
       <div className="bg-gray-50 px-4 py-3 border-b">
-        <h3 className="font-semibold text-gray-900">{formatDateFull(date)}</h3>
+        <h3 className="font-semibold font-heading tracking-tight text-gray-900">{formatDateFull(date)}</h3>
         <p className="text-sm text-gray-500 mt-0.5">
           {dayItems.length} {dayItems.length === 1 ? 'item' : 'items'} scheduled
         </p>
@@ -344,7 +344,7 @@ function WeekView({ startDate, items, projectColorMap, onItemClick, onDayClick }
     <Card className="overflow-hidden" padding="none">
       {/* Header */}
       <div className="bg-gray-50 px-4 py-3 border-b">
-        <h3 className="font-semibold text-gray-900">
+        <h3 className="font-semibold font-heading tracking-tight text-gray-900">
           {formatDateShort(weekDates[0])} - {formatDateShort(weekDates[6])}
         </h3>
         <p className="text-sm text-gray-500 mt-0.5">
@@ -362,7 +362,7 @@ function WeekView({ startDate, items, projectColorMap, onItemClick, onDayClick }
               key={idx}
               className={cn(
                 'text-center py-2 text-xs font-medium border-b',
-                isToday ? 'bg-blue-50 text-blue-600' : 'bg-gray-50 text-gray-500'
+                isToday ? 'bg-brand-primary/10 text-brand-primary' : 'bg-gray-50 text-gray-500'
               )}
             >
               {DAY_LABELS[date.getDay()]}
@@ -383,14 +383,14 @@ function WeekView({ startDate, items, projectColorMap, onItemClick, onDayClick }
               className={cn(
                 'min-h-[120px] sm:min-h-[140px] border-r border-b p-2 text-left transition-colors hover:bg-gray-50',
                 idx % 7 === 6 && 'border-r-0',
-                isToday && 'bg-blue-50/30'
+                isToday && 'bg-brand-primary/5'
               )}
             >
               {/* Date number */}
               <div
                 className={cn(
                   'w-7 h-7 flex items-center justify-center rounded-full text-sm font-medium mb-2',
-                  isToday ? 'bg-blue-600 text-white' : 'text-gray-700'
+                  isToday ? 'bg-brand-primary text-white' : 'text-gray-700'
                 )}
               >
                 {date.getDate()}
@@ -469,7 +469,7 @@ function ItemDetailModal({ item, onClose, projectColorMap }: ItemDetailModalProp
         <div className="flex items-start gap-3">
           <div className={cn('w-1 h-12 rounded-full flex-shrink-0', dotColor)} />
           <div>
-            <h3 className="font-semibold text-lg text-gray-900">{item.title}</h3>
+            <h3 className="font-semibold font-heading tracking-tight text-lg text-gray-900">{item.title}</h3>
             {item.description && (
               <p className="text-sm text-gray-500 mt-1">{item.description}</p>
             )}
@@ -744,7 +744,7 @@ export default function FieldSchedulePage() {
   if (loading) {
     return (
       <div className="p-4 flex items-center justify-center min-h-[400px]">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -758,7 +758,7 @@ export default function FieldSchedulePage() {
     >
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">My Schedule</h1>
+        <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">My Schedule</h1>
         <p className="text-sm text-gray-500 mt-1">View your assigned tasks and events</p>
       </div>
 

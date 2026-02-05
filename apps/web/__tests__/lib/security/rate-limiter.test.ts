@@ -38,7 +38,7 @@ import { getDoc, setDoc, doc, Timestamp, increment } from 'firebase/firestore';
 const mockGetDoc = getDoc as jest.MockedFunction<typeof getDoc>;
 const mockSetDoc = setDoc as jest.MockedFunction<typeof setDoc>;
 const mockDoc = doc as jest.MockedFunction<typeof doc>;
-const mockIncrement = increment as jest.MockedFunction<typeof increment>;
+const _mockIncrement = increment as jest.MockedFunction<typeof increment>;
 
 describe('Rate Limiter', () => {
   const mockDb = {} as ReturnType<typeof import('firebase/firestore').getFirestore>;

@@ -90,7 +90,7 @@ export function GlobalSearchBar({ className = '' }: GlobalSearchBarProps) {
   };
 
   // Handle result selection
-  const handleSelect = (result: SearchResult) => {
+  const handleSelect = (_result: SearchResult) => {
     saveRecentSearch(query);
     setIsOpen(false);
     setQuery('');

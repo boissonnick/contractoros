@@ -3,7 +3,6 @@
 import { useMemo } from 'react';
 import { Project, Activity } from '@/types';
 import {
-  CheckCircleIcon,
   ClockIcon,
   CalendarIcon,
   FlagIcon,

@@ -20,7 +20,7 @@ interface Expense {
   date: Date;
 }
 
-interface ProjectCosts {
+interface _ProjectCosts {
   projectId: string;
   expenses: number;
   laborCosts: number;

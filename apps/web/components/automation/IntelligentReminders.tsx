@@ -87,7 +87,7 @@ export function IntelligentReminders({
   reminders,
   onSnooze,
   onComplete,
-  onDismiss,
+  onDismiss: _onDismiss,
   defaultCollapsed = false,
 }: IntelligentRemindersProps) {
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
@@ -198,7 +198,7 @@ export function IntelligentReminders({
           <div className="space-y-2 max-h-80 overflow-y-auto">
             {sortedReminders.map((reminder) => {
               const priorityConfig = PRIORITY_CONFIG[reminder.priority];
-              const CategoryIcon = CATEGORY_ICONS[reminder.category];
+              const _CategoryIcon = CATEGORY_ICONS[reminder.category];
 
               return (
                 <div

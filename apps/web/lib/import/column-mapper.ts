@@ -121,7 +121,7 @@ export function generateMappings(
   headers: string[],
   target: ImportTarget
 ): ColumnMapping[] {
-  const fields = IMPORT_FIELD_DEFINITIONS[target];
+  const _fields = IMPORT_FIELD_DEFINITIONS[target];
   const usedFields = new Set<string>();
   const mappings: ColumnMapping[] = [];
 

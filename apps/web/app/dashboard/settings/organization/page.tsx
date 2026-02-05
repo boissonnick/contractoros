@@ -2,12 +2,11 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/lib/auth';
-import { useTheme } from '@/lib/theme/ThemeProvider';
 import { db } from '@/lib/firebase/config';
 import { doc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
 import { uploadCompanyLogo } from '@/lib/firebase/storage-helpers';
 import { Button, Input, toast } from '@/components/ui';
-import { Organization, FiscalYearConfig, PayrollPeriodConfig, TaxConfig, CorporateStructure, InsuranceCompliance, BusinessType } from '@/types';
+import { Organization, PayrollPeriodConfig, TaxConfig, BusinessType } from '@/types';
 import {
   CloudArrowUpIcon,
   XMarkIcon,
@@ -22,7 +21,7 @@ export default function OrganizationSettingsPage() {
   const { profile } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [org, setOrg] = useState<Partial<Organization> | null>(null);
+  const [, setOrg] = useState<Partial<Organization> | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [generatingDemo, setGeneratingDemo] = useState(false);
@@ -337,6 +336,7 @@ export default function OrganizationSettingsPage() {
 
             {logoPreview ? (
               <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={logoPreview} alt="Logo" className="h-12 max-w-[120px] object-contain" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-gray-600 truncate">{logoFile ? logoFile.name : 'Current logo'}</p>

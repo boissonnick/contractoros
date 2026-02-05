@@ -57,8 +57,8 @@ interface UseBidIntelligenceReturn {
 
 export function useBidIntelligence(options: UseBidIntelligenceOptions = {}): UseBidIntelligenceReturn {
   const { profile } = useAuth();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [loading] = useState(false);
+  const [error] = useState<string | null>(null);
 
   const {
     projectBids = [],

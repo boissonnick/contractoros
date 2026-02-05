@@ -9,7 +9,6 @@ import {
   isSignInWithEmailLink,
   signInWithEmailLink,
   RecaptchaVerifier,
-  PhoneAuthProvider,
   linkWithCredential,
   UserCredential,
   ConfirmationResult,

@@ -61,7 +61,7 @@ export function QuoteTemplatesTab() {
     try {
       await deleteTemplate(id);
       toast.success('Template deleted successfully');
-    } catch (err) {
+    } catch {
       toast.error('Failed to delete template');
     }
   };
@@ -73,7 +73,7 @@ export function QuoteTemplatesTab() {
     try {
       await duplicateTemplate(id, `${template.name} (Copy)`);
       toast.success('Template duplicated successfully');
-    } catch (err) {
+    } catch {
       toast.error('Failed to duplicate template');
     }
   };
@@ -82,7 +82,7 @@ export function QuoteTemplatesTab() {
     try {
       await setDefaultTemplate(id);
       toast.success('Default template updated');
-    } catch (err) {
+    } catch {
       toast.error('Failed to set default template');
     }
   };

@@ -12,7 +12,7 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import { useAuth } from '@/lib/auth';
-import { Card, Button, Input, EmptyState, PageHeader, Skeleton } from '@/components/ui';
+import { Card, Button, Input, EmptyState, Skeleton } from '@/components/ui';
 import { useSMS, SMSConversation, useSmsTemplates } from '@/lib/hooks/useSms';
 import {
   SmsComposer,
@@ -20,13 +20,11 @@ import {
   SMSConversationView,
 } from '@/components/sms';
 import { SmsConversation } from '@/types';
-import { formatPhoneForDisplay, formatToE164 } from '@/lib/sms/phoneUtils';
 import {
   ChatBubbleLeftRightIcon,
   PlusIcon,
   MagnifyingGlassIcon,
   XMarkIcon,
-  FunnelIcon,
   Cog6ToothIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';

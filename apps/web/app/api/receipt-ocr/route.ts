@@ -177,7 +177,7 @@ async function processWithGemini(
       cleanText = cleanText.replace(/```json?\n?/g, '').replace(/```$/g, '').trim();
     }
     parsed = JSON.parse(cleanText);
-  } catch (e) {
+  } catch {
     console.error('[OCR] Failed to parse response:', text);
     throw new Error('Failed to parse AI response');
   }

@@ -14,7 +14,6 @@ import {
   XCircleIcon,
   LinkIcon,
   Cog6ToothIcon,
-  ClockIcon,
   UserGroupIcon,
   DocumentTextIcon,
   CreditCardIcon,
@@ -60,7 +59,7 @@ export default function QuickBooksSettingsPage() {
   const [connection, setConnection] = useState<QuickBooksConnection | null>(null);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState<string | null>(null);
-  const [syncLogs, setSyncLogs] = useState<SyncLog[]>([]);
+  const [_syncLogs, _setSyncLogs] = useState<SyncLog[]>([]);
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   // Check for OAuth callback messages
@@ -139,7 +138,7 @@ export default function QuickBooksSettingsPage() {
       }
 
       setToast({ type: 'success', message: 'QuickBooks disconnected' });
-    } catch (error) {
+    } catch {
       setToast({ type: 'error', message: 'Failed to disconnect QuickBooks' });
     }
   };

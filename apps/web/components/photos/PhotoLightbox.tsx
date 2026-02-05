@@ -397,7 +397,7 @@ export default function PhotoLightbox({
  */
 function LazyThumbnail({
   photo,
-  index,
+  index: _index,
   isActive,
   onClick,
 }: {

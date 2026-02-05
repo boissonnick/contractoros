@@ -16,8 +16,6 @@ import { db } from '@/lib/firebase/config';
 import { PortalNav, MessageThread, ThreadMessage } from '@/components/client-portal';
 import {
   uploadMultipleAttachments,
-  getAttachmentType,
-  UploadProgress,
 } from '@/lib/storage/message-attachments';
 
 interface ClientPortalData {
@@ -216,7 +214,7 @@ export default function MessagesPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="text-center">
-          <h1 className="text-xl font-semibold text-gray-900 mb-2">
+          <h1 className="text-xl font-semibold font-heading tracking-tight text-gray-900 mb-2">
             {error || 'Something went wrong'}
           </h1>
           <p className="text-gray-500">Please contact your contractor for assistance.</p>

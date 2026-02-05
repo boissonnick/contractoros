@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Button, Input } from '@/components/ui';
-import { SmsTemplate, SmsTemplateType } from '@/types';
+import { SmsTemplate } from '@/types';
 import { formatPhoneForDisplay, formatToE164 } from '@/lib/sms/phoneUtils';
 import {
   calculateSmsSegments,

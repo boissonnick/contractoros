@@ -18,7 +18,7 @@ export default function SubSchedulePage() {
   if (loading) {
     return (
       <div className="p-6 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -26,7 +26,7 @@ export default function SubSchedulePage() {
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">My Schedule</h1>
+        <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">My Schedule</h1>
         <p className="text-sm text-gray-500 mt-1">Manage your availability for upcoming projects.</p>
       </div>
 
@@ -35,7 +35,7 @@ export default function SubSchedulePage() {
           <WeeklyDefaultsEditor defaults={defaults} onSave={saveDefaults} orgId={profile?.orgId || ''} />
         </Card>
         <Card>
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">Monthly Availability</h3>
+          <h3 className="text-sm font-semibold font-heading tracking-tight text-gray-900 mb-3">Monthly Availability</h3>
           <p className="text-xs text-gray-500 mb-4">Click a date to toggle. Blue ring = date-specific override.</p>
           <AvailabilityCalendar
             getAvailabilityForDate={getAvailabilityForDate}

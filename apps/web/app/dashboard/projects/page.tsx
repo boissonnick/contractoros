@@ -451,7 +451,7 @@ export default function ProjectsPage() {
       <div className="md:hidden">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Projects</h1>
+            <h1 className="text-xl font-bold font-heading tracking-tight text-gray-900">Projects</h1>
             <p className="text-xs text-gray-500">
               {showArchived ? `${stats.archived} archived` : `${stats.total} total`}
             </p>
@@ -474,46 +474,46 @@ export default function ProjectsPage() {
       {/* Stats Cards */}
       {!showArchived && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="p-4">
+          <Card className="p-4 bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-200/50">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <ChartBarIcon className="h-5 w-5 text-green-600" />
+              <div className="p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-black/5 text-green-600">
+                <ChartBarIcon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{stats.active}</p>
+                <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{stats.active}</p>
                 <p className="text-xs text-gray-500">Active</p>
               </div>
             </div>
           </Card>
-          <Card className="p-4">
+          <Card className="p-4 bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-200/50">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <FolderIcon className="h-5 w-5 text-blue-600" />
+              <div className="p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-black/5 text-blue-600">
+                <FolderIcon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{stats.planning}</p>
+                <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{stats.planning}</p>
                 <p className="text-xs text-gray-500">In Pipeline</p>
               </div>
             </div>
           </Card>
-          <Card className="p-4">
+          <Card className="p-4 bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-200/50">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <FolderIcon className="h-5 w-5 text-purple-600" />
+              <div className="p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-black/5 text-purple-600">
+                <FolderIcon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{stats.completed}</p>
+                <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{stats.completed}</p>
                 <p className="text-xs text-gray-500">Completed</p>
               </div>
             </div>
           </Card>
-          <Card className="p-4">
+          <Card className="p-4 bg-gradient-to-br from-gray-500/10 to-gray-600/5 border-gray-200/50">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-gray-100 rounded-lg">
-                <ChartBarIcon className="h-5 w-5 text-gray-600" />
+              <div className="p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-black/5 text-gray-600">
+                <ChartBarIcon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.totalBudget)}</p>
+                <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{formatCurrency(stats.totalBudget)}</p>
                 <p className="text-xs text-gray-500">Total Budget</p>
               </div>
             </div>
@@ -530,7 +530,7 @@ export default function ProjectsPage() {
             placeholder="Search projects, addresses, or tags..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -539,7 +539,7 @@ export default function ProjectsPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as ProjectStatus | 'all')}
-              className="px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%236b7280%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.23%207.21a.75.75%200%20011.06.02L10%2011.168l3.71-3.938a.75.75%200%20111.08%201.04l-4.25%204.5a.75.75%200%2001-1.08%200l-4.25-4.5a.75.75%200%2001.02-1.06z%22%20clip-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_0.5rem_center] bg-[length:1.25rem_1.25rem]"
+              className="px-3 py-2 pr-8 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%236b7280%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.23%207.21a.75.75%200%20011.06.02L10%2011.168l3.71-3.938a.75.75%200%20111.08%201.04l-4.25%204.5a.75.75%200%2001-1.08%200l-4.25-4.5a.75.75%200%2001.02-1.06z%22%20clip-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_0.5rem_center] bg-[length:1.25rem_1.25rem]"
             >
               <option value="all">All Status</option>
               <option value="lead">Lead</option>
@@ -554,7 +554,7 @@ export default function ProjectsPage() {
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value as ProjectCategory | 'all' | 'uncategorized')}
-            className="px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%236b7280%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.23%207.21a.75.75%200%20011.06.02L10%2011.168l3.71-3.938a.75.75%200%20111.08%201.04l-4.25%204.5a.75.75%200%2001-1.08%200l-4.25-4.5a.75.75%200%2001.02-1.06z%22%20clip-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_0.5rem_center] bg-[length:1.25rem_1.25rem]"
+            className="px-3 py-2 pr-8 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%236b7280%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.23%207.21a.75.75%200%20011.06.02L10%2011.168l3.71-3.938a.75.75%200%20111.08%201.04l-4.25%204.5a.75.75%200%2001-1.08%200l-4.25-4.5a.75.75%200%2001.02-1.06z%22%20clip-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_0.5rem_center] bg-[length:1.25rem_1.25rem]"
           >
             <option value="all">All Categories</option>
             <option value="uncategorized">Uncategorized</option>
@@ -562,7 +562,7 @@ export default function ProjectsPage() {
               <option key={key} value={key}>{label}</option>
             ))}
           </select>
-          <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+          <div className="flex items-center border border-gray-300 rounded-xl overflow-hidden">
             <button
               onClick={() => setViewMode('grid')}
               className={cn(
@@ -636,7 +636,7 @@ export default function ProjectsPage() {
             {filteredProjects.map((project) => (
               <div
                 key={project.id}
-                className="bg-white rounded-xl border hover:shadow-md transition-shadow relative group"
+                className="bg-white rounded-2xl border hover:shadow-md transition-shadow relative group"
               >
                 {/* Menu Button */}
                 <div className="absolute top-3 right-3 z-10">
@@ -650,7 +650,7 @@ export default function ProjectsPage() {
                     <EllipsisVerticalIcon className="h-5 w-5 text-gray-500" />
                   </button>
                   {menuOpenId === project.id && (
-                    <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 w-48 z-50">
+                    <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg py-1 w-48 z-50">
                       <button
                         onClick={() => handleDuplicate(project)}
                         disabled={duplicating === project.id}
@@ -690,7 +690,7 @@ export default function ProjectsPage() {
 
                 <Link href={`/dashboard/projects/${project.id}`} prefetch={false} className="block p-3">
                   <div className="flex items-start justify-between mb-1.5">
-                    <h3 className="font-semibold text-gray-900 truncate pr-8 text-sm" title={project.name}>{project.name}</h3>
+                    <h3 className="font-semibold font-heading tracking-tight text-gray-900 truncate pr-8 text-sm" title={project.name}>{project.name}</h3>
                   </div>
                   <div className="flex items-center gap-1.5 mb-1.5">
                     <Badge className={statusConfig[project.status].color}>
@@ -752,14 +752,14 @@ export default function ProjectsPage() {
             {filteredProjects.map((project) => (
               <div
                 key={project.id}
-                className="bg-white rounded-lg border hover:shadow-md transition-shadow relative group"
+                className="bg-white rounded-2xl border hover:shadow-md transition-shadow relative group"
               >
                 <Link href={`/dashboard/projects/${project.id}`} prefetch={false} className="block p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4 flex-1 min-w-0">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <h3 className="font-medium text-gray-900 truncate">{project.name}</h3>
+                          <h3 className="font-medium font-heading tracking-tight text-gray-900 truncate">{project.name}</h3>
                           <Badge className={cn(statusConfig[project.status].color, 'text-xs')}>
                             {statusConfig[project.status].label}
                           </Badge>
@@ -806,7 +806,7 @@ export default function ProjectsPage() {
                         <EllipsisVerticalIcon className="h-5 w-5 text-gray-500" />
                       </button>
                       {menuOpenId === project.id && (
-                        <div className="absolute right-4 top-12 bg-white border border-gray-200 rounded-lg shadow-lg py-1 w-48 z-50">
+                        <div className="absolute right-4 top-12 bg-white border border-gray-200 rounded-xl shadow-lg py-1 w-48 z-50">
                           <button
                             onClick={(e) => {
                               e.preventDefault();

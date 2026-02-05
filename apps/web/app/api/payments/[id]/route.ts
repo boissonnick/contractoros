@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { stripe, isStripeConfigured } from '@/lib/payments/stripeClient';
 import { adminDb, Timestamp } from '@/lib/firebase/admin';
 
 export const runtime = 'nodejs';

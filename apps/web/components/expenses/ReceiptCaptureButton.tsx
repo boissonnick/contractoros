@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useCallback } from 'react';
+import Image from 'next/image';
 import {
   CameraIcon,
   XMarkIcon,
@@ -170,10 +171,11 @@ export function ReceiptCaptureButton({
       {/* Preview Image */}
       <div className="relative aspect-[4/3] max-h-48 bg-gray-100">
         {previewUrl && (
-          <img
+          <Image
             src={previewUrl}
             alt="Receipt preview"
-            className="w-full h-full object-contain"
+            fill
+            className="object-contain"
           />
         )}
 

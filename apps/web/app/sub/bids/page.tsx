@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useMemo, useCallback } from 'react';
-import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 import { useSubBids, BidWithProject, BidSubmissionData } from '@/lib/hooks/useSubBids';
 import { BidStatus } from '@/types';
@@ -14,9 +13,7 @@ import {
   Button,
   EmptyState,
   FormModal,
-  useFormModal,
   FirestoreError,
-  Badge,
   SkeletonBidsList,
 } from '@/components/ui';
 import {
@@ -24,8 +21,6 @@ import {
   ClockIcon,
   CheckCircleIcon,
   XCircleIcon,
-  ExclamationCircleIcon,
-  ArrowRightIcon,
   CalendarDaysIcon,
   BanknotesIcon,
   MapPinIcon,
@@ -77,12 +72,12 @@ function BidCard({
     <div className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-4 flex-1 min-w-0">
-          <div className={`p-2.5 rounded-lg ${config.bgColor} flex-shrink-0`}>
+          <div className={`p-2.5 rounded-xl ${config.bgColor} flex-shrink-0`}>
             <StatusIcon className={`h-5 w-5 ${config.color}`} />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="font-semibold text-gray-900 truncate">
+              <h3 className="font-semibold font-heading tracking-tight text-gray-900 truncate">
                 {bid.projectName || `Project ${bid.projectId.slice(-6)}`}
               </h3>
               <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${config.bgColor} ${config.color}`}>
@@ -477,7 +472,7 @@ function BidDetailModal({
         {/* Response Notes */}
         {bid.responseNotes && mode === 'view' && (
           <div className={`p-4 rounded-lg ${bid.status === 'accepted' ? 'bg-green-50' : bid.status === 'rejected' ? 'bg-red-50' : 'bg-gray-50'}`}>
-            <h4 className="font-medium text-gray-900 mb-1">Contractor Response</h4>
+            <h4 className="font-medium font-heading tracking-tight text-gray-900 mb-1">Contractor Response</h4>
             <p className={`text-sm ${bid.status === 'accepted' ? 'text-green-700' : bid.status === 'rejected' ? 'text-red-700' : 'text-gray-700'}`}>
               {bid.responseNotes}
             </p>
@@ -505,7 +500,7 @@ function BidStats({ bids }: { bids: BidWithProject[] }) {
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       <div className="bg-white rounded-xl border p-4">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-100 rounded-lg">
+          <div className="p-2 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
             <ClockIcon className="h-5 w-5 text-blue-600" />
           </div>
           <div>
@@ -517,7 +512,7 @@ function BidStats({ bids }: { bids: BidWithProject[] }) {
 
       <div className="bg-white rounded-xl border p-4">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-green-100 rounded-lg">
+          <div className="p-2 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
             <CheckCircleIcon className="h-5 w-5 text-green-600" />
           </div>
           <div>
@@ -529,7 +524,7 @@ function BidStats({ bids }: { bids: BidWithProject[] }) {
 
       <div className="bg-white rounded-xl border p-4">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-gray-100 rounded-lg">
+          <div className="p-2 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
             <DocumentTextIcon className="h-5 w-5 text-gray-600" />
           </div>
           <div>
@@ -541,7 +536,7 @@ function BidStats({ bids }: { bids: BidWithProject[] }) {
 
       <div className="bg-white rounded-xl border p-4">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-purple-100 rounded-lg">
+          <div className="p-2 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
             <BanknotesIcon className="h-5 w-5 text-purple-600" />
           </div>
           <div>
@@ -556,7 +551,7 @@ function BidStats({ bids }: { bids: BidWithProject[] }) {
 
 // Main Page Component
 export default function SubBidsPage() {
-  const { user, profile } = useAuth();
+  useAuth();
   const { bids, solicitations, loading, error, updateBid, withdrawBid, submitDraftBid, refetch } = useSubBids();
 
   const { search, filters, setSearch, setFilter, clearAll } = useFilterBar({
@@ -721,7 +716,7 @@ export default function SubBidsPage() {
       {/* Pending Bid Requests Section */}
       {solicitations.length > 0 && (
         <div className="mt-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">
             Open Bid Requests ({solicitations.length})
           </h2>
           <div className="space-y-3">
@@ -732,7 +727,7 @@ export default function SubBidsPage() {
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <h3 className="font-semibold text-gray-900">{solicitation.title}</h3>
+                    <h3 className="font-semibold font-heading tracking-tight text-gray-900">{solicitation.title}</h3>
                     {solicitation.description && (
                       <p className="text-sm text-gray-600 mt-1">{solicitation.description}</p>
                     )}

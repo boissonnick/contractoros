@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
@@ -8,7 +9,6 @@ import { collection, query, where, getDocs, orderBy, limit } from 'firebase/fire
 import { Project, ProjectPhoto, Invoice } from '@/types';
 import {
   HomeIcon,
-  CalendarIcon,
   PhotoIcon,
   DocumentTextIcon,
   CheckCircleIcon,
@@ -84,7 +84,7 @@ export default function ClientDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -101,7 +101,7 @@ export default function ClientDashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">
           Welcome, {profile?.displayName?.split(' ')[0]}
         </h1>
         <p className="text-gray-500 mt-1">
@@ -113,17 +113,17 @@ export default function ClientDashboard() {
       {activeProject ? (
         <Link
           href={`/client/projects/${activeProject.id}`}
-          className="block bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6 text-white hover:from-blue-700 hover:to-blue-800 transition-colors"
+          className="block bg-gradient-to-r from-brand-primary to-brand-primary-dark rounded-xl p-6 text-white hover:from-brand-primary-dark hover:to-brand-primary-darker transition-colors"
         >
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-blue-200 text-sm font-medium mb-1">Active Project</p>
-              <h2 className="text-xl font-bold mb-2">{activeProject.name}</h2>
-              <p className="text-blue-100 text-sm">
+              <p className="text-white/70 text-sm font-medium mb-1">Active Project</p>
+              <h2 className="text-xl font-bold font-heading tracking-tight mb-2">{activeProject.name}</h2>
+              <p className="text-white/80 text-sm">
                 {activeProject.address.street}, {activeProject.address.city}
               </p>
             </div>
-            <div className="p-3 bg-white/20 rounded-lg">
+            <div className="p-3 bg-white/20 rounded-xl">
               <HomeIcon className="h-6 w-6" />
             </div>
           </div>
@@ -140,7 +140,7 @@ export default function ClientDashboard() {
       ) : (
         <div className="bg-white rounded-xl border p-6 text-center">
           <HomeIcon className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-          <h3 className="text-lg font-medium text-gray-900 mb-1">No Active Projects</h3>
+          <h3 className="text-lg font-medium font-heading tracking-tight text-gray-900 mb-1">No Active Projects</h3>
           <p className="text-gray-500">Your contractor will add projects here when work begins</p>
         </div>
       )}
@@ -149,8 +149,8 @@ export default function ClientDashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="bg-white rounded-xl border p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <HomeIcon className="h-5 w-5 text-blue-600" />
+            <div className="p-2 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
+              <HomeIcon className="h-5 w-5 text-brand-primary" />
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900">{projects.length}</p>
@@ -161,7 +161,7 @@ export default function ClientDashboard() {
 
         <div className="bg-white rounded-xl border p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
+            <div className="p-2 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
               <PhotoIcon className="h-5 w-5 text-purple-600" />
             </div>
             <div>
@@ -173,7 +173,7 @@ export default function ClientDashboard() {
 
         <div className="bg-white rounded-xl border p-4 col-span-2 lg:col-span-1">
           <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg ${pendingAmount > 0 ? 'bg-yellow-100' : 'bg-green-100'}`}>
+            <div className="p-2 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
               <CurrencyDollarIcon className={`h-5 w-5 ${pendingAmount > 0 ? 'text-yellow-600' : 'text-green-600'}`} />
             </div>
             <div>
@@ -190,7 +190,7 @@ export default function ClientDashboard() {
         {/* Recent Photos */}
         <div className="bg-white rounded-xl border p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Recent Progress</h2>
+            <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900">Recent Progress</h2>
             <Link href="/client/photos" className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
               All photos <ArrowRightIcon className="h-4 w-4" />
             </Link>
@@ -201,13 +201,14 @@ export default function ClientDashboard() {
               {recentPhotos.map((photo) => (
                 <div
                   key={photo.id}
-                  className="aspect-square bg-gray-100 rounded-lg overflow-hidden"
+                  className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden"
                 >
                   {photo.thumbnailUrl || photo.url ? (
-                    <img
+                    <Image
                       src={photo.thumbnailUrl || photo.url}
                       alt={photo.caption || 'Progress photo'}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
@@ -229,7 +230,7 @@ export default function ClientDashboard() {
         {/* Recent Invoices */}
         <div className="bg-white rounded-xl border p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Invoices</h2>
+            <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900">Invoices</h2>
             <Link href="/client/documents" className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
               All documents <ArrowRightIcon className="h-4 w-4" />
             </Link>
@@ -243,10 +244,7 @@ export default function ClientDashboard() {
                   className="flex items-center justify-between p-3 rounded-lg border hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${
-                      invoice.status === 'paid' ? 'bg-green-100' :
-                      invoice.status === 'overdue' ? 'bg-red-100' : 'bg-yellow-100'
-                    }`}>
+                    <div className="p-2 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
                       <DocumentTextIcon className={`h-4 w-4 ${
                         invoice.status === 'paid' ? 'text-green-600' :
                         invoice.status === 'overdue' ? 'text-red-600' : 'text-yellow-600'
@@ -285,7 +283,7 @@ export default function ClientDashboard() {
 
       {/* Contact Card */}
       <div className="bg-white rounded-xl border p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Need Help?</h3>
+        <h3 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">Need Help?</h3>
         <p className="text-gray-600 mb-4">
           If you have questions about your project, reach out to your contractor directly.
         </p>

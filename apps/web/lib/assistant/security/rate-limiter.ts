@@ -68,7 +68,7 @@ function getTodayKey(): string {
 /**
  * Get the minute key for rate limiting (YYYY-MM-DDTHH:MM in UTC)
  */
-function getMinuteKey(): string {
+function _getMinuteKey(): string {
   const now = new Date();
   return `${now.toISOString().split(':')[0]}:${now.getUTCMinutes().toString().padStart(2, '0')}`;
 }

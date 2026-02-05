@@ -162,7 +162,7 @@ export function parseCSV(content: string, options: ParseOptions = {}): ParseResu
 
   // Check for duplicate headers
   const headerCounts = new Map<string, number>();
-  headers.forEach((h, i) => {
+  headers.forEach((h, _i) => {
     const normalized = normalizeHeader(h);
     const count = headerCounts.get(normalized) || 0;
     if (count > 0) {

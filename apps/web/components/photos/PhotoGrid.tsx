@@ -46,7 +46,7 @@ interface LazyPhotoItemProps {
   onClick: () => void;
 }
 
-function LazyPhotoItem({ photo, index, isSelected, selectable, onClick }: LazyPhotoItemProps) {
+function LazyPhotoItem({ photo, index: _index, isSelected, selectable, onClick }: LazyPhotoItemProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const ref = useRef<HTMLButtonElement>(null);

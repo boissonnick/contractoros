@@ -8,21 +8,17 @@ import {
   query,
   where,
   getDocs,
-  Timestamp,
 } from 'firebase/firestore';
 import { PageHeader } from '@/components/ui/PageHeader';
-import { Card, Button, Avatar, Badge, EmptyState, Skeleton } from '@/components/ui';
+import { Card, Button, Avatar, EmptyState, Skeleton } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import {
   UserGroupIcon,
   BuildingOffice2Icon,
   CalendarDaysIcon,
   FunnelIcon,
-  ChevronDownIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
-  ClockIcon,
-  UserIcon,
   ArrowRightIcon,
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';

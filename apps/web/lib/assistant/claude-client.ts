@@ -14,7 +14,7 @@ import {
   StreamingChunk,
   MAX_CONTEXT_TOKENS,
 } from './types';
-import { buildSystemPrompt, buildContextSummary } from './prompts';
+import { buildContextSummary } from './prompts';
 import { getAuth } from 'firebase/auth';
 
 /**
@@ -27,7 +27,7 @@ interface ClaudeClientConfig {
   temperature?: number;
 }
 
-const DEFAULT_CONFIG: Required<ClaudeClientConfig> = {
+const _DEFAULT_CONFIG: Required<ClaudeClientConfig> = {
   apiKey: '',
   model: 'claude-sonnet-4-20250514',
   maxTokens: 1024,

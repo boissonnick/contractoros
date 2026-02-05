@@ -14,7 +14,6 @@ import {
 } from 'firebase/firestore';
 import { PhaseTemplate, PhaseTemplatePhase } from '@/types';
 import { Button, Card, Input, toast } from '@/components/ui';
-import { cn } from '@/lib/utils';
 import {
   PlusIcon,
   TrashIcon,

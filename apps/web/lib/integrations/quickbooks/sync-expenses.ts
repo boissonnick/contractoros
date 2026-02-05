@@ -6,9 +6,9 @@
  * recorded in the app and need to be pushed to accounting.
  */
 
-import { adminDb, Timestamp } from '@/lib/firebase/admin';
+import { adminDb } from '@/lib/firebase/admin';
 import { Expense, ExpenseCategory, AccountMappingRule } from '@/types';
-import { qboCreate, qboUpdate, qboQuery, QBOClientError } from './client';
+import { qboCreate, qboUpdate, QBOClientError } from './client';
 import { QBOPurchase, QBOPurchaseLine, QBORef } from './types';
 import {
   getMapping,

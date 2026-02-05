@@ -27,7 +27,6 @@ import {
   doc,
   addDoc,
   updateDoc,
-  deleteDoc,
   getDocs,
   Timestamp,
   QueryConstraint,

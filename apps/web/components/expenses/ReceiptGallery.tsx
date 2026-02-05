@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+import Image from 'next/image';
 import { PhotoIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { cn, formatFileSize } from '@/lib/utils';
 import { ExpenseReceipt } from '@/types';
@@ -50,10 +51,11 @@ export default function ReceiptGallery({ receipts, className }: ReceiptGalleryPr
             onClick={() => setSelectedReceipt(receipt)}
             className="group relative aspect-square overflow-hidden rounded-lg border border-gray-200 bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
-            <img
+            <Image
               src={receipt.thumbnailUrl || receipt.url}
               alt={receipt.fileName}
-              className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
+              fill
+              className="object-cover transition-transform duration-200 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200" />
             <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-2">
@@ -83,9 +85,11 @@ export default function ReceiptGallery({ receipts, className }: ReceiptGalleryPr
             </button>
 
             {/* Full-size image */}
-            <img
+            <Image
               src={selectedReceipt.url}
               alt={selectedReceipt.fileName}
+              width={800}
+              height={600}
               className="max-h-[80vh] max-w-full object-contain rounded-lg"
             />
 

@@ -4,7 +4,7 @@
  * Helper functions for payment processing, formatting, and validation.
  */
 
-import { Payment, PaymentStatus, PaymentMethod } from '@/types';
+import { PaymentStatus, PaymentMethod } from '@/types';
 
 /**
  * Convert cents to dollars for display

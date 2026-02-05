@@ -35,7 +35,7 @@ interface OfflineProjectButtonProps {
 
 export function OfflineProjectButton({
   projectId,
-  projectName,
+  projectName: _projectName,
   variant = 'default',
   showStatus = true,
   className = '',

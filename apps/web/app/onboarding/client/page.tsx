@@ -16,7 +16,7 @@ type Step = 'welcome' | 'profile' | 'complete';
 
 export default function ClientOnboardingPage() {
   const router = useRouter();
-  const { user, profile, loading } = useAuth();
+  const { user, loading } = useAuth();
   const [step, setStep] = useState<Step>('welcome');
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ displayName: '', phone: '', address: '' });
@@ -51,20 +51,20 @@ export default function ClientOnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-brand-900 to-brand-950 flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white">ContractorOS</h1>
-          <p className="text-blue-200 mt-2">Welcome to your project portal</p>
+          <h1 className="text-3xl font-bold text-white font-heading tracking-tight">ContractorOS</h1>
+          <p className="text-brand-200 mt-2">Welcome to your project portal</p>
         </div>
 
         <Card>
           {step === 'welcome' && (
             <div className="text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <HomeIcon className="h-8 w-8 text-blue-600" />
+              <div className="w-16 h-16 bg-brand-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <HomeIcon className="h-8 w-8 text-brand-600" />
               </div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">Welcome!</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2 font-heading tracking-tight">Welcome!</h2>
               <p className="text-gray-500 mb-6">
                 Your contractor has invited you to track your project progress, approve changes, view photos, and communicate in real time.
               </p>
@@ -76,7 +76,7 @@ export default function ClientOnboardingPage() {
 
           {step === 'profile' && (
             <div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">Your Contact Info</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2 font-heading tracking-tight">Your Contact Info</h2>
               <p className="text-gray-500 mb-6">This helps your contractor stay in touch.</p>
               <div className="space-y-4">
                 <Input label="Full Name" value={form.displayName} onChange={(e) => setForm(p => ({ ...p, displayName: e.target.value }))} autoFocus />
@@ -96,9 +96,9 @@ export default function ClientOnboardingPage() {
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircleIcon className="h-8 w-8 text-green-600" />
               </div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">You&apos;re all set!</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2 font-heading tracking-tight">You&apos;re all set!</h2>
               <p className="text-gray-500">Redirecting to your project portal...</p>
-              <div className="mt-4"><div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto" /></div>
+              <div className="mt-4"><div className="w-8 h-8 border-4 border-brand-600 border-t-transparent rounded-full animate-spin mx-auto" /></div>
             </div>
           )}
         </Card>

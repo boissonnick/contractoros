@@ -12,7 +12,7 @@ import {
   ChatBubbleLeftRightIcon,
   CheckCircleIcon,
 } from '@heroicons/react/24/outline';
-import { formatDistanceToNow, differenceInDays, format } from 'date-fns';
+import { differenceInDays, format } from 'date-fns';
 
 export type RFIStatus = 'draft' | 'submitted' | 'responded' | 'closed';
 

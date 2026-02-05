@@ -1,6 +1,7 @@
 "use client";
 
 import React, { Fragment, useState } from 'react';
+import Image from 'next/image';
 import { Dialog, Transition, Tab } from '@headlessui/react';
 import { Button, Badge } from '@/components/ui';
 import {
@@ -314,13 +315,14 @@ export default function PunchItemDetailModal({
                               {item.photos.map((photo, index) => (
                                 <div
                                   key={index}
-                                  className="aspect-square rounded-lg overflow-hidden bg-gray-100 cursor-pointer hover:opacity-90 transition-opacity"
+                                  className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 cursor-pointer hover:opacity-90 transition-opacity"
                                   onClick={() => setSelectedPhoto(photo)}
                                 >
-                                  <img
+                                  <Image
                                     src={photo.url}
                                     alt={photo.caption || `Photo ${index + 1}`}
-                                    className="w-full h-full object-cover"
+                                    fill
+                                    className="object-cover"
                                   />
                                 </div>
                               ))}
@@ -347,9 +349,11 @@ export default function PunchItemDetailModal({
                             className="fixed inset-0 z-60 bg-black/90 flex items-center justify-center p-4"
                             onClick={() => setSelectedPhoto(null)}
                           >
-                            <img
+                            <Image
                               src={selectedPhoto.url}
                               alt={selectedPhoto.caption || 'Photo'}
+                              width={800}
+                              height={600}
                               className="max-w-full max-h-full object-contain"
                             />
                             {selectedPhoto.caption && (

@@ -53,7 +53,7 @@ try {
     persistence: browserLocalPersistence,
     popupRedirectResolver: browserPopupRedirectResolver,
   });
-} catch (e) {
+} catch {
   // initializeAuth throws if already called — fall back to getAuth
   auth = getAuth(app);
 }

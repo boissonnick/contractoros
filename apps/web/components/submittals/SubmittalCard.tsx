@@ -196,7 +196,7 @@ export function SubmittalCard({
         {/* Review notes */}
         {submittal.reviewNotes && !compact && (
           <div className="mt-3 p-2 bg-gray-50 rounded text-xs text-gray-600 italic">
-            "{submittal.reviewNotes}"
+            &quot;{submittal.reviewNotes}&quot;
           </div>
         )}
 

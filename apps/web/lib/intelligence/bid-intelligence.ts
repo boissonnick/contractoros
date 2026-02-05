@@ -97,7 +97,7 @@ export function analyzeBid(
 function calculateMarketComparison(
   amount: number,
   marketRates: { low: number; average: number; high: number },
-  trade: string
+  _trade: string
 ): BidMarketComparison {
   // Note: In production, this would normalize by project scope/size
   // For now, we use a simplified approach

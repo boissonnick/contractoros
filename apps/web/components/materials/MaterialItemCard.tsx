@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import {
   CubeIcon,
   ExclamationTriangleIcon,
@@ -50,9 +51,11 @@ export default function MaterialItemCard({
       >
         <div className="flex items-center gap-3">
           {material.imageUrl ? (
-            <img
+            <Image
               src={material.imageUrl}
               alt={material.name}
+              width={40}
+              height={40}
               className="w-10 h-10 rounded object-cover"
             />
           ) : (
@@ -92,9 +95,11 @@ export default function MaterialItemCard({
     >
       <div className="flex items-start gap-4">
         {material.imageUrl ? (
-          <img
+          <Image
             src={material.imageUrl}
             alt={material.name}
+            width={64}
+            height={64}
             className="w-16 h-16 rounded-lg object-cover"
           />
         ) : (

@@ -15,9 +15,7 @@ import {
   onSnapshot,
   addDoc,
   updateDoc,
-  deleteDoc,
   serverTimestamp,
-  Timestamp,
   writeBatch,
   increment,
 } from 'firebase/firestore';
@@ -179,7 +177,7 @@ export function useQuoteTemplates(): UseQuoteTemplatesReturn {
       const template = templates.find((t) => t.id === id);
       if (!template) throw new Error('Template not found');
 
-      const { id: _, createdAt, updatedAt, lastUsedAt, usageCount, isDefault, ...templateData } = template;
+      const { id: _, createdAt: _createdAt, updatedAt: _updatedAt, lastUsedAt: _lastUsedAt, usageCount: _usageCount, isDefault: _isDefault, ...templateData } = template;
 
       return createTemplate({
         ...templateData,

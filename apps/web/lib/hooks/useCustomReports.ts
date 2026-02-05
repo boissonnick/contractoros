@@ -7,15 +7,13 @@
 'use client';
 
 import { useMemo, useCallback, useState } from 'react';
-import { collection, orderBy, DocumentData, Timestamp } from 'firebase/firestore';
+import { orderBy, DocumentData } from 'firebase/firestore';
 import { useAuth } from '@/lib/auth';
 import { useFirestoreCollection } from './useFirestoreCollection';
 import { useFirestoreCrud } from './useFirestoreCrud';
 import {
   CustomReportConfig,
   executeReportQuery,
-  createDefaultReportConfig,
-  generateReportId,
 } from '@/lib/reports/report-builder';
 
 // Convert Firestore data to CustomReportConfig
@@ -129,7 +127,7 @@ export function useCustomReports(): UseCustomReportsResult {
         sharedWith: [],
       };
       // Remove id, createdAt, updatedAt for creation
-      const { id, createdAt, updatedAt, ...reportData } = duplicated;
+      const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, ...reportData } = duplicated;
       return create(reportData as Omit<CustomReportConfig, 'id' | 'createdAt' | 'updatedAt'>);
     },
     [create, userId]

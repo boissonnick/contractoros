@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '@/lib/auth';
-import { Card, Badge, Button, toast } from '@/components/ui';
-import { PermissionGuard, useCanAccess } from '@/components/auth';
+import { Card, Badge, Button } from '@/components/ui';
+import { useCanAccess } from '@/components/auth';
 import { useAuditLog } from '@/lib/hooks/useAuditLog';
 import {
   ROLE_PERMISSIONS,
@@ -13,7 +13,6 @@ import {
 } from '@/types';
 import {
   ShieldCheckIcon,
-  UserGroupIcon,
   CheckIcon,
   XMarkIcon,
   ChevronDownIcon,
@@ -191,7 +190,7 @@ const ROLE_DISPLAY: Record<ImpersonationRole, { label: string; color: string }> 
 };
 
 export default function RolesPermissionsPage() {
-  const { profile } = useAuth();
+  useAuth();
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState<'matrix' | 'audit'>('matrix');
   const canManageRoles = useCanAccess('canManageRoles');
@@ -489,7 +488,7 @@ export default function RolesPermissionsPage() {
 }
 
 function AuditLogRow({ entry }: { entry: AuditLogEntry }) {
-  const severityConfig = SEVERITY_CONFIG[entry.severity];
+  const _severityConfig = SEVERITY_CONFIG[entry.severity];
 
   return (
     <div className="p-4 hover:bg-gray-50">

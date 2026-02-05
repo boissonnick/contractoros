@@ -26,10 +26,8 @@ import {
   PlusIcon,
   PaperAirplaneIcon,
   HashtagIcon,
-  UserIcon,
   UsersIcon,
   ChatBubbleLeftRightIcon,
-  UserGroupIcon,
   HomeModernIcon,
   WrenchScrewdriverIcon,
   XMarkIcon,
@@ -350,7 +348,7 @@ export default function ProjectMessagesPage() {
   const { messages, loading: messagesLoading, sendMessage } = useProjectMessages(activeChannelId);
   const [messageText, setMessageText] = useState('');
   const [showNewChannel, setShowNewChannel] = useState(false);
-  const [teamMembers, setTeamMembers] = useState<{ uid: string; displayName: string }[]>([]);
+  const [_teamMembers, setTeamMembers] = useState<{ uid: string; displayName: string }[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);

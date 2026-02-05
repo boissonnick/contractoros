@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Photo } from '@/types';
 import {
@@ -75,13 +76,13 @@ function LazyTimelinePhoto({
 
       {/* Image */}
       {isVisible && (
-        <img
+        <Image
           src={photo.thumbnailUrl || photo.url}
           alt={photo.caption || `Photo ${photoIndex + 1}`}
-          loading="lazy"
+          fill
           onLoad={handleLoad}
           className={cn(
-            'w-full h-full object-cover transition-opacity duration-300',
+            'object-cover transition-opacity duration-300',
             isLoaded ? 'opacity-100' : 'opacity-0'
           )}
         />
@@ -247,9 +248,11 @@ export function PhotoTimeline({ photos, onViewAll }: PhotoTimelineProps) {
 
           {/* Image */}
           <div className="max-w-4xl max-h-[80vh] p-4">
-            <img
+            <Image
               src={selectedGroup.photos[currentPhotoIndex].url}
               alt={selectedGroup.photos[currentPhotoIndex].caption || ''}
+              width={800}
+              height={600}
               className="max-w-full max-h-[70vh] object-contain mx-auto"
             />
             {selectedGroup.photos[currentPhotoIndex].caption && (

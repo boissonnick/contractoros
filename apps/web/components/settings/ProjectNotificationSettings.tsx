@@ -4,7 +4,7 @@ import React, { useState, useCallback } from 'react';
 import { useAuth } from '@/lib/auth';
 import { useProjects } from '@/lib/hooks/useQueryHooks';
 import { NotificationProjectSettings } from '@/types';
-import { Card, Select } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { toast } from '@/components/ui/Toast';
 import { cn } from '@/lib/utils';
 import {
@@ -12,8 +12,6 @@ import {
   updateDoc,
   setDoc,
   collection,
-  arrayUnion,
-  arrayRemove,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import {

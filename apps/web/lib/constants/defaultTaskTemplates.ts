@@ -1,4 +1,4 @@
-import { TaskTemplate, TaskPriority, TaskChecklistItem } from '@/types';
+import { TaskPriority, TaskChecklistItem } from '@/types';
 
 export interface DefaultTaskTemplate {
   name: string;

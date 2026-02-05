@@ -12,7 +12,6 @@ import {
   ExclamationTriangleIcon,
   ArrowRightIcon,
   CalendarDaysIcon,
-  UserGroupIcon,
   CheckCircleIcon,
   DocumentTextIcon,
 } from '@heroicons/react/24/outline';

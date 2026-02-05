@@ -3,8 +3,7 @@
 import React, { useState, useCallback } from 'react';
 import { Dialog } from '@headlessui/react';
 import { useAuth } from '@/lib/auth';
-import { Button, Input, Textarea } from '@/components/ui';
-import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui';
 import {
   createSignatureRequest,
   sendSignatureRequest,

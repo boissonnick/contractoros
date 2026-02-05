@@ -264,6 +264,7 @@ export default function OfflinePhotoCapture({
     <div className={cn('flex flex-col gap-4', className)}>
       {/* Image preview */}
       <div className="relative aspect-[4/3] bg-gray-100 rounded-lg overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={capturedImage?.preview}
           alt="Captured"

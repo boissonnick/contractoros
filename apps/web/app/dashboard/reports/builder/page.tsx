@@ -3,7 +3,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
-import { PageHeader } from '@/components/ui';
 import {
   DataSourcePicker,
   FieldSelector,
@@ -33,13 +32,11 @@ import {
   FolderOpenIcon,
   PlusIcon,
   ArrowLeftIcon,
-  DocumentDuplicateIcon,
   TrashIcon,
   Cog6ToothIcon,
   ClockIcon,
 } from '@heroicons/react/24/outline';
-import { cn } from '@/lib/utils';
-import { ReportScheduleModal, ReportScheduleConfig } from '@/components/reports/ReportScheduleModal';
+import { ReportScheduleModal } from '@/components/reports/ReportScheduleModal';
 import { ReportShareModal } from '@/components/reports/ReportShareModal';
 import { useReportSchedules } from '@/lib/hooks/useReportSchedules';
 import { useReportShares } from '@/lib/hooks/useReportShares';
@@ -48,7 +45,7 @@ export default function ReportBuilderPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const reportId = searchParams.get('id');
-  const { profile, loading: authLoading } = useAuth();
+  const { loading: authLoading } = useAuth();
 
   const {
     reports,
@@ -69,7 +66,7 @@ export default function ReportBuilderPage() {
   }));
 
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [, setShowSaveModal] = useState(false);
   const [showLoadModal, setShowLoadModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
@@ -78,7 +75,6 @@ export default function ReportBuilderPage() {
 
   // Schedule & share hooks
   const {
-    schedules,
     saveSchedule,
     getScheduleForReport,
   } = useReportSchedules(reportId || undefined);
@@ -146,11 +142,11 @@ export default function ReportBuilderPage() {
     try {
       if (reportId) {
         // Update existing report
-        const { id, createdAt, ...updates } = config;
+        const { id: _id, createdAt: _createdAt, ...updates } = config;
         await updateReport(reportId, updates);
       } else {
         // Create new report
-        const { id, createdAt, updatedAt, ...reportData } = config;
+        const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, ...reportData } = config;
         const newId = await createReport(reportData);
         router.push(`/dashboard/reports/builder?id=${newId}`);
       }

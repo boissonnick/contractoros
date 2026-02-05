@@ -6,30 +6,23 @@ import { useAuth } from '@/lib/auth';
 import { useExpenses } from '@/lib/hooks/useExpenses';
 import { db } from '@/lib/firebase/config';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
-import { Button, Card, Badge, EmptyState } from '@/components/ui';
+import { Button, Card, Badge } from '@/components/ui';
 import { toast } from '@/components/ui/Toast';
 import { cn } from '@/lib/utils';
-import { Expense, Invoice, Project, ExpenseCategory } from '@/types';
+import { Invoice, Project, ExpenseCategory } from '@/types';
 import {
   CurrencyDollarIcon,
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
   ExclamationTriangleIcon,
   ChartBarIcon,
-  ReceiptPercentIcon,
-  DocumentTextIcon,
-  BanknotesIcon,
   PlusIcon,
-  InformationCircleIcon,
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 import {
   calculateProjectFinancials,
   formatBudgetCurrency,
-  formatPercentage,
-  getBudgetStatusColor,
   getBudgetBarColor,
-  BUDGET_HELP_TEXT,
 } from '@/lib/budget-utils';
 import { useProjectProfitability } from '@/lib/hooks/useJobCosting';
 import { MarginMeter } from '@/components/finances/MarginMeter';

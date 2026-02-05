@@ -6,15 +6,14 @@
  */
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import {
   CameraIcon,
   CloudArrowUpIcon,
   PhotoIcon,
-  FunnelIcon,
   Squares2X2Icon,
   ListBulletIcon,
-  WifiIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
 import PageHeader from '@/components/ui/PageHeader';
@@ -30,7 +29,6 @@ import { useProjects } from '@/lib/hooks/useQueryHooks';
 import { useProjectPhotos, MergedPhoto } from '@/lib/hooks/useProjectPhotos';
 import { Project } from '@/types';
 import { useNetworkStatus } from '@/lib/offline/network-status';
-import { PhotoCategory } from '@/lib/offline/offline-photos';
 import { cn } from '@/lib/utils';
 import { toast } from '@/components/ui/Toast';
 
@@ -70,7 +68,7 @@ export default function FieldPhotosPage() {
   const [selectedPhoto, setSelectedPhoto] = useState<MergedPhoto | null>(null);
 
   // Get projects for selector
-  const { data: projectsData, isLoading: projectsLoading } = useProjects();
+  const { data: projectsData } = useProjects();
   const projects = (projectsData || []) as Project[];
 
   // Get photos for selected project
@@ -98,7 +96,7 @@ export default function FieldPhotosPage() {
     : mergedPhotos;
 
   // Handle photo capture
-  const handleCapture = (localId: string) => {
+  const handleCapture = (_localId: string) => {
     setShowCapture(false);
     toast.success('Photo captured!');
   };
@@ -153,9 +151,9 @@ export default function FieldPhotosPage() {
         <div className="mx-4 mb-4 px-4 py-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-center gap-3">
           <ExclamationTriangleIcon className="h-5 w-5 text-yellow-600 flex-shrink-0" />
           <div className="flex-1">
-            <p className="text-sm font-medium text-yellow-800">You're offline</p>
+            <p className="text-sm font-medium text-yellow-800">You&apos;re offline</p>
             <p className="text-xs text-yellow-700">
-              Photos will be saved locally and uploaded when you're back online.
+              Photos will be saved locally and uploaded when you&apos;re back online.
             </p>
           </div>
         </div>
@@ -165,7 +163,7 @@ export default function FieldPhotosPage() {
       {pendingCount > 0 && (
         <div className="mx-4 mb-4 px-4 py-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <CloudArrowUpIcon className="h-5 w-5 text-blue-600" />
+            <CloudArrowUpIcon className="h-5 w-5 text-brand-primary" />
             <div>
               <p className="text-sm font-medium text-blue-800">
                 {pendingCount} photo{pendingCount > 1 ? 's' : ''} pending upload
@@ -250,7 +248,7 @@ export default function FieldPhotosPage() {
       {showCapture && selectedProjectId && profile?.orgId && (
         <div className="px-4 pb-4">
           <div className="bg-gray-50 rounded-lg p-4">
-            <h3 className="text-sm font-medium text-gray-700 mb-3">Capture Photo</h3>
+            <h3 className="text-sm font-medium font-heading tracking-tight text-gray-700 mb-3">Capture Photo</h3>
             <OfflinePhotoCapture
               projectId={selectedProjectId}
               orgId={profile.orgId}
@@ -305,10 +303,11 @@ export default function FieldPhotosPage() {
                 onClick={() => setSelectedPhoto(photo)}
                 className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 group focus:outline-none focus:ring-2 focus:ring-brand-primary"
               >
-                <img
+                <Image
                   src={photo.thumbnailUrl || photo.url}
                   alt={photo.caption || 'Project photo'}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
                 />
 
                 {/* Gradient overlay */}
@@ -353,9 +352,11 @@ export default function FieldPhotosPage() {
                 onClick={() => setSelectedPhoto(photo)}
                 className="w-full flex items-center gap-3 p-3 bg-white rounded-lg border hover:border-brand-primary transition-colors text-left"
               >
-                <img
+                <Image
                   src={photo.thumbnailUrl || photo.url}
                   alt={photo.caption || 'Project photo'}
+                  width={64}
+                  height={64}
                   className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
                 />
                 <div className="flex-1 min-w-0">
@@ -397,10 +398,12 @@ export default function FieldPhotosPage() {
             className="max-w-4xl max-h-full flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            <img
+            <Image
               src={selectedPhoto.url}
               alt={selectedPhoto.caption || 'Project photo'}
-              className="max-h-[70vh] object-contain rounded-lg"
+              width={800}
+              height={600}
+              className="max-h-[70vh] w-auto object-contain rounded-lg"
             />
             <div className="mt-4 text-white">
               <div className="flex items-center gap-2 mb-2">

@@ -17,24 +17,21 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   collection,
-  query,
   where,
   orderBy,
   onSnapshot,
   doc,
   addDoc,
   updateDoc,
-  getDocs,
   Timestamp,
   QueryConstraint,
-  getCountFromServer,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { convertTimestamps } from '@/lib/firebase/timestamp-converter';
 import { useFirestoreCollection, createConverter } from '@/lib/hooks/useFirestoreCollection';
 import { useFirestoreCrud } from '@/lib/hooks/useFirestoreCrud';
 import { Invoice, InvoiceStatus, InvoiceLineItem, Payment } from '@/types';
-import { reserveNumber, getNextNumber } from '@/lib/utils/auto-number';
+import { reserveNumber } from '@/lib/utils/auto-number';
 
 // Collection path - invoices are org-scoped
 const getInvoicesCollectionPath = (orgId: string) => `organizations/${orgId}/invoices`;

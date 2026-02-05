@@ -484,7 +484,7 @@ export default function ClientPhotosPage() {
             <div className="p-4 border-b">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-semibold text-gray-900">
+                  <h3 className="font-semibold font-heading tracking-tight text-gray-900">
                     {expandedPair.title || 'Before & After Comparison'}
                   </h3>
                   <p className="text-sm text-gray-500">

@@ -69,8 +69,8 @@ export function ProjectHealthCard({
   const budgetConfig = STATUS_CONFIGS.budget[statusSummary.budgetStatus];
   const qualityConfig = STATUS_CONFIGS.quality[statusSummary.qualityStatus];
 
-  const ScheduleIcon = scheduleConfig.icon;
-  const BudgetIcon = budgetConfig.icon;
+  const _ScheduleIcon = scheduleConfig.icon;
+  const _BudgetIcon = budgetConfig.icon;
   const QualityIcon = qualityConfig.icon;
 
   return (

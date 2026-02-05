@@ -2,10 +2,8 @@
 
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Input } from '@/components/ui';
 import {
   BuilderLineItem,
-  LineItemUnit,
   LINE_ITEM_UNITS,
 } from '@/types';
 import {
@@ -50,7 +48,7 @@ export default function EstimateLineItemRow({
     }).format(price);
   };
 
-  const getUnitAbbr = (unit: string) => {
+  const _getUnitAbbr = (unit: string) => {
     const found = LINE_ITEM_UNITS.find((u) => u.value === unit);
     return found?.abbr || unit;
   };

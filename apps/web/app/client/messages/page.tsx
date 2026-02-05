@@ -43,7 +43,7 @@ function formatMessageDate(date: Date): string {
 }
 
 export default function ClientMessagesPage() {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const [threads, setThreads] = useState<MessageThread[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -197,7 +197,7 @@ export default function ClientMessagesPage() {
           description="Communications about your projects"
         />
         <div className="flex items-center justify-center h-64">
-          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
         </div>
       </div>
     );
@@ -274,7 +274,7 @@ export default function ClientMessagesPage() {
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3 min-w-0">
                               <div className={cn(
-                                "p-2 rounded-lg flex-shrink-0",
+                                "p-2 rounded-xl flex-shrink-0",
                                 thread.channel.type === 'project'
                                   ? "bg-blue-100"
                                   : "bg-purple-100"
@@ -293,11 +293,11 @@ export default function ClientMessagesPage() {
                               </div>
                               <div className="min-w-0 flex-1">
                                 <div className="flex items-center gap-2">
-                                  <h3 className="font-medium text-gray-900 truncate">
+                                  <h3 className="font-medium font-heading tracking-tight text-gray-900 truncate">
                                     {thread.channel.name}
                                   </h3>
                                   {thread.unreadCount > 0 && (
-                                    <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">
+                                    <span className="bg-brand-primary text-white text-xs px-2 py-0.5 rounded-full">
                                       {thread.unreadCount}
                                     </span>
                                   )}
@@ -375,7 +375,7 @@ export default function ClientMessagesPage() {
                                           <div className={cn(
                                             'px-3 py-2 rounded-xl text-sm inline-block',
                                             isOwn
-                                              ? 'bg-blue-600 text-white rounded-tr-sm'
+                                              ? 'bg-brand-primary text-white rounded-tr-sm'
                                               : 'bg-white text-gray-900 rounded-tl-sm border'
                                           )}>
                                             {message.text}
@@ -400,10 +400,10 @@ export default function ClientMessagesPage() {
           {/* Contact Information Card */}
           <Card className="p-6 bg-gray-50 border-dashed">
             <div className="text-center">
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mb-3">
-                <EnvelopeIcon className="h-6 w-6 text-blue-600" />
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-white shadow-sm ring-1 ring-black/5 mb-3">
+                <EnvelopeIcon className="h-6 w-6 text-brand-primary" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+              <h3 className="text-lg font-medium font-heading tracking-tight text-gray-900 mb-2">
                 Need to Reply?
               </h3>
               <p className="text-gray-600 mb-4 max-w-md mx-auto">
@@ -420,7 +420,7 @@ export default function ClientMessagesPage() {
                 </a>
                 <a
                   href="mailto:"
-                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="inline-flex items-center px-4 py-2 bg-brand-primary text-white rounded-lg hover:opacity-90 transition-colors"
                 >
                   <EnvelopeIcon className="h-4 w-4 mr-2" />
                   Send Email

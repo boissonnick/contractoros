@@ -336,7 +336,7 @@ describe('projectSchema', () => {
   });
 
   it('applies default status of planning', () => {
-    const { status, ...rest } = valid;
+    const { status: _status, ...rest } = valid;
     const result = projectSchema.safeParse(rest);
     expectSuccess(result, { status: 'planning' });
   });
@@ -384,7 +384,7 @@ describe('projectSchema', () => {
   });
 
   it('accepts budget as undefined (optional)', () => {
-    const { budget, ...rest } = valid;
+    const { budget: _budget, ...rest } = valid;
     expectSuccess(projectSchema.safeParse(rest));
   });
 });
@@ -418,13 +418,13 @@ describe('taskSchema', () => {
   });
 
   it('applies default status of pending', () => {
-    const { status, ...rest } = valid;
+    const { status: _status, ...rest } = valid;
     const result = taskSchema.safeParse(rest);
     expectSuccess(result, { status: 'pending' });
   });
 
   it('applies default priority of medium', () => {
-    const { priority, ...rest } = valid;
+    const { priority: _priority, ...rest } = valid;
     const result = taskSchema.safeParse(rest);
     expectSuccess(result, { priority: 'medium' });
   });
@@ -488,7 +488,7 @@ describe('timeEntrySchema', () => {
   });
 
   it('rejects missing projectId', () => {
-    const { projectId, ...rest } = valid;
+    const { projectId: _projectId, ...rest } = valid;
     expectError(timeEntrySchema.safeParse(rest), 'projectId');
   });
 
@@ -528,7 +528,7 @@ describe('timeEntrySchema', () => {
   });
 
   it('applies default billable as true', () => {
-    const { billable, ...rest } = valid;
+    const { billable: _billable, ...rest } = valid;
     const result = timeEntrySchema.safeParse(rest);
     expectSuccess(result, { billable: true });
   });
@@ -542,12 +542,12 @@ describe('timeEntrySchema', () => {
   });
 
   it('accepts optional description as undefined', () => {
-    const { description, ...rest } = valid;
+    const { description: _description, ...rest } = valid;
     expectSuccess(timeEntrySchema.safeParse(rest));
   });
 
   it('rejects missing date', () => {
-    const { date, ...rest } = valid;
+    const { date: _date, ...rest } = valid;
     expectError(timeEntrySchema.safeParse(rest), 'date');
   });
 });
@@ -596,7 +596,7 @@ describe('inviteSchema', () => {
   });
 
   it('accepts optional message as undefined', () => {
-    const { message, ...rest } = valid;
+    const { message: _message, ...rest } = valid;
     expectSuccess(inviteSchema.safeParse(rest));
   });
 });
@@ -654,7 +654,7 @@ describe('subcontractorSchema', () => {
   });
 
   it('accepts optional insuranceExpiry as undefined', () => {
-    const { insuranceExpiry, ...rest } = valid;
+    const { insuranceExpiry: _insuranceExpiry, ...rest } = valid;
     expectSuccess(subcontractorSchema.safeParse(rest));
   });
 
@@ -842,7 +842,7 @@ describe('dailyLogSchema', () => {
   });
 
   it('applies default weather of sunny', () => {
-    const { weather, ...rest } = valid;
+    const { weather: _weather, ...rest } = valid;
     const result = dailyLogSchema.safeParse(rest);
     expectSuccess(result, { weather: 'sunny' });
   });
@@ -858,7 +858,7 @@ describe('dailyLogSchema', () => {
   });
 
   it('applies default workerCount of 0', () => {
-    const { workerCount, ...rest } = valid;
+    const { workerCount: _workerCount, ...rest } = valid;
     const result = dailyLogSchema.safeParse(rest);
     expectSuccess(result, { workerCount: 0 });
   });
@@ -890,7 +890,7 @@ describe('dailyLogSchema', () => {
   });
 
   it('accepts optional temperature as undefined', () => {
-    const { temperature, ...rest } = valid;
+    const { temperature: _temperature, ...rest } = valid;
     expectSuccess(dailyLogSchema.safeParse(rest));
   });
 
@@ -914,7 +914,7 @@ describe('dailyLogSchema', () => {
   });
 
   it('rejects missing date', () => {
-    const { date, ...rest } = valid;
+    const { date: _date, ...rest } = valid;
     expectError(dailyLogSchema.safeParse(rest), 'date');
   });
 });
@@ -958,7 +958,7 @@ describe('estimateLineItemSchema', () => {
   });
 
   it('applies default unit of ea', () => {
-    const { unit, ...rest } = valid;
+    const { unit: _unit, ...rest } = valid;
     const result = estimateLineItemSchema.safeParse(rest);
     expectSuccess(result, { unit: 'ea' });
   });
@@ -977,7 +977,7 @@ describe('estimateLineItemSchema', () => {
   });
 
   it('applies default category of material', () => {
-    const { category, ...rest } = valid;
+    const { category: _category, ...rest } = valid;
     const result = estimateLineItemSchema.safeParse(rest);
     expectSuccess(result, { category: 'material' });
   });
@@ -1057,7 +1057,7 @@ describe('estimateSchema', () => {
   });
 
   it('accepts optional validUntil as undefined', () => {
-    const { validUntil, ...rest } = valid;
+    const { validUntil: _validUntil, ...rest } = valid;
     expectSuccess(estimateSchema.safeParse(rest));
   });
 
@@ -1109,12 +1109,12 @@ describe('invoiceSchema', () => {
   });
 
   it('rejects missing dueDate', () => {
-    const { dueDate, ...rest } = valid;
+    const { dueDate: _dueDate, ...rest } = valid;
     expectError(invoiceSchema.safeParse(rest), 'dueDate');
   });
 
   it('applies default type of standard', () => {
-    const { type, ...rest } = valid;
+    const { type: _type, ...rest } = valid;
     const result = invoiceSchema.safeParse(rest);
     expectSuccess(result, { type: 'standard' });
   });
@@ -1131,7 +1131,7 @@ describe('invoiceSchema', () => {
   });
 
   it('applies default paymentTerms of Net 30', () => {
-    const { paymentTerms, ...rest } = valid;
+    const { paymentTerms: _paymentTerms, ...rest } = valid;
     const result = invoiceSchema.safeParse(rest);
     expectSuccess(result, { paymentTerms: 'Net 30' });
   });
@@ -1177,12 +1177,12 @@ describe('invoiceSchema', () => {
   });
 
   it('accepts optional taxRate as undefined', () => {
-    const { taxRate, ...rest } = valid;
+    const { taxRate: _taxRate, ...rest } = valid;
     expectSuccess(invoiceSchema.safeParse(rest));
   });
 
   it('accepts optional retainage as undefined', () => {
-    const { retainage, ...rest } = valid;
+    const { retainage: _retainage, ...rest } = valid;
     expectSuccess(invoiceSchema.safeParse(rest));
   });
 

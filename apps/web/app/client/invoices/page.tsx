@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
-import { collection, query, where, getDocs, orderBy, Timestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { Card, Button, Badge } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import {
@@ -13,11 +13,10 @@ import {
   ClockIcon,
   CheckCircleIcon,
   ExclamationCircleIcon,
-  ArrowDownTrayIcon,
   CreditCardIcon,
   FunnelIcon,
 } from '@heroicons/react/24/outline';
-import { format, isAfter, isBefore } from 'date-fns';
+import { format, isBefore } from 'date-fns';
 
 interface ClientInvoice {
   id: string;
@@ -136,7 +135,7 @@ export default function ClientInvoicesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -145,18 +144,18 @@ export default function ClientInvoicesPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Invoices</h1>
+        <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">Invoices</h1>
         <p className="text-gray-500 mt-1">View and pay your project invoices</p>
       </div>
 
       {/* Summary Card */}
       {totalPending > 0 && (
-        <Card className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6">
+        <Card className="bg-gradient-to-r from-brand-primary to-brand-primary-dark text-white p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-blue-100 text-sm font-medium">Total Balance Due</p>
+              <p className="text-white/70 text-sm font-medium">Total Balance Due</p>
               <p className="text-3xl font-bold mt-1">{formatCurrency(totalPending)}</p>
-              <p className="text-blue-100 text-sm mt-2">
+              <p className="text-white/80 text-sm mt-2">
                 {invoices.filter((i) => ['sent', 'viewed', 'overdue'].includes(i.status)).length} unpaid invoice(s)
               </p>
             </div>
@@ -182,7 +181,7 @@ export default function ClientInvoicesPage() {
             className={cn(
               'px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors',
               statusFilter === key
-                ? 'bg-blue-100 text-blue-700'
+                ? 'bg-brand-primary/10 text-brand-primary'
                 : 'text-gray-500 hover:bg-gray-100'
             )}
           >
@@ -217,7 +216,7 @@ export default function ClientInvoicesPage() {
               >
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-4 min-w-0 flex-1">
-                    <div className={cn('p-3 rounded-lg flex-shrink-0', config.color)}>
+                    <div className={cn('p-3 rounded-xl flex-shrink-0', config.color)}>
                       <StatusIcon className="h-5 w-5" />
                     </div>
                     <div className="min-w-0">
@@ -266,7 +265,7 @@ export default function ClientInvoicesPage() {
               onClick={() => setSelectedInvoice(null)}
             />
             <div className="relative bg-white rounded-xl shadow-xl max-w-lg w-full p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
+              <h2 className="text-xl font-bold font-heading tracking-tight text-gray-900 mb-4">
                 Invoice #{selectedInvoice.number}
               </h2>
 

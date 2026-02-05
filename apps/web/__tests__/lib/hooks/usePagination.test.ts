@@ -106,7 +106,7 @@ function setupGetDocs(docsOrFn: ReturnType<typeof makeDocs> | (() => ReturnType<
 // ── Tests ───────────────────────────────────────────────────────────────────
 
 describe('usePagination', () => {
-  const DEFAULT_PAGE_SIZE = 25;
+  const _DEFAULT_PAGE_SIZE = 25;
 
   beforeEach(() => {
     jest.clearAllMocks();

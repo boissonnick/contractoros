@@ -413,7 +413,7 @@ export default function ImportContent() {
             <div>
               <h2 className="text-lg font-medium text-gray-900">Map your columns</h2>
               <p className="text-sm text-gray-500 mt-1">
-                We've auto-detected some mappings. Review and adjust as needed.
+                We&apos;ve auto-detected some mappings. Review and adjust as needed.
               </p>
             </div>
 

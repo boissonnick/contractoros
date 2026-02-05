@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, Button, PageHeader } from '@/components/ui';
+import { Card, Button } from '@/components/ui';
 import { useIntegrationWaitlist } from '@/lib/hooks/useIntegrationWaitlist';
 import { GustoLogo } from '@/components/integrations';
 import {

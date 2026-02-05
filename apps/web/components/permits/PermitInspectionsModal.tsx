@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { usePermits } from '@/lib/hooks/usePermits';
-import { Permit, PermitInspection } from '@/types';
+import { Permit } from '@/types';
 import BaseModal from '@/components/ui/BaseModal';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
@@ -10,7 +10,6 @@ import Card from '@/components/ui/Card';
 import {
   PlusIcon,
   CheckCircleIcon,
-  XCircleIcon,
   ClockIcon,
   DocumentTextIcon,
 } from '@heroicons/react/24/outline';
@@ -316,7 +315,7 @@ export default function PermitInspectionsModal({ isOpen, onClose, permit }: Perm
             <DocumentTextIcon className="h-12 w-12 text-gray-300 mx-auto mb-3" />
             <p className="text-gray-500">No inspections scheduled yet</p>
             <p className="text-sm text-gray-400 mt-1">
-              Click "Schedule Inspection" to add an inspection
+              Click &quot;Schedule Inspection&quot; to add an inspection
             </p>
           </div>
         )}

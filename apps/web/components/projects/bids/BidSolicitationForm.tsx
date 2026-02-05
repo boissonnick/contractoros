@@ -28,11 +28,11 @@ const TRADES = [
   'Painting', 'Drywall', 'Concrete', 'Landscaping', 'Demolition', 'General',
 ];
 
-export default function BidSolicitationForm({ scopeItems, phases, subs, projectId, onSubmit, onCancel }: BidSolicitationFormProps) {
+export default function BidSolicitationForm({ scopeItems, phases: _phases, subs, projectId, onSubmit, onCancel }: BidSolicitationFormProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [selectedScopeIds, setSelectedScopeIds] = useState<string[]>([]);
-  const [selectedPhaseIds, setSelectedPhaseIds] = useState<string[]>([]);
+  const [selectedPhaseIds] = useState<string[]>([]);
   const [trade, setTrade] = useState('');
   const [selectedSubIds, setSelectedSubIds] = useState<string[]>([]);
   const [deadline, setDeadline] = useState('');

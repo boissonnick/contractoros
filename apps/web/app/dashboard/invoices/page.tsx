@@ -32,7 +32,6 @@ import {
   CurrencyDollarIcon,
   BanknotesIcon,
   ReceiptPercentIcon,
-  ArrowPathIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
 } from '@heroicons/react/24/outline';
@@ -268,52 +267,52 @@ export default function InvoicesPage() {
 
       {/* Mobile Header */}
       <div className="md:hidden">
-        <h1 className="text-xl font-bold text-gray-900">Invoices</h1>
+        <h1 className="text-xl font-bold font-heading tracking-tight text-gray-900">Invoices</h1>
         <p className="text-xs text-gray-500">Manage invoices and payments</p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="p-4">
+        <Card className="p-4 bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-200/50">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <BanknotesIcon className="h-5 w-5 text-blue-600" />
+            <div className="p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-black/5 text-blue-600">
+              <BanknotesIcon className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.outstandingAmount)}</p>
+              <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{formatCurrency(stats.outstandingAmount)}</p>
               <p className="text-xs text-gray-500">Outstanding ({stats.outstandingCount})</p>
             </div>
           </div>
         </Card>
-        <Card className="p-4">
+        <Card className="p-4 bg-gradient-to-br from-red-500/10 to-red-600/5 border-red-200/50">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-red-100 rounded-lg">
-              <ExclamationCircleIcon className="h-5 w-5 text-red-600" />
+            <div className="p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-black/5 text-red-600">
+              <ExclamationCircleIcon className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.overdueAmount)}</p>
+              <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{formatCurrency(stats.overdueAmount)}</p>
               <p className="text-xs text-gray-500">Overdue ({stats.overdueCount})</p>
             </div>
           </div>
         </Card>
-        <Card className="p-4">
+        <Card className="p-4 bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-200/50">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <CurrencyDollarIcon className="h-5 w-5 text-green-600" />
+            <div className="p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-black/5 text-green-600">
+              <CurrencyDollarIcon className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.paidThisMonth)}</p>
+              <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{formatCurrency(stats.paidThisMonth)}</p>
               <p className="text-xs text-gray-500">Paid This Month</p>
             </div>
           </div>
         </Card>
-        <Card className="p-4">
+        <Card className="p-4 bg-gradient-to-br from-gray-500/10 to-gray-600/5 border-gray-200/50">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-gray-100 rounded-lg">
-              <DocumentTextIcon className="h-5 w-5 text-gray-600" />
+            <div className="p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-black/5 text-gray-600">
+              <DocumentTextIcon className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+              <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{stats.total}</p>
               <p className="text-xs text-gray-500">Total Invoices</p>
             </div>
           </div>
@@ -329,7 +328,7 @@ export default function InvoicesPage() {
             placeholder="Search invoices..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -337,7 +336,7 @@ export default function InvoicesPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as InvoiceStatus | 'all')}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="all">All Status</option>
             <option value="draft">Draft</option>

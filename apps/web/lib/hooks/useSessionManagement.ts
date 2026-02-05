@@ -20,13 +20,10 @@ import {
   updateSessionActivity,
   checkSessionLimit,
   subscribeToSessions,
-  parseUserAgent,
   getDeviceDescription,
   detectSuspiciousSession,
   isSessionExpired,
   isSessionStale,
-  BROWSER_LABELS,
-  OS_LABELS,
 } from '@/lib/security/session-manager';
 
 // ============================================

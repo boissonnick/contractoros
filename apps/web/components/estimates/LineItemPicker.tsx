@@ -1,21 +1,19 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
-import { Button, Input } from '@/components/ui';
+import { Input } from '@/components/ui';
 import { useLineItems, useLineItemPriceHistory } from '@/lib/hooks/useLineItems';
 import {
   LineItem,
   LineItemTrade,
   LINE_ITEM_TRADES,
   LINE_ITEM_UNITS,
-  LineItemPriceHistory,
 } from '@/types';
 import {
   MagnifyingGlassIcon,
   StarIcon,
   ClockIcon,
-  PlusIcon,
   CheckIcon,
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,

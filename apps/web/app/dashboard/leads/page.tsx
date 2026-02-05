@@ -5,7 +5,7 @@ import { useLeads } from '@/lib/hooks/useLeads';
 import { Card, Button, Badge } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import { toast } from '@/components/ui/Toast';
-import { Lead, LeadStatus } from '@/types';
+import { LeadStatus } from '@/types';
 import {
   UserPlusIcon,
   PlusIcon,
@@ -27,7 +27,7 @@ const STATUS_CONFIG: Record<LeadStatus, { label: string; color: string }> = {
 };
 
 export default function LeadsPage() {
-  const { leads, loading, updateLead, deleteLead } = useLeads();
+  const { leads, loading, updateLead } = useLeads();
   const [statusFilter, setStatusFilter] = useState<LeadStatus | 'all'>('all');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
@@ -53,7 +53,7 @@ export default function LeadsPage() {
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(amount);
 
-  const handleStatusChange = async (id: string, status: LeadStatus) => {
+  const _handleStatusChange = async (id: string, status: LeadStatus) => {
     try {
       await updateLead(id, { status });
       toast.success('Lead status updated');

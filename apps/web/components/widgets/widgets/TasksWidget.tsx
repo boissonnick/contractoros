@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { CalendarIcon, UserIcon } from '@heroicons/react/24/outline';
 import { Widget } from '@/lib/dashboard-widgets/types';
 import { useAuth } from '@/lib/auth';
 import { useFirestoreCollection } from '@/lib/hooks/useFirestoreCollection';
-import { Task, TaskPriority, TaskStatus } from '@/types';
+import { Task, TaskPriority } from '@/types';
 import { where, orderBy, Timestamp, DocumentData } from 'firebase/firestore';
 
 interface TasksWidgetProps {

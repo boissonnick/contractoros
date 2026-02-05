@@ -15,7 +15,7 @@ import {
   limit as firestoreLimit,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import { AppNotification, NotificationPreferences, NotificationProjectSettings, QuietHoursConfig, DayOfWeek } from '@/types';
+import { AppNotification, NotificationPreferences, QuietHoursConfig, DayOfWeek } from '@/types';
 import { useAuth } from '@/lib/auth';
 
 function fromFirestore(id: string, data: Record<string, unknown>): AppNotification {

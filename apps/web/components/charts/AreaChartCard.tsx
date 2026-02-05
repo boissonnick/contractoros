@@ -16,7 +16,6 @@ import { ChartConfig, CHART_DEFAULTS, DEFAULT_COLORS } from './types';
 import { ChartTooltip } from './ChartTooltip';
 import { ChartLegend } from './ChartLegend';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ChartData = Record<string, any>[];
 
 interface AreaChartCardProps {

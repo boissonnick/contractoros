@@ -15,7 +15,6 @@ import ChangeOrderImpactAnalysis from '@/components/projects/change-orders/Chang
 import ChangeOrderApprovalPanel from '@/components/projects/change-orders/ChangeOrderApprovalPanel';
 import ChangeOrderTimeline from '@/components/projects/change-orders/ChangeOrderTimeline';
 import ChangeOrderScopeComparison from '@/components/projects/change-orders/ChangeOrderScopeComparison';
-import { cn } from '@/lib/utils';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
 export default function ProjectChangeOrdersPage() {

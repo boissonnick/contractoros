@@ -1,16 +1,13 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PayPeriod, PaySchedule, PAY_SCHEDULE_LABELS, UserProfile, TimeEntry } from '@/types';
 import BaseModal from '@/components/ui/BaseModal';
 import Button from '@/components/ui/Button';
 import { PayrollRunPreviewCalculator } from './PayrollRunPreviewCalculator';
 import {
   CalendarDaysIcon,
-  UserGroupIcon,
-  ClockIcon,
   ExclamationTriangleIcon,
-  ChevronRightIcon,
   CheckIcon,
 } from '@heroicons/react/24/outline';
 

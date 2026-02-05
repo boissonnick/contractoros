@@ -7,7 +7,7 @@ import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
 import { doc, getDoc, updateDoc, collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
 import { Project, Task, UserProfile, ProjectPhase, QuoteSection, ProjectStatus } from '@/types';
-import { Button, Card, StatusBadge, Avatar, toast, ConfirmDialog } from '@/components/ui';
+import { Button, Card, Avatar, toast, ConfirmDialog } from '@/components/ui';
 import { cn, formatCurrency } from '@/lib/utils';
 import PhaseProgressBar from '@/components/projects/PhaseProgressBar';
 import QuoteSummaryCard from '@/components/projects/QuoteSummaryCard';
@@ -46,7 +46,7 @@ const STATUS_LABELS: Record<ProjectStatus, string> = {
 export default function ProjectDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { profile } = useAuth();
+  useAuth();
   const projectId = params.id as string;
 
   const [project, setProject] = useState<Project | null>(null);
@@ -203,7 +203,7 @@ export default function ProjectDetailPage() {
 
   const nextStatuses = STATUS_TRANSITIONS[project.status] || [];
   const completedTasks = tasks.filter(t => t.status === 'completed').length;
-  const isActive = project.status === 'active' || project.status === 'planning';
+  const _isActive = project.status === 'active' || project.status === 'planning';
 
   return (
     <div className="space-y-6">

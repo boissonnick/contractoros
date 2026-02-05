@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useState, useRef } from 'react';
+import Image from 'next/image';
 import {
   DocumentIcon,
   PhotoIcon,
@@ -40,7 +41,7 @@ const ACCEPTED_EXTENSIONS = '.pdf,.doc,.docx,.jpg,.jpeg,.png,.webp,.heic,.xlsx,.
 
 export function DocumentUpload({
   onUpload,
-  onAnalysisComplete,
+  onAnalysisComplete: _onAnalysisComplete,
   maxSizeMB = 10,
   currentAnalysis,
   disabled = false,
@@ -181,9 +182,11 @@ export function DocumentUpload({
           {/* File icon or thumbnail */}
           <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
             {currentAnalysis.thumbnailUrl ? (
-              <img
+              <Image
                 src={currentAnalysis.thumbnailUrl}
                 alt={currentAnalysis.fileName}
+                width={48}
+                height={48}
                 className="w-full h-full object-cover"
               />
             ) : (

@@ -73,7 +73,7 @@ export default function EmptyState({
       {icon && (
         <div
           className={cn(
-            'mx-auto rounded-full bg-gray-100 flex items-center justify-center mb-4',
+            'mx-auto rounded-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center mb-4',
             sizeConfig.iconWrapper
           )}
         >
@@ -82,7 +82,7 @@ export default function EmptyState({
           </div>
         </div>
       )}
-      <h3 className={cn('font-semibold text-gray-900 mb-2 animate-in fade-in slide-in-from-bottom-2 duration-300 delay-100', sizeConfig.title)}>
+      <h3 className={cn('font-semibold text-gray-900 mb-2 animate-in fade-in slide-in-from-bottom-2 duration-300 delay-100 font-heading tracking-tight', sizeConfig.title)}>
         {title}
       </h3>
       {description && (

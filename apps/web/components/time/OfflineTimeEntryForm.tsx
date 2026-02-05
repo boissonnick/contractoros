@@ -62,7 +62,7 @@ export function OfflineTimeEntryForm({
   onSubmit,
   onCancel,
   initialProjectId,
-  mode = 'create',
+  mode: _mode = 'create',
   compact = false,
 }: OfflineTimeEntryFormProps) {
   const { profile } = useAuth();
@@ -113,7 +113,7 @@ export function OfflineTimeEntryForm({
   });
 
   // Watch for calculating duration
-  const watchDate = watch('date');
+  const _watchDate = watch('date');
   const watchClockIn = watch('clockInTime');
   const watchClockOut = watch('clockOutTime');
   const watchBreak = watch('breakMinutes');

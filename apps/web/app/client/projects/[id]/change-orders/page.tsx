@@ -16,7 +16,7 @@ import ChangeOrderTimeline from '@/components/projects/change-orders/ChangeOrder
 export default function ClientChangeOrdersPage() {
   const params = useParams();
   const projectId = params.id as string;
-  const { user, profile } = useAuth();
+  useAuth();
 
   const { changeOrders, loading, approveChangeOrder, rejectChangeOrder } = useChangeOrders({ projectId });
   const [phases, setPhases] = useState<ProjectPhase[]>([]);
@@ -51,7 +51,7 @@ export default function ClientChangeOrdersPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -60,7 +60,7 @@ export default function ClientChangeOrdersPage() {
     return (
       <div className="space-y-6">
         <button onClick={() => setSelectedCO(null)} className="text-sm text-blue-600 hover:underline">← Back</button>
-        <h2 className="text-lg font-semibold text-gray-900">{activeCO.number}: {activeCO.title}</h2>
+        <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900">{activeCO.number}: {activeCO.title}</h2>
 
         <ChangeOrderApprovalPanel
           co={activeCO}

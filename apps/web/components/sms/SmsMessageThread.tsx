@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useMemo } from 'react';
-import { cn } from '@/lib/utils';
 import { SmsMessage } from '@/types';
 import { formatPhoneForDisplay } from '@/lib/sms/phoneUtils';
 import {

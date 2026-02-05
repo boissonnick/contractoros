@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { collection, query, where, orderBy, limit, onSnapshot, Timestamp } from 'firebase/firestore';
+import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import {
   PayrollRun,
@@ -22,7 +22,6 @@ import {
   updatePayrollEntry,
   addPayrollAdjustment,
   deletePayrollRun,
-  getPayrollRuns,
   exportPayrollToCSV,
   generatePayPeriod,
   calculatePayrollEntry,

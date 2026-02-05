@@ -3,8 +3,8 @@
 > **Purpose:** Track current progress and enable seamless session handoffs.
 > **Last Updated:** 2026-02-05
 > **Current Phase:** Phase 7 - Quality & Architecture
-> **Latest Sprint:** Sprint 71 - AuthProvider Refactoring ✅ COMPLETE
-> **Next Sprint:** Sprint 72
+> **Latest Sprint:** Sprint 72 - UI Design System Propagation ✅ COMPLETE
+> **Next Sprint:** Sprint 73
 > **Briefs Ready:** Sprint 70, 71, 72 (`docs/specs/sprint-{70,71,72}-brief.md`)
 > **Historical Sprints:** Sprints 13B-25 archived in `.claude-coordination/archive/sprints-13b-25-history.md`
 > **Phase 3 sprints 52-55:** archived in `.claude-coordination/archive/sprints-52-55-history.md`
@@ -25,6 +25,28 @@ Find your modules instantly instead of running Explore agents for 15 minutes.
 **What's in the registry:** All 25+ features, 83 hooks, 60 component directories, 36 dashboard routes
 
 **DO NOT run Explore agents without checking the registry first!**
+
+---
+
+## ✅ Sprint 72 - UI Design System Propagation - COMPLETE
+
+**Priority:** P2 - MEDIUM (Design Consistency)
+**Completed:** 2026-02-05
+**Brief:** `docs/specs/sprint-72-brief.md`
+
+**Goal:** Propagate Antigravity premium design system (font-heading, gradient stat cards, rounded-2xl, shadow tokens, brand colors) from dashboard homepage to all pages across the platform.
+
+**Key results:**
+- [x] **Shared UI Components (Tier 1)**: Card.tsx (rounded-2xl, shadow-card, gradient StatCard variants), PageHeader (font-heading), StatsGrid (premium icon containers, uppercase labels), FilterBar (rounded-xl), FormModal (font-heading, rounded-2xl footer), EmptyState (font-heading, gradient icon wrapper)
+- [x] **6 Core Dashboard Pages (Tier 2)**: Clients, Expenses, Invoices, Projects, Team (border-l-4→gradient stats), Subcontractors — all with premium stat cards, gradient backgrounds, font-heading
+- [x] **Auth Pages**: Login, Register, 5 Onboarding pages — hardcoded `blue-600/800` → `brand-900/950`, font-heading, rounded-2xl
+- [x] **Secondary Dashboard Pages**: Schedule, Messaging, Reports, Settings, Estimates, Daily Logs, Intelligence, AP Invoicing, Documents — font-heading, rounded-xl icon containers
+- [x] **Portal Pages**: Client portal, Sub portal, Field portal (6 pages) — `blue-600` → `brand-primary`, font-heading
+- [x] **E-Signature Page**: Premium icon containers, font-heading, rounded-xl
+- [x] 1063 tests passing, 0 failures
+- [x] TypeScript clean
+
+**Pages updated:** 30+ pages across all 4 portals + auth + public pages
 
 ---
 

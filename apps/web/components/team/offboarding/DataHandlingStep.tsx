@@ -16,7 +16,7 @@ export function DataHandlingStep({
   return (
     <div className="space-y-4">
       <p className="text-sm text-gray-600">
-        Choose how to handle the user's data and configure notification settings.
+        Choose how to handle the user&apos;s data and configure notification settings.
       </p>
 
       {/* Archive data option */}

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useNotifications } from '@/lib/hooks/useNotifications';
 import { useRouter } from 'next/navigation';
-import { Card, Button, Badge } from '@/components/ui';
+import { Card, Button } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import { AppNotification, NotificationType } from '@/types';
 import {

@@ -3,9 +3,6 @@
 import React, { useState } from 'react';
 import {
   QuestionMarkCircleIcon,
-  MagnifyingGlassIcon,
-  KeyIcon,
-  DocumentTextIcon,
   ChatBubbleLeftRightIcon,
   ChevronDownIcon,
   ChevronUpIcon,

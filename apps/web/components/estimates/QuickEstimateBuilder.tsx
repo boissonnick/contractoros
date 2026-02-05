@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { cn } from '@/lib/utils';
-import { Button, Card, Input } from '@/components/ui';
+import { Button, Card } from '@/components/ui';
 import BaseModal from '@/components/ui/BaseModal';
 import LineItemPicker from './LineItemPicker';
 import EstimateLineItemRow from './EstimateLineItemRow';
@@ -11,7 +11,6 @@ import {
   LineItem,
   BuilderLineItem,
   EstimateTemplate,
-  LINE_ITEM_UNITS,
 } from '@/types';
 import {
   PlusIcon,
@@ -19,7 +18,6 @@ import {
   BookmarkIcon,
   CalculatorIcon,
   ArrowDownTrayIcon,
-  ChevronDownIcon,
 } from '@heroicons/react/24/outline';
 import { v4 as uuid } from 'uuid';
 
@@ -52,8 +50,8 @@ export interface EstimateTotals {
  * - Markup and tax calculations
  */
 export default function QuickEstimateBuilder({
-  projectId,
-  clientId,
+  projectId: _projectId,
+  clientId: _clientId,
   initialItems = [],
   onChange,
   onSave,

@@ -22,7 +22,6 @@ import { useExpenses } from '@/lib/hooks/useExpenses';
 import { useProjects } from '@/lib/hooks/useQueryHooks';
 import { useAuth } from '@/lib/auth';
 import {
-  Expense,
   ExpenseCategory,
   ExpenseStatus,
   EXPENSE_CATEGORIES,

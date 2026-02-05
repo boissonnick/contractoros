@@ -33,7 +33,7 @@ const STATUS_LABELS: Record<ProjectStatus, string> = {
   cancelled: 'Cancelled',
 };
 
-export function ProjectStatusWidget({ widget }: ProjectStatusWidgetProps) {
+export function ProjectStatusWidget({ widget: _widget }: ProjectStatusWidgetProps) {
   const router = useRouter();
   const { profile } = useAuth();
 

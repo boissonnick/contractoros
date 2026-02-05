@@ -15,7 +15,7 @@ import {
   Timestamp,
   orderBy,
 } from 'firebase/firestore';
-import { ScopeItem, ScopeMaterial } from '@/types';
+import { ScopeMaterial } from '@/types';
 
 export interface SowTemplateItem {
   title: string;

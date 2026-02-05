@@ -13,7 +13,6 @@ import {
   doc,
   serverTimestamp,
   increment,
-  Timestamp,
   writeBatch,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';

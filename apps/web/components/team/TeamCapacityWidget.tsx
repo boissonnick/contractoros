@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Card, Badge, Button } from '@/components/ui';
 import {
@@ -130,9 +131,11 @@ function MemberAvatar({
 
   if (avatar) {
     return (
-      <img
+      <Image
         src={avatar}
         alt={name}
+        width={32}
+        height={32}
         className={cn('rounded-full object-cover', sizeClasses)}
       />
     );

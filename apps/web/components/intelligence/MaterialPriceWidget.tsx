@@ -169,7 +169,7 @@ function MaterialPriceWidgetSkeleton({ className }: { className?: string }) {
  * Compact material price alert banner
  */
 export function MaterialPriceAlert({
-  material,
+  material: _material,
   displayName,
   change,
   period,

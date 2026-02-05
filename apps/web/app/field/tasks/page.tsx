@@ -20,7 +20,6 @@ import { useProjects } from '@/lib/hooks/useQueryHooks';
 import { Project } from '@/types';
 import {
   getOfflineTaskService,
-  TASK_STATUS_OPTIONS,
 } from '@/lib/offline/offline-tasks';
 import { OfflineTaskCard } from '@/components/field/OfflineTaskCard';
 import { Task, TaskStatus } from '@/types';
@@ -28,8 +27,8 @@ import { Task, TaskStatus } from '@/types';
 type FilterStatus = 'all' | 'my_tasks' | 'pending' | 'in_progress' | 'completed';
 
 export default function FieldTasksPage() {
-  const { user, profile, loading: authLoading } = useAuth();
-  const { isOnline, wasOffline } = useNetworkStatus();
+  const { profile, loading: authLoading } = useAuth();
+  const { isOnline } = useNetworkStatus();
   const router = useRouter();
 
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
@@ -42,7 +41,7 @@ export default function FieldTasksPage() {
   const userId = profile?.uid || '';
 
   // Fetch projects
-  const { data: projectsData = [], isLoading: projectsLoading } = useProjects();
+  const { data: projectsData = [] } = useProjects();
   const projects = projectsData as Project[];
 
   // Fetch tasks for selected project (when online)
@@ -164,7 +163,7 @@ export default function FieldTasksPage() {
   if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-primary"></div>
       </div>
     );
   }
@@ -180,7 +179,7 @@ export default function FieldTasksPage() {
           >
             <ChevronLeftIcon className="h-6 w-6" />
           </button>
-          <h1 className="text-lg font-semibold">My Tasks</h1>
+          <h1 className="text-lg font-semibold font-heading tracking-tight">My Tasks</h1>
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
@@ -287,7 +286,7 @@ export default function FieldTasksPage() {
           </div>
         ) : tasksLoading && isOnline ? (
           <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-primary mx-auto"></div>
             <p className="text-gray-500 mt-3">Loading tasks...</p>
           </div>
         ) : filteredTasks.length === 0 ? (

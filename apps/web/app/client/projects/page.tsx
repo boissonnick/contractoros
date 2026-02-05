@@ -146,7 +146,7 @@ export default function ClientProjectsPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">My Projects</h1>
+          <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">My Projects</h1>
           <p className="text-gray-500 mt-1">View the status and progress of your construction projects</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -162,7 +162,7 @@ export default function ClientProjectsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">My Projects</h1>
+        <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">My Projects</h1>
         <p className="text-gray-500 mt-1">
           View the status and progress of your construction projects
         </p>
@@ -173,8 +173,8 @@ export default function ClientProjectsPage() {
         <div className="grid grid-cols-3 gap-4">
           <div className="bg-white rounded-xl border p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <HomeIcon className="h-5 w-5 text-blue-600" />
+              <div className="p-2 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
+                <HomeIcon className="h-5 w-5 text-brand-primary" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
@@ -184,7 +184,7 @@ export default function ClientProjectsPage() {
           </div>
           <div className="bg-white rounded-xl border p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg">
+              <div className="p-2 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
                 <ClockIcon className="h-5 w-5 text-green-600" />
               </div>
               <div>
@@ -195,7 +195,7 @@ export default function ClientProjectsPage() {
           </div>
           <div className="bg-white rounded-xl border p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-gray-100 rounded-lg">
+              <div className="p-2 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
                 <CheckCircleIcon className="h-5 w-5 text-gray-600" />
               </div>
               <div>
@@ -223,7 +223,7 @@ export default function ClientProjectsPage() {
               className={cn(
                 'px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors',
                 statusFilter === key
-                  ? 'bg-blue-100 text-blue-700'
+                  ? 'bg-brand-primary/10 text-brand-primary'
                   : 'text-gray-500 hover:bg-gray-100'
               )}
             >

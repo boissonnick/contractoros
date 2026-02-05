@@ -68,7 +68,7 @@ const DEFAULT_LINE_ITEM_FORM_DATA: LineItemFormData = {
 };
 
 export function LineItemsTab() {
-  const { profile } = useAuth();
+  useAuth();
   const {
     lineItems,
     loading,

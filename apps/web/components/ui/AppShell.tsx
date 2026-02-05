@@ -3,13 +3,13 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { NavItem, UserRole } from '@/types';
-import { Bars3Icon, XMarkIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import { NavItem } from '@/types';
+import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import { MobileHeader, MobileDrawer, MobileBottomNav } from './MobileNav';
 import { useNetworkStatus } from '@/lib/offline/network-status';
 import { GlobalSearchBar } from '@/components/search';
 import { cn } from '@/lib/utils';
-import { CollapsibleNavSection, NavSection } from '@/components/navigation';
+import { NavSection } from '@/components/navigation';
 
 // Collapsible nav item component for sections with children
 function CollapsibleNavItem({

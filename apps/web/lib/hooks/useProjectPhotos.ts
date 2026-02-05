@@ -87,7 +87,7 @@ function albumFromFirestore(id: string, data: Record<string, unknown>): PhotoAlb
   };
 }
 
-function folderFromFirestore(id: string, data: Record<string, unknown>): PhotoFolder {
+function _folderFromFirestore(id: string, data: Record<string, unknown>): PhotoFolder {
   return {
     id,
     projectId: data.projectId as string,
@@ -136,7 +136,7 @@ export function useProjectPhotos(projectId: string) {
   const [photos, setPhotos] = useState<ProjectPhoto[]>([]);
   const [pendingPhotos, setPendingPhotos] = useState<PendingPhoto[]>([]);
   const [albums, setAlbums] = useState<PhotoAlbum[]>([]);
-  const [folders, setFolders] = useState<PhotoFolder[]>([]);
+  const [folders] = useState<PhotoFolder[]>([]);
   const [beforeAfterPairs, setBeforeAfterPairs] = useState<BeforeAfterPair[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);

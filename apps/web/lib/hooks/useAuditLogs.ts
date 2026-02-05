@@ -7,7 +7,7 @@
  * and real-time refresh capabilities. Designed for the audit logs admin page.
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/auth';
 import { DocumentSnapshot } from 'firebase/firestore';
 import {
@@ -17,7 +17,6 @@ import {
   AuditResource,
   AuditLogFilters,
   getAuditEvents,
-  logAuditEvent,
   auditHelpers,
   AUDIT_ACTION_LABELS,
   AUDIT_RESOURCE_LABELS,

@@ -6,7 +6,7 @@ import { db } from '@/lib/firebase/config';
 import { doc, getDoc, collection, getDocs, query, where, Timestamp } from 'firebase/firestore';
 import { useAuth } from '@/lib/auth';
 import { useSubAssignments } from '@/lib/hooks/useSubAssignments';
-import { ProjectPhase, Task, SubAssignment } from '@/types';
+import { ProjectPhase, Task } from '@/types';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/date-utils';
 
@@ -74,7 +74,7 @@ export default function SubProjectPage() {
   if (loading || assignmentsLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -85,7 +85,7 @@ export default function SubProjectPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-gray-900">{projectName}</h1>
+        <h1 className="text-xl font-semibold font-heading tracking-tight text-gray-900">{projectName}</h1>
         <p className="text-sm text-gray-500">
           {assignments.length} assignment{assignments.length !== 1 ? 's' : ''} · {tasks.length} task{tasks.length !== 1 ? 's' : ''}
         </p>
@@ -109,7 +109,7 @@ export default function SubProjectPage() {
 
       {/* Assignments */}
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-gray-900">My Assignments</h3>
+        <h3 className="text-sm font-semibold font-heading tracking-tight text-gray-900">My Assignments</h3>
         {assignments.map((a) => {
           const target = a.type === 'phase'
             ? phases.find(p => p.id === a.phaseId)?.name
@@ -117,7 +117,7 @@ export default function SubProjectPage() {
           const style = STATUS_STYLES[a.status] || STATUS_STYLES.pending;
 
           return (
-            <div key={a.id} className="bg-white border border-gray-200 rounded-lg px-4 py-3 flex items-center justify-between">
+            <div key={a.id} className="bg-white border border-gray-200 rounded-xl px-4 py-3 flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-900">{target || 'Assignment'}</p>
                 <p className="text-xs text-gray-500 capitalize">{a.type}</p>
@@ -136,9 +136,9 @@ export default function SubProjectPage() {
       {/* Tasks */}
       {tasks.length > 0 && (
         <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-gray-900">Assigned Tasks</h3>
+          <h3 className="text-sm font-semibold font-heading tracking-tight text-gray-900">Assigned Tasks</h3>
           {tasks.map((t) => (
-            <div key={t.id} className="bg-white border border-gray-200 rounded-lg px-4 py-3">
+            <div key={t.id} className="bg-white border border-gray-200 rounded-xl px-4 py-3">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-gray-900">{t.title}</p>
                 <span className="text-xs font-medium px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full capitalize">

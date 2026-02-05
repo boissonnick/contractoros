@@ -6,18 +6,16 @@ import { useSelections } from '@/lib/hooks/useSelections';
 import { Card, Button, Badge } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import { toast } from '@/components/ui/Toast';
-import { Selection, SelectionOption, SelectionStatus } from '@/types';
+import { SelectionStatus } from '@/types';
 import {
   PlusIcon,
   SwatchIcon,
   CheckCircleIcon,
   TruckIcon,
   WrenchScrewdriverIcon,
-  ClockIcon,
   TrashIcon,
   ChevronDownIcon,
   ChevronUpIcon,
-  CurrencyDollarIcon,
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 
@@ -345,7 +343,7 @@ export default function ProjectSelectionsPage() {
         <div className="space-y-3">
           {filtered.map((sel) => {
             const isExpanded = expandedId === sel.id;
-            const selectedOpt = sel.options.find((o) => o.id === sel.selectedOptionId);
+            const _selectedOpt = sel.options.find((o) => o.id === sel.selectedOptionId);
             return (
               <Card key={sel.id} className="overflow-hidden">
                 <div
