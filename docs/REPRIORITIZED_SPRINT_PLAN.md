@@ -5,6 +5,11 @@
 **Priority:** Bugs → Stability → Core Functionality → New Features
 **Status:** 🔴 READY FOR EXECUTION
 
+> **Note:** This is the **active execution roadmap** focusing on immediate sprint priorities.
+> For comprehensive historical context, feature vision, and archived work, see:
+> - `docs/archive/MASTER_ROADMAP_historical.md` - Complete historical roadmap
+> - `SPRINT_STATUS.md` - Current sprint progress and session handoffs
+
 ---
 
 ## Executive Summary

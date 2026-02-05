@@ -456,16 +456,81 @@ All in **GCP Secret Manager** (project: `contractoros-483812`):
 
 ## Documentation Index
 
-| Document | Purpose |
-|----------|---------|
-| `docs/SPRINT_STATUS.md` | Current progress, task tracking |
-| `docs/MASTER_ROADMAP.md` | Complete backlog |
-| `docs/STRATEGIC_PLAN_FEB_2026.md` | Current sprint plan |
-| `docs/DEVELOPMENT_GUIDE.md` | Feature patterns |
-| `docs/ARCHITECTURE.md` | Technical deep-dive |
-| `docs/TESTING_STRATEGY.md` | E2E testing approach |
-| `docs/LAUNCH_CHECKLIST.md` | Pre-deployment verification |
-| `docs/STRATEGIC_ROADMAP_NEXT_SPRINTS.md` | Platform analysis & roadmap |
+| Document | Purpose | When to Read |
+|----------|---------|--------------|
+| `docs/NEXT_SPRINTS_GUIDE.md` | Sprint quick-start & priorities | Session start (sprint planning) |
+| `docs/SPRINT_STATUS.md` | Current progress & handoffs | Daily (session start/end) |
+| `docs/REPRIORITIZED_SPRINT_PLAN.md` | Active execution roadmap | Daily (sprint work) |
+| `docs/VERSION_AUDIT_FEB_2026.md` | Package versions & upgrades | Weekly (dependency work) |
+| `docs/PLATFORM_AUDIT_COMPLETE.md` | Known issues & bug tracking | As-needed (bug fixing) |
+| `docs/STRATEGIC_PLAN_FEB_2026.md` | Platform strategy | As-needed (strategic planning) |
+| `docs/DEVELOPMENT_GUIDE.md` | Feature patterns | As-needed (new features) |
+| `docs/ARCHITECTURE.md` | Technical deep-dive | As-needed (architecture) |
+| `docs/TESTING_STRATEGY.md` | E2E testing approach | As-needed (testing) |
+| `docs/LAUNCH_CHECKLIST.md` | Pre-deployment verification | As-needed (deployment) |
+
+---
+
+## Documentation Maintenance (Rolling Window)
+
+**Purpose:** Keep documentation lean by automatically archiving completed work while preserving all historical context.
+
+### Sprint Archival Rules
+
+**Keep in SPRINT_STATUS.md:**
+- Current sprint (in progress)
+- Last 2 completed sprints
+- **Maximum:** 3 sprints total
+
+**Archive trigger:**
+When sprint N+3 completes, archive sprint N to `.claude-coordination/archive/`
+
+**Example:**
+- Sprint 53 (current) → Keep in SPRINT_STATUS.md
+- Sprint 52 (last completed) → Keep in SPRINT_STATUS.md
+- Sprint 51 (2nd last completed) → Keep in SPRINT_STATUS.md
+- Sprint 50 (3rd last completed) → Archive to `sprints-47-52-history.md`
+
+### Archive Process (5 minutes per sprint)
+
+When a sprint completes:
+
+1. **Mark complete** in SPRINT_STATUS.md with completion date
+2. **Check sprint count** — If 3+ completed sprints exist, trigger archive
+3. **Extract oldest sprint** to `.claude-coordination/archive/sprints-{start}-{end}-history.md`
+4. **Update header** in SPRINT_STATUS.md pointing to archive location
+5. **Verify token budget** — SPRINT_STATUS.md should stay <1,000 lines
+
+### Token Budgets (Per File)
+
+| File | Target Lines | Max Lines | Estimated Tokens |
+|------|--------------|-----------|------------------|
+| `SPRINT_STATUS.md` | 300-500 | 1,000 | <15,000 |
+| `REPRIORITIZED_SPRINT_PLAN.md` | 600-800 | 1,200 | <20,000 |
+| `NEXT_SPRINTS_GUIDE.md` | 100-150 | 200 | <3,000 |
+| `CLAUDE.md` | 400-500 | 600 | <10,000 |
+| **Total Daily Docs** | **~1,500** | **~3,000** | **<50,000** |
+
+### Maintenance Schedule
+
+**After Every Sprint:**
+- [ ] Mark sprint complete in SPRINT_STATUS.md
+- [ ] Update REPRIORITIZED_SPRINT_PLAN.md with next sprint
+- [ ] Check if archival triggered (3+ completed sprints)
+- [ ] Archive if needed
+
+**Monthly Review:**
+- [ ] Check token budgets (run line counts)
+- [ ] Archive sprints completed >30 days ago
+- [ ] Review for duplicate content
+- [ ] Update NEXT_SPRINTS_GUIDE.md if priorities changed
+
+**Quarterly Review:**
+- [ ] Review reference docs for currency
+- [ ] Archive superseded research
+- [ ] Update CLAUDE.md if major pattern changes
+
+See `docs/DOCUMENTATION_MAINTENANCE.md` for detailed procedures.
 
 ---
 
