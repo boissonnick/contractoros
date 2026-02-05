@@ -88,6 +88,7 @@ export function ImpersonationProvider({ children }: { children: React.ReactNode 
 
         // Validate user is the same
         if (parsed.actualUserId === user.uid && canImpersonate) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect -- initialization from sessionStorage on mount
           setState({
             isImpersonating: true,
             actualUserId: parsed.actualUserId,
@@ -103,6 +104,23 @@ export function ImpersonationProvider({ children }: { children: React.ReactNode 
       sessionStorage.removeItem(STORAGE_KEY);
     }
   }, [user, profile, canImpersonate]);
+
+  // Reset to actual user role (defined before switchRole since switchRole calls it)
+  const resetImpersonation = useCallback(() => {
+    if (state.isImpersonating) {
+      console.log(`[Impersonation] User ${state.actualUserId} exited impersonation mode`);
+    }
+
+    setState({
+      isImpersonating: false,
+      actualUserId: null,
+      actualUserRole: null,
+      impersonatedRole: 'owner',
+      startedAt: null,
+    });
+
+    sessionStorage.removeItem(STORAGE_KEY);
+  }, [state.actualUserId, state.isImpersonating]);
 
   // Switch to a different role
   const switchRole = useCallback((role: ImpersonationRole) => {
@@ -135,24 +153,7 @@ export function ImpersonationProvider({ children }: { children: React.ReactNode 
 
     // Log impersonation event (could send to analytics/audit log)
     console.log(`[Impersonation] User ${user.uid} switched to ${role} view`);
-  }, [user, profile, canImpersonate]);
-
-  // Reset to actual user role
-  const resetImpersonation = useCallback(() => {
-    if (state.isImpersonating) {
-      console.log(`[Impersonation] User ${state.actualUserId} exited impersonation mode`);
-    }
-
-    setState({
-      isImpersonating: false,
-      actualUserId: null,
-      actualUserRole: null,
-      impersonatedRole: 'owner',
-      startedAt: null,
-    });
-
-    sessionStorage.removeItem(STORAGE_KEY);
-  }, [state.actualUserId, state.isImpersonating]);
+  }, [user, profile, canImpersonate, resetImpersonation]);
 
   // Get current effective role
   const currentRole: ImpersonationRole = state.isImpersonating

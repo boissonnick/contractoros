@@ -55,6 +55,7 @@ export function useAccountingConnection() {
   // Listen for accounting connection
   useEffect(() => {
     if (!profile?.orgId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setLoading(false);
       return;
     }

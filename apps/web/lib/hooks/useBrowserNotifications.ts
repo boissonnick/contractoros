@@ -57,6 +57,7 @@ export function useBrowserNotifications(): UseBrowserNotificationsReturn {
   // Initialize permission state
   useEffect(() => {
     const status = getNotificationPermissionStatus();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- async data fetch setState is not synchronous
     setPermission(status);
 
     // Check quiet hours periodically

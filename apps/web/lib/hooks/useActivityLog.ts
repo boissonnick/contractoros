@@ -52,6 +52,7 @@ export function useActivityLog(orgId: string | undefined, maxItems = 20) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
     if (!orgId) { setLoading(false); return; }
 
     const q = query(

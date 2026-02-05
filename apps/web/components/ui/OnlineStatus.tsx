@@ -73,6 +73,7 @@ export default function OnlineStatus({
   useEffect(() => {
     // Set initial state from navigator.onLine
     if (typeof window !== 'undefined') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- event listener callback is an async handler
       setIsOnline(navigator.onLine);
       setMounted(true);
     }
@@ -196,6 +197,7 @@ export function useOnlineStatus() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- event listener callback is an async handler
       setIsOnline(navigator.onLine);
     }
 

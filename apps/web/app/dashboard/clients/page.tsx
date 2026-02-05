@@ -106,6 +106,7 @@ export default function ClientsPage() {
   // Total count for pagination display
   useEffect(() => {
     if (!orgId || isSearching) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- async data fetch setState is not synchronous
       setTotalCount(0);
       return;
     }

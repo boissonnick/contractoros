@@ -64,6 +64,7 @@ export default function Avatar({
 
   // Reset state when src changes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is necessary for this pattern
     setIsLoaded(false);
     setHasError(false);
   }, [src]);

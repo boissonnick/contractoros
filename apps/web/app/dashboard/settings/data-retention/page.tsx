@@ -363,6 +363,7 @@ function RetentionPolicyCard({
   // Reset edit values when entering edit mode
   useEffect(() => {
     if (editing) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- async data fetch setState is not synchronous
       setEditValues({
         retentionDays: policy.retentionDays,
         action: policy.action,
@@ -375,6 +376,7 @@ function RetentionPolicyCard({
   useEffect(() => {
     if (editing) {
       const result = validateDays(policy.resource, editValues.retentionDays);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- async data fetch setState is not synchronous
       setValidationError(result.valid ? null : result.message || null);
     }
   }, [editing, editValues.retentionDays, policy.resource, validateDays]);

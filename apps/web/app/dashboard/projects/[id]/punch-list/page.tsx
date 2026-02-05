@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
@@ -67,7 +67,7 @@ export default function PunchListPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<PunchItem | null>(null);
 
-  const loadPunchItems = async () => {
+  const loadPunchItems = useCallback(async () => {
     if (!profile?.orgId) return;
 
     try {
@@ -106,13 +106,13 @@ export default function PunchListPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [profile?.orgId, projectId]);
 
   useEffect(() => {
     if (profile?.orgId) {
       loadPunchItems();
     }
-  }, [profile?.orgId, projectId]);
+  }, [profile?.orgId, projectId, loadPunchItems]);
 
   const filteredItems = useMemo(() => {
     return punchItems.filter((item) => {

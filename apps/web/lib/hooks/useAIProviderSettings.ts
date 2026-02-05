@@ -103,6 +103,7 @@ export function useAIProviderSettings(): UseAIProviderSettingsReturn {
   // Load settings with real-time updates
   useEffect(() => {
     if (!orgId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setLoading(false);
       return;
     }

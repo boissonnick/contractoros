@@ -375,7 +375,7 @@ export function usePagination<T extends { id: string }>(
     setCurrentPage(1);
     setHasMore(true);
     fetchPage(1, 'initial');
-  }, [orgId, collectionPath, filtersKey, orderByField, orderDirection, pageSize, enabled]);
+  }, [orgId, collectionPath, filtersKey, orderByField, orderDirection, pageSize, enabled, fetchPage]);
 
   /**
    * Load the next page

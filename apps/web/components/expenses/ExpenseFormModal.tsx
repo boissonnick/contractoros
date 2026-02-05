@@ -63,7 +63,7 @@ export function ExpenseFormModal({
   const [scanError, setScanError] = useState<string | null>(null);
   const [ocrResult, setOcrResult] = useState<ReceiptOCRResult | null>(null);
 
-  const getDefaultValues = (): Partial<ExpenseFormData> => {
+  const getDefaultValues = useCallback((): Partial<ExpenseFormData> => {
     if (expense) {
       return {
         description: expense.description,
@@ -97,7 +97,7 @@ export function ExpenseFormModal({
       notes: '',
       tags: '',
     };
-  };
+  }, [expense, defaultProjectId]);
 
   const {
     register,
@@ -121,7 +121,7 @@ export function ExpenseFormModal({
       setScanError(null);
       setOcrResult(null);
     }
-  }, [open, expense, reset]);
+  }, [open, expense, reset, getDefaultValues]);
 
   // Handle OCR scan completion - auto-fill form fields
   const handleScanComplete = useCallback(

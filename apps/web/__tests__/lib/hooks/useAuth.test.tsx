@@ -988,6 +988,7 @@ describe('useAuth without Provider', () => {
 
     function StandaloneComponent() {
       const { signOut } = useAuth();
+      // eslint-disable-next-line react-hooks/globals -- test helper capturing hook return value
       capturedSignOut = signOut;
       return <button onClick={signOut}>Sign Out</button>;
     }

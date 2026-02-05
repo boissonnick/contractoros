@@ -164,6 +164,7 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
   // Fetch expenses with real-time updates
   useEffect(() => {
     if (!orgId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is necessary for this pattern
       setLoading(false);
       return;
     }

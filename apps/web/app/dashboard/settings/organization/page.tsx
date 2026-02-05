@@ -150,7 +150,7 @@ export default function OrganizationSettingsPage() {
       setLoading(false);
     }
     load();
-  }, [profile?.orgId]);
+  }, [profile]);
 
   // Check if demo data already exists
   useEffect(() => {
@@ -167,7 +167,7 @@ export default function OrganizationSettingsPage() {
       }
     }
     checkDemo();
-  }, [profile?.orgId]);
+  }, [profile]);
 
   const handleLogoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

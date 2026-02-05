@@ -43,6 +43,7 @@ export default function PayrollPreviewReport({ startDate, endDate }: PayrollPrev
 
   useEffect(() => {
     if (!profile?.orgId || configLoading) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- async data fetch setState is not synchronous
     setLoading(true);
     setError(null);
 

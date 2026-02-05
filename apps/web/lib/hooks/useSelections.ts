@@ -57,6 +57,7 @@ export function useSelections({ projectId }: UseSelectionsProps) {
 
   useEffect(() => {
     if (!projectId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setLoading(false);
       return;
     }

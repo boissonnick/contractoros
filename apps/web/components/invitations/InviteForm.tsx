@@ -31,7 +31,7 @@ const EMPLOYEE_TYPE_OPTIONS: { value: EmployeeType; label: string }[] = [
 
 export default function InviteForm({ onSuccess }: { onSuccess?: () => void }) {
   const { user, profile } = useAuth();
-  const [invites, setInvites] = useState<InviteRow[]>([
+  const [invites, setInvites] = useState<InviteRow[]>(() => [
     { id: Date.now().toString(), name: '', email: '', role: 'EMPLOYEE' },
   ]);
   const [sending, setSending] = useState(false);

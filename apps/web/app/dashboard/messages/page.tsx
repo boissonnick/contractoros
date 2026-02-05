@@ -39,6 +39,7 @@ export default function MessagesPage() {
   // Select first channel by default
   useEffect(() => {
     if (channels.length > 0 && !activeChannelId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- async data fetch setState is not synchronous
       setActiveChannelId(channels[0].id);
     }
   }, [channels, activeChannelId]);

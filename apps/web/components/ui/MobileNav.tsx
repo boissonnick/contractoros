@@ -163,6 +163,7 @@ export function MobileDrawer({
   // Handle open/close with animation
   useEffect(() => {
     if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- timeout callback is an async handler
       setIsVisible(true);
       setIsClosing(false);
       document.body.style.overflow = 'hidden';
@@ -178,7 +179,7 @@ export function MobileDrawer({
     return () => {
       document.body.style.overflow = '';
     };
-  }, [isOpen]);
+  }, [isOpen, isVisible]);
 
   const handleClose = () => {
     setIsClosing(true);

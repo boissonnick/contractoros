@@ -85,6 +85,7 @@ export function CollapsibleNavSection({
   // Auto-expand section when an item becomes active
   useEffect(() => {
     if (hasActiveItem && !isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is necessary for this pattern
       setIsOpen(true);
       saveSectionState(id, true);
     }

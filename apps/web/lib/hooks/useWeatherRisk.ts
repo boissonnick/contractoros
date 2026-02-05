@@ -247,7 +247,7 @@ export function useProjectWeatherRisk(
     if (!project || !orgId) return;
 
     getProjectRisk(project, phases).then(setProjectForecast);
-  }, [project?.id, orgId, phases.length]);
+  }, [project, orgId, phases, getProjectRisk]);
 
   return {
     forecast: projectForecast,

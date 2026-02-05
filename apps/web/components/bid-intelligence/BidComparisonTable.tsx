@@ -71,7 +71,7 @@ export function BidComparisonTable({
     }
   };
 
-  const SortIcon = ({ field }: { field: SortField }) => {
+  const renderSortIcon = (field: SortField) => {
     if (sortField !== field) return null;
     return sortDirection === 'asc' ? (
       <ChevronUpIcon className="w-4 h-4 inline ml-1" />
@@ -123,13 +123,13 @@ export function BidComparisonTable({
                 className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                 onClick={() => handleSort('amount')}
               >
-                Amount <SortIcon field="amount" />
+                Amount {renderSortIcon('amount')}
               </th>
               <th
                 className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                 onClick={() => handleSort('score')}
               >
-                Score <SortIcon field="score" />
+                Score {renderSortIcon('score')}
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Market
@@ -138,13 +138,13 @@ export function BidComparisonTable({
                 className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                 onClick={() => handleSort('rating')}
               >
-                Rating <SortIcon field="rating" />
+                Rating {renderSortIcon('rating')}
               </th>
               <th
                 className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                 onClick={() => handleSort('experience')}
               >
-                Experience <SortIcon field="experience" />
+                Experience {renderSortIcon('experience')}
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Flags

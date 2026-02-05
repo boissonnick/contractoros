@@ -59,6 +59,7 @@ export function PageTransition({
   // Handle route changes
   useEffect(() => {
     if (pathname !== currentPath) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- timeout callback is an async handler
       setIsVisible(false);
       // Small delay before showing new content
       const timeout = setTimeout(() => {
@@ -157,7 +158,7 @@ export function StaggeredTransition({
     });
 
     return () => timeouts.forEach(clearTimeout);
-  }, [children.length, staggerDelay]);
+  }, [children, staggerDelay]);
 
   const variantClasses = {
     fade: {

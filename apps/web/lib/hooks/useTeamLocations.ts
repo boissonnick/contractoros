@@ -57,6 +57,7 @@ export function useTeamLocations(orgId?: string) {
   // Subscribe to team locations
   useEffect(() => {
     if (!targetOrgId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setLoading(false);
       return;
     }
@@ -300,6 +301,7 @@ export function useVehicles(orgId?: string) {
   // Subscribe to vehicles
   useEffect(() => {
     if (!targetOrgId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setLoading(false);
       return;
     }

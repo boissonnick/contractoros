@@ -353,6 +353,7 @@ export default function ReportsPage() {
           startDate >= twoYearsAgo &&
           startDate <= endDate
         ) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect -- initialization from localStorage on mount
           setDateRange({
             startDate,
             endDate,
@@ -494,27 +495,6 @@ export default function ReportsPage() {
     return projectStatusDistribution?.map((item) => item.value) || [];
   }, [projectStatusDistribution]);
 
-  // Error state
-  if (!orgId) {
-    return (
-      <div className="p-8 text-center">
-        <ExclamationCircleIcon className="h-12 w-12 text-red-400 mx-auto mb-4" />
-        <h3 className="text-lg font-heading font-medium tracking-tight text-gray-900">Not authenticated</h3>
-        <p className="text-gray-500 mt-1">Please log in to view reports.</p>
-      </div>
-    );
-  }
-
-  if (dashboardError) {
-    return (
-      <div className="p-8 text-center">
-        <ExclamationCircleIcon className="h-12 w-12 text-red-400 mx-auto mb-4" />
-        <h3 className="text-lg font-heading font-medium tracking-tight text-gray-900">Failed to load reports</h3>
-        <p className="text-gray-500 mt-1">{dashboardError.message}</p>
-      </div>
-    );
-  }
-
   // Calculate business health score
   const healthScore = useMemo(() => {
     if (!financialSummary || !kpis) return null;
@@ -546,6 +526,27 @@ export default function ReportsPage() {
     if (healthScore >= 40) return 'amber';
     return 'red';
   }, [healthScore]);
+
+  // Error state
+  if (!orgId) {
+    return (
+      <div className="p-8 text-center">
+        <ExclamationCircleIcon className="h-12 w-12 text-red-400 mx-auto mb-4" />
+        <h3 className="text-lg font-heading font-medium tracking-tight text-gray-900">Not authenticated</h3>
+        <p className="text-gray-500 mt-1">Please log in to view reports.</p>
+      </div>
+    );
+  }
+
+  if (dashboardError) {
+    return (
+      <div className="p-8 text-center">
+        <ExclamationCircleIcon className="h-12 w-12 text-red-400 mx-auto mb-4" />
+        <h3 className="text-lg font-heading font-medium tracking-tight text-gray-900">Failed to load reports</h3>
+        <p className="text-gray-500 mt-1">{dashboardError.message}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

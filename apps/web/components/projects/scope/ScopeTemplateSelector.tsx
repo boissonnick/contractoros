@@ -99,7 +99,7 @@ export default function ScopeTemplateSelector({ onSelect, onClose, phases = [] }
       const itemWithPhaseName = item as typeof item & { phaseName?: string };
       return {
         ...item,
-        id: `tmpl_${Date.now()}_${idx}`,
+        id: `tmpl_item_${idx}`,
         phaseId: autoAssignPhases && phases.length > 0
           ? matchPhase(item.title, phases, itemWithPhaseName.phaseName)
           : '',

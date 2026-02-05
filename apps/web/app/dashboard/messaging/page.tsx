@@ -48,6 +48,7 @@ export default function MessagingPage() {
   // Load messages when conversation is selected
   useEffect(() => {
     if (!orgId || !selectedConversation) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setMessages([]);
       return;
     }

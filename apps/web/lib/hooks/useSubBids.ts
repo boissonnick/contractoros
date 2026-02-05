@@ -134,6 +134,7 @@ export function useSubBids() {
   // Main effect to fetch bids for this subcontractor
   useEffect(() => {
     if (!user?.uid) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setLoading(false);
       return;
     }

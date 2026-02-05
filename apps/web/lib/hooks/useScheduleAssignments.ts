@@ -39,6 +39,8 @@ export function useScheduleAssignments({ orgId, userId, startDate, endDate }: Us
   const [assignments, setAssignments] = useState<ScheduleAssignment[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const startTime = startDate?.getTime();
+  const endTime = endDate?.getTime();
   useEffect(() => {
     if (!targetOrgId) return;
     const constraints: ReturnType<typeof where>[] = [where('orgId', '==', targetOrgId)];
@@ -52,7 +54,7 @@ export function useScheduleAssignments({ orgId, userId, startDate, endDate }: Us
       setLoading(false);
     }, () => setLoading(false));
     return unsub;
-  }, [targetOrgId, userId, startDate?.getTime(), endDate?.getTime()]);
+  }, [targetOrgId, userId, startDate, endDate, startTime, endTime]);
 
   const createAssignment = useCallback(async (data: Omit<ScheduleAssignment, 'id' | 'createdAt'>) => {
     await addDoc(collection(db, 'scheduleAssignments'), {

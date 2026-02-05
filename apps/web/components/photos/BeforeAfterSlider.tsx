@@ -135,7 +135,7 @@ export default function BeforeAfterSlider({
             src={beforePhoto.url}
             alt={beforePhoto.caption || 'Before photo'}
             className="absolute inset-0 w-full h-full object-cover"
-            style={{ width: containerRef.current?.offsetWidth || '100%' }}
+            style={{ width: '100%' }}
             draggable={false}
           />
         </div>

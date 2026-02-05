@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
@@ -61,13 +61,7 @@ export default function RFIsPage() {
   const [selectedRFI, setSelectedRFI] = useState<RFI | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  useEffect(() => {
-    if (projectId && profile?.orgId) {
-      loadRFIs();
-    }
-  }, [projectId, profile?.orgId]);
-
-  const loadRFIs = async () => {
+  const loadRFIs = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -104,7 +98,13 @@ export default function RFIsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [projectId, profile?.orgId]);
+
+  useEffect(() => {
+    if (projectId && profile?.orgId) {
+      loadRFIs();
+    }
+  }, [projectId, profile?.orgId, loadRFIs]);
 
   const filteredRFIs = rfis.filter(rfi => {
     const matchesSearch =

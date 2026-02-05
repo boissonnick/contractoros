@@ -79,7 +79,7 @@ export default function GanttChart({ tasks, viewMode, onTaskClick, onDateChange 
     return () => {
       cancelled = true;
     };
-  }, [tasks]); // Only re-init when tasks change
+  }, [tasks, onTaskClick, onDateChange, viewMode]); // Re-init when tasks or callbacks change
 
   // Update view mode without reinitializing
   useEffect(() => {

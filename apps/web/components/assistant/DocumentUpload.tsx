@@ -57,7 +57,7 @@ export function DocumentUpload({
     return ACCEPTED_TYPES[file.type] || null;
   };
 
-  const validateFile = (file: File): string | null => {
+  const validateFile = useCallback((file: File): string | null => {
     if (!getFileType(file)) {
       return 'Unsupported file type. Please upload PDF, DOCX, images, or spreadsheets.';
     }
@@ -65,7 +65,7 @@ export function DocumentUpload({
       return `File too large. Maximum size is ${maxSizeMB}MB.`;
     }
     return null;
-  };
+  }, [maxSizeBytes, maxSizeMB]);
 
   const handleFile = useCallback(
     async (file: File) => {
@@ -101,7 +101,7 @@ export function DocumentUpload({
         setUploadProgress(0);
       }
     },
-    [onUpload, maxSizeBytes]
+    [onUpload, validateFile]
   );
 
   const handleDrop = useCallback(

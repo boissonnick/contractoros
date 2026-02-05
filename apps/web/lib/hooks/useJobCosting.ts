@@ -77,6 +77,7 @@ export function useJobCosts(options: UseJobCostsOptions): UseJobCostsReturn {
   // Fetch costs with real-time updates
   useEffect(() => {
     if (!orgId || !projectId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setLoading(false);
       return;
     }
@@ -250,6 +251,7 @@ export function useProjectProfitability(projectId: string): UseProjectProfitabil
 
   useEffect(() => {
     if (!orgId || !projectId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setLoading(false);
       return;
     }
@@ -326,6 +328,7 @@ export function useJobCostAlerts(projectId?: string): UseJobCostAlertsReturn {
 
   useEffect(() => {
     if (!orgId || !isAdmin) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setAlerts([]);
       setLoading(false);
       return;
@@ -461,6 +464,7 @@ export function useOrgJobCosting(): UseOrgJobCostingReturn {
   // Fetch all project profitability data
   useEffect(() => {
     if (!orgId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setLoading(false);
       return;
     }

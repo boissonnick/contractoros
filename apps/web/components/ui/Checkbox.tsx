@@ -109,7 +109,8 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
     const internalRef = useRef<HTMLInputElement>(null);
     const ref = (forwardedRef as React.RefObject<HTMLInputElement>) || internalRef;
 
-    const checkboxId = id || `checkbox-${Math.random().toString(36).substr(2, 9)}`;
+    const generatedId = React.useId();
+    const checkboxId = id || `checkbox-${generatedId}`;
 
     // Handle indeterminate state
     useEffect(() => {

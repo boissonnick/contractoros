@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -94,7 +94,7 @@ export function QuoteTemplateFormModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>('basic');
 
-  const defaultValues = template
+  const defaultValues = useMemo(() => template
     ? {
         name: template.name,
         description: template.description || '',
@@ -180,7 +180,7 @@ export function QuoteTemplateFormModal({
         defaultPaymentTerms: '',
         defaultTermsAndConditions: '',
         defaultAcceptanceText: '',
-      };
+      }, [template]);
 
   const {
     register,
@@ -200,7 +200,7 @@ export function QuoteTemplateFormModal({
       reset(defaultValues);
       setActiveTab('basic');
     }
-  }, [open, template, reset]);
+  }, [open, template, reset, defaultValues]);
 
   const watchedPrimaryColor = watch('primaryColor');
 

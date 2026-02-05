@@ -5,7 +5,7 @@
  * Offline-first photo capture and management for field workers
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import {
@@ -69,7 +69,7 @@ export default function FieldPhotosPage() {
 
   // Get projects for selector
   const { data: projectsData } = useProjects();
-  const projects = (projectsData || []) as Project[];
+  const projects = useMemo(() => (projectsData || []) as Project[], [projectsData]);
 
   // Get photos for selected project
   const {
@@ -84,6 +84,7 @@ export default function FieldPhotosPage() {
   useEffect(() => {
     const projectIdParam = searchParams.get('projectId');
     if (projectIdParam) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- async data fetch setState is not synchronous
       setSelectedProjectId(projectIdParam);
     } else if (projects.length > 0 && !selectedProjectId) {
       setSelectedProjectId(projects[0].id);

@@ -68,9 +68,12 @@ export function useVoiceLogs(options: UseVoiceLogsOptions = {}): UseVoiceLogsRet
   const [error, setError] = useState<string | null>(null);
 
   const { userId, status, startDate, endDate, limitCount = 50 } = options;
+  const startTime = startDate?.getTime();
+  const endTime = endDate?.getTime();
 
   useEffect(() => {
     if (!profile?.orgId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setLoading(false);
       return;
     }
@@ -125,7 +128,7 @@ export function useVoiceLogs(options: UseVoiceLogsOptions = {}): UseVoiceLogsRet
     );
 
     return () => unsubscribe();
-  }, [profile?.orgId, userId, status, startDate?.getTime(), endDate?.getTime(), limitCount]);
+  }, [profile?.orgId, userId, status, startDate, endDate, startTime, endTime, limitCount]);
 
   /**
    * Trigger retry for a failed voice log
@@ -167,6 +170,7 @@ export function useVoiceLog(logId: string | null): {
 
   useEffect(() => {
     if (!profile?.orgId || !logId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setLoading(false);
       return;
     }

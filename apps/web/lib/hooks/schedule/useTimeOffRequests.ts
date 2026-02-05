@@ -67,6 +67,7 @@ export function useTimeOffRequests(
 
   useEffect(() => {
     if (!orgId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setLoading(false);
       return;
     }

@@ -188,7 +188,7 @@ export default function ProjectsPage() {
       setCurrentPage(1);
       fetchProjects('first');
     }
-  }, [profile?.orgId, pageSize]);
+  }, [profile?.orgId, pageSize, fetchProjects]);
 
   const goToNextPage = () => {
     if (currentPage < totalPages) {

@@ -83,7 +83,7 @@ export function useProjectIntelligence(
 
   // Extract individual components
   const profitability = intelligence?.profitabilityForecast || null;
-  const risks = intelligence?.riskIndicators || [];
+  const risks = useMemo(() => intelligence?.riskIndicators || [], [intelligence]);
   const variance = intelligence?.varianceAnalysis || null;
   const healthScore = intelligence?.healthScore || 100;
   const riskScore = intelligence?.overallRiskScore || 0;

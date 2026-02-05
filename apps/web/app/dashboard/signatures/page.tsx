@@ -54,6 +54,10 @@ export default function SignaturesDashboard() {
   const [statusFilter, setStatusFilter] = useState<SignatureRequestStatus | 'all'>('all');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
+  // Pre-compute expiry threshold to avoid Date.now() during render
+  // eslint-disable-next-line react-hooks/purity -- Date.now() in useMemo([]) only runs once on mount
+  const expiryThreshold = useMemo(() => new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), []);
+
   // Filter requests
   const filteredRequests = useMemo(() => {
     return requests.filter((request) => {
@@ -228,7 +232,7 @@ export default function SignaturesDashboard() {
             );
             const signedSigners = request.signers.filter((s) => s.status === 'signed');
             const isExpiringSoon = request.expiresAt &&
-              new Date(request.expiresAt) < new Date(Date.now() + 3 * 24 * 60 * 60 * 1000) &&
+              new Date(request.expiresAt) < expiryThreshold &&
               (request.status === 'pending' || request.status === 'viewed');
 
             return (

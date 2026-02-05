@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
@@ -73,11 +73,7 @@ export default function ProjectLogsPage() {
     notes: '',
   });
 
-  useEffect(() => {
-    loadProjectAndLogs();
-  }, [projectId]);
-
-  const loadProjectAndLogs = async () => {
+  const loadProjectAndLogs = useCallback(async () => {
     setLoading(true);
     try {
       // Load project
@@ -105,7 +101,11 @@ export default function ProjectLogsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [projectId]);
+
+  useEffect(() => {
+    loadProjectAndLogs();
+  }, [projectId, loadProjectAndLogs]);
 
   const handleCreateLog = async () => {
     if (!user?.uid || !profile?.orgId) return;

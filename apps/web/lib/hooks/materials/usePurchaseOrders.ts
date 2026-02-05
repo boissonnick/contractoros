@@ -44,6 +44,7 @@ export function usePurchaseOrders(options: UsePurchaseOrdersOptions = {}) {
 
   useEffect(() => {
     if (!orgId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setOrders([]);
       setLoading(false);
       return;

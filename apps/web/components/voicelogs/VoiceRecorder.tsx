@@ -158,6 +158,7 @@ export function VoiceRecorder({
 
       // Start recording
       mediaRecorder.start(1000); // Collect data every second
+      // eslint-disable-next-line react-hooks/purity -- ref assignment in async event handler, not during render
       startTimeRef.current = Date.now();
       setRecordingState('recording');
 
@@ -406,7 +407,7 @@ export function VoiceRecorder({
                 )}
                 style={{
                   height: recordingState === 'recording'
-                    ? `${Math.random() * 100}%`
+                    ? `${[40, 70, 55, 85, 30][i]}%`
                     : '8px',
                   animationDelay: `${i * 0.1}s`,
                 }}

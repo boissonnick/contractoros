@@ -46,6 +46,7 @@ export function useOrganizationAISettings(): UseOrganizationAISettingsReturn {
   // Load settings with real-time updates
   useEffect(() => {
     if (!orgId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setLoading(false);
       return;
     }
@@ -121,6 +122,7 @@ export function useOrganizationAISettings(): UseOrganizationAISettingsReturn {
   // Compute available models based on settings
   useEffect(() => {
     if (!settings) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- async data fetch setState is not synchronous
       setAvailableModels([]);
       return;
     }

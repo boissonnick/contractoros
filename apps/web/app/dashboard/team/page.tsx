@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
 import { collection, query, where, getDocs, doc, updateDoc, deleteDoc, Timestamp } from 'firebase/firestore';
@@ -58,6 +58,9 @@ const roleLabels: Record<UserRole, { label: string; color: string }> = {
   SUB: { label: 'Subcontractor', color: 'bg-yellow-100 text-yellow-700' },
   CLIENT: { label: 'Client', color: 'bg-gray-100 text-gray-700' },
 };
+
+// Team roles - excludes SUB (subcontractors) and CLIENT (handled in separate modules)
+const TEAM_ROLES: UserRole[] = ['OWNER', 'PM', 'EMPLOYEE', 'CONTRACTOR'];
 
 export default function TeamPage() {
   const { user, profile } = useAuth();
@@ -126,7 +129,7 @@ export default function TeamPage() {
   });
 
   // Calculate utilization from real schedule data
-  const getMemberUtilization = (member: UserProfile) => {
+  const getMemberUtilization = useCallback((member: UserProfile) => {
     const userId = member.uid;
     const totalAvailableHours = dateRanges.workHours;
 
@@ -169,7 +172,7 @@ export default function TeamPage() {
       hoursAssigned: Math.round(totalHoursAssigned * 10) / 10,
       totalHours: totalAvailableHours
     };
-  };
+  }, [scheduleEvents, scheduleAssignments, dateRanges.workHours]);
 
   // Get upcoming assignments for a member
   const getMemberAssignments = (member: UserProfile) => {
@@ -248,7 +251,7 @@ export default function TeamPage() {
       total: members.length,
       avgUtilization: Math.round(totalUtilization / members.length),
     };
-  }, [members, scheduleEvents, scheduleAssignments, dateRanges]);
+  }, [members, getMemberUtilization]);
 
   // Get week days for weekly view
   const getWeekDays = (startDate: Date) => {
@@ -330,16 +333,7 @@ export default function TeamPage() {
     };
   };
 
-  // Team roles - excludes SUB (subcontractors) and CLIENT (handled in separate modules)
-  const TEAM_ROLES: UserRole[] = ['OWNER', 'PM', 'EMPLOYEE', 'CONTRACTOR'];
-
-  useEffect(() => {
-    if (profile?.orgId) {
-      loadTeamData();
-    }
-  }, [profile?.orgId]);
-
-  const loadTeamData = async () => {
+  const loadTeamData = useCallback(async () => {
     if (!profile?.orgId) return;
 
     setLoading(true);
@@ -386,7 +380,13 @@ export default function TeamPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [profile?.orgId]);
+
+  useEffect(() => {
+    if (profile?.orgId) {
+      loadTeamData();
+    }
+  }, [profile?.orgId, loadTeamData]);
 
   const cancelInvite = async (inviteId: string, inviteName: string) => {
     const confirmed = await confirm({

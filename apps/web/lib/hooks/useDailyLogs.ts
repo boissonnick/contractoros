@@ -72,6 +72,7 @@ export function useDailyLogs(options: UseDailyLogsOptions = {}): UseDailyLogsRet
   // Fetch logs with real-time updates
   useEffect(() => {
     if (!orgId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setLoading(false);
       return;
     }
@@ -451,6 +452,9 @@ export function usePaginatedDailyLogs(
   } = options;
 
   // Build query filters with useMemo to prevent infinite loops
+  const _dateRangeStartTime = dateRange?.start?.getTime();
+  const _dateRangeEndTime = dateRange?.end?.getTime();
+
   const filters = useMemo(() => {
     const constraints: QueryConstraint[] = [];
 
@@ -477,7 +481,7 @@ export function usePaginatedDailyLogs(
     }
 
     return constraints;
-  }, [projectId, userId, category, dateRange?.start?.getTime(), dateRange?.end?.getTime()]);
+  }, [projectId, userId, category, dateRange?.start, dateRange?.end]);
 
   // Use the generic pagination hook
   const paginationResult = usePagination<DailyLogEntry>(orgId, 'dailyLogs', {

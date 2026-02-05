@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { UserProfile, AvailabilityDefault, Availability } from '@/types';
@@ -29,7 +29,7 @@ export default function CrewAvailabilityGrid({ teamMembers, orgId }: CrewAvailab
   const [allOverrides, setAllOverrides] = useState<Availability[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const weekDates = getWeekDates(refDate);
+  const weekDates = useMemo(() => getWeekDates(refDate), [refDate]);
   const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export default function CrewAvailabilityGrid({ teamMembers, orgId }: CrewAvailab
       } as Availability)));
       setLoading(false);
     }).catch(() => setLoading(false));
-  }, [orgId, teamMembers, refDate]);
+  }, [orgId, teamMembers, weekDates]);
 
   const isAvailable = (userId: string, date: Date): boolean => {
     const dateStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());

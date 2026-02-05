@@ -132,6 +132,7 @@ export function useCompanyStats(): UseCompanyStatsReturn {
   // Fetch all collections in parallel
   useEffect(() => {
     if (!orgId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- async data fetch setState is not synchronous
       setLoading(false);
       return;
     }

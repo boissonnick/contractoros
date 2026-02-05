@@ -44,6 +44,8 @@ export function useAvailability({ userId, month }: UseAvailabilityOptions) {
   }, [targetUserId]);
 
   // Load date-specific overrides for current month
+  const monthValue = month?.getMonth();
+  const yearValue = month?.getFullYear();
   useEffect(() => {
     if (!targetUserId) return;
     const target = month || new Date();
@@ -61,7 +63,7 @@ export function useAvailability({ userId, month }: UseAvailabilityOptions) {
       setLoading(false);
     }, () => setLoading(false));
     return unsub;
-  }, [targetUserId, month?.getMonth(), month?.getFullYear()]);
+  }, [targetUserId, month, monthValue, yearValue]);
 
   const saveDefaults = useCallback(async (newDefaults: Omit<AvailabilityDefault, 'id'>[]) => {
     if (!targetUserId || !profile?.orgId) return;

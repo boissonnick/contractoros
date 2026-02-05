@@ -264,7 +264,7 @@ export function SkeletonSchedule() {
                 <Skeleton className="h-6 w-6 mx-auto" rounded="full" />
               </div>
               <div className="flex-1 p-1 space-y-1">
-                {Array.from({ length: Math.floor(Math.random() * 3) + 1 }).map((_, j) => (
+                {Array.from({ length: (i % 3) + 1 }).map((_, j) => (
                   <Skeleton key={j} className="h-12 w-full" rounded="md" />
                 ))}
               </div>
@@ -536,7 +536,7 @@ export function SkeletonReports() {
             <Skeleton className="h-4 w-32" />
             <div className="mt-4 flex gap-0.5 items-end h-8">
               {Array.from({ length: 6 }).map((_, j) => (
-                <Skeleton key={j} className="flex-1" height={12 + Math.random() * 20} rounded="sm" />
+                <Skeleton key={j} className="flex-1" height={12 + [4, 16, 8, 20, 12, 6][j]} rounded="sm" />
               ))}
             </div>
           </div>

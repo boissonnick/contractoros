@@ -109,6 +109,7 @@ export function NotificationCenter({
   // Animate badge when unread count increases
   useEffect(() => {
     if (unreadCount > prevUnreadRef.current) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- event listener callback is an async handler
       setAnimate(true);
       const timer = setTimeout(() => setAnimate(false), 1000);
       return () => clearTimeout(timer);

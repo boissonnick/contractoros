@@ -97,6 +97,7 @@ export function DailyLogCard({
               className="p-2 rounded-lg"
               style={{ backgroundColor: `${categoryInfo?.color}15` }}
             >
+              {/* eslint-disable-next-line react-hooks/static-components -- dynamic icon component selected by log category */}
               <CategoryIcon
                 className="h-5 w-5"
                 style={{ color: categoryInfo?.color }}

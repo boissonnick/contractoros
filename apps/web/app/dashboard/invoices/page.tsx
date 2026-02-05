@@ -177,7 +177,7 @@ export default function InvoicesPage() {
       setCurrentPage(1);
       loadInvoices('first');
     }
-  }, [profile?.orgId, pageSize]);
+  }, [profile?.orgId, pageSize, loadInvoices]);
 
   const goToNextPage = () => {
     if (currentPage < totalPages) {

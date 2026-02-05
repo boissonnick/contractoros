@@ -164,7 +164,7 @@ export default function BillingSettingsPage() {
     }
 
     loadData();
-  }, [profile?.orgId]);
+  }, [profile]);
 
   const currentPlan = PLANS[subscription.plan];
   const currentLimits = currentPlan.limits;

@@ -20,6 +20,7 @@ export default function ProjectPnLReport({ data }: ProjectPnLReportProps) {
 
   // Reset page when data changes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is necessary for this pattern
     setCurrentPage(1);
   }, [data.length]);
 

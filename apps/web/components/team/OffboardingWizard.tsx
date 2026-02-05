@@ -139,7 +139,7 @@ export function OffboardingWizard({
     }
 
     loadTeamMembers();
-  }, [profile?.orgId, isOpen, targetUser.id]);
+  }, [profile, isOpen, targetUser.id]);
 
   // Load impact preview when wizard opens
   useEffect(() => {
@@ -155,7 +155,7 @@ export function OffboardingWizard({
     }
 
     loadImpact();
-  }, [profile?.orgId, isOpen, targetUser.id]);
+  }, [profile, isOpen, targetUser.id]);
 
   // Reset state when modal opens
   useEffect(() => {

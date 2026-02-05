@@ -155,7 +155,7 @@ export function usePaginatedQuery<T extends { id: string }>({
       fetchTotalCount();
       fetchPage(1);
     }
-  }, [enabled, fetchTotalCount]);
+  }, [enabled, fetchTotalCount, fetchPage]);
 
   const goToPage = useCallback((page: number) => {
     if (page >= 1 && page <= pagination.totalPages) {

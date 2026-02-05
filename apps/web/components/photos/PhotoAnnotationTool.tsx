@@ -60,7 +60,7 @@ export default function PhotoAnnotationTool({
 }: PhotoAnnotationToolProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
+  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const [image, setImage] = useState<HTMLImageElement | null>(null);
   const [tool, setTool] = useState<AnnotationType>('arrow');
   const [color, setColor] = useState(COLORS[0]);
@@ -95,14 +95,33 @@ export default function PhotoAnnotationTool({
         canvasRef.current.height = height;
 
         const context = canvasRef.current.getContext('2d');
-        setCtx(context);
+        ctxRef.current = context;
       }
     };
     img.src = imageUrl;
   }, [imageUrl]);
 
+  // Draw arrow helper
+  const drawArrow = (ctx: CanvasRenderingContext2D, fromX: number, fromY: number, toX: number, toY: number) => {
+    const headLength = 15;
+    const angle = Math.atan2(toY - fromY, toX - fromX);
+
+    ctx.beginPath();
+    ctx.moveTo(fromX, fromY);
+    ctx.lineTo(toX, toY);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(toX, toY);
+    ctx.lineTo(toX - headLength * Math.cos(angle - Math.PI / 6), toY - headLength * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(toX - headLength * Math.cos(angle + Math.PI / 6), toY - headLength * Math.sin(angle + Math.PI / 6));
+    ctx.closePath();
+    ctx.fill();
+  };
+
   // Redraw canvas
   const redrawCanvas = useCallback(() => {
+    const ctx = ctxRef.current;
     if (!ctx || !image || !canvasRef.current) return;
 
     const canvas = canvasRef.current;
@@ -169,29 +188,11 @@ export default function PhotoAnnotationTool({
           break;
       }
     });
-  }, [ctx, image, existingAnnotations, annotations]);
+  }, [image, existingAnnotations, annotations]);
 
   useEffect(() => {
     redrawCanvas();
   }, [redrawCanvas]);
-
-  // Draw arrow helper
-  const drawArrow = (ctx: CanvasRenderingContext2D, fromX: number, fromY: number, toX: number, toY: number) => {
-    const headLength = 15;
-    const angle = Math.atan2(toY - fromY, toX - fromX);
-
-    ctx.beginPath();
-    ctx.moveTo(fromX, fromY);
-    ctx.lineTo(toX, toY);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(toX, toY);
-    ctx.lineTo(toX - headLength * Math.cos(angle - Math.PI / 6), toY - headLength * Math.sin(angle - Math.PI / 6));
-    ctx.lineTo(toX - headLength * Math.cos(angle + Math.PI / 6), toY - headLength * Math.sin(angle + Math.PI / 6));
-    ctx.closePath();
-    ctx.fill();
-  };
 
   // Get canvas coordinates from event
   const getCanvasCoords = (e: React.MouseEvent | React.TouchEvent): Point => {
@@ -229,6 +230,7 @@ export default function PhotoAnnotationTool({
   };
 
   const handleMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
+    const ctx = ctxRef.current;
     if (!isDrawing || !startPoint || !ctx || !canvasRef.current || !image) return;
 
     const point = getCanvasCoords(e);

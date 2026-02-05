@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
 import {
@@ -44,11 +44,7 @@ export function PhaseTemplatesTab() {
     { name: '', order: 1 },
   ]);
 
-  useEffect(() => {
-    if (profile?.orgId) loadTemplates();
-  }, [profile?.orgId]);
-
-  const loadTemplates = async () => {
+  const loadTemplates = useCallback(async () => {
     if (!profile?.orgId) return;
     setLoading(true);
     try {
@@ -65,7 +61,11 @@ export function PhaseTemplatesTab() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [profile?.orgId]);
+
+  useEffect(() => {
+    if (profile?.orgId) loadTemplates();
+  }, [profile?.orgId, loadTemplates]);
 
   const handleCreateTemplate = async () => {
     if (!profile?.orgId || !newName.trim() || !newScopeType.trim()) {

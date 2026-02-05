@@ -268,6 +268,7 @@ export function useVoiceCommands(
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const supported = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is necessary for this pattern
       setIsSupported(supported);
     }
   }, []);

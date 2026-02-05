@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
 import {
@@ -96,7 +96,7 @@ export default function EmailHistoryPage() {
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
   const orgId = profile?.orgId;
 
-  const loadLogs = async (direction: 'first' | 'next' | 'prev' = 'first') => {
+  const loadLogs = useCallback(async (direction: 'first' | 'next' | 'prev' = 'first') => {
     if (!orgId) {
       setLoading(false);
       return;
@@ -165,14 +165,14 @@ export default function EmailHistoryPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [orgId, lastDoc, pageHistory]);
 
   useEffect(() => {
     if (orgId) {
       setCurrentPage(1);
       loadLogs('first');
     }
-  }, [orgId]);
+  }, [orgId, loadLogs]);
 
   const goToNextPage = () => {
     if (currentPage < totalPages) {

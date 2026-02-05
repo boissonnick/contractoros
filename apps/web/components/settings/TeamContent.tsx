@@ -187,7 +187,7 @@ export default function TeamContent() {
     }
 
     loadMembers();
-  }, [profile?.orgId]);
+  }, [profile]);
 
   // Load restorable (offboarded) users
   useEffect(() => {
@@ -206,7 +206,7 @@ export default function TeamContent() {
     }
 
     loadRestorableUsers();
-  }, [profile?.orgId, isOwner]);
+  }, [profile, isOwner]);
 
   const startEditing = (member: TeamMember) => {
     if (!canManageTeam) return;

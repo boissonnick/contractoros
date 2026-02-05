@@ -46,6 +46,7 @@ export function useTaskComments(taskId: string | null): UseTaskCommentsReturn {
 
   useEffect(() => {
     if (!taskId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setComments([]);
       setLoading(false);
       return;

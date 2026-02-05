@@ -132,6 +132,7 @@ export function FloatingSyncIndicator({
   // Determine current status
   useEffect(() => {
     if (!state.isOnline) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- async data fetch setState is not synchronous
       setStatus('offline');
     } else if (state.syncingCount > 0) {
       setStatus('syncing');

@@ -139,6 +139,7 @@ export function useSMSTemplates(
   // Subscribe to templates collection
   useEffect(() => {
     if (!orgId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setTemplates([]);
       setLoading(false);
       return;

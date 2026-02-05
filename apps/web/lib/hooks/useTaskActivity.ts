@@ -38,6 +38,7 @@ export function useTaskActivity(taskId: string | null, limit = 50): UseTaskActiv
 
   useEffect(() => {
     if (!taskId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setActivities([]);
       setLoading(false);
       return;

@@ -47,8 +47,72 @@ export default function SigningPage() {
   const [declineReason, setDeclineReason] = useState('');
   const [showDeclineModal, setShowDeclineModal] = useState(false);
 
+  // Get client IP (mock for now - in production use a service)
+  async function getClientIp(): Promise<string> {
+    try {
+      const response = await fetch('https://api.ipify.org?format=json');
+      const data = await response.json();
+      return data.ip;
+    } catch {
+      return 'unknown';
+    }
+  }
+
   // Fetch signature request data
   useEffect(() => {
+    // Decode token (format: base64(requestId:signerIndex))
+    function decodeToken(tkn: string): [string | null, number | undefined] {
+      try {
+        const decoded = atob(tkn);
+        const [requestId, indexStr] = decoded.split(':');
+        const signerIndex = indexStr ? parseInt(indexStr, 10) : undefined;
+        return [requestId, signerIndex];
+      } catch {
+        // Try treating token as just the request ID
+        return [tkn, undefined];
+      }
+    }
+
+    // Record view event
+    async function recordView(request: SignatureRequest, signerIdx: number) {
+      try {
+        const signer = request.signers[signerIdx];
+        const now = new Date();
+
+        // Update signer view status
+        const updatedSigners = [...request.signers];
+        updatedSigners[signerIdx] = {
+          ...signer,
+          status: signer.status === 'pending' ? 'viewed' : signer.status,
+          viewedAt: signer.viewedAt || now,
+          viewCount: (signer.viewCount || 0) + 1,
+          lastViewedAt: now,
+        };
+
+        // Add audit entry
+        const auditEntry: SignatureAuditEntry = {
+          id: `audit_${Date.now()}`,
+          action: 'viewed',
+          timestamp: now,
+          actorId: signer.id,
+          actorName: signer.name,
+          actorEmail: signer.email,
+          actorRole: 'signer',
+          ipAddress: await getClientIp(),
+          userAgent: navigator.userAgent,
+        };
+
+        await updateDoc(doc(db, 'signatureRequests', request.id), {
+          signers: updatedSigners,
+          status: request.status === 'pending' ? 'viewed' : request.status,
+          auditTrail: [...request.auditTrail, auditEntry],
+          updatedAt: Timestamp.now(),
+        });
+      } catch (error) {
+        console.error('Error recording view:', error);
+      }
+    }
+
     async function fetchSignatureRequest() {
       if (!token) {
         setState((s) => ({ ...s, status: 'invalid', error: 'Invalid signing link' }));
@@ -160,70 +224,6 @@ export default function SigningPage() {
 
     fetchSignatureRequest();
   }, [token]);
-
-  // Decode token (format: base64(requestId:signerIndex))
-  function decodeToken(token: string): [string | null, number | undefined] {
-    try {
-      const decoded = atob(token);
-      const [requestId, indexStr] = decoded.split(':');
-      const signerIndex = indexStr ? parseInt(indexStr, 10) : undefined;
-      return [requestId, signerIndex];
-    } catch {
-      // Try treating token as just the request ID
-      return [token, undefined];
-    }
-  }
-
-  // Record view event
-  async function recordView(request: SignatureRequest, signerIndex: number) {
-    try {
-      const signer = request.signers[signerIndex];
-      const now = new Date();
-
-      // Update signer view status
-      const updatedSigners = [...request.signers];
-      updatedSigners[signerIndex] = {
-        ...signer,
-        status: signer.status === 'pending' ? 'viewed' : signer.status,
-        viewedAt: signer.viewedAt || now,
-        viewCount: (signer.viewCount || 0) + 1,
-        lastViewedAt: now,
-      };
-
-      // Add audit entry
-      const auditEntry: SignatureAuditEntry = {
-        id: `audit_${Date.now()}`,
-        action: 'viewed',
-        timestamp: now,
-        actorId: signer.id,
-        actorName: signer.name,
-        actorEmail: signer.email,
-        actorRole: 'signer',
-        ipAddress: await getClientIp(),
-        userAgent: navigator.userAgent,
-      };
-
-      await updateDoc(doc(db, 'signatureRequests', request.id), {
-        signers: updatedSigners,
-        status: request.status === 'pending' ? 'viewed' : request.status,
-        auditTrail: [...request.auditTrail, auditEntry],
-        updatedAt: Timestamp.now(),
-      });
-    } catch (error) {
-      console.error('Error recording view:', error);
-    }
-  }
-
-  // Get client IP (mock for now - in production use a service)
-  async function getClientIp(): Promise<string> {
-    try {
-      const response = await fetch('https://api.ipify.org?format=json');
-      const data = await response.json();
-      return data.ip;
-    } catch {
-      return 'unknown';
-    }
-  }
 
   // Handle sign document
   const handleSign = useCallback(async () => {

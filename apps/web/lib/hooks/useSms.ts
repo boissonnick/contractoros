@@ -255,6 +255,7 @@ export function useSmsConversations() {
 
   useEffect(() => {
     if (!orgId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setLoading(false);
       return;
     }
@@ -306,6 +307,7 @@ export function useSmsTemplates() {
 
   useEffect(() => {
     if (!orgId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setLoading(false);
       return;
     }
@@ -667,6 +669,7 @@ export function useSMSMessages(
 
   useEffect(() => {
     if (!orgId || !phoneNumber) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setLoading(false);
       setMessages([]);
       return;

@@ -44,6 +44,7 @@ export function useNetworkStatus(): NetworkStatus {
     if (typeof window === 'undefined') return;
 
     // Set initial state
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- event listener callback is an async handler
     setIsOnline(navigator.onLine);
 
     // Add event listeners

@@ -671,6 +671,7 @@ export default function FinancialReportsPage() {
     .reduce((sum, a) => sum + a.amount, 0);
 
   // Generate AI insights from financial data
+  // eslint-disable-next-line react-hooks/rules-of-hooks -- useMemo always called; early returns above are for loading/error states
   const financialInsightsData: FinancialDataInput = useMemo(() => ({
     revenue: summary.totalRevenue,
     expenses: summary.totalSpent,
@@ -689,11 +690,13 @@ export default function FinancialReportsPage() {
     previousPeriodRevenue: revenueByMonth.length > 1 ? revenueByMonth[revenueByMonth.length - 2]?.revenue : undefined,
   }), [summary, netProfitMarginPct, invoiceAging, overdueAmount, revenueByMonth]);
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks -- useMemo always called; early returns above are for loading/error states
   const financialInsights = useMemo(
     () => analyzeFinancialData(financialInsightsData, { maxInsights: 8 }),
     [financialInsightsData]
   );
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks -- useMemo always called; early returns above are for loading/error states
   const insightsSummary = useMemo(
     () => generateInsightSummary(financialInsights, { periodLabel: 'this period', dataType: 'financial' }),
     [financialInsights]

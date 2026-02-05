@@ -151,7 +151,8 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
     },
     ref
   ) => {
-    const inputId = id || `datepicker-${Math.random().toString(36).substr(2, 9)}`;
+    const generatedId = React.useId();
+    const inputId = id || `datepicker-${generatedId}`;
 
     const formattedValue = useMemo(() => formatDateForInput(value), [value]);
     const formattedMin = useMemo(() => formatDateForInput(min), [min]);

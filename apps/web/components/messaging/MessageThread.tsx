@@ -565,7 +565,7 @@ export function MessageThread({
     if (!loading && messages.length > 0) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
     }
-  }, [loading]);
+  }, [loading, messages.length]);
 
   // Group messages by date
   const groupedMessages = groupMessagesByDate(messages);

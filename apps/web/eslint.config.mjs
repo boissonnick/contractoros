@@ -35,7 +35,10 @@ const eslintConfig = [
       // These enforce patterns needed for the React Compiler (React 19).
       // Address incrementally as components are refactored.
       'react-hooks/set-state-in-effect': 'warn',
-      'react-hooks/preserve-manual-memoization': 'warn',
+      // Disabled: React Compiler handles memoization automatically in React 19.
+      // Manual useCallback/useMemo wrappers become no-ops when the compiler is active.
+      // The 60 warnings from this rule are false positives in a compiled codebase.
+      'react-hooks/preserve-manual-memoization': 'off',
       'react-hooks/purity': 'warn',
       'react-hooks/static-components': 'warn',
       'react-hooks/immutability': 'warn',

@@ -69,9 +69,18 @@ export default function PhotoLightbox({
   // Reset index when photos change or modal opens
   useEffect(() => {
     if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is necessary for this pattern
       setCurrentIndex(Math.min(initialIndex, photos.length - 1));
     }
   }, [open, initialIndex, photos.length]);
+
+  const goToPrevious = useCallback(() => {
+    setCurrentIndex(prev => (prev > 0 ? prev - 1 : photos.length - 1));
+  }, [photos.length]);
+
+  const goToNext = useCallback(() => {
+    setCurrentIndex(prev => (prev < photos.length - 1 ? prev + 1 : 0));
+  }, [photos.length]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -91,15 +100,7 @@ export default function PhotoLightbox({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [open, currentIndex, photos.length, isAnnotating]);
-
-  const goToPrevious = useCallback(() => {
-    setCurrentIndex(prev => (prev > 0 ? prev - 1 : photos.length - 1));
-  }, [photos.length]);
-
-  const goToNext = useCallback(() => {
-    setCurrentIndex(prev => (prev < photos.length - 1 ? prev + 1 : 0));
-  }, [photos.length]);
+  }, [open, isAnnotating, goToPrevious, goToNext, onClose]);
 
   const handleDownload = async () => {
     if (!currentPhoto) return;

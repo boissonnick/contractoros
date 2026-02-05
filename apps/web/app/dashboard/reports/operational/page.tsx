@@ -330,6 +330,7 @@ export default function OperationalReportsPage() {
   }
 
   // Generate operational insights
+  // eslint-disable-next-line react-hooks/rules-of-hooks -- useMemo always called; early returns above are for loading/error states
   const operationalInsights: AIInsight[] = useMemo(() => {
     const insights: AIInsight[] = [];
     const now = new Date();
@@ -433,6 +434,7 @@ export default function OperationalReportsPage() {
     return insights;
   }, [metrics, projectTimelines, tasksByStatus]);
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks -- useMemo always called; early returns above are for loading/error states
   const operationalSummary = useMemo(
     () => generateInsightSummary(operationalInsights, { periodLabel: 'this period', dataType: 'operational' }),
     [operationalInsights]

@@ -125,13 +125,6 @@ export function usePayroll({ orgId, enabled = true }: UsePayrollOptions): UsePay
     return () => unsubscribe();
   }, [orgId, enabled]);
 
-  // Load settings on mount
-  useEffect(() => {
-    if (!enabled || !orgId) return;
-
-    loadSettings();
-  }, [orgId, enabled]);
-
   const loadSettings = useCallback(async () => {
     try {
       const loadedSettings = await getPayrollSettings(orgId);
@@ -140,6 +133,13 @@ export function usePayroll({ orgId, enabled = true }: UsePayrollOptions): UsePay
       console.error('Error loading payroll settings:', err);
     }
   }, [orgId]);
+
+  // Load settings on mount
+  useEffect(() => {
+    if (!enabled || !orgId) return;
+
+    loadSettings();
+  }, [orgId, enabled, loadSettings]);
 
   const loadPayrollRun = useCallback(async (runId: string) => {
     try {

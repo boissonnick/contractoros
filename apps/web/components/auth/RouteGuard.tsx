@@ -71,6 +71,7 @@ export function RouteGuard({
 
     // Not authenticated at all - AuthGuard should handle this
     if (!user || !profile) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is necessary for this pattern
       setHasAccess(false);
       return;
     }

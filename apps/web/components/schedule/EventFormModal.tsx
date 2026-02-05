@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { Button, Input } from '@/components/ui';
 import BaseModal from '@/components/ui/BaseModal';
@@ -90,7 +90,7 @@ export default function EventFormModal({
 }: EventFormModalProps) {
   const isEditing = !!event;
 
-  const getDefaultStartDate = () => {
+  const getDefaultStartDate = useCallback(() => {
     if (initialDate) {
       const d = new Date(initialDate);
       d.setHours(9, 0, 0, 0);
@@ -99,7 +99,7 @@ export default function EventFormModal({
     const d = new Date();
     d.setHours(9, 0, 0, 0);
     return d;
-  };
+  }, [initialDate]);
 
   const getDefaultEndDate = (start: Date) => {
     const d = new Date(start);
@@ -141,6 +141,7 @@ export default function EventFormModal({
   useEffect(() => {
     if (open) {
       if (event) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is necessary for this pattern
         setFormData({
           title: event.title,
           description: event.description || '',
@@ -199,7 +200,7 @@ export default function EventFormModal({
       }
       setErrors({});
     }
-  }, [open, event, initialDate]);
+  }, [open, event, initialDate, getDefaultStartDate]);
 
   const formatDateForInput = (date: Date) => {
     return date.toISOString().slice(0, 16);

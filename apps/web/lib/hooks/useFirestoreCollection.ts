@@ -134,6 +134,7 @@ export function useFirestoreCollection<T>({
   useEffect(() => {
     // Skip if disabled
     if (!enabled) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setLoading(false);
       setItems([]);
       return;
@@ -187,7 +188,7 @@ export function useFirestoreCollection<T>({
     const unsubscribe = onSnapshot(q, handleSnapshot, handleError);
 
     return () => unsubscribe();
-  }, [path, constraintsKey, enabled, refetchTrigger, converter, onData, onError]);
+  }, [path, constraintsKey, constraints, enabled, refetchTrigger, converter, onData, onError]);
 
   return {
     items,

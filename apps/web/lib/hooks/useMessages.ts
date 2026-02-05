@@ -58,6 +58,7 @@ export function useChannels() {
 
   useEffect(() => {
     if (!profile?.orgId || !user?.uid) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setLoading(false);
       return;
     }
@@ -116,6 +117,7 @@ export function useMessages(channelId: string | null) {
 
   useEffect(() => {
     if (!channelId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setMessages([]);
       setLoading(false);
       return;

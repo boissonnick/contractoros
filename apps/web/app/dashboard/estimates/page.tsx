@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
@@ -53,7 +53,7 @@ export default function EstimatesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<EstimateStatus | 'all'>('all');
 
-  const loadEstimates = async () => {
+  const loadEstimates = useCallback(async () => {
     if (!profile?.orgId) return;
 
     try {
@@ -83,13 +83,13 @@ export default function EstimatesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [profile?.orgId]);
 
   useEffect(() => {
     if (profile?.orgId) {
       loadEstimates();
     }
-  }, [profile?.orgId]);
+  }, [profile?.orgId, loadEstimates]);
 
   const filteredEstimates = useMemo(() => {
     return estimates.filter((estimate) => {

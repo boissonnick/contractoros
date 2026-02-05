@@ -69,6 +69,7 @@ export default function CreateAlbumModal({
     },
   });
 
+  // eslint-disable-next-line react-hooks/incompatible-library -- react-hook-form watch() is intentional; compiler skips this component
   const isPublic = watch('isPublic');
   const clientAccessEnabled = watch('clientAccessEnabled');
 

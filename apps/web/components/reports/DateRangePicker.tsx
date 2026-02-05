@@ -58,6 +58,7 @@ export function DateRangePicker({
 
   // Update custom dates when value changes externally
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is necessary for this pattern
     setCustomStart(formatDateForInput(value.startDate));
     setCustomEnd(formatDateForInput(value.endDate));
   }, [value.startDate, value.endDate]);

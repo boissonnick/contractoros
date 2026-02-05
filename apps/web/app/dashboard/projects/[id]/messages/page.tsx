@@ -90,6 +90,7 @@ function useProjectChannels(projectId: string | null) {
 
   useEffect(() => {
     if (!profile?.orgId || !projectId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setLoading(false);
       return;
     }
@@ -149,6 +150,7 @@ function useProjectMessages(channelId: string | null) {
 
   useEffect(() => {
     if (!channelId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setMessages([]);
       setLoading(false);
       return;
@@ -361,6 +363,7 @@ export default function ProjectMessagesPage() {
   // Select first channel by default or auto-create if none exist
   useEffect(() => {
     if (!channelsLoading && channels.length > 0 && !activeChannelId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- async data fetch setState is not synchronous
       setActiveChannelId(channels[0].id);
     }
   }, [channels, channelsLoading, activeChannelId]);

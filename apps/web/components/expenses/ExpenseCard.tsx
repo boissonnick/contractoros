@@ -190,6 +190,7 @@ export function ExpenseCard({
               className="p-2 rounded-lg"
               style={{ backgroundColor: `${categoryInfo?.color}15` }}
             >
+              {/* eslint-disable-next-line react-hooks/static-components -- dynamic icon selected by expense category */}
               <CategoryIcon
                 className="h-5 w-5"
                 style={{ color: categoryInfo?.color }}
@@ -237,6 +238,7 @@ export function ExpenseCard({
               {formatCurrency(expense.amount)}
             </span>
             <Badge variant={getStatusVariant(expense.status)} size="sm">
+              {/* eslint-disable-next-line react-hooks/static-components -- dynamic icon selected by expense status */}
               <StatusIcon className="h-3 w-3 mr-1" />
               {statusInfo?.label || expense.status}
             </Badge>

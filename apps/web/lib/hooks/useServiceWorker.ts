@@ -226,6 +226,7 @@ export function useServiceWorker(): UseServiceWorkerReturn {
 
     // Check if app is installed as PWA
     const mqStandalone = window.matchMedia('(display-mode: standalone)');
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- event listener callback is an async handler
     setIsInstalled(mqStandalone.matches);
 
     const handleDisplayModeChange = (e: MediaQueryListEvent) => setIsInstalled(e.matches);

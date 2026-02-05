@@ -70,7 +70,7 @@ export default function SendForSignatureModal({
   const { profile } = useAuth();
 
   const [step, setStep] = useState<'signers' | 'message' | 'sending' | 'success' | 'error'>('signers');
-  const [signers, setSigners] = useState<Signer[]>([
+  const [signers, setSigners] = useState<Signer[]>(() => [
     {
       id: `signer_${Date.now()}`,
       name: defaultSigner?.name || '',

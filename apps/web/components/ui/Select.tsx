@@ -105,7 +105,8 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
     },
     ref
   ) => {
-    const selectId = id || `select-${Math.random().toString(36).substr(2, 9)}`;
+    const generatedId = React.useId();
+    const selectId = id || `select-${generatedId}`;
 
     return (
       <div className={cn('w-full', containerClassName)}>

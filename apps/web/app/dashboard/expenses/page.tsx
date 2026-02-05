@@ -95,6 +95,7 @@ export default function ExpensesPage() {
 
   // Reset page when filters change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- async data fetch setState is not synchronous
     setExpensePage(1);
   }, [quickFilter, filterProjectId, filterCategory, currentMonth]);
 

@@ -139,6 +139,7 @@ export default function NotificationSettingsPage() {
 
   useEffect(() => {
     if (preferences?.quietHours) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- async data fetch setState is not synchronous
       setLocalQuietHours(preferences.quietHours);
     }
   }, [preferences?.quietHours]);

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
@@ -147,7 +147,7 @@ export default function OnboardingChecklist({
   }, [profile?.orgId, userIds]);
 
   // Calculate onboarding progress for a user
-  const getOnboardingProgress = (userId: string): { progress: number; status: 'pending' | 'in_progress' | 'completed' } => {
+  const getOnboardingProgress = useCallback((userId: string): { progress: number; status: 'pending' | 'in_progress' | 'completed' } => {
     const status = onboardingStatuses[userId];
     if (!status) {
       return { progress: 0, status: 'pending' };
@@ -167,7 +167,7 @@ export default function OnboardingChecklist({
     if (progress === 100) return { progress, status: 'completed' };
     if (progress > 0) return { progress, status: 'in_progress' };
     return { progress: 0, status: 'pending' };
-  };
+  }, [onboardingStatuses]);
 
   // Filter users based on search and status
   const filteredUsers = useMemo(() => {
@@ -187,7 +187,7 @@ export default function OnboardingChecklist({
 
       return matchesSearch && matchesStatus;
     });
-  }, [users, searchQuery, statusFilter, onboardingStatuses]);
+  }, [users, searchQuery, statusFilter, getOnboardingProgress]);
 
   // Get status counts for filter badges
   const statusCounts = useMemo(() => {
@@ -198,7 +198,7 @@ export default function OnboardingChecklist({
       counts[status]++;
     });
     return counts;
-  }, [users, onboardingStatuses]);
+  }, [users, getOnboardingProgress]);
 
   // Handle manual step trigger
   const handleTriggerStep = async (userId: string, step: OnboardingStep) => {

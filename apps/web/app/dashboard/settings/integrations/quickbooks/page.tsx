@@ -114,7 +114,7 @@ export default function QuickBooksSettingsPage() {
     );
 
     return () => unsubscribe();
-  }, [profile?.orgId]);
+  }, [profile]);
 
   // Handle connect
   const handleConnect = () => {
@@ -211,7 +211,7 @@ export default function QuickBooksSettingsPage() {
         setToast({ type: 'error', message: 'Failed to update settings' });
       }
     },
-    [profile?.orgId, connection]
+    [profile, connection]
   );
 
   // Clear toast after delay

@@ -152,6 +152,7 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
   // Fetch entries with real-time updates and merge offline entries
   useEffect(() => {
     if (!orgId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- async data fetch setState is not synchronous
       setLoading(false);
       return;
     }

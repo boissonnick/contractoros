@@ -968,6 +968,7 @@ function QueueItemCard({
   useEffect(() => {
     if (item.audioBlob) {
       const url = URL.createObjectURL(item.audioBlob);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is necessary for this pattern
       setAudioUrl(url);
       return () => URL.revokeObjectURL(url);
     }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -70,7 +70,7 @@ export function DailyLogFormModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<'basic' | 'work' | 'weather' | 'issues'>('basic');
 
-  const getDefaultValues = (): Partial<DailyLogFormData> => {
+  const getDefaultValues = useCallback((): Partial<DailyLogFormData> => {
     if (log) {
       return {
         projectId: log.projectId,
@@ -103,7 +103,7 @@ export function DailyLogFormModal({
       workPerformed: [],
       issues: [],
     };
-  };
+  }, [log, defaultProjectId]);
 
   const {
     register,
@@ -135,7 +135,7 @@ export function DailyLogFormModal({
     if (open) {
       reset(getDefaultValues());
     }
-  }, [open, log, reset]);
+  }, [open, log, reset, getDefaultValues]);
 
   const handleFormSubmit = async (data: DailyLogFormData) => {
     setIsSubmitting(true);

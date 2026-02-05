@@ -62,6 +62,7 @@ export function LazyImage({
   useEffect(() => {
     // If priority is set, don't use intersection observer
     if (priority) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- IntersectionObserver callback is an async handler
       setIsVisible(true);
       return;
     }

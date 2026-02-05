@@ -40,6 +40,7 @@ export function useNotifications() {
 
   useEffect(() => {
     if (!user?.uid) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setLoading(false);
       return;
     }
@@ -125,6 +126,7 @@ export function useNotificationPreferences() {
 
   useEffect(() => {
     if (!user?.uid || !profile?.orgId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setLoading(false);
       return;
     }
