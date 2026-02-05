@@ -11,7 +11,8 @@ This directory contains all documentation for ContractorOS development, organize
 **New to the project?** Start here:
 1. Read [`../CLAUDE.md`](../CLAUDE.md) — Core development instructions
 2. Check [`NEXT_SPRINTS_GUIDE.md`](NEXT_SPRINTS_GUIDE.md) — Current sprint priorities
-3. Review [`SPRINT_STATUS.md`](SPRINT_STATUS.md) — Active progress
+3. **Check [`MODULE_REGISTRY.md`](MODULE_REGISTRY.md) — Find modules without exploring (saves 200k+ tokens!)**
+4. Review [`SPRINT_STATUS.md`](SPRINT_STATUS.md) — Active progress
 
 ---
 
@@ -19,11 +20,12 @@ This directory contains all documentation for ContractorOS development, organize
 
 | Document | Purpose | When to Read | Token Cost |
 |----------|---------|--------------|------------|
+| **[MODULE_REGISTRY.md](MODULE_REGISTRY.md)** | **Codebase navigation (eliminates 200k+ token Explore agents)** | **Every sprint start** | **~5,000** |
 | [NEXT_SPRINTS_GUIDE.md](NEXT_SPRINTS_GUIDE.md) | Sprint quick-start & priorities | Session start (sprint planning) | ~3,000 |
 | [SPRINT_STATUS.md](SPRINT_STATUS.md) | Current progress & session handoffs | Daily (session start/end) | ~12,000 |
 | [REPRIORITIZED_SPRINT_PLAN.md](REPRIORITIZED_SPRINT_PLAN.md) | Active execution roadmap | Daily (sprint work) | ~18,000 |
 
-**Total daily:** ~33,000 tokens
+**Total daily:** ~38,000 tokens (but saves 200k+ tokens by avoiding Explore agents!)
 
 ---
 
@@ -114,6 +116,7 @@ Instead of reading entire files, use targeted search:
 
 **Always read:**
 - `../CLAUDE.md`
+- `MODULE_REGISTRY.md` ← **CHECK FIRST to avoid 200k+ token Explore agents!**
 - `NEXT_SPRINTS_GUIDE.md`
 - `SPRINT_STATUS.md`
 
@@ -124,6 +127,8 @@ Instead of reading entire files, use targeted search:
 - Reference docs (grep first!)
 - Technical docs for specific tasks
 - Archives only when explicitly researching history
+
+**DO NOT run Explore agents without checking MODULE_REGISTRY.md first!**
 
 ### For Human Developers
 
@@ -178,12 +183,13 @@ Instead of reading entire files, use targeted search:
 
 ```
 1. CLAUDE.md (core instructions)
-2. SPRINT_STATUS.md (what's current)
-3. REPRIORITIZED_SPRINT_PLAN.md (what's next)
-4. [Start coding]
+2. MODULE_REGISTRY.md (find modules - avoids Explore agents!)
+3. SPRINT_STATUS.md (what's current)
+4. REPRIORITIZED_SPRINT_PLAN.md (what's next)
+5. [Start coding immediately - no exploration needed!]
 ```
 
-**Token cost:** ~40,000
+**Token cost:** ~45,000 (but saves 200k+ by avoiding Explore agents!)
 
 ### Option 2: Bug Fixing
 
@@ -200,13 +206,14 @@ Instead of reading entire files, use targeted search:
 
 ```
 1. CLAUDE.md (core instructions)
-2. ARCHITECTURE.md (system design)
-3. DEVELOPMENT_GUIDE.md (patterns)
-4. reference/PATTERNS_AND_TEMPLATES.md (templates)
-5. [Build feature]
+2. MODULE_REGISTRY.md (find similar features/patterns)
+3. ARCHITECTURE.md (system design)
+4. DEVELOPMENT_GUIDE.md (patterns)
+5. reference/PATTERNS_AND_TEMPLATES.md (templates)
+6. [Build feature]
 ```
 
-**Token cost:** ~40,000-50,000
+**Token cost:** ~45,000-55,000 (but saves Explore agent tokens!)
 
 ### Option 4: Research / Planning
 

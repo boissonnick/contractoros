@@ -28,6 +28,56 @@ Focus on Settings Consolidation"
 
 ---
 
+## ⚡ BEFORE Starting Sprint Work
+
+**🚨 CRITICAL: Check MODULE_REGISTRY.md FIRST to avoid wasting 200k+ tokens on Explore agents!**
+
+### The Problem
+
+**Sprint 53 wasted 248.8k tokens** just exploring the codebase before work could begin:
+- Explore settings module: 26 tool uses, 100.1k tokens
+- Explore schedule module: 26 tool uses, 86.2k tokens
+- Explore mobile UI: 24 tool uses, 62.5k tokens
+
+**This repeats every sprint** — Sprints 47-52 all wasted 150-250k tokens on exploration.
+
+### The Solution: MODULE_REGISTRY.md
+
+**Always follow this workflow:**
+
+1. **Identify** what features/modules you need for the sprint
+2. **Look them up** in `docs/MODULE_REGISTRY.md` first
+3. **If found:** Use those file paths directly (no exploration needed!)
+4. **If NOT found:** Run Explore agent, then UPDATE MODULE_REGISTRY.md so next sprint doesn't repeat the waste
+
+### Token Comparison
+
+| Approach | Token Cost | Time |
+|----------|-----------|------|
+| ❌ Explore from scratch | 200k+ tokens | ~15 minutes |
+| ✅ Check registry first | 5k tokens | ~30 seconds |
+| **Savings** | **~195k tokens** | **~14 minutes** |
+
+### Example: Settings Sprint
+
+**❌ Old way (Sprint 53 did this):**
+```
+1. Launch Explore agent: settings module
+2. Wait for 26 tool uses, 100.1k tokens
+3. Finally discover: useSessionManagement.ts, settings/page.tsx
+```
+
+**✅ New way (what Sprint 53 should do):**
+```
+1. Open docs/MODULE_REGISTRY.md
+2. Find "Settings" row → useSessionManagement.ts, settings/page.tsx
+3. Start work immediately
+```
+
+**DO NOT run Explore agents without checking MODULE_REGISTRY.md first!**
+
+---
+
 ## Sprint Priority Overview
 
 ### ✅ Phase 1: Infrastructure (COMPLETE)
@@ -76,6 +126,7 @@ Focus on Settings Consolidation"
 
 | Document | Purpose | When to Read |
 |----------|---------|--------------|
+| **MODULE_REGISTRY.md** | Codebase navigation (avoids Explore agents) | **EVERY sprint start** |
 | **SPRINT_STATUS.md** | Current progress & session handoffs | Every session start |
 | **REPRIORITIZED_SPRINT_PLAN.md** | Sprint execution plan | Planning new sprints |
 | **VERSION_AUDIT_FEB_2026.md** | Package versions & updates | Dependency work |

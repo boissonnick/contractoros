@@ -461,18 +461,19 @@ All in **GCP Secret Manager** (project: `contractoros-483812`):
 
 ## Documentation Index
 
-| Document | Purpose | When to Read |
-|----------|---------|--------------|
-| `docs/NEXT_SPRINTS_GUIDE.md` | Sprint quick-start & priorities | Session start (sprint planning) |
-| `docs/SPRINT_STATUS.md` | Current progress & handoffs | Daily (session start/end) |
-| `docs/REPRIORITIZED_SPRINT_PLAN.md` | Active execution roadmap | Daily (sprint work) |
-| `docs/VERSION_AUDIT_FEB_2026.md` | Package versions & upgrades | Weekly (dependency work) |
-| `docs/PLATFORM_AUDIT_COMPLETE.md` | Known issues & bug tracking | As-needed (bug fixing) |
-| `docs/STRATEGIC_PLAN_FEB_2026.md` | Platform strategy | As-needed (strategic planning) |
-| `docs/DEVELOPMENT_GUIDE.md` | Feature patterns | As-needed (new features) |
-| `docs/ARCHITECTURE.md` | Technical deep-dive | As-needed (architecture) |
-| `docs/TESTING_STRATEGY.md` | E2E testing approach | As-needed (testing) |
-| `docs/LAUNCH_CHECKLIST.md` | Pre-deployment verification | As-needed (deployment) |
+| Document | Purpose | When to Read | Token Cost |
+|----------|---------|--------------|------------|
+| **`docs/MODULE_REGISTRY.md`** | **Codebase navigation (eliminates Explore agents)** | **Every sprint start** | **~5,000** |
+| `docs/NEXT_SPRINTS_GUIDE.md` | Sprint quick-start & priorities | Session start (sprint planning) | ~3,000 |
+| `docs/SPRINT_STATUS.md` | Current progress & handoffs | Daily (session start/end) | ~12,000 |
+| `docs/REPRIORITIZED_SPRINT_PLAN.md` | Active execution roadmap | Daily (sprint work) | ~18,000 |
+| `docs/VERSION_AUDIT_FEB_2026.md` | Package versions & upgrades | Weekly (dependency work) | ~15,000 |
+| `docs/PLATFORM_AUDIT_COMPLETE.md` | Known issues & bug tracking | As-needed (bug fixing) | ~10,000 |
+| `docs/STRATEGIC_PLAN_FEB_2026.md` | Platform strategy | As-needed (strategic planning) | ~8,000 |
+| `docs/DEVELOPMENT_GUIDE.md` | Feature patterns | As-needed (new features) | ~6,000 |
+| `docs/ARCHITECTURE.md` | Technical deep-dive | As-needed (architecture) | ~18,000 |
+| `docs/TESTING_STRATEGY.md` | E2E testing approach | As-needed (testing) | ~8,000 |
+| `docs/LAUNCH_CHECKLIST.md` | Pre-deployment verification | As-needed (deployment) | ~5,000 |
 
 ---
 
@@ -605,11 +606,14 @@ Demo org: "Horizon Construction Co." with orgId matching your user's orgId (set 
 ## Session Startup Checklist
 
 1. [ ] Read this CLAUDE.md completely
-2. [ ] Check `docs/SPRINT_STATUS.md` for current sprint
-3. [ ] Check `.claude-coordination/sprint-*-overview.md` for task breakdown
-4. [ ] Run `npx tsc --noEmit` to verify build
-5. [ ] Identify parallel tasks that can use sub-agents
-6. [ ] Launch sub-agents for independent work
+2. [ ] Check `docs/NEXT_SPRINTS_GUIDE.md` for sprint overview
+3. [ ] **CHECK `docs/MODULE_REGISTRY.md` for module locations (avoids 200k+ token Explore agents!)**
+4. [ ] Check `docs/SPRINT_STATUS.md` for current sprint progress
+5. [ ] Run `npx tsc --noEmit` to verify build
+6. [ ] Identify modules needed from registry BEFORE running any Explore agents
+7. [ ] Only use Explore agents if module not documented in registry
+8. [ ] Identify parallel tasks that can use sub-agents
+9. [ ] Launch sub-agents for independent work
 
 ---
 
