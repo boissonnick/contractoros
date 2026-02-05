@@ -23,6 +23,76 @@ docker ps
 
 **⚠️ CRITICAL:** Step 0 eliminates ~195k tokens of Explore agent waste per sprint. Always check MODULE_REGISTRY.md BEFORE running any Explore agents!
 
+**🚨 FOR PLAN MODE:** If entering Plan mode, MODULE_REGISTRY check is MANDATORY before Phase 1 Explore agents. See "Plan Mode: MODULE_REGISTRY Requirement" section below.
+
+---
+
+## Plan Mode: MODULE_REGISTRY Requirement
+
+**CRITICAL:** When entering Plan mode for sprint work, MODULE_REGISTRY.md check is **MANDATORY** before launching Explore agents.
+
+### Phase 1 Module Check (MANDATORY)
+
+**BEFORE launching ANY Explore agents in Plan Mode:**
+
+1. **Read MODULE_REGISTRY.md completely** (~5k tokens)
+   ```bash
+   cat docs/MODULE_REGISTRY.md | head -200
+   ```
+
+2. **Search for required modules:**
+   ```bash
+   cat docs/MODULE_REGISTRY.md | grep -i "clients\|expenses\|reports"
+   ```
+
+3. **Decision tree:**
+   - ✅ **Module in registry** → Skip Explore agents, read files directly from registry, proceed to Phase 2
+   - ❌ **Module NOT in registry** → Launch Explore agent, note registry needs update after exploration
+
+### Example: Pagination Sprint
+
+**User request:** "Add pagination to Clients and Expenses pages"
+
+**❌ WRONG (55.9k tokens wasted):**
+```
+Phase 1: Launch Explore agent for expenses page structure
+→ Wastes 55.9k tokens discovering what's in MODULE_REGISTRY.md line 38
+```
+
+**✅ CORRECT (5k tokens):**
+```
+Phase 1:
+1. Read MODULE_REGISTRY.md
+2. Find Clients → useClients, clients/page.tsx, ClientCard
+3. Find Expenses → useExpenses, expenses/page.tsx, ExpenseCard
+4. Read those 4 specific files directly
+5. Proceed to Phase 2 design
+→ Saves 50.9k tokens by using registry
+```
+
+### When to Explore vs When to Use Registry
+
+| Scenario | Action | Token Cost |
+|----------|--------|------------|
+| Working with existing pages/features | Check registry → Read specific files | ~5k |
+| Implementing NEW feature not in registry | Explore → Update registry after | 50-100k |
+| Fixing bug in existing feature | Check registry → Read specific files | ~5k |
+| Adding component to existing feature | Check registry → Read similar components | ~5k |
+| Understanding existing page structure | Check registry → Read page files | ~5k |
+
+**Rule:** Only launch Explore agents if module truly doesn't exist in MODULE_REGISTRY.md
+
+### Token Waste History
+
+| Sprint | What Was Explored | Tokens Wasted | Already in Registry? |
+|--------|-------------------|---------------|---------------------|
+| 53 | Settings, schedule, mobile nav | 248.8k | ✅ Yes (lines 51, 49, navigation/) |
+| 54 | Reports, notifications, packages | 197.6k | ✅ Yes (lines 46, 100) |
+| 60 | Expenses page structure | 55.9k | ✅ Yes (line 38) |
+| **Total** | **All modules documented** | **502.3k** | **100% avoidable** |
+
+**Every single exploration was unnecessary** - all information was already in MODULE_REGISTRY.md.
+
 ---
 
 ## Sub-Agent Workflow (Parallel Development)
