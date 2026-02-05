@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import { onSnapshot, updateDoc, doc } from 'firebase/firestore';
+import { onSnapshot, setDoc, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
 import { ScheduleViewPreferences } from '@/types';
@@ -57,7 +57,7 @@ export function useSchedulePreferences() {
     async (data: Partial<ScheduleViewPreferences>): Promise<void> => {
       if (!userId) return;
 
-      await updateDoc(doc(db, 'schedulePreferences', userId), data);
+      await setDoc(doc(db, 'schedulePreferences', userId), data, { merge: true });
     },
     [userId]
   );

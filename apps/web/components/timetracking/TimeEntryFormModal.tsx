@@ -27,7 +27,7 @@ const timeEntrySchema = z.object({
   path: ['clockOutTime'],
 });
 
-type TimeEntryFormData = z.infer<typeof timeEntrySchema>;
+type TimeEntryFormData = z.output<typeof timeEntrySchema>;
 
 interface TimeEntryFormModalProps {
   open: boolean;
@@ -79,7 +79,7 @@ export function TimeEntryFormModal({
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<TimeEntryFormData>({
+  } = useForm<z.input<typeof timeEntrySchema>, unknown, TimeEntryFormData>({
     resolver: zodResolver(timeEntrySchema),
     defaultValues: getDefaultValues(),
   });

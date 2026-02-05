@@ -1,30 +1,110 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@theme {
+  /* Brand colors (Premium Palette) */
+  --color-brand-50: #f0f4f8;
+  --color-brand-100: #dce4ef;
+  --color-brand-200: #bfd0e5;
+  --color-brand-300: #94b2d8;
+  --color-brand-400: #608ec8;
+  --color-brand-500: #3b6eb6;
+  --color-brand-600: #2b5597;
+  --color-brand-700: #23447b;
+  --color-brand-800: #1f3b64;
+  --color-brand-900: #1e3352;
+  --color-brand-950: #0f172a; /* Deep Navy Base */
+
+  /* Dynamic org branding via CSS variables */
+  --color-brand-primary: var(--color-primary, #0f172a);
+  --color-brand-primary-light: var(--color-primary-light, #f0f4f8);
+  --color-brand-primary-dark: var(--color-primary-dark, #020617);
+  --color-brand-secondary: var(--color-secondary, #64748b);
+  --color-brand-secondary-light: var(--color-secondary-light, #f8fafc);
+  --color-brand-accent: var(--color-accent, #f59e0b); /* Electric Amber */
+  --color-brand-accent-light: var(--color-accent-light, #fffbeb);
+
+  /* Font families */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-heading: 'Outfit', 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Monaco, Consolas, monospace;
+
+  /* Box shadows */
+  --shadow-soft: 0 2px 10px -2px rgba(15, 23, 42, 0.08), 0 8px 24px -4px rgba(15, 23, 42, 0.04);
+  --shadow-glow: 0 0 20px -5px rgba(59, 130, 246, 0.3);
+  --shadow-card: 0 1px 1px rgba(0,0,0,0.05), 0 4px 6px -4px rgba(0,0,0,0.05);
+
+  /* Border radius */
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
+
+  /* Spacing */
+  --spacing-18: 4.5rem;
+  --spacing-88: 22rem;
+  --spacing-128: 32rem;
+
+  /* Animations */
+  --animate-fade-in: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-slide-up: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-slide-down: slideDown 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-scale-in: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-slide-in-right: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-bottom-sheet: bottomSheet 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes slideUp {
+  0% { transform: translateY(20px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes bottomSheet {
+  0% { transform: translateY(100%); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  0% { transform: translateY(-20px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes scaleIn {
+  0% { transform: scale(0.95); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slideInRight {
+  0% { transform: translateX(100%); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
 
 @layer base {
   :root {
-    --background: #f9fafb;
-    --foreground: #111827;
+    --background: #f8fafc;
+    --foreground: #0f172a;
     --card: #ffffff;
-    --card-foreground: #111827;
-    --primary: #2563eb;
+    --card-foreground: #0f172a;
+    --primary: #0f172a;
     --primary-foreground: #ffffff;
-    --muted: #f3f4f6;
-    --muted-foreground: #6b7280;
-    --border: #e5e7eb;
-    --ring: #2563eb;
+    --muted: #f1f5f9;
+    --muted-foreground: #64748b;
+    --border: #e2e8f0;
+    --ring: #0f172a;
 
     /* Dynamic brand colors (overridden by ThemeProvider) */
-    --color-primary: #2563eb;
-    --color-primary-light: #eff6ff;
-    --color-primary-dark: #1d4ed8;
+    --color-primary: #0f172a;
+    --color-primary-light: #f0f4f8;
+    --color-primary-dark: #020617;
     --color-secondary: #64748b;
-    --color-secondary-light: #f1f5f9;
+    --color-secondary-light: #f8fafc;
     --color-accent: #f59e0b;
-    --color-accent-light: #fef3c7;
+    --color-accent-light: #fffbeb;
   }
 
   * {
@@ -110,27 +190,9 @@
     animation: slideUp 0.3s ease-out;
   }
 
-  @keyframes slideUp {
-    from {
-      transform: translateY(100%);
-    }
-    to {
-      transform: translateY(0);
-    }
-  }
-
   /* Mobile drawer slide-in from right */
   .animate-slide-in-right {
     animation: slideInRight 0.3s ease-out;
-  }
-
-  @keyframes slideInRight {
-    from {
-      transform: translateX(100%);
-    }
-    to {
-      transform: translateX(0);
-    }
   }
 
   /* Fade in animation */
@@ -138,18 +200,30 @@
     animation: fadeIn 0.2s ease-out;
   }
 
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+  /* Scrollbar hide utility (alias for compatibility) */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 
   /* Mobile card press effect */
   .mobile-press {
     @apply active:scale-[0.98] active:bg-gray-50 transition-all duration-100;
+  }
+
+  /* Respect reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-slide-up,
+    .animate-slide-in-right,
+    .animate-fade-in,
+    .mobile-press,
+    .btn-press {
+      animation: none !important;
+      transition: none !important;
+    }
   }
 
   /* Touch feedback */

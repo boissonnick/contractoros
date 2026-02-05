@@ -27,9 +27,33 @@ const profileSchema = z.object({
   phone: z.string().optional(),
   trade: z.string().optional(),
   bio: z.string().max(500, 'Bio must be less than 500 characters').optional(),
+  timezone: z.string().optional(),
+  dateFormat: z.string().optional(),
+  timeFormat: z.string().optional(),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
+
+const TIMEZONE_OPTIONS = [
+  { value: '', label: 'Auto-detect' },
+  { value: 'America/New_York', label: 'Eastern Time (ET)' },
+  { value: 'America/Chicago', label: 'Central Time (CT)' },
+  { value: 'America/Denver', label: 'Mountain Time (MT)' },
+  { value: 'America/Los_Angeles', label: 'Pacific Time (PT)' },
+  { value: 'America/Anchorage', label: 'Alaska Time (AKT)' },
+  { value: 'Pacific/Honolulu', label: 'Hawaii Time (HT)' },
+];
+
+const DATE_FORMAT_OPTIONS = [
+  { value: 'MM/DD/YYYY', label: 'MM/DD/YYYY (US)' },
+  { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY (International)' },
+  { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD (ISO)' },
+];
+
+const TIME_FORMAT_OPTIONS = [
+  { value: '12h', label: '12-hour (2:30 PM)' },
+  { value: '24h', label: '24-hour (14:30)' },
+];
 
 const TRADE_OPTIONS = [
   { value: '', label: 'Select your trade...' },
@@ -74,6 +98,9 @@ export default function ProfileSettingsPage() {
       phone: '',
       trade: '',
       bio: '',
+      timezone: '',
+      dateFormat: 'MM/DD/YYYY',
+      timeFormat: '12h',
     },
   });
 
@@ -86,6 +113,9 @@ export default function ProfileSettingsPage() {
         phone: profile.phone || '',
         trade: profile.trade || '',
         bio: profile.bio || '',
+        timezone: profile.timezone || '',
+        dateFormat: profile.dateFormat || 'MM/DD/YYYY',
+        timeFormat: profile.timeFormat || '12h',
       });
       if (profile.photoURL) {
         setPhotoPreview(profile.photoURL);
@@ -166,6 +196,9 @@ export default function ProfileSettingsPage() {
         phone: data.phone || null,
         trade: data.trade || null,
         bio: data.bio || null,
+        timezone: data.timezone || null,
+        dateFormat: data.dateFormat || 'MM/DD/YYYY',
+        timeFormat: data.timeFormat || '12h',
         updatedAt: Timestamp.now(),
       });
 
@@ -288,6 +321,24 @@ export default function ProfileSettingsPage() {
             />
           </div>
 
+          <div>
+            <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-1">
+              Bio
+            </label>
+            <textarea
+              id="bio"
+              {...register('bio')}
+              rows={3}
+              placeholder="Tell us a bit about yourself..."
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"
+              maxLength={500}
+            />
+            {errors.bio && (
+              <p className="mt-1 text-sm text-red-600">{errors.bio.message}</p>
+            )}
+            <p className="mt-1 text-xs text-gray-400">Max 500 characters</p>
+          </div>
+
           <div className="flex justify-end pt-4 border-t border-gray-200">
             <Button
               type="submit"
@@ -296,6 +347,46 @@ export default function ProfileSettingsPage() {
               disabled={!isDirty}
             >
               Save Changes
+            </Button>
+          </div>
+        </form>
+      </Card>
+
+      {/* Regional Preferences */}
+      <Card>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Regional Preferences</h2>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <FormSelect
+              name="timezone"
+              register={register}
+              label="Timezone"
+              options={TIMEZONE_OPTIONS}
+              error={errors.timezone}
+            />
+            <FormSelect
+              name="dateFormat"
+              register={register}
+              label="Date Format"
+              options={DATE_FORMAT_OPTIONS}
+              error={errors.dateFormat}
+            />
+            <FormSelect
+              name="timeFormat"
+              register={register}
+              label="Time Format"
+              options={TIME_FORMAT_OPTIONS}
+              error={errors.timeFormat}
+            />
+          </div>
+          <div className="flex justify-end pt-4 border-t border-gray-200">
+            <Button
+              type="submit"
+              variant="primary"
+              loading={isSubmitting}
+              disabled={!isDirty}
+            >
+              Save Preferences
             </Button>
           </div>
         </form>

@@ -41,7 +41,7 @@ const offlineEntrySchema = z.object({
   path: ['clockOutTime'],
 });
 
-type OfflineEntryFormData = z.infer<typeof offlineEntrySchema>;
+type OfflineEntryFormData = z.output<typeof offlineEntrySchema>;
 
 interface OfflineTimeEntryFormProps {
   onSubmit: (entry: {
@@ -107,7 +107,7 @@ export function OfflineTimeEntryForm({
     formState: { errors },
     reset,
     watch,
-  } = useForm<OfflineEntryFormData>({
+  } = useForm<z.input<typeof offlineEntrySchema>, unknown, OfflineEntryFormData>({
     resolver: zodResolver(offlineEntrySchema),
     defaultValues,
   });
@@ -125,7 +125,7 @@ export function OfflineTimeEntryForm({
     const [inHour, inMin] = watchClockIn.split(':').map(Number);
     const [outHour, outMin] = watchClockOut.split(':').map(Number);
 
-    const totalMinutes = (outHour * 60 + outMin) - (inHour * 60 + inMin) - (watchBreak || 0);
+    const totalMinutes = (outHour * 60 + outMin) - (inHour * 60 + inMin) - (Number(watchBreak) || 0);
 
     if (totalMinutes <= 0) return '--';
 

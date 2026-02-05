@@ -36,8 +36,13 @@ import {
   DocumentDuplicateIcon,
   TrashIcon,
   Cog6ToothIcon,
+  ClockIcon,
 } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
+import { ReportScheduleModal, ReportScheduleConfig } from '@/components/reports/ReportScheduleModal';
+import { ReportShareModal } from '@/components/reports/ReportShareModal';
+import { useReportSchedules } from '@/lib/hooks/useReportSchedules';
+import { useReportShares } from '@/lib/hooks/useReportShares';
 
 export default function ReportBuilderPage() {
   const router = useRouter();
@@ -67,8 +72,22 @@ export default function ReportBuilderPage() {
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showLoadModal, setShowLoadModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // Schedule & share hooks
+  const {
+    schedules,
+    saveSchedule,
+    getScheduleForReport,
+  } = useReportSchedules(reportId || undefined);
+
+  const {
+    shares,
+    createShare,
+    revokeShare,
+  } = useReportShares(reportId || undefined);
 
   // Load report from URL param
   useEffect(() => {
@@ -193,60 +212,63 @@ export default function ReportBuilderPage() {
   return (
     <div className="h-full flex flex-col">
       {/* Top Toolbar */}
-      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-3 sm:px-4 py-2 sm:py-3">
+        <div className="flex items-center justify-between gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
               type="button"
               onClick={() => router.push('/dashboard/reports')}
-              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
             >
               <ArrowLeftIcon className="h-5 w-5" />
             </button>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0">
               <input
                 type="text"
                 value={config.name}
                 onChange={(e) => updateConfig({ name: e.target.value })}
                 placeholder="Report Name"
-                className="text-lg font-semibold bg-transparent border-0 border-b-2 border-transparent focus:border-brand-primary focus:ring-0 px-1"
+                className="text-base sm:text-lg font-semibold bg-transparent border-0 border-b-2 border-transparent focus:border-brand-primary focus:ring-0 px-1 min-w-0"
               />
               {hasUnsavedChanges && (
-                <span className="text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded">
+                <span className="text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded flex-shrink-0">
                   Unsaved
                 </span>
               )}
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             <button
               type="button"
               onClick={handleNewReport}
-              className="flex items-center gap-1.5 px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 px-2 sm:px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+              title="New report"
             >
               <PlusIcon className="h-4 w-4" />
-              New
+              <span className="hidden sm:inline">New</span>
             </button>
 
             <button
               type="button"
               onClick={() => setShowLoadModal(true)}
-              className="flex items-center gap-1.5 px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 px-2 sm:px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Load report"
             >
               <FolderOpenIcon className="h-4 w-4" />
-              Load
+              <span className="hidden sm:inline">Load</span>
             </button>
 
             <button
               type="button"
               onClick={handleSaveReport}
               disabled={saving}
-              className="flex items-center gap-1.5 px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 px-2 sm:px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+              title="Save report"
             >
               <BookmarkIcon className="h-4 w-4" />
-              {saving ? 'Saving...' : 'Save'}
+              <span className="hidden sm:inline">{saving ? 'Saving...' : 'Save'}</span>
             </button>
 
             <button
@@ -256,37 +278,61 @@ export default function ReportBuilderPage() {
               className="flex items-center gap-1.5 px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
             >
               <ArrowDownTrayIcon className="h-4 w-4" />
-              Export
+              <span className="hidden sm:inline">Export</span>
             </button>
 
             {reportId && (
-              <button
-                type="button"
-                onClick={() => setShowDeleteConfirm(true)}
-                className="flex items-center gap-1.5 px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
-              >
-                <TrashIcon className="h-4 w-4" />
-                Delete
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={() => setShowScheduleModal(true)}
+                  className="flex items-center gap-1.5 px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+                  title="Schedule report"
+                >
+                  <ClockIcon className="h-4 w-4" />
+                  <span className="hidden sm:inline">Schedule</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowShareModal(true)}
+                  className="flex items-center gap-1.5 px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+                  title="Share report"
+                >
+                  <ShareIcon className="h-4 w-4" />
+                  <span className="hidden sm:inline">Share</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="flex items-center gap-1.5 px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                  title="Delete report"
+                >
+                  <TrashIcon className="h-4 w-4" />
+                  <span className="hidden sm:inline">Delete</span>
+                </button>
+              </>
             )}
 
             <button
               type="button"
               onClick={handleRunReport}
               disabled={config.fields.length === 0 || executing}
-              className="flex items-center gap-1.5 px-4 py-2 text-sm text-white bg-brand-primary hover:bg-brand-primary-dark rounded-lg transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 text-sm text-white bg-brand-primary hover:bg-brand-primary-dark rounded-lg transition-colors disabled:opacity-50"
+              title="Run report"
             >
               <PlayIcon className="h-4 w-4" />
-              {executing ? 'Running...' : 'Run Report'}
+              <span className="hidden sm:inline">{executing ? 'Running...' : 'Run Report'}</span>
             </button>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Left Sidebar - Data Source & Fields */}
-        <div className="w-80 flex-shrink-0 bg-white border-r border-gray-200 overflow-y-auto p-4 space-y-6">
+        <div className="lg:w-80 flex-shrink-0 bg-white border-b lg:border-b-0 lg:border-r border-gray-200 overflow-y-auto p-4 space-y-6">
           <DataSourcePicker
             value={config.dataSource}
             onChange={handleDataSourceChange}
@@ -300,7 +346,7 @@ export default function ReportBuilderPage() {
         </div>
 
         {/* Center Canvas - Preview */}
-        <div className="flex-1 bg-gray-100 overflow-y-auto p-6">
+        <div className="flex-1 bg-gray-100 overflow-y-auto p-4 sm:p-6">
           <ReportPreview
             config={config}
             data={reportData}
@@ -311,7 +357,7 @@ export default function ReportBuilderPage() {
         </div>
 
         {/* Right Sidebar - Filters & Settings */}
-        <div className="w-80 flex-shrink-0 bg-white border-l border-gray-200 overflow-y-auto p-4 space-y-6">
+        <div className="lg:w-80 flex-shrink-0 bg-white border-t lg:border-t-0 lg:border-l border-gray-200 overflow-y-auto p-4 space-y-6">
           <FilterBuilder
             dataSource={config.dataSource}
             filters={config.filters}
@@ -483,6 +529,30 @@ export default function ReportBuilderPage() {
           </div>
         </div>
       )}
+
+      {/* Schedule Modal */}
+      <ReportScheduleModal
+        isOpen={showScheduleModal}
+        onClose={() => setShowScheduleModal(false)}
+        onSave={saveSchedule}
+        reportId={reportId || config.id}
+        reportName={config.name}
+        existingSchedule={reportId ? getScheduleForReport(reportId) : null}
+      />
+
+      {/* Share Modal */}
+      <ReportShareModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        onCreateShare={async (shareConfig) => {
+          const share = await createShare(shareConfig);
+          return { ...share, reportName: config.name };
+        }}
+        onRevokeShare={revokeShare}
+        reportId={reportId || config.id}
+        reportName={config.name}
+        existingShares={shares}
+      />
     </div>
   );
 }

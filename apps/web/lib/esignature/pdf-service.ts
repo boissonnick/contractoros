@@ -3,8 +3,14 @@
  * Handles PDF generation and storage for e-signature documents
  */
 
-import { pdf } from '@react-pdf/renderer';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+
+// Lazy-load @react-pdf/renderer to reduce initial bundle size (~3MB)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function renderPdfToBlob(document: any): Promise<Blob> {
+  const { pdf } = await import('@react-pdf/renderer');
+  return pdf(document).toBlob();
+}
 import { ref, uploadBytes, getDownloadURL, getBlob } from 'firebase/storage';
 import { storage } from '@/lib/firebase/config';
 import { Estimate, Organization, QuotePdfTemplate, ChangeOrder, Invoice, LienWaiver } from '@/types';
@@ -40,7 +46,7 @@ export async function generateEstimatePdfBlob(
     template,
   });
 
-  const blob = await pdf(pdfDocument).toBlob();
+  const blob = await renderPdfToBlob(pdfDocument);
   return blob;
 }
 
@@ -138,7 +144,7 @@ export async function generateAndUploadContractPdf(
 ): Promise<PdfGenerationResult> {
   try {
     const pdfDocument = ContractPdf({ contract, organization });
-    const blob = await pdf(pdfDocument).toBlob();
+    const blob = await renderPdfToBlob(pdfDocument);
 
     const timestamp = Date.now();
     const filename = `contract_${contract.number}_${timestamp}.pdf`;
@@ -175,7 +181,7 @@ export async function generateAndUploadChangeOrderPdf(
 ): Promise<PdfGenerationResult> {
   try {
     const pdfDocument = ChangeOrderPdf({ changeOrder, organization });
-    const blob = await pdf(pdfDocument).toBlob();
+    const blob = await renderPdfToBlob(pdfDocument);
 
     const timestamp = Date.now();
     const filename = `change_order_${changeOrder.number}_${timestamp}.pdf`;
@@ -212,7 +218,7 @@ export async function generateAndUploadScopeOfWorkPdf(
 ): Promise<PdfGenerationResult> {
   try {
     const pdfDocument = ScopeOfWorkPdf({ scopeOfWork: sow, organization });
-    const blob = await pdf(pdfDocument).toBlob();
+    const blob = await renderPdfToBlob(pdfDocument);
 
     const timestamp = Date.now();
     const filename = `sow_${sow.number}_${timestamp}.pdf`;
@@ -249,7 +255,7 @@ export async function generateAndUploadInvoicePdf(
 ): Promise<PdfGenerationResult> {
   try {
     const pdfDocument = InvoicePdf({ invoice, organization });
-    const blob = await pdf(pdfDocument).toBlob();
+    const blob = await renderPdfToBlob(pdfDocument);
 
     const timestamp = Date.now();
     const filename = `invoice_${invoice.number}_${timestamp}.pdf`;
@@ -286,7 +292,7 @@ export async function generateAndUploadLienWaiverPdf(
 ): Promise<PdfGenerationResult> {
   try {
     const pdfDocument = LienWaiverPdf({ lienWaiver, organization });
-    const blob = await pdf(pdfDocument).toBlob();
+    const blob = await renderPdfToBlob(pdfDocument);
 
     const timestamp = Date.now();
     const filename = `lien_waiver_${lienWaiver.id}_${timestamp}.pdf`;

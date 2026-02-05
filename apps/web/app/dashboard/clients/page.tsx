@@ -1,15 +1,25 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { useClients, useClientStats, CLIENT_STATUS_LABELS, CLIENT_SOURCE_LABELS } from '@/lib/hooks/useClients';
+import { usePagination } from '@/lib/hooks/usePagination';
 import { Client, ClientStatus, ClientSource } from '@/types';
 import { Button, Card, Badge, EmptyState, PageHeader } from '@/components/ui';
+import { CompactPagination } from '@/components/ui/Pagination';
 import { SkeletonList } from '@/components/ui/Skeleton';
 import Skeleton from '@/components/ui/Skeleton';
 import { AddClientModal } from '@/components/clients';
 import { cn } from '@/lib/utils';
+import {
+  collection,
+  query,
+  where,
+  getCountFromServer,
+  QueryConstraint,
+} from 'firebase/firestore';
+import { db } from '@/lib/firebase/config';
 import {
   PlusIcon,
   MagnifyingGlassIcon,
@@ -43,21 +53,77 @@ const statusColors: Record<ClientStatus, string> = {
   inactive: 'bg-red-100 text-red-700',
 };
 
+const CLIENT_DATE_FIELDS = ['createdAt', 'updatedAt', 'firstContactDate', 'lastContactDate'] as const;
+
 export default function ClientsPage() {
   const router = useRouter();
   const { profile } = useAuth();
+  const orgId = profile?.orgId || '';
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<ClientStatus | 'all'>('all');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
 
-  const { clients, loading, error } = useClients({
-    orgId: profile?.orgId || '',
+  const isSearching = !!searchQuery;
+
+  // Pagination filters (memoized to prevent re-fetches)
+  const paginationFilters = useMemo(() => {
+    const f: QueryConstraint[] = [];
+    if (statusFilter !== 'all') f.push(where('status', '==', statusFilter));
+    return f;
+  }, [statusFilter]);
+
+  // Paginated clients (when not searching)
+  const {
+    items: paginatedClients,
+    loading: paginatedLoading,
+    error: paginatedError,
+    hasMore,
+    hasPrevious,
+    loadMore,
+    loadPrevious,
+    currentPage,
+    pageSize,
+    setPageSize,
+  } = usePagination<Client>(profile?.orgId, 'clients', {
+    pageSize: 25,
+    orderByField: 'displayName',
+    orderDirection: 'asc',
+    filters: paginationFilters,
+    enabled: !!orgId && !isSearching,
+    dateFields: CLIENT_DATE_FIELDS,
+  });
+
+  // Full-text search results (when searching — loads all for client-side filtering)
+  const { clients: searchResults, loading: searchLoading, error: searchError } = useClients({
+    orgId: isSearching ? orgId : '',
     status: statusFilter === 'all' ? undefined : statusFilter,
     search: searchQuery,
   });
 
-  const { stats, loading: statsLoading } = useClientStats(profile?.orgId || '');
+  // Stats (always active for dashboard cards)
+  const { stats, loading: statsLoading } = useClientStats(orgId);
+
+  // Total count for pagination display
+  useEffect(() => {
+    if (!orgId || isSearching) {
+      setTotalCount(0);
+      return;
+    }
+    const countConstraints: QueryConstraint[] = [];
+    if (statusFilter !== 'all') countConstraints.push(where('status', '==', statusFilter));
+    const q = query(collection(db, `organizations/${orgId}/clients`), ...countConstraints);
+    getCountFromServer(q)
+      .then((snap) => setTotalCount(snap.data().count))
+      .catch(() => setTotalCount(0));
+  }, [orgId, statusFilter, isSearching]);
+
+  // Display logic — paginated by default, full list when searching
+  const displayClients = isSearching ? searchResults : paginatedClients;
+  const isLoading = isSearching ? searchLoading : paginatedLoading;
+  const displayError = isSearching ? searchError : paginatedError;
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -261,19 +327,19 @@ export default function ClientsPage() {
       </div>
 
       {/* Clients List */}
-      {loading ? (
+      {isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3, 4, 5].map((i) => (
             <Skeleton key={i} className="h-24 rounded-xl" />
           ))}
         </div>
-      ) : error ? (
+      ) : displayError ? (
         <Card className="p-8 text-center">
           <ExclamationCircleIcon className="h-12 w-12 text-red-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading Clients</h3>
-          <p className="text-gray-500">{error.message}</p>
+          <p className="text-gray-500">{displayError.message}</p>
         </Card>
-      ) : clients.length === 0 ? (
+      ) : displayClients.length === 0 ? (
         <EmptyState
           icon={<UserGroupIcon className="h-full w-full" />}
           title={searchQuery || statusFilter !== 'all' ? "No matching clients" : "No clients yet"}
@@ -289,16 +355,66 @@ export default function ClientsPage() {
           }
         />
       ) : (
-        <div className="space-y-3">
-          {clients.map((client) => (
-            <ClientCard
-              key={client.id}
-              client={client}
-              onClick={() => router.push(`/dashboard/clients/${client.id}`)}
-              formatCurrency={formatCurrency}
+        <>
+          {/* Search result count */}
+          {isSearching && (
+            <p className="text-sm text-gray-500">
+              {searchResults.length} result{searchResults.length !== 1 ? 's' : ''} found
+            </p>
+          )}
+
+          {/* Pagination info bar */}
+          {!isSearching && totalCount > 0 && (
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-sm text-gray-600">
+              <span>
+                Showing{' '}
+                <span className="font-medium">{(currentPage - 1) * pageSize + 1}</span>
+                {' – '}
+                <span className="font-medium">{Math.min(currentPage * pageSize, totalCount)}</span>
+                {' of '}
+                <span className="font-medium">{totalCount}</span> clients
+              </span>
+              <div className="flex items-center gap-2">
+                <label htmlFor="client-page-size" className="text-gray-500">Show:</label>
+                <select
+                  id="client-page-size"
+                  value={pageSize}
+                  onChange={(e) => setPageSize(Number(e.target.value))}
+                  className="rounded-md border border-gray-300 bg-white py-1 pl-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                >
+                  {[10, 25, 50].map((size) => (
+                    <option key={size} value={size}>{size} per page</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-3">
+            {displayClients.map((client) => (
+              <ClientCard
+                key={client.id}
+                client={client}
+                onClick={() => router.push(`/dashboard/clients/${client.id}`)}
+                formatCurrency={formatCurrency}
+              />
+            ))}
+          </div>
+
+          {/* Pagination controls */}
+          {!isSearching && (hasPrevious || hasMore) && (
+            <CompactPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              hasNextPage={hasMore}
+              hasPreviousPage={hasPrevious}
+              onNextPage={loadMore}
+              onPreviousPage={loadPrevious}
+              loading={paginatedLoading}
+              className="pt-2"
             />
-          ))}
-        </div>
+          )}
+        </>
       )}
 
       {/* Add Client Modal */}

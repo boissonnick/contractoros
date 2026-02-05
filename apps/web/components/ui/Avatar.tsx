@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { cn, getInitials } from '@/lib/utils';
 
 export interface AvatarProps {
@@ -55,9 +56,11 @@ export default function Avatar({
   const colorIndex = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
   const bgColor = colors[colorIndex];
 
+  // Pixel dimensions for next/image
+  const pixelSizes = { xs: 24, sm: 32, md: 40, lg: 48, xl: 64 };
+
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const imgRef = useRef<HTMLImageElement>(null);
 
   // Reset state when src changes
   useEffect(() => {
@@ -72,9 +75,6 @@ export default function Avatar({
   const handleError = useCallback(() => {
     setHasError(true);
   }, []);
-
-  // Show initials if no src, error loading, or still loading
-  const showInitials = !src || hasError;
 
   return (
     <div className={cn('relative inline-flex', className)}>
@@ -92,13 +92,14 @@ export default function Avatar({
               {getInitials(name)}
             </div>
           )}
-          <img
-            ref={imgRef}
+          <Image
             src={src}
             alt={name}
-            loading="lazy"
+            width={pixelSizes[size]}
+            height={pixelSizes[size]}
             onLoad={handleLoad}
             onError={handleError}
+            unoptimized={!src.includes('googleapis.com')}
             className={cn(
               'rounded-full object-cover transition-opacity duration-200',
               sizes[size],

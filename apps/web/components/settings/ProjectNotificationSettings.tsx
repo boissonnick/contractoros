@@ -123,6 +123,8 @@ export function ProjectNotificationSettings({
               invoiceOverdue: true,
               rfiCreated: true,
               expenseApproved: true,
+              changeOrderPending: true,
+              selectionPending: true,
               messages: false,
               mentions: true,
               dailyDigest: false,
@@ -132,6 +134,7 @@ export function ProjectNotificationSettings({
               taskAssigned: true,
               taskDueSoon: true,
               invoicePaid: true,
+              changeOrderPending: true,
               messages: true,
               mentions: true,
             },
@@ -164,6 +167,7 @@ export function ProjectNotificationSettings({
       taskNotifications: true,
       rfiNotifications: true,
       expenseNotifications: true,
+      changeOrderNotifications: true,
       updatedAt: new Date(),
     };
 
@@ -374,6 +378,19 @@ export function ProjectNotificationSettings({
                           ps.projectId,
                           'expenseNotifications',
                           ps.expenseNotifications
+                        )
+                      }
+                      disabled={ps.muted || saving}
+                    />
+                    <Toggle
+                      label="Change Order Notifications"
+                      description="Change order submissions and approvals"
+                      checked={ps.changeOrderNotifications ?? true}
+                      onChange={() =>
+                        handleToggleSetting(
+                          ps.projectId,
+                          'changeOrderNotifications',
+                          ps.changeOrderNotifications ?? true
                         )
                       }
                       disabled={ps.muted || saving}

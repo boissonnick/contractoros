@@ -158,33 +158,54 @@ export function MobileDrawer({
 }: MobileDrawerProps) {
   const pathname = usePathname();
   const { isOnline } = useNetworkStatus();
+  const [isClosing, setIsClosing] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
-  // Prevent body scroll when drawer is open
+  // Handle open/close with animation
   useEffect(() => {
     if (isOpen) {
+      setIsVisible(true);
+      setIsClosing(false);
       document.body.style.overflow = 'hidden';
-    } else {
+    } else if (isVisible) {
+      setIsClosing(true);
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+        setIsClosing(false);
+      }, 250);
       document.body.style.overflow = '';
+      return () => clearTimeout(timer);
     }
     return () => {
       document.body.style.overflow = '';
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      onClose();
+    }, 250);
+  };
+
+  if (!isVisible) return null;
 
   return (
     <div className="md:hidden fixed inset-0 z-50">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 animate-fade-in"
-        onClick={onClose}
+        className={`absolute inset-0 bg-black/50 transition-opacity duration-250 ${
+          isClosing ? 'opacity-0' : 'animate-fade-in'
+        }`}
+        onClick={handleClose}
         aria-hidden="true"
       />
 
       {/* Drawer */}
       <div
-        className="absolute right-0 top-0 bottom-0 w-[85%] max-w-sm bg-white shadow-xl animate-slide-in-right flex flex-col"
+        className={`absolute right-0 top-0 bottom-0 w-[85%] max-w-sm bg-white shadow-xl flex flex-col transition-transform duration-250 ease-out ${
+          isClosing ? 'translate-x-full' : 'animate-slide-in-right'
+        }`}
         role="dialog"
         aria-modal="true"
         aria-label="Navigation menu"
@@ -193,7 +214,7 @@ export function MobileDrawer({
         <div className="flex items-center justify-between px-4 h-14 border-b border-gray-200">
           <span className="font-bold text-lg text-brand-primary">Menu</span>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100"
             aria-label="Close menu"
           >
@@ -237,7 +258,7 @@ export function MobileDrawer({
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={onClose}
+                onClick={handleClose}
                 className={`
                   flex items-center gap-3 px-4 py-3 min-h-[48px]
                   transition-colors
@@ -261,7 +282,7 @@ export function MobileDrawer({
           {footer}
           <button
             onClick={() => {
-              onClose();
+              handleClose();
               onSignOut();
             }}
             className="w-full min-h-[44px] px-4 py-3 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 active:bg-gray-100"

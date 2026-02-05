@@ -43,6 +43,13 @@ interface NavSection {
 }
 
 const SETTINGS_NAV: NavSection[] = [
+  // Home - Settings overview hub
+  {
+    key: 'home',
+    label: 'Overview',
+    icon: Cog6ToothIcon,
+    href: '/dashboard/settings',
+  },
   // Account - Personal settings & security
   {
     key: 'account',
@@ -118,6 +125,7 @@ const SETTINGS_NAV: NavSection[] = [
 
 // Path mapping for section highlighting
 const SECTION_PATHS: Record<string, string[]> = {
+  home: ['/dashboard/settings'],
   account: ['/dashboard/settings/profile', '/dashboard/settings/sessions'],
   organization: [
     '/dashboard/settings/organization',
@@ -137,7 +145,6 @@ const SECTION_PATHS: Record<string, string[]> = {
     '/dashboard/settings/sow-templates',
     '/dashboard/settings/sms-templates',
     '/dashboard/settings/email-templates',
-    '/dashboard/settings', // Phase templates (root settings page - redirects to templates)
   ],
   notifications: [
     '/dashboard/settings/notifications',
@@ -251,9 +258,9 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
         <p className="text-gray-500 mt-1">Manage your organization and preferences</p>
       </div>
 
-      {/* Grouped tab bar - 7 logical sections with collapsible dropdowns */}
-      <div className="border-b border-gray-200 -mx-6 px-6 overflow-visible">
-        <nav className="flex gap-1 overflow-visible" aria-label="Settings tabs">
+      {/* Grouped tab bar - scrollable on mobile, full display on desktop */}
+      <div className="border-b border-gray-200 -mx-4 px-4 md:-mx-6 md:px-6 overflow-visible">
+        <nav className="flex gap-1 overflow-x-auto scrollbar-hide overflow-y-visible pb-px -mb-px" aria-label="Settings tabs">
           {SETTINGS_NAV.map((section) => {
             const isActive = isPathInSection(pathname, section);
             const Icon = section.icon;
@@ -276,7 +283,7 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
                 key={section.key}
                 href={section.href!}
                 className={cn(
-                  'flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors',
+                  'flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors flex-shrink-0',
                   isActive
                     ? 'border-blue-600 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'

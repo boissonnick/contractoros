@@ -290,4 +290,87 @@ export function DateRangePicker({
   );
 }
 
+/**
+ * DateQuickSelect Component
+ *
+ * Quick date selection presets for common dates.
+ *
+ * @example
+ * <DateQuickSelect onSelect={(date) => setDate(date)} />
+ */
+export interface DateQuickSelectProps {
+  onSelect: (date: Date) => void;
+  className?: string;
+  presets?: Array<{ label: string; getDate: () => Date }>;
+}
+
+const DEFAULT_PRESETS = [
+  {
+    label: 'Today',
+    getDate: () => {
+      const d = new Date();
+      d.setHours(12, 0, 0, 0);
+      return d;
+    },
+  },
+  {
+    label: 'Tomorrow',
+    getDate: () => {
+      const d = new Date();
+      d.setDate(d.getDate() + 1);
+      d.setHours(12, 0, 0, 0);
+      return d;
+    },
+  },
+  {
+    label: 'Next Week',
+    getDate: () => {
+      const d = new Date();
+      const daysUntilMonday = ((8 - d.getDay()) % 7) || 7;
+      d.setDate(d.getDate() + daysUntilMonday);
+      d.setHours(12, 0, 0, 0);
+      return d;
+    },
+  },
+  {
+    label: 'In 2 Weeks',
+    getDate: () => {
+      const d = new Date();
+      d.setDate(d.getDate() + 14);
+      d.setHours(12, 0, 0, 0);
+      return d;
+    },
+  },
+  {
+    label: 'End of Month',
+    getDate: () => {
+      const d = new Date();
+      d.setMonth(d.getMonth() + 1, 0);
+      d.setHours(12, 0, 0, 0);
+      return d;
+    },
+  },
+];
+
+export function DateQuickSelect({
+  onSelect,
+  className,
+  presets = DEFAULT_PRESETS,
+}: DateQuickSelectProps) {
+  return (
+    <div className={cn('flex flex-wrap gap-1.5', className)}>
+      {presets.map((preset) => (
+        <button
+          key={preset.label}
+          type="button"
+          onClick={() => onSelect(preset.getDate())}
+          className="px-2.5 py-1 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+        >
+          {preset.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default DatePicker;

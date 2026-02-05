@@ -6,6 +6,7 @@ import {
   query,
   where,
   orderBy,
+  limit,
   onSnapshot,
   addDoc,
   updateDoc,
@@ -91,7 +92,8 @@ export function useBids(projectId: string) {
       collection(db, 'bids'),
       where('orgId', '==', profile.orgId),
       where('projectId', '==', projectId),
-      orderBy('createdAt', 'desc')
+      orderBy('createdAt', 'desc'),
+      limit(100)
     );
     const unsub1 = onSnapshot(bidQ, (snap) => {
       setBids(snap.docs.map(d => bidFromFirestore(d.id, d.data())));
@@ -113,7 +115,8 @@ export function useBids(projectId: string) {
       collection(db, 'bidSolicitations'),
       where('orgId', '==', profile.orgId),
       where('projectId', '==', projectId),
-      orderBy('createdAt', 'desc')
+      orderBy('createdAt', 'desc'),
+      limit(50)
     );
     const unsub2 = onSnapshot(solQ, (snap) => {
       setSolicitations(snap.docs.map(d => solicitationFromFirestore(d.id, d.data())));

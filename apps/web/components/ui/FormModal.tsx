@@ -174,7 +174,7 @@ export function FormModal({
     <BaseModal open={isOpen} onClose={handleClose} size={size}>
       <form onSubmit={handleSubmit}>
         {/* Header */}
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-4 md:p-6 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
           {description && (
             <p className="mt-1 text-sm text-gray-500">{description}</p>
@@ -182,7 +182,7 @@ export function FormModal({
         </div>
 
         {/* Content */}
-        <div className={`p-6 space-y-4 ${className}`}>
+        <div className={`p-4 md:p-6 space-y-4 ${className}`}>
           {error && (
             <div className="rounded-md bg-red-50 p-4">
               <p className="text-sm text-red-700">{error}</p>
@@ -193,7 +193,7 @@ export function FormModal({
 
         {/* Footer */}
         {!hideFooter && (
-          <div className="flex justify-end gap-3 p-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 p-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
             {footer ?? (
               <>
                 <Button
@@ -201,6 +201,7 @@ export function FormModal({
                   variant="outline"
                   onClick={handleClose}
                   disabled={loading}
+                  className="w-full sm:w-auto"
                 >
                   {cancelLabel}
                 </Button>
@@ -209,6 +210,7 @@ export function FormModal({
                   variant={submitVariant}
                   loading={loading}
                   disabled={disabled}
+                  className="w-full sm:w-auto"
                 >
                   {submitLabel}
                 </Button>

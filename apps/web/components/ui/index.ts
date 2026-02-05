@@ -44,6 +44,7 @@ export { FormInput, FormTextarea, FormSelect, FormCheckbox, FormSection, FormErr
 
 export { default as Pagination, CompactPagination } from './Pagination';
 export type { PaginationProps } from './Pagination';
+export { SectionErrorBoundary } from './SectionErrorBoundary';
 
 export {
   Table,

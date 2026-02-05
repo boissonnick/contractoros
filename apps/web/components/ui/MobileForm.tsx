@@ -293,8 +293,8 @@ export function MobileActionBar({ children, className = '' }: MobileActionBarPro
   return (
     <div
       className={`
-        fixed bottom-0 inset-x-0 bg-white border-t border-gray-200
-        p-4 pb-safe md:static md:p-0 md:border-0 md:bg-transparent
+        fixed bottom-16 inset-x-0 bg-white border-t border-gray-200
+        p-4 pb-safe md:static md:bottom-auto md:p-0 md:border-0 md:bg-transparent
         z-40
         ${className}
       `}

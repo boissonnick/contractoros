@@ -47,7 +47,7 @@ function getApp(): App {
  */
 function getDb(): Firestore {
   if (_db) return _db;
-  _db = getFirestore(getApp());
+  _db = getFirestore(getApp(), 'contractoros');
   return _db;
 }
 

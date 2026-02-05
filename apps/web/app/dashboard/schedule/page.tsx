@@ -194,6 +194,19 @@ export default function SchedulePage() {
 
   const goToToday = () => setSelectedDate(new Date());
 
+  const goToTomorrow = () => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    setSelectedDate(d);
+  };
+
+  const goToNextMonday = () => {
+    const d = new Date();
+    const daysUntilMonday = ((8 - d.getDay()) % 7) || 7;
+    d.setDate(d.getDate() + daysUntilMonday);
+    setSelectedDate(d);
+  };
+
   // Header text
   const getHeaderText = () => {
     if (view === 'day') {
@@ -519,9 +532,36 @@ export default function SchedulePage() {
           <Card className="p-4 hidden md:block">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Button variant="secondary" size="sm" onClick={goToToday}>
-                  Today
-                </Button>
+                <div className="flex items-center bg-gray-100 rounded-lg p-0.5 gap-0.5">
+                  <button
+                    onClick={goToToday}
+                    className={cn(
+                      'px-3 py-1 text-sm rounded-md transition-colors',
+                      selectedDate.toDateString() === new Date().toDateString()
+                        ? 'bg-white shadow-sm font-medium text-gray-900'
+                        : 'text-gray-600 hover:text-gray-900'
+                    )}
+                  >
+                    Today
+                  </button>
+                  <button
+                    onClick={goToTomorrow}
+                    className={cn(
+                      'px-3 py-1 text-sm rounded-md transition-colors',
+                      (() => { const t = new Date(); t.setDate(t.getDate() + 1); return selectedDate.toDateString() === t.toDateString(); })()
+                        ? 'bg-white shadow-sm font-medium text-gray-900'
+                        : 'text-gray-600 hover:text-gray-900'
+                    )}
+                  >
+                    Tomorrow
+                  </button>
+                  <button
+                    onClick={goToNextMonday}
+                    className="px-3 py-1 text-sm rounded-md transition-colors text-gray-600 hover:text-gray-900"
+                  >
+                    Next Week
+                  </button>
+                </div>
                 <div className="flex items-center">
                   <Button variant="ghost" size="sm" onClick={navigatePrev}>
                     <ChevronLeftIcon className="h-4 w-4" />

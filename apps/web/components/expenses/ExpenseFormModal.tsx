@@ -36,7 +36,7 @@ const expenseSchema = z.object({
   tags: z.string().optional(),
 });
 
-type ExpenseFormData = z.infer<typeof expenseSchema>;
+type ExpenseFormData = z.output<typeof expenseSchema>;
 
 interface ExpenseFormModalProps {
   open: boolean;
@@ -103,7 +103,7 @@ export function ExpenseFormModal({
     reset,
     watch,
     setValue,
-  } = useForm<ExpenseFormData>({
+  } = useForm<z.input<typeof expenseSchema>, unknown, ExpenseFormData>({
     resolver: zodResolver(expenseSchema),
     defaultValues: getDefaultValues(),
   });

@@ -105,7 +105,7 @@ export default function BaseModal({
 
         {/* Modal container */}
         <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-start justify-center p-4 pt-[10vh] text-center">
+          <div className="flex min-h-full items-start justify-center p-2 pt-4 sm:p-4 sm:pt-[10vh] text-center">
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-200"
@@ -148,7 +148,7 @@ export default function BaseModal({
                       <button
                         type="button"
                         onClick={onClose}
-                        className="ml-4 flex-shrink-0 p-2 -m-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
+                        className="ml-4 flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2 -m-2"
                         aria-label="Close modal"
                       >
                         <XMarkIcon className="h-5 w-5" />
@@ -158,7 +158,7 @@ export default function BaseModal({
                 )}
 
                 {/* Content */}
-                <div className="max-h-[60vh] overflow-y-auto p-4">
+                <div className="max-h-[70vh] sm:max-h-[60vh] overflow-y-auto p-4">
                   {children}
                 </div>
 

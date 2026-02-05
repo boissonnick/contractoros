@@ -22,7 +22,6 @@ import {
   ShieldExclamationIcon,
 } from '@heroicons/react/24/outline';
 import { PayrollRun, PayPeriod, UserProfile } from '@/types';
-import { pdf } from '@react-pdf/renderer';
 import { PayStubPdf, payrollEntryToPayStub } from '@/lib/payroll/pay-stub-pdf';
 
 // Roles allowed to access payroll (BUG #3 FIX)
@@ -145,6 +144,7 @@ export default function PayrollDashboardPage() {
           undefined  // sickBalance - would come from user profile
         );
 
+        const { pdf } = await import('@react-pdf/renderer');
         const blob = await pdf(<PayStubPdf payStub={payStub} />).toBlob();
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);

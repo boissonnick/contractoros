@@ -7,10 +7,12 @@
 ## Session Quick Start
 
 ```bash
-# 0. Check module locations FIRST (eliminates 200k+ token Explore waste!)
+# 0. Check for implementation brief FIRST (skip plan mode entirely!)
+ls docs/specs/sprint-*-brief.md 2>/dev/null
+
+# 1. Check module locations (eliminates 200k+ token Explore waste!)
 cat docs/MODULE_REGISTRY.md | head -100
 
-# 1. Identify your session role (see "Multi-Session Roles" below)
 # 2. Check current status
 cat docs/SPRINT_STATUS.md | head -100
 
@@ -21,7 +23,10 @@ cd apps/web && npx tsc --noEmit
 docker ps
 ```
 
-**⚠️ CRITICAL:** Step 0 eliminates ~195k tokens of Explore agent waste per sprint. Always check MODULE_REGISTRY.md BEFORE running any Explore agents!
+**⚠️ CRITICAL: Sprint Start Decision Tree:**
+1. **Brief exists?** (`docs/specs/sprint-{N}-brief.md`) → Read it, skip plan mode, start coding immediately
+2. **No brief?** → Check MODULE_REGISTRY.md → Enter plan mode only if needed
+3. **Never run Explore agents** without checking both the brief AND the registry first
 
 **🚨 FOR PLAN MODE:** If entering Plan mode, MODULE_REGISTRY check is MANDATORY before Phase 1 Explore agents. See "Plan Mode: MODULE_REGISTRY Requirement" section below.
 
@@ -92,6 +97,51 @@ Phase 1:
 | **Total** | **All modules documented** | **502.3k** | **100% avoidable** |
 
 **Every single exploration was unnecessary** - all information was already in MODULE_REGISTRY.md.
+
+---
+
+## Implementation Briefs (Skip Plan Mode)
+
+**Implementation briefs** are pre-generated files that contain everything needed to start coding a sprint immediately — no plan mode, no Explore agents.
+
+### What's in a Brief?
+- Existing files (types, hooks, pages, components) with line numbers
+- What exists vs what's missing
+- Files to create and modify
+- Patterns to follow (with references)
+- Parallel work plan with sub-agent assignments
+- Firestore rules/indexes needed
+
+### Sprint Start with Brief (PREFERRED)
+```
+1. Check: ls docs/specs/sprint-{N}-brief.md
+2. Read the brief (~5k tokens)
+3. Launch parallel sub-agents per the brief's work plan
+4. Start coding immediately — NO plan mode needed
+```
+
+### Sprint Start without Brief (FALLBACK)
+```
+1. Check MODULE_REGISTRY.md for module locations
+2. Enter plan mode only if truly needed
+3. After exploration: GENERATE a brief for this sprint AND the next 2
+4. This prevents the same waste for future sprints
+```
+
+### Generating Briefs (Scoping Sprints)
+- **Template:** `docs/specs/SPRINT_BRIEF_TEMPLATE.md`
+- **Process:** `docs/specs/SPRINT-65-SCOPING.md`
+- **When:** Dedicated scoping sprint, or end-of-sprint as background agent
+
+### End-of-Sprint Brief Generation
+After completing sprint N, generate a brief for sprint N+3 as a background agent:
+```
+Task(Explore, background): "Read spec for Sprint {N+3}.
+Cross-reference with MODULE_REGISTRY.md and codebase.
+Write implementation brief to docs/specs/sprint-{N+3}-brief.md
+using template at docs/specs/SPRINT_BRIEF_TEMPLATE.md"
+```
+This keeps a rolling 2-sprint buffer of pre-generated briefs.
 
 ---
 
@@ -700,14 +750,15 @@ Demo org: "Horizon Construction Co." with orgId matching your user's orgId (set 
 ## Session Startup Checklist
 
 1. [ ] Read this CLAUDE.md completely
-2. [ ] Check `docs/NEXT_SPRINTS_GUIDE.md` for sprint overview
-3. [ ] **CHECK `docs/MODULE_REGISTRY.md` for module locations (avoids 200k+ token Explore agents!)**
+2. [ ] **CHECK for implementation brief:** `ls docs/specs/sprint-{N}-brief.md`
+   - **Brief exists?** Read it, skip plan mode, start coding immediately
+   - **No brief?** Continue to step 3
+3. [ ] **CHECK `docs/MODULE_REGISTRY.md`** for module locations (avoids 200k+ token Explore agents!)
 4. [ ] Check `docs/SPRINT_STATUS.md` for current sprint progress
 5. [ ] Run `npx tsc --noEmit` to verify build
-6. [ ] Identify modules needed from registry BEFORE running any Explore agents
-7. [ ] Only use Explore agents if module not documented in registry
-8. [ ] Identify parallel tasks that can use sub-agents
-9. [ ] Launch sub-agents for independent work
+6. [ ] If no brief exists: enter plan mode, then generate brief for this sprint AND next 2
+7. [ ] Identify parallel tasks from brief's work plan (or from registry)
+8. [ ] Launch sub-agents for independent work
 
 ---
 

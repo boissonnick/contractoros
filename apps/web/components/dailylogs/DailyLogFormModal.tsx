@@ -48,7 +48,7 @@ const dailyLogSchema = z.object({
   })).optional(),
 });
 
-type DailyLogFormData = z.infer<typeof dailyLogSchema>;
+type DailyLogFormData = z.output<typeof dailyLogSchema>;
 
 interface DailyLogFormModalProps {
   open: boolean;
@@ -113,7 +113,7 @@ export function DailyLogFormModal({
     formState: { errors },
     reset,
     watch,
-  } = useForm<DailyLogFormData>({
+  } = useForm<z.input<typeof dailyLogSchema>, unknown, DailyLogFormData>({
     resolver: zodResolver(dailyLogSchema),
     defaultValues: getDefaultValues(),
   });

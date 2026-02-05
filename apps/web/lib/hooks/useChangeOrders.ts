@@ -6,6 +6,7 @@ import {
   query,
   where,
   orderBy,
+  limit,
   onSnapshot,
   addDoc,
   updateDoc,
@@ -104,7 +105,8 @@ export function useChangeOrders({ projectId }: UseChangeOrdersOptions) {
       collection(db, 'change_orders'),
       where('orgId', '==', profile.orgId),
       where('projectId', '==', projectId),
-      orderBy('createdAt', 'desc')
+      orderBy('createdAt', 'desc'),
+      limit(100)
     );
 
     const unsub = onSnapshot(

@@ -29,11 +29,11 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const baseStyles = 'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
 
     const variants = {
-      primary: 'bg-brand-primary text-white hover:opacity-90 focus:ring-brand-primary shadow-sm',
-      secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-500',
-      outline: 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-brand-primary',
-      ghost: 'text-gray-700 hover:bg-gray-100 focus:ring-gray-500',
-      danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-sm',
+      primary: 'bg-gradient-to-b from-brand-600 to-brand-700 text-white hover:from-brand-500 hover:to-brand-600 hover:shadow-lg hover:shadow-brand-500/30 hover:-translate-y-0.5 active:translate-y-0 focus:ring-brand-primary shadow-md shadow-brand-900/10 border border-brand-800/20',
+      secondary: 'bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900 border border-gray-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all',
+      outline: 'border border-gray-300 bg-transparent text-gray-700 hover:bg-gray-50/50 hover:border-gray-400 focus:ring-brand-primary',
+      ghost: 'text-gray-600 hover:bg-gray-100/50 hover:text-gray-900',
+      danger: 'bg-gradient-to-b from-red-600 to-red-700 text-white hover:from-red-500 hover:to-red-600 shadow-md shadow-red-500/20 hover:-translate-y-0.5 border border-red-800/20',
     };
 
     // Mobile-first sizes with minimum touch target of 44px on touch devices

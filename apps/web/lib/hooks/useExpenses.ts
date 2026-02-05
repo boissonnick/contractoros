@@ -6,6 +6,7 @@ import {
   query,
   where,
   orderBy,
+  limit,
   onSnapshot,
   addDoc,
   updateDoc,
@@ -218,6 +219,7 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
     // Order by date descending
     constraints.push(orderBy('date', 'desc'));
     constraints.push(orderBy('createdAt', 'desc'));
+    constraints.push(limit(500));
 
     const q = query(
       collection(db, `organizations/${orgId}/expenses`),

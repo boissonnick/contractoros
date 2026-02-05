@@ -6,6 +6,7 @@ import {
   query,
   where,
   orderBy,
+  limit,
   onSnapshot,
   addDoc,
   updateDoc,
@@ -103,6 +104,7 @@ export function useDailyLogs(options: UseDailyLogsOptions = {}): UseDailyLogsRet
     // Order by date descending, then by creation time
     constraints.push(orderBy('date', 'desc'));
     constraints.push(orderBy('createdAt', 'desc'));
+    constraints.push(limit(200));
 
     const q = query(
       collection(db, `organizations/${orgId}/dailyLogs`),

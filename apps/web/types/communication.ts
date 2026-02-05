@@ -98,6 +98,8 @@ export interface NotificationPreferences {
     invoiceOverdue: boolean;
     rfiCreated: boolean;
     expenseApproved: boolean;
+    changeOrderPending: boolean;
+    selectionPending: boolean;
     messages: boolean;
     mentions: boolean;
     dailyDigest: boolean;
@@ -107,6 +109,7 @@ export interface NotificationPreferences {
     taskAssigned: boolean;
     taskDueSoon: boolean;
     invoicePaid: boolean;
+    changeOrderPending: boolean;
     messages: boolean;
     mentions: boolean;
   };
@@ -122,6 +125,7 @@ export interface NotificationProjectSettings {
   taskNotifications: boolean;
   rfiNotifications: boolean;
   expenseNotifications: boolean;
+  changeOrderNotifications: boolean;
   updatedAt?: Date;
 }
 

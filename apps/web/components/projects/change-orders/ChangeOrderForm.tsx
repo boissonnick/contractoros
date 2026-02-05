@@ -1,9 +1,13 @@
 "use client";
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
+import { useForm, useFieldArray } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { ScopeChange, ScopeChangeType, ChangeOrderImpact, ProjectPhase } from '@/types';
 import { Button, Input, Textarea } from '@/components/ui';
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { changeOrderSchema, type ChangeOrderFormData } from '@/lib/validations';
 
 interface ChangeOrderFormProps {
   phases: ProjectPhase[];
@@ -18,49 +22,61 @@ interface ChangeOrderFormProps {
 }
 
 export default function ChangeOrderForm({ phases, onSubmit, onCancel }: ChangeOrderFormProps) {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [reason, setReason] = useState('');
-  const [scopeChanges, setScopeChanges] = useState<ScopeChange[]>([]);
-  const [costChange, setCostChange] = useState('');
-  const [scheduleChange, setScheduleChange] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const addScopeChange = useCallback(() => {
-    setScopeChanges(prev => [...prev, {
-      id: Date.now().toString(),
-      type: 'add',
-      proposedDescription: '',
+  const {
+    register,
+    control,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<z.input<typeof changeOrderSchema>, unknown, ChangeOrderFormData>({
+    resolver: zodResolver(changeOrderSchema),
+    defaultValues: {
+      title: '',
+      description: '',
+      reason: '',
+      scopeChanges: [],
       costImpact: 0,
-    }]);
-  }, []);
+      scheduleImpact: 0,
+    },
+  });
 
-  const updateScopeChange = useCallback((index: number, updates: Partial<ScopeChange>) => {
-    setScopeChanges(prev => {
-      const updated = [...prev];
-      updated[index] = { ...updated[index], ...updates };
-      return updated;
-    });
-  }, []);
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'scopeChanges',
+  });
 
-  const removeScopeChange = useCallback((index: number) => {
-    setScopeChanges(prev => prev.filter((_, i) => i !== index));
-  }, []);
+  const watchedScopeChanges = watch('scopeChanges');
+  const calculatedCost = watchedScopeChanges?.reduce(
+    (sum, sc) => sum + (parseFloat(String(sc.costImpact)) || 0),
+    0
+  ) || 0;
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim() || !description.trim() || !reason.trim()) return;
+  const onFormSubmit = async (data: ChangeOrderFormData) => {
     setSaving(true);
     try {
-      const affectedPhaseIds = Array.from(new Set(scopeChanges.filter(sc => sc.phaseId).map(sc => sc.phaseId!)));
+      const scopeChanges: ScopeChange[] = data.scopeChanges.map((sc, i) => ({
+        id: Date.now().toString() + i,
+        type: sc.type as ScopeChangeType,
+        phaseId: sc.phaseId || undefined,
+        originalDescription: sc.originalDescription || undefined,
+        proposedDescription: sc.proposedDescription,
+        costImpact: sc.costImpact,
+      }));
+
+      const affectedPhaseIds = Array.from(
+        new Set(scopeChanges.filter((sc) => sc.phaseId).map((sc) => sc.phaseId!))
+      );
+
       await onSubmit({
-        title: title.trim(),
-        description: description.trim(),
-        reason: reason.trim(),
+        title: data.title,
+        description: data.description,
+        reason: data.reason,
         scopeChanges,
         impact: {
-          costChange: costChange ? parseFloat(costChange) : scopeChanges.reduce((sum, sc) => sum + sc.costImpact, 0),
-          scheduleChange: scheduleChange ? parseInt(scheduleChange) : 0,
+          costChange: data.costImpact || calculatedCost,
+          scheduleChange: data.scheduleImpact,
           affectedPhaseIds,
           affectedTaskIds: [],
         },
@@ -68,29 +84,61 @@ export default function ChangeOrderForm({ phases, onSubmit, onCancel }: ChangeOr
     } finally {
       setSaving(false);
     }
-  }, [title, description, reason, scopeChanges, costChange, scheduleChange, onSubmit]);
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <Input label="Title" value={title} onChange={(e) => setTitle(e.target.value)} required placeholder="e.g. Add master bath shower upgrade" />
-      <Textarea label="Description" value={description} onChange={(e) => setDescription(e.target.value)} required rows={3} />
-      <Textarea label="Reason for Change" value={reason} onChange={(e) => setReason(e.target.value)} required rows={2} placeholder="Client request, unforeseen condition, etc." />
+    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
+      <Input
+        label="Title"
+        {...register('title')}
+        error={errors.title?.message}
+        placeholder="e.g. Add master bath shower upgrade"
+      />
+      <Textarea
+        label="Description"
+        {...register('description')}
+        error={errors.description?.message}
+        rows={3}
+      />
+      <Textarea
+        label="Reason for Change"
+        {...register('reason')}
+        error={errors.reason?.message}
+        rows={2}
+        placeholder="Client request, unforeseen condition, etc."
+      />
 
       {/* Scope Changes */}
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="text-sm font-medium text-gray-700">Scope Changes</label>
-          <Button variant="secondary" size="sm" type="button" onClick={addScopeChange} icon={<PlusIcon className="h-3.5 w-3.5" />}>
+          <Button
+            variant="secondary"
+            size="sm"
+            type="button"
+            onClick={() =>
+              append({
+                type: 'add',
+                phaseId: '',
+                originalDescription: '',
+                proposedDescription: '',
+                costImpact: 0,
+              })
+            }
+            icon={<PlusIcon className="h-3.5 w-3.5" />}
+          >
             Add Change
           </Button>
         </div>
+        {errors.scopeChanges?.message && (
+          <p className="text-sm text-red-600 mb-2">{errors.scopeChanges.message}</p>
+        )}
         <div className="space-y-3">
-          {scopeChanges.map((sc, i) => (
-            <div key={sc.id} className="border border-gray-200 rounded-lg p-3 space-y-2">
+          {fields.map((field, index) => (
+            <div key={field.id} className="border border-gray-200 rounded-lg p-3 space-y-2">
               <div className="flex gap-2">
                 <select
-                  value={sc.type}
-                  onChange={(e) => updateScopeChange(i, { type: e.target.value as ScopeChangeType })}
+                  {...register(`scopeChanges.${index}.type`)}
                   className="border border-gray-300 rounded-lg px-2 py-1.5 text-sm w-28"
                 >
                   <option value="add">Add</option>
@@ -98,25 +146,39 @@ export default function ChangeOrderForm({ phases, onSubmit, onCancel }: ChangeOr
                   <option value="modify">Modify</option>
                 </select>
                 <select
-                  value={sc.phaseId || ''}
-                  onChange={(e) => updateScopeChange(i, { phaseId: e.target.value || undefined })}
+                  {...register(`scopeChanges.${index}.phaseId`)}
                   className="border border-gray-300 rounded-lg px-2 py-1.5 text-sm flex-1"
                 >
                   <option value="">No phase</option>
-                  {phases.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  {phases.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
                 </select>
-                <button type="button" onClick={() => removeScopeChange(i)} className="p-1.5 text-gray-400 hover:text-red-500">
+                <button
+                  type="button"
+                  onClick={() => remove(index)}
+                  className="p-1.5 text-gray-400 hover:text-red-500"
+                >
                   <TrashIcon className="h-4 w-4" />
                 </button>
               </div>
-              {sc.type === 'modify' && (
-                <Input value={sc.originalDescription || ''} onChange={(e) => updateScopeChange(i, { originalDescription: e.target.value })} placeholder="Original scope description" />
+              {watchedScopeChanges?.[index]?.type === 'modify' && (
+                <Input
+                  {...register(`scopeChanges.${index}.originalDescription`)}
+                  placeholder="Original scope description"
+                />
               )}
-              <Input value={sc.proposedDescription} onChange={(e) => updateScopeChange(i, { proposedDescription: e.target.value })} placeholder="Proposed change description" />
+              <Input
+                {...register(`scopeChanges.${index}.proposedDescription`)}
+                error={errors.scopeChanges?.[index]?.proposedDescription?.message}
+                placeholder="Proposed change description"
+              />
               <Input
                 type="number"
-                value={sc.costImpact.toString()}
-                onChange={(e) => updateScopeChange(i, { costImpact: parseFloat(e.target.value) || 0 })}
+                {...register(`scopeChanges.${index}.costImpact`)}
+                error={errors.scopeChanges?.[index]?.costImpact?.message}
                 placeholder="Cost impact ($)"
                 step="0.01"
               />
@@ -130,22 +192,25 @@ export default function ChangeOrderForm({ phases, onSubmit, onCancel }: ChangeOr
         <Input
           label="Total Cost Impact ($)"
           type="number"
-          value={costChange || scopeChanges.reduce((sum, sc) => sum + sc.costImpact, 0).toString()}
-          onChange={(e) => setCostChange(e.target.value)}
+          {...register('costImpact')}
+          error={errors.costImpact?.message}
+          placeholder={calculatedCost.toString()}
           step="0.01"
         />
         <Input
           label="Schedule Impact (days)"
           type="number"
-          value={scheduleChange}
-          onChange={(e) => setScheduleChange(e.target.value)}
+          {...register('scheduleImpact')}
+          error={errors.scheduleImpact?.message}
           placeholder="e.g. 5 or -2"
         />
       </div>
 
       <div className="flex justify-end gap-2 pt-2">
-        <Button variant="secondary" size="sm" type="button" onClick={onCancel}>Cancel</Button>
-        <Button variant="primary" size="sm" type="submit" disabled={saving || !title.trim()}>
+        <Button variant="secondary" size="sm" type="button" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button variant="primary" size="sm" type="submit" disabled={saving}>
           {saving ? 'Creating...' : 'Create Change Order'}
         </Button>
       </div>

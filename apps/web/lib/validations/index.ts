@@ -57,7 +57,7 @@ export const projectSchema = z.object({
   budget: z.coerce.number().min(0, 'Budget must be positive').optional(),
   status: z.enum(['lead', 'bidding', 'planning', 'active', 'on_hold', 'completed', 'cancelled']).default('planning'),
 });
-export type ProjectFormData = z.infer<typeof projectSchema>;
+export type ProjectFormData = z.output<typeof projectSchema>;
 
 // Task schemas
 export const taskSchema = z.object({
@@ -70,7 +70,7 @@ export const taskSchema = z.object({
   estimatedHours: z.coerce.number().min(0).optional(),
   phaseId: optionalString,
 });
-export type TaskFormData = z.infer<typeof taskSchema>;
+export type TaskFormData = z.output<typeof taskSchema>;
 
 // Time entry schemas
 export const timeEntrySchema = z.object({
@@ -81,7 +81,7 @@ export const timeEntrySchema = z.object({
   date: z.string(),
   billable: z.boolean().default(true),
 });
-export type TimeEntryFormData = z.infer<typeof timeEntrySchema>;
+export type TimeEntryFormData = z.output<typeof timeEntrySchema>;
 
 // Invite schemas
 export const inviteSchema = z.object({
@@ -105,15 +105,26 @@ export const subcontractorSchema = z.object({
 });
 export type SubcontractorFormData = z.infer<typeof subcontractorSchema>;
 
+// Scope change schema (for change order line items)
+export const scopeChangeSchema = z.object({
+  type: z.enum(['add', 'remove', 'modify']),
+  phaseId: optionalString,
+  originalDescription: optionalString,
+  proposedDescription: z.string().min(1, 'Description is required'),
+  costImpact: z.coerce.number(),
+});
+export type ScopeChangeFormData = z.output<typeof scopeChangeSchema>;
+
 // Change order schemas
 export const changeOrderSchema = z.object({
   title: requiredString.min(2, 'Title must be at least 2 characters'),
   description: requiredString.min(10, 'Please provide a detailed description'),
-  reason: z.enum(['client_request', 'unforeseen_conditions', 'design_change', 'code_requirement', 'other']),
+  reason: requiredString.min(2, 'Please provide a reason for the change'),
+  scopeChanges: z.array(scopeChangeSchema),
   costImpact: z.coerce.number(),
-  scheduleImpact: z.coerce.number().int().min(-365).max(365).default(0),
+  scheduleImpact: z.coerce.number().int().min(-365).max(365),
 });
-export type ChangeOrderFormData = z.infer<typeof changeOrderSchema>;
+export type ChangeOrderFormData = z.output<typeof changeOrderSchema>;
 
 // Daily log schemas
 export const dailyLogSchema = z.object({
@@ -127,7 +138,7 @@ export const dailyLogSchema = z.object({
   delays: optionalString,
   safetyNotes: optionalString,
 });
-export type DailyLogFormData = z.infer<typeof dailyLogSchema>;
+export type DailyLogFormData = z.output<typeof dailyLogSchema>;
 
 // Estimate / Quote schemas
 export const estimateLineItemSchema = z.object({
@@ -137,7 +148,7 @@ export const estimateLineItemSchema = z.object({
   unitPrice: z.coerce.number().min(0, 'Unit price must be positive'),
   category: z.enum(['labor', 'material', 'equipment', 'subcontractor', 'other']).default('material'),
 });
-export type EstimateLineItemFormData = z.infer<typeof estimateLineItemSchema>;
+export type EstimateLineItemFormData = z.output<typeof estimateLineItemSchema>;
 
 export const estimateSchema = z.object({
   name: requiredString.min(2, 'Estimate name must be at least 2 characters'),
@@ -147,7 +158,7 @@ export const estimateSchema = z.object({
   terms: optionalString,
   lineItems: z.array(estimateLineItemSchema).min(1, 'At least one line item is required'),
 });
-export type EstimateFormData = z.infer<typeof estimateSchema>;
+export type EstimateFormData = z.output<typeof estimateSchema>;
 
 // Invoice schemas
 export const invoiceSchema = z.object({
@@ -162,7 +173,7 @@ export const invoiceSchema = z.object({
   retainage: z.coerce.number().min(0).max(100).optional(),
   notes: optionalString,
 });
-export type InvoiceFormData = z.infer<typeof invoiceSchema>;
+export type InvoiceFormData = z.output<typeof invoiceSchema>;
 
 // Payroll config schemas
 export const payrollConfigSchema = z.object({
@@ -171,4 +182,4 @@ export const payrollConfigSchema = z.object({
   overtimeMultiplier: z.coerce.number().min(1).max(3).default(1.5),
   payDayOfWeek: z.coerce.number().int().min(0).max(6).default(5),
 });
-export type PayrollConfigFormData = z.infer<typeof payrollConfigSchema>;
+export type PayrollConfigFormData = z.output<typeof payrollConfigSchema>;

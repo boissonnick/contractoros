@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   BanknotesIcon,
   PlusIcon,
@@ -19,6 +19,7 @@ import Card from '@/components/ui/Card';
 import EmptyState from '@/components/ui/EmptyState';
 import Skeleton from '@/components/ui/Skeleton';
 import Badge from '@/components/ui/Badge';
+import { CompactPagination } from '@/components/ui/Pagination';
 import { ExpenseCard, ExpenseFormModal } from '@/components/expenses';
 import { useExpenses } from '@/lib/hooks/useExpenses';
 import { useProjects } from '@/lib/hooks/useQueryHooks';
@@ -47,6 +48,8 @@ export default function ExpensesPage() {
   const [filterCategory, setFilterCategory] = useState<ExpenseCategory | ''>('');
   const [quickFilter, setQuickFilter] = useState<QuickFilter>('all');
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+  const [expensePage, setExpensePage] = useState(1);
+  const EXPENSE_PAGE_SIZE = 25;
 
   // Calculate date range for current month
   const dateRange = useMemo(() => {
@@ -88,6 +91,18 @@ export default function ExpensesPage() {
   const summary = useMemo(() => {
     return getSummary(dateRange.startDate, dateRange.endDate, filterProjectId || undefined);
   }, [getSummary, dateRange.startDate, dateRange.endDate, filterProjectId]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setExpensePage(1);
+  }, [quickFilter, filterProjectId, filterCategory, currentMonth]);
+
+  // Client-side pagination (keeps summary accurate with all data)
+  const paginatedExpenses = useMemo(
+    () => expenses.slice((expensePage - 1) * EXPENSE_PAGE_SIZE, expensePage * EXPENSE_PAGE_SIZE),
+    [expenses, expensePage]
+  );
+  const expenseTotalPages = Math.ceil(expenses.length / EXPENSE_PAGE_SIZE);
 
   // Navigate months
   const navigateMonth = (direction: 'prev' | 'next') => {
@@ -365,29 +380,56 @@ export default function ExpensesPage() {
           description={`No ${quickFilter !== 'all' ? quickFilter.replace('_', ' ') + ' ' : ''}expenses match your current filters.`}
         />
       ) : (
-        <div className="space-y-4">
-          {expenses.map((expense) => (
-            <ExpenseCard
-              key={expense.id}
-              expense={expense}
-              showProject={!filterProjectId}
-              showUser={isManager}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onStartReview={handleStartReview}
-              onApprove={handleApprove}
-              onReject={handleReject}
-              onRequestMoreInfo={handleRequestMoreInfo}
-              onMarkPaid={handleMarkPaid}
-              onCancel={handleCancel}
-              canEdit={expense.userId === profile?.uid || isManager}
-              canDelete={expense.userId === profile?.uid || isManager}
-              canApprove={isManager}
-              canMarkPaid={isManager}
-              isOwner={expense.userId === profile?.uid}
+        <>
+          {/* Expense count and page size info */}
+          {expenses.length > EXPENSE_PAGE_SIZE && (
+            <div className="text-sm text-gray-600">
+              Showing{' '}
+              <span className="font-medium">{(expensePage - 1) * EXPENSE_PAGE_SIZE + 1}</span>
+              {' – '}
+              <span className="font-medium">{Math.min(expensePage * EXPENSE_PAGE_SIZE, expenses.length)}</span>
+              {' of '}
+              <span className="font-medium">{expenses.length}</span> expenses
+            </div>
+          )}
+
+          <div className="space-y-4">
+            {paginatedExpenses.map((expense) => (
+              <ExpenseCard
+                key={expense.id}
+                expense={expense}
+                showProject={!filterProjectId}
+                showUser={isManager}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onStartReview={handleStartReview}
+                onApprove={handleApprove}
+                onReject={handleReject}
+                onRequestMoreInfo={handleRequestMoreInfo}
+                onMarkPaid={handleMarkPaid}
+                onCancel={handleCancel}
+                canEdit={expense.userId === profile?.uid || isManager}
+                canDelete={expense.userId === profile?.uid || isManager}
+                canApprove={isManager}
+                canMarkPaid={isManager}
+                isOwner={expense.userId === profile?.uid}
+              />
+            ))}
+          </div>
+
+          {/* Pagination controls */}
+          {expenseTotalPages > 1 && (
+            <CompactPagination
+              currentPage={expensePage}
+              totalPages={expenseTotalPages}
+              hasNextPage={expensePage < expenseTotalPages}
+              hasPreviousPage={expensePage > 1}
+              onNextPage={() => setExpensePage((p) => Math.min(p + 1, expenseTotalPages))}
+              onPreviousPage={() => setExpensePage((p) => Math.max(p - 1, 1))}
+              className="pt-2"
             />
-          ))}
-        </div>
+          )}
+        </>
       )}
 
       {/* Category Breakdown (if expenses exist) */}

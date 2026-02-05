@@ -354,6 +354,8 @@ export default function NotificationSettingsPage() {
           <Toggle label="Invoice Overdue" description="When an invoice becomes overdue" checked={preferences.email.invoiceOverdue} onChange={() => handleToggle('email', 'invoiceOverdue', preferences.email.invoiceOverdue)} />
           <Toggle label="RFI Created" description="When a new RFI is submitted" checked={preferences.email.rfiCreated} onChange={() => handleToggle('email', 'rfiCreated', preferences.email.rfiCreated)} />
           <Toggle label="Expense Approved/Rejected" description="When your expense report is reviewed" checked={preferences.email.expenseApproved} onChange={() => handleToggle('email', 'expenseApproved', preferences.email.expenseApproved)} />
+          <Toggle label="Change Order Pending" description="When a change order needs your approval" checked={preferences.email.changeOrderPending ?? true} onChange={() => handleToggle('email', 'changeOrderPending', preferences.email.changeOrderPending ?? true)} />
+          <Toggle label="Selection Pending" description="When a selection is awaiting your decision" checked={preferences.email.selectionPending ?? true} onChange={() => handleToggle('email', 'selectionPending', preferences.email.selectionPending ?? true)} />
           <Toggle label="Messages" description="New messages in your channels" checked={preferences.email.messages} onChange={() => handleToggle('email', 'messages', preferences.email.messages)} />
           <Toggle label="@Mentions" description="When someone mentions you" checked={preferences.email.mentions} onChange={() => handleToggle('email', 'mentions', preferences.email.mentions)} />
           <Toggle label="Daily Digest" description="Summary of daily activity" checked={preferences.email.dailyDigest} onChange={() => handleToggle('email', 'dailyDigest', preferences.email.dailyDigest)} />
@@ -393,6 +395,13 @@ export default function NotificationSettingsPage() {
             label="Invoice Paid"
             checked={preferences.push.invoicePaid}
             onChange={() => handlePushToggle('invoicePaid', preferences.push.invoicePaid)}
+            disabled={isPushDisabled}
+          />
+          <Toggle
+            label="Change Order Pending"
+            description="When a change order needs your approval"
+            checked={preferences.push.changeOrderPending ?? true}
+            onChange={() => handlePushToggle('changeOrderPending', preferences.push.changeOrderPending ?? true)}
             disabled={isPushDisabled}
           />
           <Toggle

@@ -8,6 +8,12 @@ export * from './types';
 // Firestore notification service
 export * from './service';
 
+// Preference-aware notification creation
+export {
+  createPreferenceAwareNotification,
+  checkNotificationPreferences,
+} from './preference-aware';
+
 // Browser notifications
 export {
   isNotificationSupported,
