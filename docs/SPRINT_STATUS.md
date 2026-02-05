@@ -3,8 +3,8 @@
 > **Purpose:** Track current progress and enable seamless session handoffs.
 > **Last Updated:** 2026-02-05
 > **Current Phase:** Phase 6 - Financial Operations & Mobile Experience
-> **Latest Sprint:** Sprint 67 - Financial Intelligence (BI Dashboards) ✅ COMPLETE
-> **Next Sprint:** Sprint 68 - Expense Automation (OCR Display/Analytics)
+> **Latest Sprint:** Sprint 68 - Expense Automation (OCR Display/Analytics) ✅ COMPLETE
+> **Next Sprint:** Sprint 69 - Subcontractor Invoice Management (AP Automation)
 > **Historical Sprints:** Sprints 13B-25 archived in `.claude-coordination/archive/sprints-13b-25-history.md`
 > **Phase 3 sprints 52-55:** archived in `.claude-coordination/archive/sprints-52-55-history.md`
 
@@ -24,6 +24,39 @@ Find your modules instantly instead of running Explore agents for 15 minutes.
 **What's in the registry:** All 25+ features, 83 hooks, 60 component directories, 36 dashboard routes
 
 **DO NOT run Explore agents without checking the registry first!**
+
+---
+
+## ✅ Sprint 68 - Expense Automation (OCR Display/Analytics) - COMPLETE
+
+**Priority:** P1 - HIGH
+**Completed:** 2026-02-05
+**Brief:** `docs/specs/sprint-68-brief.md`
+
+**Goal:** Add display/analytics layer on top of the existing OCR pipeline. Line items table, receipt gallery, confidence alerts, and OCR analytics dashboard.
+
+**Key deliverables:**
+- [x] LineItemsTable — OCR-extracted line items in table/card format
+- [x] ReceiptGallery — Receipt image thumbnails with lightbox
+- [x] OCRConfidenceAlert — Confidence banner with retry for low-confidence scans
+- [x] useOCRLogs hook — Admin analytics from ocrLogs collection
+- [x] OCR Analytics page — KPI cards, confidence distribution chart, model usage chart, recent scans table
+- [x] ExpenseFormModal integration — Shows confidence + line items after scan, saves OCR metadata
+- [x] Expense type updated — Added ocrConfidence, ocrModel, ocrProcessingTimeMs, lineItems fields
+
+**New files:**
+- `components/expenses/LineItemsTable.tsx`
+- `components/expenses/ReceiptGallery.tsx`
+- `components/expenses/OCRConfidenceAlert.tsx`
+- `lib/hooks/useOCRLogs.ts`
+- `app/dashboard/expenses/ocr-analytics/page.tsx`
+
+**Modified files:**
+- `components/expenses/ExpenseFormModal.tsx` — OCR confidence alert + line items + metadata saving
+- `app/dashboard/expenses/page.tsx` — Added OCR Analytics link for managers
+- `types/index.ts` — Added OCR metadata fields to Expense interface
+
+**Next Sprint:** Sprint 69 - Subcontractor Invoice Management (AP Automation)
 
 ---
 

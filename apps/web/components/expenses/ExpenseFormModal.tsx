@@ -18,6 +18,8 @@ import {
 } from '@/types';
 import { ReceiptCaptureButton } from './ReceiptCaptureButton';
 import { ReceiptOCRResult } from './ReceiptScanner';
+import OCRConfidenceAlert from './OCRConfidenceAlert';
+import LineItemsTable from './LineItemsTable';
 import { SparklesIcon } from '@heroicons/react/24/outline';
 
 const expenseSchema = z.object({
@@ -59,6 +61,7 @@ export function ExpenseFormModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [wasAutoFilled, setWasAutoFilled] = useState(false);
   const [scanError, setScanError] = useState<string | null>(null);
+  const [ocrResult, setOcrResult] = useState<ReceiptOCRResult | null>(null);
 
   const getDefaultValues = (): Partial<ExpenseFormData> => {
     if (expense) {
@@ -116,6 +119,7 @@ export function ExpenseFormModal({
       reset(getDefaultValues());
       setWasAutoFilled(false);
       setScanError(null);
+      setOcrResult(null);
     }
   }, [open, expense, reset]);
 
@@ -123,6 +127,7 @@ export function ExpenseFormModal({
   const handleScanComplete = useCallback(
     (result: ReceiptOCRResult) => {
       setScanError(null);
+      setOcrResult(result);
 
       // Auto-fill vendor name
       if (result.vendor) {
@@ -216,6 +221,10 @@ export function ExpenseFormModal({
         notes: data.notes || undefined,
         tags: data.tags?.split(',').map(t => t.trim()).filter(Boolean),
         status: expense?.status || 'pending',
+        ocrConfidence: ocrResult?.confidence,
+        ocrModel: ocrResult?.modelUsed,
+        ocrProcessingTimeMs: ocrResult?.processingTimeMs,
+        lineItems: ocrResult?.lineItems,
       };
 
       await onSubmit(expenseData);
@@ -258,9 +267,24 @@ export function ExpenseFormModal({
             {scanError && (
               <p className="mt-2 text-sm text-red-600">{scanError}</p>
             )}
-            <p className="mt-2 text-xs text-gray-500">
-              Take a photo or upload a receipt image to auto-fill expense details using AI.
-            </p>
+            {ocrResult && (
+              <div className="space-y-3 mt-3">
+                <OCRConfidenceAlert
+                  confidence={ocrResult.confidence}
+                  model={ocrResult.modelUsed}
+                  processingTimeMs={ocrResult.processingTimeMs}
+                  onRetry={() => { setOcrResult(null); setWasAutoFilled(false); }}
+                />
+                {ocrResult.lineItems.length > 0 && (
+                  <LineItemsTable lineItems={ocrResult.lineItems} />
+                )}
+              </div>
+            )}
+            {!ocrResult && (
+              <p className="mt-2 text-xs text-gray-500">
+                Take a photo or upload a receipt image to auto-fill expense details using AI.
+              </p>
+            )}
           </div>
         )}
 

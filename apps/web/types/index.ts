@@ -1523,6 +1523,17 @@ export interface Expense {
   // Tags for filtering
   tags?: string[];
 
+  // OCR metadata (populated when receipt is scanned)
+  ocrConfidence?: number; // 0.0-1.0
+  ocrModel?: string; // e.g., "claude-haiku", "gemini-1.5-flash"
+  ocrProcessingTimeMs?: number;
+  lineItems?: Array<{
+    description: string;
+    quantity: number | null;
+    unitPrice: number | null;
+    totalPrice: number | null;
+  }>;
+
   // Metadata
   createdAt: Date;
   updatedAt?: Date;

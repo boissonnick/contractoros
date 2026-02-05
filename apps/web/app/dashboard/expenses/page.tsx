@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
+import Link from 'next/link';
 import {
   BanknotesIcon,
   PlusIcon,
@@ -13,6 +14,7 @@ import {
   CheckIcon,
   XMarkIcon,
   CurrencyDollarIcon,
+  ChartBarIcon,
 } from '@heroicons/react/24/outline';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
@@ -208,10 +210,21 @@ export default function ExpensesPage() {
             Track expenses, submit reimbursement requests, and manage approvals
           </p>
         </div>
-        <Button onClick={() => setShowAddModal(true)}>
-          <PlusIcon className="h-5 w-5 mr-2" />
-          Add Expense
-        </Button>
+        <div className="flex items-center gap-3">
+          {isManager && (
+            <Link
+              href="/dashboard/expenses/ocr-analytics"
+              className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700"
+            >
+              <ChartBarIcon className="h-4 w-4" />
+              OCR Analytics
+            </Link>
+          )}
+          <Button onClick={() => setShowAddModal(true)}>
+            <PlusIcon className="h-5 w-5 mr-2" />
+            Add Expense
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}

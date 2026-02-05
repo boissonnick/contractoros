@@ -1,6 +1,6 @@
 # ContractorOS Module Registry
 
-**Last Updated:** 2026-02-05 (Sprint 67 - added BI Dashboards, useCompanyStats, Intelligence page)
+**Last Updated:** 2026-02-05 (Sprint 68 - added OCR display components, useOCRLogs, OCR Analytics page)
 **Purpose:** Fast codebase navigation - eliminates 200k+ token waste from Explore agents
 **Usage:** Check this file BEFORE running Explore agents at sprint start
 
@@ -37,7 +37,8 @@
 | **Equipment** | useEquipment | equipment/page.tsx | EquipmentCard | CRUD hook |
 | **E-signature** | useSignatureRequests | signatures/page.tsx | SignatureFlow, SignaturePad | Magic links |
 | **Estimates** | useEstimates | estimates/page.tsx | EstimateForm, EstimatePDF | PDF generation |
-| **Expenses** | useExpenses | expenses/page.tsx | ExpenseCard | Receipts + OCR |
+| **Expenses** | useExpenses | expenses/page.tsx | ExpenseCard, LineItemsTable, ReceiptGallery, OCRConfidenceAlert | Receipts + OCR |
+| **Expense OCR Analytics** | useOCRLogs | expenses/ocr-analytics/page.tsx | BarChartCard | Admin OCR stats |
 | **Financial Intelligence** | useCompanyStats | intelligence/page.tsx | CompanyOverviewDashboard, ProjectProfitabilityLeaderboard, CashFlowRunwayDashboard | BI dashboards |
 | **Invoices** | useInvoices | invoices/page.tsx | InvoiceGenerator, InvoicePDF | PDF + Stripe |
 | **Leads** | useLeads | leads/page.tsx | LeadCard | CRM pipeline |
@@ -94,6 +95,7 @@
 | useEquipmentMaintenance | useEquipmentMaintenance.ts | equipmentMaintenance | {records, loading, error} | Equipment maintenance |
 | useEstimates | useEstimates.ts | estimates | {estimates, loading, error} | Estimates/quotes |
 | useExpenses | useExpenses.ts | expenses | {expenses, loading, error} | Expense tracking |
+| useOCRLogs | useOCRLogs.ts | ocrLogs | {logs, stats, loading, error} | OCR analytics (admin) |
 | useFieldReports | useFieldReports.ts | fieldReports | {reports, loading, error} | Field reports |
 | useInspections | useInspections.ts | inspections | {inspections, loading, error} | Inspections |
 | useInvoices | useInvoices.ts | invoices | {invoices, loading, error} | Invoicing |
