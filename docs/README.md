@@ -1,233 +1,286 @@
 # ContractorOS Documentation
 
-> **For AI Assistants:** Start with `../CLAUDE.md`, then `SPRINT_STATUS.md`.
+**Last Updated:** 2026-02-04
+
+This directory contains all documentation for ContractorOS development, organized by read frequency and use case.
 
 ---
 
-## Documentation Structure
+## 🚀 Quick Start
 
-```
-docs/
-├── README.md                     # This file - documentation index
-├── MASTER_ROADMAP.md             # Complete backlog (SINGLE SOURCE OF TRUTH)
-├── SPRINT_STATUS.md              # Current progress and next tasks
-├── DEVELOPMENT_GUIDE.md          # How to build features, code patterns
-├── ARCHITECTURE.md               # Technical architecture reference
-├── COMPONENT_PATTERNS.md         # UI component library guide
-├── DEPLOYMENT_CHECKLIST.md       # Firebase/infrastructure requirements
-├── TESTING_STRATEGY.md           # Testing requirements, common mistakes
-├── FEATURE_TEMPLATE.md           # Template for new feature development
-├── HELP_DOCUMENTATION_PLAN.md    # User docs & help center plan
-├── bugfixes/
-│   ├── ACCEPTANCE_CRITERIA.md    # Test cases for bug fixes
-│   └── REFACTORING.md            # Technical debt items
-└── archive/                      # Historical roadmap versions
-
-Root Files:
-├── CHANGELOG.md                  # Version history (Keep a Changelog format)
-└── CLAUDE.md                     # AI assistant context file
-```
+**New to the project?** Start here:
+1. Read [`../CLAUDE.md`](../CLAUDE.md) — Core development instructions
+2. Check [`NEXT_SPRINTS_GUIDE.md`](NEXT_SPRINTS_GUIDE.md) — Current sprint priorities
+3. Review [`SPRINT_STATUS.md`](SPRINT_STATUS.md) — Active progress
 
 ---
 
-## Quick Reference
+## 📅 Daily Reference (Read These Often)
 
-### Starting a New Session
+| Document | Purpose | When to Read | Token Cost |
+|----------|---------|--------------|------------|
+| [NEXT_SPRINTS_GUIDE.md](NEXT_SPRINTS_GUIDE.md) | Sprint quick-start & priorities | Session start (sprint planning) | ~3,000 |
+| [SPRINT_STATUS.md](SPRINT_STATUS.md) | Current progress & session handoffs | Daily (session start/end) | ~12,000 |
+| [REPRIORITIZED_SPRINT_PLAN.md](REPRIORITIZED_SPRINT_PLAN.md) | Active execution roadmap | Daily (sprint work) | ~18,000 |
 
-```bash
-# 1. Verify CLI authentication
-firebase login
-gcloud auth login
-
-# 2. Check current status
-cat docs/SPRINT_STATUS.md
-
-# 3. Verify code compiles
-cd apps/web && npx tsc --noEmit
-```
-
-### Building a New Feature
-
-1. **Read the spec:** `docs/MASTER_ROADMAP.md`
-2. **Copy the template:** `docs/FEATURE_TEMPLATE.md`
-3. **Check patterns:** `docs/DEVELOPMENT_GUIDE.md`
-4. **Follow infrastructure checklist:** `docs/DEPLOYMENT_CHECKLIST.md`
-5. **Reference components:** `docs/COMPONENT_PATTERNS.md`
-
-### After Completing Work
-
-1. **Run pre-commit checks:**
-   ```bash
-   cd apps/web && npx tsc --noEmit  # Type check
-   npm run lint                      # Lint check
-   npm run build                     # Build check
-   ```
-2. **Deploy infrastructure changes:**
-   ```bash
-   firebase deploy --only firestore:rules --project contractoros-483812
-   firebase deploy --only firestore:indexes --project contractoros-483812
-   npm run deploy:functions  # if functions changed
-   ```
-3. **Update documentation:**
-   - Update `CHANGELOG.md` with version entry
-   - Update `SPRINT_STATUS.md` with progress
-4. **Manual testing:** Follow checklist in `TESTING_STRATEGY.md`
+**Total daily:** ~33,000 tokens
 
 ---
 
-## Document Purposes
+## 📊 Weekly Reference
 
-| Document | Purpose | Update Frequency |
-|----------|---------|------------------|
-| **CHANGELOG.md** | Version history, all changes | Every feature/fix |
-| **MASTER_ROADMAP.md** | Complete backlog, feature specs | When adding/completing features |
-| **SPRINT_STATUS.md** | Current progress, session handoffs | Every session |
-| **DEVELOPMENT_GUIDE.md** | Code patterns, conventions | When patterns change |
-| **ARCHITECTURE.md** | Technical deep-dive, data models | When architecture changes |
-| **COMPONENT_PATTERNS.md** | UI component examples | When adding UI patterns |
-| **DEPLOYMENT_CHECKLIST.md** | Firebase/infra requirements | When infrastructure changes |
-| **TESTING_STRATEGY.md** | Testing requirements, error prevention | When issues discovered |
-| **FEATURE_TEMPLATE.md** | New feature checklist | Rarely (template) |
-| **HELP_DOCUMENTATION_PLAN.md** | User docs roadmap | When planning help content |
+| Document | Purpose | When to Read | Token Cost |
+|----------|---------|--------------|------------|
+| [VERSION_AUDIT_FEB_2026.md](VERSION_AUDIT_FEB_2026.md) | Package versions & upgrade tracking | Weekly (dependency work) | ~15,000 |
+| [STRATEGIC_PLAN_FEB_2026.md](STRATEGIC_PLAN_FEB_2026.md) | Platform strategy & roadmap | Weekly (planning sessions) | ~10,000 |
+
+**Total weekly:** ~25,000 tokens
 
 ---
 
-## Key Processes
+## 🔧 Technical Reference (As-Needed)
 
-### New Feature Development Flow
+| Document | Purpose | When to Read | Token Cost |
+|----------|---------|--------------|------------|
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Technical deep-dive & system design | Architecture decisions | ~10,000 |
+| [DEVELOPMENT_GUIDE.md](DEVELOPMENT_GUIDE.md) | Development patterns & conventions | Building new features | ~12,000 |
+| [COMPONENT_PATTERNS.md](COMPONENT_PATTERNS.md) | UI component patterns | Building UI components | ~8,000 |
+| [TESTING_STRATEGY.md](TESTING_STRATEGY.md) | E2E testing approach | Writing/running tests | ~6,000 |
+| [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md) | Pre-deployment verification | Deployment prep | ~3,000 |
 
-```
-┌─────────────────┐
-│ Read Spec in    │
-│ MASTER_ROADMAP  │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Copy FEATURE    │
-│ TEMPLATE        │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Check CLI Auth  │
-│ (firebase/gcloud)│
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Build Feature   │
-│ (types→hook→    │
-│  pages→components)│
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Deploy Infra    │
-│ (rules, indexes,│
-│  functions)     │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Update          │
-│ SPRINT_STATUS   │
-└─────────────────┘
-```
+**Total technical:** ~39,000 tokens (only when needed)
 
 ---
 
-## CLI Authentication Quick Reference
+## 🎯 Quick References (Target Search First)
 
-### Firebase
-```bash
-firebase login              # Interactive login
-firebase projects:list      # Check projects
-firebase use contractoros-483812  # Set project
-```
+Instead of reading entire files, use targeted search:
 
-### Google Cloud
-```bash
-gcloud auth login           # Interactive login
-gcloud config set project contractoros-483812  # Set project
-gcloud auth list            # Check current auth
-```
+| Reference | Purpose | Search First | Token Cost |
+|-----------|---------|--------------|------------|
+| [reference/ENVIRONMENT_CONFIG.md](reference/ENVIRONMENT_CONFIG.md) | Environment setup & config | grep for specific tool | ~6,000 |
+| [reference/TROUBLESHOOTING.md](reference/TROUBLESHOOTING.md) | Error debugging guide | grep for error message | ~7,000 |
+| [reference/PATTERNS_AND_TEMPLATES.md](reference/PATTERNS_AND_TEMPLATES.md) | Code patterns & templates | grep for pattern name | ~5,000 |
 
-### Verification
-```bash
-# Verify both are working
-firebase projects:list
-gcloud config get-value project
-```
+**See:** [reference/README.md](reference/README.md) for detailed reference documentation index
+
+**Total references:** ~18,000 tokens (only when needed)
 
 ---
 
-## Common Tasks
+## 📚 Research & Strategy (Occasional)
 
-### Deploy Firestore Rules
-```bash
-firebase deploy --only firestore:rules
-```
-
-### Deploy Cloud Functions
-```bash
-cd functions && npm run build
-firebase deploy --only functions
-```
-
-### Create Firestore Index
-```bash
-# Add to firestore.indexes.json, then:
-firebase deploy --only firestore:indexes
-```
+| Document | Purpose | Token Cost |
+|----------|---------|------------|
+| [research/RESEARCH_SUMMARY.md](research/RESEARCH_SUMMARY.md) | Index of research documents | ~2,000 |
+| [STRATEGIC_ROADMAP_NEXT_SPRINTS.md](STRATEGIC_ROADMAP_NEXT_SPRINTS.md) | Platform analysis & strategic roadmap | ~8,000 |
 
 ---
 
-## Key Files Reference
+## 📦 Archives (Historical Reference)
 
-### Types
-All types in: `apps/web/types/index.ts`
+**Don't read these unless specifically needed — historical context only**
 
-### Hooks
-Data hooks in: `apps/web/lib/hooks/`
-- `useClients.ts` - Client CRUD
-- `useSignatureRequests.ts` - E-signature tracking
-- `useTasks.ts` - Task management
-- `usePhases.ts` - Phase management
+| Archive | Contents | When to Access |
+|---------|----------|----------------|
+| [archive/planning/](archive/planning/) | Completed sprint plans (Sprints 9-37B) | Researching historical decisions |
+| [archive/audit/](archive/audit/) | Historical audit reports | Checking old bug reports |
+| [archive/marketing-research/](archive/marketing-research/) | Branding & naming research | Brand strategy questions |
+| [archive/business-fundraising/](archive/business-fundraising/) | Business documents | Fundraising context |
+| [archive/MASTER_ROADMAP_historical.md](archive/MASTER_ROADMAP_historical.md) | Original roadmap | Complete historical vision |
+| [archive/IMPLEMENTATION_ROADMAP_2026.md](archive/IMPLEMENTATION_ROADMAP_2026.md) | Old implementation plan | Historical implementation notes |
 
-### UI Components
-Shared components: `apps/web/components/ui/`
-- Button, Card, Badge, EmptyState, Toast, Skeleton
-
-### Feature Components
-Domain components:
-- `apps/web/components/clients/` - Client CRM
-- `apps/web/components/esignature/` - E-signature
-- `apps/web/components/projects/` - Project management
-- `apps/web/components/tasks/` - Task management
+**Token savings:** ~60,000-80,000 per session by not reading archives
 
 ---
 
-## Troubleshooting
+## 🎯 Documentation Strategy by Role
 
-### "Permission denied" in Firestore
-1. Check rules are deployed: `firebase deploy --only firestore:rules`
-2. Verify user authenticated
-3. Check orgId in query matches user's org
+### For AI Development Sessions
 
-### "Missing index" error
-1. Click link in error to auto-create
-2. Or add to firestore.indexes.json and deploy
+**Always read:**
+- `../CLAUDE.md`
+- `NEXT_SPRINTS_GUIDE.md`
+- `SPRINT_STATUS.md`
 
-### TypeScript errors
-```bash
-cd apps/web && npx tsc --noEmit
+**Read when starting sprint:**
+- `REPRIORITIZED_SPRINT_PLAN.md`
+
+**Read as-needed:**
+- Reference docs (grep first!)
+- Technical docs for specific tasks
+- Archives only when explicitly researching history
+
+### For Human Developers
+
+**Start here:**
+- `../CLAUDE.md` — AI assistant instructions (useful for humans too)
+- `ARCHITECTURE.md` — System design
+- `DEVELOPMENT_GUIDE.md` — Patterns and conventions
+
+**Reference:**
+- `reference/` directory for quick lookups
+- `TESTING_STRATEGY.md` for writing tests
+
+### For Project Management
+
+**Planning:**
+- `REPRIORITIZED_SPRINT_PLAN.md` — Current roadmap
+- `STRATEGIC_PLAN_FEB_2026.md` — Strategic direction
+- `SPRINT_STATUS.md` — Current progress
+
+**Tracking:**
+- `VERSION_AUDIT_FEB_2026.md` — Dependency status
+- `NEXT_SPRINTS_GUIDE.md` — Upcoming work
+
+---
+
+## 🔄 Maintenance
+
+### Documentation Lifecycle
+
+**Daily:** Update `SPRINT_STATUS.md` with progress
+**After sprint:** Archive old sprints (rolling window - keep 3 most recent)
+**Monthly:** Review token budgets, archive completed work
+**Quarterly:** Update reference docs, remove stale content
+
+**See:** [DOCUMENTATION_MAINTENANCE.md](DOCUMENTATION_MAINTENANCE.md) for complete maintenance procedures
+
+### Token Budgets
+
+| Category | Target | Max | Current Status |
+|----------|--------|-----|----------------|
+| Daily docs | 30,000 | 50,000 | ✅ ~33,000 |
+| Weekly docs | 20,000 | 30,000 | ✅ ~25,000 |
+| Technical docs | As-needed | 40,000 | ✅ On-demand |
+| Reference docs | As-needed | 20,000 | ✅ On-demand |
+| **Total active** | **50,000** | **80,000** | ✅ **~58,000** |
+
+---
+
+## 📖 Reading Order for New Sessions
+
+### Option 1: Sprint Work (Most Common)
+
+```
+1. CLAUDE.md (core instructions)
+2. SPRINT_STATUS.md (what's current)
+3. REPRIORITIZED_SPRINT_PLAN.md (what's next)
+4. [Start coding]
 ```
 
-### Function deployment fails
-```bash
-cd functions
-npm install
-npm run build
-firebase deploy --only functions
+**Token cost:** ~40,000
+
+### Option 2: Bug Fixing
+
 ```
+1. CLAUDE.md (core instructions)
+2. SPRINT_STATUS.md (context)
+3. reference/TROUBLESHOOTING.md (search for error)
+4. [Fix bug]
+```
+
+**Token cost:** ~30,000 + targeted reference
+
+### Option 3: New Feature Development
+
+```
+1. CLAUDE.md (core instructions)
+2. ARCHITECTURE.md (system design)
+3. DEVELOPMENT_GUIDE.md (patterns)
+4. reference/PATTERNS_AND_TEMPLATES.md (templates)
+5. [Build feature]
+```
+
+**Token cost:** ~40,000-50,000
+
+### Option 4: Research / Planning
+
+```
+1. CLAUDE.md (core instructions)
+2. STRATEGIC_PLAN_FEB_2026.md (strategy)
+3. REPRIORITIZED_SPRINT_PLAN.md (roadmap)
+4. [Research]
+```
+
+**Token cost:** ~40,000
+
+---
+
+## 🔍 Search Strategies
+
+### Finding Information Without Reading Entire Files
+
+```bash
+# Find specific error
+grep -rn "Missing permissions" docs/reference/
+
+# Find pattern example
+grep -rn "Form Modal Pattern" docs/
+
+# Find sprint details
+grep -rn "Sprint 52" docs/SPRINT_STATUS.md
+
+# Find type definition (DON'T read whole file!)
+grep -n "export interface Client" apps/web/types/index.ts
+```
+
+**Token savings:** 90%+ when searching instead of reading
+
+---
+
+## 📊 Token Optimization Results
+
+### Before Documentation Cleanup (Pre-2026-02-04)
+
+- Daily docs: ~90,000 tokens
+- SPRINT_STATUS.md: 3,142 lines
+- 3 overlapping roadmaps
+- No reference doc structure
+
+### After Documentation Cleanup (Current)
+
+- Daily docs: ~33,000 tokens (63% reduction!)
+- SPRINT_STATUS.md: 483 lines (85% reduction!)
+- 1 active roadmap
+- Organized reference structure
+
+**Total savings:** ~57,000 tokens per session (30-35% reduction)
+
+---
+
+## 🆘 Getting Help
+
+**Can't find something?**
+1. Check this README index
+2. Use grep/search (see Search Strategies above)
+3. Check `../CLAUDE.md` Documentation Index
+4. Look in `archive/` if it's historical
+
+**Documentation seems outdated?**
+- See `DOCUMENTATION_MAINTENANCE.md` for update procedures
+- Monthly reviews ensure currency
+
+---
+
+## 📝 Contributing to Documentation
+
+### Adding New Documentation
+
+**Before creating new file:**
+1. Can existing file be updated instead?
+2. Which directory? (active vs reference vs archive)
+3. What's the read frequency? (daily, weekly, as-needed)
+4. What's the lifecycle? (living doc, temporary, archival)
+
+**File placement:**
+- Active sprint work → `docs/` (root level)
+- Reference material → `docs/reference/`
+- Research → `docs/research/`
+- Completed work → `docs/archive/`
+
+**See:** [DOCUMENTATION_MAINTENANCE.md](DOCUMENTATION_MAINTENANCE.md) for complete guidelines
+
+---
+
+*This documentation structure is optimized for token efficiency while maintaining complete context availability.*

@@ -344,15 +344,20 @@ grep -n "export interface PayrollRun" apps/web/types/index.ts
 
 ## Common Errors & Fixes
 
-| Error | Cause | Fix |
-|-------|-------|-----|
-| `FirebaseError: Missing permissions` | Missing Firestore rule | Add rule to `firestore.rules`, deploy |
-| `requires an index` | Missing composite index | Add to `firestore.indexes.json`, deploy |
-| `Cannot find module '@/types'` | Wrong import | Use `from '@/types'` not `from '@/types/index'` |
-| `auth/invalid-api-key` | Docker build without env vars | Use `./docker-build-local.sh` not `docker build` |
-| Data seeded but not visible in app | Used default database instead of named | Use `getFirestore(app, 'contractoros')` — see "Named Firestore Database" section |
-| Data visible in Firebase Console but not app | Viewing wrong database in Console | Select `contractoros` database in Console dropdown |
-| Container exists error | Old container not removed | `docker stop contractoros-web; docker rm contractoros-web` |
+**Top 3 Issues:**
+
+| Error | Fix |
+|-------|-----|
+| `FirebaseError: Missing permissions` | Add rule to `firestore.rules`, deploy |
+| `requires an index` | Add to `firestore.indexes.json`, deploy |
+| Data seeded but not in app | Use `getFirestore(app, 'contractoros')` not default DB |
+
+See `docs/reference/TROUBLESHOOTING.md` for complete error reference including:
+- Named database issues
+- TypeScript/module errors
+- Docker build failures
+- Performance debugging
+- Testing timeouts
 
 ---
 
@@ -431,15 +436,15 @@ All in `components/ui/`:
 
 ## Environment
 
-| Tool | Version | Path |
-|------|---------|------|
-| Node | v22 | `/opt/homebrew/opt/node@22/bin/` |
-| npm | v10.x | - |
-| Firebase CLI | v15.4.0 | `/opt/homebrew/bin/firebase` |
-| Docker | Desktop for Mac | - |
-| gcloud | SDK | `/opt/homebrew/bin/gcloud` |
+| Tool | Version | Status |
+|------|---------|--------|
+| Node | v22 | ✅ Required |
+| Firebase CLI | v15.4.0+ | ✅ Required |
+| Docker Desktop | Latest | ✅ Required |
 
 **Note:** Use `.nvmrc` for automatic version switching: `nvm use`
+
+See `docs/reference/ENVIRONMENT_CONFIG.md` for complete setup instructions, paths, and configuration.
 
 ---
 
