@@ -28,6 +28,22 @@ Focus on Settings Consolidation"
 
 ---
 
+## 🎯 First Time Running a Sprint?
+
+**MODULE_REGISTRY.md is mandatory.**
+
+✅ **What it does:** Eliminates 195k tokens of Explore agent waste per sprint
+✅ **How long:** 30 seconds to read vs 15 minutes of exploration
+✅ **When:** Check it BEFORE any Explore agents run
+
+**Token savings example:**
+- ❌ Explore agents: 200k+ tokens, 15 minutes
+- ✅ MODULE_REGISTRY: 5k tokens, 30 seconds
+
+**[→ Read MODULE_REGISTRY.md now](MODULE_REGISTRY.md)**
+
+---
+
 ## ⚡ BEFORE Starting Sprint Work
 
 **🚨 CRITICAL: Check MODULE_REGISTRY.md FIRST to avoid wasting 200k+ tokens on Explore agents!**

@@ -7,6 +7,9 @@
 ## Session Quick Start
 
 ```bash
+# 0. Check module locations FIRST (eliminates 200k+ token Explore waste!)
+cat docs/MODULE_REGISTRY.md | head -100
+
 # 1. Identify your session role (see "Multi-Session Roles" below)
 # 2. Check current status
 cat docs/SPRINT_STATUS.md | head -100
@@ -17,6 +20,8 @@ cd apps/web && npx tsc --noEmit
 # 4. Check what's running
 docker ps
 ```
+
+**⚠️ CRITICAL:** Step 0 eliminates ~195k tokens of Explore agent waste per sprint. Always check MODULE_REGISTRY.md BEFORE running any Explore agents!
 
 ---
 
@@ -60,6 +65,11 @@ You are a feature development agent for ContractorOS.
 
 TASK: [Specific feature to build]
 
+BEFORE STARTING:
+☑️ CHECK docs/MODULE_REGISTRY.md for [FEATURE] location first
+☑️ Do NOT run Explore agents if module is in the registry
+☑️ Start work immediately if paths are found
+
 CONTEXT:
 - Next.js 14 App Router at apps/web/
 - Firestore with named database "contractoros"
@@ -83,6 +93,10 @@ You are a data seeding agent for ContractorOS.
 
 TASK: [Seed script to run or create]
 
+BEFORE STARTING:
+☑️ CHECK docs/MODULE_REGISTRY.md for seed script patterns
+☑️ Follow existing seed script structure if available
+
 CONTEXT:
 - Scripts location: scripts/seed-demo/
 - MUST use named database via: import { getDb } from './db'
@@ -100,6 +114,11 @@ DELIVERABLE: Confirm records created with count
 You are a UI component agent for ContractorOS.
 
 TASK: [Component to build]
+
+BEFORE STARTING:
+☑️ CHECK docs/MODULE_REGISTRY.md for similar component patterns
+☑️ Find existing components in the same feature area
+☑️ Do NOT explore if component directory is in the registry
 
 CONTEXT:
 - Components in apps/web/components/
@@ -120,6 +139,11 @@ DELIVERABLE: TypeScript-safe component matching existing patterns
 You are a database agent for ContractorOS.
 
 TASK: [Rules or indexes to add]
+
+BEFORE STARTING:
+☑️ CHECK docs/MODULE_REGISTRY.md Firestore Collections table
+☑️ Verify collection structure before adding rules/indexes
+☑️ Follow existing org-scoped patterns
 
 CONTEXT:
 - Rules file: firestore.rules
@@ -641,14 +665,27 @@ Step 2: After rules deployed, Task(general-purpose): "Build UI using new collect
 
 ### Current Sprint Quick-Start
 
-Check `.claude-coordination/sprint-40-overview.md` for current tasks, then launch:
+**ALWAYS check MODULE_REGISTRY.md first:**
 
+```bash
+# 1. Find your modules (no exploration needed!)
+cat docs/MODULE_REGISTRY.md | grep -i "feature_name"
+
+# 2. Check current sprint tasks
+cat docs/SPRINT_STATUS.md | head -100
+```
+
+**If module NOT in registry:**
+- Run Explore agent to find it
+- UPDATE MODULE_REGISTRY.md with findings so future sprints don't repeat
+
+**Then launch parallel work:**
 ```
 # Data completeness (can run in parallel)
 Task(Bash, background): "cd scripts/seed-demo && npx ts-node seed-tasks.ts"
 Task(Bash, background): "cd scripts/seed-demo && npx ts-node seed-rfis.ts"
 
 # Feature development (can run in parallel)
-Task(general-purpose): "Build SubcontractorCard component..."
-Task(general-purpose): "Build WeatherWidget component..."
+Task(general-purpose): "Build ComponentA..."
+Task(general-purpose): "Build ComponentB..."
 ```
