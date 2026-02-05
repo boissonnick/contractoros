@@ -36,6 +36,7 @@ import {
   CreditCardIcon,
   TruckIcon,
   InboxIcon,
+  ChartBarSquareIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
@@ -296,6 +297,7 @@ function createOwnerPmSections(permissions: RolePermissions): NavSection[] {
             { label: 'Payroll', href: '/dashboard/payroll' },
           ],
         },
+        { label: 'Intelligence', href: '/dashboard/intelligence', icon: ChartBarSquareIcon },
       ],
     });
   }

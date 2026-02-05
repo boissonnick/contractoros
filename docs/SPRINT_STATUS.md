@@ -3,8 +3,8 @@
 > **Purpose:** Track current progress and enable seamless session handoffs.
 > **Last Updated:** 2026-02-05
 > **Current Phase:** Phase 6 - Financial Operations & Mobile Experience
-> **Latest Sprint:** Sprint 66 - Scoping Sprint ✅ COMPLETE
-> **Next Sprint:** Sprint 67 - Financial Intelligence (BI Dashboards)
+> **Latest Sprint:** Sprint 67 - Financial Intelligence (BI Dashboards) ✅ COMPLETE
+> **Next Sprint:** Sprint 68 - Expense Automation (OCR Display/Analytics)
 > **Historical Sprints:** Sprints 13B-25 archived in `.claude-coordination/archive/sprints-13b-25-history.md`
 > **Phase 3 sprints 52-55:** archived in `.claude-coordination/archive/sprints-52-55-history.md`
 
@@ -27,22 +27,36 @@ Find your modules instantly instead of running Explore agents for 15 minutes.
 
 ---
 
-## 🔧 Sprint 67 - Financial Intelligence (BI Dashboards) - NEXT
+## ✅ Sprint 67 - Financial Intelligence (BI Dashboards) - COMPLETE
 
 **Priority:** P1 - HIGH
-**Brief:** `docs/specs/sprint-67-brief.md` (skip plan mode — read brief and start coding)
+**Completed:** 2026-02-05
+**Brief:** `docs/specs/sprint-67-brief.md`
 **Spec:** `docs/specs/EPIC-08-BI-DASHBOARDS.md`
 
 **Goal:** Deliver actionable financial insights via 3 dashboards: Company Overview ("The Pulse"), Project Profitability Leaderboard (RAG status), and Cash Flow Runway (AR aging).
 
 **Key deliverables:**
-- [ ] CompanyOverviewDashboard — Revenue/Margin MTD/YTD, pipeline, AR KPIs + trend charts
-- [ ] ProjectProfitabilityLeaderboard — Sortable table with RAG status (Green >25%, Yellow 15-25%, Red <15%)
-- [ ] CashFlowRunwayDashboard — AR aging chart (0-30, 31-60, 61-90, 90+ days)
-- [ ] useCompanyStats hook — Aggregated org-wide financial metrics
-- [ ] /dashboard/intelligence page — Composed from all 3 dashboards
+- [x] CompanyOverviewDashboard — Revenue/Margin MTD/YTD, pipeline, AR KPIs + trend charts
+- [x] ProjectProfitabilityLeaderboard — Sortable table with RAG status (Green >25%, Yellow 15-25%, Red <15%)
+- [x] CashFlowRunwayDashboard — AR aging chart (0-30, 31-60, 61-90, 90+ days)
+- [x] useCompanyStats hook — Aggregated org-wide financial metrics
+- [x] /dashboard/intelligence page — Composed from all 3 dashboards with tab navigation
+- [x] Sidebar nav — Intelligence link added to Finance section
+
+**New files:**
+- `lib/hooks/useCompanyStats.ts` — Org-wide financial aggregation hook
+- `components/intelligence/CompanyOverviewDashboard.tsx` — KPI cards + revenue/margin trend charts
+- `components/intelligence/ProjectProfitabilityLeaderboard.tsx` — Sortable table with RAG indicators
+- `components/intelligence/CashFlowRunwayDashboard.tsx` — AR aging chart + top invoices + insights
+
+**Modified files:**
+- `app/dashboard/intelligence/page.tsx` — Replaced with 3-tab BI dashboard layout
+- `app/dashboard/layout.tsx` — Added Intelligence link to Finance nav section
 
 **Dependencies:** Sprint 65 (Job Costing) provides projectProfitability data. Recharts already installed.
+
+**Next Sprint:** Sprint 68 - Expense Automation (OCR display/analytics)
 
 ---
 

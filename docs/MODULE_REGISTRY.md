@@ -1,6 +1,6 @@
 # ContractorOS Module Registry
 
-**Last Updated:** 2026-02-05 (Sprint 66 - added job costing, MarginMeter, TeamMemberCostRateModal)
+**Last Updated:** 2026-02-05 (Sprint 67 - added BI Dashboards, useCompanyStats, Intelligence page)
 **Purpose:** Fast codebase navigation - eliminates 200k+ token waste from Explore agents
 **Usage:** Check this file BEFORE running Explore agents at sprint start
 
@@ -38,6 +38,7 @@
 | **E-signature** | useSignatureRequests | signatures/page.tsx | SignatureFlow, SignaturePad | Magic links |
 | **Estimates** | useEstimates | estimates/page.tsx | EstimateForm, EstimatePDF | PDF generation |
 | **Expenses** | useExpenses | expenses/page.tsx | ExpenseCard | Receipts + OCR |
+| **Financial Intelligence** | useCompanyStats | intelligence/page.tsx | CompanyOverviewDashboard, ProjectProfitabilityLeaderboard, CashFlowRunwayDashboard | BI dashboards |
 | **Invoices** | useInvoices | invoices/page.tsx | InvoiceGenerator, InvoicePDF | PDF + Stripe |
 | **Leads** | useLeads | leads/page.tsx | LeadCard | CRM pipeline |
 | **Materials** | useMaterials | materials/page.tsx | MaterialCard | Inventory |
@@ -82,6 +83,7 @@
 | useClientNotes | useClientNotes.ts | clientNotes | {notes, loading, error} | Client notes |
 | useClientPortal | useClientPortal.ts | clientPortalSettings | {settings, loading, error} | Client portal config |
 | **useClients** | **useClients.ts** | **clients** | **{clients, loading, error}** | **Client CRM** |
+| useCompanyStats | useCompanyStats.ts | invoices, projectProfitability, estimates, projects, expenses | {stats, loading, error, refresh} | Org-wide BI aggregation |
 | useCloseoutChecklist | useCloseoutChecklist.ts | closeoutChecklists | {checklists, loading, error} | Project closeout |
 | useCustomReports | useCustomReports.ts | customReports | {reports, loading, error} | Custom reporting |
 | useDailyLogs | useDailyLogs.ts | dailyLogs | {logs, loading, error} | Daily logs |
