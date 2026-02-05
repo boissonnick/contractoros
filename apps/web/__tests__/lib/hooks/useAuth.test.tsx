@@ -3,7 +3,8 @@
  *
  * CRITICAL AUTHENTICATION TESTS
  * These tests verify the core authentication hook (useAuth) and AuthProvider
- * that handle login state, user profile fetching, and sign out functionality.
+ * that handle login state, user profile fetching (via real-time onSnapshot),
+ * session cookie integration, and sign out functionality.
  *
  * This is the most critical hook in the application - all auth state flows through it.
  */
@@ -19,8 +20,9 @@ import { UserProfile } from '@/types';
 // Mock functions - declared at module level
 let mockOnAuthStateChanged: jest.Mock;
 let mockSignOut: jest.Mock;
-let mockGetDoc: jest.Mock;
 let mockDoc: jest.Mock;
+let mockOnSnapshotFirestore: jest.Mock;
+let mockProfileUnsub: jest.Mock;
 let mockUnsubscribe: jest.Mock;
 
 // Mock Firebase Auth
@@ -29,16 +31,24 @@ jest.mock('firebase/auth', () => ({
   signOut: (...args: unknown[]) => mockSignOut(...args),
 }));
 
-// Mock Firestore
+// Mock Firestore - onSnapshot instead of getDoc
 jest.mock('firebase/firestore', () => ({
   doc: (...args: unknown[]) => mockDoc(...args),
-  getDoc: (...args: unknown[]) => mockGetDoc(...args),
+  onSnapshot: (...args: unknown[]) => mockOnSnapshotFirestore(...args),
 }));
 
-// Mock firebase config (already mocked globally in jest.setup.js, but we override for control)
+// Mock firebase config
 jest.mock('@/lib/firebase/config', () => ({
   auth: { mockAuth: true },
   db: { mockDb: true },
+}));
+
+// Mock session cookie
+const mockSetSessionCookie = jest.fn().mockResolvedValue(undefined);
+const mockClearSessionCookie = jest.fn();
+jest.mock('@/lib/auth/session-cookie', () => ({
+  setSessionCookie: (...args: unknown[]) => mockSetSessionCookie(...args),
+  clearSessionCookie: (...args: unknown[]) => mockClearSessionCookie(...args),
 }));
 
 // Import after mocks
@@ -60,7 +70,7 @@ function createMockUser(overrides?: Partial<User>): User {
     providerData: [],
     refreshToken: '',
     delete: jest.fn(),
-    getIdToken: jest.fn(),
+    getIdToken: jest.fn().mockResolvedValue('mock-id-token'),
     getIdTokenResult: jest.fn(),
     reload: jest.fn(),
     toJSON: jest.fn(),
@@ -83,10 +93,36 @@ function createMockProfile(overrides?: Partial<UserProfile>): UserProfile {
   } as UserProfile;
 }
 
+/**
+ * Helper to simulate a profile document snapshot arriving via onSnapshot.
+ * After auth callback fires and sets up onSnapshot, call this to deliver profile data.
+ */
+function simulateProfileSnapshot(profileData: UserProfile | null, callIndex?: number) {
+  const idx = callIndex ?? mockOnSnapshotFirestore.mock.calls.length - 1;
+  const lastCall = mockOnSnapshotFirestore.mock.calls[idx];
+  const onNext = lastCall[1];
+
+  if (profileData) {
+    onNext({ exists: () => true, data: () => profileData });
+  } else {
+    onNext({ exists: () => false, data: () => null });
+  }
+}
+
+/**
+ * Helper to simulate a profile onSnapshot error.
+ */
+function simulateProfileError(error: Error, callIndex?: number) {
+  const idx = callIndex ?? mockOnSnapshotFirestore.mock.calls.length - 1;
+  const lastCall = mockOnSnapshotFirestore.mock.calls[idx];
+  const onError = lastCall[2];
+  onError(error);
+}
+
 // Test component to access hook values
 function TestComponent({ onRender }: { onRender?: (ctx: ReturnType<typeof useAuth>) => void }) {
   const authContext = useAuth();
-  const { user, profile, loading, authError, signOut } = authContext;
+  const { user, profile, loading, authError, profileError, signOut } = authContext;
 
   // Allow tests to capture the context
   React.useEffect(() => {
@@ -101,6 +137,7 @@ function TestComponent({ onRender }: { onRender?: (ctx: ReturnType<typeof useAut
       <span data-testid="profile-role">{profile?.role || 'null'}</span>
       <span data-testid="profile-orgId">{profile?.orgId || 'null'}</span>
       <span data-testid="error">{authError || 'null'}</span>
+      <span data-testid="profile-error">{profileError || 'null'}</span>
       <button onClick={signOut} data-testid="signout-button">Sign Out</button>
     </div>
   );
@@ -122,7 +159,10 @@ beforeEach(() => {
   mockOnAuthStateChanged = jest.fn().mockReturnValue(mockUnsubscribe);
   mockSignOut = jest.fn().mockResolvedValue(undefined);
   mockDoc = jest.fn().mockReturnValue({ id: 'mock-doc-ref' });
-  mockGetDoc = jest.fn();
+  mockProfileUnsub = jest.fn();
+  mockOnSnapshotFirestore = jest.fn().mockReturnValue(mockProfileUnsub);
+  mockSetSessionCookie.mockClear();
+  mockClearSessionCookie.mockClear();
 
   jest.useFakeTimers();
 });
@@ -161,17 +201,17 @@ describe('useAuth Hook', () => {
         displayName: 'John Doe'
       });
 
-      mockGetDoc.mockResolvedValue({
-        exists: () => true,
-        data: () => mockProfile,
-      });
-
       renderWithAuth();
 
       // Trigger the auth state change callback
       const authCallback = mockOnAuthStateChanged.mock.calls[0][1];
       await act(async () => {
         await authCallback(mockUser);
+      });
+
+      // Now simulate the profile snapshot arriving via onSnapshot
+      await act(async () => {
+        simulateProfileSnapshot(mockProfile);
       });
 
       await waitFor(() => {
@@ -181,7 +221,7 @@ describe('useAuth Hook', () => {
       expect(screen.getByTestId('user')).toHaveTextContent('user-abc-123');
     });
 
-    it('fetches user profile from Firestore after auth', async () => {
+    it('fetches user profile from Firestore via onSnapshot after auth', async () => {
       const mockUser = createMockUser({ uid: 'firestore-user-123' });
       const mockProfile = createMockProfile({
         displayName: 'Jane Smith',
@@ -189,16 +229,16 @@ describe('useAuth Hook', () => {
         orgId: 'org-xyz-789'
       });
 
-      mockGetDoc.mockResolvedValue({
-        exists: () => true,
-        data: () => mockProfile,
-      });
-
       renderWithAuth();
 
       const authCallback = mockOnAuthStateChanged.mock.calls[0][1];
       await act(async () => {
         await authCallback(mockUser);
+      });
+
+      // Simulate the profile snapshot arriving
+      await act(async () => {
+        simulateProfileSnapshot(mockProfile);
       });
 
       await waitFor(() => {
@@ -208,25 +248,25 @@ describe('useAuth Hook', () => {
       expect(screen.getByTestId('profile-role')).toHaveTextContent('PM');
       expect(screen.getByTestId('profile-orgId')).toHaveTextContent('org-xyz-789');
 
-      // Verify Firestore was called correctly
+      // Verify Firestore doc was called correctly
       expect(mockDoc).toHaveBeenCalledWith({ mockDb: true }, 'users', 'firestore-user-123');
-      expect(mockGetDoc).toHaveBeenCalled();
+      // Verify onSnapshot was called (instead of getDoc)
+      expect(mockOnSnapshotFirestore).toHaveBeenCalled();
     });
 
     it('clears authError when auth state changes successfully', async () => {
       const mockUser = createMockUser();
       const mockProfile = createMockProfile();
 
-      mockGetDoc.mockResolvedValue({
-        exists: () => true,
-        data: () => mockProfile,
-      });
-
       renderWithAuth();
 
       const authCallback = mockOnAuthStateChanged.mock.calls[0][1];
       await act(async () => {
         await authCallback(mockUser);
+      });
+
+      await act(async () => {
+        simulateProfileSnapshot(mockProfile);
       });
 
       await waitFor(() => {
@@ -267,7 +307,7 @@ describe('useAuth Hook', () => {
       });
     });
 
-    it('does not fetch profile when user is null', async () => {
+    it('does not set up profile listener when user is null', async () => {
       renderWithAuth();
 
       const authCallback = mockOnAuthStateChanged.mock.calls[0][1];
@@ -280,19 +320,26 @@ describe('useAuth Hook', () => {
         expect(screen.getByTestId('loading')).toHaveTextContent('false');
       });
 
-      // getDoc should not have been called
-      expect(mockGetDoc).not.toHaveBeenCalled();
+      // onSnapshot should not have been called
+      expect(mockOnSnapshotFirestore).not.toHaveBeenCalled();
+    });
+
+    it('calls clearSessionCookie when user signs out via auth state change', async () => {
+      renderWithAuth();
+
+      const authCallback = mockOnAuthStateChanged.mock.calls[0][1];
+
+      await act(async () => {
+        await authCallback(null);
+      });
+
+      expect(mockClearSessionCookie).toHaveBeenCalled();
     });
   });
 
   describe('Profile Fetching Edge Cases', () => {
     it('sets profile to null when user document does not exist in Firestore', async () => {
       const mockUser = createMockUser({ uid: 'no-profile-user' });
-
-      mockGetDoc.mockResolvedValue({
-        exists: () => false,
-        data: () => null,
-      });
 
       // Spy on console.warn
       const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
@@ -302,6 +349,11 @@ describe('useAuth Hook', () => {
       const authCallback = mockOnAuthStateChanged.mock.calls[0][1];
       await act(async () => {
         await authCallback(mockUser);
+      });
+
+      // Simulate onSnapshot delivering a non-existent document
+      await act(async () => {
+        simulateProfileSnapshot(null);
       });
 
       await waitFor(() => {
@@ -321,7 +373,6 @@ describe('useAuth Hook', () => {
       const mockUser = createMockUser({ uid: 'error-user' });
 
       const firestoreError = new Error('Firestore permission denied');
-      mockGetDoc.mockRejectedValue(firestoreError);
 
       // Spy on console.error
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
@@ -333,6 +384,11 @@ describe('useAuth Hook', () => {
         await authCallback(mockUser);
       });
 
+      // Simulate onSnapshot error callback
+      await act(async () => {
+        simulateProfileError(firestoreError);
+      });
+
       await waitFor(() => {
         expect(screen.getByTestId('loading')).toHaveTextContent('false');
       });
@@ -341,6 +397,8 @@ describe('useAuth Hook', () => {
       expect(screen.getByTestId('user')).toHaveTextContent('error-user');
       // Profile should be null due to error
       expect(screen.getByTestId('profile')).toHaveTextContent('null');
+      // profileError should be surfaced
+      expect(screen.getByTestId('profile-error')).toHaveTextContent('Firestore permission denied');
       // Error should have been logged
       expect(consoleSpy).toHaveBeenCalledWith(
         'Error fetching user profile:',
@@ -354,7 +412,6 @@ describe('useAuth Hook', () => {
       const mockUser = createMockUser();
 
       const networkError = new Error('Network timeout');
-      mockGetDoc.mockRejectedValue(networkError);
 
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
 
@@ -365,14 +422,116 @@ describe('useAuth Hook', () => {
         await authCallback(mockUser);
       });
 
+      // Simulate onSnapshot error
+      await act(async () => {
+        simulateProfileError(networkError);
+      });
+
       await waitFor(() => {
         expect(screen.getByTestId('loading')).toHaveTextContent('false');
       });
 
       // Should not crash - profile is null but app continues
       expect(screen.getByTestId('profile')).toHaveTextContent('null');
+      expect(screen.getByTestId('profile-error')).toHaveTextContent('Network timeout');
 
       consoleSpy.mockRestore();
+    });
+  });
+
+  describe('Profile Error State', () => {
+    it('surfaces profileError when onSnapshot fires error callback', async () => {
+      const mockUser = createMockUser();
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      renderWithAuth();
+
+      const authCallback = mockOnAuthStateChanged.mock.calls[0][1];
+      await act(async () => {
+        await authCallback(mockUser);
+      });
+
+      await act(async () => {
+        simulateProfileError(new Error('Permission denied'));
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('profile-error')).toHaveTextContent('Permission denied');
+      });
+
+      consoleSpy.mockRestore();
+    });
+
+    it('clears profileError when profile loads successfully after error', async () => {
+      const mockUser = createMockUser();
+      const mockProfile = createMockProfile();
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      renderWithAuth();
+
+      const authCallback = mockOnAuthStateChanged.mock.calls[0][1];
+      await act(async () => {
+        await authCallback(mockUser);
+      });
+
+      // First, simulate an error
+      await act(async () => {
+        simulateProfileError(new Error('Temporary error'));
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('profile-error')).toHaveTextContent('Temporary error');
+      });
+
+      // Then, simulate profile arriving (onSnapshot can retry)
+      await act(async () => {
+        simulateProfileSnapshot(mockProfile);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('profile-error')).toHaveTextContent('null');
+        expect(screen.getByTestId('profile')).toHaveTextContent('Test User');
+      });
+
+      consoleSpy.mockRestore();
+    });
+
+    it('clears profileError when user signs out', async () => {
+      const mockUser = createMockUser();
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      renderWithAuth();
+
+      const authCallback = mockOnAuthStateChanged.mock.calls[0][1];
+
+      // Sign in, get error
+      await act(async () => {
+        await authCallback(mockUser);
+      });
+
+      await act(async () => {
+        simulateProfileError(new Error('Some error'));
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('profile-error')).toHaveTextContent('Some error');
+      });
+
+      // Sign out - profileError should clear
+      await act(async () => {
+        await authCallback(null);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('profile-error')).toHaveTextContent('null');
+      });
+
+      consoleSpy.mockRestore();
+    });
+
+    it('profileError defaults to null', () => {
+      renderWithAuth();
+      expect(screen.getByTestId('profile-error')).toHaveTextContent('null');
     });
   });
 
@@ -380,10 +539,6 @@ describe('useAuth Hook', () => {
     it('returns correct signOut function that calls Firebase signOut', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       const mockProfile = createMockProfile();
-      mockGetDoc.mockResolvedValue({
-        exists: () => true,
-        data: () => mockProfile,
-      });
 
       renderWithAuth();
 
@@ -391,6 +546,10 @@ describe('useAuth Hook', () => {
       const authCallback = mockOnAuthStateChanged.mock.calls[0][1];
       await act(async () => {
         await authCallback(createMockUser());
+      });
+
+      await act(async () => {
+        simulateProfileSnapshot(mockProfile);
       });
 
       await waitFor(() => {
@@ -412,17 +571,16 @@ describe('useAuth Hook', () => {
       const mockUser = createMockUser();
       const mockProfile = createMockProfile();
 
-      mockGetDoc.mockResolvedValue({
-        exists: () => true,
-        data: () => mockProfile,
-      });
-
       renderWithAuth();
 
       // Sign in
       const authCallback = mockOnAuthStateChanged.mock.calls[0][1];
       await act(async () => {
         await authCallback(mockUser);
+      });
+
+      await act(async () => {
+        simulateProfileSnapshot(mockProfile);
       });
 
       await waitFor(() => {
@@ -449,10 +607,6 @@ describe('useAuth Hook', () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
 
       const mockProfile = createMockProfile();
-      mockGetDoc.mockResolvedValue({
-        exists: () => true,
-        data: () => mockProfile,
-      });
 
       renderWithAuth();
 
@@ -460,6 +614,10 @@ describe('useAuth Hook', () => {
       const authCallback = mockOnAuthStateChanged.mock.calls[0][1];
       await act(async () => {
         await authCallback(createMockUser());
+      });
+
+      await act(async () => {
+        simulateProfileSnapshot(mockProfile);
       });
 
       await waitFor(() => {
@@ -478,6 +636,94 @@ describe('useAuth Hook', () => {
       });
 
       consoleSpy.mockRestore();
+    });
+
+    it('calls clearSessionCookie on sign out', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      const mockProfile = createMockProfile();
+
+      renderWithAuth();
+
+      const authCallback = mockOnAuthStateChanged.mock.calls[0][1];
+      await act(async () => {
+        await authCallback(createMockUser());
+      });
+
+      await act(async () => {
+        simulateProfileSnapshot(mockProfile);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('user')).not.toHaveTextContent('null');
+      });
+
+      // Sign out
+      const signOutButton = screen.getByTestId('signout-button');
+      await act(async () => {
+        await user.click(signOutButton);
+      });
+
+      expect(mockClearSessionCookie).toHaveBeenCalled();
+    });
+  });
+
+  describe('Session Cookie Integration', () => {
+    it('calls setSessionCookie with ID token when user signs in', async () => {
+      const mockUser = createMockUser();
+
+      renderWithAuth();
+
+      const authCallback = mockOnAuthStateChanged.mock.calls[0][1];
+      await act(async () => {
+        await authCallback(mockUser);
+      });
+
+      expect(mockSetSessionCookie).toHaveBeenCalledWith('mock-id-token');
+    });
+
+    it('does not crash if setSessionCookie fails', async () => {
+      mockSetSessionCookie.mockRejectedValueOnce(new Error('Cookie error'));
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+      const mockUser = createMockUser();
+      const mockProfile = createMockProfile();
+
+      renderWithAuth();
+
+      const authCallback = mockOnAuthStateChanged.mock.calls[0][1];
+      await act(async () => {
+        await authCallback(mockUser);
+      });
+
+      // onSnapshot should still be set up even if cookie fails
+      expect(mockOnSnapshotFirestore).toHaveBeenCalled();
+
+      await act(async () => {
+        simulateProfileSnapshot(mockProfile);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('user')).toHaveTextContent('test-user-123');
+        expect(screen.getByTestId('profile')).toHaveTextContent('Test User');
+      });
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Failed to set session cookie:',
+        expect.any(Error)
+      );
+
+      consoleSpy.mockRestore();
+    });
+
+    it('does not call setSessionCookie when user is null', async () => {
+      renderWithAuth();
+
+      const authCallback = mockOnAuthStateChanged.mock.calls[0][1];
+      await act(async () => {
+        await authCallback(null);
+      });
+
+      expect(mockSetSessionCookie).not.toHaveBeenCalled();
     });
   });
 
@@ -508,11 +754,6 @@ describe('useAuth Hook', () => {
       const mockUser = createMockUser();
       const mockProfile = createMockProfile();
 
-      mockGetDoc.mockResolvedValue({
-        exists: () => true,
-        data: () => mockProfile,
-      });
-
       renderWithAuth();
 
       // Trigger auth callback before timeout
@@ -524,6 +765,10 @@ describe('useAuth Hook', () => {
 
       await act(async () => {
         await authCallback(mockUser);
+      });
+
+      await act(async () => {
+        simulateProfileSnapshot(mockProfile);
       });
 
       // Advance past timeout
@@ -567,16 +812,15 @@ describe('AuthProvider', () => {
       const mockUser = createMockUser({ uid: 'context-user' });
       const mockProfile = createMockProfile({ displayName: 'Context User' });
 
-      mockGetDoc.mockResolvedValue({
-        exists: () => true,
-        data: () => mockProfile,
-      });
-
       renderWithAuth();
 
       const authCallback = mockOnAuthStateChanged.mock.calls[0][1];
       await act(async () => {
         await authCallback(mockUser);
+      });
+
+      await act(async () => {
+        simulateProfileSnapshot(mockProfile);
       });
 
       await waitFor(() => {
@@ -648,6 +892,68 @@ describe('AuthProvider', () => {
 
       clearTimeoutSpy.mockRestore();
     });
+
+    it('cleans up profile listener on unmount', async () => {
+      const mockUser = createMockUser();
+
+      renderWithAuth();
+
+      const authCallback = mockOnAuthStateChanged.mock.calls[0][1];
+      await act(async () => {
+        await authCallback(mockUser);
+      });
+
+      // onSnapshot was called, so profileUnsub is set
+      expect(mockOnSnapshotFirestore).toHaveBeenCalled();
+
+      const { unmount } = render(
+        <AuthProvider>
+          <TestComponent />
+        </AuthProvider>
+      );
+
+      // Sign in on the new instance
+      const authCallback2 = mockOnAuthStateChanged.mock.calls[1][1];
+      await act(async () => {
+        await authCallback2(createMockUser());
+      });
+
+      // The profile unsub from the second mount's onSnapshot
+      const profileUnsubForSecond = mockOnSnapshotFirestore.mock.results[mockOnSnapshotFirestore.mock.results.length - 1].value;
+
+      unmount();
+
+      // The unsub returned by onSnapshot should have been called during cleanup
+      expect(profileUnsubForSecond).toHaveBeenCalled();
+    });
+
+    it('cleans up previous profile listener when user changes', async () => {
+      const user1 = createMockUser({ uid: 'user-1' });
+      const user2 = createMockUser({ uid: 'user-2' });
+
+      renderWithAuth();
+
+      const authCallback = mockOnAuthStateChanged.mock.calls[0][1];
+
+      // User 1 signs in
+      await act(async () => {
+        await authCallback(user1);
+      });
+
+      // onSnapshot was called for user 1
+      expect(mockOnSnapshotFirestore).toHaveBeenCalledTimes(1);
+      const firstUnsub = mockOnSnapshotFirestore.mock.results[0].value;
+
+      // User 2 signs in (user switch)
+      await act(async () => {
+        await authCallback(user2);
+      });
+
+      // Previous profile listener should have been cleaned up
+      expect(firstUnsub).toHaveBeenCalled();
+      // New onSnapshot should have been set up
+      expect(mockOnSnapshotFirestore).toHaveBeenCalledTimes(2);
+    });
   });
 });
 
@@ -655,13 +961,14 @@ describe('useAuth without Provider', () => {
   it('returns default context values when used outside provider', () => {
     // Render TestComponent without AuthProvider - uses default context
     function StandaloneComponent() {
-      const { user, profile, loading, authError } = useAuth();
+      const { user, profile, loading, authError, profileError } = useAuth();
       return (
         <div>
           <span data-testid="standalone-loading">{String(loading)}</span>
           <span data-testid="standalone-user">{user?.uid || 'null'}</span>
           <span data-testid="standalone-profile">{profile?.displayName || 'null'}</span>
           <span data-testid="standalone-error">{authError || 'null'}</span>
+          <span data-testid="standalone-profile-error">{profileError || 'null'}</span>
         </div>
       );
     }
@@ -673,6 +980,7 @@ describe('useAuth without Provider', () => {
     expect(screen.getByTestId('standalone-user')).toHaveTextContent('null');
     expect(screen.getByTestId('standalone-profile')).toHaveTextContent('null');
     expect(screen.getByTestId('standalone-error')).toHaveTextContent('null');
+    expect(screen.getByTestId('standalone-profile-error')).toHaveTextContent('null');
   });
 
   it('default signOut is a no-op function', async () => {
@@ -698,10 +1006,6 @@ describe('Multiple Auth State Changes', () => {
     const profile1 = createMockProfile({ uid: 'user-1', displayName: 'User One' });
     const profile2 = createMockProfile({ uid: 'user-2', displayName: 'User Two' });
 
-    mockGetDoc
-      .mockResolvedValueOnce({ exists: () => true, data: () => profile1 })
-      .mockResolvedValueOnce({ exists: () => true, data: () => profile2 });
-
     renderWithAuth();
 
     const authCallback = mockOnAuthStateChanged.mock.calls[0][1];
@@ -709,6 +1013,10 @@ describe('Multiple Auth State Changes', () => {
     // First user signs in
     await act(async () => {
       await authCallback(user1);
+    });
+
+    await act(async () => {
+      simulateProfileSnapshot(profile1, 0);
     });
 
     await waitFor(() => {
@@ -731,6 +1039,10 @@ describe('Multiple Auth State Changes', () => {
       await authCallback(user2);
     });
 
+    await act(async () => {
+      simulateProfileSnapshot(profile2);
+    });
+
     await waitFor(() => {
       expect(screen.getByTestId('user')).toHaveTextContent('user-2');
       expect(screen.getByTestId('profile')).toHaveTextContent('User Two');
@@ -740,12 +1052,7 @@ describe('Multiple Auth State Changes', () => {
   it('handles rapid auth state changes', async () => {
     const user1 = createMockUser({ uid: 'rapid-user-1' });
     const user2 = createMockUser({ uid: 'rapid-user-2' });
-    const profile1 = createMockProfile({ displayName: 'Rapid One' });
     const profile2 = createMockProfile({ displayName: 'Rapid Two' });
-
-    mockGetDoc
-      .mockResolvedValueOnce({ exists: () => true, data: () => profile1 })
-      .mockResolvedValueOnce({ exists: () => true, data: () => profile2 });
 
     renderWithAuth();
 
@@ -753,8 +1060,13 @@ describe('Multiple Auth State Changes', () => {
 
     // Rapid changes
     await act(async () => {
-      authCallback(user1);
-      authCallback(user2);
+      await authCallback(user1);
+      await authCallback(user2);
+    });
+
+    // Simulate profile for the last user
+    await act(async () => {
+      simulateProfileSnapshot(profile2);
     });
 
     // Should eventually settle on the last state
@@ -778,10 +1090,13 @@ describe('Multiple Auth State Changes', () => {
     // Now auth resolves
     const authCallback = mockOnAuthStateChanged.mock.calls[0][1];
     const mockProfile = createMockProfile();
-    mockGetDoc.mockResolvedValue({ exists: () => true, data: () => mockProfile });
 
     await act(async () => {
       await authCallback(createMockUser());
+    });
+
+    await act(async () => {
+      simulateProfileSnapshot(mockProfile);
     });
 
     // Error should be cleared
@@ -795,19 +1110,20 @@ describe('Edge Cases', () => {
   it('handles user with minimal properties', async () => {
     const minimalUser = {
       uid: 'minimal-user',
-    } as User;
+      getIdToken: jest.fn().mockResolvedValue('minimal-token'),
+    } as unknown as User;
 
     const mockProfile = createMockProfile();
-    mockGetDoc.mockResolvedValue({
-      exists: () => true,
-      data: () => mockProfile,
-    });
 
     renderWithAuth();
 
     const authCallback = mockOnAuthStateChanged.mock.calls[0][1];
     await act(async () => {
       await authCallback(minimalUser);
+    });
+
+    await act(async () => {
+      simulateProfileSnapshot(mockProfile);
     });
 
     await waitFor(() => {
@@ -822,16 +1138,15 @@ describe('Edge Cases', () => {
       displayName: 'Minimal',
     } as UserProfile;
 
-    mockGetDoc.mockResolvedValue({
-      exists: () => true,
-      data: () => minimalProfile,
-    });
-
     renderWithAuth();
 
     const authCallback = mockOnAuthStateChanged.mock.calls[0][1];
     await act(async () => {
       await authCallback(mockUser);
+    });
+
+    await act(async () => {
+      simulateProfileSnapshot(minimalProfile);
     });
 
     await waitFor(() => {
@@ -839,19 +1154,21 @@ describe('Edge Cases', () => {
     });
   });
 
-  it('handles getDoc returning undefined data', async () => {
+  it('handles onSnapshot returning undefined data', async () => {
     const mockUser = createMockUser();
-
-    mockGetDoc.mockResolvedValue({
-      exists: () => true,
-      data: () => undefined,
-    });
 
     renderWithAuth();
 
     const authCallback = mockOnAuthStateChanged.mock.calls[0][1];
     await act(async () => {
       await authCallback(mockUser);
+    });
+
+    // Simulate onSnapshot returning exists() true but data() undefined
+    await act(async () => {
+      const lastCall = mockOnSnapshotFirestore.mock.calls[mockOnSnapshotFirestore.mock.calls.length - 1];
+      const onNext = lastCall[1];
+      onNext({ exists: () => true, data: () => undefined });
     });
 
     await waitFor(() => {

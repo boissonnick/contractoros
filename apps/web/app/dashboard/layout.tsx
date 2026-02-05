@@ -293,6 +293,7 @@ function createOwnerPmSections(permissions: RolePermissions): NavSection[] {
           children: [
             { label: 'Overview', href: '/dashboard/finances' },
             { label: 'Invoices', href: '/dashboard/invoices' },
+            { label: 'AP Invoicing', href: '/dashboard/ap-invoicing' },
             { label: 'Expenses', href: '/dashboard/expenses' },
             { label: 'Payroll', href: '/dashboard/payroll' },
           ],

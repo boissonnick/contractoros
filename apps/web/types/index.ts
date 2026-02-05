@@ -1443,6 +1443,83 @@ export const JOB_COST_SOURCE_LABELS: Record<JobCostSource, string> = {
 };
 
 // ============================================
+// AP Invoice Types (PM-facing Accounts Payable)
+// Note: Distinct from SubInvoice types in types/subcontractor.ts
+// which are the sub-portal-facing invoice types.
+// ============================================
+
+export type APInvoiceStatus = 'draft' | 'submitted' | 'approved' | 'paid' | 'disputed';
+
+export interface APLineItem {
+  description: string;
+  quantity: number;
+  rate: number;
+  amount: number;
+}
+
+/**
+ * Subcontractor invoice for Accounts Payable (AP) workflow.
+ * Stored in: organizations/{orgId}/subcontractorInvoices/{invoiceId}
+ */
+export interface SubcontractorInvoice {
+  id: string;
+  orgId: string;
+
+  // Vendor info (denormalized)
+  vendorId: string;
+  vendorName: string;
+
+  // Project info (denormalized)
+  projectId: string;
+  projectName: string;
+
+  // Invoice details
+  invoiceNumber: string;
+  invoiceDate: string; // ISO date string
+  dueDate: string;     // ISO date string
+  amount: number;
+  description: string;
+  lineItems: APLineItem[];
+
+  // Status & approval
+  status: APInvoiceStatus;
+  approvedBy?: string;
+  approvedAt?: Date;
+  paidAt?: Date;
+  paymentMethod?: string;
+  checkNumber?: string;
+
+  // Lien waiver tracking
+  lienWaiverStatus: 'not_required' | 'pending' | 'received';
+  lienWaiverId?: string;
+
+  // Attachments
+  attachmentUrls: string[];
+  notes?: string;
+
+  // Metadata
+  createdAt: Date;
+  createdBy: string;
+  updatedAt?: Date;
+}
+
+export const AP_INVOICE_STATUS_LABELS: Record<APInvoiceStatus, string> = {
+  draft: 'Draft',
+  submitted: 'Submitted',
+  approved: 'Approved',
+  paid: 'Paid',
+  disputed: 'Disputed',
+};
+
+export const AP_INVOICE_STATUS_COLORS: Record<APInvoiceStatus, string> = {
+  draft: 'gray',
+  submitted: 'blue',
+  approved: 'green',
+  paid: 'emerald',
+  disputed: 'red',
+};
+
+// ============================================
 // Expense Types
 // ============================================
 

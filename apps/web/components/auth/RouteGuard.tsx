@@ -7,6 +7,7 @@ import { RolePermissions, UserRole } from '@/types';
 import { usePermissions, useImpersonation } from '@/lib/contexts/ImpersonationContext';
 import { ShieldExclamationIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui';
+import { getDefaultPathForRole } from '@/lib/auth/role-utils';
 
 interface RouteGuardProps {
   children: React.ReactNode;
@@ -145,10 +146,11 @@ export function RouteGuard({
 
 /**
  * Default Access Denied page component
- * BUG #7 FIX: Shows impersonated role instead of actual role when impersonating
+ * BUG #7 FIXED: Now shows actual role from useAuth, plus impersonated role when in demo mode
  */
 function AccessDeniedPage({ pathname }: { pathname: string }) {
   const router = useRouter();
+  const { profile } = useAuth();
   const { currentRole, isImpersonating } = useImpersonation();
 
   return (
@@ -161,9 +163,18 @@ function AccessDeniedPage({ pathname }: { pathname: string }) {
         <p className="text-gray-600 mb-6">
           You don&apos;t have permission to access this page.
           <span className="block mt-1 text-sm text-gray-500">
-            Your current role: <span className="font-medium uppercase">{currentRole.replace('_', ' ')}</span>
-            {isImpersonating && (
-              <span className="ml-1 text-amber-600">(Demo Mode)</span>
+            {isImpersonating ? (
+              <>
+                Viewing as: <span className="font-medium uppercase">{currentRole.replace('_', ' ')}</span>
+                <span className="ml-1 text-amber-600">(Demo Mode)</span>
+                <span className="block mt-0.5">
+                  Your actual role: <span className="font-medium uppercase">{profile?.role || 'Unknown'}</span>
+                </span>
+              </>
+            ) : (
+              <>
+                Your current role: <span className="font-medium uppercase">{profile?.role || 'Unknown'}</span>
+              </>
             )}
           </span>
         </p>
@@ -172,7 +183,7 @@ function AccessDeniedPage({ pathname }: { pathname: string }) {
             <ArrowLeftIcon className="h-4 w-4 mr-1.5" />
             Go Back
           </Button>
-          <Button onClick={() => router.push('/dashboard')}>
+          <Button onClick={() => router.push(profile?.role ? getDefaultPathForRole(profile.role) : '/dashboard')}>
             Go to Dashboard
           </Button>
         </div>

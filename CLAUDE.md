@@ -739,11 +739,11 @@ Demo org: "Horizon Construction Co." with orgId matching your user's orgId (set 
 
 ## Known Issues / Tech Debt
 
-- No pagination — will break at scale
-- No unit tests — E2E tests only
+- Pagination only on Clients + Expenses — other lists may need it at scale
+- Limited unit tests (9 files, 5 hooks tested out of 95) — Sprint 70 planned
 - Mobile UI needs ongoing polish
-- AuthProvider architecture needs refactoring
-- Some silent error handling
+- AuthProvider architecture needs refactoring — Sprint 71 planned
+- Some silent error handling (especially auth profile loading)
 
 ---
 

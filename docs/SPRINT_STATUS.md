@@ -2,9 +2,10 @@
 
 > **Purpose:** Track current progress and enable seamless session handoffs.
 > **Last Updated:** 2026-02-05
-> **Current Phase:** Phase 6 - Financial Operations & Mobile Experience
-> **Latest Sprint:** Sprint 68 - Expense Automation (OCR Display/Analytics) ✅ COMPLETE
-> **Next Sprint:** Sprint 69 - Subcontractor Invoice Management (AP Automation)
+> **Current Phase:** Phase 7 - Quality & Architecture
+> **Latest Sprint:** Sprint 71 - AuthProvider Refactoring ✅ COMPLETE
+> **Next Sprint:** Sprint 72
+> **Briefs Ready:** Sprint 70, 71, 72 (`docs/specs/sprint-{70,71,72}-brief.md`)
 > **Historical Sprints:** Sprints 13B-25 archived in `.claude-coordination/archive/sprints-13b-25-history.md`
 > **Phase 3 sprints 52-55:** archived in `.claude-coordination/archive/sprints-52-55-history.md`
 
@@ -24,6 +25,91 @@ Find your modules instantly instead of running Explore agents for 15 minutes.
 **What's in the registry:** All 25+ features, 83 hooks, 60 component directories, 36 dashboard routes
 
 **DO NOT run Explore agents without checking the registry first!**
+
+---
+
+## ✅ Sprint 71 - AuthProvider Refactoring - COMPLETE
+
+**Priority:** P1 - HIGH (Architecture/Tech Debt)
+**Completed:** 2026-02-05
+**Brief:** `docs/specs/sprint-71-brief.md`
+
+**Goal:** Refactor auth architecture to fix 5 critical issues: silent profile failures, no middleware, unvalidated orgId, stale profiles, and duplicate role mappings.
+
+**Key results:**
+- [x] `lib/auth/role-utils.ts` — Consolidated 3 duplicate role→path mappings into single source of truth (74 tests)
+- [x] `middleware.ts` — Next.js server-side auth pre-check (cookie-based, prevents flash of protected content)
+- [x] `lib/auth/session-cookie.ts` — Cookie utilities for middleware (set/clear/check)
+- [x] `lib/hooks/useAuthenticatedOrg.ts` — Hook guaranteeing orgId exists (discriminated union type, 6 tests)
+- [x] `lib/auth.tsx` refactored — Real-time profile via onSnapshot (replaces one-time getDoc), profileError exposed, session cookie integration
+- [x] `AuthGuard.tsx` — Uses shared role-utils instead of local getDefaultPath
+- [x] `app/login/page.tsx` — Uses shared role-utils instead of local getRedirectPath
+- [x] `RouteGuard.tsx` — Bug #7 fixed (shows actual role vs impersonated role), smart redirect to role-appropriate portal
+- [x] `ImpersonationContext.tsx` — Uses shared mapUserRoleToImpersonationRole, switched from localStorage to sessionStorage
+- [x] Auth tests updated — 42 tests (up from 30), covers onSnapshot profile, profileError, session cookies, cleanup
+
+**New files:**
+- `lib/auth/role-utils.ts` (role→path mapping, portal roles, canAccessPortal, mapUserRoleToImpersonationRole)
+- `lib/auth/session-cookie.ts` (setSessionCookie, clearSessionCookie, hasSessionCookie)
+- `middleware.ts` (Next.js edge middleware for /dashboard, /field, /client, /sub)
+- `lib/hooks/useAuthenticatedOrg.ts` (guaranteed orgId hook with discriminated union)
+- `__tests__/lib/auth/role-utils.test.ts` (74 tests)
+- `__tests__/lib/hooks/useAuthenticatedOrg.test.ts` (6 tests)
+
+**Modified files:**
+- `lib/auth.tsx` (getDoc→onSnapshot, profileError, session cookie)
+- `components/auth/AuthGuard.tsx` (removed duplicate, uses role-utils)
+- `components/auth/RouteGuard.tsx` (bug #7 fix, uses role-utils)
+- `lib/contexts/ImpersonationContext.tsx` (uses role-utils, sessionStorage)
+- `app/login/page.tsx` (removed duplicate, uses role-utils)
+- `__tests__/lib/hooks/useAuth.test.tsx` (updated for onSnapshot + 12 new tests)
+
+**Test count:** 1063 total tests, 0 failures, 25 suites
+
+---
+
+## ✅ Sprint 70 - Unit Testing Expansion - COMPLETE
+
+**Priority:** P1 - HIGH (Infrastructure/Quality)
+**Completed:** 2026-02-05
+**Brief:** `docs/specs/sprint-70-brief.md`
+
+**Goal:** Expand test coverage from 9 files to 23, covering validation schemas, utility functions, and 10 core business hooks. All 14 new test files created and passing.
+
+**Key results:**
+- [x] 14 new test files — 972 total tests, 0 failures
+- [x] Validation schema tests — All 15 Zod schemas tested (valid + invalid + edge cases)
+- [x] Tax calculator tests — 9 functions with zero/negative/rounding edge cases
+- [x] Auto-number tests — formatDocumentNumber, previewNextNumber, DEFAULT_NUMBERING_CONFIG
+- [x] Gantt transform tests — tasksToGanttData (dates, progress, dependencies), findTaskById
+- [x] useExpenses tests — CRUD, approval workflow (startReview/approve/reject/markPaid/cancel), getSummary
+- [x] usePayroll tests — Payroll runs, calculateSummary (aggregation + alerts), settings
+- [x] useJobCosting tests — useJobCosts, useProjectProfitability, useJobCostAlerts, useOrgJobCosting, formatPercent, getCategoryColor
+- [x] useCompanyStats tests — Revenue MTD/YTD, avgMargin, pipelineValue, AR aging, monthlyTrends
+- [x] useBids tests — Dual onSnapshot (bids + solicitations), createSolicitation, updateBidStatus
+- [x] useChangeOrders tests — CRUD, submitForApproval, approve/reject with status advancement
+- [x] useTasks tests — CRUD, moveTask (completedAt), bulk operations (writeBatch)
+- [x] useDailyLogs tests — CRUD, photos, getDailySummary, getDateRange, privacy filter
+- [x] useSubcontractors tests — CRUD with toasts, query construction
+- [x] usePagination tests — Cursor-based pagination, loadMore, loadPrevious, setPageSize, cache
+
+**New files:**
+- `__tests__/lib/validations/index.test.ts` (204 tests)
+- `__tests__/lib/utils/tax-calculator.test.ts` (82 tests)
+- `__tests__/lib/utils/auto-number.test.ts` (22 tests)
+- `__tests__/lib/utils/ganttTransform.test.ts` (23 tests)
+- `__tests__/lib/hooks/useExpenses.test.ts` (24 tests)
+- `__tests__/lib/hooks/usePayroll.test.ts` (15 tests)
+- `__tests__/lib/hooks/useJobCosting.test.ts` (26 tests)
+- `__tests__/lib/hooks/useCompanyStats.test.ts` (11 tests)
+- `__tests__/lib/hooks/useBids.test.ts` (13 tests)
+- `__tests__/lib/hooks/useChangeOrders.test.ts` (20 tests)
+- `__tests__/lib/hooks/useTasks.test.ts` (16 tests)
+- `__tests__/lib/hooks/useDailyLogs.test.ts` (13 tests)
+- `__tests__/lib/hooks/useSubcontractors.test.ts` (12 tests)
+- `__tests__/lib/hooks/usePagination.test.ts` (19 tests)
+
+**Coverage note:** Global coverage is ~5% because the 60% threshold measures the entire codebase (~40K statements). Tested modules have high coverage. The threshold is not enforced in CI.
 
 ---
 
@@ -56,7 +142,42 @@ Find your modules instantly instead of running Explore agents for 15 minutes.
 - `app/dashboard/expenses/page.tsx` — Added OCR Analytics link for managers
 - `types/index.ts` — Added OCR metadata fields to Expense interface
 
-**Next Sprint:** Sprint 69 - Subcontractor Invoice Management (AP Automation)
+---
+
+## ✅ Sprint 69 - Subcontractor Invoice Management (AP Automation) - COMPLETE
+
+**Priority:** P1 - HIGH
+**Completed:** 2026-02-05
+**Brief:** `docs/specs/sprint-69-brief.md`
+
+**Goal:** Build AP workflow for subcontractor invoices — create/edit invoices, approval workflow (draft → submitted → approved → paid/disputed), lien waiver tracking, and profitability recalculation on payment.
+
+**Key deliverables:**
+- [x] SubcontractorInvoice + APLineItem types — AP invoice schema distinct from sub-portal SubInvoice
+- [x] useSubcontractorInvoices hook — CRUD + approval workflow (submit, approve, dispute, markPaid) + lien waiver requests
+- [x] SubcontractorInvoiceForm — FormModal with dynamic line items (useFieldArray), vendor/project selects
+- [x] InvoiceApprovalCard — Status-based action buttons, expandable details, lien waiver status
+- [x] LienWaiverModal — Request conditional/unconditional waivers per invoice
+- [x] AP Invoicing dashboard page — Stats, quick filters, vendor/project dropdowns, role-gated OWNER/PM
+- [x] Cloud Function onSubInvoiceWrite — Recalculates profitability when sub invoice approved/paid
+- [x] SubcontractorCard — Added "Invoices" action linking to /dashboard/ap-invoicing?vendor={id}
+- [x] Sidebar nav — AP Invoicing added to Finance section
+
+**New files:**
+- `lib/hooks/useSubcontractorInvoices.ts` — AP invoice CRUD + approval + lien waiver hook
+- `components/subcontractors/SubcontractorInvoiceForm.tsx` — Invoice form with line items
+- `components/subcontractors/InvoiceApprovalCard.tsx` — Approval workflow card
+- `components/subcontractors/LienWaiverModal.tsx` — Lien waiver request form
+- `app/dashboard/ap-invoicing/page.tsx` — AP dashboard with approval queue
+- `functions/src/ap-invoicing/index.ts` — Cloud Function for profitability recalc
+
+**Modified files:**
+- `types/index.ts` — Added SubcontractorInvoice, APInvoiceStatus, APLineItem, AP_INVOICE_STATUS_LABELS
+- `functions/src/index.ts` — Exported onSubInvoiceWrite trigger
+- `components/subcontractors/SubcontractorCard.tsx` — Added Invoices action button
+- `app/dashboard/layout.tsx` — Added AP Invoicing to Finance nav section
+
+**Note:** Firestore rules and indexes for subcontractorInvoices + lienWaivers collections need deployment.
 
 ---
 
@@ -257,11 +378,11 @@ Find your modules instantly instead of running Explore agents for 15 minutes.
   - `twilio`: 5.12.0 → 5.12.1 (patch)
 - ✅ Skipped major version bumps (eslint 9, firebase 12, tailwind 4, zod 4) — require separate migration sprints
 
-**Remaining Major Versions (Future Sprints):**
-- `eslint` 8→9 + `eslint-config-next` 14→16 (major config rewrite)
-- `firebase` 11→12 (SDK migration)
-- `tailwindcss` 3→4 (Sprint 60 planned)
-- `zod` 3→4 (API changes)
+**Remaining Major Versions — ALL COMPLETE:**
+- `eslint` 8→9 ✅ Sprint 62
+- `firebase` 11→12 ✅ Sprint 64
+- `tailwindcss` 3→4 ✅ (now 4.1.18, `@import 'tailwindcss'` + `@theme` syntax, `tailwind.config.js` removed)
+- `zod` 3→4 ✅ (now 4.3.6)
 
 ---
 
@@ -430,14 +551,19 @@ Find your modules instantly instead of running Explore agents for 15 minutes.
 - **Sprint 61:** Form Validation & Error Boundaries ✅
 - **Sprint 62:** ESLint 9 Migration ✅
 
-### Phase 6: Financial Operations & Mobile Experience (IN PROGRESS)
+### Phase 6: Financial Operations & Mobile Experience ✅ COMPLETE
 - **Sprint 63:** Mobile Experience Overhaul ✅
 - **Sprint 64:** Firebase 12 Upgrade ✅
 - **Sprint 65:** Job Costing Engine ✅
-- **Sprint 66:** Scoping Sprint (pre-generate briefs for 67-69) 🔧 NEXT
-- **Sprint 67:** Financial Intelligence (BI MVP)
-- **Sprint 68:** Expense Automation (OCR)
-- **Sprint 69:** TBD (next backlog priority)
+- **Sprint 66:** Scoping Sprint ✅
+- **Sprint 67:** Financial Intelligence (BI MVP) ✅
+- **Sprint 68:** Expense Automation (OCR) ✅
+
+### Phase 7: Quality & Architecture (IN PROGRESS)
+- **Sprint 69:** Subcontractor Invoice Management (AP Automation) ✅
+- **Sprint 70:** Unit Testing Expansion
+- **Sprint 71:** AuthProvider Refactoring
+- **Sprint 72:** UI Design System Propagation (Antigravity polish across all pages)
 
 ---
 
@@ -664,7 +790,7 @@ See `docs/REPRIORITIZED_SPRINT_PLAN.md` for complete list.
 3. **Sprint 66 is a SCOPING sprint** — run 3 parallel Explore agents to generate briefs
 4. **Read `docs/specs/SPRINT-65-SCOPING.md`** for exact execution steps
 5. **After Sprint 66:** Sprints 67-69 should start WITHOUT plan mode (read brief instead)
-6. **Remaining major upgrades:** tailwind 4, zod 4
+6. **All major upgrades COMPLETE:** eslint 9 ✅, firebase 12 ✅, tailwind 4 ✅, zod 4 ✅
 7. **ALWAYS deploy Firebase before Docker build** - see workflow below
 
 ### Build & Deploy Workflow (CRITICAL)
@@ -681,8 +807,9 @@ docker ps
 **Why:** Firebase indexes take 30s-2min to build. Deploy them BEFORE Docker build so they're ready when app starts.
 
 ### Known Issues
-- No test coverage
-- Silent error handling in some places
+- Limited test coverage (9 test files, 5 hooks tested out of 95) — Sprint 70 planned
+- Silent error handling in auth (profile loading) — Sprint 71 planned
+- AuthProvider architecture needs refactoring — Sprint 71 planned
 - Clients + Expenses paginated; other high-volume lists may still need pagination
 - 1050 ESLint warnings to address incrementally (706 unused vars, 213 React Compiler)
 

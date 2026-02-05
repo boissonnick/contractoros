@@ -7,34 +7,18 @@ import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase/config';
 import { signInWithGoogle, sendMagicLink } from '@/lib/auth-providers';
 import { UserRole } from '@/types';
+import { getDefaultPathForRole } from '@/lib/auth/role-utils';
 import {
   EnvelopeIcon,
   ExclamationCircleIcon,
 } from '@heroicons/react/24/outline';
-
-function getRedirectPath(role: UserRole): string {
-  switch (role) {
-    case 'OWNER':
-    case 'PM':
-      return '/dashboard';
-    case 'EMPLOYEE':
-    case 'CONTRACTOR':
-      return '/field';
-    case 'SUB':
-      return '/sub';
-    case 'CLIENT':
-      return '/client';
-    default:
-      return '/onboarding';
-  }
-}
 
 async function handlePostAuth(uid: string, router: ReturnType<typeof useRouter>) {
   try {
     const userDoc = await getDoc(doc(db, 'users', uid));
     if (userDoc.exists()) {
       const role = userDoc.data().role as UserRole;
-      router.push(getRedirectPath(role));
+      router.push(getDefaultPathForRole(role));
     } else {
       router.push('/onboarding');
     }
@@ -141,7 +125,7 @@ export default function LoginPage() {
       if (userDoc.exists()) {
         // Existing user — route based on role
         const role = userDoc.data().role as UserRole;
-        router.push(getRedirectPath(role));
+        router.push(getDefaultPathForRole(role));
       } else {
         // New user via Google SSO — create as OWNER, route to company setup
         await setDoc(doc(db, 'users', uid), {

@@ -37,6 +37,9 @@ export { processReceiptOCR } from "./expenses/processReceiptOCR";
 // Job Costing Engine — auto-recalculate project profitability
 export { onTimeEntryWrite, onExpenseWrite } from "./job-costing";
 
+// AP Invoicing — recalculate profitability on sub invoice approval/payment
+export { onSubInvoiceWrite } from "./ap-invoicing";
+
 // QuickBooks Online Integration - Scheduled Sync
 export {
   qboScheduledSync,

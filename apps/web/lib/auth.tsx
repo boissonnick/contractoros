@@ -1,8 +1,9 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { User, onAuthStateChanged, signOut as firebaseSignOut } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase/config';
 import { UserProfile } from '@/types';
+import { setSessionCookie, clearSessionCookie } from '@/lib/auth/session-cookie';
 
 const AUTH_TIMEOUT_MS = 10_000;
 
@@ -11,6 +12,7 @@ interface AuthContextType {
   profile: UserProfile | null;
   loading: boolean;
   authError: string | null;
+  profileError: string | null;
   signOut: () => Promise<void>;
 }
 
@@ -19,6 +21,7 @@ const AuthContext = createContext<AuthContextType>({
   profile: null,
   loading: true,
   authError: null,
+  profileError: null,
   signOut: async () => {},
 });
 
@@ -33,6 +36,7 @@ const AuthContext = createContext<AuthContextType>({
  * @returns {UserProfile|null} profile - Firestore user profile with role, orgId, permissions
  * @returns {boolean} loading - True while auth state is being determined
  * @returns {string|null} authError - Error message if auth initialization failed
+ * @returns {string|null} profileError - Error message if profile loading failed
  * @returns {Function} signOut - Async function to sign out the current user
  *
  * @example
@@ -60,6 +64,10 @@ export function AuthProvider({ children }: { children?: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [profileError, setProfileError] = useState<string | null>(null);
+
+  // Ref to track profile subscription for cleanup
+  const profileUnsubRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     let didResolve = false;
@@ -69,27 +77,49 @@ export function AuthProvider({ children }: { children?: React.ReactNode }) {
       setAuthError(null);
       setUser(currentUser);
 
-      if (currentUser) {
-        try {
-          const userDocRef = doc(db, 'users', currentUser.uid);
-          const userDoc = await getDoc(userDocRef);
-
-          if (userDoc.exists()) {
-            setProfile(userDoc.data() as UserProfile);
-          } else {
-            console.warn("User authenticated but no profile found in Firestore.");
-            setProfile(null);
-          }
-        } catch (error) {
-          // Prevent UI crash if Firestore is unreachable or permissions fail
-          console.error("Error fetching user profile:", error);
-          setProfile(null);
-        }
-      } else {
-        setProfile(null);
+      // Clean up previous profile listener
+      if (profileUnsubRef.current) {
+        profileUnsubRef.current();
+        profileUnsubRef.current = null;
       }
 
-      setLoading(false);
+      if (currentUser) {
+        // Set session cookie for middleware
+        try {
+          const idToken = await currentUser.getIdToken();
+          await setSessionCookie(idToken);
+        } catch (e) {
+          console.warn('Failed to set session cookie:', e);
+        }
+
+        // Set up real-time profile listener
+        const userDocRef = doc(db, 'users', currentUser.uid);
+
+        profileUnsubRef.current = onSnapshot(
+          userDocRef,
+          (docSnap) => {
+            if (docSnap.exists()) {
+              setProfile(docSnap.data() as UserProfile);
+              setProfileError(null);
+            } else {
+              console.warn("User authenticated but no profile found in Firestore.");
+              setProfile(null);
+            }
+            setLoading(false);
+          },
+          (error) => {
+            console.error("Error fetching user profile:", error);
+            setProfileError(error.message || 'Failed to load user profile');
+            setProfile(null);
+            setLoading(false);
+          }
+        );
+      } else {
+        clearSessionCookie();
+        setProfile(null);
+        setProfileError(null);
+        setLoading(false);
+      }
     });
 
     // Timeout: if onAuthStateChanged hasn't fired after AUTH_TIMEOUT_MS,
@@ -104,21 +134,27 @@ export function AuthProvider({ children }: { children?: React.ReactNode }) {
     return () => {
       unsubscribe();
       clearTimeout(timer);
+      if (profileUnsubRef.current) {
+        profileUnsubRef.current();
+        profileUnsubRef.current = null;
+      }
     };
   }, []);
 
   const signOut = async () => {
     try {
+      clearSessionCookie();
       await firebaseSignOut(auth);
       setProfile(null);
       setUser(null);
+      setProfileError(null);
     } catch (error) {
       console.error("Error signing out:", error);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, authError, signOut }}>
+    <AuthContext.Provider value={{ user, profile, loading, authError, profileError, signOut }}>
       {children}
     </AuthContext.Provider>
   );

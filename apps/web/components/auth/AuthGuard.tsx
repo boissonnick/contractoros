@@ -3,30 +3,13 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
+import { getDefaultPathForRole } from '@/lib/auth/role-utils';
 import { UserRole } from '@/types';
 
 interface AuthGuardProps {
   children: React.ReactNode;
   allowedRoles?: UserRole[];
   fallbackPath?: string;
-}
-
-// Get the default dashboard path for each role
-function getDefaultPath(role: UserRole): string {
-  switch (role) {
-    case 'OWNER':
-    case 'PM':
-      return '/dashboard';
-    case 'EMPLOYEE':
-    case 'CONTRACTOR':
-      return '/field';
-    case 'SUB':
-      return '/sub';
-    case 'CLIENT':
-      return '/client';
-    default:
-      return '/login';
-  }
 }
 
 export default function AuthGuard({ children, allowedRoles, fallbackPath }: AuthGuardProps) {
@@ -39,7 +22,7 @@ export default function AuthGuard({ children, allowedRoles, fallbackPath }: Auth
         router.push('/login');
       } else if (profile && allowedRoles && !allowedRoles.includes(profile.role)) {
         // Redirect to the appropriate path for their role
-        const redirectPath = fallbackPath || getDefaultPath(profile.role);
+        const redirectPath = fallbackPath || getDefaultPathForRole(profile.role);
         router.push(redirectPath);
       }
     }

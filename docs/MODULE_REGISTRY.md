@@ -1,6 +1,6 @@
 # ContractorOS Module Registry
 
-**Last Updated:** 2026-02-05 (Sprint 68 - added OCR display components, useOCRLogs, OCR Analytics page)
+**Last Updated:** 2026-02-05 (Sprint 69 - added AP Invoicing, SubcontractorInvoiceForm, useSubcontractorInvoices)
 **Purpose:** Fast codebase navigation - eliminates 200k+ token waste from Explore agents
 **Usage:** Check this file BEFORE running Explore agents at sprint start
 
@@ -40,6 +40,7 @@
 | **Expenses** | useExpenses | expenses/page.tsx | ExpenseCard, LineItemsTable, ReceiptGallery, OCRConfidenceAlert | Receipts + OCR |
 | **Expense OCR Analytics** | useOCRLogs | expenses/ocr-analytics/page.tsx | BarChartCard | Admin OCR stats |
 | **Financial Intelligence** | useCompanyStats | intelligence/page.tsx | CompanyOverviewDashboard, ProjectProfitabilityLeaderboard, CashFlowRunwayDashboard | BI dashboards |
+| **AP Invoicing** | useSubcontractorInvoices | ap-invoicing/page.tsx | SubcontractorInvoiceForm, InvoiceApprovalCard, LienWaiverModal | Subcontractor AP workflow |
 | **Invoices** | useInvoices | invoices/page.tsx | InvoiceGenerator, InvoicePDF | PDF + Stripe |
 | **Leads** | useLeads | leads/page.tsx | LeadCard | CRM pipeline |
 | **Materials** | useMaterials | materials/page.tsx | MaterialCard | Inventory |

@@ -10,6 +10,7 @@ import {
   EnvelopeIcon,
   EyeIcon,
   ChatBubbleLeftRightIcon,
+  DocumentTextIcon,
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
 import { StarIcon } from '@heroicons/react/24/outline';
@@ -183,6 +184,20 @@ export default function SubcontractorCard({
         >
           View Details
         </Button>
+        <Link
+          href={`/dashboard/ap-invoicing?vendor=${subcontractor.id}`}
+          onClick={(e) => e.stopPropagation()}
+          className="flex-1"
+        >
+          <Button
+            variant="outline"
+            size="sm"
+            icon={<DocumentTextIcon className="h-4 w-4" />}
+            className="w-full"
+          >
+            Invoices
+          </Button>
+        </Link>
         <Button
           variant="secondary"
           size="sm"

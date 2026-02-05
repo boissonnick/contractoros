@@ -9,6 +9,7 @@ import {
   UserRole,
 } from '@/types';
 import { useAuth } from '@/lib/auth';
+import { mapUserRoleToImpersonationRole } from '@/lib/auth/role-utils';
 
 // ============================================
 // Types
@@ -68,12 +69,12 @@ export function ImpersonationProvider({ children }: { children: React.ReactNode 
   // Determine if user can impersonate (only OWNER and PM roles)
   const canImpersonate = profile?.role === 'OWNER' || profile?.role === 'PM';
 
-  // Load saved impersonation state from localStorage
+  // Load saved impersonation state from sessionStorage
   useEffect(() => {
     if (typeof window === 'undefined' || !user || !profile) return;
 
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+      const saved = sessionStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         const startedAt = new Date(parsed.startedAt);
@@ -81,7 +82,7 @@ export function ImpersonationProvider({ children }: { children: React.ReactNode 
         // Check if expired (2 hours)
         const hoursElapsed = (Date.now() - startedAt.getTime()) / (1000 * 60 * 60);
         if (hoursElapsed > AUTO_EXPIRE_HOURS) {
-          localStorage.removeItem(STORAGE_KEY);
+          sessionStorage.removeItem(STORAGE_KEY);
           return;
         }
 
@@ -95,11 +96,11 @@ export function ImpersonationProvider({ children }: { children: React.ReactNode 
             startedAt,
           });
         } else {
-          localStorage.removeItem(STORAGE_KEY);
+          sessionStorage.removeItem(STORAGE_KEY);
         }
       }
     } catch {
-      localStorage.removeItem(STORAGE_KEY);
+      sessionStorage.removeItem(STORAGE_KEY);
     }
   }, [user, profile, canImpersonate]);
 
@@ -126,8 +127,8 @@ export function ImpersonationProvider({ children }: { children: React.ReactNode 
 
     setState(newState);
 
-    // Persist to localStorage
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    // Persist to sessionStorage
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
       ...newState,
       startedAt: newState.startedAt?.toISOString(),
     }));
@@ -150,7 +151,7 @@ export function ImpersonationProvider({ children }: { children: React.ReactNode 
       startedAt: null,
     });
 
-    localStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem(STORAGE_KEY);
   }, [state.actualUserId, state.isImpersonating]);
 
   // Get current effective role
@@ -211,24 +212,3 @@ export function useHasPermission(permission: keyof RolePermissions): boolean {
   return hasPermission(permission);
 }
 
-// ============================================
-// Helpers
-// ============================================
-
-function mapUserRoleToImpersonationRole(role: UserRole): ImpersonationRole {
-  switch (role) {
-    case 'OWNER':
-      return 'owner';
-    case 'PM':
-      return 'project_manager';
-    case 'EMPLOYEE':
-      return 'employee';
-    case 'CONTRACTOR':
-    case 'SUB':
-      return 'contractor';
-    case 'CLIENT':
-      return 'client';
-    default:
-      return 'employee';
-  }
-}
