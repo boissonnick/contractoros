@@ -191,7 +191,7 @@ export default function ClientDashboard() {
         <div className="bg-white rounded-xl border p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900">Recent Progress</h2>
-            <Link href="/client/photos" className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
+            <Link href="/client/photos" className="text-sm text-brand-600 hover:text-brand-700 flex items-center gap-1">
               All photos <ArrowRightIcon className="h-4 w-4" />
             </Link>
           </div>
@@ -231,7 +231,7 @@ export default function ClientDashboard() {
         <div className="bg-white rounded-xl border p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900">Invoices</h2>
-            <Link href="/client/documents" className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
+            <Link href="/client/documents" className="text-sm text-brand-600 hover:text-brand-700 flex items-center gap-1">
               All documents <ArrowRightIcon className="h-4 w-4" />
             </Link>
           </div>

@@ -178,7 +178,7 @@ export function PhaseTemplatesTab() {
             value={phase.name}
             onChange={(e) => updatePhaseName(phases, index, e.target.value, setter)}
             placeholder="Phase name..."
-            className="flex-1 text-sm px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+            className="flex-1 text-sm px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-transparent text-gray-900"
           />
           <button
             onClick={() => movePhase(phases, index, -1, setter)}
@@ -204,7 +204,7 @@ export function PhaseTemplatesTab() {
       ))}
       <button
         onClick={() => addPhaseRow(phases, setter)}
-        className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 mt-2"
+        className="flex items-center gap-1 text-sm text-brand-600 hover:text-brand-700 mt-2"
       >
         <PlusIcon className="h-4 w-4" />
         Add Phase
@@ -224,7 +224,7 @@ export function PhaseTemplatesTab() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">Phase Templates</h2>
+          <h2 className="text-lg font-semibold text-gray-900 font-heading tracking-tight">Phase Templates</h2>
           <p className="text-sm text-gray-500">
             Define construction phases for different project types. Templates are used when creating new projects.
           </p>

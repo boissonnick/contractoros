@@ -80,7 +80,7 @@ export default function TaskTemplateSelector({ onSelect, onClose }: TaskTemplate
               placeholder="Search templates..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-transparent"
               autoFocus
             />
           </div>
@@ -92,7 +92,7 @@ export default function TaskTemplateSelector({ onSelect, onClose }: TaskTemplate
                 className={cn(
                   'px-3 py-1.5 text-sm rounded-full border transition-colors',
                   selectedTrade === trade
-                    ? 'bg-blue-50 border-blue-300 text-blue-700'
+                    ? 'bg-brand-50 border-brand-300 text-brand-primary'
                     : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'
                 )}
               >
@@ -121,11 +121,11 @@ export default function TaskTemplateSelector({ onSelect, onClose }: TaskTemplate
                       <button
                         key={`${template.name}-${index}`}
                         onClick={() => onSelect(template)}
-                        className="w-full text-left p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all group"
+                        className="w-full text-left p-4 rounded-lg border border-gray-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all group"
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <h4 className="font-medium text-gray-900 group-hover:text-blue-700">
+                            <h4 className="font-medium text-gray-900 group-hover:text-brand-700">
                               {template.name}
                             </h4>
                             {template.defaultDescription && (
@@ -155,7 +155,7 @@ export default function TaskTemplateSelector({ onSelect, onClose }: TaskTemplate
                             </div>
                           </div>
                           <div className="ml-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <span className="text-xs font-medium text-blue-600">Use →</span>
+                            <span className="text-xs font-medium text-brand-600">Use →</span>
                           </div>
                         </div>
                       </button>

@@ -46,7 +46,7 @@ export default function SubSchedulePage() {
       </div>
 
       <Card>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3">My Assignments</h3>
+        <h3 className="text-sm font-semibold font-heading tracking-tight text-gray-900 mb-3">My Assignments</h3>
         <ScheduleCalendar assignments={assignments} view="week" />
       </Card>
     </div>

@@ -253,7 +253,7 @@ export default function ImportContent() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Import Data</h1>
+        <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight">Import Data</h1>
         <p className="text-gray-500 mt-1">
           Import clients, projects, contacts, or communication logs from CSV files
         </p>
@@ -270,7 +270,7 @@ export default function ImportContent() {
             return (
               <React.Fragment key={s}>
                 {index > 0 && (
-                  <div className={`w-12 h-0.5 ${isComplete ? 'bg-blue-600' : 'bg-gray-200'}`} />
+                  <div className={`w-12 h-0.5 ${isComplete ? 'bg-brand-primary' : 'bg-gray-200'}`} />
                 )}
                 <div
                   className={`

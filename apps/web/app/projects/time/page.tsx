@@ -297,7 +297,7 @@ export default function ProjectsTimePage() {
             <select
               value={datePreset}
               onChange={(e) => setDatePreset(e.target.value as DateRangePreset)}
-              className="rounded-lg border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500"
+              className="rounded-xl border-gray-300 text-sm focus:border-brand-primary focus:ring-brand-primary/20"
             >
               <option value="this_week">This Week</option>
               <option value="last_week">Last Week</option>
@@ -313,7 +313,7 @@ export default function ProjectsTimePage() {
             <select
               value={selectedCrewMember}
               onChange={(e) => setSelectedCrewMember(e.target.value)}
-              className="rounded-lg border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500"
+              className="rounded-xl border-gray-300 text-sm focus:border-brand-primary focus:ring-brand-primary/20"
             >
               <option value="all">All Crew Members</option>
               {crewMembers.map(member => (
@@ -333,7 +333,7 @@ export default function ProjectsTimePage() {
                 placeholder="Search projects..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-300 text-sm focus:border-brand-primary focus:ring-brand-primary/20"
               />
             </div>
           </div>
@@ -347,8 +347,8 @@ export default function ProjectsTimePage() {
             label: 'Total Hours',
             value: totals.totalHours.toFixed(1),
             icon: ClockIcon,
-            iconBg: 'bg-blue-100',
-            iconColor: 'text-blue-600',
+            iconBg: 'bg-brand-100',
+            iconColor: 'text-brand-primary',
             description: `${totals.totalEntries} entries`,
           },
           {
@@ -382,7 +382,7 @@ export default function ProjectsTimePage() {
       {/* Project Breakdown Table */}
       <Card padding="none">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Project Breakdown</h3>
+          <h3 className="text-lg font-semibold font-heading tracking-tight text-gray-900">Project Breakdown</h3>
           <p className="text-sm text-gray-500">Time and costs grouped by project</p>
         </div>
 
@@ -439,7 +439,7 @@ export default function ProjectsTimePage() {
                                 {project.projectId !== 'unassigned' ? (
                                   <Link
                                     href={`/dashboard/projects/${project.projectId}`}
-                                    className="hover:text-blue-600 hover:underline"
+                                    className="hover:text-brand-600 hover:underline"
                                     onClick={(e) => e.stopPropagation()}
                                   >
                                     {project.projectName}
@@ -471,7 +471,7 @@ export default function ProjectsTimePage() {
                           <div className="flex items-center justify-end gap-2">
                             <div className="w-16 bg-gray-200 rounded-full h-2">
                               <div
-                                className="bg-blue-600 h-2 rounded-full transition-all"
+                                className="bg-brand-primary h-2 rounded-full transition-all"
                                 style={{ width: `${Math.min(parseFloat(percentOfTotal), 100)}%` }}
                               />
                             </div>
@@ -602,7 +602,7 @@ export default function ProjectsTimePage() {
               <div className="mt-3">
                 <div className="w-full bg-gray-200 rounded-full h-1.5">
                   <div
-                    className="bg-blue-600 h-1.5 rounded-full transition-all"
+                    className="bg-brand-primary h-1.5 rounded-full transition-all"
                     style={{ width: `${Math.min(parseFloat(percentOfTotal), 100)}%` }}
                   />
                 </div>

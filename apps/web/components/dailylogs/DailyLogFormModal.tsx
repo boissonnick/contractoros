@@ -198,7 +198,7 @@ export function DailyLogFormModal({
               onClick={() => setActiveTab(tab)}
               className={`px-3 py-1.5 text-sm font-medium rounded-md ${
                 activeTab === tab
-                  ? 'bg-blue-100 text-blue-700'
+                  ? 'bg-brand-100 text-brand-primary'
                   : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
               }`}
             >
@@ -218,7 +218,7 @@ export function DailyLogFormModal({
                 </label>
                 <select
                   {...register('projectId')}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20 sm:text-sm"
                 >
                   <option value="">Select project</option>
                   {(projects as Project[])
@@ -291,7 +291,7 @@ export function DailyLogFormModal({
               </label>
               <textarea
                 {...register('description')}
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20 sm:text-sm"
                 rows={4}
                 placeholder="Detailed description of activities, observations, or notes..."
               />
@@ -306,7 +306,7 @@ export function DailyLogFormModal({
                 <input
                   type="checkbox"
                   {...register('isPrivate')}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-gray-300 text-brand-primary focus:ring-brand-primary/20"
                 />
                 <span className="text-sm text-gray-700">Private (PM/Owner only)</span>
               </label>
@@ -314,7 +314,7 @@ export function DailyLogFormModal({
                 <input
                   type="checkbox"
                   {...register('requiresFollowUp')}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-gray-300 text-brand-primary focus:ring-brand-primary/20"
                 />
                 <span className="text-sm text-gray-700">Requires follow-up</span>
               </label>
@@ -422,7 +422,7 @@ export function DailyLogFormModal({
               </label>
               <textarea
                 {...register('safetyNotes')}
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20 sm:text-sm"
                 rows={3}
                 placeholder="Any safety observations, incidents, or concerns..."
               />
@@ -444,7 +444,7 @@ export function DailyLogFormModal({
                     key={w.value}
                     className={`flex items-center justify-center p-3 border rounded-md cursor-pointer hover:bg-gray-50 ${
                       watch('weatherCondition') === w.value
-                        ? 'border-blue-500 bg-blue-50'
+                        ? 'border-brand-primary bg-brand-50'
                         : 'border-gray-200'
                     }`}
                   >
@@ -491,7 +491,7 @@ export function DailyLogFormModal({
               </label>
               <textarea
                 {...register('weatherNotes')}
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20 sm:text-sm"
                 rows={2}
                 placeholder="Additional weather-related notes..."
               />
@@ -545,7 +545,7 @@ export function DailyLogFormModal({
                       <label className="block text-xs text-gray-500 mb-1">Impact</label>
                       <select
                         {...register(`issues.${index}.impact`)}
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20 sm:text-sm"
                       >
                         <option value="low">Low</option>
                         <option value="medium">Medium</option>
@@ -557,7 +557,7 @@ export function DailyLogFormModal({
                         <input
                           type="checkbox"
                           {...register(`issues.${index}.resolved`)}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          className="rounded border-gray-300 text-brand-primary focus:ring-brand-primary/20"
                         />
                         <span className="text-sm text-gray-700">Resolved</span>
                       </label>

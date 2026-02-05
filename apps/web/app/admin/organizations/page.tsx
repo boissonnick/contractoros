@@ -39,7 +39,7 @@ export default function AdminOrganizationsPage() {
 
   return (
     <div className="p-6 max-w-4xl">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Organizations</h1>
+      <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight mb-6">Organizations</h1>
 
       <div className="relative mb-4">
         <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -48,13 +48,13 @@ export default function AdminOrganizationsPage() {
           placeholder="Search organizations..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-xl text-sm text-gray-900 focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
         />
       </div>
 
       {loading ? (
         <div className="flex justify-center py-12">
-          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
         </div>
       ) : filtered.length === 0 ? (
         <Card><p className="text-gray-500 text-sm text-center py-4">No organizations found</p></Card>

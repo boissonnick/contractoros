@@ -146,7 +146,7 @@ export default function DailyLogsPage() {
           <select
             value={filterProjectId}
             onChange={(e) => setFilterProjectId(e.target.value)}
-            className="rounded-md border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500"
+            className="rounded-md border-gray-300 text-sm focus:border-brand-primary focus:ring-brand-primary/20"
           >
             <option value="">All Projects</option>
             {(projects as Project[])
@@ -162,7 +162,7 @@ export default function DailyLogsPage() {
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value as DailyLogCategory | '')}
-            className="rounded-md border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500"
+            className="rounded-md border-gray-300 text-sm focus:border-brand-primary focus:ring-brand-primary/20"
           >
             <option value="">All Categories</option>
             {DAILY_LOG_CATEGORIES.map((cat) => (

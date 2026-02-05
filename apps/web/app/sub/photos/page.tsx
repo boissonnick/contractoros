@@ -347,7 +347,7 @@ export default function SubPhotosPage() {
           <select
             value={selectedProject}
             onChange={(e) => setSelectedProject(e.target.value)}
-            className="flex-1 sm:flex-none sm:min-w-[200px] rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 sm:flex-none sm:min-w-[200px] rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
           >
             <option value="">All Projects</option>
             {projects.map((p) => (
@@ -472,7 +472,7 @@ export default function SubPhotosPage() {
             <select
               value={uploadProjectId}
               onChange={(e) => setUploadProjectId(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
               required
             >
               <option value="">Select a project</option>
@@ -498,7 +498,7 @@ export default function SubPhotosPage() {
                   className={cn(
                     'px-3 py-1.5 rounded-full text-sm font-medium transition-colors',
                     uploadType === type.value
-                      ? 'bg-blue-100 text-blue-700 ring-2 ring-blue-500'
+                      ? 'bg-brand-100 text-brand-primary ring-2 ring-brand-primary'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   )}
                 >
@@ -518,7 +518,7 @@ export default function SubPhotosPage() {
               onChange={(e) => setUploadCaption(e.target.value)}
               placeholder="Add a description of the work shown..."
               rows={2}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 resize-none"
             />
           </div>
 
@@ -533,7 +533,7 @@ export default function SubPhotosPage() {
               onClick={() => setCaptureLocation(!captureLocation)}
               className={cn(
                 'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
-                captureLocation ? 'bg-blue-600' : 'bg-gray-200'
+                captureLocation ? 'bg-brand-primary' : 'bg-gray-200'
               )}
             >
               <span
@@ -554,7 +554,7 @@ export default function SubPhotosPage() {
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  className="bg-brand-primary h-2 rounded-full transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
                 />
               </div>

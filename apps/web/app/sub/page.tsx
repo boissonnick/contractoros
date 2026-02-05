@@ -166,7 +166,7 @@ export default function SubDashboard() {
         <div className="bg-white rounded-xl border p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900">Pending Bids</h2>
-            <Link href="/sub/bids" className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
+            <Link href="/sub/bids" className="text-sm text-brand-600 hover:text-brand-700 flex items-center gap-1">
               View all <ArrowRightIcon className="h-4 w-4" />
             </Link>
           </div>
@@ -210,7 +210,7 @@ export default function SubDashboard() {
         <div className="bg-white rounded-xl border p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900">Upcoming Work</h2>
-            <Link href="/sub/schedule" className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
+            <Link href="/sub/schedule" className="text-sm text-brand-600 hover:text-brand-700 flex items-center gap-1">
               Full schedule <ArrowRightIcon className="h-4 w-4" />
             </Link>
           </div>
@@ -252,19 +252,19 @@ export default function SubDashboard() {
         <div className="flex flex-wrap gap-3">
           <Link
             href="/sub/availability"
-            className="inline-flex items-center px-4 py-2 bg-white text-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-colors"
+            className="inline-flex items-center px-4 py-2 bg-white text-brand-primary rounded-lg font-medium hover:bg-brand-50 transition-colors"
           >
             Update Availability
           </Link>
           <Link
             href="/sub/invoices/new"
-            className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-400 transition-colors"
+            className="inline-flex items-center px-4 py-2 bg-brand-primary text-white rounded-lg font-medium hover:bg-brand-900 transition-colors"
           >
             Create Invoice
           </Link>
           <Link
             href="/sub/expenses/new"
-            className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-400 transition-colors"
+            className="inline-flex items-center px-4 py-2 bg-brand-primary text-white rounded-lg font-medium hover:bg-brand-900 transition-colors"
           >
             Submit Expense
           </Link>

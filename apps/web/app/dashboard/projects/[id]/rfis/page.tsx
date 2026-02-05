@@ -232,7 +232,7 @@ export default function RFIsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">RFIs</h1>
+          <h1 className="text-xl font-semibold text-gray-900 font-heading tracking-tight">RFIs</h1>
           <p className="text-sm text-gray-500 mt-1">
             Request for Information tracking
           </p>
@@ -275,13 +275,13 @@ export default function RFIsPage() {
             placeholder="Search RFIs..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
           />
         </div>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as RFIStatus | 'all')}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
         >
           <option value="all">All Statuses</option>
           <option value="open">Open</option>

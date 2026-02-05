@@ -148,7 +148,7 @@ export default function TaskForm({
         <button
           type="button"
           onClick={() => setShowTemplateSelector(true)}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-brand-primary bg-brand-50 border border-brand-200 rounded-lg hover:bg-brand-100 transition-colors"
         >
           <DocumentDuplicateIcon className="h-4 w-4" />
           Start from Template
@@ -190,7 +190,7 @@ export default function TaskForm({
             <button
               type="button"
               onClick={() => setShowCreatePhase(true)}
-              className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-0.5"
+              className="text-xs text-brand-600 hover:text-brand-700 flex items-center gap-0.5"
             >
               <PlusIcon className="h-3 w-3" /> Create Phase
             </button>
@@ -198,7 +198,7 @@ export default function TaskForm({
           <select
             value={phaseId}
             onChange={(e) => setPhaseId(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-transparent"
           >
             <option value="">No phase</option>
             {phases.map((p) => (

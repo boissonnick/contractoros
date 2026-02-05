@@ -49,7 +49,7 @@ export default function ReceiptGallery({ receipts, className }: ReceiptGalleryPr
             key={receipt.id}
             type="button"
             onClick={() => setSelectedReceipt(receipt)}
-            className="group relative aspect-square overflow-hidden rounded-lg border border-gray-200 bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="group relative aspect-square overflow-hidden rounded-lg border border-gray-200 bg-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:ring-offset-2"
           >
             <Image
               src={receipt.thumbnailUrl || receipt.url}

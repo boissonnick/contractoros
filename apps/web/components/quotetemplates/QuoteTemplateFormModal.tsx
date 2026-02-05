@@ -297,7 +297,7 @@ export function QuoteTemplateFormModal({
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 ${
                     activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600'
+                      ? 'border-brand-primary text-brand-primary'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
                 >
@@ -335,7 +335,7 @@ export function QuoteTemplateFormModal({
                   <label className="block text-sm font-medium text-gray-700 mb-1">Layout Style</label>
                   <select
                     {...register('layout')}
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20 sm:text-sm"
                   >
                     {QUOTE_PDF_LAYOUTS.map((layout) => (
                       <option key={layout.value} value={layout.value}>
@@ -352,7 +352,7 @@ export function QuoteTemplateFormModal({
                   <label className="block text-sm font-medium text-gray-700 mb-1">Font Family</label>
                   <select
                     {...register('font')}
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20 sm:text-sm"
                   >
                     {QUOTE_PDF_FONTS.map((font) => (
                       <option key={font.value} value={font.value}>
@@ -367,7 +367,7 @@ export function QuoteTemplateFormModal({
                 <label className="block text-sm font-medium text-gray-700 mb-1">Header Style</label>
                 <select
                   {...register('headerStyle')}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20 sm:text-sm"
                 >
                   {QUOTE_PDF_HEADER_STYLES.map((style) => (
                     <option key={style.value} value={style.value}>
@@ -520,7 +520,7 @@ export function QuoteTemplateFormModal({
                   <label className="block text-sm font-medium text-gray-700 mb-1">Logo Size</label>
                   <select
                     {...register('logoSize')}
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20 sm:text-sm"
                   >
                     <option value="small">Small</option>
                     <option value="medium">Medium</option>
@@ -637,7 +637,7 @@ export function QuoteTemplateFormModal({
                 </label>
                 <textarea
                   {...register('defaultScopeOfWork')}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20 sm:text-sm"
                   rows={3}
                   placeholder="Enter default scope of work text..."
                 />
@@ -647,7 +647,7 @@ export function QuoteTemplateFormModal({
                 <label className="block text-sm font-medium text-gray-700 mb-1">Default Exclusions</label>
                 <textarea
                   {...register('defaultExclusions')}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20 sm:text-sm"
                   rows={3}
                   placeholder="Enter default exclusions..."
                 />
@@ -657,7 +657,7 @@ export function QuoteTemplateFormModal({
                 <label className="block text-sm font-medium text-gray-700 mb-1">Default Payment Terms</label>
                 <textarea
                   {...register('defaultPaymentTerms')}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20 sm:text-sm"
                   rows={3}
                   placeholder="e.g., 50% due upon contract signing, 50% due upon completion"
                 />
@@ -669,7 +669,7 @@ export function QuoteTemplateFormModal({
                 </label>
                 <textarea
                   {...register('defaultTermsAndConditions')}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20 sm:text-sm"
                   rows={4}
                   placeholder="Enter default terms and conditions..."
                 />
@@ -681,7 +681,7 @@ export function QuoteTemplateFormModal({
                 </label>
                 <textarea
                   {...register('defaultAcceptanceText')}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20 sm:text-sm"
                   rows={2}
                   placeholder="By signing below, I accept this estimate and authorize..."
                 />

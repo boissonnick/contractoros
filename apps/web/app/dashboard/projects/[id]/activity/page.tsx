@@ -258,7 +258,7 @@ export default function ActivityPage() {
           className={cn(
             'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
             activeTab === 'all'
-              ? 'bg-blue-100 text-blue-700'
+              ? 'bg-brand-100 text-brand-primary'
               : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
           )}
         >
@@ -269,7 +269,7 @@ export default function ActivityPage() {
           className={cn(
             'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
             activeTab === 'notes'
-              ? 'bg-blue-100 text-blue-700'
+              ? 'bg-brand-100 text-brand-primary'
               : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
           )}
         >
@@ -280,7 +280,7 @@ export default function ActivityPage() {
           className={cn(
             'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
             activeTab === 'activity'
-              ? 'bg-blue-100 text-blue-700'
+              ? 'bg-brand-100 text-brand-primary'
               : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
           )}
         >
@@ -291,7 +291,7 @@ export default function ActivityPage() {
       {/* Notes Section */}
       {(activeTab === 'all' || activeTab === 'notes') && (
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">Notes</h2>
+          <h2 className="text-lg font-semibold text-gray-900 font-heading tracking-tight">Notes</h2>
 
           {/* Add Note Form */}
           <Card className="p-4">
@@ -427,14 +427,14 @@ export default function ActivityPage() {
       {(activeTab === 'all' || activeTab === 'activity') && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">Activity Feed</h2>
+            <h2 className="text-lg font-semibold text-gray-900 font-heading tracking-tight">Activity Feed</h2>
             {activityTypes.length > 0 && (
               <div className="flex items-center gap-2">
                 <FunnelIcon className="h-4 w-4 text-gray-400" />
                 <select
                   value={activityFilter}
                   onChange={(e) => setActivityFilter(e.target.value as ProjectActivityType | 'all')}
-                  className="text-sm border border-gray-300 rounded-lg px-2 py-1"
+                  className="text-sm border border-gray-300 rounded-xl px-2 py-1"
                 >
                   <option value="all">All Activity</option>
                   {activityTypes.map((type) => (

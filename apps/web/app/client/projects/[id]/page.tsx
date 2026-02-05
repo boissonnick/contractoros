@@ -168,7 +168,7 @@ export default function ClientProjectDetailPage() {
     return (
       <div className="text-center py-12">
         <p className="text-gray-500">{error || 'Project not found'}</p>
-        <Link href="/client/projects" className="text-blue-600 hover:text-blue-700 mt-4 inline-block">
+        <Link href="/client/projects" className="text-brand-600 hover:text-brand-700 mt-4 inline-block">
           Back to Projects
         </Link>
       </div>

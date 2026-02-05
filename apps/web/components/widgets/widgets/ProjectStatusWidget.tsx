@@ -98,7 +98,7 @@ export function ProjectStatusWidget({ widget: _widget }: ProjectStatusWidgetProp
         <p className="text-gray-500 text-sm">No projects yet</p>
         <button
           onClick={() => router.push('/dashboard/projects/new')}
-          className="mt-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
+          className="mt-2 text-sm text-brand-600 hover:text-brand-700 font-medium"
         >
           Create your first project
         </button>

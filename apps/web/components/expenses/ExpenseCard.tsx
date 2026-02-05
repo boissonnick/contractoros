@@ -485,7 +485,7 @@ export function ExpenseCard({
                 size="sm"
                 variant="ghost"
                 onClick={() => setActiveModal('markPaid')}
-                className="text-blue-600 hover:text-blue-700"
+                className="text-brand-600 hover:text-brand-700"
               >
                 <BanknotesIcon className="h-4 w-4 mr-1" />
                 Mark Paid
@@ -531,7 +531,7 @@ export function ExpenseCard({
             value={modalInput}
             onChange={(e) => setModalInput(e.target.value)}
             placeholder="Enter reason for rejection..."
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
             rows={3}
           />
           <div className="flex justify-end gap-2">
@@ -560,7 +560,7 @@ export function ExpenseCard({
             value={modalInput}
             onChange={(e) => setModalInput(e.target.value)}
             placeholder="e.g., Please attach a receipt for this expense..."
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
             rows={3}
           />
           <div className="flex justify-end gap-2">
@@ -592,7 +592,7 @@ export function ExpenseCard({
             <select
               value={paymentMethod}
               onChange={(e) => setPaymentMethod(e.target.value)}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20 sm:text-sm"
             >
               <option value="direct_deposit">Direct Deposit</option>
               <option value="check">Check</option>

@@ -287,7 +287,7 @@ function FilterTab({
       onClick={onClick}
       className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
         active
-          ? 'bg-blue-50 text-blue-700 border border-blue-200'
+          ? 'bg-brand-50 text-brand-primary border border-brand-200'
           : 'text-gray-600 hover:bg-gray-100 border border-transparent'
       }`}
     >

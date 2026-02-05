@@ -61,7 +61,7 @@ export function BulkSelectBar({
           <div className="flex items-center justify-between h-16 gap-4">
             {/* Selection count */}
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-8 h-8 bg-blue-600 rounded-full">
+              <div className="flex items-center justify-center w-8 h-8 bg-brand-primary rounded-full">
                 <span className="text-sm font-medium text-white">
                   {selectedCount}
                 </span>
@@ -137,8 +137,8 @@ export function InlineBulkBar({
   }
 
   return (
-    <div className="flex items-center gap-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-      <span className="text-sm font-medium text-blue-900">
+    <div className="flex items-center gap-4 p-3 bg-brand-50 border border-brand-200 rounded-lg">
+      <span className="text-sm font-medium text-brand-900">
         {selectedCount} selected
       </span>
 
@@ -157,7 +157,7 @@ export function InlineBulkBar({
                 'transition-colors disabled:opacity-50',
                 isDestructive
                   ? 'text-red-700 hover:bg-red-100'
-                  : 'text-blue-700 hover:bg-blue-100'
+                  : 'text-brand-700 hover:bg-brand-100'
               )}
             >
               <Icon className="h-3 w-3" />

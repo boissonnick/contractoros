@@ -582,7 +582,7 @@ export default function DataExportPage() {
                     value="json"
                     checked={gdprFormat === 'json'}
                     onChange={() => setGdprFormat('json')}
-                    className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    className="h-4 w-4 text-brand-primary border-gray-300 focus:ring-brand-primary/20"
                   />
                   <span className="ml-2 text-sm text-gray-700">JSON (machine-readable)</span>
                 </label>
@@ -592,7 +592,7 @@ export default function DataExportPage() {
                     value="csv"
                     checked={gdprFormat === 'csv'}
                     onChange={() => setGdprFormat('csv')}
-                    className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    className="h-4 w-4 text-brand-primary border-gray-300 focus:ring-brand-primary/20"
                   />
                   <span className="ml-2 text-sm text-gray-700">CSV (spreadsheet)</span>
                 </label>
@@ -609,7 +609,7 @@ export default function DataExportPage() {
                     key={category}
                     className={`flex items-start p-3 border rounded-lg cursor-pointer transition-colors ${
                       selectedCategories.includes(category)
-                        ? 'border-blue-500 bg-blue-50'
+                        ? 'border-brand-primary bg-brand-50'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
@@ -617,7 +617,7 @@ export default function DataExportPage() {
                       type="checkbox"
                       checked={selectedCategories.includes(category)}
                       onChange={() => handleCategoryToggle(category)}
-                      className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mt-0.5"
+                      className="h-4 w-4 text-brand-primary border-gray-300 rounded focus:ring-brand-primary/20 mt-0.5"
                     />
                     <div className="ml-3">
                       <span className="block text-sm font-medium text-gray-900">

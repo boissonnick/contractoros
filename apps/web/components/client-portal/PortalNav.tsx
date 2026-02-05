@@ -64,7 +64,7 @@ export function PortalNav({ token, projectName, companyName }: PortalNavProps) {
                   className={cn(
                     'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap',
                     active
-                      ? 'bg-blue-50 text-blue-700'
+                      ? 'bg-brand-50 text-brand-primary'
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                   )}
                 >
@@ -99,7 +99,7 @@ export function PortalNav({ token, projectName, companyName }: PortalNavProps) {
                 href={`${basePath}${item.path}`}
                 className={cn(
                   'flex flex-col items-center py-2 px-3 min-w-[64px]',
-                  active ? 'text-blue-600' : 'text-gray-500'
+                  active ? 'text-brand-primary' : 'text-gray-500'
                 )}
               >
                 <Icon className="w-6 h-6" />

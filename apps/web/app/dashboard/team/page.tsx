@@ -487,7 +487,7 @@ export default function TeamPage() {
                 placeholder="Search team members..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
               />
             </div>
             <div className="flex bg-gray-100 rounded-xl p-1">
@@ -564,7 +564,7 @@ export default function TeamPage() {
               </div>
               <Link
                 href="/dashboard/subcontractors"
-                className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                className="flex items-center gap-1 text-sm text-brand-600 hover:text-brand-700 font-medium"
               >
                 View Subcontractors
                 <ArrowRightIcon className="h-4 w-4" />
@@ -636,7 +636,7 @@ export default function TeamPage() {
                     {isAdmin && (
                       <button
                         onClick={() => setCostRateMember(member)}
-                        className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 mt-1"
+                        className="flex items-center gap-1 text-xs text-brand-600 hover:text-brand-700 mt-1"
                       >
                         <CurrencyDollarIcon className="h-3.5 w-3.5" />
                         {member.hourlyCost
@@ -660,7 +660,7 @@ export default function TeamPage() {
                   <select
                     value={selectedTrade}
                     onChange={(e) => setSelectedTrade(e.target.value)}
-                    className="pl-3 pr-8 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500"
+                    className="pl-3 pr-8 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20"
                   >
                     <option value="all">All Trades</option>
                     {allTrades.map((trade) => (
@@ -673,7 +673,7 @@ export default function TeamPage() {
                   <select
                     value={selectedTimeRange}
                     onChange={(e) => setSelectedTimeRange(e.target.value as typeof selectedTimeRange)}
-                    className="pl-3 pr-8 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500"
+                    className="pl-3 pr-8 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20"
                   >
                     <option value="this_week">This Week</option>
                     <option value="next_week">Next Week</option>

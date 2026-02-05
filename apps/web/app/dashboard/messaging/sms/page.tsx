@@ -216,7 +216,7 @@ export default function SMSPage() {
           <div className="text-red-500 mb-4">
             <XMarkIcon className="h-12 w-12 mx-auto" />
           </div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">
+          <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-2">
             Failed to load messages
           </h2>
           <p className="text-gray-500 mb-4">{error.message}</p>
@@ -232,7 +232,7 @@ export default function SMSPage() {
       <div className="flex-shrink-0 bg-white border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-semibold text-gray-900">SMS Messages</h1>
+            <h1 className="text-xl font-semibold font-heading tracking-tight text-gray-900">SMS Messages</h1>
             {totalUnread > 0 && (
               <span className="px-2 py-0.5 bg-brand-primary text-white text-xs font-medium rounded-full">
                 {totalUnread} unread
@@ -307,7 +307,7 @@ export default function SMSPage() {
             /* New message composer */
             <div className="flex-1 flex flex-col">
               <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900">
+                <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900">
                   New Message
                 </h2>
                 <button

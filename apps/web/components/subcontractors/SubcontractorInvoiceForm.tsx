@@ -237,7 +237,7 @@ export default function SubcontractorInvoiceForm({
             </label>
             <select
               {...register('vendorId')}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20 sm:text-sm"
               disabled={subsLoading}
             >
               <option value="">Select vendor</option>
@@ -259,7 +259,7 @@ export default function SubcontractorInvoiceForm({
             </label>
             <select
               {...register('projectId')}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20 sm:text-sm"
             >
               <option value="">Select project</option>
               {(projects as Project[])
@@ -311,7 +311,7 @@ export default function SubcontractorInvoiceForm({
           </label>
           <textarea
             {...register('description')}
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20 sm:text-sm"
             rows={2}
             placeholder="Brief description of work performed..."
           />
@@ -423,7 +423,7 @@ export default function SubcontractorInvoiceForm({
           </label>
           <select
             {...register('lienWaiverStatus')}
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20 sm:text-sm"
           >
             <option value="not_required">Not Required</option>
             <option value="pending">Pending</option>
@@ -473,7 +473,7 @@ export default function SubcontractorInvoiceForm({
           </label>
           <textarea
             {...register('notes')}
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20 sm:text-sm"
             rows={3}
             placeholder="Additional notes about this invoice..."
           />

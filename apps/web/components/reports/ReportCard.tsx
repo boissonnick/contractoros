@@ -95,7 +95,7 @@ export function ReportCard({
   const content = (
     <div
       className={cn(
-        'bg-white rounded-lg border border-gray-200 p-4 transition-all',
+        'bg-white rounded-2xl border border-gray-200 p-4 transition-all',
         href && 'hover:shadow-md hover:border-gray-300 cursor-pointer',
         className
       )}
@@ -120,7 +120,7 @@ export function ReportCard({
         </div>
       ) : (
         <>
-          <p className="text-2xl font-semibold text-gray-900 truncate">{value}</p>
+          <p className="text-2xl font-bold font-heading tracking-tight text-gray-900 truncate">{value}</p>
 
           {/* Subtitle */}
           {subtitle && (

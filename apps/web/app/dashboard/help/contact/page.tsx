@@ -41,11 +41,11 @@ export default function ContactSupportPage() {
         {/* Contact Options */}
         <div className="space-y-4">
           <Card className="p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Contact Options</h2>
+            <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">Contact Options</h2>
             <div className="space-y-4">
               <a
                 href="mailto:support@contractoros.com"
-                className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
+                className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:border-brand-300 hover:bg-brand-50 transition-colors"
               >
                 <div className="p-2 bg-blue-100 rounded-lg">
                   <EnvelopeIcon className="h-5 w-5 text-blue-600" />
@@ -77,7 +77,7 @@ export default function ContactSupportPage() {
           <Card className="p-6">
             <div className="flex items-center gap-3 mb-4">
               <ClockIcon className="h-5 w-5 text-gray-400" />
-              <h2 className="text-lg font-semibold text-gray-900">Support Hours</h2>
+              <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900">Support Hours</h2>
             </div>
             <div className="space-y-2 text-sm text-gray-600">
               <div className="flex justify-between">
@@ -101,7 +101,7 @@ export default function ContactSupportPage() {
 
         {/* Support Form */}
         <Card className="p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Send a Message</h2>
+          <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">Send a Message</h2>
 
           {formSubmitted ? (
             <div className="text-center py-8">
@@ -115,7 +115,7 @@ export default function ContactSupportPage() {
                   setFormSubmitted(false);
                   setFormData({ subject: '', category: 'general', message: '' });
                 }}
-                className="text-sm text-blue-600 hover:text-blue-700"
+                className="text-sm text-brand-600 hover:text-brand-700"
               >
                 Send another message
               </button>
@@ -130,7 +130,7 @@ export default function ContactSupportPage() {
                   id="category"
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                 >
                   <option value="general">General Question</option>
                   <option value="bug">Bug Report</option>
@@ -151,7 +151,7 @@ export default function ContactSupportPage() {
                   onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                   required
                   placeholder="Brief description of your issue"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                 />
               </div>
 
@@ -166,13 +166,13 @@ export default function ContactSupportPage() {
                   required
                   rows={5}
                   placeholder="Please describe your question or issue in detail..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary resize-none"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                className="w-full px-4 py-2 bg-brand-primary text-white font-medium rounded-lg hover:bg-brand-900 transition-colors"
               >
                 Send Message
               </button>

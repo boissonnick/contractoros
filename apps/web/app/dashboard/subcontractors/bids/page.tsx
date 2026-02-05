@@ -162,7 +162,7 @@ export default function SubcontractorBidsPage() {
             placeholder="Search bids by subcontractor, project, or trade..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -170,7 +170,7 @@ export default function SubcontractorBidsPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+            className="px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 text-sm"
           >
             <option value="all">All Status</option>
             <option value="draft">Draft</option>
@@ -186,23 +186,23 @@ export default function SubcontractorBidsPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <Card className="p-4">
-          <p className="text-2xl font-bold text-gray-900">{bids.length}</p>
+          <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{bids.length}</p>
           <p className="text-sm text-gray-500">Total Bids</p>
         </Card>
         <Card className="p-4">
-          <p className="text-2xl font-bold text-blue-600">
+          <p className="text-2xl font-bold font-heading tracking-tight text-blue-600">
             {bids.filter(b => b.status === 'draft' || b.status === 'submitted' || b.status === 'under_review').length}
           </p>
           <p className="text-sm text-gray-500">Pending</p>
         </Card>
         <Card className="p-4">
-          <p className="text-2xl font-bold text-green-600">
+          <p className="text-2xl font-bold font-heading tracking-tight text-green-600">
             {bids.filter(b => b.status === 'accepted').length}
           </p>
           <p className="text-sm text-gray-500">Accepted</p>
         </Card>
         <Card className="p-4">
-          <p className="text-2xl font-bold text-gray-900">
+          <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">
             {formatCurrency(bids.filter(b => b.status === 'accepted').reduce((sum, b) => sum + (b.amount || 0), 0))}
           </p>
           <p className="text-sm text-gray-500">Total Awarded</p>
@@ -256,7 +256,7 @@ export default function SubcontractorBidsPage() {
                           )}
                           <Link
                             href={`/dashboard/projects/${bid.projectId}/bids`}
-                            className="text-sm text-blue-600 hover:underline"
+                            className="text-sm text-brand-600 hover:underline"
                           >
                             View Details
                           </Link>

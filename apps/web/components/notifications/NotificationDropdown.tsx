@@ -42,7 +42,7 @@ export function NotificationDropdown({ isOpen, onClose }: NotificationDropdownPr
           {unreadCount > 0 && (
             <button
               onClick={() => markAllAsRead()}
-              className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+              className="text-xs text-brand-600 hover:text-brand-700 font-medium"
             >
               Mark all read
             </button>
@@ -91,7 +91,7 @@ export function NotificationDropdown({ isOpen, onClose }: NotificationDropdownPr
             <Link
               href="/dashboard/notifications"
               onClick={onClose}
-              className="block w-full text-center text-sm text-blue-600 hover:text-blue-700 font-medium py-2 rounded hover:bg-gray-50"
+              className="block w-full text-center text-sm text-brand-600 hover:text-brand-700 font-medium py-2 rounded hover:bg-gray-50"
             >
               View all notifications
             </Link>

@@ -240,7 +240,7 @@ export default function QuoteBuilderPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -260,7 +260,7 @@ export default function QuoteBuilderPage() {
           onChange={(e) => handleUpdateSection(section.id, 'name', e.target.value)}
           onBlur={() => handleSaveSection(section.id)}
           placeholder="Line item name..."
-          className="w-full text-sm font-medium text-gray-900 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-0 px-0 py-1"
+          className="w-full text-sm font-medium text-gray-900 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-brand-primary focus:ring-0 px-0 py-1"
         />
       </div>
       <div className="w-28">
@@ -272,7 +272,7 @@ export default function QuoteBuilderPage() {
             onChange={(e) => handleUpdateSection(section.id, 'laborCost', parseFloat(e.target.value) || 0)}
             onBlur={() => handleSaveSection(section.id)}
             placeholder="Labor"
-            className="w-full text-sm text-right text-gray-900 bg-gray-50 rounded px-2 pl-5 py-1 border border-gray-200 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full text-sm text-right text-gray-900 bg-gray-50 rounded px-2 pl-5 py-1 border border-gray-200 focus:ring-1 focus:ring-brand-primary/20 focus:border-brand-primary"
           />
         </div>
       </div>
@@ -285,7 +285,7 @@ export default function QuoteBuilderPage() {
             onChange={(e) => handleUpdateSection(section.id, 'materialCost', parseFloat(e.target.value) || 0)}
             onBlur={() => handleSaveSection(section.id)}
             placeholder="Materials"
-            className="w-full text-sm text-right text-gray-900 bg-gray-50 rounded px-2 pl-5 py-1 border border-gray-200 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full text-sm text-right text-gray-900 bg-gray-50 rounded px-2 pl-5 py-1 border border-gray-200 focus:ring-1 focus:ring-brand-primary/20 focus:border-brand-primary"
           />
         </div>
       </div>
@@ -308,7 +308,7 @@ export default function QuoteBuilderPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Quote Builder</h1>
+          <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight">Quote Builder</h1>
           <div className="flex items-center gap-2 mt-1">
             <span className={cn(
               'text-xs px-2 py-0.5 rounded-full font-medium',
@@ -346,7 +346,7 @@ export default function QuoteBuilderPage() {
           <select
             value={quoteStatus}
             onChange={(e) => handleStatusChange(e.target.value as 'draft' | 'sent' | 'approved' | 'rejected')}
-            className="text-sm border border-gray-300 rounded-lg px-3 py-1.5"
+            className="text-sm border border-gray-300 rounded-xl px-3 py-1.5"
           >
             <option value="draft">Draft</option>
             <option value="sent">Sent</option>
@@ -383,7 +383,7 @@ export default function QuoteBuilderPage() {
                 ) : (
                   <ChevronRightIcon className="h-4 w-4 text-gray-400" />
                 )}
-                <h3 className="font-semibold text-gray-900">{phase.name}</h3>
+                <h3 className="font-semibold text-gray-900 font-heading tracking-tight">{phase.name}</h3>
                 <span className="text-xs text-gray-400">({phaseSections.length} items)</span>
               </div>
               <span className="text-sm font-medium text-gray-700">{formatCurrency(phaseTotal)}</span>
@@ -394,7 +394,7 @@ export default function QuoteBuilderPage() {
                 {phaseSections.map(renderSectionRow)}
                 <button
                   onClick={() => handleAddSection(phase.id)}
-                  className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 mt-3 py-1"
+                  className="flex items-center gap-2 text-sm text-brand-600 hover:text-brand-700 mt-3 py-1"
                 >
                   <PlusIcon className="h-4 w-4" />
                   Add line item
@@ -411,13 +411,13 @@ export default function QuoteBuilderPage() {
         if (unassigned.length > 0 || phases.length === 0) {
           return (
             <Card>
-              <h3 className="font-semibold text-gray-900 mb-3">
+              <h3 className="font-semibold text-gray-900 font-heading tracking-tight mb-3">
                 {phases.length === 0 ? 'Quote Items' : 'General Items'}
               </h3>
               {unassigned.map(renderSectionRow)}
               <button
                 onClick={() => handleAddSection()}
-                className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 mt-3 py-1"
+                className="flex items-center gap-2 text-sm text-brand-600 hover:text-brand-700 mt-3 py-1"
               >
                 <PlusIcon className="h-4 w-4" />
                 Add line item

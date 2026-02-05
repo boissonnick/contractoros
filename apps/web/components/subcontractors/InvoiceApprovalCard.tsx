@@ -252,7 +252,7 @@ export default function InvoiceApprovalCard({
                       href={url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg hover:bg-gray-100 text-sm text-blue-600 hover:text-blue-700"
+                      className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg hover:bg-gray-100 text-sm text-brand-600 hover:text-brand-700"
                     >
                       <DocumentTextIcon className="h-4 w-4" />
                       Attachment {idx + 1}
@@ -339,7 +339,7 @@ export default function InvoiceApprovalCard({
                     size="sm"
                     variant="ghost"
                     onClick={() => onSubmitInvoice(invoice.id)}
-                    className="text-blue-600 hover:text-blue-700"
+                    className="text-brand-600 hover:text-brand-700"
                   >
                     <PaperAirplaneIcon className="h-4 w-4 mr-1" />
                     Submit
@@ -442,7 +442,7 @@ export default function InvoiceApprovalCard({
                     size="sm"
                     variant="ghost"
                     onClick={() => onResubmit(invoice.id)}
-                    className="text-blue-600 hover:text-blue-700"
+                    className="text-brand-600 hover:text-brand-700"
                   >
                     <ArrowPathIcon className="h-4 w-4 mr-1" />
                     Re-submit

@@ -154,7 +154,7 @@ export default function ProjectSelectionsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -196,7 +196,7 @@ export default function ProjectSelectionsPage() {
               onClick={() => setStatusFilter(s)}
               className={cn(
                 'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
-                statusFilter === s ? 'bg-blue-50 text-blue-600' : 'text-gray-500 hover:bg-gray-100'
+                statusFilter === s ? 'bg-brand-100 text-brand-primary' : 'text-gray-500 hover:bg-gray-100'
               )}
             >
               {s === 'all' ? 'All' : STATUS_CONFIG[s].label}
@@ -212,7 +212,7 @@ export default function ProjectSelectionsPage() {
       {/* Add Form */}
       {showAddForm && (
         <Card className="p-5">
-          <h3 className="font-semibold text-gray-900 mb-4">New Selection Category</h3>
+          <h3 className="font-semibold text-gray-900 font-heading tracking-tight mb-4">New Selection Category</h3>
           <div className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
@@ -221,7 +221,7 @@ export default function ProjectSelectionsPage() {
                   type="text"
                   value={form.categoryName}
                   onChange={(e) => setForm({ ...form, categoryName: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm"
                   placeholder="e.g., Kitchen Countertops"
                 />
               </div>
@@ -231,7 +231,7 @@ export default function ProjectSelectionsPage() {
                   type="text"
                   value={form.room}
                   onChange={(e) => setForm({ ...form, room: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm"
                   placeholder="e.g., Kitchen"
                 />
               </div>
@@ -241,7 +241,7 @@ export default function ProjectSelectionsPage() {
                   type="number"
                   value={form.budgetAmount}
                   onChange={(e) => setForm({ ...form, budgetAmount: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm"
                   placeholder="5000"
                 />
               </div>
@@ -261,7 +261,7 @@ export default function ProjectSelectionsPage() {
                         next[idx] = { ...next[idx], name: e.target.value };
                         setForm({ ...form, options: next });
                       }}
-                      className="col-span-4 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      className="col-span-4 px-3 py-2 border border-gray-300 rounded-xl text-sm"
                       placeholder="Option name"
                     />
                     <input
@@ -272,7 +272,7 @@ export default function ProjectSelectionsPage() {
                         next[idx] = { ...next[idx], price: e.target.value };
                         setForm({ ...form, options: next });
                       }}
-                      className="col-span-2 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      className="col-span-2 px-3 py-2 border border-gray-300 rounded-xl text-sm"
                       placeholder="Price"
                     />
                     <input
@@ -283,7 +283,7 @@ export default function ProjectSelectionsPage() {
                         next[idx] = { ...next[idx], supplierName: e.target.value };
                         setForm({ ...form, options: next });
                       }}
-                      className="col-span-3 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      className="col-span-3 px-3 py-2 border border-gray-300 rounded-xl text-sm"
                       placeholder="Supplier"
                     />
                     <label className="col-span-2 flex items-center gap-1 text-xs text-gray-500">
@@ -308,7 +308,7 @@ export default function ProjectSelectionsPage() {
                   </div>
                 ))}
               </div>
-              <button onClick={addOptionRow} className="mt-2 text-sm text-blue-600 hover:text-blue-700">
+              <button onClick={addOptionRow} className="mt-2 text-sm text-brand-600 hover:text-brand-700">
                 + Add Option
               </button>
             </div>
@@ -318,7 +318,7 @@ export default function ProjectSelectionsPage() {
               <textarea
                 value={form.notes}
                 onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm"
                 rows={2}
                 placeholder="Any notes for the client..."
               />
@@ -395,7 +395,7 @@ export default function ProjectSelectionsPage() {
                           className={cn(
                             'p-3 rounded-lg border-2 transition-colors',
                             opt.id === sel.selectedOptionId
-                              ? 'border-blue-500 bg-blue-50'
+                              ? 'border-brand-primary bg-brand-50'
                               : 'border-gray-200 bg-white'
                           )}
                         >
@@ -413,7 +413,7 @@ export default function ProjectSelectionsPage() {
                             <p className="text-xs text-gray-400">{opt.leadTimeDays} day lead time</p>
                           )}
                           {opt.id === sel.selectedOptionId && (
-                            <div className="flex items-center gap-1 mt-2 text-blue-600">
+                            <div className="flex items-center gap-1 mt-2 text-brand-primary">
                               <CheckCircleIcon className="h-4 w-4" />
                               <span className="text-xs font-medium">Selected</span>
                             </div>

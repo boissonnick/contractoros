@@ -95,7 +95,7 @@ export default function TaskDependencySelector({
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Depends on</label>
             <select
-              className="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
               value={selectedTaskId}
               onChange={(e) => setSelectedTaskId(e.target.value)}
             >
@@ -110,7 +110,7 @@ export default function TaskDependencySelector({
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
               <select
-                className="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value as DependencyType)}
               >
@@ -123,7 +123,7 @@ export default function TaskDependencySelector({
               <label className="block text-sm font-medium text-gray-700 mb-1">Lag (days)</label>
               <input
                 type="number"
-                className="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
                 value={lag}
                 onChange={(e) => setLag(e.target.value)}
               />
@@ -143,7 +143,7 @@ export default function TaskDependencySelector({
         <button
           type="button"
           onClick={() => setShowAdd(true)}
-          className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+          className="flex items-center gap-1 text-sm text-brand-600 hover:text-brand-700"
           disabled={unusedTasks.length === 0}
         >
           <PlusIcon className="h-3.5 w-3.5" />

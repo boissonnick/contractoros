@@ -146,7 +146,7 @@ export function ApprovalCard({
             href={item.documentUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+            className="text-sm text-brand-600 hover:text-brand-700 font-medium"
           >
             View Full Document →
           </a>
@@ -162,7 +162,7 @@ export function ApprovalCard({
               onChange={(e) => setFeedback(e.target.value)}
               placeholder="Describe the changes you'd like..."
               rows={3}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
             />
             <div className="flex gap-2">
               <button

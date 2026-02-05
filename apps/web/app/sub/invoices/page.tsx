@@ -278,7 +278,7 @@ function CreateInvoiceModal({
             <select
               value={selectedAssignmentId}
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedAssignmentId(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
             >
               <option value="">No assignment linked</option>
               {assignments.map((assignment) => (
@@ -304,7 +304,7 @@ function CreateInvoiceModal({
                     placeholder="Description"
                     value={item.description}
                     onChange={(e) => updateLineItem(index, 'description', e.target.value)}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-brand-primary/20"
                   />
                 </div>
                 <div className="w-20">
@@ -313,14 +313,14 @@ function CreateInvoiceModal({
                     placeholder="Qty"
                     value={item.quantity}
                     onChange={(e) => updateLineItem(index, 'quantity', parseFloat(e.target.value) || 0)}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 text-right"
+                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-brand-primary/20 text-right"
                   />
                 </div>
                 <div className="w-20">
                   <select
                     value={item.unit}
                     onChange={(e) => updateLineItem(index, 'unit', e.target.value)}
-                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-brand-primary/20"
                   >
                     <option value="hours">hrs</option>
                     <option value="each">ea</option>
@@ -336,7 +336,7 @@ function CreateInvoiceModal({
                       placeholder="Rate"
                       value={item.unitPrice}
                       onChange={(e) => updateLineItem(index, 'unitPrice', parseFloat(e.target.value) || 0)}
-                      className="w-full pl-5 pr-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 text-right"
+                      className="w-full pl-5 pr-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-brand-primary/20 text-right"
                     />
                   </div>
                 </div>
@@ -356,7 +356,7 @@ function CreateInvoiceModal({
             <button
               type="button"
               onClick={addLineItem}
-              className="w-full py-2 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+              className="w-full py-2 text-sm text-brand-600 hover:text-brand-700 hover:bg-brand-50 rounded-lg transition-colors"
             >
               <PlusIcon className="h-4 w-4 inline mr-1" />
               Add Line Item
@@ -372,7 +372,7 @@ function CreateInvoiceModal({
           </div>
           <div className="flex justify-between py-2 text-lg font-semibold border-t">
             <span>Total</span>
-            <span className="text-blue-600">{formatCurrency(total)}</span>
+            <span className="text-brand-primary">{formatCurrency(total)}</span>
           </div>
         </div>
 
@@ -386,7 +386,7 @@ function CreateInvoiceModal({
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNotes(e.target.value)}
             placeholder="Additional notes or comments..."
             rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
           />
         </div>
       </div>
@@ -493,7 +493,7 @@ function InvoiceDetailModal({ invoice, isOpen, onClose, onSubmit }: InvoiceDetai
             </div>
           )}
           {invoice.amountDue > 0 && invoice.status !== 'paid' && (
-            <div className="flex justify-between text-blue-600 font-medium">
+            <div className="flex justify-between text-brand-primary font-medium">
               <span>Amount Due</span>
               <span>{formatCurrency(invoice.amountDue)}</span>
             </div>
@@ -789,7 +789,7 @@ export default function SubInvoicesPage() {
               {count > 0 && (
                 <span className={cn(
                   'ml-2 px-1.5 py-0.5 rounded-full text-xs',
-                  isActive ? 'bg-blue-500' : 'bg-gray-200'
+                  isActive ? 'bg-brand-500' : 'bg-gray-200'
                 )}>
                   {count}
                 </span>
@@ -856,7 +856,7 @@ export default function SubInvoicesPage() {
                       </p>
                     )}
                     {invoice.amountDue > 0 && invoice.status !== 'paid' && (
-                      <p className="text-sm text-blue-600">
+                      <p className="text-sm text-brand-primary">
                         {formatCurrency(invoice.amountDue)} due
                       </p>
                     )}

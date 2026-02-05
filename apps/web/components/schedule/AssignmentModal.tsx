@@ -324,7 +324,7 @@ export function AssignmentModal({
               placeholder="Search team members..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-10 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-9 pr-10 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-transparent"
             />
             {/* Filter toggle button */}
             <button
@@ -332,7 +332,7 @@ export function AssignmentModal({
               className={cn(
                 'absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md transition-colors',
                 showFilters || activeFiltersCount > 0
-                  ? 'bg-blue-100 text-blue-600'
+                  ? 'bg-brand-100 text-brand-primary'
                   : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
               )}
             >
@@ -369,7 +369,7 @@ export function AssignmentModal({
                   type="checkbox"
                   checked={showAvailableOnly}
                   onChange={(e) => setShowAvailableOnly(e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-gray-300 text-blue-600 focus:ring-brand-primary/20"
                 />
                 <span className="text-sm text-gray-700">Available only</span>
                 {conflictCount > 0 && (
@@ -385,7 +385,7 @@ export function AssignmentModal({
                 <select
                   value={roleFilter}
                   onChange={(e) => setRoleFilter(e.target.value as UserRole | 'all')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-transparent"
                 >
                   {ROLE_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -406,7 +406,7 @@ export function AssignmentModal({
           <div className="flex gap-2">
             <button
               onClick={handleSelectAll}
-              className="text-blue-600 hover:text-blue-700 font-medium"
+              className="text-brand-600 hover:text-brand-700 font-medium"
             >
               Select All
             </button>
@@ -462,7 +462,7 @@ export function AssignmentModal({
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => toggleMember(member.uid)}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0"
+                        className="rounded border-gray-300 text-blue-600 focus:ring-brand-primary/20 flex-shrink-0"
                       />
                       <Avatar name={member.displayName || ''} size="sm" />
                       <div className="flex-1 min-w-0">

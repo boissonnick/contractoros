@@ -222,7 +222,7 @@ export default function PunchListPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Punch List</h1>
+          <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight">Punch List</h1>
           <p className="text-gray-500 mt-1">
             Track and resolve punch items before project close-out
           </p>
@@ -315,7 +315,7 @@ export default function PunchListPage() {
             placeholder="Search punch items..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -323,7 +323,7 @@ export default function PunchListPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as PunchItemStatus | 'all')}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
           >
             <option value="all">All Status</option>
             <option value="open">Open</option>
@@ -335,7 +335,7 @@ export default function PunchListPage() {
           <select
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value as PunchItemPriority | 'all')}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
           >
             <option value="all">All Priority</option>
             <option value="critical">Critical</option>

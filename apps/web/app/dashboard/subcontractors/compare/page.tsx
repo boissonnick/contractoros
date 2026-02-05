@@ -138,13 +138,13 @@ export default function SubcontractorComparePage() {
               placeholder="Search subcontractors..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20"
             />
           </div>
           <select
             value={tradeFilter}
             onChange={(e) => setTradeFilter(e.target.value)}
-            className="px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+            className="px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 text-sm"
           >
             <option value="all">All Trades</option>
             {trades.map(trade => (

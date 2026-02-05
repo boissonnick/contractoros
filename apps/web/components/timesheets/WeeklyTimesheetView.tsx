@@ -56,11 +56,11 @@ export default function WeeklyTimesheetView({ entries, weekStart, onSubmit, onCh
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <button onClick={() => onChangeWeek(-1)} className="text-sm text-blue-600 hover:text-blue-700">&larr; Prev</button>
+        <button onClick={() => onChangeWeek(-1)} className="text-sm text-brand-600 hover:text-brand-700">&larr; Prev</button>
         <h3 className="text-sm font-semibold text-gray-900">
           Week of {formatDate(weekStart, { month: 'short', day: 'numeric', year: 'numeric' })}
         </h3>
-        <button onClick={() => onChangeWeek(1)} className="text-sm text-blue-600 hover:text-blue-700">Next &rarr;</button>
+        <button onClick={() => onChangeWeek(1)} className="text-sm text-brand-600 hover:text-brand-700">Next &rarr;</button>
       </div>
 
       <div className="grid grid-cols-7 gap-1">
@@ -68,7 +68,7 @@ export default function WeeklyTimesheetView({ entries, weekStart, onSubmit, onCh
           const mins = dailyMinutes[idx];
           const isToday = date.toDateString() === new Date().toDateString();
           return (
-            <div key={idx} className={cn('text-center p-3 rounded-lg border', isToday ? 'border-blue-400 bg-blue-50' : 'border-gray-200')}>
+            <div key={idx} className={cn('text-center p-3 rounded-lg border', isToday ? 'border-brand-400 bg-brand-50' : 'border-gray-200')}>
               <div className="text-xs text-gray-500 font-medium">{DAY_LABELS[idx]}</div>
               <div className="text-xs text-gray-400">{date.getDate()}</div>
               <div className={cn('text-lg font-bold mt-1', mins > 0 ? 'text-gray-900' : 'text-gray-300')}>

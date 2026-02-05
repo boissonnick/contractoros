@@ -181,7 +181,7 @@ export function NotificationCenter({
         className={cn(
           'relative p-2 rounded-lg transition-colors',
           'text-gray-500 hover:text-gray-700 hover:bg-gray-100',
-          'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+          'focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:ring-offset-2',
           isOpen && 'bg-gray-100 text-gray-700'
         )}
         aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
@@ -235,7 +235,7 @@ export function NotificationCenter({
                 {unreadCount > 0 && (
                   <button
                     onClick={() => markAllAsRead()}
-                    className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                    className="text-xs text-brand-600 hover:text-brand-700 font-medium"
                   >
                     Mark all read
                   </button>
@@ -293,7 +293,7 @@ export function NotificationCenter({
                 <Link
                   href="/dashboard/notifications"
                   onClick={() => setIsOpen(false)}
-                  className="block w-full text-center text-sm text-blue-600 hover:text-blue-700 font-medium py-2 rounded hover:bg-gray-50"
+                  className="block w-full text-center text-sm text-brand-600 hover:text-brand-700 font-medium py-2 rounded hover:bg-gray-50"
                 >
                   View all notifications
                 </Link>

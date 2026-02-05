@@ -312,7 +312,7 @@ export default function ClientPhotosPage() {
           <select
             value={selectedProject}
             onChange={(e) => setSelectedProject(e.target.value)}
-            className="w-48 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+            className="w-48 px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
           >
             <option value="all">All Projects</option>
             {projects.map((project) => (
@@ -329,7 +329,7 @@ export default function ClientPhotosPage() {
           <select
             value={datePreset}
             onChange={(e) => setDatePreset(e.target.value as DateRangePreset)}
-            className="w-40 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+            className="w-40 px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
           >
             {DATE_PRESET_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -345,7 +345,7 @@ export default function ClientPhotosPage() {
                 type="date"
                 value={customStartDate}
                 onChange={(e) => setCustomStartDate(e.target.value)}
-                className="px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                className="px-2 py-1.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
               />
               <span className="text-gray-400 text-sm">to</span>
               <input
@@ -353,7 +353,7 @@ export default function ClientPhotosPage() {
                 value={customEndDate}
                 onChange={(e) => setCustomEndDate(e.target.value)}
                 min={customStartDate}
-                className="px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                className="px-2 py-1.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
               />
             </div>
           )}

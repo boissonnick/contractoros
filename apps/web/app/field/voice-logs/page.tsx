@@ -211,7 +211,7 @@ export default function VoiceLogsPage() {
           className={cn(
             "ml-auto flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors min-h-[44px]",
             showQueue
-              ? "bg-blue-100 text-blue-700"
+              ? "bg-brand-100 text-brand-primary"
               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
           )}
         >
@@ -702,7 +702,7 @@ function EnhancedVoiceRecorder({
             <div className="flex items-center gap-4 bg-gray-50 rounded-lg p-4">
               <button
                 onClick={togglePlayback}
-                className="w-14 h-14 rounded-full bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white flex items-center justify-center shadow transition-all"
+                className="w-14 h-14 rounded-full bg-brand-primary hover:bg-brand-900 active:bg-brand-950 text-white flex items-center justify-center shadow transition-all"
                 aria-label={isPlaying ? 'Pause' : 'Play'}
               >
                 {isPlaying ? (
@@ -722,7 +722,7 @@ function EnhancedVoiceRecorder({
                 />
                 <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-blue-500 rounded-full transition-all"
+                    className="h-full bg-brand-primary rounded-full transition-all"
                     style={{ width: isPlaying ? '100%' : '0%' }}
                   />
                 </div>
@@ -742,7 +742,7 @@ function EnhancedVoiceRecorder({
             onChange={(e) => setSummary(e.target.value)}
             placeholder="What did you work on today?"
             rows={4}
-            className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-xl border border-gray-300 px-4 py-3 text-base focus:border-brand-primary focus:ring-1 focus:ring-brand-primary/20"
             disabled={submitState === 'uploading'}
           />
         </Card>

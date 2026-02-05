@@ -285,7 +285,7 @@ export default function ProjectsSchedulePage() {
             placeholder="Search projects..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
           />
         </div>
 
@@ -295,7 +295,7 @@ export default function ProjectsSchedulePage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as ProjectStatus | 'all')}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+            className="px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary text-sm"
           >
             <option value="all">All Status</option>
             {Object.entries(statusConfig).map(([key, config]) => (
@@ -307,7 +307,7 @@ export default function ProjectsSchedulePage() {
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value as ProjectCategory | 'all')}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+            className="px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary text-sm"
           >
             <option value="all">All Categories</option>
             {Object.entries(categoryConfig).map(([key, label]) => (
@@ -339,7 +339,7 @@ export default function ProjectsSchedulePage() {
                 className={cn(
                   'px-3 py-1.5 text-sm capitalize transition-colors',
                   zoom === level
-                    ? 'bg-blue-100 text-blue-700 font-medium'
+                    ? 'bg-brand-100 text-brand-primary font-medium'
                     : 'text-gray-600 hover:bg-gray-50'
                 )}
               >

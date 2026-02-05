@@ -43,8 +43,8 @@ export function BulkCheckbox({
       onClick={handleClick}
       disabled={disabled}
       className={cn(
-        'h-4 w-4 rounded border-gray-300 text-blue-600',
-        'focus:ring-blue-500 focus:ring-2 focus:ring-offset-0',
+        'h-4 w-4 rounded border-gray-300 text-brand-primary',
+        'focus:ring-brand-primary/20 focus:ring-2 focus:ring-offset-0',
         'transition-colors cursor-pointer',
         'disabled:cursor-not-allowed disabled:opacity-50',
         className
@@ -94,8 +94,8 @@ export function BulkSelectAllCheckbox({
         onChange={(e) => onChange(e.target.checked)}
         disabled={disabled}
         className={cn(
-          'h-4 w-4 rounded border-gray-300 text-blue-600',
-          'focus:ring-blue-500 focus:ring-2 focus:ring-offset-0',
+          'h-4 w-4 rounded border-gray-300 text-brand-primary',
+          'focus:ring-brand-primary/20 focus:ring-2 focus:ring-offset-0',
           'transition-colors cursor-pointer',
           'disabled:cursor-not-allowed'
         )}
@@ -233,7 +233,7 @@ export function BulkSelectableRow({
     <tr
       className={cn(
         'transition-colors',
-        isSelected ? 'bg-blue-50' : 'hover:bg-gray-50',
+        isSelected ? 'bg-brand-50' : 'hover:bg-gray-50',
         className
       )}
     >

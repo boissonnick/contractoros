@@ -141,7 +141,7 @@ export default function PhoneAuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-brand-900 to-brand-950 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-white">ContractorOS</h1>
@@ -155,8 +155,8 @@ export default function PhoneAuthPage() {
 
           {step === 'phone' ? (
             <>
-              <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
-                <DevicePhoneMobileIcon className="h-7 w-7 text-blue-600" />
+              <div className="w-14 h-14 bg-brand-100 rounded-xl flex items-center justify-center mb-4">
+                <DevicePhoneMobileIcon className="h-7 w-7 text-brand-primary" />
               </div>
               <h2 className="text-xl font-semibold text-gray-900 mb-2">Phone Sign-In</h2>
               <p className="text-gray-500 text-sm mb-6">
@@ -175,7 +175,7 @@ export default function PhoneAuthPage() {
                       value={phone}
                       onChange={handlePhoneChange}
                       placeholder="(555) 555-5555"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-r-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-r-lg text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary text-gray-900"
                       autoFocus
                     />
                   </div>
@@ -218,7 +218,7 @@ export default function PhoneAuthPage() {
                     value={digit}
                     onChange={(e) => handleCodeInput(i, e.target.value)}
                     onKeyDown={(e) => handleCodeKeyDown(i, e)}
-                    className="w-12 h-14 text-center text-xl font-semibold border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                    className="w-12 h-14 text-center text-xl font-semibold border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary text-gray-900"
                     autoFocus={i === 0}
                   />
                 ))}
@@ -233,7 +233,7 @@ export default function PhoneAuthPage() {
 
               {loading && (
                 <div className="flex justify-center mb-4">
-                  <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-6 h-6 border-2 border-brand-primary border-t-transparent rounded-full animate-spin" />
                 </div>
               )}
 

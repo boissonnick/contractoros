@@ -156,7 +156,7 @@ export function TasksWidget({ widget }: TasksWidgetProps) {
 
             <div className="flex-1 min-w-0">
               {/* Task title */}
-              <p className="text-sm font-medium text-gray-900 truncate group-hover:text-blue-600 transition-colors">
+              <p className="text-sm font-medium text-gray-900 truncate group-hover:text-brand-600 transition-colors">
                 {task.title}
               </p>
 
@@ -186,7 +186,7 @@ export function TasksWidget({ widget }: TasksWidgetProps) {
       {/* View all link */}
       <button
         onClick={() => router.push('/dashboard/projects')}
-        className="w-full text-center text-xs text-blue-600 hover:text-blue-700 font-medium pt-2 mt-2 border-t border-gray-100"
+        className="w-full text-center text-xs text-brand-600 hover:text-brand-700 font-medium pt-2 mt-2 border-t border-gray-100"
       >
         View all tasks
       </button>

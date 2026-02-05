@@ -96,7 +96,7 @@ export function PayrollSummaryWidget({
       <Card className="p-4">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-gray-900">Payroll</h3>
-          <Link href="/dashboard/payroll" className="text-sm text-blue-600 hover:text-blue-700">
+          <Link href="/dashboard/payroll" className="text-sm text-brand-600 hover:text-brand-700">
             View All
           </Link>
         </div>

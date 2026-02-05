@@ -76,11 +76,11 @@ export default function VerifyEmailPage() {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-brand-900 to-brand-950 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center">
         {status === 'verifying' && (
           <>
-            <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <div className="w-12 h-12 border-4 border-brand-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
             <h2 className="text-xl font-semibold text-gray-900 mb-2">Verifying your email...</h2>
             <p className="text-gray-500">Please wait while we sign you in.</p>
           </>

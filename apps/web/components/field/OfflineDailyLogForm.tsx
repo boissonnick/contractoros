@@ -192,7 +192,7 @@ export function OfflineDailyLogForm({
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
           />
         </div>
         <div>
@@ -202,7 +202,7 @@ export function OfflineDailyLogForm({
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value as DailyLogCategory)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
           >
             {CATEGORIES.map((cat) => (
               <option key={cat.value} value={cat.value}>
@@ -223,7 +223,7 @@ export function OfflineDailyLogForm({
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder={`Daily Log - ${new Date(date).toLocaleDateString()}`}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
         />
       </div>
 
@@ -283,7 +283,7 @@ export function OfflineDailyLogForm({
           onChange={(e) => setWorkPerformed(e.target.value)}
           rows={4}
           placeholder="- Installed drywall in master bedroom&#10;- Ran electrical in kitchen&#10;- Framed closet"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
         />
       </div>
 
@@ -307,14 +307,14 @@ export function OfflineDailyLogForm({
                 onClick={() => toggleWorker(member.uid)}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm transition-colors ${
                   selectedWorkers.includes(member.uid)
-                    ? 'bg-blue-100 border-blue-300 border'
+                    ? 'bg-brand-100 border-brand-300 border'
                     : 'bg-gray-50 border border-gray-200 hover:bg-gray-100'
                 }`}
               >
                 <div
                   className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
                     selectedWorkers.includes(member.uid)
-                      ? 'bg-blue-500 text-white'
+                      ? 'bg-brand-primary text-white'
                       : 'bg-gray-300 text-gray-600'
                   }`}
                 >
@@ -344,7 +344,7 @@ export function OfflineDailyLogForm({
           max="24"
           value={hoursWorked}
           onChange={(e) => setHoursWorked(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
         />
       </div>
 
@@ -358,7 +358,7 @@ export function OfflineDailyLogForm({
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
           placeholder="Overall progress, key accomplishments, general notes..."
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
         />
       </div>
 
@@ -374,7 +374,7 @@ export function OfflineDailyLogForm({
             onChange={(e) => setDelays(e.target.value)}
             rows={2}
             placeholder="Weather delays, material shortages..."
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
           />
         </div>
         <div>
@@ -387,7 +387,7 @@ export function OfflineDailyLogForm({
             onChange={(e) => setIssues(e.target.value)}
             rows={2}
             placeholder="Problems encountered, safety concerns..."
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
           />
         </div>
       </div>

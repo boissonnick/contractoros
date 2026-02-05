@@ -87,7 +87,7 @@ export default function ChangePasswordPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-brand-900 to-brand-950 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-white">ContractorOS</h1>
@@ -114,11 +114,11 @@ export default function ChangePasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-brand-900 to-brand-950 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-white">ContractorOS</h1>
-          <p className="text-blue-200 mt-2">Change your password</p>
+          <p className="text-brand-200 mt-2">Change your password</p>
         </div>
 
         <Card>
@@ -132,8 +132,8 @@ export default function ChangePasswordPage() {
             </Link>
           </div>
 
-          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-            <LockClosedIcon className="h-6 w-6 text-blue-600" />
+          <div className="w-12 h-12 bg-brand-100 rounded-full flex items-center justify-center mb-4">
+            <LockClosedIcon className="h-6 w-6 text-brand-primary" />
           </div>
 
           <h2 className="text-xl font-semibold text-gray-900 mb-2">
@@ -212,7 +212,7 @@ export default function ChangePasswordPage() {
           <div className="mt-6 pt-6 border-t border-gray-200 text-center">
             <p className="text-sm text-gray-600">
               Forgot your password?{' '}
-              <Link href="/auth/forgot-password" className="font-medium text-blue-600 hover:text-blue-700">
+              <Link href="/auth/forgot-password" className="font-medium text-brand-600 hover:text-brand-700">
                 Reset it
               </Link>
             </p>

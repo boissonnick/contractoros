@@ -94,7 +94,7 @@ export default function OCRAnalyticsPage() {
         </p>
         <Link
           href="/dashboard/expenses"
-          className="mt-4 text-sm text-blue-600 hover:text-blue-700"
+          className="mt-4 text-sm text-brand-600 hover:text-brand-700"
         >
           Back to Expenses
         </Link>
@@ -152,7 +152,7 @@ export default function OCRAnalyticsPage() {
             <ArrowLeftIcon className="h-4 w-4" />
             Back to Expenses
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">OCR Analytics</h1>
+          <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">OCR Analytics</h1>
         </div>
         <Card className="p-6 text-center">
           <XCircleIcon className="h-10 w-10 text-red-400 mx-auto mb-3" />
@@ -173,7 +173,7 @@ export default function OCRAnalyticsPage() {
           <ArrowLeftIcon className="h-4 w-4" />
           Back to Expenses
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900">OCR Analytics</h1>
+        <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">OCR Analytics</h1>
         <p className="text-sm text-gray-500 mt-1">
           Receipt scanning performance and model accuracy metrics
         </p>
@@ -185,12 +185,12 @@ export default function OCRAnalyticsPage() {
           {/* Total Scans */}
           <Card className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-blue-50">
+              <div className="p-2 rounded-xl bg-blue-50">
                 <DocumentMagnifyingGlassIcon className="h-5 w-5 text-blue-600" />
               </div>
               <div>
                 <p className="text-sm text-gray-500">Total Scans</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalScans}</p>
+                <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{stats.totalScans}</p>
               </div>
             </div>
           </Card>
@@ -200,7 +200,7 @@ export default function OCRAnalyticsPage() {
             <div className="flex items-center gap-3">
               <div
                 className={cn(
-                  'p-2 rounded-lg',
+                  'p-2 rounded-xl',
                   stats.successRate > 90
                     ? 'bg-green-50'
                     : stats.successRate > 75
@@ -239,7 +239,7 @@ export default function OCRAnalyticsPage() {
           {/* Avg Confidence */}
           <Card className="p-4">
             <div className="flex items-center gap-3">
-              <div className={cn('p-2 rounded-lg', getConfidenceBgColor(stats.avgConfidence * 100))}>
+              <div className={cn('p-2 rounded-xl', getConfidenceBgColor(stats.avgConfidence * 100))}>
                 <DocumentMagnifyingGlassIcon
                   className={cn('h-5 w-5', getConfidenceColor(stats.avgConfidence * 100))}
                 />
@@ -256,12 +256,12 @@ export default function OCRAnalyticsPage() {
           {/* Avg Processing Time */}
           <Card className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-purple-50">
+              <div className="p-2 rounded-xl bg-purple-50">
                 <ClockIcon className="h-5 w-5 text-purple-600" />
               </div>
               <div>
                 <p className="text-sm text-gray-500">Avg Processing Time</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">
                   {(stats.avgProcessingTime / 1000).toFixed(1)}s
                 </p>
               </div>

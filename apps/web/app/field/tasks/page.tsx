@@ -222,7 +222,7 @@ export default function FieldTasksPage() {
           <select
             value={selectedProjectId}
             onChange={(e) => setSelectedProjectId(e.target.value)}
-            className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20"
           >
             <option value="">Select a project</option>
             {projects.map((project) => (
@@ -373,7 +373,7 @@ function FilterButton({
       <span>{label}</span>
       <span
         className={`ml-1 px-1.5 py-0.5 rounded-full text-xs ${
-          active ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'
+          active ? 'bg-brand-500 text-white' : 'bg-gray-200 text-gray-600'
         }`}
       >
         {count}

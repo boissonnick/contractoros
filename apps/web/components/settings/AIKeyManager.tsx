@@ -279,7 +279,7 @@ export default function AIKeyManager({
               disabled={disabled || validating}
               className={cn(
                 'w-full px-3 py-2 pr-10 border rounded-lg text-sm font-mono',
-                'focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+                'focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary',
                 'disabled:opacity-50 disabled:bg-gray-50',
                 errorMessage ? 'border-red-300' : 'border-gray-300'
               )}
@@ -320,7 +320,7 @@ export default function AIKeyManager({
               href={providerConfig.docsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+              className="inline-flex items-center gap-1 text-sm text-brand-600 hover:text-brand-700"
             >
               <LinkIcon className="h-3.5 w-3.5" />
               Get API Key

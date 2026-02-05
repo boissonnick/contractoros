@@ -81,11 +81,11 @@ export function OfflineProjectButton({
           <button
             onClick={downloadProject}
             disabled={isDownloading || !isOnline}
-            className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-1 text-xs text-brand-600 hover:text-brand-700 disabled:opacity-50 disabled:cursor-not-allowed"
             title={isOnline ? 'Download for offline' : 'No network connection'}
           >
             {isDownloading ? (
-              <div className="h-4 w-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+              <div className="h-4 w-4 border-2 border-brand-primary border-t-transparent rounded-full animate-spin" />
             ) : !isOnline ? (
               <SignalSlashIcon className="h-4 w-4" />
             ) : (
@@ -169,7 +169,7 @@ export function OfflineProjectButton({
             <button
               onClick={downloadProject}
               disabled={isDownloading || !isOnline}
-              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-white bg-brand-primary hover:bg-brand-900 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isDownloading ? (
                 <>
@@ -232,12 +232,12 @@ export function OfflineProjectButton({
           <button
             onClick={downloadProject}
             disabled={isDownloading || !isOnline}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-brand-600 bg-brand-50 hover:bg-brand-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             title={isOnline ? 'Download for offline access' : 'No network connection'}
           >
             {isDownloading ? (
               <>
-                <div className="h-4 w-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                <div className="h-4 w-4 border-2 border-brand-primary border-t-transparent rounded-full animate-spin" />
                 {downloadProgress ? (
                   <span>Downloading... {downloadProgress.percent}%</span>
                 ) : (

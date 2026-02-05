@@ -312,7 +312,7 @@ export function PayrollApprovalStatus({
               onChange={(e) => setRejectReason(e.target.value)}
               placeholder="Please provide a reason for rejecting this payroll run..."
               rows={3}
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20"
             />
           </div>
 

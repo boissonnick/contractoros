@@ -150,8 +150,8 @@ export default function RecurringTaskConfig({
             }
           }}
           className={cn(
-            'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
-            isEnabled ? 'bg-blue-600' : 'bg-gray-200'
+            'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:ring-offset-2',
+            isEnabled ? 'bg-brand-primary' : 'bg-gray-200'
           )}
         >
           <span
@@ -207,7 +207,7 @@ export default function RecurringTaskConfig({
                     className={cn(
                       'px-3 py-1.5 text-sm rounded-lg border transition-colors',
                       config.daysOfWeek?.includes(day.value)
-                        ? 'bg-blue-100 border-blue-300 text-blue-700'
+                        ? 'bg-brand-100 border-brand-300 text-brand-primary'
                         : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'
                     )}
                   >
@@ -248,7 +248,7 @@ export default function RecurringTaskConfig({
                   type="date"
                   value={config.endDate ? new Date(config.endDate).toISOString().split('T')[0] : ''}
                   onChange={(e) => handleEndDateChange(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-transparent"
                 />
               </div>
               <div>
@@ -261,7 +261,7 @@ export default function RecurringTaskConfig({
                   value={config.maxOccurrences || ''}
                   onChange={(e) => handleMaxOccurrencesChange(parseInt(e.target.value) || 0)}
                   placeholder="Unlimited"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-transparent"
                 />
               </div>
             </div>

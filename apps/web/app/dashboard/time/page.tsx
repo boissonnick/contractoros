@@ -126,7 +126,7 @@ export default function TimeTrackingPage() {
                   onClick={() => setViewMode('timesheet')}
                   className={`px-3 py-2 text-sm font-medium rounded-l-md border ${
                     viewMode === 'timesheet'
-                      ? 'bg-blue-50 text-blue-700 border-blue-200'
+                      ? 'bg-brand-50 text-brand-primary border-brand-200'
                       : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                   }`}
                 >
@@ -136,7 +136,7 @@ export default function TimeTrackingPage() {
                   onClick={() => setViewMode('list')}
                   className={`px-3 py-2 text-sm font-medium border-t border-b ${
                     viewMode === 'list'
-                      ? 'bg-blue-50 text-blue-700 border-blue-200'
+                      ? 'bg-brand-50 text-brand-primary border-brand-200'
                       : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                   }`}
                 >
@@ -147,7 +147,7 @@ export default function TimeTrackingPage() {
                     onClick={() => setViewMode('team')}
                     className={`px-3 py-2 text-sm font-medium rounded-r-md border relative ${
                       viewMode === 'team'
-                        ? 'bg-blue-50 text-blue-700 border-blue-200'
+                        ? 'bg-brand-50 text-brand-primary border-brand-200'
                         : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                     }`}
                   >
@@ -239,7 +239,7 @@ export default function TimeTrackingPage() {
                   <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value as FilterStatus)}
-                    className="rounded-md border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500"
+                    className="rounded-md border-gray-300 text-sm focus:border-brand-primary focus:ring-brand-primary/20"
                   >
                     <option value="all">All Entries</option>
                     <option value="completed">Completed</option>
@@ -400,7 +400,7 @@ export default function TimeTrackingPage() {
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value as FilterStatus)}
-              className="w-full min-h-[44px] rounded-xl border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500"
+              className="w-full min-h-[44px] rounded-xl border-gray-300 text-sm focus:border-brand-primary focus:ring-brand-primary/20"
             >
               <option value="all">All Entries</option>
               <option value="completed">Completed</option>

@@ -210,7 +210,7 @@ export default function APInvoicingPage() {
           <div className="flex items-start justify-between">
             <div>
               <div className="text-sm text-gray-500">Pending Approval</div>
-              <div className="text-2xl font-bold text-yellow-600 mt-1">
+              <div className="text-2xl font-bold font-heading tracking-tight text-yellow-600 mt-1">
                 {stats.pendingCount}
               </div>
               <div className="text-xs text-gray-400 mt-1">
@@ -227,7 +227,7 @@ export default function APInvoicingPage() {
           <div className="flex items-start justify-between">
             <div>
               <div className="text-sm text-gray-500">Approved</div>
-              <div className="text-2xl font-bold text-green-600 mt-1">
+              <div className="text-2xl font-bold font-heading tracking-tight text-green-600 mt-1">
                 {stats.approvedCount}
               </div>
               <div className="text-xs text-gray-400 mt-1">
@@ -244,7 +244,7 @@ export default function APInvoicingPage() {
           <div className="flex items-start justify-between">
             <div>
               <div className="text-sm text-gray-500">Total Paid</div>
-              <div className="text-2xl font-bold text-blue-600 mt-1">
+              <div className="text-2xl font-bold font-heading tracking-tight text-blue-600 mt-1">
                 {formatCurrency(stats.paidAmount)}
               </div>
               <div className="text-xs text-gray-400 mt-1">this period</div>
@@ -259,7 +259,7 @@ export default function APInvoicingPage() {
           <div className="flex items-start justify-between">
             <div>
               <div className="text-sm text-gray-500">Lien Waivers Pending</div>
-              <div className="text-2xl font-bold text-purple-600 mt-1">
+              <div className="text-2xl font-bold font-heading tracking-tight text-purple-600 mt-1">
                 {stats.pendingWaiversCount}
               </div>
               <div className="text-xs text-gray-400 mt-1">awaiting signature</div>
@@ -286,7 +286,7 @@ export default function APInvoicingPage() {
                 flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors
                 ${
                   isActive
-                    ? 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 border-2 border-blue-300 shadow-sm'
+                    ? 'bg-gradient-to-r from-brand-50 to-brand-100 text-brand-primary border-2 border-brand-300 shadow-sm'
                     : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
                 }
               `}
@@ -312,7 +312,7 @@ export default function APInvoicingPage() {
           <select
             value={filterVendorId}
             onChange={(e) => setFilterVendorId(e.target.value)}
-            className="rounded-md border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500"
+            className="rounded-md border-gray-300 text-sm focus:border-brand-primary focus:ring-brand-primary/20"
           >
             <option value="">All Vendors</option>
             {subs
@@ -328,7 +328,7 @@ export default function APInvoicingPage() {
           <select
             value={filterProjectId}
             onChange={(e) => setFilterProjectId(e.target.value)}
-            className="rounded-md border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500"
+            className="rounded-md border-gray-300 text-sm focus:border-brand-primary focus:ring-brand-primary/20"
           >
             <option value="">All Projects</option>
             {(projects as Project[])

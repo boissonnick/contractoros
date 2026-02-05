@@ -336,7 +336,7 @@ export default function FinancesPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="p-5">
           <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 bg-green-100 rounded-lg">
+            <div className="p-2 bg-green-100 rounded-xl">
               <ArrowTrendingUpIcon className="h-5 w-5 text-green-600" />
             </div>
             <div className="flex-1 min-w-0">
@@ -360,7 +360,7 @@ export default function FinancesPage() {
           onClick={() => openExpenseModal('All Expenses (YTD)', {})}
         >
           <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 bg-red-100 rounded-lg">
+            <div className="p-2 bg-red-100 rounded-xl">
               <ArrowTrendingDownIcon className="h-5 w-5 text-red-600" />
             </div>
             <div className="flex-1 min-w-0">
@@ -384,7 +384,7 @@ export default function FinancesPage() {
 
         <Card className={cn('p-5', stats.grossProfit >= 0 ? 'ring-1 ring-green-200' : 'ring-1 ring-red-200')}>
           <div className="flex items-center gap-3 mb-3">
-            <div className={cn('p-2 rounded-lg', stats.grossProfit >= 0 ? 'bg-green-100' : 'bg-red-100')}>
+            <div className={cn('p-2 rounded-xl', stats.grossProfit >= 0 ? 'bg-green-100' : 'bg-red-100')}>
               <CurrencyDollarIcon className={cn('h-5 w-5', stats.grossProfit >= 0 ? 'text-green-600' : 'text-red-600')} />
             </div>
             <div className="flex-1 min-w-0">
@@ -407,7 +407,7 @@ export default function FinancesPage() {
 
         <Card className="p-5">
           <div className="flex items-center gap-3 mb-3">
-            <div className={cn('p-2 rounded-lg', stats.profitMargin >= 20 ? 'bg-green-100' : stats.profitMargin >= 10 ? 'bg-amber-100' : 'bg-red-100')}>
+            <div className={cn('p-2 rounded-xl', stats.profitMargin >= 20 ? 'bg-green-100' : stats.profitMargin >= 10 ? 'bg-amber-100' : 'bg-red-100')}>
               <ReceiptPercentIcon className={cn('h-5 w-5', stats.profitMargin >= 20 ? 'text-green-600' : stats.profitMargin >= 10 ? 'text-amber-600' : 'text-red-600')} />
             </div>
             <div className="flex-1 min-w-0">
@@ -512,7 +512,7 @@ export default function FinancesPage() {
             <div className="mt-4 pt-3 border-t border-gray-100">
               <button
                 onClick={() => openExpenseModal('All Expenses', {})}
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                className="text-sm text-brand-600 hover:text-brand-700 font-medium"
               >
                 View all expenses
               </button>
@@ -626,7 +626,7 @@ export default function FinancesPage() {
             <ChartBarIcon className="h-5 w-5 text-gray-400" />
             Budget Utilization Overview
           </h3>
-          <Link href="/dashboard/reports/financial" className="text-sm text-blue-600 hover:text-blue-700">
+          <Link href="/dashboard/reports/financial" className="text-sm text-brand-600 hover:text-brand-700">
             View Details
           </Link>
         </div>
@@ -666,7 +666,7 @@ export default function FinancesPage() {
       <Card className="p-5">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-gray-900">Project Profitability</h3>
-          <Link href="/dashboard/projects" className="text-sm text-blue-600 hover:text-blue-700">
+          <Link href="/dashboard/projects" className="text-sm text-brand-600 hover:text-brand-700">
             View All Projects
           </Link>
         </div>

@@ -115,7 +115,7 @@ export function PhotoGallery({ photos, phases = [], className }: PhotoGalleryPro
             className={cn(
               'px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors',
               selectedPhase === null
-                ? 'bg-blue-100 text-blue-700'
+                ? 'bg-brand-100 text-brand-primary'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             )}
           >
@@ -128,7 +128,7 @@ export function PhotoGallery({ photos, phases = [], className }: PhotoGalleryPro
               className={cn(
                 'px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors',
                 selectedPhase === phase
-                  ? 'bg-blue-100 text-blue-700'
+                  ? 'bg-brand-100 text-brand-primary'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               )}
             >
@@ -144,7 +144,7 @@ export function PhotoGallery({ photos, phases = [], className }: PhotoGalleryPro
           <button
             key={photo.id}
             onClick={() => openLightbox(index)}
-            className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
           >
             <Image
               src={photo.thumbnailUrl || photo.url}

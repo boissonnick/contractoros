@@ -79,7 +79,7 @@ export default function ScopeItemForm({ initialData, phases, quoteSections, proj
               <button
                 type="button"
                 onClick={() => setShowCreatePhase(true)}
-                className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-0.5"
+                className="text-xs text-brand-600 hover:text-brand-700 flex items-center gap-0.5"
               >
                 <PlusIcon className="h-3 w-3" /> Create
               </button>

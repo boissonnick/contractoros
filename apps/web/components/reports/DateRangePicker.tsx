@@ -108,7 +108,7 @@ export function DateRangePicker({
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           'flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg',
-          'text-sm text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500',
+          'text-sm text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-primary/20',
           'transition-colors min-w-[200px]'
         )}
       >
@@ -124,7 +124,7 @@ export function DateRangePicker({
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute z-50 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg">
+        <div className="absolute z-50 mt-2 w-80 bg-white border border-gray-200 rounded-2xl shadow-lg">
           {showPresets && (
             <>
               {/* Quick presets */}
@@ -141,7 +141,7 @@ export function DateRangePicker({
                         className={cn(
                           'px-2 py-1 text-xs rounded-full transition-colors',
                           selectedPreset === preset
-                            ? 'bg-blue-100 text-blue-700'
+                            ? 'bg-brand-100 text-brand-primary'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         )}
                       >
@@ -161,7 +161,7 @@ export function DateRangePicker({
                     onClick={() => handlePresetSelect(preset.value)}
                     className={cn(
                       'w-full px-3 py-2 text-sm text-left hover:bg-gray-50 transition-colors',
-                      selectedPreset === preset.value && 'bg-blue-50 text-blue-700'
+                      selectedPreset === preset.value && 'bg-brand-100 text-brand-primary'
                     )}
                   >
                     {preset.label}
@@ -183,7 +183,7 @@ export function DateRangePicker({
                   onChange={(e) => setCustomStart(e.target.value)}
                   min={minDate ? formatDateForInput(minDate) : undefined}
                   max={customEnd || (maxDate ? formatDateForInput(maxDate) : undefined)}
-                  className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-brand-primary/20"
                 />
               </div>
               <span className="text-gray-400">to</span>
@@ -195,7 +195,7 @@ export function DateRangePicker({
                   onChange={(e) => setCustomEnd(e.target.value)}
                   min={customStart || (minDate ? formatDateForInput(minDate) : undefined)}
                   max={maxDate ? formatDateForInput(maxDate) : undefined}
-                  className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-brand-primary/20"
                 />
               </div>
             </div>
@@ -246,14 +246,14 @@ export function InlineDateRangePicker({
         type="date"
         value={formatDateForInput(value.startDate)}
         onChange={handleStartChange}
-        className="px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+        className="px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-brand-primary/20"
       />
       <span className="text-gray-400">to</span>
       <input
         type="date"
         value={formatDateForInput(value.endDate)}
         onChange={handleEndChange}
-        className="px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+        className="px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-brand-primary/20"
       />
     </div>
   );

@@ -71,7 +71,7 @@ export default function SmokePage() {
         <section className="mb-8">
           <h2 className="text-lg font-semibold text-gray-700 mb-3">Buttons</h2>
           <div className="flex flex-wrap gap-3">
-            <button className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
+            <button className="px-4 py-2 bg-brand-primary text-white font-medium rounded-lg hover:bg-brand-900 transition-colors">
               Primary
             </button>
             <button className="px-4 py-2 bg-white text-gray-700 font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors">

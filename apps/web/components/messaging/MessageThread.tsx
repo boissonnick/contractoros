@@ -222,7 +222,7 @@ function MessageBubble({
         className={cn(
           'max-w-[75%] rounded-2xl px-4 py-2.5 shadow-sm',
           isOwn
-            ? 'bg-blue-600 text-white rounded-br-md'
+            ? 'bg-brand-primary text-white rounded-br-md'
             : 'bg-white text-gray-900 rounded-bl-md border border-gray-100'
         )}
       >
@@ -487,7 +487,7 @@ function MessageInput({
           onKeyDown={handleKeyPress}
           placeholder={placeholder}
           rows={1}
-          className="flex-1 resize-none rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400"
+          className="flex-1 resize-none rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-transparent placeholder-gray-400"
           style={{ maxHeight: '120px' }}
         />
 
@@ -497,7 +497,7 @@ function MessageInput({
           className={cn(
             'flex-shrink-0 p-2.5 rounded-xl transition-all',
             canSend
-              ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm'
+              ? 'bg-brand-primary text-white hover:bg-brand-900 shadow-sm'
               : 'bg-gray-100 text-gray-400 cursor-not-allowed'
           )}
           title="Send message"
@@ -623,7 +623,7 @@ export function MessageThread({
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <div className="flex flex-col items-center gap-3">
-              <span className="w-8 h-8 border-3 border-gray-300 border-t-blue-600 rounded-full animate-spin" />
+              <span className="w-8 h-8 border-3 border-gray-300 border-t-brand-primary rounded-full animate-spin" />
               <span className="text-sm text-gray-500">Loading messages...</span>
             </div>
           </div>

@@ -23,7 +23,7 @@ export function CompleteStep({ report }: CompleteStepProps) {
         ) : (
           <CheckCircleIcon className="h-16 w-16 text-green-500 mx-auto mb-4" />
         )}
-        <h3 className="text-xl font-semibold text-gray-900">
+        <h3 className="text-xl font-semibold font-heading tracking-tight text-gray-900">
           {hasErrors ? 'Offboarding completed with warnings' : 'Offboarding complete'}
         </h3>
         <p className="text-gray-500 mt-1">

@@ -46,7 +46,7 @@ export default function CertificationsStep({ initialCerts = [], onNext, onBack }
           </div>
         ))}
       </div>
-      <button onClick={addCert} className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 mt-3">
+      <button onClick={addCert} className="flex items-center gap-1 text-sm text-brand-600 hover:text-brand-700 mt-3">
         <PlusIcon className="h-4 w-4" /> Add another
       </button>
       <div className="flex justify-between mt-6">

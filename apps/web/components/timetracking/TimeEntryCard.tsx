@@ -250,7 +250,7 @@ export function TimeEntryCard({
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
               placeholder="Please provide a reason for rejection..."
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20 text-sm"
               rows={2}
             />
             <div className="flex gap-2 mt-2">

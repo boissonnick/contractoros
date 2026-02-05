@@ -50,14 +50,14 @@ export default function TaskAssignment({
           {assignedMembers.map((member) => (
             <span
               key={member.uid}
-              className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 rounded-full px-2.5 py-1 text-sm"
+              className="inline-flex items-center gap-1 bg-brand-50 text-brand-700 rounded-full px-2.5 py-1 text-sm"
             >
               <UserCircleIcon className="h-4 w-4" />
               {member.displayName}
               <button
                 type="button"
                 onClick={() => handleUnassign(member.uid)}
-                className="text-blue-400 hover:text-blue-600"
+                className="text-brand-400 hover:text-brand-600"
               >
                 <XMarkIcon className="h-3.5 w-3.5" />
               </button>
@@ -69,7 +69,7 @@ export default function TaskAssignment({
       {/* Add assignee dropdown */}
       {unassignedMembers.length > 0 && (
         <select
-          className="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
+          className="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20 text-gray-700"
           value=""
           onChange={(e) => {
             if (e.target.value) handleAssign(e.target.value);
@@ -91,7 +91,7 @@ export default function TaskAssignment({
         </label>
         <input
           type="text"
-          className="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
           placeholder="Enter subcontractor ID (will be replaced with picker)"
           value={assignedSubId}
           onChange={(e) => onAssignedSubChange(e.target.value)}

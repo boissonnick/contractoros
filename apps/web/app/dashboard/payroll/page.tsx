@@ -232,7 +232,7 @@ export default function PayrollDashboardPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Payroll</h1>
+          <h1 className="text-2xl font-semibold font-heading tracking-tight text-gray-900">Payroll</h1>
           <p className="text-gray-500 mt-1">Manage employee payroll runs and compensation</p>
         </div>
         <Button onClick={() => setShowCreateModal(true)}>
@@ -246,12 +246,12 @@ export default function PayrollDashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg">
+              <div className="p-2 bg-green-100 rounded-xl">
                 <BanknotesIcon className="h-5 w-5 text-green-600" />
               </div>
               <div>
                 <div className="text-sm text-gray-500">Total Gross (90 days)</div>
-                <div className="text-xl font-semibold text-gray-900">
+                <div className="text-xl font-bold font-heading tracking-tight text-gray-900">
                   {formatCurrency(summary.totalGrossPay)}
                 </div>
               </div>
@@ -260,12 +260,12 @@ export default function PayrollDashboardPage() {
 
           <Card className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
+              <div className="p-2 bg-blue-100 rounded-xl">
                 <ChartBarIcon className="h-5 w-5 text-blue-600" />
               </div>
               <div>
                 <div className="text-sm text-gray-500">Total Net (90 days)</div>
-                <div className="text-xl font-semibold text-gray-900">
+                <div className="text-xl font-bold font-heading tracking-tight text-gray-900">
                   {formatCurrency(summary.totalNetPay)}
                 </div>
               </div>
@@ -274,12 +274,12 @@ export default function PayrollDashboardPage() {
 
           <Card className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
+              <div className="p-2 bg-purple-100 rounded-xl">
                 <CalendarDaysIcon className="h-5 w-5 text-purple-600" />
               </div>
               <div>
                 <div className="text-sm text-gray-500">Payroll Runs</div>
-                <div className="text-xl font-semibold text-gray-900">
+                <div className="text-xl font-bold font-heading tracking-tight text-gray-900">
                   {summary.totalRuns}
                 </div>
               </div>
@@ -288,12 +288,12 @@ export default function PayrollDashboardPage() {
 
           <Card className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-amber-100 rounded-lg">
+              <div className="p-2 bg-amber-100 rounded-xl">
                 <ClockIcon className="h-5 w-5 text-amber-600" />
               </div>
               <div>
                 <div className="text-sm text-gray-500">Active Employees</div>
-                <div className="text-xl font-semibold text-gray-900">
+                <div className="text-xl font-bold font-heading tracking-tight text-gray-900">
                   {summary.totalEmployees}
                 </div>
               </div>
@@ -357,7 +357,7 @@ export default function PayrollDashboardPage() {
 
       {/* Payroll runs list */}
       <div>
-        <h2 className="text-lg font-medium text-gray-900 mb-4">Recent Payroll Runs</h2>
+        <h2 className="text-lg font-medium font-heading tracking-tight text-gray-900 mb-4">Recent Payroll Runs</h2>
 
         {payrollRuns.length === 0 ? (
           <EmptyState

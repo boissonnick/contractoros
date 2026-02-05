@@ -112,7 +112,7 @@ export function ClientNotes({
           onChange={(e) => setNewNote(e.target.value)}
           placeholder="Add a note or question..."
           rows={3}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm resize-none focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
         />
         <div className="flex justify-end mt-2">
           <button
@@ -220,7 +220,7 @@ export function ClientNotes({
                         value={editContent}
                         onChange={(e) => setEditContent(e.target.value)}
                         rows={3}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm resize-none focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
                       />
                       <div className="flex justify-end gap-2 mt-2">
                         <button

@@ -281,7 +281,7 @@ export function EmployeeRateManager({
                 onClick={() => handleUpdateEmployeeType('hourly')}
                 className={`flex-1 py-2 px-4 rounded-lg border-2 text-sm font-medium transition-colors ${
                   employeeType === 'hourly'
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
+                    ? 'border-brand-primary bg-brand-50 text-brand-primary'
                     : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
                 }`}
               >
@@ -292,7 +292,7 @@ export function EmployeeRateManager({
                 onClick={() => handleUpdateEmployeeType('salaried')}
                 className={`flex-1 py-2 px-4 rounded-lg border-2 text-sm font-medium transition-colors ${
                   employeeType === 'salaried'
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
+                    ? 'border-brand-primary bg-brand-50 text-brand-primary'
                     : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
                 }`}
               >
@@ -314,7 +314,7 @@ export function EmployeeRateManager({
                 min="0"
                 value={newRate}
                 onChange={(e) => setNewRate(e.target.value)}
-                className="w-full pl-8 pr-16 py-2 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                className="w-full pl-8 pr-16 py-2 rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20"
                 placeholder={employeeType === 'salaried' ? '75000.00' : '25.00'}
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
@@ -337,7 +337,7 @@ export function EmployeeRateManager({
                   max="3"
                   value={overtimeMultiplier}
                   onChange={(e) => setOvertimeMultiplier(e.target.value)}
-                  className="w-24 py-2 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="w-24 py-2 rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20"
                 />
                 <span className="text-gray-500">x base rate</span>
                 {newRate && (
@@ -358,7 +358,7 @@ export function EmployeeRateManager({
               type="date"
               value={effectiveDate}
               onChange={(e) => setEffectiveDate(e.target.value)}
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20"
             />
           </div>
 
@@ -372,7 +372,7 @@ export function EmployeeRateManager({
               onChange={(e) => setReason(e.target.value)}
               placeholder="e.g., Annual review, Promotion, Market adjustment..."
               rows={2}
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20"
             />
           </div>
 

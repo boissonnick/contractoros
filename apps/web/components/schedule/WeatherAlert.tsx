@@ -211,7 +211,7 @@ export default function WeatherAlert({
   return (
     <div
       className={cn(
-        'w-full rounded-lg p-4',
+        'w-full rounded-2xl p-4',
         styles.container,
         className
       )}

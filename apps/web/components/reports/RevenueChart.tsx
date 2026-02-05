@@ -91,7 +91,7 @@ export function RevenueChart({
     return (
       <div
         className={cn(
-          'bg-white rounded-lg border border-gray-200 p-4',
+          'bg-white rounded-2xl border border-gray-200 p-4',
           className
         )}
       >
@@ -119,7 +119,7 @@ export function RevenueChart({
   return (
     <div
       className={cn(
-        'bg-white rounded-lg border border-gray-200 p-4',
+        'bg-white rounded-2xl border border-gray-200 p-4',
         className
       )}
     >
@@ -217,7 +217,7 @@ export function SimpleRevenueChart({
     return (
       <div
         className={cn(
-          'bg-white rounded-lg border border-gray-200 p-4',
+          'bg-white rounded-2xl border border-gray-200 p-4',
           className
         )}
       >
@@ -237,7 +237,7 @@ export function SimpleRevenueChart({
   return (
     <div
       className={cn(
-        'bg-white rounded-lg border border-gray-200 p-4',
+        'bg-white rounded-2xl border border-gray-200 p-4',
         className
       )}
     >

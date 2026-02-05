@@ -139,7 +139,7 @@ export function JobCostingCard({
         {onViewDetails && (
           <button
             onClick={onViewDetails}
-            className="mt-3 text-xs text-blue-600 hover:text-blue-700 font-medium"
+            className="mt-3 text-xs text-brand-600 hover:text-brand-700 font-medium"
           >
             View Details →
           </button>
@@ -262,7 +262,7 @@ export function JobCostingCard({
       {onViewDetails && (
         <button
           onClick={onViewDetails}
-          className="mt-4 w-full text-sm text-blue-600 hover:text-blue-700 font-medium py-2 border-t border-gray-200"
+          className="mt-4 w-full text-sm text-brand-600 hover:text-brand-700 font-medium py-2 border-t border-gray-200"
         >
           View Full Cost Report →
         </button>

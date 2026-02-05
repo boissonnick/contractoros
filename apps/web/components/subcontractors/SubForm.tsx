@@ -90,13 +90,13 @@ export default function SubForm({ initialData, onSubmit, onCancel }: SubFormProp
         <label className="block text-sm font-medium text-gray-700 mb-1">Trades</label>
         <div className="flex flex-wrap gap-1.5 mb-2">
           {trades.map(t => (
-            <span key={t} className="inline-flex items-center gap-1 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+            <span key={t} className="inline-flex items-center gap-1 bg-brand-100 text-brand-primary text-xs px-2 py-1 rounded-full">
               {t}
-              <button type="button" onClick={() => toggleTrade(t)} className="hover:text-blue-600">&times;</button>
+              <button type="button" onClick={() => toggleTrade(t)} className="hover:text-brand-600">&times;</button>
             </span>
           ))}
         </div>
-        <button type="button" onClick={() => setShowTradeSelector(!showTradeSelector)} className="text-sm text-blue-600 hover:text-blue-700">
+        <button type="button" onClick={() => setShowTradeSelector(!showTradeSelector)} className="text-sm text-brand-600 hover:text-brand-700">
           {showTradeSelector ? 'Hide trades' : '+ Select trades'}
         </button>
         {showTradeSelector && (
@@ -108,7 +108,7 @@ export default function SubForm({ initialData, onSubmit, onCancel }: SubFormProp
                 onClick={() => toggleTrade(t)}
                 className={cn(
                   'flex items-center gap-1 text-xs px-2 py-1 rounded border transition-all text-left',
-                  trades.includes(t) ? 'border-blue-600 bg-blue-50 text-blue-800' : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                  trades.includes(t) ? 'border-brand-primary bg-brand-50 text-brand-primary' : 'border-gray-200 text-gray-600 hover:border-gray-300'
                 )}
               >
                 {trades.includes(t) && <CheckIcon className="h-3 w-3 flex-shrink-0" />}
@@ -130,7 +130,7 @@ export default function SubForm({ initialData, onSubmit, onCancel }: SubFormProp
           <select
             value={taxClassification}
             onChange={(e) => setTaxClassification(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
           >
             <option value="1099">1099 - Independent Contractor</option>
             <option value="W2">W2 - Employee</option>
@@ -153,7 +153,7 @@ export default function SubForm({ initialData, onSubmit, onCancel }: SubFormProp
             </div>
           </div>
         ))}
-        <button type="button" onClick={addCert} className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700">
+        <button type="button" onClick={addCert} className="flex items-center gap-1 text-xs text-brand-600 hover:text-brand-700">
           <PlusIcon className="h-3.5 w-3.5" /> Add certification
         </button>
       </div>

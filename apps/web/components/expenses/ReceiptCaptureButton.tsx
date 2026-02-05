@@ -139,7 +139,7 @@ export function ReceiptCaptureButton({
             'transition-colors duration-200',
             disabled || !profile?.orgId
               ? 'border-gray-200 text-gray-400 cursor-not-allowed'
-              : 'border-blue-300 text-blue-600 hover:border-blue-400 hover:bg-blue-50'
+              : 'border-brand-300 text-brand-primary hover:border-brand-400 hover:bg-brand-50'
           )}
         >
           <CameraIcon className="h-5 w-5" />
@@ -237,7 +237,7 @@ export function ReceiptCaptureButton({
             <button
               type="button"
               onClick={handleScan}
-              className="flex items-center gap-2 px-4 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-1.5 bg-brand-primary text-white text-sm font-medium rounded-md hover:bg-brand-900 transition-colors"
             >
               <DocumentMagnifyingGlassIcon className="h-4 w-4" />
               Scan Receipt
@@ -310,7 +310,7 @@ export function ReceiptCaptureButton({
             <button
               type="button"
               onClick={handleScan}
-              className="flex items-center gap-2 px-4 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-1.5 bg-brand-primary text-white text-sm font-medium rounded-md hover:bg-brand-900 transition-colors"
             >
               <ArrowPathIcon className="h-4 w-4" />
               Retry

@@ -86,7 +86,7 @@ export function ProjectProgressCard({
           <div className="flex-1 min-w-0">
             <Link
               href={`/dashboard/projects/${projectId}`}
-              className="text-base sm:text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors truncate block"
+              className="text-base sm:text-lg font-semibold text-gray-900 hover:text-brand-600 transition-colors truncate block"
             >
               {projectName}
             </Link>
@@ -201,7 +201,7 @@ export function ProjectProgressCard({
         <div className="px-4 sm:px-5 py-3 bg-gray-50 border-t border-gray-100">
           <button
             onClick={handleClick}
-            className="w-full flex items-center justify-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+            className="w-full flex items-center justify-center gap-2 text-sm font-medium text-brand-600 hover:text-brand-700 transition-colors"
           >
             View Project Details
             <ArrowRightIcon className="h-4 w-4" />

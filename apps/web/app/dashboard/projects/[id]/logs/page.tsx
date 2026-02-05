@@ -160,7 +160,7 @@ export default function ProjectLogsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -169,7 +169,7 @@ export default function ProjectLogsPage() {
     <div>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Daily Logs</h1>
+        <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight">Daily Logs</h1>
         <Button
           variant="primary"
           onClick={() => setShowNewLog(true)}
@@ -184,7 +184,7 @@ export default function ProjectLogsPage() {
         {showNewLog && (
           <Card className="mb-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="text-lg font-semibold text-gray-900 font-heading tracking-tight">
                 Daily Log - {formatDate(new Date())}
               </h2>
               <button
@@ -209,7 +209,7 @@ export default function ProjectLogsPage() {
                       className={cn(
                         'p-3 rounded-lg border-2 text-center transition-all',
                         newLog.weather === option.value
-                          ? 'border-blue-500 bg-blue-50'
+                          ? 'border-brand-primary bg-brand-50'
                           : 'border-gray-200 hover:border-gray-300'
                       )}
                     >
@@ -248,7 +248,7 @@ export default function ProjectLogsPage() {
                   placeholder="Describe the work completed today..."
                   value={newLog.workPerformed}
                   onChange={(e) => setNewLog({ ...newLog, workPerformed: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                 />
               </div>
 
@@ -263,7 +263,7 @@ export default function ProjectLogsPage() {
                     placeholder="List materials used..."
                     value={newLog.materials}
                     onChange={(e) => setNewLog({ ...newLog, materials: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                   />
                 </div>
                 <div>
@@ -275,7 +275,7 @@ export default function ProjectLogsPage() {
                     placeholder="List equipment used..."
                     value={newLog.equipment}
                     onChange={(e) => setNewLog({ ...newLog, equipment: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                   />
                 </div>
               </div>
@@ -291,7 +291,7 @@ export default function ProjectLogsPage() {
                     placeholder="Any delays or issues encountered..."
                     value={newLog.delays}
                     onChange={(e) => setNewLog({ ...newLog, delays: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                   />
                 </div>
                 <div>
@@ -303,7 +303,7 @@ export default function ProjectLogsPage() {
                     placeholder="Safety observations or incidents..."
                     value={newLog.safetyNotes}
                     onChange={(e) => setNewLog({ ...newLog, safetyNotes: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                   />
                 </div>
               </div>
@@ -318,7 +318,7 @@ export default function ProjectLogsPage() {
                   placeholder="Any other notes or observations..."
                   value={newLog.notes}
                   onChange={(e) => setNewLog({ ...newLog, notes: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                 />
               </div>
 
@@ -346,7 +346,7 @@ export default function ProjectLogsPage() {
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <DocumentTextIcon className="h-8 w-8 text-gray-400" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No daily logs yet</h3>
+            <h3 className="text-lg font-semibold text-gray-900 font-heading tracking-tight mb-2">No daily logs yet</h3>
             <p className="text-gray-500 mb-6">Start documenting your project progress with daily logs.</p>
             <Button
               variant="primary"

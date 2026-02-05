@@ -143,7 +143,7 @@ export function CheckOutModal({
                 value={formData.userId}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
               >
                 <option value="">Select team member</option>
                 {teamMembers.map((member) => (
@@ -163,7 +163,7 @@ export function CheckOutModal({
                 name="projectId"
                 value={formData.projectId}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
               >
                 <option value="">Select project (optional)</option>
                 {projects.map((project) => (
@@ -185,7 +185,7 @@ export function CheckOutModal({
                 value={formData.expectedReturnDate}
                 onChange={handleChange}
                 min={new Date().toISOString().split('T')[0]}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
               />
             </div>
 
@@ -199,7 +199,7 @@ export function CheckOutModal({
                 value={formData.notes}
                 onChange={handleChange}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
                 placeholder="Any notes about this checkout..."
               />
             </div>

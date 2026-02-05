@@ -51,7 +51,7 @@ export default function IntegrationStubs() {
       </div>
       <p className="text-xs text-gray-500">
         Looking for accounting integrations?{' '}
-        <Link href="/dashboard/settings/integrations" className="text-blue-600 hover:underline">
+        <Link href="/dashboard/settings/integrations" className="text-brand-600 hover:underline">
           View all integrations
         </Link>
         {' '}including QuickBooks Online.

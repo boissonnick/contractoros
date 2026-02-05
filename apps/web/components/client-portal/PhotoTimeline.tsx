@@ -67,7 +67,7 @@ function LazyTimelinePhoto({
     <button
       ref={ref}
       onClick={onClick}
-      className="relative aspect-square rounded-md overflow-hidden bg-gray-100 hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-blue-500"
+      className="relative aspect-square rounded-md overflow-hidden bg-gray-100 hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
     >
       {/* Placeholder */}
       {(!isVisible || !isLoaded) && (
@@ -172,7 +172,7 @@ export function PhotoTimeline({ photos, onViewAll }: PhotoTimelineProps) {
         {onViewAll && (
           <button
             onClick={onViewAll}
-            className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+            className="flex items-center gap-1 text-sm text-brand-600 hover:text-brand-700"
           >
             View All Photos
             <ArrowTopRightOnSquareIcon className="h-4 w-4" />

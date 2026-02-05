@@ -98,7 +98,7 @@ export function BulkProgressModal({
                       </div>
                       <div className="overflow-hidden h-2 text-xs flex rounded-full bg-gray-200">
                         <div
-                          className="transition-all duration-300 ease-out bg-blue-600 rounded-full"
+                          className="transition-all duration-300 ease-out bg-brand-primary rounded-full"
                           style={{ width: `${percentComplete}%` }}
                         />
                       </div>

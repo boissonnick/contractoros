@@ -328,7 +328,7 @@ export default function InvoicesPage() {
             placeholder="Search invoices..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -336,7 +336,7 @@ export default function InvoicesPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as InvoiceStatus | 'all')}
-            className="px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
           >
             <option value="all">All Status</option>
             <option value="draft">Draft</option>
@@ -434,7 +434,7 @@ export default function InvoicesPage() {
             <select
               value={pageSize}
               onChange={(e) => handlePageSizeChange(Number(e.target.value) as PageSize)}
-              className="px-2 py-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-2 py-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
             >
               {PAGE_SIZE_OPTIONS.map((size) => (
                 <option key={size} value={size}>

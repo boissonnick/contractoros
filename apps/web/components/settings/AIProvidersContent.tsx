@@ -156,7 +156,7 @@ function ApiKeyInput({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholderText}
-          className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-mono"
+          className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary text-sm font-mono"
         />
         {!isOllama && (
           <button
@@ -224,7 +224,7 @@ function ProviderCard({
   };
 
   return (
-    <Card className={cn('transition-all', expanded && 'ring-2 ring-blue-200')}>
+    <Card className={cn('transition-all', expanded && 'ring-2 ring-brand-primary/20')}>
       <div className="flex items-start gap-4">
         {/* Provider Icon */}
         <div
@@ -298,7 +298,7 @@ function ProviderCard({
                       href={info.documentationUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
+                      className="text-brand-600 hover:underline"
                     >
                       Installation guide
                     </a>
@@ -310,7 +310,7 @@ function ProviderCard({
                       href={info.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
+                      className="text-brand-600 hover:underline"
                     >
                       {info.name}
                     </a>
@@ -378,7 +378,7 @@ function Tab({ label, active, onClick, icon: Icon }: TabProps) {
       className={cn(
         'flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors',
         active
-          ? 'bg-blue-100 text-blue-700'
+          ? 'bg-brand-100 text-brand-primary'
           : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
       )}
     >
@@ -418,7 +418,7 @@ function PriorityToggle({ enabled, onChange, disabled }: { enabled: boolean; onC
       onClick={() => !disabled && onChange(!enabled)}
       disabled={disabled}
       className={cn(
-        'relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+        'relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:ring-offset-2',
         enabled ? 'bg-blue-600' : 'bg-gray-200',
         disabled && 'opacity-50 cursor-not-allowed'
       )}
@@ -651,7 +651,7 @@ function ProviderPriorityTab({ connectedProviders: _connectedProviders }: Provid
                 })
               }
               disabled={saving}
-              className="w-32 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-32 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
             >
               <option value={1}>1 provider</option>
               <option value={2}>2 providers</option>
@@ -707,7 +707,7 @@ function ProviderPriorityTab({ connectedProviders: _connectedProviders }: Provid
                       )
                     }
                     disabled={saving || availableModels.length === 0}
-                    className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 min-w-[180px]"
+                    className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary disabled:opacity-50 min-w-[180px]"
                   >
                     {availableModels.length === 0 ? (
                       <option value="gemini-2.0-flash">Gemini 2.0 Flash (Default)</option>
@@ -925,7 +925,7 @@ export default function AIProvidersContent() {
             <CloudIcon className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">AI Providers</h2>
+            <h2 className="text-lg font-semibold text-gray-900 font-heading tracking-tight">AI Providers</h2>
             <p className="text-sm text-gray-500">
               Connect AI models and configure provider priorities
             </p>

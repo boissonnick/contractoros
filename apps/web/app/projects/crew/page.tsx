@@ -302,7 +302,7 @@ export default function ProjectsCrewPage() {
               placeholder="Search team members..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
             />
           </div>
 
@@ -312,7 +312,7 @@ export default function ProjectsCrewPage() {
             <select
               value={selectedTimeRange}
               onChange={(e) => setSelectedTimeRange(e.target.value as TimeRange)}
-              className="pl-3 pr-8 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+              className="pl-3 pr-8 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
             >
               <option value="this_week">This Week</option>
               <option value="next_week">Next Week</option>
@@ -326,7 +326,7 @@ export default function ProjectsCrewPage() {
             <select
               value={projectStatusFilter}
               onChange={(e) => setProjectStatusFilter(e.target.value as 'active' | 'all')}
-              className="pl-3 pr-8 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+              className="pl-3 pr-8 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
             >
               <option value="active">Active Projects</option>
               <option value="all">All Projects</option>
@@ -336,10 +336,10 @@ export default function ProjectsCrewPage() {
 
         {/* Summary Stats */}
         <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <Card className="border-l-4 border-l-blue-500">
+          <Card className="border-l-4 border-l-brand-500">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-50 rounded-lg">
-                <UserGroupIcon className="h-5 w-5 text-blue-600" />
+              <div className="p-2 bg-brand-50 rounded-lg">
+                <UserGroupIcon className="h-5 w-5 text-brand-primary" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-gray-900">{filteredMembers.length}</p>
@@ -415,7 +415,7 @@ export default function ProjectsCrewPage() {
         {/* Loading indicator for events */}
         {eventsLoading && (
           <div className="mt-4 flex items-center justify-center py-2">
-            <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2" />
+            <div className="w-5 h-5 border-2 border-brand-primary border-t-transparent rounded-full animate-spin mr-2" />
             <span className="text-sm text-gray-500">Loading schedule data...</span>
           </div>
         )}
@@ -423,7 +423,7 @@ export default function ProjectsCrewPage() {
         {/* Assignment Grid */}
         <Card className="mt-6 overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-            <h3 className="text-sm font-semibold text-gray-900">
+            <h3 className="text-sm font-semibold font-heading tracking-tight text-gray-900">
               Crew vs Project Matrix ({timeRangeLabels[selectedTimeRange]})
             </h3>
             <p className="text-xs text-gray-500 mt-0.5">
@@ -504,7 +504,7 @@ export default function ProjectsCrewPage() {
                               >
                                 <span
                                   className={cn(
-                                    "inline-flex items-center justify-center px-2 py-1 rounded text-xs font-medium cursor-pointer hover:ring-2 hover:ring-blue-300 transition-all",
+                                    "inline-flex items-center justify-center px-2 py-1 rounded text-xs font-medium cursor-pointer hover:ring-2 hover:ring-brand-primary/30 transition-all",
                                     assignment.hours >= 20 ? "bg-green-100 text-green-700" :
                                     assignment.hours >= 8 ? "bg-blue-100 text-blue-700" :
                                     "bg-gray-100 text-gray-700"
@@ -654,7 +654,7 @@ export default function ProjectsCrewPage() {
         <div className="mt-6 text-center text-sm text-gray-500">
           <p>
             Click on hours in the grid to view schedule details. Use the{' '}
-            <Link href="/dashboard/schedule" className="text-blue-600 hover:underline">
+            <Link href="/dashboard/schedule" className="text-brand-600 hover:underline">
               Schedule
             </Link>{' '}
             page to create new assignments.

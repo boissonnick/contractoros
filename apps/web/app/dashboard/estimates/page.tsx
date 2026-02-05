@@ -166,46 +166,46 @@ export default function EstimatesPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="p-4">
+        <Card className="p-4 bg-gradient-to-br from-gray-500/10 to-gray-600/5 border-gray-200/50">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-gray-100 rounded-xl">
+            <div className="p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
               <DocumentTextIcon className="h-5 w-5 text-gray-600" />
             </div>
             <div>
-              <p className="text-2xl font-heading font-bold tracking-tight text-gray-900">{stats.total}</p>
+              <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{stats.total}</p>
               <p className="text-xs text-gray-500">Total Estimates</p>
             </div>
           </div>
         </Card>
-        <Card className="p-4">
+        <Card className="p-4 bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-200/50">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-xl">
+            <div className="p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
               <EnvelopeIcon className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-2xl font-heading font-bold tracking-tight text-gray-900">{stats.sent}</p>
+              <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{stats.sent}</p>
               <p className="text-xs text-gray-500">Pending Response</p>
             </div>
           </div>
         </Card>
-        <Card className="p-4">
+        <Card className="p-4 bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-200/50">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 rounded-xl">
+            <div className="p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
               <CurrencyDollarIcon className="h-5 w-5 text-green-600" />
             </div>
             <div>
-              <p className="text-2xl font-heading font-bold tracking-tight text-gray-900">{formatCurrency(stats.wonValue)}</p>
+              <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{formatCurrency(stats.wonValue)}</p>
               <p className="text-xs text-gray-500">Won Value</p>
             </div>
           </div>
         </Card>
-        <Card className="p-4">
+        <Card className="p-4 bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-200/50">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 rounded-xl">
+            <div className="p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
               <ArrowTrendingUpIcon className="h-5 w-5 text-purple-600" />
             </div>
             <div>
-              <p className="text-2xl font-heading font-bold tracking-tight text-gray-900">{stats.winRate}%</p>
+              <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{stats.winRate}%</p>
               <p className="text-xs text-gray-500">Win Rate</p>
             </div>
           </div>
@@ -221,7 +221,7 @@ export default function EstimatesPage() {
             placeholder="Search estimates..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -229,7 +229,7 @@ export default function EstimatesPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as EstimateStatus | 'all')}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
           >
             <option value="all">All Status</option>
             <option value="draft">Draft</option>

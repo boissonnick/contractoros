@@ -87,7 +87,7 @@ export function EstimateConfidenceCard({
             {onViewDetails && (
               <button
                 onClick={onViewDetails}
-                className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                className="text-xs text-brand-600 hover:text-brand-700 font-medium"
               >
                 View Details
               </button>

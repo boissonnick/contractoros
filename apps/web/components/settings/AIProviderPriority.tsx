@@ -345,7 +345,7 @@ export function FeatureModelSelector({
           value={selectedModel}
           onChange={(e) => onChange(e.target.value, fallbackModel)}
           disabled={disabled}
-          className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+          className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary disabled:opacity-50"
         >
           {availableModels.map((model) => (
             <option key={model.key} value={model.key}>

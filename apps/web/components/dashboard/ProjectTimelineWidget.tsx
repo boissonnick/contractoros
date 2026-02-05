@@ -198,7 +198,7 @@ export default function ProjectTimelineWidget({
         {hasMoreMilestones && (
           <Link
             href="/dashboard/schedule"
-            className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+            className="text-sm text-brand-600 hover:text-brand-700 flex items-center gap-1"
           >
             View All <ArrowRightIcon className="h-3 w-3" />
           </Link>
@@ -231,7 +231,7 @@ export default function ProjectTimelineWidget({
         <div className="p-3 border-t border-gray-100 bg-gray-50">
           <Link
             href="/dashboard/schedule"
-            className="text-sm text-blue-600 hover:text-blue-700 flex items-center justify-center gap-1"
+            className="text-sm text-brand-600 hover:text-brand-700 flex items-center justify-center gap-1"
           >
             View Full Schedule <ArrowRightIcon className="h-3 w-3" />
           </Link>

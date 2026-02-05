@@ -175,7 +175,7 @@ export function Pagination({
               disabled={loading}
               className={cn(
                 'block rounded-md border border-gray-300 bg-white py-1.5 pl-2 pr-8 text-sm',
-                'focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500',
+                'focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary',
                 'transition-colors appearance-none cursor-pointer',
                 "bg-[url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")] bg-[length:1.25rem_1.25rem] bg-[right_0.25rem_center] bg-no-repeat",
                 loading && 'opacity-50 cursor-not-allowed'
@@ -200,7 +200,7 @@ export function Pagination({
           aria-label="Go to previous page"
           className={cn(
             'inline-flex items-center justify-center px-2 py-2 rounded-md text-sm font-medium transition-colors',
-            'focus:outline-none focus:ring-2 focus:ring-blue-500/20',
+            'focus:outline-none focus:ring-2 focus:ring-brand-primary/20',
             hasPrevious && !loading
               ? 'text-gray-700 hover:bg-gray-100'
               : 'text-gray-300 cursor-not-allowed'
@@ -229,9 +229,9 @@ export function Pagination({
                 aria-current={page === currentPage ? 'page' : undefined}
                 className={cn(
                   'inline-flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium transition-colors',
-                  'focus:outline-none focus:ring-2 focus:ring-blue-500/20',
+                  'focus:outline-none focus:ring-2 focus:ring-brand-primary/20',
                   page === currentPage
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-brand-primary text-white'
                     : 'text-gray-700 hover:bg-gray-100'
                 )}
               >
@@ -253,7 +253,7 @@ export function Pagination({
           aria-label="Go to next page"
           className={cn(
             'inline-flex items-center justify-center px-2 py-2 rounded-md text-sm font-medium transition-colors',
-            'focus:outline-none focus:ring-2 focus:ring-blue-500/20',
+            'focus:outline-none focus:ring-2 focus:ring-brand-primary/20',
             hasNext && !loading
               ? 'text-gray-700 hover:bg-gray-100'
               : 'text-gray-300 cursor-not-allowed'
@@ -299,7 +299,7 @@ export function CompactPagination({
         aria-label="Previous page"
         className={cn(
           'flex items-center gap-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
-          'focus:outline-none focus:ring-2 focus:ring-blue-500/20',
+          'focus:outline-none focus:ring-2 focus:ring-brand-primary/20',
           hasPreviousPage && !loading
             ? 'text-gray-700 hover:bg-gray-100'
             : 'text-gray-300 cursor-not-allowed'
@@ -319,7 +319,7 @@ export function CompactPagination({
         aria-label="Next page"
         className={cn(
           'flex items-center gap-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
-          'focus:outline-none focus:ring-2 focus:ring-blue-500/20',
+          'focus:outline-none focus:ring-2 focus:ring-brand-primary/20',
           hasNextPage && !loading
             ? 'text-gray-700 hover:bg-gray-100'
             : 'text-gray-300 cursor-not-allowed'
@@ -444,7 +444,7 @@ export default function LegacyPagination({
                   className={cn(
                     'relative inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors',
                     page === currentPage
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-brand-primary text-white'
                       : 'text-gray-700 hover:bg-gray-50'
                   )}
                 >

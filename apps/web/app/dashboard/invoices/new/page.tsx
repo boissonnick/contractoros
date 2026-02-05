@@ -182,7 +182,7 @@ export default function NewInvoicePage() {
               >
                 <ArrowLeftIcon className="h-5 w-5" />
               </button>
-              <h1 className="text-xl font-semibold text-gray-900">New Invoice</h1>
+              <h1 className="text-xl font-semibold font-heading tracking-tight text-gray-900">New Invoice</h1>
             </div>
             <div className="flex items-center gap-3">
               <Button variant="outline" onClick={() => router.back()}>
@@ -199,7 +199,7 @@ export default function NewInvoicePage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* Invoice Type */}
         <Card className="p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Invoice Type</h2>
+          <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">Invoice Type</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {invoiceTypeOptions.map((type) => (
               <button
@@ -207,7 +207,7 @@ export default function NewInvoicePage() {
                 onClick={() => setInvoice({ ...invoice, type: type.value })}
                 className={`p-4 text-left border rounded-lg transition-colors ${
                   invoice.type === type.value
-                    ? 'border-blue-500 bg-blue-50'
+                    ? 'border-brand-primary bg-brand-100'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
@@ -220,7 +220,7 @@ export default function NewInvoicePage() {
 
         {/* Client & Project Info */}
         <Card className="p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Bill To</h2>
+          <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">Bill To</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -246,7 +246,7 @@ export default function NewInvoicePage() {
                 type="text"
                 value={invoice.clientName || ''}
                 onChange={(e) => setInvoice({ ...invoice, clientName: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20"
               />
             </div>
             <div>
@@ -257,7 +257,7 @@ export default function NewInvoicePage() {
                 type="email"
                 value={invoice.clientEmail || ''}
                 onChange={(e) => setInvoice({ ...invoice, clientEmail: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20"
               />
             </div>
             <div>
@@ -268,7 +268,7 @@ export default function NewInvoicePage() {
                 type="text"
                 value={invoice.projectName || ''}
                 onChange={(e) => setInvoice({ ...invoice, projectName: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20"
               />
             </div>
             <div>
@@ -279,7 +279,7 @@ export default function NewInvoicePage() {
                 type="text"
                 value={invoice.billingAddress || ''}
                 onChange={(e) => setInvoice({ ...invoice, billingAddress: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20"
               />
             </div>
           </div>
@@ -288,7 +288,7 @@ export default function NewInvoicePage() {
         {/* Line Items */}
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Line Items</h2>
+            <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900">Line Items</h2>
             <Button variant="outline" size="sm" onClick={addLineItem}>
               <PlusIcon className="h-4 w-4 mr-1" />
               Add Item
@@ -323,7 +323,7 @@ export default function NewInvoicePage() {
                       value={item.description}
                       onChange={(e) => updateLineItem(index, 'description', e.target.value)}
                       placeholder="Description"
-                      className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+                      className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-brand-primary/20"
                     />
                   </div>
                   <div className="col-span-2">
@@ -331,7 +331,7 @@ export default function NewInvoicePage() {
                       type="number"
                       value={item.quantity}
                       onChange={(e) => updateLineItem(index, 'quantity', parseFloat(e.target.value) || 0)}
-                      className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 text-right"
+                      className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-brand-primary/20 text-right"
                     />
                   </div>
                   <div className="col-span-2">
@@ -342,7 +342,7 @@ export default function NewInvoicePage() {
                         value={item.unitPrice}
                         onChange={(e) => updateLineItem(index, 'unitPrice', parseFloat(e.target.value) || 0)}
                         step="0.01"
-                        className="w-full pl-5 pr-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 text-right"
+                        className="w-full pl-5 pr-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-brand-primary/20 text-right"
                       />
                     </div>
                   </div>
@@ -372,7 +372,7 @@ export default function NewInvoicePage() {
         <div className="grid grid-cols-2 gap-6">
           {/* Payment Terms */}
           <Card className="p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Payment Terms</h2>
+            <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">Payment Terms</h2>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -381,7 +381,7 @@ export default function NewInvoicePage() {
                 <select
                   value={invoice.paymentTerms || 'Net 30'}
                   onChange={(e) => setInvoice({ ...invoice, paymentTerms: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20"
                 >
                   {paymentTermsOptions.map((term) => (
                     <option key={term.value} value={term.value}>{term.value}</option>
@@ -408,7 +408,7 @@ export default function NewInvoicePage() {
                   onChange={(e) => setInvoice({ ...invoice, notes: e.target.value })}
                   placeholder="Additional notes..."
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20"
                 />
               </div>
             </div>
@@ -416,7 +416,7 @@ export default function NewInvoicePage() {
 
           {/* Totals */}
           <Card className="p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Totals</h2>
+            <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">Totals</h2>
             <div className="space-y-3">
               <div className="flex justify-between py-2">
                 <span className="text-gray-600">Subtotal</span>

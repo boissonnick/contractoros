@@ -98,7 +98,7 @@ export function ColumnMapper({
                     <select
                       value={mapping.targetField}
                       onChange={(e) => onMappingChange(mapping.sourceColumn, e.target.value)}
-                      className="w-full text-sm border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full text-sm border-gray-300 rounded-md shadow-sm focus:ring-brand-primary/20 focus:border-brand-primary"
                     >
                       <option value="">-- Skip this column --</option>
                       {/* Show current selection if mapped */}

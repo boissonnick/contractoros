@@ -118,7 +118,7 @@ export default function SignaturesDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">E-Signatures</h1>
+          <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">E-Signatures</h1>
           <p className="text-gray-500 mt-1">
             Track and manage signature requests for your documents
           </p>
@@ -129,55 +129,55 @@ export default function SignaturesDashboard() {
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-gray-100 rounded-lg">
+            <div className="p-2 bg-gray-100 rounded-xl">
               <DocumentTextIcon className="h-5 w-5 text-gray-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+              <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{stats.total}</p>
               <p className="text-xs text-gray-500">Total</p>
             </div>
           </div>
         </Card>
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-yellow-100 rounded-lg">
+            <div className="p-2 bg-yellow-100 rounded-xl">
               <ClockIcon className="h-5 w-5 text-yellow-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{stats.pending}</p>
+              <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{stats.pending}</p>
               <p className="text-xs text-gray-500">Pending</p>
             </div>
           </div>
         </Card>
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 rounded-lg">
+            <div className="p-2 bg-green-100 rounded-xl">
               <CheckCircleIcon className="h-5 w-5 text-green-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{stats.signed}</p>
+              <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{stats.signed}</p>
               <p className="text-xs text-gray-500">Signed</p>
             </div>
           </div>
         </Card>
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-red-100 rounded-lg">
+            <div className="p-2 bg-red-100 rounded-xl">
               <XCircleIcon className="h-5 w-5 text-red-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{stats.declined}</p>
+              <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{stats.declined}</p>
               <p className="text-xs text-gray-500">Declined</p>
             </div>
           </div>
         </Card>
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-orange-100 rounded-lg">
+            <div className="p-2 bg-orange-100 rounded-xl">
               <ExclamationTriangleIcon className="h-5 w-5 text-orange-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{stats.expired}</p>
+              <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{stats.expired}</p>
               <p className="text-xs text-gray-500">Expired</p>
             </div>
           </div>

@@ -260,7 +260,7 @@ export function TimeClockWidget({
             <select
               value={selectedProjectId}
               onChange={(e) => setSelectedProjectId(e.target.value)}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20 sm:text-sm"
             >
               <option value="">No project selected</option>
               {(projects as Project[])
@@ -293,7 +293,7 @@ export function TimeClockWidget({
               }
             }}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              locationEnabled ? 'bg-blue-600' : 'bg-gray-200'
+              locationEnabled ? 'bg-brand-primary' : 'bg-gray-200'
             }`}
           >
             <span

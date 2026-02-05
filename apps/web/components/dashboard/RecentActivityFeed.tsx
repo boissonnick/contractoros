@@ -158,7 +158,7 @@ function FilterPill({
       className={cn(
         'px-3 py-1.5 text-sm font-medium rounded-full transition-all duration-200',
         active
-          ? 'bg-blue-600 text-white shadow-sm'
+          ? 'bg-brand-primary text-white shadow-sm'
           : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
       )}
     >
@@ -233,7 +233,7 @@ function ActivityItem({
               <span className="text-gray-300">|</span>
               <Link
                 href={`/dashboard/projects/${activity.projectId}`}
-                className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1 hover:underline"
+                className="text-xs text-brand-600 hover:text-brand-700 flex items-center gap-1 hover:underline"
                 onClick={(e) => e.stopPropagation()}
               >
                 <FolderIcon className="h-3 w-3" />
@@ -370,7 +370,7 @@ export default function RecentActivityFeed({
           <button
             type="button"
             onClick={() => setActiveFilter('all')}
-            className="mt-2 text-sm text-blue-600 hover:text-blue-700"
+            className="mt-2 text-sm text-brand-600 hover:text-brand-700"
           >
             View all activity
           </button>

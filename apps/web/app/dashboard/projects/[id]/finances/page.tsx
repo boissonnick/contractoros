@@ -136,7 +136,7 @@ export default function ProjectFinancesPage() {
   if (loading || expensesLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -218,7 +218,7 @@ export default function ProjectFinancesPage() {
       {summary.budget > 0 && (
         <Card className="p-5">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-gray-900">Budget Usage</h3>
+            <h3 className="font-semibold text-gray-900 font-heading tracking-tight">Budget Usage</h3>
             <span className={cn(
               'text-sm font-medium',
               summary.budgetUsed > 90 ? 'text-red-600' :
@@ -256,7 +256,7 @@ export default function ProjectFinancesPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Cost Breakdown by Category */}
         <Card className="p-5">
-          <h3 className="font-semibold text-gray-900 mb-4">Cost Breakdown</h3>
+          <h3 className="font-semibold text-gray-900 font-heading tracking-tight mb-4">Cost Breakdown</h3>
           {Object.keys(summary.byCategory).length === 0 ? (
             <p className="text-sm text-gray-400 italic">No expenses recorded yet</p>
           ) : (
@@ -290,7 +290,7 @@ export default function ProjectFinancesPage() {
 
         {/* Payment Summary */}
         <Card className="p-5">
-          <h3 className="font-semibold text-gray-900 mb-4">Payment Summary</h3>
+          <h3 className="font-semibold text-gray-900 font-heading tracking-tight mb-4">Payment Summary</h3>
           <div className="space-y-4">
             <div className="flex items-center justify-between py-2 border-b border-gray-100">
               <span className="text-sm text-gray-600">Contract Value</span>
@@ -329,7 +329,7 @@ export default function ProjectFinancesPage() {
       {/* Recent Expenses */}
       <Card className="p-5">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-gray-900">Recent Expenses</h3>
+          <h3 className="font-semibold text-gray-900 font-heading tracking-tight">Recent Expenses</h3>
           <Button
             variant="outline"
             size="sm"

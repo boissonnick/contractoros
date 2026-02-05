@@ -129,7 +129,7 @@ export default function TaskChecklist({
               onDragEnd={handleDragEnd}
               className={cn(
                 'flex items-center gap-2 p-2 rounded-lg group transition-colors',
-                draggedIndex === index ? 'opacity-50 bg-blue-50' : 'hover:bg-gray-50',
+                draggedIndex === index ? 'opacity-50 bg-brand-50' : 'hover:bg-gray-50',
                 item.isCompleted && 'opacity-60'
               )}
             >
@@ -147,7 +147,7 @@ export default function TaskChecklist({
                   'flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors',
                   item.isCompleted
                     ? 'bg-green-500 border-green-500 text-white'
-                    : 'border-gray-300 hover:border-blue-500'
+                    : 'border-gray-300 hover:border-brand-primary'
                 )}
               >
                 {item.isCompleted && <CheckIcon className="h-3 w-3" />}
@@ -202,7 +202,7 @@ export default function TaskChecklist({
               }
             }}
             placeholder="Add checklist item..."
-            className="flex-1 text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="flex-1 text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-primary/20 focus:border-transparent"
           />
           <Button
             size="sm"

@@ -194,7 +194,7 @@ export default function ProjectDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -298,7 +298,7 @@ export default function ProjectDetailPage() {
       {phases.length > 0 && (
         <Card>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-gray-900">Project Phases</h3>
+            <h3 className="text-sm font-semibold text-gray-900 font-heading tracking-tight">Project Phases</h3>
             <span className="text-xs text-gray-500">
               {phases.filter(p => p.status === 'completed').length} of {phases.length} complete
             </span>
@@ -390,7 +390,7 @@ export default function ProjectDetailPage() {
               <UserGroupIcon className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900">Client Preferences</h3>
+              <h3 className="font-semibold text-gray-900 font-heading tracking-tight">Client Preferences</h3>
               <p className="text-sm text-gray-500">
                 Collect client preferences for finishes, budget, and timeline.
               </p>
@@ -407,7 +407,7 @@ export default function ProjectDetailPage() {
         <Card>
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-semibold text-gray-900">Tasks</h3>
+              <h3 className="font-semibold text-gray-900 font-heading tracking-tight">Tasks</h3>
               <p className="text-sm text-gray-500 mt-0.5">
                 {completedTasks} of {tasks.length} completed
                 {tasks.filter(t => t.status === 'in_progress').length > 0 &&

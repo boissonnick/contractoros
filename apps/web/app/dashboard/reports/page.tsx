@@ -781,7 +781,7 @@ export default function ReportsPage() {
           </div>
           <Link
             href="/dashboard/reports/financial"
-            className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+            className="text-xs text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1"
           >
             View Details <ArrowRightIcon className="h-3 w-3" />
           </Link>

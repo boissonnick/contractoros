@@ -80,7 +80,7 @@ export default function TaskFilters({
           placeholder="Search tasks..."
           value={filters.search}
           onChange={(e) => onChange({ ...filters, search: e.target.value })}
-          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
         />
         {hasActiveFilters && (
           <button
@@ -102,7 +102,7 @@ export default function TaskFilters({
             <select
               value={filters.phaseId}
               onChange={(e) => onChange({ ...filters, phaseId: e.target.value })}
-              className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
             >
               <option value="">All phases</option>
               {phases.map((p) => (
@@ -123,7 +123,7 @@ export default function TaskFilters({
                 className={cn(
                   'px-2 py-0.5 rounded-full text-xs font-medium transition-colors',
                   filters.status.includes(opt.value)
-                    ? 'bg-blue-100 text-blue-700'
+                    ? 'bg-brand-100 text-brand-primary'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 )}
               >
@@ -144,7 +144,7 @@ export default function TaskFilters({
                 className={cn(
                   'px-2 py-0.5 rounded-full text-xs font-medium transition-colors',
                   filters.priority.includes(opt.value)
-                    ? 'bg-blue-100 text-blue-700'
+                    ? 'bg-brand-100 text-brand-primary'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 )}
               >
@@ -166,7 +166,7 @@ export default function TaskFilters({
                   className={cn(
                     'px-2 py-0.5 rounded-full text-xs font-medium transition-colors',
                     filters.assignedTo.includes(m.uid)
-                      ? 'bg-blue-100 text-blue-700'
+                      ? 'bg-brand-100 text-brand-primary'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   )}
                 >
@@ -184,7 +184,7 @@ export default function TaskFilters({
             <select
               value={filters.trade}
               onChange={(e) => onChange({ ...filters, trade: e.target.value })}
-              className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
             >
               <option value="">All trades</option>
               {trades.map((t) => (

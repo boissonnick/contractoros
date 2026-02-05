@@ -379,7 +379,7 @@ export default function ClientsPage() {
                   id="client-page-size"
                   value={pageSize}
                   onChange={(e) => setPageSize(Number(e.target.value))}
-                  className="rounded-md border border-gray-300 bg-white py-1 pl-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  className="rounded-md border border-gray-300 bg-white py-1 pl-2 pr-8 text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                 >
                   {[10, 25, 50].map((size) => (
                     <option key={size} value={size}>{size} per page</option>

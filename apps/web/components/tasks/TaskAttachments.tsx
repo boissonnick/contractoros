@@ -120,7 +120,7 @@ export default function TaskAttachments({
                   href={att.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-blue-500"
+                  className="text-gray-400 hover:text-brand-primary"
                   title="Download"
                 >
                   <ArrowDownTrayIcon className="h-4 w-4" />
@@ -165,7 +165,7 @@ export default function TaskAttachments({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+              className="flex items-center gap-1 text-sm text-brand-600 hover:text-brand-700"
             >
               <PaperClipIcon className="h-3.5 w-3.5" />
               Attach files

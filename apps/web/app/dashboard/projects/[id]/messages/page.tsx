@@ -233,7 +233,7 @@ function NewChannelModal({
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl max-w-md w-full shadow-xl">
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">New Channel</h2>
+          <h2 className="text-lg font-semibold text-gray-900 font-heading tracking-tight">New Channel</h2>
           <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg">
             <XMarkIcon className="h-5 w-5 text-gray-500" />
           </button>
@@ -249,7 +249,7 @@ function NewChannelModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., General, Client Updates, Sub Coordination"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
               autoFocus
             />
           </div>
@@ -269,7 +269,7 @@ function NewChannelModal({
                     className={cn(
                       'flex items-center gap-2 p-3 rounded-lg border text-left transition-colors',
                       type === key
-                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        ? 'border-brand-primary bg-brand-50 text-brand-700'
                         : 'border-gray-200 hover:border-gray-300 text-gray-700'
                     )}
                   >
@@ -328,7 +328,7 @@ function MessageBubble({
           className={cn(
             'px-3 py-2 rounded-xl text-sm inline-block whitespace-pre-wrap break-words',
             isOwn
-              ? 'bg-blue-600 text-white rounded-tr-sm'
+              ? 'bg-brand-primary text-white rounded-tr-sm'
               : 'bg-gray-100 text-gray-900 rounded-tl-sm'
           )}
         >
@@ -447,7 +447,7 @@ export default function ProjectMessagesPage() {
   if (channelsLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -462,7 +462,7 @@ export default function ProjectMessagesPage() {
             <h3 className="font-semibold text-gray-900 text-sm">Channels</h3>
             <button
               onClick={() => setShowNewChannel(true)}
-              className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              className="p-1.5 text-gray-400 hover:text-brand-primary hover:bg-brand-50 rounded-lg transition-colors"
               title="New channel"
             >
               <PlusIcon className="h-4 w-4" />
@@ -476,7 +476,7 @@ export default function ProjectMessagesPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search channels..."
-                className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-primary/20"
               />
             </div>
           )}
@@ -513,7 +513,7 @@ export default function ProjectMessagesPage() {
                   className={cn(
                     'w-full text-left px-3 py-2.5 rounded-lg transition-colors',
                     activeChannelId === channel.id
-                      ? 'bg-blue-50 text-blue-700'
+                      ? 'bg-brand-100 text-brand-primary'
                       : 'text-gray-700 hover:bg-gray-50'
                   )}
                 >
@@ -561,7 +561,7 @@ export default function ProjectMessagesPage() {
               <div className="flex items-center gap-2">
                 {channelConfig && <channelConfig.icon className="h-5 w-5 text-gray-400" />}
                 <div>
-                  <h3 className="font-semibold text-gray-900">{activeChannel.name}</h3>
+                  <h3 className="font-semibold text-gray-900 font-heading tracking-tight">{activeChannel.name}</h3>
                   <p className="text-xs text-gray-400">
                     {activeChannel.participantIds.length} participant{activeChannel.participantIds.length !== 1 ? 's' : ''}
                     {channelConfig && ` \u00b7 ${channelConfig.description}`}
@@ -574,7 +574,7 @@ export default function ProjectMessagesPage() {
             <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 bg-gray-50">
               {messagesLoading ? (
                 <div className="flex items-center justify-center h-32">
-                  <div className="w-6 h-6 border-3 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-6 h-6 border-3 border-brand-primary border-t-transparent rounded-full animate-spin" />
                 </div>
               ) : messages.length === 0 ? (
                 <div className="text-center py-12 text-gray-400">
@@ -614,7 +614,7 @@ export default function ProjectMessagesPage() {
                       handleSend();
                     }
                   }}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                   placeholder={`Message ${activeChannel.name}...`}
                 />
                 <Button

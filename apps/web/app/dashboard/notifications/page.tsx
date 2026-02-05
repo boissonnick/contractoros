@@ -72,7 +72,7 @@ export default function NotificationsPage() {
     <div className="p-6 max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
+          <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">Notifications</h1>
           <p className="text-gray-500 mt-1">
             {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up'}
           </p>
@@ -91,7 +91,7 @@ export default function NotificationsPage() {
           onClick={() => setFilter('all')}
           className={cn(
             'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
-            filter === 'all' ? 'bg-blue-50 text-blue-600' : 'text-gray-500 hover:bg-gray-100'
+            filter === 'all' ? 'bg-brand-50 text-brand-primary' : 'text-gray-500 hover:bg-gray-100'
           )}
         >
           All
@@ -100,7 +100,7 @@ export default function NotificationsPage() {
           onClick={() => setFilter('unread')}
           className={cn(
             'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
-            filter === 'unread' ? 'bg-blue-50 text-blue-600' : 'text-gray-500 hover:bg-gray-100'
+            filter === 'unread' ? 'bg-brand-50 text-brand-primary' : 'text-gray-500 hover:bg-gray-100'
           )}
         >
           Unread ({unreadCount})

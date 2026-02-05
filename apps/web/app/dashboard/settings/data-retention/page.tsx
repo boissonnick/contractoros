@@ -154,7 +154,7 @@ export default function DataRetentionPage() {
     return (
       <div className="flex flex-col items-center justify-center py-16">
         <ShieldCheckIcon className="h-16 w-16 text-gray-300 mb-4" />
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">Access Restricted</h2>
+        <h2 className="text-xl font-semibold text-gray-900 font-heading tracking-tight mb-2">Access Restricted</h2>
         <p className="text-gray-500 text-center max-w-md">
           Data retention settings are only accessible to organization owners for security
           and compliance purposes.
@@ -169,7 +169,7 @@ export default function DataRetentionPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">Data Retention</h2>
+            <h2 className="text-lg font-semibold text-gray-900 font-heading tracking-tight">Data Retention</h2>
             <p className="text-sm text-gray-500">
               Configure how long different types of data are retained before cleanup.
             </p>
@@ -199,12 +199,12 @@ export default function DataRetentionPage() {
         </div>
 
         {/* Summary Banner */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="bg-brand-100/50 border border-brand-200 rounded-lg p-4">
           <div className="flex items-start gap-3">
-            <ClockIcon className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <ClockIcon className="h-5 w-5 text-brand-primary flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-blue-800">Data Retention Overview</p>
-              <p className="text-sm text-blue-700 mt-1">
+              <p className="text-sm font-medium text-brand-800">Data Retention Overview</p>
+              <p className="text-sm text-brand-700 mt-1">
                 {enabledCount === 0 ? (
                   'No retention policies are currently active. Enable policies below to automatically manage data lifecycle.'
                 ) : (
@@ -269,7 +269,7 @@ export default function DataRetentionPage() {
         {/* Loading State */}
         {loading && policies.length === 0 ? (
           <div className="flex items-center justify-center py-16">
-            <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
           /* Policy List */
@@ -395,7 +395,7 @@ function RetentionPolicyCard({
   };
 
   return (
-    <Card className={cn('overflow-hidden', policy.enabled && 'ring-2 ring-blue-200')}>
+    <Card className={cn('overflow-hidden', policy.enabled && 'ring-2 ring-brand-200')}>
       {/* Header */}
       <div className="p-4">
         <div className="flex items-start justify-between gap-4">
@@ -404,11 +404,11 @@ function RetentionPolicyCard({
             <div
               className={cn(
                 'p-2 rounded-lg flex-shrink-0',
-                policy.enabled ? 'bg-blue-100' : 'bg-gray-100'
+                policy.enabled ? 'bg-brand-100' : 'bg-gray-100'
               )}
             >
               <ResourceIcon
-                className={cn('h-5 w-5', policy.enabled ? 'text-blue-600' : 'text-gray-500')}
+                className={cn('h-5 w-5', policy.enabled ? 'text-brand-primary' : 'text-gray-500')}
               />
             </div>
 
@@ -468,8 +468,8 @@ function RetentionPolicyCard({
               onClick={onToggle}
               disabled={updating}
               className={cn(
-                'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
-                policy.enabled ? 'bg-blue-600' : 'bg-gray-200',
+                'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:ring-offset-2',
+                policy.enabled ? 'bg-brand-primary' : 'bg-gray-200',
                 updating && 'opacity-50 cursor-not-allowed'
               )}
             >
@@ -519,7 +519,7 @@ function RetentionPolicyCard({
                       onLoadPreview(days);
                     }}
                     className={cn(
-                      'w-full px-3 py-2 border rounded-lg text-sm',
+                      'w-full px-3 py-2 border rounded-xl text-sm',
                       validationError ? 'border-red-300' : 'border-gray-300'
                     )}
                   />
@@ -545,7 +545,7 @@ function RetentionPolicyCard({
                         action: e.target.value as RetentionAction,
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm"
                   >
                     {(Object.keys(RETENTION_ACTION_LABELS) as RetentionAction[]).map(
                       (action) => (
@@ -631,7 +631,7 @@ function RetentionPolicyCard({
               {/* Compliance Notes */}
               {compliance.notes && (
                 <div className="flex items-start gap-2 text-sm">
-                  <InformationCircleIcon className="h-4 w-4 text-blue-500 flex-shrink-0 mt-0.5" />
+                  <InformationCircleIcon className="h-4 w-4 text-brand-primary flex-shrink-0 mt-0.5" />
                   <p className="text-gray-600">{compliance.notes}</p>
                 </div>
               )}

@@ -27,7 +27,7 @@ export default function TaskListToolbar({
         <select
           value={groupBy}
           onChange={(e) => onGroupByChange(e.target.value as GroupBy)}
-          className="border border-gray-300 rounded-md px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-gray-300 rounded-md px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
         >
           <option value="phase">Phase</option>
           <option value="status">Status</option>
@@ -41,7 +41,7 @@ export default function TaskListToolbar({
         <select
           value={sortBy}
           onChange={(e) => onSortByChange(e.target.value as SortBy)}
-          className="border border-gray-300 rounded-md px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-gray-300 rounded-md px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
         >
           <option value="dueDate">Due Date</option>
           <option value="priority">Priority</option>

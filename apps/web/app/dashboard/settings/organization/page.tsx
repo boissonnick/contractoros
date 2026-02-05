@@ -276,7 +276,7 @@ export default function OrganizationSettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -340,7 +340,7 @@ export default function OrganizationSettingsPage() {
                 <img src={logoPreview} alt="Logo" className="h-12 max-w-[120px] object-contain" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-gray-600 truncate">{logoFile ? logoFile.name : 'Current logo'}</p>
-                  <button onClick={() => fileInputRef.current?.click()} className="text-xs text-blue-600 hover:underline">
+                  <button onClick={() => fileInputRef.current?.click()} className="text-xs text-brand-600 hover:underline">
                     Change
                   </button>
                 </div>
@@ -352,7 +352,7 @@ export default function OrganizationSettingsPage() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full border-2 border-dashed border-gray-200 rounded-lg p-4 flex items-center gap-3 hover:border-blue-400 hover:bg-blue-50/50 transition-colors"
+                className="w-full border-2 border-dashed border-gray-200 rounded-lg p-4 flex items-center gap-3 hover:border-brand-primary hover:bg-brand-100/50 transition-colors"
               >
                 <CloudArrowUpIcon className="h-6 w-6 text-gray-300" />
                 <div className="text-left">
@@ -365,7 +365,7 @@ export default function OrganizationSettingsPage() {
             {uploadProgress > 0 && uploadProgress < 100 && (
               <div className="mt-2">
                 <div className="w-full bg-gray-200 rounded-full h-1.5">
-                  <div className="bg-blue-600 h-1.5 rounded-full transition-all" style={{ width: `${uploadProgress}%` }} />
+                  <div className="bg-brand-primary h-1.5 rounded-full transition-all" style={{ width: `${uploadProgress}%` }} />
                 </div>
               </div>
             )}
@@ -434,7 +434,7 @@ export default function OrganizationSettingsPage() {
               <select
                 value={fiscalStartMonth}
                 onChange={(e) => setFiscalStartMonth(Number(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
               >
                 <option value={1}>January</option>
                 <option value={2}>February</option>
@@ -455,7 +455,7 @@ export default function OrganizationSettingsPage() {
               <select
                 value={fiscalStartDay}
                 onChange={(e) => setFiscalStartDay(Number(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
               >
                 {Array.from({ length: 28 }, (_, i) => i + 1).map((day) => (
                   <option key={day} value={day}>{day}</option>
@@ -477,7 +477,7 @@ export default function OrganizationSettingsPage() {
               <select
                 value={payrollFrequency}
                 onChange={(e) => setPayrollFrequency(e.target.value as PayrollPeriodConfig['frequency'])}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
               >
                 <option value="weekly">Weekly</option>
                 <option value="biweekly">Bi-weekly</option>
@@ -492,7 +492,7 @@ export default function OrganizationSettingsPage() {
               <select
                 value={payrollStartDay}
                 onChange={(e) => setPayrollStartDay(Number(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
               >
                 {payrollFrequency === 'weekly' || payrollFrequency === 'biweekly' ? (
                   <>
@@ -519,7 +519,7 @@ export default function OrganizationSettingsPage() {
                 max={14}
                 value={payDateOffset}
                 onChange={(e) => setPayDateOffset(Number(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
               />
             </div>
           </div>
@@ -534,7 +534,7 @@ export default function OrganizationSettingsPage() {
               <select
                 value={taxEntityType}
                 onChange={(e) => setTaxEntityType(e.target.value as TaxConfig['entityType'])}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
               >
                 <option value="sole_proprietor">Sole Proprietor</option>
                 <option value="llc">LLC</option>
@@ -551,7 +551,7 @@ export default function OrganizationSettingsPage() {
                 onChange={(e) => setTaxState(e.target.value)}
                 placeholder="e.g., TX, CA, NY"
                 maxLength={2}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 uppercase"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary uppercase"
               />
             </div>
             <div className="grid grid-cols-3 gap-2">
@@ -564,7 +564,7 @@ export default function OrganizationSettingsPage() {
                   step={0.1}
                   value={federalTaxRate}
                   onChange={(e) => setFederalTaxRate(Number(e.target.value))}
-                  className="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-2 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                 />
               </div>
               <div>
@@ -576,7 +576,7 @@ export default function OrganizationSettingsPage() {
                   step={0.1}
                   value={stateTaxRate}
                   onChange={(e) => setStateTaxRate(Number(e.target.value))}
-                  className="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-2 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                 />
               </div>
               <div>
@@ -588,7 +588,7 @@ export default function OrganizationSettingsPage() {
                   step={0.1}
                   value={localTaxRate}
                   onChange={(e) => setLocalTaxRate(Number(e.target.value))}
-                  className="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-2 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                 />
               </div>
             </div>
@@ -600,7 +600,7 @@ export default function OrganizationSettingsPage() {
                 onChange={(e) => setTaxIdEin(e.target.value)}
                 placeholder="XX-XXXXXXX (optional)"
                 maxLength={20}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
               />
               <p className="text-xs text-gray-400 mt-1">Displayed on invoices</p>
             </div>
@@ -621,7 +621,7 @@ export default function OrganizationSettingsPage() {
                 value={legalName}
                 onChange={(e) => setLegalName(e.target.value)}
                 placeholder="Full legal business name"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -632,7 +632,7 @@ export default function OrganizationSettingsPage() {
                   value={dba}
                   onChange={(e) => setDba(e.target.value)}
                   placeholder="Doing Business As"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                 />
               </div>
               <div>
@@ -643,7 +643,7 @@ export default function OrganizationSettingsPage() {
                   onChange={(e) => setEin(e.target.value)}
                   placeholder="XX-XXXXXXX"
                   maxLength={10}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                 />
               </div>
             </div>
@@ -652,7 +652,7 @@ export default function OrganizationSettingsPage() {
               <select
                 value={businessType}
                 onChange={(e) => setBusinessType(e.target.value as BusinessType)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
               >
                 <option value="sole_prop">Sole Proprietorship</option>
                 <option value="llc">LLC</option>
@@ -668,7 +668,7 @@ export default function OrganizationSettingsPage() {
                 value={businessStreet}
                 onChange={(e) => setBusinessStreet(e.target.value)}
                 placeholder="Street address"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-2"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary mb-2"
               />
               <div className="grid grid-cols-3 gap-2">
                 <input
@@ -676,7 +676,7 @@ export default function OrganizationSettingsPage() {
                   value={businessCity}
                   onChange={(e) => setBusinessCity(e.target.value)}
                   placeholder="City"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                 />
                 <input
                   type="text"
@@ -684,7 +684,7 @@ export default function OrganizationSettingsPage() {
                   onChange={(e) => setBusinessState(e.target.value)}
                   placeholder="State"
                   maxLength={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 uppercase"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary uppercase"
                 />
                 <input
                   type="text"
@@ -692,7 +692,7 @@ export default function OrganizationSettingsPage() {
                   onChange={(e) => setBusinessZip(e.target.value)}
                   placeholder="ZIP"
                   maxLength={10}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                 />
               </div>
             </div>
@@ -714,7 +714,7 @@ export default function OrganizationSettingsPage() {
                   value={stateUnemploymentRate}
                   onChange={(e) => setStateUnemploymentRate(Number(e.target.value))}
                   placeholder="e.g., 2.7"
-                  className="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-2 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                 />
               </div>
               <div>
@@ -727,7 +727,7 @@ export default function OrganizationSettingsPage() {
                   value={futaRate}
                   onChange={(e) => setFutaRate(Number(e.target.value))}
                   placeholder="e.g., 0.6"
-                  className="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-2 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                 />
               </div>
               <div>
@@ -740,7 +740,7 @@ export default function OrganizationSettingsPage() {
                   value={workersCompRate}
                   onChange={(e) => setWorkersCompRate(Number(e.target.value))}
                   placeholder="Per $100"
-                  className="w-full px-2 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-2 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                 />
               </div>
             </div>
@@ -754,7 +754,7 @@ export default function OrganizationSettingsPage() {
                 onChange={(e) => setWorkersCompClass(e.target.value)}
                 placeholder="e.g., 5403 (Carpentry)"
                 maxLength={10}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
               />
             </div>
 
@@ -768,7 +768,7 @@ export default function OrganizationSettingsPage() {
                     value={glProvider}
                     onChange={(e) => setGlProvider(e.target.value)}
                     placeholder="Insurance company"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                   />
                 </div>
                 <div>
@@ -778,7 +778,7 @@ export default function OrganizationSettingsPage() {
                     value={glPolicyNumber}
                     onChange={(e) => setGlPolicyNumber(e.target.value)}
                     placeholder="Policy number"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                   />
                 </div>
               </div>
@@ -790,7 +790,7 @@ export default function OrganizationSettingsPage() {
                     value={wcProvider}
                     onChange={(e) => setWcProvider(e.target.value)}
                     placeholder="Insurance company"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                   />
                 </div>
                 <div>
@@ -800,7 +800,7 @@ export default function OrganizationSettingsPage() {
                     value={wcPolicyNumber}
                     onChange={(e) => setWcPolicyNumber(e.target.value)}
                     placeholder="Policy number"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                   />
                 </div>
               </div>
@@ -833,8 +833,8 @@ export default function OrganizationSettingsPage() {
           <button
             type="button"
             onClick={() => setAiContributionEnabled(!aiContributionEnabled)}
-            className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-              aiContributionEnabled ? 'bg-blue-600' : 'bg-gray-200'
+            className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:ring-offset-2 ${
+              aiContributionEnabled ? 'bg-brand-primary' : 'bg-gray-200'
             }`}
           >
             <span
@@ -862,7 +862,7 @@ export default function OrganizationSettingsPage() {
             </div>
             <div className="flex-1">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-lg font-semibold text-gray-900">Demo Data</h3>
+                <h3 className="text-lg font-semibold text-gray-900 font-heading tracking-tight">Demo Data</h3>
                 {/* Status indicator */}
                 {checkingDemoData ? (
                   <span className="text-xs text-gray-500 flex items-center gap-1">

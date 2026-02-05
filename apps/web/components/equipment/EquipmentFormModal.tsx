@@ -161,7 +161,7 @@ export function EquipmentFormModal({
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
                 placeholder="e.g., DeWalt 20V Drill"
               />
             </div>
@@ -176,7 +176,7 @@ export function EquipmentFormModal({
                 value={formData.category}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
               >
                 {CATEGORY_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -196,7 +196,7 @@ export function EquipmentFormModal({
                 name="serialNumber"
                 value={formData.serialNumber}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
                 placeholder="e.g., DW-12345-ABC"
               />
             </div>
@@ -211,7 +211,7 @@ export function EquipmentFormModal({
                 name="purchaseDate"
                 value={formData.purchaseDate}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
               />
             </div>
 
@@ -228,7 +228,7 @@ export function EquipmentFormModal({
                   onChange={handleChange}
                   min="0"
                   step="0.01"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
                   placeholder="$0.00"
                 />
               </div>
@@ -243,7 +243,7 @@ export function EquipmentFormModal({
                   onChange={handleChange}
                   min="0"
                   step="0.01"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
                   placeholder="$0.00"
                 />
               </div>
@@ -258,7 +258,7 @@ export function EquipmentFormModal({
                 name="maintenanceSchedule"
                 value={formData.maintenanceSchedule}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
               >
                 <option value="">No schedule</option>
                 {MAINTENANCE_SCHEDULE_OPTIONS.map((opt) => (
@@ -279,7 +279,7 @@ export function EquipmentFormModal({
                 value={formData.description}
                 onChange={handleChange}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
                 placeholder="Additional details about the equipment..."
               />
             </div>

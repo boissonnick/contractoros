@@ -120,7 +120,7 @@ function PerformerCard({ title, icon, projects, type, emptyMessage }: PerformerC
   return (
     <Card className={cn('p-4 border-2', bgColor)}>
       <div className="flex items-center gap-2 mb-4">
-        <div className={cn('p-2 rounded-lg', type === 'best' ? 'bg-green-100' : 'bg-red-100')}>
+        <div className={cn('p-2 rounded-xl', type === 'best' ? 'bg-green-100' : 'bg-red-100')}>
           <div className={cn('h-5 w-5', iconColor)}>{icon}</div>
         </div>
         <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
@@ -403,7 +403,7 @@ export default function BenchmarkingPage() {
               <p className="mt-1 text-2xl font-semibold text-gray-900">{benchmarkData.totalProjects}</p>
               <p className="mt-1 text-xs text-gray-500">With revenue or budget data</p>
             </div>
-            <div className="p-2 bg-blue-50 rounded-lg">
+            <div className="p-2 bg-blue-50 rounded-xl">
               <ChartBarIcon className="h-5 w-5 text-blue-600" />
             </div>
           </div>
@@ -422,7 +422,7 @@ export default function BenchmarkingPage() {
               />
             </div>
             <div className={cn(
-              'p-2 rounded-lg',
+              'p-2 rounded-xl',
               benchmarkData.avgMargin >= 20 ? 'bg-green-50' : 'bg-amber-50'
             )}>
               <ArrowTrendingUpIcon className={cn(
@@ -446,7 +446,7 @@ export default function BenchmarkingPage() {
               />
             </div>
             <div className={cn(
-              'p-2 rounded-lg',
+              'p-2 rounded-xl',
               benchmarkData.avgBudgetAccuracy >= 85 ? 'bg-green-50' : 'bg-amber-50'
             )}>
               <CheckCircleIcon className={cn(
@@ -495,7 +495,7 @@ export default function BenchmarkingPage() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as 'margin' | 'revenue' | 'variance')}
-              className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-blue-500 focus:border-blue-500"
+              className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-brand-primary/20 focus:border-brand-primary"
             >
               <option value="margin">Sort by Margin</option>
               <option value="revenue">Sort by Revenue</option>

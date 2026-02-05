@@ -55,7 +55,7 @@ export function ActivityFeed() {
                   <span className="text-gray-300">·</span>
                   <Link
                     href={`/dashboard/projects/${activity.projectId}`}
-                    className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                    className="text-xs text-brand-600 hover:text-brand-700 flex items-center gap-1"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <FolderIcon className="h-3 w-3" />

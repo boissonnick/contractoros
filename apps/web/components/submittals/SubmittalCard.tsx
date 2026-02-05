@@ -215,7 +215,7 @@ export function SubmittalCard({
           {onReview && isActionable && (
             <button
               onClick={() => onReview(submittal)}
-              className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 px-2 py-1 rounded hover:bg-blue-50 transition-colors"
+              className="inline-flex items-center gap-1 text-xs font-medium text-brand-600 hover:text-brand-700 px-2 py-1 rounded hover:bg-brand-50 transition-colors"
             >
               <CheckCircleIcon className="h-3.5 w-3.5" />
               Review

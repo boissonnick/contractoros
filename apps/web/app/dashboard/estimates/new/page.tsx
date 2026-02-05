@@ -106,7 +106,7 @@ function LineItemRow({ item, onChange, onDelete, onMoveUp, onMoveDown, isFirst, 
             value={item.name}
             onChange={(e) => updateField('name', e.target.value)}
             placeholder="Item name"
-            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-brand-primary/20"
           />
           <input
             type="text"
@@ -120,7 +120,7 @@ function LineItemRow({ item, onChange, onDelete, onMoveUp, onMoveDown, isFirst, 
           <select
             value={item.category || ''}
             onChange={(e) => updateField('category', e.target.value)}
-            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-brand-primary/20"
           >
             <option value="">Category</option>
             {categoryOptions.map((cat) => (
@@ -134,14 +134,14 @@ function LineItemRow({ item, onChange, onDelete, onMoveUp, onMoveDown, isFirst, 
             value={item.quantity}
             onChange={(e) => updateField('quantity', parseFloat(e.target.value) || 0)}
             placeholder="Qty"
-            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 text-right"
+            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-brand-primary/20 text-right"
           />
         </div>
         <div className="col-span-1">
           <select
             value={item.unit}
             onChange={(e) => updateField('unit', e.target.value)}
-            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
+            className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-brand-primary/20"
           >
             {unitOptions.map((unit) => (
               <option key={unit.value} value={unit.value}>{unit.label}</option>
@@ -157,7 +157,7 @@ function LineItemRow({ item, onChange, onDelete, onMoveUp, onMoveDown, isFirst, 
               onChange={(e) => updateField('unitCost', parseFloat(e.target.value) || 0)}
               placeholder="Unit cost"
               step="0.01"
-              className="w-full pl-5 pr-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 text-right"
+              className="w-full pl-5 pr-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-brand-primary/20 text-right"
             />
           </div>
         </div>
@@ -328,7 +328,7 @@ export default function NewEstimatePage() {
               >
                 <ArrowLeftIcon className="h-5 w-5" />
               </button>
-              <h1 className="text-xl font-semibold text-gray-900">New Estimate</h1>
+              <h1 className="text-xl font-semibold font-heading tracking-tight text-gray-900">New Estimate</h1>
             </div>
             <div className="flex items-center gap-3">
               <Button variant="outline" onClick={() => router.back()}>
@@ -348,7 +348,7 @@ export default function NewEstimatePage() {
           <div className="col-span-2 space-y-6">
             {/* Basic Info */}
             <Card className="p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Estimate Details</h2>
+              <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">Estimate Details</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -375,7 +375,7 @@ export default function NewEstimatePage() {
                     value={estimate.name || ''}
                     onChange={(e) => setEstimate({ ...estimate, name: e.target.value })}
                     placeholder="e.g., Kitchen Remodel - Smith Residence"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                   />
                 </div>
                 <div>
@@ -387,7 +387,7 @@ export default function NewEstimatePage() {
                     value={estimate.projectName || ''}
                     onChange={(e) => setEstimate({ ...estimate, projectName: e.target.value })}
                     placeholder="Project name"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                   />
                 </div>
                 <div>
@@ -399,7 +399,7 @@ export default function NewEstimatePage() {
                     value={estimate.projectAddress || ''}
                     onChange={(e) => setEstimate({ ...estimate, projectAddress: e.target.value })}
                     placeholder="Address"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                   />
                 </div>
               </div>
@@ -407,7 +407,7 @@ export default function NewEstimatePage() {
 
             {/* Client Info */}
             <Card className="p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Client Information</h2>
+              <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">Client Information</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -418,7 +418,7 @@ export default function NewEstimatePage() {
                     value={estimate.clientName || ''}
                     onChange={(e) => setEstimate({ ...estimate, clientName: e.target.value })}
                     placeholder="John Smith"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                   />
                 </div>
                 <div>
@@ -430,7 +430,7 @@ export default function NewEstimatePage() {
                     value={estimate.clientEmail || ''}
                     onChange={(e) => setEstimate({ ...estimate, clientEmail: e.target.value })}
                     placeholder="client@email.com"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                   />
                 </div>
                 <div>
@@ -442,7 +442,7 @@ export default function NewEstimatePage() {
                     value={estimate.clientPhone || ''}
                     onChange={(e) => setEstimate({ ...estimate, clientPhone: e.target.value })}
                     placeholder="(555) 123-4567"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                   />
                 </div>
                 <div>
@@ -454,7 +454,7 @@ export default function NewEstimatePage() {
                     value={estimate.clientAddress || ''}
                     onChange={(e) => setEstimate({ ...estimate, clientAddress: e.target.value })}
                     placeholder="123 Main St, City, State"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                   />
                 </div>
               </div>
@@ -463,7 +463,7 @@ export default function NewEstimatePage() {
             {/* Line Items */}
             <Card className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">Line Items</h2>
+                <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900">Line Items</h2>
                 <Button variant="outline" size="sm" onClick={addLineItem}>
                   <PlusIcon className="h-4 w-4 mr-1" />
                   Add Item
@@ -517,7 +517,7 @@ export default function NewEstimatePage() {
 
             {/* Scope of Work */}
             <Card className="p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Scope & Terms</h2>
+              <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">Scope & Terms</h2>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -528,7 +528,7 @@ export default function NewEstimatePage() {
                     onChange={(e) => setEstimate({ ...estimate, scopeOfWork: e.target.value })}
                     placeholder="Describe the work to be performed..."
                     rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                   />
                 </div>
                 <div>
@@ -540,7 +540,7 @@ export default function NewEstimatePage() {
                     onChange={(e) => setEstimate({ ...estimate, exclusions: e.target.value })}
                     placeholder="Items not included in this estimate..."
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                   />
                 </div>
                 <div>
@@ -552,7 +552,7 @@ export default function NewEstimatePage() {
                     onChange={(e) => setEstimate({ ...estimate, notes: e.target.value })}
                     placeholder="Additional notes or clarifications..."
                     rows={2}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                   />
                 </div>
               </div>
@@ -563,7 +563,7 @@ export default function NewEstimatePage() {
           <div className="space-y-6">
             {/* Totals */}
             <Card className="p-6 sticky top-24">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4 flex items-center gap-2">
                 <CurrencyDollarIcon className="h-5 w-5" />
                 Pricing
               </h2>
@@ -613,7 +613,7 @@ export default function NewEstimatePage() {
                 <select
                   value={estimate.paymentTerms || 'Net 30'}
                   onChange={(e) => setEstimate({ ...estimate, paymentTerms: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                 >
                   <option value="Due on Receipt">Due on Receipt</option>
                   <option value="Net 15">Net 15</option>
@@ -659,7 +659,7 @@ export default function NewEstimatePage() {
                   type="date"
                   value={estimate.validUntil ? new Date(estimate.validUntil).toISOString().split('T')[0] : ''}
                   onChange={(e) => setEstimate({ ...estimate, validUntil: new Date(e.target.value) })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                 />
               </div>
             </Card>

@@ -206,14 +206,14 @@ export function SowTemplatesTab() {
                   value={item.title}
                   onChange={(e) => updateItem(items, index, 'title', e.target.value, setter)}
                   placeholder="Item title (e.g., Demo existing kitchen)"
-                  className="w-full text-sm px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full text-sm px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-transparent"
                 />
                 <textarea
                   value={item.description || ''}
                   onChange={(e) => updateItem(items, index, 'description', e.target.value, setter)}
                   placeholder="Description of work..."
                   rows={2}
-                  className="w-full text-sm px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  className="w-full text-sm px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-transparent resize-none"
                 />
                 <div className="grid grid-cols-3 gap-2">
                   <div>
@@ -282,7 +282,7 @@ export function SowTemplatesTab() {
 
       <button
         onClick={() => addItem(items, setter)}
-        className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+        className="flex items-center gap-1 text-sm text-brand-600 hover:text-brand-700"
       >
         <PlusIcon className="h-4 w-4" />
         Add Scope Item
@@ -308,7 +308,7 @@ export function SowTemplatesTab() {
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             placeholder="e.g., Kitchen Remodel"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-transparent"
           />
         </div>
         <div>
@@ -316,7 +316,7 @@ export function SowTemplatesTab() {
           <select
             value={form.projectType}
             onChange={(e) => setForm({ ...form, projectType: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-transparent"
           >
             {PROJECT_TYPES.map((type) => (
               <option key={type.value} value={type.value}>{type.label}</option>
@@ -332,7 +332,7 @@ export function SowTemplatesTab() {
           onChange={(e) => setForm({ ...form, description: e.target.value })}
           placeholder="Brief description of what this template covers..."
           rows={2}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-transparent resize-none"
         />
       </div>
 

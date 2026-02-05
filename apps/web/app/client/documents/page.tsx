@@ -129,7 +129,7 @@ export default function ClientDocumentsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search documents..."
-            className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm"
+            className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-xl text-sm"
           />
         </div>
         <div className="flex gap-1">
@@ -192,7 +192,7 @@ export default function ClientDocumentsPage() {
                         href={doc.fileURL}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-2 text-gray-400 hover:text-blue-600"
+                        className="p-2 text-gray-400 hover:text-brand-600"
                       >
                         <ArrowDownTrayIcon className="h-4 w-4" />
                       </a>

@@ -47,7 +47,7 @@ function Toggle({ label, description, checked, onChange, disabled }: ToggleProps
         className={cn(
           'relative w-11 h-6 rounded-full transition-colors',
           disabled && 'opacity-50 cursor-not-allowed',
-          checked ? 'bg-blue-600' : 'bg-gray-300'
+          checked ? 'bg-brand-primary' : 'bg-gray-300'
         )}
       >
         <span className={cn(
@@ -228,7 +228,7 @@ export default function NotificationSettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -240,7 +240,7 @@ export default function NotificationSettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-gray-900">Notification Preferences</h2>
+        <h2 className="text-lg font-semibold text-gray-900 font-heading tracking-tight">Notification Preferences</h2>
         <p className="text-sm text-gray-500">Control how and when you receive notifications</p>
       </div>
 
@@ -311,8 +311,8 @@ export default function NotificationSettingsPage() {
               onClick={handleRequestPermission}
               disabled={isRequesting}
               className={cn(
-                "px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg",
-                "hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+                "px-4 py-2 text-sm font-medium text-white bg-brand-primary rounded-xl",
+                "hover:bg-brand-900 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:ring-offset-2",
                 "disabled:opacity-50 disabled:cursor-not-allowed",
                 "transition-colors"
               )}
@@ -325,8 +325,8 @@ export default function NotificationSettingsPage() {
             <button
               onClick={handleTestNotification}
               className={cn(
-                "px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg",
-                "hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2",
+                "px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl",
+                "hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:ring-offset-2",
                 "transition-colors"
               )}
             >
@@ -457,7 +457,7 @@ export default function NotificationSettingsPage() {
                       type="time"
                       value={localQuietHours.startTime}
                       onChange={(e) => handleQuietHoursChange({ startTime: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                     />
                   </div>
                   <div>
@@ -468,7 +468,7 @@ export default function NotificationSettingsPage() {
                       type="time"
                       value={localQuietHours.endTime}
                       onChange={(e) => handleQuietHoursChange({ endTime: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                     />
                   </div>
                 </div>
@@ -481,7 +481,7 @@ export default function NotificationSettingsPage() {
                   <select
                     value={getPresetFromDays(localQuietHours.days)}
                     onChange={(e) => handlePresetChange(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                   >
                     {PRESET_OPTIONS.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -505,7 +505,7 @@ export default function NotificationSettingsPage() {
                           className={cn(
                             'w-9 h-9 rounded-full text-sm font-medium transition-colors',
                             localQuietHours.days.includes(day.value)
-                              ? 'bg-blue-600 text-white'
+                              ? 'bg-brand-primary text-white'
                               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                           )}
                         >

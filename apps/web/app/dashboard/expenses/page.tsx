@@ -214,7 +214,7 @@ export default function ExpensesPage() {
           {isManager && (
             <Link
               href="/dashboard/expenses/ocr-analytics"
-              className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700"
+              className="inline-flex items-center gap-1.5 text-sm text-brand-600 hover:text-brand-700"
             >
               <ChartBarIcon className="h-4 w-4" />
               OCR Analytics
@@ -315,7 +315,7 @@ export default function ExpensesPage() {
               className={`
                 flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors
                 ${isActive
-                  ? 'bg-blue-100 text-blue-700 border-2 border-blue-300'
+                  ? 'bg-brand-100 text-brand-primary border-2 border-brand-300'
                   : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
                 }
               `}
@@ -344,7 +344,7 @@ export default function ExpensesPage() {
           <select
             value={filterProjectId}
             onChange={(e) => setFilterProjectId(e.target.value)}
-            className="rounded-md border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500"
+            className="rounded-md border-gray-300 text-sm focus:border-brand-primary focus:ring-brand-primary/20"
           >
             <option value="">All Projects</option>
             {(projects as Project[])
@@ -360,7 +360,7 @@ export default function ExpensesPage() {
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value as ExpenseCategory | '')}
-            className="rounded-md border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500"
+            className="rounded-md border-gray-300 text-sm focus:border-brand-primary focus:ring-brand-primary/20"
           >
             <option value="">All Categories</option>
             {EXPENSE_CATEGORIES.map((cat) => (

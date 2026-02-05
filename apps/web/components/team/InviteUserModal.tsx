@@ -102,7 +102,7 @@ export function InviteUserModal({ isOpen, onClose, onInvite }: InviteUserModalPr
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="colleague@company.com"
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
               disabled={sending}
               autoFocus
             />
@@ -121,7 +121,7 @@ export function InviteUserModal({ isOpen, onClose, onInvite }: InviteUserModalPr
                 className={cn(
                   'flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-colors',
                   role === option.value
-                    ? 'border-blue-500 bg-blue-50'
+                    ? 'border-brand-primary bg-brand-50'
                     : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                 )}
               >
@@ -131,7 +131,7 @@ export function InviteUserModal({ isOpen, onClose, onInvite }: InviteUserModalPr
                   value={option.value}
                   checked={role === option.value}
                   onChange={() => setRole(option.value)}
-                  className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500"
+                  className="mt-1 h-4 w-4 text-brand-primary focus:ring-brand-primary/20"
                   disabled={sending}
                 />
                 <div className="flex-1">
@@ -139,7 +139,7 @@ export function InviteUserModal({ isOpen, onClose, onInvite }: InviteUserModalPr
                   <span className="block text-sm text-gray-500 mt-0.5">{option.description}</span>
                 </div>
                 {role === option.value && (
-                  <CheckIcon className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                  <CheckIcon className="h-5 w-5 text-brand-primary flex-shrink-0" />
                 )}
               </label>
             ))}
@@ -157,7 +157,7 @@ export function InviteUserModal({ isOpen, onClose, onInvite }: InviteUserModalPr
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Add a personal note to the invitation..."
             rows={3}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary resize-none"
             disabled={sending}
           />
         </div>

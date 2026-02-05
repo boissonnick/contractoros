@@ -367,7 +367,7 @@ export default function JobCostingSummary({
         {!projectId && (
           <Link
             href="/dashboard/reports/job-costing"
-            className="text-sm text-blue-600 hover:text-blue-700"
+            className="text-sm text-brand-600 hover:text-brand-700"
           >
             View Details
           </Link>

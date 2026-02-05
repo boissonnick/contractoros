@@ -25,7 +25,7 @@ export function DataHandlingStep({
           className={cn(
             'flex items-start gap-3 p-4 border rounded-lg cursor-pointer transition-colors',
             options.archiveData
-              ? 'border-blue-500 bg-blue-50'
+              ? 'border-brand-primary bg-brand-50'
               : 'border-gray-200 hover:border-gray-300'
           )}
         >
@@ -34,11 +34,11 @@ export function DataHandlingStep({
             name="dataHandling"
             checked={options.archiveData === true}
             onChange={() => onUpdateOptions({ archiveData: true })}
-            className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500"
+            className="mt-1 h-4 w-4 text-brand-primary focus:ring-brand-primary/20"
           />
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <ArchiveBoxIcon className="h-5 w-5 text-blue-600" />
+              <ArchiveBoxIcon className="h-5 w-5 text-brand-primary" />
               <p className="font-medium text-gray-900">Archive data (Recommended)</p>
             </div>
             <p className="text-sm text-gray-500 mt-1">
@@ -96,8 +96,8 @@ export function DataHandlingStep({
               onUpdateOptions({ sendNotification: !options.sendNotification })
             }
             className={cn(
-              'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
-              options.sendNotification ? 'bg-blue-600' : 'bg-gray-200'
+              'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:ring-offset-2',
+              options.sendNotification ? 'bg-brand-primary' : 'bg-gray-200'
             )}
           >
             <span
@@ -120,7 +120,7 @@ export function DataHandlingStep({
           onChange={(e) => onUpdateOptions({ reason: e.target.value })}
           placeholder="e.g., Resignation, end of contract, restructuring..."
           rows={2}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary resize-none"
         />
       </div>
     </div>

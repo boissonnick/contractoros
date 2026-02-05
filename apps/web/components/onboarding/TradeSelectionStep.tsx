@@ -33,11 +33,11 @@ export default function TradeSelectionStep({ initialTrades = [], onNext, onBack 
             onClick={() => toggle(trade)}
             className={cn(
               'flex items-center gap-2 px-3 py-2 rounded-lg border text-sm text-left transition-all',
-              selected.has(trade) ? 'border-blue-600 bg-blue-50 text-blue-900' : 'border-gray-200 hover:border-gray-300 text-gray-700'
+              selected.has(trade) ? 'border-brand-primary bg-brand-50 text-brand-900' : 'border-gray-200 hover:border-gray-300 text-gray-700'
             )}
           >
             <div className={cn('w-4 h-4 rounded border flex items-center justify-center flex-shrink-0',
-              selected.has(trade) ? 'bg-blue-600 border-blue-600' : 'border-gray-300'
+              selected.has(trade) ? 'bg-brand-primary border-brand-primary' : 'border-gray-300'
             )}>
               {selected.has(trade) && <CheckIcon className="h-3 w-3 text-white" />}
             </div>

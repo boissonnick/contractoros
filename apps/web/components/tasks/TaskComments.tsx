@@ -93,7 +93,7 @@ export default function TaskComments({ taskId }: TaskCommentsProps) {
             {editingId === comment.id ? (
               <div className="mt-1">
                 <textarea
-                  className="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  className="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 resize-none"
                   rows={2}
                   value={editContent}
                   onChange={(e) => setEditContent(e.target.value)}
@@ -142,7 +142,7 @@ export default function TaskComments({ taskId }: TaskCommentsProps) {
       <div className="flex gap-3 pt-2 border-t border-gray-100">
         <div className="flex-1">
           <textarea
-            className="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            className="w-full text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 resize-none"
             rows={2}
             placeholder="Write a comment..."
             value={newComment}

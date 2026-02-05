@@ -261,7 +261,7 @@ export function ProjectNotificationSettings({
                     <button
                       onClick={() => handleUnmuteProject(ps.projectId)}
                       disabled={saving}
-                      className="text-sm text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50"
+                      className="text-sm text-brand-600 hover:text-brand-700 font-medium disabled:opacity-50"
                     >
                       Unmute
                     </button>
@@ -288,7 +288,7 @@ export function ProjectNotificationSettings({
                 <select
                   value={selectedProjectId}
                   onChange={(e) => setSelectedProjectId(e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                 >
                   <option value="">Select a project...</option>
                   {availableProjects.map((project) => (
@@ -300,7 +300,7 @@ export function ProjectNotificationSettings({
                 <button
                   onClick={handleAddProject}
                   disabled={!selectedProjectId || saving}
-                  className="flex items-center gap-1 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-1 px-4 py-2 bg-brand-primary text-white text-sm font-medium rounded-lg hover:bg-brand-900 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <PlusIcon className="h-4 w-4" />
                   Add

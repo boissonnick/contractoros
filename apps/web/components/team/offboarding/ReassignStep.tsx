@@ -38,7 +38,7 @@ export function ReassignStep({
             className={cn(
               'flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors',
               !selectedUser
-                ? 'border-blue-500 bg-blue-50'
+                ? 'border-brand-primary bg-brand-50'
                 : 'border-gray-200 hover:border-gray-300'
             )}
           >
@@ -47,7 +47,7 @@ export function ReassignStep({
               name="reassign"
               checked={!selectedUser}
               onChange={() => onSelectUser(null)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+              className="h-4 w-4 text-brand-primary focus:ring-brand-primary/20"
             />
             <div>
               <p className="font-medium text-gray-900">Leave unassigned</p>
@@ -58,7 +58,7 @@ export function ReassignStep({
           {/* Team member options */}
           {loadingTeam ? (
             <div className="flex items-center justify-center py-8">
-              <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+              <div className="w-6 h-6 border-2 border-brand-primary border-t-transparent rounded-full animate-spin" />
             </div>
           ) : teamMembers.length === 0 ? (
             <p className="text-sm text-gray-500 text-center py-4">
@@ -72,7 +72,7 @@ export function ReassignStep({
                   className={cn(
                     'flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors',
                     selectedUser?.id === member.id
-                      ? 'border-blue-500 bg-blue-50'
+                      ? 'border-brand-primary bg-brand-50'
                       : 'border-gray-200 hover:border-gray-300'
                   )}
                 >
@@ -83,7 +83,7 @@ export function ReassignStep({
                     onChange={() =>
                       onSelectUser({ id: member.id, name: member.displayName })
                     }
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                    className="h-4 w-4 text-brand-primary focus:ring-brand-primary/20"
                   />
                   <div className="h-8 w-8 bg-gray-200 rounded-full flex items-center justify-center">
                     <UserIcon className="h-4 w-4 text-gray-500" />

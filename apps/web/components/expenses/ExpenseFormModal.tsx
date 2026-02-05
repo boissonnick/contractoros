@@ -350,7 +350,7 @@ export function ExpenseFormModal({
           </label>
           <select
             {...register('category')}
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20 sm:text-sm"
           >
             {EXPENSE_CATEGORIES.map((cat) => (
               <option key={cat.value} value={cat.value}>
@@ -370,7 +370,7 @@ export function ExpenseFormModal({
           </label>
           <select
             {...register('projectId')}
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20 sm:text-sm"
           >
             <option value="">No project selected</option>
             {(projects as Project[])
@@ -406,7 +406,7 @@ export function ExpenseFormModal({
             </label>
             <select
               {...register('paymentMethod')}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20 sm:text-sm"
             >
               <option value="">Select method</option>
               {EXPENSE_PAYMENT_METHODS.map((method) => (
@@ -444,7 +444,7 @@ export function ExpenseFormModal({
               <input
                 type="checkbox"
                 {...register('taxDeductible')}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-gray-300 text-brand-primary focus:ring-brand-primary/20"
               />
               <span className="text-sm text-gray-700">Tax Deductible</span>
             </label>
@@ -457,7 +457,7 @@ export function ExpenseFormModal({
             <input
               type="checkbox"
               {...register('reimbursable')}
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              className="rounded border-gray-300 text-brand-primary focus:ring-brand-primary/20"
             />
             <span className="text-sm text-gray-700">Reimbursable</span>
           </label>
@@ -465,7 +465,7 @@ export function ExpenseFormModal({
             <input
               type="checkbox"
               {...register('billable')}
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              className="rounded border-gray-300 text-brand-primary focus:ring-brand-primary/20"
             />
             <span className="text-sm text-gray-700">Billable to Client</span>
           </label>
@@ -478,7 +478,7 @@ export function ExpenseFormModal({
           </label>
           <textarea
             {...register('notes')}
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20 sm:text-sm"
             rows={3}
             placeholder="Additional details about this expense..."
           />

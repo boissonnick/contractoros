@@ -218,7 +218,7 @@ export default function ProfileSettingsPage() {
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -329,7 +329,7 @@ export default function ProfileSettingsPage() {
               {...register('bio')}
               rows={3}
               placeholder="Tell us a bit about yourself..."
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary resize-vertical"
               maxLength={500}
             />
             {errors.bio && (

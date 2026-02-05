@@ -172,8 +172,8 @@ export function OfflineTimeEntryForm({
   const StatusIndicator = () => {
     if (submitStatus === 'saving') {
       return (
-        <div className="flex items-center gap-2 text-blue-600">
-          <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <div className="flex items-center gap-2 text-brand-primary">
+          <div className="w-4 h-4 border-2 border-brand-primary border-t-transparent rounded-full animate-spin" />
           <span className="text-sm">Saving{!isOnline ? ' offline' : ''}...</span>
         </div>
       );
@@ -288,7 +288,7 @@ export function OfflineTimeEntryForm({
           ) : (
             <select
               {...register('projectId')}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20 sm:text-sm"
             >
               <option value="">No project selected</option>
               {projects.map((project) => (
@@ -308,7 +308,7 @@ export function OfflineTimeEntryForm({
           </label>
           <textarea
             {...register('notes')}
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary/20 sm:text-sm"
             rows={2}
             placeholder="Work description (optional)"
           />
