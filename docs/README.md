@@ -73,7 +73,21 @@ Instead of reading entire files, use targeted search:
 | Document | Purpose | Token Cost |
 |----------|---------|------------|
 | [research/RESEARCH_SUMMARY.md](research/RESEARCH_SUMMARY.md) | Index of research documents | ~2,000 |
-| [STRATEGIC_ROADMAP_NEXT_SPRINTS.md](STRATEGIC_ROADMAP_NEXT_SPRINTS.md) | Platform analysis & strategic roadmap | ~8,000 |
+| [DOCUMENTATION_AUDIT_PLAN.md](DOCUMENTATION_AUDIT_PLAN.md) | Strategy for maintaining technical docs | ~5,000 |
+| [ACTIVE_DOCS_INVENTORY.md](ACTIVE_DOCS_INVENTORY.md) | Master registry of all docs with update schedules | ~6,000 |
+
+---
+
+## 📖 User Documentation (Separate System)
+
+**Location:** [help/](help/)
+
+**Purpose:** End-user help documentation (20+ feature guides)
+**Audience:** App users, not developers
+**Maintenance:** Updated when features release
+**Last Updated:** Jan 30, 2026
+
+**Note:** User help docs are maintained separately from development documentation and are not part of daily dev doc reading. See `help/README.md` for structure.
 
 ---
 

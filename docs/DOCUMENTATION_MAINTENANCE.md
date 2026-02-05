@@ -501,6 +501,86 @@ find docs/ -name "*.md" -exec wc -l {} + | tail -1
 
 ---
 
+## Technical Documentation Update Schedules
+
+### Architecture Documentation (ARCHITECTURE.md)
+
+**Update Triggers:**
+- After major tech stack upgrades (Node, React, Next.js, Firebase)
+- Every 10 sprints as maintenance review
+- When data models change significantly
+
+**Update Process:**
+1. Update version references throughout document
+2. Update diagrams if architecture changed
+3. Add "Last Verified: [DATE]" to each major section
+4. Review data models match current codebase
+5. Test that code examples still work
+6. Update tech stack table
+
+**Last Updated:** Feb 4, 2026 (Post Sprint 47-48 upgrades)
+**Next Review:** Sprint 60 or next major upgrade
+
+### Component Patterns (COMPONENT_PATTERNS.md)
+
+**Update Triggers:**
+- New shared UI component created
+- Major UI library upgrade
+- Design system changes
+- Every 20 sprints as maintenance review
+
+**Update Process:**
+1. Add new pattern with code example
+2. Update existing patterns if API changed
+3. Remove deprecated patterns
+4. Verify examples match current components
+
+**Last Updated:** Feb 3, 2026
+**Next Review:** Sprint 70 or new major pattern
+
+### Development Guide (DEVELOPMENT_GUIDE.md)
+
+**Update Triggers:**
+- Git workflow changes
+- Code review process updates
+- New coding standards adopted
+- Quarterly review (every ~30 sprints)
+
+**Update Process:**
+1. Document new practices
+2. Update workflow examples
+3. Archive old practices if deprecated
+4. Sync with CLAUDE.md if workflow changes
+
+**Last Updated:** Jan 28, 2026 ⚠️ (Review needed)
+**Next Review:** May 2026 (quarterly)
+
+### Testing Strategy (TESTING_STRATEGY.md)
+
+**Update Triggers:**
+- Test framework upgraded
+- New testing approach adopted
+- E2E test structure changes
+- Quarterly review (every ~30 sprints)
+
+**Update Process:**
+1. Document current test structure
+2. Update test writing guidelines
+3. Sync with apps/web/e2e/ README
+4. Update test examples
+
+**Last Updated:** Jan 28, 2026 ⚠️ (Review needed)
+**Next Review:** May 2026 (quarterly)
+
+### Documentation Audit
+
+**Trigger:** Annually or when major issues discovered
+**Process:** See `DOCUMENTATION_AUDIT_PLAN.md`
+**Last Audit:** Feb 4, 2026
+**Next Audit:** Feb 2027 or when needed
+
+---
+
 ## Change Log
 
 | Date | Change | Impact |

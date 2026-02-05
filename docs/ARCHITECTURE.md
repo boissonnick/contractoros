@@ -1,7 +1,8 @@
 # ContractorOS Technical Architecture
 
 > **Purpose:** Deep technical reference for understanding system design and making architectural decisions.
-> **Last Updated:** 2026-02-02
+> **Last Updated:** 2026-02-04 (Post-upgrade: Node 22, Next.js 16, React 19)
+> **Update Schedule:** Every 10 sprints or after major tech stack changes
 
 ---
 
@@ -11,7 +12,7 @@
 ┌─────────────────────────────────────────────────────────────────┐
 │                        CLIENT LAYER                              │
 ├─────────────────────────────────────────────────────────────────┤
-│  Next.js 14 App Router (apps/web)                               │
+│  Next.js 16 App Router (apps/web)                               │
 │  ├── Dashboard Portal (/dashboard/*)  - Contractors/PMs         │
 │  ├── Client Portal (/client/*, /portal/*) - Homeowners          │
 │  ├── Sub Portal (/sub/*) - Subcontractors                       │
@@ -51,9 +52,32 @@
 
 ---
 
+## Tech Stack (Current)
+
+**Last Verified:** 2026-02-04 (Sprints 47-48 completed)
+
+| Layer | Technology | Version | Upgrade Sprint |
+|-------|-----------|---------|----------------|
+| **Runtime** | Node.js | v22.x | Sprint 47 ✅ |
+| **Framework** | Next.js | 16.1.6 | Sprint 48 ✅ |
+| **UI Library** | React | 19.2.4 | Sprint 48 ✅ |
+| **Database** | Firestore | Latest | - |
+| **Auth** | Firebase Auth | Latest | - |
+| **Functions** | Cloud Functions Gen 2 | v7.0.5 | Sprint 47 ✅ |
+| **Styling** | Tailwind CSS | 3.x | Sprint 48 ✅ |
+| **Forms** | React Hook Form | Latest | - |
+| **Validation** | Zod | 3.x | - |
+| **PDF** | @react-pdf/renderer | Latest | - |
+
+**See:** `docs/VERSION_AUDIT_FEB_2026.md` for complete version matrix and planned upgrades.
+
+---
+
 ## Frontend Architecture
 
-### Next.js 14 App Router
+### Next.js 16 App Router
+
+**Last Verified:** 2026-02-04 (Sprints 47-48 upgrades)
 
 We use the App Router with server/client component split:
 
