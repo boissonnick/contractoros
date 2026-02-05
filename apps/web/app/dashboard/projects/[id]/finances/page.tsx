@@ -31,6 +31,8 @@ import {
   getBudgetBarColor,
   BUDGET_HELP_TEXT,
 } from '@/lib/budget-utils';
+import { useProjectProfitability } from '@/lib/hooks/useJobCosting';
+import { MarginMeter } from '@/components/finances/MarginMeter';
 
 const categoryLabels: Record<ExpenseCategory, string> = {
   materials: 'Materials',
@@ -57,6 +59,7 @@ export default function ProjectFinancesPage() {
   const { profile } = useAuth();
 
   const { expenses, loading: expensesLoading } = useExpenses({ projectId });
+  const { profitability, loading: profitLoading } = useProjectProfitability(projectId);
   const [project, setProject] = useState<Project | null>(null);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
@@ -214,6 +217,9 @@ export default function ProjectFinancesPage() {
           </div>
         </Card>
       </div>
+
+      {/* Margin Meter — from Cloud Function profitability data */}
+      <MarginMeter profitability={profitability} loading={profitLoading} />
 
       {/* Budget Progress */}
       {summary.budget > 0 && (

@@ -61,7 +61,8 @@ export interface UserProfile {
   orgId: string;
   photoURL?: string;
   trade?: string;                 // For SUBs: electrician, plumber, etc.
-  hourlyRate?: number;            // For billing/payroll
+  hourlyRate?: number;            // For billing/payroll (what you bill the client)
+  hourlyCost?: number;            // Internal cost rate (what the employee costs the company)
   permissions?: UserPermissions;
   isActive: boolean;
   onboardingCompleted: boolean;
@@ -96,6 +97,11 @@ export interface UserProfile {
 
   // Specialty for display
   specialty?: string;            // Job title or specialty
+
+  // Regional preferences
+  timezone?: string;             // IANA timezone (e.g., 'America/New_York')
+  dateFormat?: string;           // Date display format (e.g., 'MM/DD/YYYY')
+  timeFormat?: string;           // Time display format ('12h' or '24h')
 }
 
 export interface EmergencyContact {
@@ -3242,6 +3248,8 @@ export interface NotificationPreferences {
     invoiceOverdue: boolean;
     rfiCreated: boolean;
     expenseApproved: boolean;
+    changeOrderPending: boolean;
+    selectionPending: boolean;
     messages: boolean;
     mentions: boolean;
     dailyDigest: boolean;
@@ -3251,6 +3259,7 @@ export interface NotificationPreferences {
     taskAssigned: boolean;
     taskDueSoon: boolean;
     invoicePaid: boolean;
+    changeOrderPending: boolean;
     messages: boolean;
     mentions: boolean;
   };
@@ -3266,6 +3275,7 @@ export interface NotificationProjectSettings {
   taskNotifications: boolean;
   rfiNotifications: boolean;
   expenseNotifications: boolean;
+  changeOrderNotifications: boolean;
   updatedAt?: Date;
 }
 

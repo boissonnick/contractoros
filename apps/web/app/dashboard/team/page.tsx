@@ -29,6 +29,8 @@ import {
   PlusIcon,
 } from '@heroicons/react/24/outline';
 import { UserProfile, UserRole, ScheduleEvent, ScheduleAssignment, CONSTRUCTION_TRADES } from '@/types';
+import { TeamMemberCostRateModal } from '@/components/team/TeamMemberCostRateModal';
+import { CurrencyDollarIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useScheduleEvents } from '@/lib/hooks/useSchedule';
 import { useScheduleAssignments } from '@/lib/hooks/useScheduleAssignments';
@@ -69,7 +71,10 @@ export default function TeamPage() {
   const [memberFilter, setMemberFilter] = useState<'employees' | 'all'>('employees');
   const [selectedTrade, setSelectedTrade] = useState<string>('all');
   const [selectedTimeRange, setSelectedTimeRange] = useState<'this_week' | 'next_week' | 'this_month'>('this_week');
+  const [costRateMember, setCostRateMember] = useState<UserProfile | null>(null);
   const { confirm, DialogComponent } = useConfirmDialog();
+
+  const isAdmin = profile?.role === 'OWNER' || profile?.role === 'PM';
 
   const timeRangeLabels = {
     this_week: 'This Week',
@@ -451,6 +456,13 @@ export default function TeamPage() {
     >
     <div className="min-h-screen bg-gray-50">
       <DialogComponent />
+      {costRateMember && (
+        <TeamMemberCostRateModal
+          member={costRateMember}
+          isOpen={!!costRateMember}
+          onClose={() => setCostRateMember(null)}
+        />
+      )}
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -622,6 +634,17 @@ export default function TeamPage() {
                       <div className="text-sm text-gray-500">
                         Trade: {member.trade}
                       </div>
+                    )}
+                    {isAdmin && (
+                      <button
+                        onClick={() => setCostRateMember(member)}
+                        className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 mt-1"
+                      >
+                        <CurrencyDollarIcon className="h-3.5 w-3.5" />
+                        {member.hourlyCost
+                          ? `Cost: $${member.hourlyCost}/hr`
+                          : 'Set Cost Rate'}
+                      </button>
                     )}
                   </div>
                 </Card>

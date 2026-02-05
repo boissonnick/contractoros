@@ -1,6 +1,6 @@
 # ContractorOS Module Registry
 
-**Last Updated:** 2026-02-04 (Sprint 53 - updated after explore agents ran)
+**Last Updated:** 2026-02-05 (Sprint 66 - added job costing, MarginMeter, TeamMemberCostRateModal)
 **Purpose:** Fast codebase navigation - eliminates 200k+ token waste from Explore agents
 **Usage:** Check this file BEFORE running Explore agents at sprint start
 
@@ -54,7 +54,7 @@
 | **Subcontractors** | useSubcontractors | subcontractors/page.tsx | SubcontractorCard, BidList | Bidding |
 | **Submittals** | useSubmittals | submittals/page.tsx | SubmittalCard | Document tracking |
 | **Tasks** | useTasks | tasks/page.tsx | TaskBoard, TaskCard | Drag & drop |
-| **Team** | useTeamMembers | team/page.tsx | TeamMemberCard | User management |
+| **Team** | useTeamMembers | team/page.tsx | TeamMemberCard, TeamMemberCostRateModal | User management |
 | **Time Tracking** | useTimeEntries | time/page.tsx | TimeTracker, TimeEntryList | Real-time tracking |
 | **Timesheets** | useTimesheets | timesheets/page.tsx | TimesheetTable | Payroll integration |
 | **Warranties** | useWarranties | warranties/page.tsx | WarrantyCard | Warranty tracking |
@@ -190,7 +190,7 @@ Core reusable components used everywhere:
 | **estimates/** | EstimateForm, EstimatePreview, EstimatePDF | Estimates/quotes | useEstimates |
 | **expenses/** | ExpenseCard, ReceiptUploader | Expense tracking | useExpenses |
 | **field/** | FieldReportForm, PhotoCapture | Field operations | useFieldReports |
-| **finances/** | FinancialDashboard, CashFlow | Financial overview | Multiple |
+| **finances/** | FinancialDashboard, CashFlow, MarginMeter, JobCostingSummary | Financial overview + profitability | useJobCosting, useOrgJobCosting |
 | **intelligence/** | InsightCard, Recommendations | Business intelligence | useBidIntelligence |
 | **invoicing/** | InvoiceGenerator, InvoicePDF, InvoiceList | Invoicing | useInvoices |
 | **leads/** | LeadCard, LeadFormModal, LeadPipeline | Lead management | useLeads |

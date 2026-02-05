@@ -2,7 +2,9 @@
 
 > **Purpose:** Track current progress and enable seamless session handoffs.
 > **Last Updated:** 2026-02-05
-> **Current Phase:** Phase 4 - Enhancements ✅ COMPLETE
+> **Current Phase:** Phase 6 - Financial Operations & Mobile Experience
+> **Latest Sprint:** Sprint 66 - Scoping Sprint ✅ COMPLETE
+> **Next Sprint:** Sprint 67 - Financial Intelligence (BI Dashboards)
 > **Historical Sprints:** Sprints 13B-25 archived in `.claude-coordination/archive/sprints-13b-25-history.md`
 > **Phase 3 sprints 52-55:** archived in `.claude-coordination/archive/sprints-52-55-history.md`
 
@@ -22,6 +24,174 @@ Find your modules instantly instead of running Explore agents for 15 minutes.
 **What's in the registry:** All 25+ features, 83 hooks, 60 component directories, 36 dashboard routes
 
 **DO NOT run Explore agents without checking the registry first!**
+
+---
+
+## 🔧 Sprint 67 - Financial Intelligence (BI Dashboards) - NEXT
+
+**Priority:** P1 - HIGH
+**Brief:** `docs/specs/sprint-67-brief.md` (skip plan mode — read brief and start coding)
+**Spec:** `docs/specs/EPIC-08-BI-DASHBOARDS.md`
+
+**Goal:** Deliver actionable financial insights via 3 dashboards: Company Overview ("The Pulse"), Project Profitability Leaderboard (RAG status), and Cash Flow Runway (AR aging).
+
+**Key deliverables:**
+- [ ] CompanyOverviewDashboard — Revenue/Margin MTD/YTD, pipeline, AR KPIs + trend charts
+- [ ] ProjectProfitabilityLeaderboard — Sortable table with RAG status (Green >25%, Yellow 15-25%, Red <15%)
+- [ ] CashFlowRunwayDashboard — AR aging chart (0-30, 31-60, 61-90, 90+ days)
+- [ ] useCompanyStats hook — Aggregated org-wide financial metrics
+- [ ] /dashboard/intelligence page — Composed from all 3 dashboards
+
+**Dependencies:** Sprint 65 (Job Costing) provides projectProfitability data. Recharts already installed.
+
+---
+
+## ✅ Sprint 66 - Scoping Sprint - COMPLETE
+
+**Priority:** P1 - HIGH (Process improvement)
+**Completed:** 2026-02-05
+
+**What was done:**
+- [x] `docs/specs/sprint-67-brief.md` — Financial Intelligence (BI) brief
+- [x] `docs/specs/sprint-68-brief.md` — Expense Automation (OCR) brief
+- [x] `docs/specs/sprint-69-brief.md` — Subcontractor Invoice Management (AP Automation) brief
+- [x] MODULE_REGISTRY.md updated with Sprint 65 additions
+
+**Key findings:**
+- Sprint 68 (OCR): Core OCR pipeline is ALREADY COMPLETE (processReceiptOCR + ReceiptCaptureButton). Sprint focuses on display/analytics layer only.
+- Sprint 69: Identified as Subcontractor Invoice Management (AP Automation MVP) — fills gap in financial operations.
+- Estimated token savings: ~500k tokens across Sprints 67-69 by eliminating plan mode.
+
+---
+
+## ✅ Sprint 65 - Job Costing Engine - COMPLETE
+
+**Priority:** P1 - HIGH
+**Completed:** 2026-02-05
+**Risk:** MEDIUM — New Cloud Functions + Firestore trigger patterns
+
+**What was built:**
+- [x] `hourlyCost` field added to UserProfile in all 3 type files
+- [x] Cloud Functions: `onTimeEntryWrite` + `onExpenseWrite` triggers (auto-recalculate profitability)
+- [x] Core engine: `functions/src/job-costing/recalculate.ts` — full recalculation logic
+- [x] Category mapping: expense categories → cost categories
+- [x] MarginMeter UI component: visual margin bar + profit stats
+- [x] TeamMemberCostRateModal: admin-only modal to set employee cost rates
+- [x] Seed script: `scripts/seed-demo/seed-project-profitability.ts`
+- [x] Integrated MarginMeter into project finances page
+- [x] Integrated cost rate action into team member cards
+
+**New files:**
+- `functions/src/job-costing/index.ts` — Trigger definitions
+- `functions/src/job-costing/recalculate.ts` — Core recalculation engine
+- `functions/src/job-costing/category-mapping.ts` — Expense→Cost category mapping
+- `apps/web/components/finances/MarginMeter.tsx` — Margin visualization
+- `apps/web/components/team/TeamMemberCostRateModal.tsx` — Cost rate editing
+- `scripts/seed-demo/seed-project-profitability.ts` — Initial data seed
+
+**Modified files:**
+- `types/index.ts`, `types/user.ts`, `types/domains/core.ts` — Added `hourlyCost`
+- `functions/src/index.ts` — Added job-costing exports
+- `app/dashboard/projects/[id]/finances/page.tsx` — Integrated MarginMeter
+- `app/dashboard/team/page.tsx` — Integrated cost rate modal
+
+**Deploy needed:** `cd functions && npm run build && firebase deploy --only functions --project contractoros-483812`
+
+---
+
+## ✅ Sprint 64 - Firebase 12 Upgrade - COMPLETE
+
+**Priority:** P2 - MEDIUM
+**Completed:** 2026-02-05
+
+**What Was Done:**
+- ✅ Upgraded `firebase` JS SDK from 11.8.0 → 12.9.0
+- ✅ Fixed named database bug in `lib/firebase/admin.ts` — was using `getFirestore(getApp())` (default DB), now correctly uses `getFirestore(getApp(), 'contractoros')`
+- ✅ TypeScript check: 0 errors
+- ✅ Production build: passes (152 static pages generated)
+- ✅ No breaking changes apply (VertexAI not used, Node 22 already met, ES2020 already met, no Firebase enums used)
+
+**Files Modified:**
+- `package.json` — firebase 11.8.0 → 12.9.0
+- `lib/firebase/admin.ts` — Added `'contractoros'` named database parameter
+
+**Note:** `@firebase/auth` SSR warnings during static generation ("INTERNAL ASSERTION FAILED: Expected a class definition") are a known Firebase Auth SSR issue — Auth requires browser APIs. Does not affect runtime behavior.
+
+---
+
+## ✅ Sprint 62 - ESLint 9 Migration - COMPLETE
+
+**Priority:** P2 - MEDIUM
+**Completed:** 2026-02-05
+
+**What Was Done:**
+- ✅ Upgraded ESLint 8.57.1 → 9.39.2
+- ✅ Upgraded eslint-config-next 14.2.35 → 16.1.6
+- ✅ Created `eslint.config.mjs` (ESLint 9 flat config format)
+- ✅ Uses native eslint-config-next flat config export (no FlatCompat needed)
+- ✅ Removed unused `@eslint/eslintrc` package
+- ✅ Updated `package.json` lint script: `next lint` → `eslint .` (next lint removed in Next.js 16)
+- ✅ React Compiler rules downgraded to warnings (188 violations — address incrementally)
+- ✅ Configured underscore-prefixed unused vars pattern
+- ✅ 0 errors, 1050 warnings (all warnings, no blockers)
+
+**Warning Breakdown (1050 total):**
+- 706 `@typescript-eslint/no-unused-vars` (unused imports/vars)
+- 99 `react-hooks/set-state-in-effect` (React Compiler)
+- 60 `react-hooks/preserve-manual-memoization` (React Compiler)
+- 54 `react-hooks/exhaustive-deps` (dependency arrays)
+- 40 `@next/next/no-img-element` (img vs next/image)
+- 91 other (unescaped entities, a11y, misc React Compiler)
+
+**Files Created:**
+- `eslint.config.mjs` — ESLint 9 flat config
+
+**Files Modified:**
+- `package.json` — lint script updated, eslint/eslint-config-next upgraded, @eslint/eslintrc removed
+
+---
+
+## ✅ Sprint 61 - Form Validation & Error Boundaries - COMPLETE
+
+**Priority:** P2 - MEDIUM
+**Completed:** 2026-02-05
+
+**What Was Done:**
+- ✅ Migrated ChangeOrderForm from manual useState validation to react-hook-form + Zod + useFieldArray
+- ✅ Added `scopeChangeSchema` to `lib/validations/index.ts` for change order line items
+- ✅ Updated `changeOrderSchema` to use free-text reason field (matching actual form behavior)
+- ✅ Created `SectionErrorBoundary` component — lightweight inline error boundary for page sections
+- ✅ Shows compact error card with retry button (not full-page crash)
+- ✅ Dev-mode error details display
+
+**Files Created:**
+- `components/ui/SectionErrorBoundary.tsx` — Inline error boundary with retry
+
+**Files Modified:**
+- `lib/validations/index.ts` — Added scopeChangeSchema, updated changeOrderSchema
+- `components/projects/change-orders/ChangeOrderForm.tsx` — Full react-hook-form migration
+- `components/ui/index.ts` — Exported SectionErrorBoundary
+
+---
+
+## ✅ Sprint 60 - Pagination System - COMPLETE
+
+**Priority:** P2 - MEDIUM
+**Completed:** 2026-02-05
+
+**What Was Done:**
+- ✅ Clients page: Server-side cursor-based pagination via `usePagination` hook
+  - 25 items per page, `getCountFromServer` for total count display
+  - Falls back to `useClients` (full load) when search is active
+  - CompactPagination controls with "Showing X-Y of Z" display
+- ✅ Expenses page: Client-side pagination (preserves summary accuracy)
+  - All expenses loaded for `getSummary()`, paginated for rendering
+  - 25 per page, auto-resets page on filter changes
+  - CompactPagination controls
+
+**Files Modified:**
+- `app/dashboard/clients/page.tsx` — Server-side pagination with usePagination + search fallback
+- `app/dashboard/expenses/page.tsx` — Client-side pagination with useMemo slice
 
 ---
 
@@ -207,7 +377,20 @@ Find your modules instantly instead of running Explore agents for 15 minutes.
 - **Sprint 57:** Reporting Enhancements ✅
 - **Sprint 58:** Notification System Completion ✅
 - **Sprint 59:** Minor Package Updates ✅
-- **Sprint 60:** Tailwind CSS 4 (Optional — requires major migration)
+
+### Phase 5: DX & Code Quality ✅ COMPLETE
+- **Sprint 60:** Pagination System ✅
+- **Sprint 61:** Form Validation & Error Boundaries ✅
+- **Sprint 62:** ESLint 9 Migration ✅
+
+### Phase 6: Financial Operations & Mobile Experience (IN PROGRESS)
+- **Sprint 63:** Mobile Experience Overhaul ✅
+- **Sprint 64:** Firebase 12 Upgrade ✅
+- **Sprint 65:** Job Costing Engine ✅
+- **Sprint 66:** Scoping Sprint (pre-generate briefs for 67-69) 🔧 NEXT
+- **Sprint 67:** Financial Intelligence (BI MVP)
+- **Sprint 68:** Expense Automation (OCR)
+- **Sprint 69:** TBD (next backlog priority)
 
 ---
 
@@ -277,10 +460,11 @@ Find your modules instantly instead of running Explore agents for 15 minutes.
 
 | Metric | Value |
 |--------|-------|
-| **Current Sprint** | Phase 4 Complete — Sprint 60 (Tailwind 4) optional |
-| **Previous Sprint** | Sprint 59 - Package Updates ✅ COMPLETE |
+| **Current Sprint** | Sprint 66 - Scoping Sprint 🔧 NEXT |
+| **Previous Sprint** | Sprint 65 - Job Costing Engine ✅ COMPLETE |
 | **Active Bugs** | 0 critical, 8 high, 15 medium |
 | **TypeScript Status** | ✅ Passing |
+| **ESLint Status** | ✅ 0 errors, 1050 warnings |
 | **Firestore Rules** | ✅ Deployed |
 | **Docker Build** | ✅ Working |
 
@@ -429,11 +613,12 @@ See `docs/REPRIORITIZED_SPRINT_PLAN.md` for complete list.
 
 ### For Next Session
 1. **TypeScript is passing** - run `npx tsc --noEmit` to verify
-2. **Phases 1-4 ALL COMPLETE** (Sprints 47-59)
-3. **Sprint 60 (Tailwind CSS 4) is optional** — major migration, consider carefully
-4. **Package updates done** — 6 safe patches applied, major bumps (eslint 9, firebase 12, zod 4, tailwind 4) deferred
-5. **New features this session:** Report scheduling/sharing modals, preference-aware notifications, notification type expansion
-6. **ALWAYS deploy Firebase before Docker build** - see workflow below
+2. **Phases 1-5 ALL COMPLETE** (Sprints 47-62), Phase 6 in progress (Sprint 65 Job Costing done)
+3. **Sprint 66 is a SCOPING sprint** — run 3 parallel Explore agents to generate briefs
+4. **Read `docs/specs/SPRINT-65-SCOPING.md`** for exact execution steps
+5. **After Sprint 66:** Sprints 67-69 should start WITHOUT plan mode (read brief instead)
+6. **Remaining major upgrades:** tailwind 4, zod 4
+7. **ALWAYS deploy Firebase before Docker build** - see workflow below
 
 ### Build & Deploy Workflow (CRITICAL)
 ```bash
@@ -451,7 +636,8 @@ docker ps
 ### Known Issues
 - No test coverage
 - Silent error handling in some places
-- Invoice pagination implemented; other lists still need pagination
+- Clients + Expenses paginated; other high-volume lists may still need pagination
+- 1050 ESLint warnings to address incrementally (706 unused vars, 213 React Compiler)
 
 ---
 
@@ -463,3 +649,21 @@ After each work session:
 3. Update "Current Sprint" with progress
 4. Add any blockers or decisions to "Session Handoff Notes"
 5. Update "Last Updated" timestamp
+## ✅ Sprint 63 - Mobile Experience Overhaul - COMPLETE
+
+**Priority:** P1 - HIGH
+**Completed:** 2026-02-05 (via Claude Code CLI)
+
+**What Was Done:**
+- ✅ Implemented `MobileBottomNav` component (Home, Projects, Schedule, Time, More)
+- ✅ Added Full-Screen Navigation Drawer for "More" menu
+- ✅ Polished Time Clock mobile experience (Role-based access)
+- ✅ Integrated into `AppShell` for mobile-only display
+- ✅ Ensured "Native App" feel with proper touch targets and safe areas
+
+**Files Created:**
+- `components/layout/MobileBottomNav.tsx`
+- `components/layout/MobileNavigationDrawer.tsx`
+- `docs/specs/EPIC-06-MOBILE-OVERHAUL.md`
+
+---

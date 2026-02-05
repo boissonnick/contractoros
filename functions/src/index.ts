@@ -34,6 +34,9 @@ export { sendSMS, smsWebhook } from "./sms";
 // Receipt OCR Cloud Function
 export { processReceiptOCR } from "./expenses/processReceiptOCR";
 
+// Job Costing Engine — auto-recalculate project profitability
+export { onTimeEntryWrite, onExpenseWrite } from "./job-costing";
+
 // QuickBooks Online Integration - Scheduled Sync
 export {
   qboScheduledSync,
