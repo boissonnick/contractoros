@@ -434,7 +434,7 @@ export default function ProjectsInboxPage() {
               <InboxIcon className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{stats.unreadCount}</p>
+              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.unreadCount}</p>
               <p className="text-xs text-gray-500">Unread</p>
             </div>
           </div>
@@ -445,7 +445,7 @@ export default function ProjectsInboxPage() {
               <ClockIcon className="h-5 w-5 text-green-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{stats.todayCount}</p>
+              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.todayCount}</p>
               <p className="text-xs text-gray-500">Today</p>
             </div>
           </div>
@@ -456,7 +456,7 @@ export default function ProjectsInboxPage() {
               <FolderIcon className="h-5 w-5 text-purple-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{projects.length}</p>
+              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{projects.length}</p>
               <p className="text-xs text-gray-500">Projects</p>
             </div>
           </div>
@@ -467,7 +467,7 @@ export default function ProjectsInboxPage() {
               <FunnelIcon className="h-5 w-5 text-orange-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.total}</p>
               <p className="text-xs text-gray-500">
                 {filters.type || filters.projectId ? 'Filtered' : 'Total'} Activity
               </p>

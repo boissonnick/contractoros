@@ -129,7 +129,7 @@ export default function SubcontractorDetailPage() {
             Back to Subcontractors
           </Link>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-gray-900">{sub.companyName}</h1>
+            <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{sub.companyName}</h1>
             <Badge className={sub.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}>
               {sub.isActive ? 'Active' : 'Inactive'}
             </Badge>
@@ -366,7 +366,7 @@ export default function SubcontractorDetailPage() {
                   : <StarIcon key={star} className="h-6 w-6 text-gray-300" />
               ))}
             </div>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">
               {sub.metrics.avgRating > 0 ? sub.metrics.avgRating.toFixed(1) : '—'}
               <span className="text-sm font-normal text-gray-500"> / 5</span>
             </p>
@@ -399,11 +399,11 @@ export default function SubcontractorDetailPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-gray-50 rounded-lg p-3 text-center">
-                  <p className="text-2xl font-bold text-gray-900">{sub.metrics.projectsCompleted}</p>
+                  <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{sub.metrics.projectsCompleted}</p>
                   <p className="text-xs text-gray-500">Projects Completed</p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-3 text-center">
-                  <p className="text-2xl font-bold text-gray-900">{fmt(sub.metrics.totalPaid)}</p>
+                  <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{fmt(sub.metrics.totalPaid)}</p>
                   <p className="text-xs text-gray-500">Total Paid</p>
                 </div>
               </div>

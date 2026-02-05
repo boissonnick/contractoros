@@ -222,7 +222,7 @@ export default function OCRAnalyticsPage() {
               <div>
                 <p className="text-sm text-gray-500">Success Rate</p>
                 <div className="flex items-center gap-2">
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">
                     {stats.successRate.toFixed(1)}%
                   </p>
                   <Badge

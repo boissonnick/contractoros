@@ -326,7 +326,7 @@ function BidDetailModal({
                 />
               </div>
             ) : (
-              <p className="text-lg font-semibold text-gray-900">{formatCurrency(bid.amount)}</p>
+              <p className="text-lg font-semibold text-gray-900 font-heading tracking-tight">{formatCurrency(bid.amount)}</p>
             )}
           </div>
 
@@ -504,7 +504,7 @@ function BidStats({ bids }: { bids: BidWithProject[] }) {
             <ClockIcon className="h-5 w-5 text-blue-600" />
           </div>
           <div>
-            <p className="text-2xl font-bold text-gray-900">{stats.active}</p>
+            <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.active}</p>
             <p className="text-sm text-gray-500">Active Bids</p>
           </div>
         </div>
@@ -516,7 +516,7 @@ function BidStats({ bids }: { bids: BidWithProject[] }) {
             <CheckCircleIcon className="h-5 w-5 text-green-600" />
           </div>
           <div>
-            <p className="text-2xl font-bold text-gray-900">{stats.won}</p>
+            <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.won}</p>
             <p className="text-sm text-gray-500">Won Bids</p>
           </div>
         </div>
@@ -528,7 +528,7 @@ function BidStats({ bids }: { bids: BidWithProject[] }) {
             <DocumentTextIcon className="h-5 w-5 text-gray-600" />
           </div>
           <div>
-            <p className="text-2xl font-bold text-gray-900">{stats.pending}</p>
+            <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.pending}</p>
             <p className="text-sm text-gray-500">Drafts</p>
           </div>
         </div>
@@ -540,7 +540,7 @@ function BidStats({ bids }: { bids: BidWithProject[] }) {
             <BanknotesIcon className="h-5 w-5 text-purple-600" />
           </div>
           <div>
-            <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.totalWonValue)}</p>
+            <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{formatCurrency(stats.totalWonValue)}</p>
             <p className="text-sm text-gray-500">Won Value</p>
           </div>
         </div>

@@ -16,7 +16,7 @@ export default function ActivityPage() {
           <ArrowLeftIcon className="h-5 w-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Activity Feed</h1>
+          <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight">Activity Feed</h1>
           <p className="text-sm text-gray-500 mt-0.5">View all activity across your organization</p>
         </div>
       </div>

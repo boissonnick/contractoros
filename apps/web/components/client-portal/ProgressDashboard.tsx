@@ -105,7 +105,7 @@ export function ProgressDashboard({
               <CalendarIcon className="h-8 w-8 text-blue-600 mx-auto mb-2" />
               {estimatedCompletionDate ? (
                 <>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">
                     {new Date(estimatedCompletionDate).toLocaleDateString('en-US', {
                       month: 'long',
                       day: 'numeric',

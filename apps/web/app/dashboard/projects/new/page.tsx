@@ -243,7 +243,7 @@ export default function NewProjectPage() {
           <ArrowLeftIcon className="h-4 w-4" />
           Back to Projects
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">Create New Project</h1>
+        <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight">Create New Project</h1>
         <p className="text-gray-500 mt-1">Set up a new job in a few simple steps</p>
       </div>
 

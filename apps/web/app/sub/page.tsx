@@ -118,7 +118,7 @@ export default function SubDashboard() {
               <DocumentTextIcon className="h-5 w-5 text-brand-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{stats.activeBids}</p>
+              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.activeBids}</p>
               <p className="text-sm text-gray-500">Active Bids</p>
             </div>
           </div>
@@ -130,7 +130,7 @@ export default function SubDashboard() {
               <CheckCircleIcon className="h-5 w-5 text-green-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{stats.acceptedBids}</p>
+              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.acceptedBids}</p>
               <p className="text-sm text-gray-500">Won Jobs</p>
             </div>
           </div>
@@ -142,7 +142,7 @@ export default function SubDashboard() {
               <ClockIcon className="h-5 w-5 text-yellow-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">${stats.pendingPayments.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">${stats.pendingPayments.toLocaleString()}</p>
               <p className="text-sm text-gray-500">Pending Payment</p>
             </div>
           </div>
@@ -154,7 +154,7 @@ export default function SubDashboard() {
               <BanknotesIcon className="h-5 w-5 text-purple-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">${stats.totalEarnings.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">${stats.totalEarnings.toLocaleString()}</p>
               <p className="text-sm text-gray-500">Total Earned</p>
             </div>
           </div>

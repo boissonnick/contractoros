@@ -141,7 +141,7 @@ export default function RFIsPage() {
       <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
         <Card className="p-4">
           <p className="text-sm text-gray-500">Total RFIs</p>
-          <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+          <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.total}</p>
         </Card>
         <Card className="p-4">
           <p className="text-sm text-gray-500">Open</p>

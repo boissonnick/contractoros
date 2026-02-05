@@ -100,7 +100,7 @@ export default function AdminOrgDetailPage() {
 
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{org.name}</h1>
+          <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{org.name}</h1>
           <p className="text-gray-500">{org.email || 'No email'}</p>
         </div>
         <Button

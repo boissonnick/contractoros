@@ -152,7 +152,7 @@ export function InsightCard({
 
           {/* Value and trend */}
           <div className="mt-1 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-gray-900">{value}</span>
+            <span className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{value}</span>
             {trend && (
               <span className={cn('flex items-center gap-0.5 text-sm font-medium', getTrendColor())}>
                 {getTrendIcon()}

@@ -83,13 +83,13 @@ export function ProfitabilityForecastCard({
       <div className="p-4 grid grid-cols-3 gap-4 text-center">
         <div>
           <p className="text-xs text-gray-500 uppercase tracking-wide">Revenue</p>
-          <p className="text-lg font-semibold text-gray-900">
+          <p className="text-lg font-semibold text-gray-900 font-heading tracking-tight">
             {formatCurrency(estimatedRevenue)}
           </p>
         </div>
         <div>
           <p className="text-xs text-gray-500 uppercase tracking-wide">Costs</p>
-          <p className="text-lg font-semibold text-gray-900">
+          <p className="text-lg font-semibold text-gray-900 font-heading tracking-tight">
             {formatCurrency(estimatedCosts)}
           </p>
         </div>

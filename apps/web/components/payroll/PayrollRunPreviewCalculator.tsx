@@ -154,7 +154,7 @@ export function PayrollRunPreviewCalculator({
             <UserGroupIcon className="h-4 w-4" />
             Employees
           </div>
-          <div className="text-xl font-semibold text-gray-900">
+          <div className="text-xl font-semibold text-gray-900 font-heading tracking-tight">
             {selectedEmployees.length}
           </div>
         </div>
@@ -163,7 +163,7 @@ export function PayrollRunPreviewCalculator({
             <ClockIcon className="h-4 w-4" />
             Total Hours
           </div>
-          <div className="text-xl font-semibold text-gray-900">
+          <div className="text-xl font-semibold text-gray-900 font-heading tracking-tight">
             {totals.totalHours.toFixed(1)}
           </div>
           {totals.overtimeHours > 0 && (
@@ -177,7 +177,7 @@ export function PayrollRunPreviewCalculator({
             <CurrencyDollarIcon className="h-4 w-4" />
             Est. Gross
           </div>
-          <div className="text-xl font-semibold text-gray-900">
+          <div className="text-xl font-semibold text-gray-900 font-heading tracking-tight">
             {formatCurrency(totals.estimatedGross)}
           </div>
         </div>

@@ -729,7 +729,7 @@ export default function SubInvoicesPage() {
               <DocumentTextIcon className="h-5 w-5 text-gray-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.total}</p>
               <p className="text-xs text-gray-500">Total Invoices</p>
             </div>
           </div>
@@ -740,7 +740,7 @@ export default function SubInvoicesPage() {
               <ClockIcon className="h-5 w-5 text-brand-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{stats.pending}</p>
+              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.pending}</p>
               <p className="text-xs text-gray-500">Pending</p>
             </div>
           </div>
@@ -751,7 +751,7 @@ export default function SubInvoicesPage() {
               <BanknotesIcon className="h-5 w-5 text-yellow-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.pendingAmount)}</p>
+              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{formatCurrency(stats.pendingAmount)}</p>
               <p className="text-xs text-gray-500">Pending Amount</p>
             </div>
           </div>
@@ -762,7 +762,7 @@ export default function SubInvoicesPage() {
               <CheckCircleIcon className="h-5 w-5 text-green-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.paidAmount)}</p>
+              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{formatCurrency(stats.paidAmount)}</p>
               <p className="text-xs text-gray-500">Total Paid</p>
             </div>
           </div>
@@ -847,7 +847,7 @@ export default function SubInvoicesPage() {
                 </div>
                 <div className="text-right flex items-center gap-3">
                   <div>
-                    <p className="text-lg font-semibold text-gray-900">
+                    <p className="text-lg font-semibold text-gray-900 font-heading tracking-tight">
                       {formatCurrency(invoice.total)}
                     </p>
                     {invoice.amountPaid > 0 && invoice.amountPaid < invoice.total && (

@@ -179,7 +179,7 @@ export default function EstimateDetailPage() {
             Back to Estimates
           </button>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-gray-900">{estimate.name}</h1>
+            <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{estimate.name}</h1>
             <Badge className={statusConfig[estimate.status]?.color || 'bg-gray-100 text-gray-700'}>
               {statusConfig[estimate.status]?.icon}
               <span className="ml-1">{statusConfig[estimate.status]?.label || estimate.status}</span>

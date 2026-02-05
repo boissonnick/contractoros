@@ -65,11 +65,11 @@ export function VarianceAnalysisCard({
         <div className="grid grid-cols-3 gap-4 text-center mb-4">
           <div>
             <p className="text-xs text-gray-500 uppercase tracking-wide">Estimated</p>
-            <p className="text-lg font-semibold text-gray-900">{formatCurrency(overall.estimatedTotal)}</p>
+            <p className="text-lg font-semibold text-gray-900 font-heading tracking-tight">{formatCurrency(overall.estimatedTotal)}</p>
           </div>
           <div>
             <p className="text-xs text-gray-500 uppercase tracking-wide">Actual</p>
-            <p className="text-lg font-semibold text-gray-900">{formatCurrency(overall.actualTotal)}</p>
+            <p className="text-lg font-semibold text-gray-900 font-heading tracking-tight">{formatCurrency(overall.actualTotal)}</p>
           </div>
           <div>
             <p className="text-xs text-gray-500 uppercase tracking-wide">Variance</p>

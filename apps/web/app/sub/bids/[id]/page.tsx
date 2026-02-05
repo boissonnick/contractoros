@@ -407,17 +407,17 @@ export default function SubBidDetailPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
                     <p className="text-sm text-gray-500">Total Bid Amount</p>
-                    <p className="text-2xl font-bold text-gray-900">{formatCurrency(bid.amount)}</p>
+                    <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{formatCurrency(bid.amount)}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Labor Cost</p>
-                    <p className="text-lg font-semibold text-gray-900">
+                    <p className="text-lg font-semibold text-gray-900 font-heading tracking-tight">
                       {bid.laborCost ? formatCurrency(bid.laborCost) : '-'}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Material Cost</p>
-                    <p className="text-lg font-semibold text-gray-900">
+                    <p className="text-lg font-semibold text-gray-900 font-heading tracking-tight">
                       {bid.materialCost ? formatCurrency(bid.materialCost) : '-'}
                     </p>
                   </div>
@@ -474,19 +474,19 @@ export default function SubBidDetailPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
                     <p className="text-sm text-gray-500">Proposed Start</p>
-                    <p className="text-lg font-semibold text-gray-900">
+                    <p className="text-lg font-semibold text-gray-900 font-heading tracking-tight">
                       {bid.proposedStartDate ? formatDate(bid.proposedStartDate) : '-'}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Proposed End</p>
-                    <p className="text-lg font-semibold text-gray-900">
+                    <p className="text-lg font-semibold text-gray-900 font-heading tracking-tight">
                       {bid.proposedEndDate ? formatDate(bid.proposedEndDate) : '-'}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Duration</p>
-                    <p className="text-lg font-semibold text-gray-900">
+                    <p className="text-lg font-semibold text-gray-900 font-heading tracking-tight">
                       {bid.timeline || '-'}
                     </p>
                   </div>

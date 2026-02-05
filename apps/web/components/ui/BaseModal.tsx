@@ -131,7 +131,7 @@ export default function BaseModal({
                       <div className="flex-1 min-w-0">
                         <Dialog.Title
                           as="h3"
-                          className="text-lg font-semibold text-gray-900"
+                          className="text-lg font-semibold text-gray-900 font-heading tracking-tight"
                         >
                           {title}
                         </Dialog.Title>

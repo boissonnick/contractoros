@@ -445,7 +445,7 @@ export default function OperationalReportsPage() {
       {/* Page Header with Export */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Operational Report</h1>
+          <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight">Operational Report</h1>
           <p className="text-sm text-gray-500 mt-1">{reportDate}</p>
         </div>
         <div className="relative">

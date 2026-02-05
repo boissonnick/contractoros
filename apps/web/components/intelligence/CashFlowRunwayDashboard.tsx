@@ -318,7 +318,7 @@ export default function CashFlowRunwayDashboard({ className }: CashFlowRunwayDas
             <p className="text-xs font-medium text-gray-500 mb-1">
               Weighted Avg Days Outstanding
             </p>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">
               {insights.weightedAvgDays}
               <span className="text-sm font-normal text-gray-500 ml-1">days</span>
             </p>
@@ -330,7 +330,7 @@ export default function CashFlowRunwayDashboard({ className }: CashFlowRunwayDas
           {/* Collection Rate */}
           <div className="rounded-lg bg-gray-50 p-4">
             <p className="text-xs font-medium text-gray-500 mb-1">Collection Rate</p>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">
               {insights.collectionRate.toFixed(1)}
               <span className="text-sm font-normal text-gray-500 ml-0.5">%</span>
             </p>
@@ -340,7 +340,7 @@ export default function CashFlowRunwayDashboard({ className }: CashFlowRunwayDas
           {/* Total Invoiced */}
           <div className="rounded-lg bg-gray-50 p-4">
             <p className="text-xs font-medium text-gray-500 mb-1">Total Invoiced</p>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">
               {formatCurrency(insights.totalInvoiced)}
             </p>
             <p className="text-xs text-gray-400 mt-1">

@@ -96,7 +96,7 @@ export default function MessagesPage() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Messages</h1>
+          <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight">Messages</h1>
           <p className="text-gray-500 mt-1">Team communication channels</p>
         </div>
       </div>

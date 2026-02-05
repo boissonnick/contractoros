@@ -153,7 +153,7 @@ export default function ClientDashboard() {
               <HomeIcon className="h-5 w-5 text-brand-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{projects.length}</p>
+              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{projects.length}</p>
               <p className="text-sm text-gray-500">Total Projects</p>
             </div>
           </div>
@@ -165,7 +165,7 @@ export default function ClientDashboard() {
               <PhotoIcon className="h-5 w-5 text-purple-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{recentPhotos.length}</p>
+              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{recentPhotos.length}</p>
               <p className="text-sm text-gray-500">Recent Photos</p>
             </div>
           </div>
@@ -177,7 +177,7 @@ export default function ClientDashboard() {
               <CurrencyDollarIcon className={`h-5 w-5 ${pendingAmount > 0 ? 'text-yellow-600' : 'text-green-600'}`} />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">${pendingAmount.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">${pendingAmount.toLocaleString()}</p>
               <p className="text-sm text-gray-500">
                 {pendingAmount > 0 ? 'Balance Due' : 'All Paid Up'}
               </p>

@@ -599,7 +599,7 @@ export default function NewEstimatePage() {
 
                 <div className="flex items-center justify-between py-3 border-t-2 border-gray-200">
                   <span className="text-lg font-semibold text-gray-900">Total</span>
-                  <span className="text-2xl font-bold text-gray-900">
+                  <span className="text-2xl font-bold text-gray-900 font-heading tracking-tight">
                     ${total.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </span>
                 </div>

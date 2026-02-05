@@ -152,7 +152,7 @@ export default function ProjectFinancesPage() {
               <ChartBarIcon className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(summary.budget)}</p>
+              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{formatCurrency(summary.budget)}</p>
               <p className="text-xs text-gray-500">Budget</p>
             </div>
           </div>
@@ -165,7 +165,7 @@ export default function ProjectFinancesPage() {
               <ArrowTrendingDownIcon className="h-5 w-5 text-red-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(summary.totalExpenses)}</p>
+              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{formatCurrency(summary.totalExpenses)}</p>
               <p className="text-xs text-gray-500">Total Expenses</p>
             </div>
           </div>
@@ -178,7 +178,7 @@ export default function ProjectFinancesPage() {
               <ArrowTrendingUpIcon className="h-5 w-5 text-green-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(summary.totalPaid)}</p>
+              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{formatCurrency(summary.totalPaid)}</p>
               <p className="text-xs text-gray-500">Revenue Collected</p>
             </div>
           </div>
@@ -198,7 +198,7 @@ export default function ProjectFinancesPage() {
             </div>
             <div>
               <p className={cn(
-                'text-2xl font-bold',
+                'text-2xl font-bold font-heading tracking-tight',
                 summary.grossProfit >= 0 ? 'text-green-700' : 'text-red-700'
               )}>
                 {formatCurrency(summary.grossProfit)}

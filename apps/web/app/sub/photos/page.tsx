@@ -327,7 +327,7 @@ export default function SubPhotosPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <p className="text-2xl font-bold text-gray-900">{totalPhotos}</p>
+          <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{totalPhotos}</p>
           <p className="text-sm text-gray-500">Total Photos</p>
         </div>
         <div className="bg-white rounded-xl border border-gray-200 p-4">
@@ -335,7 +335,7 @@ export default function SubPhotosPage() {
           <p className="text-sm text-gray-500">Approved</p>
         </div>
         <div className="bg-white rounded-xl border border-gray-200 p-4 col-span-2 sm:col-span-1">
-          <p className="text-2xl font-bold text-gray-900">{projects.length}</p>
+          <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{projects.length}</p>
           <p className="text-sm text-gray-500">Active Projects</p>
         </div>
       </div>

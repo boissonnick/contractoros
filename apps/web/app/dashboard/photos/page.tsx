@@ -8,7 +8,7 @@ export default function PhotosPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Project Photos</h1>
+        <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight">Project Photos</h1>
         <p className="text-gray-500 mt-1">View progress photos from all your projects</p>
       </div>
 

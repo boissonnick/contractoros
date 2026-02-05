@@ -251,7 +251,7 @@ export default function EmailHistoryPage() {
               <EnvelopeIcon className="h-5 w-5 text-gray-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{totalCount}</p>
+              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{totalCount}</p>
               <p className="text-xs text-gray-500">Total Sent</p>
             </div>
           </div>
@@ -262,7 +262,7 @@ export default function EmailHistoryPage() {
               <EnvelopeOpenIcon className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{stats.openRate}%</p>
+              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.openRate}%</p>
               <p className="text-xs text-gray-500">Open Rate</p>
             </div>
           </div>
@@ -273,7 +273,7 @@ export default function EmailHistoryPage() {
               <CheckCircleIcon className="h-5 w-5 text-green-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{stats.sent}</p>
+              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.sent}</p>
               <p className="text-xs text-gray-500">Delivered</p>
             </div>
           </div>
@@ -284,7 +284,7 @@ export default function EmailHistoryPage() {
               <XCircleIcon className="h-5 w-5 text-red-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{stats.failed}</p>
+              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.failed}</p>
               <p className="text-xs text-gray-500">Failed/Bounced</p>
             </div>
           </div>

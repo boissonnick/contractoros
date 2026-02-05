@@ -94,7 +94,7 @@ export default function SubProjectPage() {
       {/* Summary */}
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-white border border-gray-200 rounded-xl p-4 text-center">
-          <p className="text-2xl font-bold text-gray-900">{fmt(totalAgreed)}</p>
+          <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{fmt(totalAgreed)}</p>
           <p className="text-xs text-gray-500">Contract Total</p>
         </div>
         <div className="bg-white border border-gray-200 rounded-xl p-4 text-center">
@@ -102,7 +102,7 @@ export default function SubProjectPage() {
           <p className="text-xs text-gray-500">Paid</p>
         </div>
         <div className="bg-white border border-gray-200 rounded-xl p-4 text-center">
-          <p className="text-2xl font-bold text-gray-900">{fmt(totalAgreed - totalPaid)}</p>
+          <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{fmt(totalAgreed - totalPaid)}</p>
           <p className="text-xs text-gray-500">Remaining</p>
         </div>
       </div>

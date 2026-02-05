@@ -449,14 +449,14 @@ export default function NewInvoicePage() {
 
               <div className="flex justify-between py-3 border-t-2 border-gray-200">
                 <span className="text-lg font-semibold text-gray-900">Total</span>
-                <span className="text-2xl font-bold text-gray-900">
+                <span className="text-2xl font-bold text-gray-900 font-heading tracking-tight">
                   ${total.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </span>
               </div>
 
               <div className="flex justify-between py-2 bg-blue-50 px-3 rounded-lg">
                 <span className="font-medium text-blue-800">Amount Due</span>
-                <span className="text-xl font-bold text-blue-800">
+                <span className="text-xl font-bold text-blue-800 font-heading tracking-tight">
                   ${amountDue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </span>
               </div>

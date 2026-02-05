@@ -342,7 +342,7 @@ export default function ProjectsCrewPage() {
                 <UserGroupIcon className="h-5 w-5 text-brand-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{filteredMembers.length}</p>
+                <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{filteredMembers.length}</p>
                 <p className="text-xs text-gray-500">Team Members</p>
               </div>
             </div>
@@ -353,7 +353,7 @@ export default function ProjectsCrewPage() {
                 <BuildingOffice2Icon className="h-5 w-5 text-purple-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900">{filteredProjects.length}</p>
+                <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{filteredProjects.length}</p>
                 <p className="text-xs text-gray-500">Projects</p>
               </div>
             </div>
