@@ -87,6 +87,7 @@
  */
 
 import { AIModelProvider, AIKeyValidationResult } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * OpenAI model information returned from the API
@@ -177,7 +178,7 @@ export async function validateOpenAIKey(apiKey: string): Promise<AIKeyValidation
       models: chatModels.length > 0 ? chatModels : ['gpt-4o', 'gpt-4o-mini', 'gpt-3.5-turbo'],
     };
   } catch (error) {
-    console.error('[validateOpenAIKey] Network error:', error);
+    logger.error('Network error validating OpenAI key', { error, module: 'ai-key-validation' });
     return {
       valid: false,
       provider: 'openai',
@@ -267,7 +268,7 @@ export async function validateAnthropicKey(apiKey: string): Promise<AIKeyValidat
       models: ['claude-3-5-sonnet-20241022', 'claude-3-opus-20240229', 'claude-3-haiku-20240307'],
     };
   } catch (error) {
-    console.error('[validateAnthropicKey] Network error:', error);
+    logger.error('Network error validating Anthropic key', { error, module: 'ai-key-validation' });
     return {
       valid: false,
       provider: 'claude',
@@ -343,7 +344,7 @@ export async function validateGeminiKey(apiKey: string): Promise<AIKeyValidation
       models: models.length > 0 ? models : ['gemini-2.0-flash', 'gemini-1.5-pro'],
     };
   } catch (error) {
-    console.error('[validateGeminiKey] Network error:', error);
+    logger.error('Network error validating Gemini key', { error, module: 'ai-key-validation' });
     return {
       valid: false,
       provider: 'gemini',

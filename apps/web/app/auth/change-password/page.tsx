@@ -21,6 +21,7 @@ import {
   ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import { logger } from '@/lib/utils/logger';
 
 const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, 'Current password is required'),
@@ -71,7 +72,7 @@ export default function ChangePasswordPage() {
       setSuccess(true);
       toast.success('Password updated', 'Your password has been changed successfully');
     } catch (error: any) {
-      console.error('Change password error:', error);
+      logger.error('Change password error', { error, page: 'change-password' });
 
       if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
         toast.error('Incorrect password', 'Your current password is incorrect');

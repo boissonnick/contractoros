@@ -23,6 +23,7 @@ import { getStorage } from 'firebase-admin/storage';
 import { initializeAdminApp } from '@/lib/assistant/firebase-admin-init';
 import { PHOTO_ANALYSIS_PROMPT, SAFETY_PHOTO_PROMPT } from '@/lib/ai/prompts';
 import type { PhotoAnalysis } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 // Configuration
 const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024; // 20MB
@@ -63,7 +64,7 @@ async function verifyAuth(request: NextRequest): Promise<{ uid: string; orgId: s
       orgId: userData.orgId,
     };
   } catch (error) {
-    console.error('[Photo Analysis] Auth error:', error);
+    logger.error('[Photo Analysis] Auth error', { error, route: 'assistant-analyze-photo' });
     return null;
   }
 }
@@ -166,7 +167,7 @@ async function analyzeWithGeminiVision(
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error('[Photo Analysis] Gemini API error:', errorText);
+    logger.error('[Photo Analysis] Gemini API error', { error: errorText, route: 'assistant-analyze-photo' });
     throw new Error(`AI API error: ${response.status}`);
   }
 
@@ -201,7 +202,7 @@ async function analyzeWithGeminiVision(
         : undefined,
     };
   } catch (parseError) {
-    console.error('[Photo Analysis] Failed to parse AI response:', parseError);
+    logger.error('[Photo Analysis] Failed to parse AI response', { error: parseError, route: 'assistant-analyze-photo' });
     // Return basic analysis if parsing fails
     analysis = {
       description: responseText.slice(0, 500),
@@ -354,7 +355,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('[Photo Analysis] Error:', error);
+    logger.error('[Photo Analysis] Error', { error, route: 'assistant-analyze-photo' });
 
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 

@@ -32,6 +32,7 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 import { toast } from '@/components/ui/Toast';
+import { logger } from '@/lib/utils/logger';
 
 // Mock data for development
 const _mockSubmittals: Submittal[] = [
@@ -169,7 +170,7 @@ export default function SubmittalsPage() {
         setLoading(false);
       },
       (error) => {
-        console.error('Error fetching submittals:', error);
+        logger.error('Error fetching submittals', { error: error, page: 'dashboard-projects-id-submittals' });
         toast.error('Failed to load submittals');
         setLoading(false);
       }
@@ -235,7 +236,7 @@ export default function SubmittalsPage() {
       toast.success('Submittal created successfully');
       setIsCreateModalOpen(false);
     } catch (error) {
-      console.error('Error creating submittal:', error);
+      logger.error('Error creating submittal', { error: error, page: 'dashboard-projects-id-submittals' });
       toast.error('Failed to create submittal');
     }
   };
@@ -277,7 +278,7 @@ export default function SubmittalsPage() {
         });
       }
     } catch (error) {
-      console.error('Error updating submittal:', error);
+      logger.error('Error updating submittal', { error: error, page: 'dashboard-projects-id-submittals' });
       toast.error('Failed to update submittal');
     }
   };

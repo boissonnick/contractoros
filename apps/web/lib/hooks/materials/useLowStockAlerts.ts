@@ -15,6 +15,7 @@ import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
 import { LowStockAlert } from '@/types';
 import { convertTimestamp } from './utils';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================
 // Low Stock Alerts Hook
@@ -59,7 +60,7 @@ export function useLowStockAlerts() {
         setLoading(false);
       },
       (err) => {
-        console.error('Error fetching alerts:', err);
+        logger.error('Error fetching alerts', { error: err, hook: 'useLowStockAlerts' });
         setError(err as Error);
         setLoading(false);
       }

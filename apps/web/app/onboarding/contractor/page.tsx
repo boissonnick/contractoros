@@ -13,6 +13,7 @@ import {
   DocumentTextIcon,
   CloudArrowUpIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 type Step = 'info' | 'w9' | 'complete';
 
@@ -59,7 +60,7 @@ export default function ContractorOnboardingPage() {
       setStep('complete');
       setTimeout(() => router.push('/field'), 2000);
     } catch (error) {
-      console.error('Error completing onboarding:', error);
+      logger.error('Error completing onboarding', { error: error, page: 'onboarding-contractor' });
       toast.error('Something went wrong. Please try again.');
     } finally {
       setSaving(false);

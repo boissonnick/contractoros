@@ -22,6 +22,74 @@ import {
   writeBatch,
 } from 'firebase/firestore';
 import { UserProfile, UserRole, OnboardingStatus, OnboardingStep } from '@/types';
+import { logger } from '@/lib/utils/logger';
+
+// Compliance checklist items for new employees
+export interface ComplianceItem {
+  key: string;
+  label: string;
+  description: string;
+  required: boolean;
+  category: 'tax' | 'identification' | 'payroll' | 'safety' | 'policy';
+}
+
+export interface ComplianceItemStatus {
+  completed: boolean;
+  completedAt?: Date;
+  completedBy?: string;
+}
+
+export const COMPLIANCE_CHECKLIST: ComplianceItem[] = [
+  {
+    key: 'w4_form',
+    label: 'W-4 Tax Withholding',
+    description: 'Federal tax withholding form',
+    required: true,
+    category: 'tax',
+  },
+  {
+    key: 'i9_form',
+    label: 'I-9 Employment Eligibility',
+    description: 'Employment eligibility verification',
+    required: true,
+    category: 'identification',
+  },
+  {
+    key: 'direct_deposit',
+    label: 'Direct Deposit Authorization',
+    description: 'Bank account info for payroll',
+    required: false,
+    category: 'payroll',
+  },
+  {
+    key: 'emergency_contact',
+    label: 'Emergency Contact Form',
+    description: 'Emergency contact information',
+    required: true,
+    category: 'safety',
+  },
+  {
+    key: 'handbook_acknowledgment',
+    label: 'Employee Handbook Acknowledgment',
+    description: 'Signed acknowledgment of company policies',
+    required: true,
+    category: 'policy',
+  },
+  {
+    key: 'safety_orientation',
+    label: 'Safety Orientation',
+    description: 'Completed safety training and orientation',
+    required: true,
+    category: 'safety',
+  },
+  {
+    key: 'state_tax_form',
+    label: 'State Tax Withholding',
+    description: 'State tax withholding form (if applicable)',
+    required: false,
+    category: 'tax',
+  },
+];
 
 // Onboarding step definitions
 export const ONBOARDING_STEPS: { id: OnboardingStep; label: string; description: string }[] = [
@@ -144,7 +212,7 @@ export async function initiateOnboarding(
     // Get user document
     const userDoc = await getDoc(doc(db, 'users', userId));
     if (!userDoc.exists()) {
-      console.error(`User ${userId} not found`);
+      logger.error('User ${userId} not found', { component: 'onboarding-user-onboarding' });
       return null;
     }
 
@@ -194,7 +262,7 @@ export async function initiateOnboarding(
 
     return onboardingStatus;
   } catch (error) {
-    console.error('Error initiating onboarding:', error);
+    logger.error('Error initiating onboarding', { error: error, component: 'onboarding-user-onboarding' });
     throw error;
   }
 }
@@ -244,7 +312,7 @@ export async function sendWelcomeEmail(
 
     return true;
   } catch (error) {
-    console.error('Error sending welcome email:', error);
+    logger.error('Error sending welcome email', { error: error, component: 'onboarding-user-onboarding' });
     return false;
   }
 }
@@ -286,7 +354,7 @@ export async function setupUserDefaults(user: UserProfile): Promise<void> {
 
     await batch.commit();
   } catch (error) {
-    console.error('Error setting up user defaults:', error);
+    logger.error('Error setting up user defaults', { error: error, component: 'onboarding-user-onboarding' });
     throw error;
   }
 }
@@ -339,7 +407,7 @@ export async function assignToDefaultProjects(
 
     return assignedProjectIds;
   } catch (error) {
-    console.error('Error assigning to default projects:', error);
+    logger.error('Error assigning to default projects', { error: error, component: 'onboarding-user-onboarding' });
     throw error;
   }
 }
@@ -385,7 +453,7 @@ export async function assignToProjects(
 
     await batch.commit();
   } catch (error) {
-    console.error('Error assigning to projects:', error);
+    logger.error('Error assigning to projects', { error: error, component: 'onboarding-user-onboarding' });
     throw error;
   }
 }
@@ -408,7 +476,7 @@ export async function updateOnboardingStep(
     const statusSnap = await getDocs(statusQuery);
 
     if (statusSnap.empty) {
-      console.warn(`No onboarding status found for user ${userId}`);
+      logger.warn('No onboarding status found for user ${userId}', { component: 'onboarding-user-onboarding' });
       return;
     }
 
@@ -460,7 +528,7 @@ export async function updateOnboardingStep(
 
     await updateDoc(statusDoc.ref, updateData);
   } catch (error) {
-    console.error('Error updating onboarding step:', error);
+    logger.error('Error updating onboarding step', { error: error, component: 'onboarding-user-onboarding' });
     throw error;
   }
 }
@@ -498,7 +566,7 @@ export async function getOnboardingStatus(
       steps: data.steps,
     };
   } catch (error) {
-    console.error('Error getting onboarding status:', error);
+    logger.error('Error getting onboarding status', { error: error, component: 'onboarding-user-onboarding' });
     return null;
   }
 }
@@ -547,7 +615,7 @@ export async function resendWelcomeEmail(
     const user = { ...userDoc.data(), uid: userId } as UserProfile;
     return await sendWelcomeEmail(user);
   } catch (error) {
-    console.error('Error resending welcome email:', error);
+    logger.error('Error resending welcome email', { error: error, component: 'onboarding-user-onboarding' });
     return false;
   }
 }
@@ -585,6 +653,7 @@ const userOnboarding = {
   bulkInitiateOnboarding,
   resendWelcomeEmail,
   ONBOARDING_STEPS,
+  COMPLIANCE_CHECKLIST,
 };
 
 export default userOnboarding;

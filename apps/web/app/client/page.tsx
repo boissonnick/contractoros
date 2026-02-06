@@ -18,6 +18,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { FirestoreError } from '@/components/ui';
 import { formatDate } from '@/lib/date-utils';
+import { logger } from '@/lib/utils/logger';
 
 export default function ClientDashboard() {
   const { user, profile } = useAuth();
@@ -70,7 +71,7 @@ export default function ClientDashboard() {
       setInvoices(invoicesSnap.docs.map(d => ({ id: d.id, ...d.data() })) as Invoice[]);
 
     } catch (error) {
-      console.error('Error fetching client data:', error);
+      logger.error('Error fetching client data', { error, page: 'client-dashboard' });
       setFetchError('Failed to load data. The database may be unreachable.');
     } finally {
       setLoading(false);

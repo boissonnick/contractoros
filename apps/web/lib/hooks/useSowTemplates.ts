@@ -16,6 +16,7 @@ import {
   orderBy,
 } from 'firebase/firestore';
 import { ScopeMaterial } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 export interface SowTemplateItem {
   title: string;
@@ -76,7 +77,7 @@ export function useSowTemplates() {
 
       setTemplates(data);
     } catch (err) {
-      console.error('Error loading SOW templates:', err);
+      logger.error('Error loading SOW templates', { error: err, hook: 'useSowTemplates' });
       setError(err instanceof Error ? err : new Error('Failed to load templates'));
     } finally {
       setLoading(false);

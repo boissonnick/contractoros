@@ -13,6 +13,7 @@ import {
 import { db } from '@/lib/firebase/config';
 import { Subcontractor, SubcontractorDocument, SubcontractorMetrics, Project, SubAssignment } from '@/types';
 import { useAuth } from '@/lib/auth';
+import { logger } from '@/lib/utils/logger';
 
 // Safe date conversion helper - handles Timestamp, Date, string, or undefined
 function safeToDate(value: unknown): Date | undefined {
@@ -210,7 +211,7 @@ export function useSubcontractor(subId: string | null) {
             });
           }
         } catch (err) {
-          console.error(`Error fetching project ${projectId}:`, err);
+          logger.error(`Error fetching project ${projectId}`, { error: err, hook: 'useSubcontractor' });
         }
       }
 
@@ -223,7 +224,7 @@ export function useSubcontractor(subId: string | null) {
 
       setLinkedProjects(linked);
     } catch (err) {
-      console.error('Error loading subcontractor:', err);
+      logger.error('Error loading subcontractor', { error: err, hook: 'useSubcontractor' });
       setError(err instanceof Error ? err : new Error('Failed to load subcontractor'));
     } finally {
       setLoading(false);

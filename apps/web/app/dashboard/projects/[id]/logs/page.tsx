@@ -29,6 +29,7 @@ import {
   ChevronRightIcon,
 } from '@heroicons/react/24/outline';
 import { Project, DailyLog } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 interface DailyLogWithId extends DailyLog {
   id: string;
@@ -96,7 +97,7 @@ export default function ProjectLogsPage() {
       })) as DailyLogWithId[];
       setLogs(logsData);
     } catch (error) {
-      console.error('Error loading logs:', error);
+      logger.error('Error loading logs', { error: error, page: 'dashboard-projects-id-logs' });
       toast.error('Failed to load logs');
     } finally {
       setLoading(false);
@@ -146,7 +147,7 @@ export default function ProjectLogsPage() {
       });
       loadProjectAndLogs();
     } catch (error) {
-      console.error('Error creating log:', error);
+      logger.error('Error creating log', { error: error, page: 'dashboard-projects-id-logs' });
       toast.error('Failed to create log. Please try again.');
     } finally {
       setSaving(false);

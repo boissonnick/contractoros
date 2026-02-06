@@ -17,6 +17,7 @@ import {
   DocumentData,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { logger } from '@/lib/utils/logger';
 import type {
   ParsedQuery,
   QueryResult,
@@ -423,7 +424,7 @@ export async function executeQuery<T = DocumentData>(
     return formatResults(items, parsedQuery, executionTimeMs);
 
   } catch (error) {
-    console.error('[QueryExecutor] Error executing query:', error);
+    logger.error('Error executing query', { error, module: 'query-executor' });
 
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 

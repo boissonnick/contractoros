@@ -4,6 +4,7 @@ import React from 'react';
 import { useAuth } from '@/lib/auth';
 import AuthGuard from '@/components/auth/AuthGuard';
 import AppShell from '@/components/ui/AppShell';
+import { SectionErrorBoundary } from '@/components/ui/SectionErrorBoundary';
 import { NavItem } from '@/types';
 import {
   HomeIcon,
@@ -11,6 +12,8 @@ import {
   CalendarDaysIcon,
   BanknotesIcon,
   CameraIcon,
+  ShieldCheckIcon,
+  RocketLaunchIcon,
 } from '@heroicons/react/24/outline';
 
 const navItems: NavItem[] = [
@@ -19,6 +22,8 @@ const navItems: NavItem[] = [
   { label: 'Schedule', href: '/sub/schedule', icon: CalendarDaysIcon },
   { label: 'Invoices', href: '/sub/invoices', icon: BanknotesIcon },
   { label: 'Photos', href: '/sub/photos', icon: CameraIcon },
+  { label: 'Compliance', href: '/sub/compliance', icon: ShieldCheckIcon },
+  { label: 'Onboarding', href: '/sub/onboarding', icon: RocketLaunchIcon },
 ];
 
 function SubLayoutContent({ children }: { children: React.ReactNode }) {
@@ -30,7 +35,9 @@ function SubLayoutContent({ children }: { children: React.ReactNode }) {
       userDisplayName={profile?.displayName}
       onSignOut={signOut}
     >
-      {children}
+      <SectionErrorBoundary sectionName="Sub Portal">
+        {children}
+      </SectionErrorBoundary>
     </AppShell>
   );
 }

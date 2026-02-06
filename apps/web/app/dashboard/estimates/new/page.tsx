@@ -6,7 +6,7 @@ import { useAuth } from '@/lib/auth';
 import { Button, Card } from '@/components/ui';
 import { toast } from '@/components/ui/Toast';
 import { Estimate, EstimateLineItem } from '@/types';
-import { createEstimate, calculateEstimateTotals } from '@/lib/hooks/useEstimates';
+import { createEstimate } from '@/lib/hooks/useEstimates';
 import {
   ArrowLeftIcon,
   PlusIcon,
@@ -18,6 +18,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
 import { getNextNumber } from '@/lib/utils/auto-number';
+import { logger } from '@/lib/utils/logger';
 
 const unitOptions = [
   { value: 'each', label: 'Each' },
@@ -215,7 +216,7 @@ export default function NewEstimatePage() {
         const nextNum = await getNextNumber(profile.orgId, 'estimate');
         setEstimateNumber(nextNum);
       } catch (error) {
-        console.error('Failed to load estimate number:', error);
+        logger.error('Failed to load estimate number', { error, page: 'new-estimate' });
         // Fallback to timestamp-based number
         setEstimateNumber(`EST-${String(Date.now()).slice(-6)}`);
       } finally {
@@ -312,7 +313,7 @@ export default function NewEstimatePage() {
       toast.success('Estimate created');
       router.push(`/dashboard/estimates/${estimateId}`);
     } catch (error) {
-      console.error('Error creating estimate:', error);
+      logger.error('Error creating estimate', { error, page: 'new-estimate' });
       toast.error('Failed to create estimate');
     } finally {
       setSaving(false);

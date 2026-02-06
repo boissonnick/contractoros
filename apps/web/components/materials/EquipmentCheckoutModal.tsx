@@ -9,6 +9,7 @@ import BaseModal from '@/components/ui/BaseModal';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { EquipmentItem } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 // Checkout schema
 const checkoutSchema = z.object({
@@ -81,7 +82,7 @@ export default function EquipmentCheckoutModal({
       );
       onClose();
     } catch (error) {
-      console.error('Error checking out equipment:', error);
+      logger.error('Error checking out equipment', { error: error, component: 'EquipmentCheckoutModal' });
     } finally {
       setIsSubmitting(false);
     }
@@ -93,7 +94,7 @@ export default function EquipmentCheckoutModal({
       await onReturn(data.condition, data.notes || undefined);
       onClose();
     } catch (error) {
-      console.error('Error returning equipment:', error);
+      logger.error('Error returning equipment', { error: error, component: 'EquipmentCheckoutModal' });
     } finally {
       setIsSubmitting(false);
     }

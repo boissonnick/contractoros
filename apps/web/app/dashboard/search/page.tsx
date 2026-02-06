@@ -8,6 +8,7 @@ import { searchAll, SearchResult, SearchEntityType, ENTITY_TYPE_LABELS } from '@
 import { SearchResultList } from '@/components/search';
 import { PageHeader } from '@/components/ui';
 import { SkeletonList } from '@/components/ui/Skeleton';
+import { logger } from '@/lib/utils/logger';
 
 const ALL_ENTITY_TYPES: SearchEntityType[] = [
   'project',
@@ -50,7 +51,7 @@ function SearchPageContent() {
       });
       setResults(searchResults);
     } catch (error) {
-      console.error('Search error:', error);
+      logger.error('Search error', { error: error, page: 'dashboard-search' });
       setResults([]);
     } finally {
       setLoading(false);

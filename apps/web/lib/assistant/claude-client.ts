@@ -16,6 +16,7 @@ import {
 } from './types';
 import { buildContextSummary } from './prompts';
 import { getAuth } from 'firebase/auth';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * Configuration for the Claude client
@@ -47,7 +48,7 @@ async function getIdToken(): Promise<string | null> {
     }
     return null;
   } catch (error) {
-    console.warn('[Assistant] Failed to get ID token:', error);
+    logger.warn('Failed to get ID token', { error, module: 'claude-client' });
     return null;
   }
 }

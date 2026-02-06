@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getFirestore } from 'firebase-admin/firestore';
 import { initializeAdminApp } from '@/lib/assistant/firebase-admin-init';
+import { logger } from '@/lib/utils/logger';
 
 async function validateClientToken(token: string) {
   await initializeAdminApp();
@@ -55,7 +56,7 @@ export async function GET(
 
     return NextResponse.json({ selections });
   } catch (error) {
-    console.error('Error fetching selections:', error);
+    logger.error('Error fetching selections', { error, route: 'client-selections' });
     return NextResponse.json({ error: 'Failed to fetch selections' }, { status: 500 });
   }
 }
@@ -111,7 +112,7 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, ...updates });
   } catch (error) {
-    console.error('Error updating selection:', error);
+    logger.error('Error updating selection', { error, route: 'client-selections' });
     return NextResponse.json({ error: 'Failed to update selection' }, { status: 500 });
   }
 }

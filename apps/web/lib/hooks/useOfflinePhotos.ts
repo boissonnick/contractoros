@@ -16,6 +16,7 @@ import {
 import { useNetworkStatus } from '@/lib/offline/network-status';
 import { useAuth } from '@/lib/auth';
 import { toast } from '@/components/ui/Toast';
+import { logger } from '@/lib/utils/logger';
 
 interface UseOfflinePhotosOptions {
   projectId?: string;
@@ -73,7 +74,7 @@ export function useOfflinePhotos(options: UseOfflinePhotosOptions = {}): UseOffl
       // Only show non-completed photos
       setPendingPhotos(photos.filter((p) => p.syncStatus !== 'completed'));
     } catch (error) {
-      console.error('Failed to load pending photos:', error);
+      logger.error('Failed to load pending photos', { error: error, hook: 'useOfflinePhotos' });
     }
   }, [projectId, service]);
 
@@ -130,13 +131,13 @@ export function useOfflinePhotos(options: UseOfflinePhotosOptions = {}): UseOffl
         // If online, attempt immediate upload
         if (isOnline && autoSync) {
           setTimeout(() => {
-            service.uploadPhoto(localId).catch(console.error);
+            service.uploadPhoto(localId).catch((err) => logger.error('Async operation failed', { error: err, hook: 'useOfflinePhotos' }));
           }, 500);
         }
 
         return localId;
       } catch (error) {
-        console.error('Failed to queue photo:', error);
+        logger.error('Failed to queue photo', { error: error, hook: 'useOfflinePhotos' });
         toast.error('Failed to save photo');
         return null;
       }
@@ -174,7 +175,7 @@ export function useOfflinePhotos(options: UseOfflinePhotosOptions = {}): UseOffl
       await loadPhotos();
       return result;
     } catch (error) {
-      console.error('Sync failed:', error);
+      logger.error('Sync failed', { error: error, hook: 'useOfflinePhotos' });
       toast.error('Sync failed');
       return null;
     } finally {
@@ -195,7 +196,7 @@ export function useOfflinePhotos(options: UseOfflinePhotosOptions = {}): UseOffl
       await loadPhotos();
       return result;
     } catch (error) {
-      console.error('Retry failed:', error);
+      logger.error('Retry failed', { error: error, hook: 'useOfflinePhotos' });
       toast.error('Retry failed');
       return null;
     }
@@ -208,7 +209,7 @@ export function useOfflinePhotos(options: UseOfflinePhotosOptions = {}): UseOffl
         await service.deletePendingPhoto(localId);
         await loadPhotos();
       } catch (error) {
-        console.error('Failed to delete photo:', error);
+        logger.error('Failed to delete photo', { error: error, hook: 'useOfflinePhotos' });
         throw error;
       }
     },
@@ -222,7 +223,7 @@ export function useOfflinePhotos(options: UseOfflinePhotosOptions = {}): UseOffl
         await service.updatePendingPhoto(localId, updates);
         await loadPhotos();
       } catch (error) {
-        console.error('Failed to update photo:', error);
+        logger.error('Failed to update photo', { error: error, hook: 'useOfflinePhotos' });
         throw error;
       }
     },

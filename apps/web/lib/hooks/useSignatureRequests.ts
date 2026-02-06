@@ -14,6 +14,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { SignatureRequest } from '@/lib/esignature/types';
+import { logger } from '@/lib/utils/logger';
 
 interface UseSignatureRequestsOptions {
   projectId?: string;
@@ -86,7 +87,7 @@ export function useSignatureRequests({
         setLoading(false);
       },
       (err) => {
-        console.error('Error fetching signature requests:', err);
+        logger.error('Error fetching signature requests', { error: err, hook: 'useSignatureRequests' });
         setError(err as Error);
         setLoading(false);
       }

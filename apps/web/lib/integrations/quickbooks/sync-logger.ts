@@ -7,6 +7,7 @@
 
 import { adminDb, Timestamp } from '@/lib/firebase/admin';
 import { AccountingProvider } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 // Extended action type to include customers
 export type SyncAction =
@@ -79,7 +80,7 @@ export async function completeSyncLog(
   const doc = await docRef.get();
 
   if (!doc.exists) {
-    console.error(`Sync log ${logId} not found`);
+    logger.error('Sync log ${logId} not found', { component: 'integrations-quickbooks-sync-logger' });
     return;
   }
 
@@ -110,7 +111,7 @@ export async function failSyncLog(
   const doc = await docRef.get();
 
   if (!doc.exists) {
-    console.error(`Sync log ${logId} not found`);
+    logger.error('Sync log ${logId} not found', { component: 'integrations-quickbooks-sync-logger' });
     return;
   }
 

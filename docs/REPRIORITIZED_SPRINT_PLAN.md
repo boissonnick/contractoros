@@ -1690,7 +1690,405 @@ Sprint 120: LAST (cleanup after all building)
 
 ---
 
-**Document Version:** 5.0
+## PHASE 18: PRODUCTION HARDENING & TEST COVERAGE (Sprints 121-124)
+
+> **Target Market:** Residential GCs (home builders, remodelers, custom homes)
+> **Balance:** 50% New Features / 50% Hardening & Optimization
+> **Strategic Priorities:** Native Mobile, Integrations, AI/Automation
+> **Goal:** Make the platform bulletproof before adding major new capabilities. Covers deferred work from Sprints 98-105 plus new hardening.
+
+### Sprint 121: E2E Regression & Smoke Testing
+**Priority:** P0 | **Hours:** 8-12
+
+Run full E2E test suites against the live app via Chrome MCP. Fix all critical/high bugs found.
+
+- Execute `e2e/suites/00-smoke.md` (all pages load)
+- Execute `e2e/suites/22-ui-ux-mobile.md` at 375x812
+- Execute `e2e/suites/02-rbac.md` (auth/permissions)
+- Fix all critical + high bugs discovered
+- Document results in `e2e/results/sprint-121-regression.md`
+
+**Acceptance:** Smoke 100%, Mobile 95%+, RBAC 100%, all critical bugs fixed
+
+---
+
+### Sprint 122: ESLint Cleanup & Console Cleanup Mega-Sprint
+**Priority:** P1 | **Hours:** 10-14
+
+Combine ESLint warning cleanup (1,050 → <300) and console statement cleanup (1,041 → <50).
+
+**Subagent Plan (4 agents, no file overlap):**
+| Agent | Type | Task | Files |
+|-------|------|------|-------|
+| Agent 1 | general-purpose | `no-unused-vars` cleanup | `components/**` (~350 warnings) |
+| Agent 2 | general-purpose | `no-unused-vars` cleanup | `app/**`, `lib/**` (~350 warnings) |
+| Agent 3 | general-purpose | `no-img-element` (40) + `exhaustive-deps` (54) | All files |
+| Agent 4 | general-purpose | Create `lib/utils/logger.ts`, replace 1,041 console.* calls | All files |
+
+**Acceptance:** ESLint warnings <300, console statements <50, `npx tsc --noEmit` passes, all tests pass
+
+---
+
+### Sprint 123: Unit Test Coverage Push (1,502 → 2,000+)
+**Priority:** P1 | **Hours:** 10-14
+
+Cover remaining high-value hooks, utilities, and new code from Sprints 106-120.
+
+**Subagent Plan (5 agents, separate test files):**
+| Agent | Type | Hooks to Test | Est. Tests |
+|-------|------|---------------|------------|
+| Agent 1 | general-purpose | `useInvoices`, `useEstimates`, `useRecurringInvoices` | ~80 |
+| Agent 2 | general-purpose | `useTimesheets`, `useTimeEntries`, `useAvailability` | ~60 |
+| Agent 3 | general-purpose | `useProjects`, `useClients`, `useDocuments` | ~60 |
+| Agent 4 | general-purpose | Formatters, validators, QBO sync utils, logger | ~100 |
+| Agent 5 | general-purpose | `useAccountingConnection`, `useEstimateStats`, `useCompanyStats` | ~50 |
+
+**Acceptance:** 2,000+ total tests, all passing, no OOM regressions
+
+---
+
+### Sprint 124: Error Handling, Boundaries & Loading States
+**Priority:** P1 | **Hours:** 8-10
+
+Comprehensive error resilience across all portals.
+
+- SectionErrorBoundary on all dashboard widget sections (30+ sections)
+- Audit all catch blocks in `lib/hooks/*.ts` — no silent swallows, add toast errors
+- Skeleton loading screens on 15 highest-traffic pages
+- Retry logic for failed Firestore operations (exponential backoff wrapper)
+- Graceful offline degradation (show cached data + "offline" banner)
+- `useEffect` cleanup audit — no memory leaks in React strict mode
+
+**Acceptance:** Error boundaries on all portal layouts + 30 sections, skeleton loading on 15 pages, no silent catch blocks
+
+---
+
+## PHASE 19: INTEGRATIONS & ECOSYSTEM (Sprints 125-128)
+
+> **Goal:** Expand the integration ecosystem. Residential GCs need accounting, payments, calendars, and leads flowing between tools.
+
+### Sprint 125: Stripe Connect — Online Payments for Clients
+**Priority:** P0 | **Hours:** 10-14
+
+Enable real client payments. GCs connect their Stripe account, clients pay invoices online.
+
+- Stripe Connect onboarding flow (Express accounts for GCs)
+- "Pay Now" button on client portal invoices (Stripe Checkout)
+- Payment confirmation webhook → mark invoice as paid
+- Partial payment support (pay custom amount)
+- Payment receipt email to client
+- Payout dashboard for GC (Stripe balance, upcoming payouts)
+- **Files:** `lib/integrations/stripe/`, `app/api/payments/`, `app/pay/[token]/page.tsx` (enhance existing)
+
+**Acceptance:** End-to-end: GC sends invoice → client clicks Pay Now → Stripe Checkout → invoice marked paid → GC sees payout
+
+---
+
+### Sprint 126: Google Calendar & Apple Calendar Sync
+**Priority:** P1 | **Hours:** 8-10
+
+Sync ContractorOS schedule events to Google Calendar and generate .ics files for Apple Calendar.
+
+- Google Calendar OAuth + Calendar API write access
+- Push schedule events → Google Calendar (create/update/delete)
+- Pull Google Calendar events → ContractorOS (optional, read-only)
+- .ics file generation for Apple Calendar (download per event + full calendar export)
+- Two-way sync toggle in settings
+- Sync status indicator on schedule page
+- **Files:** `lib/integrations/google-calendar/`, `app/api/integrations/calendar/`, `lib/utils/ics-generator.ts`
+
+**Acceptance:** Events created in ContractorOS appear in Google Calendar within 30s, .ics download works
+
+---
+
+### Sprint 127: Xero Accounting Integration
+**Priority:** P2 | **Hours:** 10-14
+
+Second accounting platform. Many residential GCs outside the US use Xero.
+
+- Xero OAuth 2.0 connection flow
+- Contact sync (Clients ↔ Xero Contacts)
+- Invoice sync (push to Xero on send, pull payment status)
+- Expense sync (push approved expenses to Xero)
+- Account mapping UI (reuse QBO pattern — adapt `QBOAccountMapping.tsx`)
+- Sync status dashboard (reuse `QBOSyncStatus.tsx` pattern)
+- **Files:** `lib/integrations/xero/`, `app/api/integrations/xero/`, `components/settings/XeroAccountMapping.tsx`
+
+**Acceptance:** Xero connection, invoice sync, expense sync all working. Account mapping UI functional.
+
+---
+
+### Sprint 128: Zapier / Make.com Webhook Integration
+**Priority:** P2 | **Hours:** 6-8
+
+Enable ContractorOS to connect to 5,000+ apps via Zapier/Make.com webhooks.
+
+- Outbound webhooks: Fire events on key actions (invoice sent, payment received, project created, task completed, estimate accepted)
+- Webhook configuration UI (URL, events, secret key, test button)
+- Webhook delivery log (success/failure, retry on failure)
+- Inbound webhook endpoint for triggers (create task, add note, update status)
+- API key management for inbound auth
+- **Files:** `lib/webhooks/`, `app/api/webhooks/`, `app/dashboard/settings/integrations/webhooks/page.tsx`
+
+**Acceptance:** Outbound webhooks fire on 5 key events, inbound endpoint creates tasks, delivery log shows history
+
+---
+
+## PHASE 20: AI & INTELLIGENCE (Sprints 129-132)
+
+> **Goal:** Differentiate from competitors with AI capabilities no one else has. Residential GCs get smart automation.
+
+### Sprint 129: AI Estimate Builder
+**Priority:** P0 | **Hours:** 10-14
+
+Use AI to generate estimates from project descriptions. The killer feature for residential GCs.
+
+- "Generate Estimate with AI" button on new estimate page
+- Input: project description (free text), square footage, project type, location
+- AI generates line items with quantities, unit prices, labor hours
+- Uses material price data (FRED/BLS integration already exists) for current pricing
+- Regional cost adjustment based on ZIP code
+- User reviews, edits, accepts/rejects each line item
+- Save as draft estimate with all AI-generated items
+- **Files:** `app/api/ai/generate-estimate/route.ts`, `components/estimates/AIEstimateBuilder.tsx`, `lib/ai/estimate-generator.ts`
+
+**Acceptance:** User enters "2,500 sq ft kitchen remodel in Portland, OR" → AI generates 20-40 line items with realistic prices → user edits and saves
+
+---
+
+### Sprint 130: AI Schedule Optimizer
+**Priority:** P1 | **Hours:** 8-10
+
+Smart scheduling that considers weather, crew availability, task dependencies, and trade sequencing.
+
+- "Optimize Schedule" button on schedule page
+- Analyze: current tasks, dependencies, crew availability, weather forecast
+- Suggest: optimal task ordering, crew assignments, weather-adjusted dates
+- Conflict detection: overlapping crew, missing dependencies, weather risks
+- One-click apply suggestions or manual review
+- Weather integration with real API (replace mock data in WeatherWidget)
+- **Files:** `app/api/ai/optimize-schedule/route.ts`, `components/schedule/ScheduleOptimizer.tsx`, `lib/ai/schedule-optimizer.ts`
+
+**Acceptance:** Optimizer suggests reordering based on weather + dependencies, user can apply with one click
+
+---
+
+### Sprint 131: Smart Notifications & Auto-Categorization
+**Priority:** P1 | **Hours:** 6-8
+
+AI-powered notification intelligence and expense auto-categorization.
+
+- Smart notification digest: AI summarizes daily activity into 3-5 key takeaways
+- Priority scoring: AI ranks notifications by urgency and business impact
+- Expense auto-categorization: Receipt OCR (exists) → AI assigns category, project, vendor
+- Invoice payment prediction: Based on client payment history
+- Anomaly alerts: Flag unusual expenses, late payments, budget overruns
+- **Files:** `lib/ai/notification-digest.ts`, `lib/ai/expense-categorizer.ts`, `lib/ai/payment-predictor.ts`
+
+**Acceptance:** Daily digest summarizes activity, expenses auto-categorize from receipts, anomaly alerts fire
+
+---
+
+### Sprint 132: AI Assistant Chat Enhancement
+**Priority:** P2 | **Hours:** 8-10
+
+Enhance existing AI assistant with contextual project knowledge and action capabilities.
+
+- Context-aware: AI knows current project, recent activity, financial status
+- Actionable: "Create a task for electrician rough-in next Tuesday" → creates task
+- Queryable: "What's the margin on the Johnson kitchen project?" → pulls real data
+- Document generation: "Draft a change order for the added bathroom" → generates CO
+- Natural language search: "Show me all overdue invoices over $5,000" → filters and displays
+- Voice input support (integrate with existing voice log infrastructure)
+- **Files:** `lib/ai/assistant-context.ts`, `app/api/ai/assistant/route.ts`, `components/ai/AIAssistantPanel.tsx` (enhance)
+
+**Acceptance:** AI assistant answers project questions, creates tasks, generates documents from natural language
+
+---
+
+## PHASE 21: NATIVE MOBILE FOUNDATION (Sprints 133-136)
+
+> **Goal:** Begin the React Native mobile app. Highest-value screens for field workers and GCs on the go.
+
+### Sprint 133: React Native Project Setup & Shared Types
+**Priority:** P0 | **Hours:** 10-14
+
+Bootstrap the React Native project with shared code architecture.
+
+- Initialize React Native project with Expo (managed workflow)
+- Shared TypeScript types package (`packages/shared/types/`)
+- Firebase React Native SDK setup (Auth, Firestore)
+- Navigation structure (React Navigation): Dashboard, Projects, Schedule, Time, Messages, More
+- Authentication flow: Login, session persistence, biometric unlock
+- Theme system matching web (brand colors, Outfit font, design tokens)
+- **Files:** `apps/mobile/` (new), `packages/shared/` (new)
+
+**Acceptance:** App runs on iOS simulator, Firebase auth works, navigates between 6 main screens (empty shells)
+
+---
+
+### Sprint 134: Mobile — Dashboard & Projects
+**Priority:** P0 | **Hours:** 10-14
+
+Build the two most-used screens with native components.
+
+- Dashboard: KPI cards (revenue, active projects, outstanding AR, tasks due), quick actions, recent activity
+- Projects list: Search, filter by status, project cards with photo/progress/budget
+- Project detail: Tabbed view (Overview, Tasks, Photos, Finances, Documents)
+- Pull-to-refresh on all lists
+- Offline data caching with AsyncStorage / WatermelonDB
+- Push notification setup (Firebase Cloud Messaging)
+- **Files:** `apps/mobile/screens/Dashboard.tsx`, `apps/mobile/screens/Projects.tsx`, `apps/mobile/screens/ProjectDetail.tsx`
+
+**Acceptance:** Dashboard shows live KPI data, project list loads with search/filter, project detail shows 5 tabs
+
+---
+
+### Sprint 135: Mobile — Time Tracking & Schedule
+**Priority:** P0 | **Hours:** 8-10
+
+Field workers' most critical screens.
+
+- Time clock: Large clock-in/out button, GPS location capture, project selector
+- Active timer display with elapsed time
+- Today's schedule: List view of events with project, location, crew
+- Quick task completion (swipe to complete from schedule)
+- Photo capture for daily log (native camera integration)
+- Offline time entries (queue and sync when connected)
+- **Files:** `apps/mobile/screens/TimeClock.tsx`, `apps/mobile/screens/Schedule.tsx`, `apps/mobile/screens/DailyLog.tsx`
+
+**Acceptance:** Clock in/out works with GPS, timer persists across app backgrounding, schedule shows today's events
+
+---
+
+### Sprint 136: Mobile — Messages, Notifications & App Store Prep
+**Priority:** P1 | **Hours:** 10-14
+
+Complete core mobile experience and prepare for TestFlight/App Store.
+
+- Messages: Channel list, message thread, reply/compose
+- Push notifications: Receive and tap to navigate to relevant screen
+- Notification center: In-app notification list with read/unread
+- Settings: Profile, notification preferences, biometric toggle
+- App icons, splash screen, app store screenshots
+- TestFlight build for iOS beta testing
+- Android APK build for internal testing
+- **Files:** `apps/mobile/screens/Messages.tsx`, `apps/mobile/screens/Notifications.tsx`, `apps/mobile/screens/Settings.tsx`
+
+**Acceptance:** Full app flow on iOS + Android, push notifications received, TestFlight build uploaded
+
+---
+
+## PHASE 22: CLIENT EXPERIENCE & RESIDENTIAL GC POLISH (Sprints 137-140)
+
+> **Goal:** Best client experience in the residential market. Beat Buildertrend and CoConstruct.
+
+### Sprint 137: Client Selection Board & Allowance Tracking
+**Priority:** P0 | **Hours:** 8-10
+
+The #1 feature residential GC clients ask for: picking finishes, fixtures, and materials.
+
+- Visual selection board: Grid of categories (Flooring, Countertops, Fixtures, Paint, Hardware, Appliances)
+- Per-selection: Photo, description, vendor, price, allowance vs actual, status
+- Allowance tracking: Budget per category, spent vs remaining, over/under alerts
+- Client portal integration: Clients browse options, make selections, see budget impact
+- GC approval workflow: Client selects → GC reviews → approves/suggests alternative
+- PDF export of all selections with photos and pricing
+- **Files:** `components/selections/SelectionBoard.tsx`, `components/selections/AllowanceTracker.tsx`, `app/client/selections/page.tsx` (enhance)
+
+**Acceptance:** Client browses selections by category, picks items, sees budget impact. GC approves/rejects. PDF export works.
+
+---
+
+### Sprint 138: Project Timeline & Progress Sharing
+**Priority:** P0 | **Hours:** 8-10
+
+Clients want to see progress. Beautiful timeline they can share with family.
+
+- Visual project timeline: Phase-based progress bar with milestones
+- Photo progress: Before/during/after photo comparisons per phase
+- Daily/weekly update emails: Auto-generated progress summary with photos
+- Public shareable link: Client can share progress URL with family/friends (read-only, no auth)
+- Progress % auto-calculation from task completion
+- Next milestone ETA with confidence indicator
+- Weather delay tracking: Show impact of weather on schedule
+- **Files:** `components/client-portal/ProjectTimeline.tsx`, `app/progress/[token]/page.tsx` (public), `lib/email/progress-digest.ts`
+
+**Acceptance:** Client portal shows visual timeline, photos per phase. Public share link works without auth. Weekly email sends.
+
+---
+
+### Sprint 139: Warranty & Maintenance Tracking
+**Priority:** P1 | **Hours:** 8-10
+
+Post-project value: Track warranties, schedule maintenance, handle service requests.
+
+- Warranty registry: Per-project items with manufacturer, duration, start/expiration dates
+- Warranty expiration alerts: Email/notification 30/60/90 days before expiration
+- Maintenance schedule: Recurring tasks (HVAC filter, gutter cleaning) with reminders
+- Service request portal: Client submits → GC triages → assigns → resolves
+- Warranty claim tracking: Submit to manufacturer, track status, resolution
+- Post-project revenue: Maintenance contracts, warranty extensions
+- **Files:** `lib/hooks/useWarranties.ts`, `components/warranty/WarrantyRegistry.tsx`, `app/client/warranty/page.tsx`, `app/dashboard/warranty/page.tsx`
+
+**Acceptance:** Warranties tracked per project, expiration alerts fire, clients submit service requests
+
+---
+
+### Sprint 140: Performance Audit & Optimization Mega-Sprint
+**Priority:** P1 | **Hours:** 10-14 | **RUN LAST**
+
+End-of-roadmap optimization pass. Make everything fast.
+
+- Bundle analysis: Code-split large chunks, lazy-load below-fold components
+- Firestore optimization: Audit all queries for missing indexes, add limit() where missing
+- Image pipeline: WebP-optimized, properly sized, lazy-loaded
+- Server component migration: Convert data-fetching pages to RSC where possible
+- Caching strategy: SWR/React Query for API responses, Firebase cache config
+- Core Web Vitals targets: LCP < 2.5s, FID < 100ms, CLS < 0.1
+- Lighthouse audit: Run on 10 key pages, fix all "Opportunities"
+- Database indexing review: Ensure every compound query has matching index
+- Memory leak audit: Profile with React DevTools, fix growing subscriptions
+
+**Acceptance:** Lighthouse > 85 on all key pages, bundle < 400KB, dashboard < 2s, no "requires index" errors
+
+---
+
+### Phases 18-22 Dependency Graph
+
+```
+Phase 18 (Hardening) ── Sequential: 121 -> 122 -> 123 -> 124
+                                                            |
+                         ┌──────────────────────────────────┘
+                         v
+Phase 19 (Integrations) ── 125, 126, 127, 128 all independent (any order)
+Phase 20 (AI)           ── 129, 130, 131 independent; 132 after 129-131
+Phase 21 (Mobile)       ── Sequential: 133 -> 134 -> 135 -> 136
+Phase 22 (Client UX)    ── 137, 138, 139 independent; 140 LAST
+
+Phases 19, 20, 21 can run in PARALLEL after Phase 18.
+Phase 22 Sprints 137-139 can start alongside Phases 19-21.
+Sprint 140 runs absolutely last.
+```
+
+### Key Metrics Targets (Post Sprint 140)
+
+| Metric | Current (Sprint 120) | Target (Sprint 140) |
+|--------|---------------------|---------------------|
+| Unit Tests | ~1,800 | 2,000+ |
+| ESLint Warnings | <400 | <300 |
+| Console Statements | <100 | <50 |
+| Lighthouse Score | Unknown | >85 all pages |
+| Bundle Size | Unknown | <400KB main |
+| Integrations | QBO only | QBO + Xero + Stripe + Calendar + Webhooks |
+| Mobile App | Web PWA only | Native iOS + Android (TestFlight) |
+| AI Features | BI dashboards + OCR | Estimate builder + Schedule optimizer + Smart notifications + Assistant |
+| Client Portal | Basic experience | Selections + Timeline + Progress sharing + Warranty |
+| Payment Processing | Stripe stub | Full Stripe Connect + online payments |
+
+---
+
+**Document Version:** 6.0
 **Last Updated:** 2026-02-06
-**Status:** Phases 1-14 COMPLETE, Sprints 97-105 DEFERRED, Phase 17 IN PROGRESS (Sprint 106 complete)
-**Next Action:** Start Sprint 107 — Invoice PDF & Email Delivery
+**Status:** Phases 1-14 COMPLETE, Sprints 97-105 DEFERRED, Phase 17 IN PROGRESS (Sprint 110 complete), Phases 18-22 PLANNED (Sprints 121-140)
+**Next Action:** Complete Phase 17 (Sprints 111-120), then begin Phase 18

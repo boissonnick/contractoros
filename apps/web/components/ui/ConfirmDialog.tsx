@@ -8,6 +8,7 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import Button from './Button';
+import { logger } from '@/lib/utils/logger';
 
 export interface ConfirmDialogProps {
   isOpen: boolean;
@@ -63,7 +64,7 @@ export default function ConfirmDialog({
       await onConfirm();
       onClose();
     } catch (error) {
-      console.error('Confirm action failed:', error);
+      logger.error('Confirm action failed', { error: error, component: 'ConfirmDialog' });
     } finally {
       setIsLoading(false);
     }

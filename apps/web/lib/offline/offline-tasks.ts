@@ -7,6 +7,7 @@ import { saveOffline, getOfflineData } from './storage';
 import { addToQueue, subscribeToQueue } from './sync-queue';
 import { checkNetworkStatus } from './network-status';
 import { Task, TaskStatus } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 // Offline task update record
 export interface OfflineTaskUpdate {
@@ -339,7 +340,7 @@ export class OfflineTaskService {
       this.pendingCount = updates.filter((u) => u.syncStatus === 'pending').length;
       this.listeners.forEach((listener) => listener(this.pendingCount));
     } catch (err) {
-      console.error('Failed to update pending count:', err);
+      logger.error('Failed to update pending count', { error: err, component: 'offline-offline-tasks' });
     }
   }
 }

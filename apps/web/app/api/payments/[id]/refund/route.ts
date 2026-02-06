@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { stripe, isStripeConfigured } from '@/lib/payments/stripeClient';
 import { adminDb, Timestamp } from '@/lib/firebase/admin';
 import { verifyAuth, verifyOrgAccess, verifyAdminAccess } from '@/lib/api/auth';
+import { logger } from '@/lib/utils/logger';
 
 export const runtime = 'nodejs';
 
@@ -107,7 +108,7 @@ export async function POST(
       status: refund.status,
     });
   } catch (error) {
-    console.error('Process refund error:', error);
+    logger.error('Process refund error', { error, route: 'payments-refund' });
 
     if (error instanceof Error) {
       return NextResponse.json(

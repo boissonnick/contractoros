@@ -17,6 +17,7 @@ import { PortalNav, MessageThread, ThreadMessage } from '@/components/client-por
 import {
   uploadMultipleAttachments,
 } from '@/lib/storage/message-attachments';
+import { logger } from '@/lib/utils/logger';
 
 interface ClientPortalData {
   projectId: string;
@@ -98,7 +99,7 @@ export default function MessagesPage() {
 
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching portal data:', err);
+        logger.error('Error fetching portal data', { error: err, page: 'client-messages' });
         setError('Failed to load messages');
         setLoading(false);
       }
@@ -136,7 +137,7 @@ export default function MessagesPage() {
         setMessages(messagesData);
       },
       (err) => {
-        console.error('Error listening to messages:', err);
+        logger.error('Error listening to messages', { error: err, page: 'client-messages' });
       }
     );
 
@@ -191,7 +192,7 @@ export default function MessagesPage() {
         }
       );
     } catch (err) {
-      console.error('Error sending message:', err);
+      logger.error('Error sending message', { error: err, page: 'client-messages' });
       setUploadProgress(null);
       throw err; // Re-throw to let MessageThread handle the error UI
     }

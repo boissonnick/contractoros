@@ -4,6 +4,7 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase/config';
 import { UserProfile } from '@/types';
 import { setSessionCookie, clearSessionCookie } from '@/lib/auth/session-cookie';
+import { logger } from '@/lib/utils/logger';
 
 const AUTH_TIMEOUT_MS = 10_000;
 
@@ -89,7 +90,7 @@ export function AuthProvider({ children }: { children?: React.ReactNode }) {
           const idToken = await currentUser.getIdToken();
           await setSessionCookie(idToken);
         } catch (e) {
-          console.warn('Failed to set session cookie:', e);
+          logger.warn('Failed to set session cookie', { error: e, module: 'auth' });
         }
 
         // Set up real-time profile listener
@@ -102,13 +103,13 @@ export function AuthProvider({ children }: { children?: React.ReactNode }) {
               setProfile(docSnap.data() as UserProfile);
               setProfileError(null);
             } else {
-              console.warn("User authenticated but no profile found in Firestore.");
+              logger.warn('User authenticated but no profile found in Firestore', { module: 'auth' });
               setProfile(null);
             }
             setLoading(false);
           },
           (error) => {
-            console.error("Error fetching user profile:", error);
+            logger.error('Error fetching user profile', { error, module: 'auth' });
             setProfileError(error.message || 'Failed to load user profile');
             setProfile(null);
             setLoading(false);
@@ -149,7 +150,7 @@ export function AuthProvider({ children }: { children?: React.ReactNode }) {
       setUser(null);
       setProfileError(null);
     } catch (error) {
-      console.error("Error signing out:", error);
+      logger.error('Error signing out', { error, module: 'auth' });
     }
   };
 

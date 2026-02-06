@@ -35,6 +35,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { logger } from '@/lib/utils/logger';
 
 // Date preset types
 export type DatePresetValue =

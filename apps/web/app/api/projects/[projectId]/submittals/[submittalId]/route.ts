@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import { initializeAdminApp } from '@/lib/assistant/firebase-admin-init';
+import { logger } from '@/lib/utils/logger';
 
 async function verifyAuth(request: NextRequest) {
   await initializeAdminApp();
@@ -42,7 +43,7 @@ export async function GET(
 
     return NextResponse.json({ submittal: { id: doc.id, ...doc.data() } });
   } catch (error) {
-    console.error('Error fetching submittal:', error);
+    logger.error('Error fetching submittal', { error, route: 'submittal-detail' });
     return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 });
   }
 }
@@ -81,7 +82,7 @@ export async function PATCH(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error updating submittal:', error);
+    logger.error('Error updating submittal', { error, route: 'submittal-detail' });
     return NextResponse.json({ error: 'Failed to update' }, { status: 500 });
   }
 }
@@ -114,7 +115,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting submittal:', error);
+    logger.error('Error deleting submittal', { error, route: 'submittal-detail' });
     return NextResponse.json({ error: 'Failed to delete' }, { status: 500 });
   }
 }

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { formatDateTime } from '@/lib/date-utils';
+import { logger } from '@/lib/utils/logger';
 
 interface Activity {
   id: string;
@@ -31,7 +32,7 @@ export function ProjectActivityFeed({ projectId }: ProjectActivityFeedProps) {
         const snapshot = await getDocs(q);
         setActivities(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Activity)));
       } catch (error) {
-        console.error('Error fetching project activity:', error);
+        logger.error('Error fetching project activity', { error: error, component: 'project-activity-feed' });
       } finally {
         setLoading(false);
       }

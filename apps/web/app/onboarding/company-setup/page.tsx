@@ -20,6 +20,7 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { toast } from '@/components/ui/Toast';
+import { logger } from '@/lib/utils/logger';
 
 type Step = 'company' | 'branding' | 'logo' | 'complete';
 
@@ -154,7 +155,7 @@ export default function CompanySetupPage() {
         try {
           await seedDemoData(orgId, user.uid);
         } catch (err) {
-          console.error('Demo data seeding failed (non-critical):', err);
+          logger.error('Demo data seeding failed (non-critical)', { error: err, page: 'onboarding-company-setup' });
         }
       }
 
@@ -165,7 +166,7 @@ export default function CompanySetupPage() {
         router.push('/dashboard');
       }, 2000);
     } catch (error) {
-      console.error('Error completing company setup:', error);
+      logger.error('Error completing company setup', { error: error, page: 'onboarding-company-setup' });
       toast.error('Setup failed', 'Something went wrong. Please try again.');
     } finally {
       setSaving(false);

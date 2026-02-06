@@ -23,6 +23,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 import { useGDPRExport, DataCategory, DATA_CATEGORY_LABELS, DATA_CATEGORY_DESCRIPTIONS, ALL_DATA_CATEGORIES, EXPORT_STATUS_CONFIG, formatFileSize, getExpirationMessage, isExportExpired } from '@/lib/hooks/useGDPRExport';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================
 // Business Export Types (existing functionality)
@@ -352,7 +353,7 @@ export default function DataExportPage() {
         }
       }
     } catch (err) {
-      console.error('Export error:', err);
+      logger.error('Export error', { error: err, page: 'dashboard-settings-data-export' });
       toast.error('Failed to export data');
     } finally {
       setExporting(null);
@@ -395,7 +396,7 @@ export default function DataExportPage() {
         setIsProcessing(null);
       }
     } catch (err) {
-      console.error('Failed to create GDPR export:', err);
+      logger.error('Failed to create GDPR export', { error: err, page: 'dashboard-settings-data-export' });
       toast.error('Failed to create export request');
     } finally {
       setIsCreatingRequest(false);

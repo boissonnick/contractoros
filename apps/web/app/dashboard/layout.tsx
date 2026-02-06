@@ -11,6 +11,7 @@ import { ImpersonationBanner } from '@/components/impersonation';
 import { OfflineBanner } from '@/components/offline/OfflineBanner';
 import { FloatingSyncIndicator } from '@/components/offline/SyncStatusIndicator';
 import SidebarDevTools from '@/components/ui/SidebarDevTools';
+import { SectionErrorBoundary } from '@/components/ui/SectionErrorBoundary';
 import { AssistantPanel, AssistantTrigger } from '@/components/assistant';
 import { useAssistant } from '@/lib/hooks/useAssistant';
 import {
@@ -36,6 +37,7 @@ import {
   ChartBarSquareIcon,
   StarIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 // =============================================================================
 // OWNER/PM Navigation - Organized by "Jobs to be Done"
@@ -146,10 +148,13 @@ const ownerPmNavItems: (NavItem & { requiredPermission?: keyof RolePermissions; 
     children: [
       { label: 'Overview', href: '/dashboard/reports' },
       { label: 'Financial', href: '/dashboard/reports/financial' },
+      { label: 'Balance Sheet', href: '/dashboard/reports/balance-sheet' },
+      { label: 'Cash Flow', href: '/dashboard/reports/cash-flow' },
       { label: 'Operational', href: '/dashboard/reports/operational' },
       { label: 'Benchmarking', href: '/dashboard/reports/benchmarking' },
       { label: 'Detailed', href: '/dashboard/reports/detailed' },
       { label: 'Report Builder', href: '/dashboard/reports/builder' },
+      { label: 'Templates', href: '/dashboard/reports/templates' },
     ],
   },
 
@@ -346,10 +351,13 @@ function createOwnerPmSections(permissions: RolePermissions): NavSection[] {
       children: [
         { label: 'Overview', href: '/dashboard/reports' },
         { label: 'Financial', href: '/dashboard/reports/financial' },
+        { label: 'Balance Sheet', href: '/dashboard/reports/balance-sheet' },
+        { label: 'Cash Flow', href: '/dashboard/reports/cash-flow' },
         { label: 'Operational', href: '/dashboard/reports/operational' },
         { label: 'Benchmarking', href: '/dashboard/reports/benchmarking' },
         { label: 'Detailed', href: '/dashboard/reports/detailed' },
         { label: 'Report Builder', href: '/dashboard/reports/builder' },
+        { label: 'Templates', href: '/dashboard/reports/templates' },
       ],
     });
   }
@@ -409,7 +417,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       navigator.serviceWorker
         .register('/sw.js')
         .then((registration) => {
-          console.log('[SW] Service worker registered:', registration.scope);
+          logger.info('Service worker registered', { scope: registration.scope, page: 'dashboard-layout' });
 
           // Check for updates periodically
           registration.addEventListener('updatefound', () => {
@@ -418,14 +426,14 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                   // New content available, prompt user to refresh
-                  console.log('[SW] New content available, refresh to update');
+                  logger.info('New content available, refresh to update', { page: 'dashboard-layout' });
                 }
               });
             }
           });
         })
         .catch((error) => {
-          console.warn('[SW] Service worker registration failed:', error);
+          logger.warn('Service worker registration failed', { error, page: 'dashboard-layout' });
         });
     }
   }, []);
@@ -481,7 +489,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         onSignOut={signOut}
         sidebarFooter={<SidebarDevTools />}
       >
-        {children}
+        <SectionErrorBoundary sectionName="Dashboard">
+          {children}
+        </SectionErrorBoundary>
       </AppShell>
 
       {/* AI Assistant */}

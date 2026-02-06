@@ -25,6 +25,7 @@ import {
   EquipmentCheckoutStatus,
 } from '@/types';
 import { convertTimestamp } from './utils';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================
 // Equipment Hook
@@ -101,7 +102,7 @@ export function useEquipment(options: UseEquipmentOptions = {}) {
         setLoading(false);
       },
       (err) => {
-        console.error('Error fetching equipment:', err);
+        logger.error('Error fetching equipment', { error: err, hook: 'useEquipment' });
         setError(err as Error);
         setLoading(false);
       }

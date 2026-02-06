@@ -26,6 +26,7 @@ import {
 } from '@/lib/budget-utils';
 import { useProjectProfitability } from '@/lib/hooks/useJobCosting';
 import { MarginMeter } from '@/components/finances/MarginMeter';
+import { logger } from '@/lib/utils/logger';
 
 const categoryLabels: Record<ExpenseCategory, string> = {
   materials: 'Materials',
@@ -79,7 +80,7 @@ export default function ProjectFinancesPage() {
           ...d.data(),
         })) as Invoice[]);
       } catch (err) {
-        console.error('Error loading finances:', err);
+        logger.error('Error loading finances', { error: err, page: 'dashboard-projects-id-finances' });
         toast.error('Failed to load financial data');
       } finally {
         setLoading(false);

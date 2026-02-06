@@ -24,6 +24,7 @@ import {
   APInvoiceStatus,
   LienWaiver,
 } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 interface UseSubcontractorInvoicesOptions {
   vendorId?: string;
@@ -107,7 +108,7 @@ export function useSubcontractorInvoices(
         setError(null);
       },
       (err) => {
-        console.error('Error fetching subcontractor invoices:', err);
+        logger.error('Error fetching subcontractor invoices', { error: err, hook: 'useSubcontractorInvoices' });
         if (err.message?.includes('requires an index')) {
           setError('Database index required. Please deploy Firestore indexes.');
         } else if (err.message?.includes('permission-denied')) {
@@ -142,7 +143,7 @@ export function useSubcontractorInvoices(
         setLienWaivers(data);
       },
       (err) => {
-        console.error('Error fetching lien waivers:', err);
+        logger.error('Error fetching lien waivers', { error: err, hook: 'useSubcontractorInvoices' });
       }
     );
 
@@ -170,7 +171,7 @@ export function useSubcontractorInvoices(
       toast.success('Subcontractor invoice created');
       return docRef.id;
     } catch (err) {
-      console.error('Create sub invoice error:', err);
+      logger.error('Create sub invoice error', { error: err, hook: 'useSubcontractorInvoices' });
       toast.error('Failed to create invoice');
       throw err;
     }
@@ -201,7 +202,7 @@ export function useSubcontractorInvoices(
         updateData
       );
     } catch (err) {
-      console.error('Update sub invoice error:', err);
+      logger.error('Update sub invoice error', { error: err, hook: 'useSubcontractorInvoices' });
       toast.error('Failed to update invoice');
       throw err;
     }
@@ -214,7 +215,7 @@ export function useSubcontractorInvoices(
       await deleteDoc(doc(db, `organizations/${orgId}/subcontractorInvoices/${invoiceId}`));
       toast.success('Invoice deleted');
     } catch (err) {
-      console.error('Delete sub invoice error:', err);
+      logger.error('Delete sub invoice error', { error: err, hook: 'useSubcontractorInvoices' });
       toast.error('Failed to delete invoice');
       throw err;
     }
@@ -227,7 +228,7 @@ export function useSubcontractorInvoices(
       await updateInvoice(invoiceId, { status: 'submitted' });
       toast.success('Invoice submitted for approval');
     } catch (err) {
-      console.error('Submit invoice error:', err);
+      logger.error('Submit invoice error', { error: err, hook: 'useSubcontractorInvoices' });
       throw err;
     }
   }, [orgId, updateInvoice]);
@@ -245,7 +246,7 @@ export function useSubcontractorInvoices(
       });
       toast.success('Invoice approved');
     } catch (err) {
-      console.error('Approve invoice error:', err);
+      logger.error('Approve invoice error', { error: err, hook: 'useSubcontractorInvoices' });
       throw err;
     }
   }, [orgId, currentUserId, isManager, updateInvoice]);
@@ -261,7 +262,7 @@ export function useSubcontractorInvoices(
       });
       toast.success('Invoice marked as disputed');
     } catch (err) {
-      console.error('Dispute invoice error:', err);
+      logger.error('Dispute invoice error', { error: err, hook: 'useSubcontractorInvoices' });
       throw err;
     }
   }, [orgId, updateInvoice]);
@@ -284,7 +285,7 @@ export function useSubcontractorInvoices(
       });
       toast.success('Invoice marked as paid');
     } catch (err) {
-      console.error('Mark paid error:', err);
+      logger.error('Mark paid error', { error: err, hook: 'useSubcontractorInvoices' });
       throw err;
     }
   }, [orgId, currentUserId, isManager, updateInvoice]);
@@ -328,7 +329,7 @@ export function useSubcontractorInvoices(
       toast.success('Lien waiver requested');
       return docRef.id;
     } catch (err) {
-      console.error('Request lien waiver error:', err);
+      logger.error('Request lien waiver error', { error: err, hook: 'useSubcontractorInvoices' });
       toast.error('Failed to request lien waiver');
       throw err;
     }

@@ -11,6 +11,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { TaskActivity, TaskActivityAction } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 function fromFirestore(id: string, data: Record<string, unknown>): TaskActivity {
   return {
@@ -62,7 +63,7 @@ export function useTaskActivity(taskId: string | null, limit = 50): UseTaskActiv
         setError(null);
       },
       (err) => {
-        console.error('Task activity listener error:', err);
+        logger.error('Task activity listener error', { error: err, hook: 'useTaskActivity' });
         setError(err.message);
         setLoading(false);
       }

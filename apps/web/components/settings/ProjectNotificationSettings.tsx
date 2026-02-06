@@ -22,6 +22,7 @@ import {
   TrashIcon,
   PlusIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 interface ToggleProps {
   label: string;
@@ -142,7 +143,7 @@ export function ProjectNotificationSettings({
         onUpdate();
         return true;
       } catch (error) {
-        console.error('Failed to save project notification settings:', error);
+        logger.error('Failed to save project notification settings', { error: error, component: 'ProjectNotificationSettings' });
         toast.error('Failed to save project settings');
         return false;
       } finally {

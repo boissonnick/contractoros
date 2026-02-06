@@ -15,6 +15,7 @@ import {
 import { db } from '@/lib/firebase/config';
 import { SubAssignment, SubAssignmentStatus, SubPaymentScheduleItem } from '@/types';
 import { useAuth } from '@/lib/auth';
+import { logger } from '@/lib/utils/logger';
 
 function fromFirestore(id: string, data: Record<string, unknown>): SubAssignment {
   const schedule = ((data.paymentSchedule as unknown[]) || []).map((p: unknown) => {
@@ -95,7 +96,7 @@ export function useSubAssignments({ projectId, subId }: UseSubAssignmentsOptions
         setLoading(false);
       },
       (err) => {
-        console.error('useSubAssignments error:', err);
+        logger.error('useSubAssignments error', { error: err, hook: 'useSubAssignments' });
         setError(err.message);
         setLoading(false);
       }

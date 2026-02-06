@@ -2,6 +2,7 @@
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { ExclamationTriangleIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 interface SectionErrorBoundaryProps {
   children: ReactNode;
@@ -38,11 +39,7 @@ export class SectionErrorBoundary extends Component<SectionErrorBoundaryProps, S
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error(
-      `SectionErrorBoundary [${this.props.sectionName || 'unknown'}]:`,
-      error,
-      errorInfo
-    );
+    logger.error('SectionErrorBoundary caught error', { error, errorInfo, sectionName: this.props.sectionName || 'unknown', component: 'SectionErrorBoundary' });
   }
 
   private handleRetry = () => {

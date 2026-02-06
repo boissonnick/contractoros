@@ -18,6 +18,7 @@ import { VoiceLogCreate } from '@/types';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/utils/logger';
 
 // Recording constraints
 const MAX_DURATION_MS = 10 * 60 * 1000; // 10 minutes
@@ -97,7 +98,7 @@ export function VoiceRecorder({
           });
         },
         (error) => {
-          console.warn('Could not get location:', error.message);
+          logger.warn('Could not get location', { errorMessage: error.message, component: 'VoiceRecorder' });
         },
         { enableHighAccuracy: false, timeout: 10000 }
       );
@@ -173,7 +174,7 @@ export function VoiceRecorder({
         }
       }, 1000);
     } catch (err) {
-      console.error('Failed to start recording:', err);
+      logger.error('Failed to start recording', { error: err, component: 'VoiceRecorder' });
       setError('Could not access microphone. Please check permissions.');
     }
   };
@@ -286,7 +287,7 @@ export function VoiceRecorder({
         setSubmitState('error');
       }
     } catch (err) {
-      console.error('Failed to queue recording:', err);
+      logger.error('Failed to queue recording', { error: err, component: 'VoiceRecorder' });
       setError(err instanceof Error ? err.message : 'Failed to save recording');
       setSubmitState('error');
     }

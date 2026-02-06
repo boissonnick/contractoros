@@ -45,10 +45,10 @@ jest.mock('@/components/ui/Toast', () => ({
 }));
 
 // Mock Firestore
-const mockOnSnapshot = jest.fn();
-const mockAddDoc = jest.fn();
-const mockUpdateDoc = jest.fn();
-const mockDeleteDoc = jest.fn();
+const _mockOnSnapshot = jest.fn();
+const _mockAddDoc = jest.fn();
+const _mockUpdateDoc = jest.fn();
+const _mockDeleteDoc = jest.fn();
 
 jest.mock('firebase/firestore', () => ({
   collection: jest.fn(),
@@ -138,7 +138,7 @@ beforeEach(() => {
   });
 
   // Default mock for onSnapshot (invoices)
-  (onSnapshot as jest.Mock).mockImplementation((query, onNext, onError) => {
+  (onSnapshot as jest.Mock).mockImplementation((_query, onNext, _onError) => {
     // Call with empty data immediately
     setTimeout(() => {
       onNext({

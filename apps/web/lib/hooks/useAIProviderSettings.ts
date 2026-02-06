@@ -27,6 +27,7 @@ import type {
 } from '@/types';
 import { AVAILABLE_MODELS } from '@/lib/assistant/models/types';
 import { getProviderBlendedCost } from '@/lib/ai/provider-manager';
+import { logger } from '@/lib/utils/logger';
 
 // Default settings factory
 function createDefaultSettings(orgId: string): OrganizationAIProviderSettings {
@@ -137,14 +138,14 @@ export function useAIProviderSettings(): UseAIProviderSettingsReturn {
             });
             setSettings(defaults);
           } catch (err) {
-            console.error('[useAIProviderSettings] Error creating defaults:', err);
+            logger.error('Error creating defaults', { error: err, hook: 'useAIProviderSettings' });
             setError('Failed to initialize AI provider settings');
           }
         }
         setLoading(false);
       },
       (err) => {
-        console.error('[useAIProviderSettings] Error loading settings:', err);
+        logger.error('Error loading settings', { error: err, hook: 'useAIProviderSettings' });
         setError(err.message);
         setLoading(false);
       }
@@ -194,7 +195,7 @@ export function useAIProviderSettings(): UseAIProviderSettingsReturn {
           { merge: true }
         );
       } catch (err) {
-        console.error('[useAIProviderSettings] Error updating priorities:', err);
+        logger.error('Error updating priorities', { error: err, hook: 'useAIProviderSettings' });
         throw err;
       }
     },
@@ -220,7 +221,7 @@ export function useAIProviderSettings(): UseAIProviderSettingsReturn {
           { merge: true }
         );
       } catch (err) {
-        console.error('[useAIProviderSettings] Error updating assignments:', err);
+        logger.error('Error updating assignments', { error: err, hook: 'useAIProviderSettings' });
         throw err;
       }
     },
@@ -246,7 +247,7 @@ export function useAIProviderSettings(): UseAIProviderSettingsReturn {
           { merge: true }
         );
       } catch (err) {
-        console.error('[useAIProviderSettings] Error updating settings:', err);
+        logger.error('Error updating settings', { error: err, hook: 'useAIProviderSettings' });
         throw err;
       }
     },

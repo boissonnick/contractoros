@@ -14,6 +14,7 @@ import { getOfflinePhotoService, PhotoCategory } from '@/lib/offline/offline-pho
 import { getCurrentLocation } from '@/lib/photo-processing';
 import { useAuth } from '@/lib/auth';
 import { toast } from '@/components/ui/Toast';
+import { logger } from '@/lib/utils/logger';
 
 interface OfflinePhotoCaptureProps {
   projectId: string;
@@ -83,7 +84,7 @@ export default function OfflinePhotoCapture({
       }
       setCaptureMode('camera');
     } catch (error) {
-      console.error('Camera access denied:', error);
+      logger.error('Camera access denied', { error: error, component: 'OfflinePhotoCapture' });
       toast.error('Camera access denied. Please use file upload instead.');
       // Fall back to file input
       fileInputRef.current?.click();
@@ -183,7 +184,7 @@ export default function OfflinePhotoCapture({
       onCapture(localId);
       handleCancel();
     } catch (error) {
-      console.error('Failed to save photo:', error);
+      logger.error('Failed to save photo', { error: error, component: 'OfflinePhotoCapture' });
       toast.error('Failed to save photo');
     } finally {
       setSaving(false);

@@ -129,7 +129,7 @@ const PAGE_ACTIONS: Record<string, QuickAction[]> = {
 export function QuickActionsFAB({
   actions,
   onAction,
-  bottomOffset = 80,
+  bottomOffset: _bottomOffset = 80,
   visible = true,
   className = '',
 }: QuickActionsFABProps) {

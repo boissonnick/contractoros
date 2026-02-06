@@ -18,6 +18,7 @@ import { ClientPreferences } from '@/types';
 import { Button, Card, Input, Textarea, toast } from '@/components/ui';
 import ImageUploader from '@/components/projects/ImageUploader';
 import { CheckCircleIcon } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 const FINISH_FIELDS: { key: string; label: string; placeholder: string }[] = [
   { key: 'flooring', label: 'Flooring', placeholder: 'e.g., Hardwood, tile, LVP...' },
@@ -93,7 +94,7 @@ export default function ClientPreferencesOnboarding() {
           });
         }
       } catch (err) {
-        console.error('Error validating token:', err);
+        logger.error('Error validating token', { error: err, page: 'onboarding-preferences-token' });
         setError('Something went wrong. Please try again.');
       } finally {
         setLoading(false);
@@ -131,7 +132,7 @@ export default function ClientPreferencesOnboarding() {
 
       setSubmitted(true);
     } catch (err) {
-      console.error('Error saving preferences:', err);
+      logger.error('Error saving preferences', { error: err, page: 'onboarding-preferences-token' });
       toast.error('Failed to save. Please try again.');
     } finally {
       setSaving(false);

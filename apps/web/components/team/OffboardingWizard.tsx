@@ -33,6 +33,7 @@ import {
   CompleteStep,
   TeamMember,
 } from './offboarding';
+import { logger } from '@/lib/utils/logger';
 
 interface OffboardingWizardProps {
   isOpen: boolean;
@@ -57,6 +58,10 @@ const STEP_CONFIG: Record<OffboardingWizardStep, { title: string; description: s
     title: 'Reassign Work',
     description: 'Transfer tasks and projects to another team member',
   },
+  equipment_return: {
+    title: 'Equipment Return',
+    description: 'Verify company equipment has been returned',
+  },
   data_handling: {
     title: 'Data Handling',
     description: 'Choose how to handle user data',
@@ -78,11 +83,44 @@ const STEP_CONFIG: Record<OffboardingWizardStep, { title: string; description: s
 const STEP_ORDER: OffboardingWizardStep[] = [
   'confirm',
   'reassign',
+  'equipment_return',
   'data_handling',
   'review',
   'processing',
   'complete',
 ];
+
+function EquipmentReturnStep({
+  onEquipmentSelected,
+}: {
+  userId: string;
+  orgId: string;
+  onEquipmentSelected: (ids: string[]) => void;
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+        <p className="text-sm text-amber-800 font-medium">Equipment Return Verification</p>
+        <p className="text-sm text-amber-700 mt-1">
+          Please verify all company equipment has been returned by this team member before proceeding.
+        </p>
+      </div>
+      <div className="border border-gray-200 rounded-lg p-4">
+        <p className="text-sm text-gray-500">
+          Equipment tracking integration coming soon. For now, please manually verify equipment return.
+        </p>
+        <label className="flex items-center gap-2 mt-3 cursor-pointer">
+          <input
+            type="checkbox"
+            onChange={(e) => onEquipmentSelected(e.target.checked ? ['verified'] : [])}
+            className="h-4 w-4 rounded border-gray-300 text-brand-primary focus:ring-brand-primary"
+          />
+          <span className="text-sm text-gray-700">I confirm all equipment has been returned or accounted for</span>
+        </label>
+      </div>
+    </div>
+  );
+}
 
 export function OffboardingWizard({
   isOpen,
@@ -132,7 +170,7 @@ export function OffboardingWizard({
           .filter((m) => m.id !== targetUser.id && m.role !== 'CLIENT');
         setTeamMembers(members);
       } catch (err) {
-        console.error('Error loading team members:', err);
+        logger.error('Error loading team members', { error: err, component: 'OffboardingWizard' });
       } finally {
         setLoadingTeam(false);
       }
@@ -150,7 +188,7 @@ export function OffboardingWizard({
         const preview = await getOffboardingImpactPreview(profile!.orgId, targetUser.id);
         setState((prev) => ({ ...prev, impactPreview: preview }));
       } catch (err) {
-        console.error('Error loading impact preview:', err);
+        logger.error('Error loading impact preview', { error: err, component: 'OffboardingWizard' });
       }
     }
 
@@ -247,7 +285,7 @@ export function OffboardingWizard({
       onComplete?.(report);
       toast.success('User offboarded successfully');
     } catch (err) {
-      console.error('Offboarding failed:', err);
+      logger.error('Offboarding failed', { error: err, component: 'OffboardingWizard' });
       setState((prev) => ({
         ...prev,
         isProcessing: false,
@@ -283,6 +321,17 @@ export function OffboardingWizard({
             selectedUser={state.reassignToUser}
             impactPreview={state.impactPreview}
             onSelectUser={(user) => setState((prev) => ({ ...prev, reassignToUser: user }))}
+          />
+        );
+      case 'equipment_return':
+        return (
+          <EquipmentReturnStep
+            userId={targetUser.id}
+            orgId={profile?.orgId || ''}
+            onEquipmentSelected={(ids) => setState(prev => ({
+              ...prev,
+              options: { ...prev.options, equipmentToReturn: ids },
+            }))}
           />
         );
       case 'data_handling':
@@ -382,7 +431,7 @@ export function OffboardingWizard({
       {!['processing', 'complete'].includes(state.currentStep) && (
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
-            {STEP_ORDER.slice(0, 4).map((step, index) => (
+            {STEP_ORDER.slice(0, 5).map((step, index) => (
               <React.Fragment key={step}>
                 <div
                   className={cn(
@@ -400,7 +449,7 @@ export function OffboardingWizard({
                     index + 1
                   )}
                 </div>
-                {index < 3 && (
+                {index < 4 && (
                   <div
                     className={cn(
                       'flex-1 h-1 mx-2',
@@ -414,6 +463,7 @@ export function OffboardingWizard({
           <div className="flex justify-between text-xs text-gray-500">
             <span>Confirm</span>
             <span>Reassign</span>
+            <span>Equip</span>
             <span>Data</span>
             <span>Review</span>
           </div>

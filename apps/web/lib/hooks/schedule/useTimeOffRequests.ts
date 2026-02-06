@@ -16,8 +16,30 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
-import { TimeOffRequest } from '@/types';
+import { TimeOffRequest, PTOBalance } from '@/types';
 import { toast } from '@/components/ui/Toast';
+import { logger } from '@/lib/utils/logger';
+
+export interface AccrualConfig {
+  vacationHoursPerPayPeriod: number; // e.g. 3.08 = 80hrs/year biweekly
+  sickHoursPerPayPeriod: number;     // e.g. 1.85 = 48hrs/year biweekly
+  personalDaysPerYear: number;       // e.g. 3
+  payPeriodsPerYear: number;         // e.g. 26 (biweekly) or 24 (semimonthly)
+  hireDate?: Date;
+}
+
+export interface PTOBalanceSummary {
+  vacation: { accrued: number; used: number; balance: number };
+  sick: { accrued: number; used: number; balance: number };
+  personal: { total: number; used: number; balance: number };
+}
+
+const DEFAULT_ACCRUAL: AccrualConfig = {
+  vacationHoursPerPayPeriod: 3.08, // ~80 hrs/yr (10 days)
+  sickHoursPerPayPeriod: 1.85,     // ~48 hrs/yr (6 days)
+  personalDaysPerYear: 3,
+  payPeriodsPerYear: 26,
+};
 
 // =============================================================================
 // TYPES
@@ -40,6 +62,7 @@ export interface UseTimeOffRequestsReturn {
 
   getPendingRequests: () => TimeOffRequest[];
   getUpcomingTimeOff: (userId?: string) => TimeOffRequest[];
+  getBalances: (userId: string, accrualConfig?: AccrualConfig) => PTOBalanceSummary;
 }
 
 export interface SubmitTimeOffData {
@@ -107,7 +130,7 @@ export function useTimeOffRequests(
         setLoading(false);
       },
       (err) => {
-        console.error('Error loading time off requests:', err);
+        logger.error('Error loading time off requests', { error: err, hook: 'useTimeOffRequests' });
         setLoading(false);
       }
     );
@@ -243,6 +266,61 @@ export function useTimeOffRequests(
     [requests]
   );
 
+  const getBalances = useCallback(
+    (userId: string, accrualConfig: AccrualConfig = DEFAULT_ACCRUAL): PTOBalanceSummary => {
+      const now = new Date();
+      const hireDate = accrualConfig.hireDate || new Date(now.getFullYear(), 0, 1); // default to Jan 1 of current year
+
+      // Calculate pay periods elapsed since hire date (or start of year)
+      const msPerPayPeriod = (365.25 * 24 * 60 * 60 * 1000) / accrualConfig.payPeriodsPerYear;
+      const elapsed = now.getTime() - hireDate.getTime();
+      const periodsElapsed = Math.min(
+        Math.floor(elapsed / msPerPayPeriod),
+        accrualConfig.payPeriodsPerYear
+      );
+
+      const vacationAccrued = Math.round(periodsElapsed * accrualConfig.vacationHoursPerPayPeriod * 100) / 100;
+      const sickAccrued = Math.round(periodsElapsed * accrualConfig.sickHoursPerPayPeriod * 100) / 100;
+      const personalTotal = accrualConfig.personalDaysPerYear * 8; // 8 hrs per day
+
+      // Calculate used hours from approved requests
+      const userApproved = requests.filter(
+        (r) => r.userId === userId && r.status === 'approved' && r.startDate.getFullYear() === now.getFullYear()
+      );
+
+      let vacationUsed = 0;
+      let sickUsed = 0;
+      let personalUsed = 0;
+
+      for (const req of userApproved) {
+        const days = Math.max(1, Math.ceil((req.endDate.getTime() - req.startDate.getTime()) / (24 * 60 * 60 * 1000)) + 1);
+        const hours = req.halfDay ? days * 4 : days * 8;
+
+        switch (req.type) {
+          case 'vacation':
+            vacationUsed += hours;
+            break;
+          case 'sick':
+            sickUsed += hours;
+            break;
+          case 'personal':
+            personalUsed += hours;
+            break;
+          default:
+            // bereavement, jury_duty, other — don't count against PTO
+            break;
+        }
+      }
+
+      return {
+        vacation: { accrued: vacationAccrued, used: vacationUsed, balance: Math.round((vacationAccrued - vacationUsed) * 100) / 100 },
+        sick: { accrued: sickAccrued, used: sickUsed, balance: Math.round((sickAccrued - sickUsed) * 100) / 100 },
+        personal: { total: personalTotal, used: personalUsed, balance: personalTotal - personalUsed },
+      };
+    },
+    [requests]
+  );
+
   return {
     requests,
     loading,
@@ -253,5 +331,6 @@ export function useTimeOffRequests(
     denyRequest,
     getPendingRequests,
     getUpcomingTimeOff,
+    getBalances,
   };
 }

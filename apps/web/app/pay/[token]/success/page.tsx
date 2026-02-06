@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 export default function PaymentSuccessPage() {
   const params = useParams();
@@ -30,7 +31,7 @@ export default function PaymentSuccessPage() {
           });
           setStatus('success');
         } catch (error) {
-          console.error('Error updating payment link:', error);
+          logger.error('Error updating payment link', { error: error, page: 'pay-token-success' });
           // Payment was still successful, just failed to update link status
           setStatus('success');
         }

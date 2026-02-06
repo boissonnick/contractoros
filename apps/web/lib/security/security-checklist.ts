@@ -23,6 +23,7 @@ import {
   where,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================
 // Types
@@ -667,7 +668,7 @@ export function getScoreGrade(score: number): {
  */
 export async function runSecurityChecks(orgId: string): Promise<SecurityCheckItem[]> {
   if (!orgId) {
-    console.warn('[SecurityChecklist] Missing orgId');
+    logger.warn('[SecurityChecklist] Missing orgId', { component: 'security-security-checklist' });
     return [];
   }
 
@@ -715,7 +716,7 @@ export async function runSecurityChecks(orgId: string): Promise<SecurityCheckIte
 
     return checks;
   } catch (error) {
-    console.error('[SecurityChecklist] Failed to run security checks:', error);
+    logger.error('[SecurityChecklist] Failed to run security checks', { error: error, component: 'security-security-checklist' });
     return DEFAULT_SECURITY_CHECKS;
   }
 }
@@ -912,7 +913,7 @@ async function runAutoCheck(
         };
     }
   } catch (error) {
-    console.error(`[SecurityChecklist] Error running check ${checkId}:`, error);
+    logger.error('[SecurityChecklist] Error running check ${checkId}', { error: error, component: 'security-security-checklist' });
     return {
       status: 'not_checked',
       details: 'Error running automatic check',
@@ -957,7 +958,7 @@ export async function saveSecurityChecks(
       { merge: true }
     );
   } catch (error) {
-    console.error('[SecurityChecklist] Failed to save security checks:', error);
+    logger.error('[SecurityChecklist] Failed to save security checks', { error: error, component: 'security-security-checklist' });
     throw error;
   }
 }
@@ -996,7 +997,7 @@ export async function updateSecurityCheck(
       { merge: true }
     );
   } catch (error) {
-    console.error('[SecurityChecklist] Failed to update security check:', error);
+    logger.error('[SecurityChecklist] Failed to update security check', { error: error, component: 'security-security-checklist' });
     throw error;
   }
 }
@@ -1031,7 +1032,7 @@ export async function getSecurityHistory(
       };
     });
   } catch (error) {
-    console.error('[SecurityChecklist] Failed to get security history:', error);
+    logger.error('[SecurityChecklist] Failed to get security history', { error: error, component: 'security-security-checklist' });
     return [];
   }
 }
@@ -1076,7 +1077,7 @@ export async function saveSecurityHistory(
       runBy: userId,
     });
   } catch (error) {
-    console.error('[SecurityChecklist] Failed to save security history:', error);
+    logger.error('[SecurityChecklist] Failed to save security history', { error: error, component: 'security-security-checklist' });
     throw error;
   }
 }

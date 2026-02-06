@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { GanttTask, GanttOptions } from 'frappe-gantt';
 import type { GanttViewMode } from './GanttToolbar';
+import { logger } from '@/lib/utils/logger';
 
 interface GanttChartProps {
   tasks: GanttTask[];
@@ -70,7 +71,7 @@ export default function GanttChart({ tasks, viewMode, onTaskClick, onDateChange 
         ganttRef.current = new Gantt(svgEl, tasks, options);
         setLoaded(true);
       } catch (err) {
-        console.error('Failed to load Gantt chart:', err);
+        logger.error('Failed to load Gantt chart', { error: err, component: 'GanttChart' });
       }
     }
 

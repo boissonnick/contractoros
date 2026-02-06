@@ -22,6 +22,7 @@ import {
 import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
 import { QuotePdfTemplate, createDefaultQuotePdfTemplate } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 interface UseQuoteTemplatesReturn {
   templates: QuotePdfTemplate[];
@@ -78,7 +79,7 @@ export function useQuoteTemplates(): UseQuoteTemplatesReturn {
         setError(null);
       },
       (err) => {
-        console.error('Error loading quote templates:', err);
+        logger.error('Error loading quote templates', { error: err, hook: 'useQuoteTemplates' });
         setError(err.message);
         setLoading(false);
       }

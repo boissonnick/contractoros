@@ -17,6 +17,7 @@ import { db } from '@/lib/firebase/config';
 import { WarrantyItem, WarrantyStatus, WarrantyClaim } from '@/types';
 import { useAuth } from '@/lib/auth';
 import { toast } from '@/components/ui/Toast';
+import { logger } from '@/lib/utils/logger';
 
 interface UseWarrantiesOptions {
   projectId?: string;
@@ -90,7 +91,7 @@ export function useWarranties(options: UseWarrantiesOptions = {}) {
         setLoading(false);
       },
       (err) => {
-        console.error('Error loading warranties:', err);
+        logger.error('Error loading warranties', { error: err, hook: 'useWarranties' });
         setLoading(false);
       }
     );

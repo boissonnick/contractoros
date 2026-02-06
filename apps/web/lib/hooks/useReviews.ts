@@ -281,7 +281,7 @@ export function useReview(orgId: string, reviewId: string | null): UseReviewRetu
         setLoading(false);
       },
       (err) => {
-        console.error('Error fetching review:', err);
+        logger.error('Error fetching review', { error: err, hook: 'useReviews' });
         setError(err as Error);
         setLoading(false);
       }
@@ -610,3 +610,4 @@ export {
   REVIEW_REQUEST_CHANNEL_LABELS,
   REVIEW_AUTOMATION_TRIGGER_LABELS,
 } from '@/types/review';
+import { logger } from '@/lib/utils/logger';

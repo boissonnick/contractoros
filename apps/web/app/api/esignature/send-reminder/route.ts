@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb, Timestamp } from '@/lib/firebase/admin';
 import { verifyAuthAndOrg } from '@/lib/api/auth';
+import { logger } from '@/lib/utils/logger';
 
 export const runtime = 'nodejs';
 
@@ -133,14 +134,14 @@ export async function POST(request: NextRequest) {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Mailgun error:', errorText);
+        logger.error('Mailgun error', { error: errorText, route: 'esignature-send-reminder' });
         return NextResponse.json(
           { error: 'Failed to send reminder email' },
           { status: 500 }
         );
       }
     } else {
-      console.warn('Mailgun not configured, skipping email send');
+      logger.warn('Mailgun not configured, skipping email send', { route: 'esignature-send-reminder' });
     }
 
     // Update the signature request with reminder info
@@ -173,7 +174,7 @@ export async function POST(request: NextRequest) {
       message: `Reminder sent to ${signer.email}`,
     });
   } catch (error) {
-    console.error('Error sending reminder:', error);
+    logger.error('Error sending reminder', { error, route: 'esignature-send-reminder' });
     return NextResponse.json(
       { error: 'Failed to send reminder' },
       { status: 500 }

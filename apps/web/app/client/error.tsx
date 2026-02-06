@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { ExclamationTriangleIcon, ArrowPathIcon, HomeIcon } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 export default function ClientPortalError({
   error,
@@ -12,7 +13,7 @@ export default function ClientPortalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error('Client portal error:', error);
+    logger.error('Client portal error', { error, page: 'client-error' });
   }, [error]);
 
   return (

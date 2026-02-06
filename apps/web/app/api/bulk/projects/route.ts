@@ -23,6 +23,7 @@ import {
   TagParams,
 } from '@/lib/bulk-operations/types';
 import { ProjectStatus } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 export async function POST(request: NextRequest) {
   // Verify authentication
@@ -154,7 +155,7 @@ export async function POST(request: NextRequest) {
       result,
     });
   } catch (error) {
-    console.error('Bulk project operation error:', error);
+    logger.error('Bulk project operation error', { error, route: 'bulk-projects' });
 
     return NextResponse.json(
       {

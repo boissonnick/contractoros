@@ -19,6 +19,7 @@ import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import EmptyState from '@/components/ui/EmptyState';
 import Skeleton from '@/components/ui/Skeleton';
+import { logger } from '@/lib/utils/logger';
 
 interface SubmittalWithProject extends Submittal {
   projectName: string;
@@ -74,7 +75,7 @@ export default function SubmittalsPage() {
         const results = await Promise.all(promises);
         setAllSubmittals(results.flat());
       } catch (err) {
-        console.error('Error fetching submittals:', err);
+        logger.error('Error fetching submittals', { error: err, page: 'dashboard-submittals' });
       } finally {
         setLoading(false);
       }

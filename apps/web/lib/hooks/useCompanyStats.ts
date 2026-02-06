@@ -32,6 +32,7 @@ import {
   format,
   differenceInDays,
 } from 'date-fns';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================
 // Types
@@ -197,7 +198,7 @@ export function useCompanyStats(): UseCompanyStatsReturn {
         setLoading(false);
       } catch (err) {
         if (cancelled) return;
-        console.error('Error fetching company stats:', err);
+        logger.error('Error fetching company stats', { error: err, hook: 'useCompanyStats' });
         setError(err instanceof Error ? err.message : 'Failed to load company stats');
         setLoading(false);
       }

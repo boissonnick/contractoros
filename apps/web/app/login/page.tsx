@@ -12,6 +12,7 @@ import {
   EnvelopeIcon,
   ExclamationCircleIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 async function handlePostAuth(uid: string, router: ReturnType<typeof useRouter>) {
   try {
@@ -23,7 +24,7 @@ async function handlePostAuth(uid: string, router: ReturnType<typeof useRouter>)
       router.push('/onboarding');
     }
   } catch (error: any) {
-    console.error('handlePostAuth error:', error?.code, error?.message);
+    logger.error('handlePostAuth error', { error: error, page: 'login' });
     throw error;
   }
 }
@@ -47,7 +48,7 @@ export default function LoginPage() {
     // Safety timeout: show login form if auth check hangs
     const timer = setTimeout(() => {
       if (!didResolve) {
-        console.warn('Auth check timed out, showing login form');
+        logger.warn('Auth check timed out, showing login form', { page: 'login' });
         setCheckingAuth(false);
       }
     }, 5000);
@@ -59,7 +60,7 @@ export default function LoginPage() {
           await handlePostAuth(user.uid, router);
           return;
         } catch (error) {
-          console.error('Error checking auth:', error);
+          logger.error('Error checking auth', { error: error, page: 'login' });
         }
       }
       setCheckingAuth(false);
@@ -79,7 +80,7 @@ export default function LoginPage() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       await handlePostAuth(userCredential.user.uid, router);
     } catch (err: any) {
-      console.error("Login error:", err?.code, err?.message, err);
+      logger.error('Login error', { error: err, page: 'login' });
       if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
         setError('Invalid email or password.');
       } else if (err.code === 'auth/too-many-requests') {
@@ -105,7 +106,7 @@ export default function LoginPage() {
       await sendMagicLink(email);
       setMagicLinkSent(true);
     } catch (err: any) {
-      console.error("Magic link error:", err);
+      logger.error('Magic link error', { error: err, page: 'login' });
       setError('Failed to send sign-in link. Please try again.');
     } finally {
       setLoading(false);
@@ -142,7 +143,7 @@ export default function LoginPage() {
         router.push('/onboarding/company-setup');
       }
     } catch (err: any) {
-      console.error("Google login error:", err);
+      logger.error('Google login error', { error: err, page: 'login' });
       if (err.code === 'auth/popup-closed-by-user') {
         // User closed popup, no error needed
       } else if (err.code === 'auth/popup-blocked') {

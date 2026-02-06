@@ -19,6 +19,7 @@ import {
   TrashIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 const profileSchema = z.object({
   displayName: z.string().min(2, 'Name must be at least 2 characters'),
@@ -157,7 +158,7 @@ export default function ProfileSettingsPage() {
 
       toast.success('Photo updated');
     } catch (error) {
-      console.error('Photo upload error:', error);
+      logger.error('Photo upload error', { error: error, page: 'dashboard-settings-profile' });
       toast.error('Failed to upload photo');
       setPhotoPreview(profile?.photoURL || null);
     } finally {
@@ -180,7 +181,7 @@ export default function ProfileSettingsPage() {
       setPhotoPreview(null);
       toast.success('Photo removed');
     } catch (error) {
-      console.error('Remove photo error:', error);
+      logger.error('Remove photo error', { error: error, page: 'dashboard-settings-profile' });
       toast.error('Failed to remove photo');
     }
   };
@@ -210,7 +211,7 @@ export default function ProfileSettingsPage() {
       toast.success('Profile updated');
       reset(data); // Reset form state to mark as not dirty
     } catch (error: any) {
-      console.error('Profile update error:', error);
+      logger.error('Profile update error', { error: error, page: 'dashboard-settings-profile' });
       toast.error('Failed to update profile', error.message);
     }
   };

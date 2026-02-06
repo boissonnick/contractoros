@@ -1,5 +1,6 @@
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { logger } from '@/lib/utils/logger';
 
 export interface ActivityLogEntry {
   id: string;
@@ -21,6 +22,6 @@ export async function logActivity(entry: Omit<ActivityLogEntry, 'id' | 'timestam
     });
   } catch (err) {
     // Silent fail — activity logging should never block the main operation
-    console.warn('Failed to log activity:', err);
+    logger.warn('Failed to log activity', { error: err, module: 'activity' });
   }
 }

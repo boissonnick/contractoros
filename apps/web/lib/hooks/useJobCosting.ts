@@ -120,7 +120,7 @@ export function useJobCosts(options: UseJobCostsOptions): UseJobCostsReturn {
         setError(null);
       },
       (err) => {
-        console.error('Error fetching job costs:', err);
+        logger.error('Error fetching job costs', { error: err, hook: 'useJobCosting' });
         setError(err.message);
         setLoading(false);
       }
@@ -271,7 +271,7 @@ export function useProjectProfitability(projectId: string): UseProjectProfitabil
         setError(null);
       },
       (err) => {
-        console.error('Error fetching profitability:', err);
+        logger.error('Error fetching profitability', { error: err, hook: 'useJobCosting' });
         setError(err.message);
         setLoading(false);
       }
@@ -293,7 +293,7 @@ export function useProjectProfitability(projectId: string): UseProjectProfitabil
     const _q = query(costsRef, where('projectId', '==', projectId));
 
     // Note: In production, this should be a Cloud Function that runs server-side
-    console.log('Profitability recalculation should be triggered via Cloud Function');
+    logger.debug('Profitability recalculation should be triggered via Cloud Function', { hook: 'useJobCosting' });
   }, [orgId, projectId]);
 
   return {
@@ -355,7 +355,7 @@ export function useJobCostAlerts(projectId?: string): UseJobCostAlertsReturn {
         setError(null);
       },
       (err) => {
-        console.error('Error fetching job cost alerts:', err);
+        logger.error('Error fetching job cost alerts', { error: err, hook: 'useJobCosting' });
         setError(err.message);
         setLoading(false);
       }
@@ -393,6 +393,7 @@ export function useJobCostAlerts(projectId?: string): UseJobCostAlertsReturn {
 
 // Re-export from centralized formatters
 export { formatCurrencyCompact as formatCurrency } from '@/lib/utils/formatters';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * Format percentage for display with +/- sign
@@ -485,7 +486,7 @@ export function useOrgJobCosting(): UseOrgJobCostingReturn {
         setError(null);
       },
       (err) => {
-        console.error('Error fetching org profitability:', err);
+        logger.error('Error fetching org profitability', { error: err, hook: 'useJobCosting' });
         setError(err.message);
         setLoading(false);
       }

@@ -16,6 +16,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { seedDemoData, resetDemoData, checkDemoDataExists, SeedProgress } from '@/scripts/seeders/demoData';
 import { TrashIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 export default function OrganizationSettingsPage() {
   const { profile } = useAuth();
@@ -161,7 +162,7 @@ export default function OrganizationSettingsPage() {
         const exists = await checkDemoDataExists(profile!.orgId);
         setDemoDataExists(exists);
       } catch (error) {
-        console.error('Error checking demo data:', error);
+        logger.error('Error checking demo data', { error: error, page: 'dashboard-settings-organization' });
       } finally {
         setCheckingDemoData(false);
       }
@@ -266,7 +267,7 @@ export default function OrganizationSettingsPage() {
       setUploadProgress(0);
       toast.success('Organization settings saved');
     } catch (error) {
-      console.error('Error saving org settings:', error);
+      logger.error('Error saving org settings', { error: error, page: 'dashboard-settings-organization' });
       toast.error('Failed to save settings');
     } finally {
       setSaving(false);
@@ -995,7 +996,7 @@ export default function OrganizationSettingsPage() {
                         });
                         toast.success('Demo data generated successfully!');
                       } catch (error) {
-                        console.error('Error generating demo data:', error);
+                        logger.error('Error generating demo data', { error: error, page: 'dashboard-settings-organization' });
                         setDemoResult({
                           success: false,
                           message: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -1052,7 +1053,7 @@ export default function OrganizationSettingsPage() {
                         });
                         toast.success('Demo data removed successfully!');
                       } catch (error) {
-                        console.error('Error resetting demo data:', error);
+                        logger.error('Error resetting demo data', { error: error, page: 'dashboard-settings-organization' });
                         setDemoResult({
                           success: false,
                           message: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -1129,7 +1130,7 @@ export default function OrganizationSettingsPage() {
                         });
                         toast.success('Demo data regenerated successfully!');
                       } catch (error) {
-                        console.error('Error regenerating demo data:', error);
+                        logger.error('Error regenerating demo data', { error: error, page: 'dashboard-settings-organization' });
                         setDemoResult({
                           success: false,
                           message: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,

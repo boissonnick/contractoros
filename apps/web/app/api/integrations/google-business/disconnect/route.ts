@@ -9,6 +9,7 @@ import {
   deleteConnection,
   getConnection,
 } from '@/lib/integrations/google-business/oauth';
+import { logger } from '@/lib/utils/logger';
 
 export async function POST(request: NextRequest) {
   // Verify authentication
@@ -55,14 +56,14 @@ export async function POST(request: NextRequest) {
     // Delete the connection (this also revokes tokens)
     await deleteConnection(user.orgId, connectionId);
 
-    console.log(`Google Business disconnected for org ${user.orgId}`);
+    logger.info(`Google Business disconnected for org ${user.orgId}`, { route: 'google-business-disconnect' });
 
     return NextResponse.json({
       success: true,
       message: 'Google Business disconnected successfully',
     });
   } catch (error) {
-    console.error('Error disconnecting Google Business:', error);
+    logger.error('Error disconnecting Google Business', { error, route: 'google-business-disconnect' });
     return NextResponse.json(
       { error: 'Failed to disconnect Google Business' },
       { status: 500 }

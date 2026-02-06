@@ -24,6 +24,7 @@ import {
   ChevronDownIcon,
   Cog6ToothIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 // Tab structure with groups for better organization
 // Groups: Core (always visible), Docs (dropdown), Activity (dropdown)
@@ -174,7 +175,7 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
           setProjectDescription(snap.data().description || '');
         }
       } catch (e) {
-        console.error('Error fetching project name:', e);
+        logger.error('Error fetching project name', { error: e, page: 'project-layout' });
       }
     }
     fetchName();

@@ -14,6 +14,7 @@ import {
   DocumentTextIcon,
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
+import { logger } from '@/lib/utils/logger';
 
 interface PermitInspectionsModalProps {
   isOpen: boolean;
@@ -71,7 +72,7 @@ export default function PermitInspectionsModal({ isOpen, onClose, permit }: Perm
       });
       setShowAddForm(false);
     } catch (error) {
-      console.error('Error adding inspection:', error);
+      logger.error('Error adding inspection', { error: error, component: 'PermitInspectionsModal' });
     } finally {
       setLoading(false);
     }
@@ -92,7 +93,7 @@ export default function PermitInspectionsModal({ isOpen, onClose, permit }: Perm
         notes: '',
       });
     } catch (error) {
-      console.error('Error recording result:', error);
+      logger.error('Error recording result', { error: error, component: 'PermitInspectionsModal' });
     } finally {
       setLoading(false);
     }

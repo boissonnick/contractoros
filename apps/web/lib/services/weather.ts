@@ -20,6 +20,7 @@ import {
   Project,
   Phase,
 } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 const WEATHER_API_KEY = process.env.NEXT_PUBLIC_WEATHER_API_KEY || process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY;
 const WEATHER_API_BASE = 'https://api.openweathermap.org/data/2.5';
@@ -75,14 +76,14 @@ export async function getWeatherForecast(
     );
 
     if (!response.ok) {
-      console.warn('Weather API error, using mock data');
+      logger.warn('Weather API error, using mock data', { component: 'services-weather' });
       return getMockWeatherData(days);
     }
 
     const data = await response.json();
     return transformWeatherData(data, days);
   } catch (error) {
-    console.error('Weather fetch error:', error);
+    logger.error('Weather fetch error', { error: error, component: 'services-weather' });
     return getMockWeatherData(days);
   }
 }
@@ -517,7 +518,7 @@ export async function getWeatherByCoords(lat: number, lng: number): Promise<Exte
 
   // Check rate limit
   if (!canMakeRequest()) {
-    console.warn('Rate limit reached, using mock data');
+    logger.warn('Rate limit reached, using mock data', { component: 'services-weather' });
     return generateMockExtendedWeatherData('Location');
   }
 
@@ -540,7 +541,7 @@ export async function getWeatherByCoords(lat: number, lng: number): Promise<Exte
     );
 
     if (!currentResponse.ok || !forecastResponse.ok) {
-      console.warn('Weather API error, using mock data');
+      logger.warn('Weather API error, using mock data', { component: 'services-weather' });
       return generateMockExtendedWeatherData('Location');
     }
 
@@ -552,7 +553,7 @@ export async function getWeatherByCoords(lat: number, lng: number): Promise<Exte
 
     return weatherData;
   } catch (error) {
-    console.error('Weather fetch error:', error);
+    logger.error('Weather fetch error', { error: error, component: 'services-weather' });
     return generateMockExtendedWeatherData('Location');
   }
 }
@@ -569,7 +570,7 @@ export async function getWeatherByZip(zip: string): Promise<ExtendedWeatherData>
 
   // Check rate limit
   if (!canMakeRequest()) {
-    console.warn('Rate limit reached, using mock data');
+    logger.warn('Rate limit reached, using mock data', { component: 'services-weather' });
     return generateMockExtendedWeatherData(`ZIP: ${zip}`);
   }
 
@@ -582,7 +583,7 @@ export async function getWeatherByZip(zip: string): Promise<ExtendedWeatherData>
     );
 
     if (!currentResponse.ok) {
-      console.warn('Weather API error, using mock data');
+      logger.warn('Weather API error, using mock data', { component: 'services-weather' });
       return generateMockExtendedWeatherData(`ZIP: ${zip}`);
     }
 
@@ -592,7 +593,7 @@ export async function getWeatherByZip(zip: string): Promise<ExtendedWeatherData>
     const { lat, lon } = currentData.coord;
     return getWeatherByCoords(lat, lon);
   } catch (error) {
-    console.error('Weather fetch error:', error);
+    logger.error('Weather fetch error', { error: error, component: 'services-weather' });
     return generateMockExtendedWeatherData(`ZIP: ${zip}`);
   }
 }
@@ -611,7 +612,7 @@ export async function getWeatherByCity(city: string, state?: string): Promise<Ex
 
   // Check rate limit
   if (!canMakeRequest()) {
-    console.warn('Rate limit reached, using mock data');
+    logger.warn('Rate limit reached, using mock data', { component: 'services-weather' });
     return generateMockExtendedWeatherData(location);
   }
 
@@ -624,7 +625,7 @@ export async function getWeatherByCity(city: string, state?: string): Promise<Ex
     );
 
     if (!currentResponse.ok) {
-      console.warn('Weather API error, using mock data');
+      logger.warn('Weather API error, using mock data', { component: 'services-weather' });
       return generateMockExtendedWeatherData(location);
     }
 
@@ -634,7 +635,7 @@ export async function getWeatherByCity(city: string, state?: string): Promise<Ex
     const { lat, lon } = currentData.coord;
     return getWeatherByCoords(lat, lon);
   } catch (error) {
-    console.error('Weather fetch error:', error);
+    logger.error('Weather fetch error', { error: error, component: 'services-weather' });
     return generateMockExtendedWeatherData(location);
   }
 }
@@ -1184,7 +1185,7 @@ export async function fetchWeatherForecast(
   orgId: string
 ): Promise<WeatherForecast[]> {
   if (!WEATHER_API_KEY) {
-    console.warn('OpenWeatherMap API key not configured');
+    logger.warn('OpenWeatherMap API key not configured', { component: 'services-weather' });
     return [];
   }
 
@@ -1252,7 +1253,7 @@ export async function fetchWeatherForecast(
 
     return forecasts;
   } catch (error) {
-    console.error('Error fetching weather:', error);
+    logger.error('Error fetching weather', { error: error, component: 'services-weather' });
     return [];
   }
 }

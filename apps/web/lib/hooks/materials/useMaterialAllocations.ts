@@ -16,6 +16,7 @@ import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
 import { MaterialItem, MaterialAllocation } from '@/types';
 import { convertTimestamp } from './utils';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================
 // Material Allocations Hook
@@ -59,7 +60,7 @@ export function useMaterialAllocations(projectId?: string) {
         setLoading(false);
       },
       (err) => {
-        console.error('Error fetching allocations:', err);
+        logger.error('Error fetching allocations', { error: err, hook: 'useMaterialAllocations' });
         setError(err as Error);
         setLoading(false);
       }

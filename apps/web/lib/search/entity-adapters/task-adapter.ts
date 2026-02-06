@@ -5,6 +5,7 @@
 import { db } from '@/lib/firebase/config';
 import { collectionGroup, getDocs, query, where, limit } from 'firebase/firestore';
 import { SearchResult } from '../types';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * Search tasks by name, description, and assignee
@@ -77,7 +78,7 @@ export async function searchTasks(
     results.sort((a, b) => b.score - a.score);
     return results.slice(0, 20);
   } catch (error) {
-    console.error('Error searching tasks:', error);
+    logger.error('Error searching tasks', { error: error, component: 'search-entity-adapters-task-adapter' });
     return [];
   }
 }

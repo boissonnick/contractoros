@@ -27,6 +27,7 @@ import {
 import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
 import { convertTimestamps } from '@/lib/firebase/timestamp-converter';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================
 // Types
@@ -187,7 +188,7 @@ export function useIntegrationStatus(): UseIntegrationStatusReturn {
         setLoading(false);
       },
       (err) => {
-        console.error('Error fetching integration statuses:', err);
+        logger.error('Error fetching integration statuses', { error: err, hook: 'useIntegrationStatus' });
         setError(err as Error);
         setLoading(false);
       }
@@ -291,7 +292,7 @@ export function useIntegrationSyncLogs(
         setLoading(false);
       },
       (err) => {
-        console.error('Error fetching sync logs:', err);
+        logger.error('Error fetching sync logs', { error: err, hook: 'useIntegrationStatus' });
         setError(err as Error);
         setLoading(false);
       }
@@ -435,12 +436,12 @@ export function useTriggerSync(): UseTriggerSyncReturn {
 
             setSyncing(null);
           } catch (err) {
-            console.error('Error updating sync status:', err);
+            logger.error('Error updating sync status', { error: err, hook: 'useIntegrationStatus' });
             setSyncing(null);
           }
         }, 2000);
       } catch (err) {
-        console.error('Error triggering sync:', err);
+        logger.error('Error triggering sync', { error: err, hook: 'useIntegrationStatus' });
         setError(err as Error);
         setSyncing(null);
       }

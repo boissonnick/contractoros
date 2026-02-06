@@ -14,6 +14,7 @@ import {
   CpuChipIcon,
   ArrowPathIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 const NOTIFICATION_TYPE_LABELS: Record<AppNotificationType, { label: string; description: string }> = {
   task_assigned: { label: 'Task Assignments', description: 'When a task is assigned to you' },
@@ -83,7 +84,7 @@ export function NotificationSettings() {
         },
       });
     } catch (error) {
-      console.error('Failed to send test notification:', error);
+      logger.error('Failed to send test notification', { error: error, component: 'NotificationSettings' });
     }
     setTestingNotification(false);
   };

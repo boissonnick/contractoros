@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import type { EquipmentItem, EquipmentCheckoutStatus } from '@/types';
+import { toast } from '@/components/ui/Toast';
 
 interface UseEquipmentOptions {
   orgId: string;
@@ -45,6 +46,7 @@ export function useEquipment({ orgId, projectId, status }: UseEquipmentOptions) 
     if (!res.ok) throw new Error('Failed to create equipment');
     const newItem = await res.json();
     setEquipment(prev => [newItem, ...prev]);
+    toast.success("Equipment created");
     return newItem;
   };
 
@@ -56,6 +58,7 @@ export function useEquipment({ orgId, projectId, status }: UseEquipmentOptions) 
     });
     if (!res.ok) throw new Error('Failed to update equipment');
     await fetchEquipment();
+    toast.success('Equipment updated');
   };
 
   const deleteEquipment = async (equipmentId: string) => {
@@ -64,6 +67,7 @@ export function useEquipment({ orgId, projectId, status }: UseEquipmentOptions) 
     });
     if (!res.ok) throw new Error('Failed to delete equipment');
     setEquipment(prev => prev.filter(e => e.id !== equipmentId));
+    toast.success('Equipment deleted');
   };
 
   const checkOut = async (equipmentId: string, data: {
@@ -81,6 +85,7 @@ export function useEquipment({ orgId, projectId, status }: UseEquipmentOptions) 
     });
     if (!res.ok) throw new Error('Failed to check out equipment');
     await fetchEquipment();
+    toast.success('Equipment checked out');
   };
 
   const returnEquipment = async (equipmentId: string, data: {
@@ -94,6 +99,7 @@ export function useEquipment({ orgId, projectId, status }: UseEquipmentOptions) 
     });
     if (!res.ok) throw new Error('Failed to return equipment');
     await fetchEquipment();
+    toast.success('Equipment returned');
   };
 
   const stats = {

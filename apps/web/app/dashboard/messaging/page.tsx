@@ -31,6 +31,7 @@ import {
   onSnapshot,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { logger } from '@/lib/utils/logger';
 
 export default function MessagingPage() {
   const { profile } = useAuth();
@@ -97,7 +98,7 @@ export default function MessagingPage() {
         setMessagesLoading(false);
       },
       (err) => {
-        console.error('Error loading outbound messages:', err);
+        logger.error('Error loading outbound messages', { error: err, page: 'dashboard-messaging' });
         setMessagesLoading(false);
       }
     );
@@ -125,7 +126,7 @@ export default function MessagingPage() {
         setMessagesLoading(false);
       },
       (err) => {
-        console.error('Error loading inbound messages:', err);
+        logger.error('Error loading inbound messages', { error: err, page: 'dashboard-messaging' });
         setMessagesLoading(false);
       }
     );

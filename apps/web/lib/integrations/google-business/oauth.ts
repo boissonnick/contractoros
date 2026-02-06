@@ -6,6 +6,7 @@
  */
 
 import { adminDb } from '@/lib/firebase/admin';
+import { logger } from '@/lib/utils/logger';
 import {
   GoogleBusinessOAuthConfig,
   GoogleBusinessAuthState,
@@ -105,7 +106,7 @@ export async function exchangeCodeForTokens(
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error('Google token exchange failed:', errorText);
+    logger.error('Google token exchange failed', { error: errorText, module: 'google-business-oauth' });
     throw new Error(`Failed to exchange code for tokens: ${response.status}`);
   }
 
@@ -148,7 +149,7 @@ export async function refreshAccessToken(
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error('Google token refresh failed:', errorText);
+    logger.error('Google token refresh failed', { error: errorText, module: 'google-business-oauth' });
     throw new Error(`Failed to refresh token: ${response.status}`);
   }
 
@@ -178,7 +179,7 @@ export async function revokeTokens(token: string): Promise<void> {
   );
 
   if (!response.ok) {
-    console.error('Google token revocation failed:', await response.text());
+    logger.error('Google token revocation failed', { module: 'google-business-oauth' });
     // Don't throw - we still want to clear local data
   }
 }
@@ -303,7 +304,7 @@ export async function deleteConnection(
       try {
         await revokeTokens(data.accessToken);
       } catch (error) {
-        console.error('Failed to revoke Google tokens:', error);
+        logger.error('Failed to revoke Google tokens', { error, module: 'google-business-oauth' });
       }
     }
   }
@@ -340,7 +341,7 @@ export async function getValidAccessToken(
   if (now.getTime() > tokenExpiresAt.getTime() - bufferTime) {
     // Token is expired or about to expire, refresh it
     if (!connection.refreshToken) {
-      console.error('No refresh token available');
+      logger.error('No refresh token available', { module: 'google-business-oauth' });
       return null;
     }
 
@@ -352,7 +353,7 @@ export async function getValidAccessToken(
         locationId: connection.locationId,
       };
     } catch (error) {
-      console.error('Failed to refresh Google token:', error);
+      logger.error('Failed to refresh Google token', { error, module: 'google-business-oauth' });
       return null;
     }
   }

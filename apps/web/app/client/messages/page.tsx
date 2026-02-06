@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
 import {
@@ -9,6 +9,10 @@ import {
   where,
   orderBy,
   getDocs,
+  addDoc,
+  updateDoc,
+  doc,
+  onSnapshot,
   limit,
   Timestamp,
 } from 'firebase/firestore';
@@ -28,6 +32,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { format, isToday, isYesterday } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/utils/logger';
 
 interface MessageThread {
   channel: MessageChannel;
@@ -43,17 +48,31 @@ function formatMessageDate(date: Date): string {
 }
 
 export default function ClientMessagesPage() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [threads, setThreads] = useState<MessageThread[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [expandedThreadId, setExpandedThreadId] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState('');
+  const [sending, setSending] = useState(false);
+  const unsubscribeRefs = useRef<(() => void)[]>([]);
+
+  // Cleanup snapshot listeners on unmount
+  useEffect(() => {
+    return () => {
+      unsubscribeRefs.current.forEach(unsub => unsub());
+    };
+  }, []);
 
   const fetchData = useCallback(async () => {
     if (!user?.uid) {
       setLoading(false);
       return;
     }
+
+    // Clean up previous listeners before setting up new ones
+    unsubscribeRefs.current.forEach(unsub => unsub());
+    unsubscribeRefs.current = [];
 
     setFetchError(null);
     setLoading(true);
@@ -109,17 +128,26 @@ export default function ClientMessagesPage() {
         }
       }
 
-      // Fetch messages for each channel
-      const threadsData: MessageThread[] = await Promise.all(
-        channelsData.map(async (channel) => {
-          const messagesQuery = query(
-            collection(db, 'messages'),
-            where('channelId', '==', channel.id),
-            orderBy('createdAt', 'desc'),
-            limit(50)
-          );
-          const messagesSnap = await getDocs(messagesQuery);
-          const messages: Message[] = messagesSnap.docs.map(d => {
+      // Build initial threads with empty messages (snapshots will fill them)
+      const threadsData: MessageThread[] = channelsData.map((channel) => ({
+        channel,
+        messages: [],
+        project: channel.projectId ? projectsMap.get(channel.projectId) : undefined,
+        unreadCount: 0,
+      }));
+
+      setThreads(threadsData);
+
+      // Set up real-time listeners for messages in each channel
+      const unsubscribes = channelsData.map((channel) => {
+        const messagesQuery = query(
+          collection(db, 'messages'),
+          where('channelId', '==', channel.id),
+          orderBy('createdAt', 'desc'),
+          limit(50)
+        );
+        return onSnapshot(messagesQuery, (snapshot) => {
+          const messages: Message[] = snapshot.docs.map(d => {
             const data = d.data();
             return {
               id: d.id,
@@ -137,22 +165,19 @@ export default function ClientMessagesPage() {
               updatedAt: data.updatedAt ? (data.updatedAt as Timestamp).toDate() : undefined,
             };
           });
-
           // Reverse to show oldest first in expanded view
           messages.reverse();
 
-          return {
-            channel,
-            messages,
-            project: channel.projectId ? projectsMap.get(channel.projectId) : undefined,
-            unreadCount: 0, // For V1, we don't track read status per-client
-          };
-        })
-      );
+          setThreads(prev => prev.map(t =>
+            t.channel.id === channel.id ? { ...t, messages } : t
+          ));
+        });
+      });
 
-      setThreads(threadsData);
+      // Store unsubscribe functions for cleanup
+      unsubscribeRefs.current = unsubscribes;
     } catch (error) {
-      console.error('Error fetching messages:', error);
+      logger.error('Error fetching messages', { error, page: 'client-messages' });
       setFetchError('Failed to load messages. Please try again.');
     } finally {
       setLoading(false);
@@ -187,6 +212,42 @@ export default function ClientMessagesPage() {
 
   const toggleThread = (channelId: string) => {
     setExpandedThreadId(prev => prev === channelId ? null : channelId);
+  };
+
+  const handleSend = async (channelId: string) => {
+    if (!replyText.trim() || sending || !user?.uid) return;
+
+    const thread = threads.find(t => t.channel.id === channelId);
+    if (!thread) return;
+
+    setSending(true);
+    try {
+      const senderName = profile?.displayName || user.email || 'Client';
+      const now = Timestamp.now();
+
+      // Add message to messages collection
+      await addDoc(collection(db, 'messages'), {
+        channelId,
+        orgId: thread.channel.orgId,
+        senderId: user.uid,
+        senderName,
+        text: replyText.trim(),
+        createdAt: now,
+      });
+
+      // Update channel with latest message info
+      await updateDoc(doc(db, 'messageChannels', channelId), {
+        lastMessageAt: now,
+        lastMessageText: replyText.trim(),
+        lastMessageBy: senderName,
+      });
+
+      setReplyText('');
+    } catch (error) {
+      logger.error('Error sending message', { error, page: 'client-messages' });
+    } finally {
+      setSending(false);
+    }
   };
 
   if (loading) {
@@ -387,6 +448,27 @@ export default function ClientMessagesPage() {
                                 })
                               )}
                             </div>
+
+                            {/* Message Composer */}
+                            <div className="border-t border-gray-200 px-4 py-3 bg-white">
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="text"
+                                  value={replyText}
+                                  onChange={(e) => setReplyText(e.target.value)}
+                                  placeholder="Type a message..."
+                                  className="flex-1 px-4 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
+                                  onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(thread.channel.id); } }}
+                                />
+                                <button
+                                  onClick={() => handleSend(thread.channel.id)}
+                                  disabled={!replyText.trim() || sending}
+                                  className="px-4 py-2 bg-brand-primary text-white text-sm font-medium rounded-xl hover:opacity-90 disabled:opacity-50 transition-colors"
+                                >
+                                  {sending ? 'Sending...' : 'Send'}
+                                </button>
+                              </div>
+                            </div>
                           </div>
                         )}
                       </Card>
@@ -401,14 +483,14 @@ export default function ClientMessagesPage() {
           <Card className="p-6 bg-gray-50 border-dashed">
             <div className="text-center">
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-white shadow-sm ring-1 ring-black/5 mb-3">
-                <EnvelopeIcon className="h-6 w-6 text-brand-primary" />
+                <ChatBubbleLeftRightIcon className="h-6 w-6 text-brand-primary" />
               </div>
               <h3 className="text-lg font-medium tracking-tight text-gray-900 mb-2">
-                Need to Reply?
+                Stay Connected
               </h3>
               <p className="text-gray-600 mb-4 max-w-md mx-auto">
-                This is a read-only view of your project communications.
-                To respond or ask questions, please contact your project manager directly.
+                Expand any thread above to view messages and reply directly.
+                You can also reach your project manager by phone or email.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <a
@@ -433,7 +515,7 @@ export default function ClientMessagesPage() {
           <div className="text-center">
             <p className="text-xs text-gray-400 flex items-center justify-center gap-1">
               <ClockIcon className="h-3 w-3" />
-              Messages update when you refresh the page
+              Messages update in real time
             </p>
           </div>
         </div>

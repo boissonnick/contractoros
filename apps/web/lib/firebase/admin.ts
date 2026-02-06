@@ -1,6 +1,7 @@
 import { initializeApp, getApps, cert, type App } from 'firebase-admin/app';
 import { getFirestore, Timestamp, FieldValue, type Firestore } from 'firebase-admin/firestore';
 import { getAuth, type Auth } from 'firebase-admin/auth';
+import { logger } from '@/lib/utils/logger';
 
 // Singleton instances
 let _app: App | null = null;
@@ -29,7 +30,7 @@ function getApp(): App {
         projectId: serviceAccount.project_id,
       });
     } catch (error) {
-      console.error('Failed to parse Firebase service account:', error);
+      logger.error('Failed to parse Firebase service account', { error, module: 'firebase-admin' });
       throw new Error('Invalid Firebase service account configuration');
     }
   } else {

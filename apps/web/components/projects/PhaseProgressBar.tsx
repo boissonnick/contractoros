@@ -9,6 +9,7 @@ import { db } from '@/lib/firebase/config';
 import { doc, updateDoc, Timestamp } from 'firebase/firestore';
 import { toast } from '@/components/ui';
 import { formatDate } from '@/lib/date-utils';
+import { logger } from '@/lib/utils/logger';
 
 interface PhaseProgressBarProps {
   phases: ProjectPhase[];
@@ -89,7 +90,7 @@ export default function PhaseProgressBar({
       onPhasesChange(updatedPhases);
       toast.success(`Phase updated`);
     } catch (error) {
-      console.error('Error updating phase:', error);
+      logger.error('Error updating phase', { error: error, component: 'PhaseProgressBar' });
       toast.error('Failed to update phase');
     }
   };

@@ -4,6 +4,7 @@
  */
 
 import OpenAI from 'openai';
+import { logger } from '@/lib/utils/logger';
 import {
   ModelAdapter,
   ChatRequest,
@@ -67,7 +68,7 @@ export class OpenAIAdapter implements ModelAdapter {
         estimatedCost: this.estimateCost(inputTokens, outputTokens),
       };
     } catch (error) {
-      console.error('[OpenAIAdapter] Chat error:', error);
+      logger.error('Chat error', { error, module: 'openai-adapter' });
       throw this.handleError(error);
     }
   }
@@ -116,7 +117,7 @@ export class OpenAIAdapter implements ModelAdapter {
 
       yield { type: 'done' };
     } catch (error) {
-      console.error('[OpenAIAdapter] Stream error:', error);
+      logger.error('Stream error', { error, module: 'openai-adapter' });
       yield {
         type: 'error',
         error: this.handleError(error).message,
@@ -136,7 +137,7 @@ export class OpenAIAdapter implements ModelAdapter {
       });
       return response.choices.length > 0;
     } catch (error) {
-      console.error('[OpenAIAdapter] API key validation failed:', error);
+      logger.error('API key validation failed', { error, module: 'openai-adapter' });
       return false;
     }
   }

@@ -7,6 +7,7 @@ import { doc, updateDoc, addDoc, collection, Timestamp } from 'firebase/firestor
 import { Button, Card, Badge, Input } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import { PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 const taskColumns: { id: TaskStatus; title: string; color: string }[] = [
   { id: 'pending', title: 'To Do', color: 'bg-gray-100' },
@@ -54,7 +55,7 @@ export default function TaskBoard({ projectId, tasks, phases, selectedPhaseId, o
       setNewTaskTitle('');
       setShowAddTask(false);
     } catch (error) {
-      console.error('Error adding task:', error);
+      logger.error('Error adding task', { error: error, component: 'TaskBoard' });
     } finally {
       setAddingTask(false);
     }
@@ -68,7 +69,7 @@ export default function TaskBoard({ projectId, tasks, phases, selectedPhaseId, o
       });
       onTasksChange(tasks.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
     } catch (error) {
-      console.error('Error moving task:', error);
+      logger.error('Error moving task', { error: error, component: 'TaskBoard' });
     }
   };
 

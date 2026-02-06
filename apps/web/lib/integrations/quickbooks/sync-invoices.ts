@@ -6,6 +6,7 @@
  */
 
 import { adminDb, Timestamp } from '@/lib/firebase/admin';
+import { logger } from '@/lib/utils/logger';
 import { Invoice, InvoiceLineItem } from '@/types';
 import { qboCreate, qboUpdate, qboQuery, QBOClientError } from './client';
 import { QBOInvoice, QBOInvoiceLine } from './types';
@@ -383,7 +384,7 @@ export async function syncInvoiceOnSend(
     .get();
 
   if (!doc.exists) {
-    console.error(`Invoice ${invoiceId} not found`);
+    logger.error(`Invoice ${invoiceId} not found`, { module: 'qbo-sync-invoices' });
     return null;
   }
 
@@ -404,7 +405,7 @@ export async function syncInvoiceOnSend(
   try {
     return await pushInvoiceToQBO(orgId, invoice);
   } catch (error) {
-    console.error(`Failed to sync invoice ${invoiceId} to QBO:`, error);
+    logger.error(`Failed to sync invoice ${invoiceId} to QBO`, { error, module: 'qbo-sync-invoices' });
     return null;
   }
 }
@@ -516,7 +517,7 @@ export async function voidInvoiceInQBO(
 
     return true;
   } catch (error) {
-    console.error(`Failed to void invoice ${invoiceId} in QBO:`, error);
+    logger.error(`Failed to void invoice ${invoiceId} in QBO`, { error, module: 'qbo-sync-invoices' });
     throw error;
   }
 }

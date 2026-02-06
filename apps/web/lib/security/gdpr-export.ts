@@ -28,6 +28,7 @@ import {
   limit as firestoreLimit,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================
 // Types
@@ -538,7 +539,7 @@ export async function getUserDataForExport(
           break;
       }
     } catch (error) {
-      console.error(`Failed to collect ${category} data:`, error);
+      logger.error('Failed to collect ${category} data', { error: error, component: 'security-gdpr-export' });
       // Continue with other categories even if one fails
     }
   }

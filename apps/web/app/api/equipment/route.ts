@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import { initializeAdminApp } from '@/lib/assistant/firebase-admin-init';
+import { logger } from '@/lib/utils/logger';
 
 async function verifyAuth(request: NextRequest) {
   await initializeAdminApp();
@@ -54,7 +55,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ equipment });
   } catch (error) {
-    console.error('Error fetching equipment:', error);
+    logger.error('Error fetching equipment', { error, route: 'equipment-list' });
     return NextResponse.json({ error: 'Failed to fetch equipment' }, { status: 500 });
   }
 }
@@ -101,7 +102,7 @@ export async function POST(request: NextRequest) {
       ...equipmentData
     }, { status: 201 });
   } catch (error) {
-    console.error('Error creating equipment:', error);
+    logger.error('Error creating equipment', { error, route: 'equipment-list' });
     return NextResponse.json({ error: 'Failed to create equipment' }, { status: 500 });
   }
 }

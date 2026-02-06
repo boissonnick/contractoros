@@ -53,6 +53,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { format, formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================
 // Security Score Gauge Component
@@ -462,7 +463,7 @@ export default function SecurityChecklistPage() {
         const historyData = await getSecurityHistory(orgId);
         setHistory(historyData);
       } catch (error) {
-        console.error('Failed to load security data:', error);
+        logger.error('Failed to load security data', { error: error, page: 'dashboard-settings-security' });
         setChecks(DEFAULT_SECURITY_CHECKS);
       } finally {
         setLoading(false);
@@ -500,7 +501,7 @@ export default function SecurityChecklistPage() {
       setChecks(checkResults);
       toast.success('Security check completed');
     } catch (error) {
-      console.error('Failed to run security check:', error);
+      logger.error('Failed to run security check', { error: error, page: 'dashboard-settings-security' });
       toast.error('Failed to run security check');
     } finally {
       setRunning(false);

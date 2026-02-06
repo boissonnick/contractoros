@@ -9,6 +9,7 @@ import {
   CurrencyDollarIcon,
   UserIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 const TYPE_CONFIG: Record<MaintenanceRecord['type'], { label: string; color: string }> = {
   routine: { label: 'Routine', color: 'bg-blue-100 text-blue-700' },
@@ -73,7 +74,7 @@ export function MaintenanceLog({
       });
       setShowForm(false);
     } catch (error) {
-      console.error('Error adding maintenance record:', error);
+      logger.error('Error adding maintenance record', { error: error, component: 'MaintenanceLog' });
     } finally {
       setSubmitting(false);
     }

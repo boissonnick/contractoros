@@ -18,6 +18,7 @@ import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
 import { CrewAvailability } from '@/types';
 import { toast } from '@/components/ui/Toast';
+import { logger } from '@/lib/utils/logger';
 
 // =============================================================================
 // TYPES
@@ -113,7 +114,7 @@ export function useCrewAvailability(
         setLoading(false);
       },
       (err) => {
-        console.error('Error loading crew availability:', err);
+        logger.error('Error loading crew availability', { error: err, hook: 'useCrewAvailability' });
         setLoading(false);
       }
     );

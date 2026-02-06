@@ -7,6 +7,7 @@ import { saveOffline, getOfflineData, deleteOfflineData } from './storage';
 import { collection, doc, getDoc, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { Project, Task, Client, UserProfile } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================
 // Types
@@ -230,7 +231,7 @@ export async function downloadProjectForOffline(
           };
         }
       } catch (err) {
-        console.warn('Failed to fetch client:', err);
+        logger.warn('Failed to fetch client', { err, component: 'offline-offline-project' });
       }
     }
 
@@ -255,7 +256,7 @@ export async function downloadProjectForOffline(
           };
         }
       } catch (err) {
-        console.warn('Failed to fetch PM:', err);
+        logger.warn('Failed to fetch PM', { err, component: 'offline-offline-project' });
       }
     }
 
@@ -287,7 +288,7 @@ export async function downloadProjectForOffline(
       message: 'Download complete',
     });
   } catch (error) {
-    console.error('[OfflineProject] Failed to download project:', error);
+    logger.error('[OfflineProject] Failed to download project', { error: error, component: 'offline-offline-project' });
     throw error;
   }
 }
@@ -312,7 +313,7 @@ export async function getOfflineProject(projectId: string): Promise<OfflineProje
 
     return data;
   } catch (error) {
-    console.error('[OfflineProject] Failed to get cached project:', error);
+    logger.error('[OfflineProject] Failed to get cached project', { error: error, component: 'offline-offline-project' });
     return null;
   }
 }

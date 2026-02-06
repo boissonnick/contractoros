@@ -38,6 +38,7 @@ import {
   ArrowRightIcon,
   CheckIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 type ImportStep = 'select' | 'upload' | 'map' | 'validate' | 'import' | 'complete';
 
@@ -129,7 +130,7 @@ export default function ImportContent() {
         setMappings(autoMappings);
       }
     } catch (error) {
-      console.error('Error parsing file:', error);
+      logger.error('Error parsing file', { error: error, component: 'ImportContent' });
     } finally {
       setIsProcessing(false);
     }
@@ -209,7 +210,7 @@ export default function ImportContent() {
       setImportStatus(errors.length > 0 && importedIds.length === 0 ? 'failed' : 'completed');
       setStep('complete');
     } catch (error) {
-      console.error('Import failed:', error);
+      logger.error('Import failed', { error: error, component: 'ImportContent' });
       setImportStatus('failed');
 
       if (jobId) {

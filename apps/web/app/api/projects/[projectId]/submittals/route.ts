@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import { initializeAdminApp } from '@/lib/assistant/firebase-admin-init';
+import { logger } from '@/lib/utils/logger';
 
 async function verifyAuth(request: NextRequest) {
   await initializeAdminApp();
@@ -64,7 +65,7 @@ export async function GET(
 
     return NextResponse.json({ submittals });
   } catch (error) {
-    console.error('Error fetching submittals:', error);
+    logger.error('Error fetching submittals', { error, route: 'submittals-list' });
     return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 });
   }
 }
@@ -104,7 +105,7 @@ export async function POST(
 
     return NextResponse.json({ id: docRef.id, ...submittal });
   } catch (error) {
-    console.error('Error creating submittal:', error);
+    logger.error('Error creating submittal', { error, route: 'submittals-list' });
     return NextResponse.json({ error: 'Failed to create' }, { status: 500 });
   }
 }

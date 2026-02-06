@@ -15,6 +15,7 @@ import {
   CheckCircleIcon,
   ExclamationCircleIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 function RegisterContent() {
   const router = useRouter();
@@ -88,7 +89,7 @@ function RegisterContent() {
         }
       }
     } catch (error) {
-      console.error('Error checking invite:', error);
+      logger.error('Error checking invite', { error: error, page: 'register' });
     }
   };
 
@@ -148,7 +149,7 @@ function RegisterContent() {
       await updateProfile(userCredential.user, { displayName: formData.name });
       await createUserDoc(userCredential.user.uid, formData.email, formData.name);
     } catch (err: any) {
-      console.error('Registration error:', err);
+      logger.error('Registration error', { error: err, page: 'register' });
       if (err.code === 'auth/email-already-in-use') {
         setError('An account with this email already exists. Try signing in instead.');
       } else if (err.code === 'auth/weak-password') {

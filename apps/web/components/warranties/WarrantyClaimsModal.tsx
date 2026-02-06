@@ -14,6 +14,7 @@ import {
   DocumentTextIcon,
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
+import { logger } from '@/lib/utils/logger';
 
 interface WarrantyClaimsModalProps {
   isOpen: boolean;
@@ -53,7 +54,7 @@ export default function WarrantyClaimsModal({ isOpen, onClose, warranty }: Warra
       });
       setShowAddForm(false);
     } catch (error) {
-      console.error('Error adding claim:', error);
+      logger.error('Error adding claim', { error: error, component: 'WarrantyClaimsModal' });
     } finally {
       setLoading(false);
     }
@@ -68,7 +69,7 @@ export default function WarrantyClaimsModal({ isOpen, onClose, warranty }: Warra
       setResolvingClaimId(null);
       setResolution('');
     } catch (error) {
-      console.error('Error resolving claim:', error);
+      logger.error('Error resolving claim', { error: error, component: 'WarrantyClaimsModal' });
     } finally {
       setLoading(false);
     }

@@ -18,6 +18,7 @@ import {
   MapPinIcon,
   TagIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 const clientSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
@@ -162,7 +163,7 @@ export function EditClientModal({ client, isOpen, onClose, onSave }: EditClientM
       toast.success('Client updated successfully');
       onClose();
     } catch (err) {
-      console.error('Error updating client:', err);
+      logger.error('Error updating client', { error: err, component: 'EditClientModal' });
       toast.error('Failed to update client');
     } finally {
       setIsSubmitting(false);

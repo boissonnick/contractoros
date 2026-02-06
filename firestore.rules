@@ -2318,6 +2318,21 @@ service cloud.firestore {
     }
 
     // ==========================================
+    // Organization-Scoped Message Templates Collection (Sprint 115)
+    // ==========================================
+    match /organizations/{orgId}/messageTemplates/{templateId} {
+      // Org members can read message templates
+      allow read: if isSameOrg(orgId);
+
+      // Admins can create/update message templates
+      allow create: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+      allow update: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+
+      // Only owners can delete message templates
+      allow delete: if isSameOrg(orgId) && getUserProfile().role == 'OWNER';
+    }
+
+    // ==========================================
     // Organization-Scoped Email Logs Collection
     // ==========================================
     match /organizations/{orgId}/emailLogs/{logId} {

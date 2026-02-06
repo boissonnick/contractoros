@@ -163,7 +163,29 @@ export default function EstimatesPage() {
 
       {/* Estimates List */}
       {loading ? (
-        <SkeletonList count={5} />
+        <div className="space-y-3">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="bg-white rounded-xl border p-4 animate-pulse">
+              <div className="flex items-start justify-between">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="h-4 w-20 bg-gray-200 rounded" />
+                    <div className="h-5 w-14 bg-gray-200 rounded-full" />
+                  </div>
+                  <div className="h-5 w-48 bg-gray-200 rounded mb-1" />
+                  <div className="flex gap-4 mt-1">
+                    <div className="h-4 w-28 bg-gray-100 rounded" />
+                    <div className="h-4 w-32 bg-gray-100 rounded" />
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="h-6 w-24 bg-gray-200 rounded mb-1" />
+                  <div className="h-3 w-20 bg-gray-100 rounded" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       ) : filteredEstimates.length === 0 ? (
         <EmptyState
           icon={<DocumentTextIcon className="h-full w-full" />}

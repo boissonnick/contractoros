@@ -6,3 +6,4 @@ export { PayrollApprovalStatus } from './PayrollApprovalStatus';
 export { EmployeeRateManager } from './EmployeeRateManager';
 export { PayrollSummaryWidget } from './PayrollSummaryWidget';
 export { PayrollRunPreviewCalculator } from './PayrollRunPreviewCalculator';
+export { OvertimeAlertCard } from './OvertimeAlertCard';

@@ -175,7 +175,7 @@ export function useGDPRExport(options: UseGDPRExportOptions = {}): UseGDPRExport
         setLoading(false);
       },
       (err) => {
-        console.error('Failed to fetch export requests:', err);
+        logger.error('Failed to fetch export requests', { error: err, hook: 'useGDPRExport' });
         setError('Failed to load export requests');
         setLoading(false);
       }
@@ -250,7 +250,7 @@ export function useGDPRExport(options: UseGDPRExportOptions = {}): UseGDPRExport
 
         return requestId;
       } catch (err) {
-        console.error('Failed to create export request:', err);
+        logger.error('Failed to create export request', { error: err, hook: 'useGDPRExport' });
         setError('Failed to create export request');
         return null;
       }
@@ -301,7 +301,7 @@ export function useGDPRExport(options: UseGDPRExportOptions = {}): UseGDPRExport
 
         return true;
       } catch (err) {
-        console.error('Failed to cancel export request:', err);
+        logger.error('Failed to cancel export request', { error: err, hook: 'useGDPRExport' });
         setError('Failed to cancel export request');
         return false;
       }
@@ -388,7 +388,7 @@ export function useGDPRExport(options: UseGDPRExportOptions = {}): UseGDPRExport
           throw processError;
         }
       } catch (err) {
-        console.error('Failed to process export:', err);
+        logger.error('Failed to process export', { error: err, hook: 'useGDPRExport' });
         setError('Failed to process export');
         return false;
       }
@@ -454,5 +454,6 @@ export {
   formatFileSize,
   getExpirationMessage,
 } from '@/lib/security/gdpr-export';
+import { logger } from '@/lib/utils/logger';
 
 export default useGDPRExport;

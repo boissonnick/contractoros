@@ -13,6 +13,7 @@ import {
   UserProfile,
   TimeEntry,
 } from '@/types';
+import { toast } from '@/components/ui/Toast';
 import {
   getPayrollSettings,
   savePayrollSettings,
@@ -27,6 +28,7 @@ import {
   calculatePayrollEntry,
   getEmployeeYTDTotals,
 } from '@/lib/payroll/payroll-service';
+import { logger } from '@/lib/utils/logger';
 
 const getPayrollRunsPath = (orgId: string) => `organizations/${orgId}/payrollRuns`;
 
@@ -116,7 +118,7 @@ export function usePayroll({ orgId, enabled = true }: UsePayrollOptions): UsePay
         setLoading(false);
       },
       (err) => {
-        console.error('Error fetching payroll runs:', err);
+        logger.error('Error fetching payroll runs', { error: err, hook: 'usePayroll' });
         setError(err.message);
         setLoading(false);
       }
@@ -130,7 +132,8 @@ export function usePayroll({ orgId, enabled = true }: UsePayrollOptions): UsePay
       const loadedSettings = await getPayrollSettings(orgId);
       setSettings(loadedSettings);
     } catch (err) {
-      console.error('Error loading payroll settings:', err);
+      logger.error('Error loading payroll settings', { error: err, hook: 'usePayroll' });
+      toast.error('Failed to load payroll settings: ' + (err as Error).message);
     }
   }, [orgId]);
 
@@ -147,8 +150,9 @@ export function usePayroll({ orgId, enabled = true }: UsePayrollOptions): UsePay
       const run = await getPayrollRun(orgId, runId);
       setCurrentRun(run);
     } catch (err) {
-      console.error('Error loading payroll run:', err);
+      logger.error('Error loading payroll run', { error: err, hook: 'usePayroll' });
       setError((err as Error).message);
+      toast.error('Failed to load payroll run: ' + (err as Error).message);
     } finally {
       setLoading(false);
     }

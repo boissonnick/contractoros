@@ -22,6 +22,7 @@ import {
   UserIcon,
   PhotoIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 export interface PhotoLightboxProps {
   photos: ProjectPhoto[];
@@ -117,7 +118,7 @@ export default function PhotoLightbox({
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Failed to download photo:', error);
+      logger.error('Failed to download photo', { error: error, component: 'PhotoLightbox' });
     }
   };
 

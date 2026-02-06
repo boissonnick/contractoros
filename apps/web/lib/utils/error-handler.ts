@@ -7,6 +7,7 @@
 
 import { toast } from '@/components/ui/Toast';
 import { FirebaseError } from 'firebase/app';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * Standard application error structure
@@ -177,17 +178,11 @@ export function showInfoToast(message: string, title?: string): void {
 export function logError(error: unknown, context?: string): void {
   const appError = createAppError(error, context);
 
-  // Log to console in development
-  console.error(`[${appError.code}]${context ? ` ${context}:` : ''}`, {
+  logger.error(`[${appError.code}]${context ? ` ${context}:` : ''}`, {
     message: appError.message,
     details: appError.details,
     originalError: appError.originalError,
   });
-
-  // TODO: In production, send to error monitoring service (e.g., Sentry)
-  // if (process.env.NODE_ENV === 'production') {
-  //   Sentry.captureException(error, { extra: { context } });
-  // }
 }
 
 /**

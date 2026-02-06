@@ -25,6 +25,7 @@ import {
 import { Project, ProjectStatus, UserProfile, UserRole, ScheduleEvent } from '@/types';
 import { useScheduleEvents } from '@/lib/hooks/useSchedule';
 import Link from 'next/link';
+import { logger } from '@/lib/utils/logger';
 
 // Team roles that we consider "crew" (excludes SUB and CLIENT)
 const CREW_ROLES: UserRole[] = ['OWNER', 'PM', 'EMPLOYEE', 'CONTRACTOR'];
@@ -136,7 +137,7 @@ export default function ProjectsCrewPage() {
         });
         setProjects(projectsData);
       } catch (error) {
-        console.error('Error loading data:', error);
+        logger.error('Error loading data', { error: error, page: 'projects-crew' });
       } finally {
         setLoading(false);
       }

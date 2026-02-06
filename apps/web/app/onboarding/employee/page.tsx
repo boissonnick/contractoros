@@ -16,6 +16,7 @@ import OnboardingStepLayout from '@/components/onboarding/OnboardingStepLayout';
 import TradeSelectionStep from '@/components/onboarding/TradeSelectionStep';
 import EmergencyContactStep from '@/components/onboarding/EmergencyContactStep';
 import CertificationsStep from '@/components/onboarding/CertificationsStep';
+import { logger } from '@/lib/utils/logger';
 
 type Step = 'type' | 'trades' | 'emergency' | 'certifications' | 'profile' | 'complete';
 const STEPS: Step[] = ['type', 'trades', 'emergency', 'certifications', 'profile', 'complete'];
@@ -74,7 +75,7 @@ export default function EmployeeOnboardingPage() {
       setStep('complete');
       setTimeout(() => router.push('/field'), 2000);
     } catch (error) {
-      console.error('Error completing onboarding:', error);
+      logger.error('Error completing onboarding', { error: error, page: 'onboarding-employee' });
       toast.error('Something went wrong. Please try again.');
     } finally {
       setSaving(false);

@@ -10,6 +10,7 @@
  */
 
 import { logAuditEvent, type AuditAction } from '@/lib/security/audit-logger';
+import { logger } from '@/lib/utils/logger';
 
 export type PromptThreat =
   | 'injection_attempt'
@@ -292,7 +293,8 @@ export function logSecurityEvent(
   context: { orgId: string; userId: string; promptPreview?: string }
 ): void {
   if (validation.threats.length > 0) {
-    console.warn('[SECURITY] Prompt threat detected', {
+    logger.warn('Prompt threat detected', {
+      module: 'prompt-guard',
       orgId: context.orgId,
       userId: context.userId,
       threats: validation.threats,
@@ -319,7 +321,7 @@ export function logSecurityEvent(
       severity: validation.riskScore >= 80 ? 'critical' : validation.riskScore >= 50 ? 'warning' : 'info',
     }).catch((err) => {
       // Don't let audit logging failures affect the main flow
-      console.error('[SECURITY] Failed to write audit log:', err);
+      logger.error('Failed to write audit log', { error: err, module: 'prompt-guard' });
     });
   }
 }

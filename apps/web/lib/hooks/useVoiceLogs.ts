@@ -22,6 +22,7 @@ import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
 import { VoiceLog, VoiceLogStatus } from '@/types';
 import { convertTimestamps } from '@/lib/firebase/timestamp-converter';
+import { logger } from '@/lib/utils/logger';
 
 // Date fields to convert from Timestamp to Date
 const DATE_FIELDS = [
@@ -121,7 +122,7 @@ export function useVoiceLogs(options: UseVoiceLogsOptions = {}): UseVoiceLogsRet
         setLoading(false);
       },
       (err) => {
-        console.error('Error fetching voice logs:', err);
+        logger.error('Error fetching voice logs', { error: err, hook: 'useVoiceLogs' });
         setError(err.message);
         setLoading(false);
       }
@@ -192,7 +193,7 @@ export function useVoiceLog(logId: string | null): {
         setLoading(false);
       },
       (err) => {
-        console.error('Error fetching voice log:', err);
+        logger.error('Error fetching voice log', { error: err, hook: 'useVoiceLogs' });
         setError(err.message);
         setLoading(false);
       }
@@ -279,7 +280,7 @@ export function useVoiceLogStats(): {
         setLoading(false);
       },
       (err) => {
-        console.error('Error fetching voice log stats:', err);
+        logger.error('Error fetching voice log stats', { error: err, hook: 'useVoiceLogs' });
         setLoading(false);
       }
     );

@@ -32,6 +32,7 @@ import {
   ClipboardDocumentListIcon,
   WrenchScrewdriverIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat('en-US', {
@@ -186,7 +187,7 @@ function useBusinessAlerts(orgId?: string) {
 
       setAlerts(alertsList);
     } catch (err) {
-      console.error('Failed to fetch alerts:', err);
+      logger.error('Failed to fetch alerts', { error: err, page: 'dashboard-reports' });
     } finally {
       setLoading(false);
     }
@@ -308,7 +309,7 @@ function useCashFlowForecast(orgId?: string, currentCashPosition?: number) {
 
       setForecast(forecastData);
     } catch (err) {
-      console.error('Failed to fetch forecast:', err);
+      logger.error('Failed to fetch forecast', { error: err, page: 'dashboard-reports' });
     } finally {
       setLoading(false);
     }
@@ -369,7 +370,7 @@ export default function ReportsPage() {
       }
     } catch (e) {
       // Invalid data in localStorage, use default
-      console.warn('Failed to load saved date range:', e);
+      logger.warn('Failed to load saved date range', { e, page: 'dashboard-reports' });
     }
   }, []);
 
@@ -385,7 +386,7 @@ export default function ReportsPage() {
         }));
       } catch (e) {
         // localStorage might be full or unavailable
-        console.warn('Failed to save date range:', e);
+        logger.warn('Failed to save date range', { e, page: 'dashboard-reports' });
       }
     }
   }, [dateRange, selectedPreset]);
@@ -544,6 +545,57 @@ export default function ReportsPage() {
         <ExclamationCircleIcon className="h-12 w-12 text-red-400 mx-auto mb-4" />
         <h3 className="text-lg font-medium tracking-tight text-gray-900">Failed to load reports</h3>
         <p className="text-gray-500 mt-1">{dashboardError.message}</p>
+      </div>
+    );
+  }
+
+  if (loading && !kpis) {
+    return (
+      <div className="space-y-6">
+        {/* Header skeleton */}
+        <div className="flex items-start justify-between">
+          <div>
+            <div className="h-7 w-56 bg-gray-200 rounded animate-pulse" />
+            <div className="h-4 w-80 bg-gray-100 rounded animate-pulse mt-1" />
+          </div>
+          <div className="h-10 w-40 bg-gray-200 rounded-xl animate-pulse" />
+        </div>
+        {/* Date presets skeleton */}
+        <div className="flex gap-2 overflow-hidden">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="h-8 w-24 bg-gray-100 rounded-full animate-pulse flex-shrink-0" />
+          ))}
+        </div>
+        {/* Executive summary skeleton */}
+        <div className="bg-gray-200 rounded-xl p-6 animate-pulse h-36" />
+        {/* Report cards skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="bg-white rounded-lg border border-gray-200 p-4 animate-pulse">
+              <div className="flex items-start justify-between mb-3">
+                <div className="h-4 w-20 bg-gray-200 rounded" />
+                <div className="h-9 w-9 bg-gray-200 rounded-lg" />
+              </div>
+              <div className="h-8 w-24 bg-gray-200 rounded mb-2" />
+              <div className="h-4 w-32 bg-gray-100 rounded" />
+              <div className="mt-4 flex gap-0.5 items-end h-8">
+                {[...Array(6)].map((_, j) => (
+                  <div key={j} className="flex-1 bg-gray-100 rounded-sm" style={{ height: (12 + [4, 16, 8, 20, 12, 6][j]) + 'px' }} />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* Cash flow section skeleton */}
+        <div className="bg-white rounded-xl border border-gray-200 p-4 animate-pulse">
+          <div className="h-5 w-36 bg-gray-200 rounded mb-4" />
+          <div className="h-[200px] bg-gray-100 rounded-lg" />
+        </div>
+        {/* Chart skeleton */}
+        <div className="bg-white rounded-xl border border-gray-200 p-4 animate-pulse">
+          <div className="h-5 w-36 bg-gray-200 rounded mb-4" />
+          <div className="h-[350px] bg-gray-100 rounded-lg" />
+        </div>
       </div>
     );
   }
@@ -918,6 +970,48 @@ export default function ReportsPage() {
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-gray-900">Detailed</p>
             <p className="text-xs text-gray-500 truncate">Export & drill down</p>
+          </div>
+          <ArrowRightIcon className="h-4 w-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+        </Link>
+
+        <Link
+          href="/dashboard/reports/balance-sheet"
+          className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-colors group"
+        >
+          <div className="p-2 bg-indigo-100 rounded-xl group-hover:bg-indigo-200 transition-colors">
+            <ScaleIcon className="h-5 w-5 text-indigo-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-gray-900">Balance Sheet</p>
+            <p className="text-xs text-gray-500 truncate">Assets, liabilities & equity</p>
+          </div>
+          <ArrowRightIcon className="h-4 w-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+        </Link>
+
+        <Link
+          href="/dashboard/reports/cash-flow"
+          className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-colors group"
+        >
+          <div className="p-2 bg-teal-100 rounded-xl group-hover:bg-teal-200 transition-colors">
+            <BanknotesIcon className="h-5 w-5 text-teal-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-gray-900">Cash Flow</p>
+            <p className="text-xs text-gray-500 truncate">Inflows & outflows analysis</p>
+          </div>
+          <ArrowRightIcon className="h-4 w-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+        </Link>
+
+        <Link
+          href="/dashboard/reports/templates"
+          className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-colors group"
+        >
+          <div className="p-2 bg-cyan-100 rounded-xl group-hover:bg-cyan-200 transition-colors">
+            <DocumentTextIcon className="h-5 w-5 text-cyan-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-gray-900">Templates</p>
+            <p className="text-xs text-gray-500 truncate">Pre-built report shortcuts</p>
           </div>
           <ArrowRightIcon className="h-4 w-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
         </Link>

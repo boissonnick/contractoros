@@ -16,6 +16,7 @@ import {
   CheckCircleIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import { logger } from '@/lib/utils/logger';
 
 export default function ForgotPasswordPage() {
   const _router = useRouter();
@@ -40,7 +41,7 @@ export default function ForgotPasswordPage() {
       setEmailSent(true);
       toast.success('Reset email sent', 'Check your inbox for the password reset link');
     } catch (error: any) {
-      console.error('Password reset error:', error);
+      logger.error('Password reset error', { error, page: 'forgot-password' });
       if (error.code === 'auth/user-not-found') {
         // Don't reveal if user exists for security
         setSentEmail(data.email);

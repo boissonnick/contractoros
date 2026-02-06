@@ -37,6 +37,7 @@ import {
 import { format } from 'date-fns';
 import CreatePunchItemModal from '@/components/projects/punchlist/CreatePunchItemModal';
 import PunchItemDetailModal from '@/components/projects/punchlist/PunchItemDetailModal';
+import { logger } from '@/lib/utils/logger';
 
 const statusConfig: Record<PunchItemStatus, { label: string; color: string; icon: React.ReactNode }> = {
   open: { label: 'Open', color: 'bg-red-100 text-red-700', icon: <ExclamationTriangleIcon className="h-4 w-4" /> },
@@ -92,7 +93,7 @@ export default function PunchListPage() {
 
       setPunchItems(items);
     } catch (err: unknown) {
-      console.error('Error loading punch items:', err);
+      logger.error('Error loading punch items', { error: err, page: 'dashboard-projects-id-punch-list' });
       const errorMessage = err instanceof Error ? err.message : String(err);
       if (errorMessage.includes('requires an index')) {
         setError('Database index required. Please deploy indexes.');
@@ -174,7 +175,7 @@ export default function PunchListPage() {
       setShowCreateModal(false);
       loadPunchItems();
     } catch (error) {
-      console.error('Error creating punch item:', error);
+      logger.error('Error creating punch item', { error: error, page: 'dashboard-projects-id-punch-list' });
       toast.error('Failed to create punch item');
     }
   };
@@ -198,7 +199,7 @@ export default function PunchListPage() {
       setSelectedItem(null);
       loadPunchItems();
     } catch (error) {
-      console.error('Error updating punch item:', error);
+      logger.error('Error updating punch item', { error: error, page: 'dashboard-projects-id-punch-list' });
       toast.error('Failed to update status');
     }
   };
@@ -212,7 +213,7 @@ export default function PunchListPage() {
       setSelectedItem(null);
       loadPunchItems();
     } catch (error) {
-      console.error('Error deleting punch item:', error);
+      logger.error('Error deleting punch item', { error: error, page: 'dashboard-projects-id-punch-list' });
       toast.error('Failed to delete punch item');
     }
   };

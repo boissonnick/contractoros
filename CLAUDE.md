@@ -6,14 +6,15 @@
 
 ## Current Sprint
 
-**Sprint 107 — Invoice PDF & Email Delivery**
+**Sprint 115 — Next Sprint (see REPRIORITIZED_SPRINT_PLAN.md)**
 - **Phase:** 17 - Development Build Phase
-- **Priority:** P0
-- **What:** Wire InvoicePdf template, add PDF download/email actions, recurring invoice support
-- **Sprint 106 DONE:** useEstimates hook created, wired into 3 pages, estimate→invoice conversion built
+- **Sprint 114 DONE:** Payroll & Team Management Polish — OT alerts, time-off page, certifications dashboard, timesheet approval, onboarding/offboarding enhancements
+- **Sprint 113 DONE:** Console cleanup & structured logging — logger utility, 377 files migrated, ESLint no-console rule
+- **Sprint 111 DONE:** Field portal hardening — 4 new field pages + 2 hooks
 
-**Next Sprints (108-120):** See `docs/REPRIORITIZED_SPRINT_PLAN.md` (Phase 17)
-**Sprints 97-105:** DEFERRED (deploy/testing — building features first)
+**Next Sprints (115-120):** See `docs/REPRIORITIZED_SPRINT_PLAN.md` (Phase 17)
+**Beyond Sprint 120 (121-140):** See `docs/REPRIORITIZED_SPRINT_PLAN.md` (Phases 18-22: Hardening, Integrations, AI, Mobile, Client UX)
+**Sprints 98-105:** DEFERRED (folded into Phase 18 hardening)
 
 ---
 
@@ -753,10 +754,14 @@ Demo org: "Horizon Construction Co." with orgId matching your user's orgId (set 
 ## Known Issues / Tech Debt
 
 - Pagination only on Clients + Expenses — other lists may need it at scale
-- Unit tests at 1,502 (42 suites) — Sprint 101 targets 1,800+
-- ESLint: 1,050 warnings — Sprint 100 targets <400
-- Some silent error handling — Sprint 102 addresses this
-- Not yet deployed to production — Sprint 96-97 handles deploy
+- Unit tests at 1,502 (42 suites) — Sprint 123 targets 2,000+
+- ESLint: 1,050 warnings — Sprint 122 targets <300
+- Console statements: 1,041 — Sprint 122 targets <50
+- Some silent error handling — Sprint 124 addresses this
+- Production deployed — Sprint 97 ✅ (Cloud Run live)
+- No native mobile app — Phase 21 (Sprints 133-136) builds React Native
+- No online client payments — Sprint 125 (Stripe Connect)
+- Weather widget uses mock data — Sprint 130 (AI Schedule Optimizer) replaces
 
 ---
 
@@ -795,29 +800,19 @@ Step 1: Task(general-purpose): "Add Firestore rules for new collection"
 Step 2: After rules deployed, Task(general-purpose): "Build UI using new collection"
 ```
 
-### Current Sprint Quick-Start (Sprint 107)
+### Current Sprint Quick-Start (Sprint 115+)
 
-**Sprint 107 — Invoice PDF & Email Delivery**
+**See `docs/REPRIORITIZED_SPRINT_PLAN.md` for next sprint**
 
 ```bash
 # 1. Verify build
 cd apps/web && npx tsc --noEmit
 
-# 2. Check existing PDF service
-cat apps/web/lib/esignature/pdf-service.ts | head -50
+# 2. Check module locations
+cat docs/MODULE_REGISTRY.md | head -100
 
-# 3. Check useInvoices hook
-cat apps/web/lib/hooks/useInvoices.ts | head -50
-
-# 4. Check email templates
-ls apps/web/lib/email/ functions/src/email/
+# 3. Check sprint plan
+cat docs/REPRIORITIZED_SPRINT_PLAN.md | tail -200
 ```
 
-**Sprint 107 Parallel Work:**
-```
-# Agent 1 (general-purpose): Wire InvoicePdf into useInvoices + download button
-# Agent 2 (general-purpose): Build invoice email template + Cloud Function
-# Agent 3 (general-purpose): Add recurring invoice schedule support
-```
-
-**Full sprint plan (106-120):** Check `docs/NEXT_SPRINTS_GUIDE.md` and `docs/REPRIORITIZED_SPRINT_PLAN.md`
+**Full sprint plan (115-120):** Check `docs/NEXT_SPRINTS_GUIDE.md` and `docs/REPRIORITIZED_SPRINT_PLAN.md`

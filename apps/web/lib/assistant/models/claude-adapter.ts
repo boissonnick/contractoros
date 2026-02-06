@@ -4,6 +4,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import { logger } from '@/lib/utils/logger';
 import {
   ModelAdapter,
   ChatRequest,
@@ -69,7 +70,7 @@ export class ClaudeAdapter implements ModelAdapter {
         estimatedCost: this.estimateCost(inputTokens, outputTokens),
       };
     } catch (error) {
-      console.error('[ClaudeAdapter] Chat error:', error);
+      logger.error('Chat error', { error, module: 'claude-adapter' });
       throw this.handleError(error);
     }
   }
@@ -120,7 +121,7 @@ export class ClaudeAdapter implements ModelAdapter {
 
       yield { type: 'done' };
     } catch (error) {
-      console.error('[ClaudeAdapter] Stream error:', error);
+      logger.error('Stream error', { error, module: 'claude-adapter' });
       yield {
         type: 'error',
         error: this.handleError(error).message,
@@ -140,7 +141,7 @@ export class ClaudeAdapter implements ModelAdapter {
       });
       return response.content.length > 0;
     } catch (error) {
-      console.error('[ClaudeAdapter] API key validation failed:', error);
+      logger.error('API key validation failed', { error, module: 'claude-adapter' });
       return false;
     }
   }

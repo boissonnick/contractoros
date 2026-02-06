@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import { Equipment, EquipmentCategory } from '@/types';
 import { XMarkIcon, PhotoIcon } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 const CATEGORY_OPTIONS: { value: EquipmentCategory; label: string }[] = [
   { value: 'power_tool', label: 'Power Tool' },
@@ -87,7 +88,7 @@ export function EquipmentFormModal({
       });
       onClose();
     } catch (error) {
-      console.error('Error saving equipment:', error);
+      logger.error('Error saving equipment', { error: error, component: 'EquipmentFormModal' });
     } finally {
       setLoading(false);
     }

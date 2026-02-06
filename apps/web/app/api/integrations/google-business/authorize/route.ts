@@ -10,6 +10,7 @@ import {
   generateNonce,
   isGoogleBusinessConfigured,
 } from '@/lib/integrations/google-business/oauth';
+import { logger } from '@/lib/utils/logger';
 
 export async function GET(request: NextRequest) {
   // Check if integration is configured
@@ -59,7 +60,7 @@ export async function GET(request: NextRequest) {
     // Redirect to Google authorization
     return NextResponse.redirect(authUrl);
   } catch (error) {
-    console.error('Error generating Google Business auth URL:', error);
+    logger.error('Error generating Google Business auth URL', { error, route: 'google-business-authorize' });
     return NextResponse.json(
       { error: 'Failed to initiate Google Business connection' },
       { status: 500 }

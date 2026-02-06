@@ -16,6 +16,7 @@ import {
 import { db } from '@/lib/firebase/config';
 import { Bid, BidStatus, BidSolicitation } from '@/types';
 import { useAuth } from '@/lib/auth';
+import { logger } from '@/lib/utils/logger';
 
 // Helper to convert Firestore data to Bid
 function bidFromFirestore(id: string, data: Record<string, unknown>): Bid {
@@ -123,7 +124,7 @@ export function useSubBids() {
           });
         }
       } catch (err) {
-        console.error('Error fetching project:', projectId, err);
+        logger.error('Error fetching project', { error: projectId, err, hook: 'useSubBids' });
       }
     }
 
@@ -168,7 +169,7 @@ export function useSubBids() {
         setLoading(false);
       },
       (err) => {
-        console.error('useSubBids error:', err);
+        logger.error('useSubBids error', { error: err, hook: 'useSubBids' });
         if (err.message?.includes('requires an index')) {
           setError('Database index required. Please contact support.');
         } else if (err.message?.includes('permission-denied')) {
@@ -200,7 +201,7 @@ export function useSubBids() {
         setSolicitations(relevantSolicitations);
       },
       (err) => {
-        console.error('useBidSolicitations error:', err);
+        logger.error('useBidSolicitations error', { error: err, hook: 'useSubBids' });
         setSolicitations([]);
       }
     );

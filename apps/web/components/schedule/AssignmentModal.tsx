@@ -17,6 +17,7 @@ import {
   ExclamationTriangleIcon,
   FunnelIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 // New interface for the modal (preferred)
 export interface AssignmentModalProps {
@@ -126,7 +127,7 @@ export function AssignmentModal({
         );
         setTeamMembers(assignableWorkers);
       } catch (error) {
-        console.error('Error loading team members:', error);
+        logger.error('Error loading team members', { error: error, component: 'AssignmentModal' });
       } finally {
         setLoading(false);
       }
@@ -244,7 +245,7 @@ export function AssignmentModal({
       }
       onClose();
     } catch (error) {
-      console.error('Error saving assignment:', error);
+      logger.error('Error saving assignment', { error: error, component: 'AssignmentModal' });
     } finally {
       setSaving(false);
     }

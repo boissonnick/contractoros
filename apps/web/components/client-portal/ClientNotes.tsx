@@ -9,6 +9,7 @@ import {
   PaperAirplaneIcon,
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckCircleSolidIcon } from '@heroicons/react/24/solid';
+import { logger } from '@/lib/utils/logger';
 
 interface ClientNote {
   id: string;
@@ -55,7 +56,7 @@ export function ClientNotes({
       await onAddNote(newNote.trim());
       setNewNote('');
     } catch (error) {
-      console.error('Error adding note:', error);
+      logger.error('Error adding note', { error: error, component: 'ClientNotes' });
     } finally {
       setSubmitting(false);
     }
@@ -70,7 +71,7 @@ export function ClientNotes({
       setEditingNoteId(null);
       setEditContent('');
     } catch (error) {
-      console.error('Error editing note:', error);
+      logger.error('Error editing note', { error: error, component: 'ClientNotes' });
     } finally {
       setSubmitting(false);
     }
@@ -83,7 +84,7 @@ export function ClientNotes({
     try {
       await onDeleteNote(noteId);
     } catch (error) {
-      console.error('Error deleting note:', error);
+      logger.error('Error deleting note', { error: error, component: 'ClientNotes' });
     }
   };
 

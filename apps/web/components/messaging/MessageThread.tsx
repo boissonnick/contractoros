@@ -15,6 +15,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
 import { format, isToday, isYesterday } from 'date-fns';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================================================
 // Types
@@ -589,7 +590,7 @@ export function MessageThread({
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
     } catch (error) {
-      console.error('Failed to send message:', error);
+      logger.error('Failed to send message', { error: error, component: 'MessageThread' });
       // Restore message on failure
       setNewMessage(messageContent);
       setAttachments(messageAttachments);

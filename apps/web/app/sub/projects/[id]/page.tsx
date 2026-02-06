@@ -9,6 +9,7 @@ import { useSubAssignments } from '@/lib/hooks/useSubAssignments';
 import { ProjectPhase, Task } from '@/types';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/date-utils';
+import { logger } from '@/lib/utils/logger';
 
 function fmt(n: number): string {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
@@ -63,7 +64,7 @@ export default function SubProjectPage() {
           }));
         }
       } catch (err) {
-        console.error('Error:', err);
+        logger.error('Error', { error: err, page: 'sub-projects-id' });
       } finally {
         setLoading(false);
       }

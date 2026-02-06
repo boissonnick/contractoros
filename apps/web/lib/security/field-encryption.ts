@@ -1,3 +1,4 @@
+import { logger } from '@/lib/utils/logger';
 /**
  * Field-Level Encryption Utilities
  *
@@ -440,7 +441,7 @@ export async function decryptSensitiveFields<T extends Record<string, unknown>>(
         const decrypted = await decryptField(value, key);
         (result as Record<string, unknown>)[field as string] = decrypted;
       } catch (error) {
-        console.error(`Failed to decrypt field '${String(field)}':`, error);
+        logger.error('Failed to decrypt field', { error, field: String(field), component: 'security-field-encryption' });
         // Leave as encrypted on failure
       }
     }

@@ -7,6 +7,7 @@ import { ensureSowTemplates, SowTemplateData } from '@/lib/firebase/seedSowTempl
 import { Button } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import { XMarkIcon, DocumentTextIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 interface ScopeTemplateSelectorProps {
   onSelect: (items: ScopeItem[]) => void;
@@ -87,7 +88,7 @@ export default function ScopeTemplateSelector({ onSelect, onClose, phases = [] }
     if (!profile?.orgId) return;
     ensureSowTemplates(profile.orgId)
       .then(setTemplates)
-      .catch(console.error)
+      .catch((err) => logger.error('Operation failed', { error: err, component: 'ScopeTemplateSelector' }))
       .finally(() => setLoading(false));
   }, [profile?.orgId]);
 

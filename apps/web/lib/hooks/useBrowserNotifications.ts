@@ -20,6 +20,7 @@ import {
   isWithinQuietHours,
   shouldSuppressNotification,
 } from '@/lib/notifications/browser-notifications';
+import { logger } from '@/lib/utils/logger';
 
 export interface UseBrowserNotificationsReturn {
   // Permission state
@@ -99,7 +100,7 @@ export function useBrowserNotifications(): UseBrowserNotificationsReturn {
       // Check quiet hours (use 'normal' priority for now)
       if (shouldSuppressNotification(preferences.quietHours, 'normal')) {
         // Could queue notification for later
-        console.log('Notification suppressed due to quiet hours:', title);
+        logger.debug('Notification suppressed due to quiet hours', { data: title, hook: 'useBrowserNotifications' });
         return null;
       }
 

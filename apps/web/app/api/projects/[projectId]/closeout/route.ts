@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import { initializeAdminApp } from '@/lib/assistant/firebase-admin-init';
+import { logger } from '@/lib/utils/logger';
 
 // Default closeout checklist template
 const DEFAULT_CHECKLIST_ITEMS = [
@@ -83,7 +84,7 @@ export async function GET(
 
     return NextResponse.json({ checklist: { id: doc.id, ...doc.data() }, isNew: false });
   } catch (error) {
-    console.error('Error fetching closeout checklist:', error);
+    logger.error('Error fetching closeout checklist', { error, route: 'project-closeout' });
     return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 });
   }
 }
@@ -125,7 +126,7 @@ export async function POST(
 
     return NextResponse.json({ success: true, checklist: { id: projectId, ...checklist } });
   } catch (error) {
-    console.error('Error saving closeout checklist:', error);
+    logger.error('Error saving closeout checklist', { error, route: 'project-closeout' });
     return NextResponse.json({ error: 'Failed to save' }, { status: 500 });
   }
 }

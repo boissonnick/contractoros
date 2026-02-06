@@ -16,6 +16,7 @@ import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import EmptyState from '@/components/ui/EmptyState';
 import Skeleton from '@/components/ui/Skeleton';
+import { logger } from '@/lib/utils/logger';
 
 type RFIStatus = 'draft' | 'submitted' | 'responded' | 'closed';
 
@@ -73,7 +74,7 @@ export default function RFIsPage() {
         const results = await Promise.all(rfiPromises);
         setAllRFIs(results.flat());
       } catch (err) {
-        console.error('Error fetching RFIs:', err);
+        logger.error('Error fetching RFIs', { error: err, page: 'dashboard-rfis' });
       } finally {
         setLoading(false);
       }

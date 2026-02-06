@@ -103,7 +103,7 @@ function toFirestoreDoc(item: Record<string, unknown>) {
   };
 }
 
-function createMockPaymentLink(overrides: Record<string, unknown> = {}) {
+function _createMockPaymentLink(overrides: Record<string, unknown> = {}) {
   return {
     id: `link-${Math.random().toString(36).slice(2, 8)}`,
     orgId: mockOrgId,
@@ -142,17 +142,17 @@ function createMockSavedMethod(overrides: Record<string, unknown> = {}) {
 // SETUP / TEARDOWN
 // =============================================================================
 
-let paymentsCallback: ((snap: { docs: unknown[] }) => void) | null = null;
-let paymentsErrorCallback: ((err: Error) => void) | null = null;
-let linksCallback: ((snap: { docs: unknown[] }) => void) | null = null;
+let _paymentsCallback: ((snap: { docs: unknown[] }) => void) | null = null;
+let _paymentsErrorCallback: ((err: Error) => void) | null = null;
+let _linksCallback: ((snap: { docs: unknown[] }) => void) | null = null;
 
 const mockFetch = jest.fn();
 
 beforeEach(() => {
   jest.clearAllMocks();
-  paymentsCallback = null;
-  paymentsErrorCallback = null;
-  linksCallback = null;
+  _paymentsCallback = null;
+  _paymentsErrorCallback = null;
+  _linksCallback = null;
 
   global.fetch = mockFetch as unknown as typeof fetch;
 
@@ -164,11 +164,11 @@ beforeEach(() => {
     (_q: unknown, onNext: (snap: { docs: unknown[] }) => void, onError?: (err: Error) => void) => {
       snapshotCallCount++;
       if (snapshotCallCount === 1) {
-        paymentsCallback = onNext;
-        paymentsErrorCallback = onError || null;
+        _paymentsCallback = onNext;
+        _paymentsErrorCallback = onError || null;
         setTimeout(() => onNext({ docs: [] }), 0);
       } else {
-        linksCallback = onNext;
+        _linksCallback = onNext;
         setTimeout(() => onNext({ docs: [] }), 0);
       }
       return jest.fn();
@@ -512,7 +512,7 @@ describe('usePayments', () => {
         expect(result.current.loading).toBe(false);
       });
 
-      expect(consoleSpy).toHaveBeenCalledWith('usePayments error:', expect.any(Error));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('usePayments error'), expect.anything());
       consoleSpy.mockRestore();
     });
   });

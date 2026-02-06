@@ -8,6 +8,8 @@
  * - Markdown/HTML injection
  */
 
+import { logger } from '@/lib/utils/logger';
+
 /**
  * Sanitize model output for safe rendering
  */
@@ -205,7 +207,7 @@ export function processOutput(
   if (checkForSystemPromptLeakage(content, systemPrompt)) {
     warnings.push('Potential system prompt leakage detected');
     // Log but don't necessarily block - could be false positive
-    console.warn('[OutputGuard] Potential system prompt leakage in response');
+    logger.warn('Potential system prompt leakage in response', { module: 'output-guard' });
   }
 
   // Step 3: Check and redact sensitive content

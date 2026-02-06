@@ -6,6 +6,7 @@
 
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { storage } from '@/lib/firebase/config';
+import { logger } from '@/lib/utils/logger';
 
 // File size limits
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -161,7 +162,7 @@ export async function uploadMessageAttachment(
       },
       (error) => {
         // Handle errors
-        console.error('Upload error:', error);
+        logger.error('Upload error', { error: error, component: 'storage-message-attachments' });
         switch (error.code) {
           case 'storage/unauthorized':
             reject(new Error('You do not have permission to upload files'));
@@ -182,7 +183,7 @@ export async function uploadMessageAttachment(
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
           resolve(downloadURL);
         } catch (error) {
-          console.error('Error getting download URL:', error);
+          logger.error('Error getting download URL', { error: error, component: 'storage-message-attachments' });
           reject(new Error('Failed to get download URL'));
         }
       }
@@ -238,7 +239,7 @@ export async function deleteMessageAttachment(url: string): Promise<void> {
     const storageRef = ref(storage, url);
     await deleteObject(storageRef);
   } catch (error) {
-    console.error('Error deleting attachment:', error);
+    logger.error('Error deleting attachment', { error: error, component: 'storage-message-attachments' });
     throw new Error('Failed to delete attachment');
   }
 }

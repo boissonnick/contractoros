@@ -10,6 +10,7 @@ import {
   fetchAccounts,
   fetchLocations,
 } from '@/lib/integrations/google-business/api';
+import { logger } from '@/lib/utils/logger';
 
 export async function GET(request: NextRequest) {
   // Verify authentication
@@ -79,7 +80,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ locations: allLocations });
   } catch (err) {
-    console.error('Error fetching Google Business locations:', err);
+    logger.error('Error fetching Google Business locations', { error: err, route: 'google-business-locations' });
     return NextResponse.json(
       { error: 'Failed to fetch locations' },
       { status: 500 }

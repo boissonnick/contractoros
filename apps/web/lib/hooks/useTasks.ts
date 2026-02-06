@@ -23,6 +23,7 @@ import { db } from '@/lib/firebase/config';
 import { Task, TaskStatus, TaskPriority, TaskDependency, TaskAttachment, TaskChecklistItem, RecurrenceConfig } from '@/types';
 import { useAuth } from '@/lib/auth';
 import { toast } from '@/components/ui/Toast';
+import { logger } from '@/lib/utils/logger';
 
 // ---- Firestore ↔ Task converters ----
 
@@ -277,7 +278,7 @@ export function useTasks({ projectId, phaseId, parentTaskId }: UseTasksOptions):
         setError(null);
       },
       (err) => {
-        console.error('Tasks listener error:', err);
+        logger.error('Tasks listener error', { error: err, hook: 'useTasks' });
         setError(err.message);
         setLoading(false);
       }
@@ -340,7 +341,7 @@ export function useTasks({ projectId, phaseId, parentTaskId }: UseTasksOptions):
         toast.success('Task created');
         return docRef.id;
       } catch (err) {
-        console.error('Failed to add task:', err);
+        logger.error('Failed to add task', { error: err, hook: 'useTasks' });
         toast.error('Failed to create task');
         throw err;
       }
@@ -354,7 +355,7 @@ export function useTasks({ projectId, phaseId, parentTaskId }: UseTasksOptions):
       await updateDoc(doc(db, 'tasks', taskId), data);
       // Don't toast on every update (status changes are frequent)
     } catch (err) {
-      console.error('Failed to update task:', err);
+      logger.error('Failed to update task', { error: err, hook: 'useTasks' });
       toast.error('Failed to update task');
       throw err;
     }
@@ -365,7 +366,7 @@ export function useTasks({ projectId, phaseId, parentTaskId }: UseTasksOptions):
       await deleteDoc(doc(db, 'tasks', taskId));
       toast.success('Task deleted');
     } catch (err) {
-      console.error('Failed to delete task:', err);
+      logger.error('Failed to delete task', { error: err, hook: 'useTasks' });
       toast.error('Failed to delete task');
       throw err;
     }
@@ -407,7 +408,7 @@ export function useTasks({ projectId, phaseId, parentTaskId }: UseTasksOptions):
       await batch.commit();
       toast.success(`Updated ${taskIds.length} task${taskIds.length > 1 ? 's' : ''}`);
     } catch (err) {
-      console.error('Failed to bulk update status:', err);
+      logger.error('Failed to bulk update status', { error: err, hook: 'useTasks' });
       toast.error('Failed to update tasks');
       throw err;
     }
@@ -422,7 +423,7 @@ export function useTasks({ projectId, phaseId, parentTaskId }: UseTasksOptions):
       await batch.commit();
       toast.success(`Assigned ${taskIds.length} task${taskIds.length > 1 ? 's' : ''}`);
     } catch (err) {
-      console.error('Failed to bulk assign:', err);
+      logger.error('Failed to bulk assign', { error: err, hook: 'useTasks' });
       toast.error('Failed to assign tasks');
       throw err;
     }
@@ -437,7 +438,7 @@ export function useTasks({ projectId, phaseId, parentTaskId }: UseTasksOptions):
       await batch.commit();
       toast.success(`Deleted ${taskIds.length} task${taskIds.length > 1 ? 's' : ''}`);
     } catch (err) {
-      console.error('Failed to bulk delete:', err);
+      logger.error('Failed to bulk delete', { error: err, hook: 'useTasks' });
       toast.error('Failed to delete tasks');
       throw err;
     }
@@ -452,7 +453,7 @@ export function useTasks({ projectId, phaseId, parentTaskId }: UseTasksOptions):
       await batch.commit();
       toast.success(`Updated priority for ${taskIds.length} task${taskIds.length > 1 ? 's' : ''}`);
     } catch (err) {
-      console.error('Failed to bulk set priority:', err);
+      logger.error('Failed to bulk set priority', { error: err, hook: 'useTasks' });
       toast.error('Failed to update task priorities');
       throw err;
     }
@@ -663,7 +664,7 @@ export function usePaginatedTasks(
         setHasMore(hasMoreItems);
         setInitialized(true);
       } catch (err) {
-        console.error('Error fetching paginated tasks:', err);
+        logger.error('Error fetching paginated tasks', { error: err, hook: 'useTasks' });
         setError(err instanceof Error ? err.message : 'Failed to fetch tasks');
       } finally {
         setLoading(false);
@@ -717,7 +718,7 @@ export function usePaginatedTasks(
         prev.map((t) => (t.id === taskId ? { ...t, ...updates } : t))
       );
     } catch (err) {
-      console.error('Failed to update task:', err);
+      logger.error('Failed to update task', { error: err, hook: 'useTasks' });
       toast.error('Failed to update task');
       throw err;
     }
@@ -733,7 +734,7 @@ export function usePaginatedTasks(
       setTasks((prev) => prev.filter((t) => t.id !== taskId));
       toast.success('Task deleted');
     } catch (err) {
-      console.error('Failed to delete task:', err);
+      logger.error('Failed to delete task', { error: err, hook: 'useTasks' });
       toast.error('Failed to delete task');
       throw err;
     }
@@ -765,7 +766,7 @@ export function usePaginatedTasks(
         )
       );
     } catch (err) {
-      console.error('Failed to move task:', err);
+      logger.error('Failed to move task', { error: err, hook: 'useTasks' });
       toast.error('Failed to update task status');
       throw err;
     }

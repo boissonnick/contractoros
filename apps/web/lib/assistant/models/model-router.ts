@@ -6,6 +6,7 @@
 import { GeminiAdapter } from './gemini-adapter';
 import { ClaudeAdapter } from './claude-adapter';
 import { OpenAIAdapter } from './openai-adapter';
+import { logger } from '@/lib/utils/logger';
 import {
   ModelAdapter,
   ChatRequest,
@@ -108,9 +109,7 @@ export class ModelRouter {
       // Fallback to default model if specified model's key isn't available
       const defaultKey = getDefaultModelKey();
       if (modelKey !== defaultKey) {
-        console.warn(
-          `[ModelRouter] ${config.provider} API key not configured, falling back to default model`
-        );
+        logger.warn(`${config.provider} API key not configured, falling back to default model`, { module: 'model-router' });
         const defaultApiKey = getApiKey(AVAILABLE_MODELS[defaultKey].provider);
         if (!defaultApiKey) {
           throw new Error('No AI model API keys configured');
@@ -148,9 +147,7 @@ export class ModelRouter {
       // Fallback to default model if specified model's key isn't available
       const defaultKey = getDefaultModelKey();
       if (modelKey !== defaultKey) {
-        console.warn(
-          `[ModelRouter] ${config.provider} API key not configured, falling back to default model`
-        );
+        logger.warn(`${config.provider} API key not configured, falling back to default model`, { module: 'model-router' });
         const defaultApiKey = getApiKey(AVAILABLE_MODELS[defaultKey].provider);
         if (!defaultApiKey) {
           yield { type: 'error', error: 'No AI model API keys configured' };

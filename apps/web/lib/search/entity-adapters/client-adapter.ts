@@ -5,6 +5,7 @@
 import { db } from '@/lib/firebase/config';
 import { collection, getDocs, query, limit } from 'firebase/firestore';
 import { SearchResult } from '../types';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * Search clients by name, email, phone, and company
@@ -84,7 +85,7 @@ export async function searchClients(
     results.sort((a, b) => b.score - a.score);
     return results.slice(0, 20);
   } catch (error) {
-    console.error('Error searching clients:', error);
+    logger.error('Error searching clients', { error: error, component: 'search-entity-adapters-client-adapter' });
     return [];
   }
 }

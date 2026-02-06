@@ -32,6 +32,7 @@ import {
 } from '@heroicons/react/24/outline';
 import RFIDetailModal from '@/components/projects/rfis/RFIDetailModal';
 import CreateRFIModal from '@/components/projects/rfis/CreateRFIModal';
+import { logger } from '@/lib/utils/logger';
 
 const statusConfig: Record<RFIStatus, { label: string; color: string; icon: React.ReactNode }> = {
   draft: { label: 'Draft', color: 'bg-gray-100 text-gray-700', icon: <DocumentTextIcon className="h-4 w-4" /> },
@@ -84,7 +85,7 @@ export default function RFIsPage() {
       })) as RFI[];
       setRfis(rfisData);
     } catch (err: unknown) {
-      console.error('Error loading RFIs:', err);
+      logger.error('Error loading RFIs', { error: err, page: 'dashboard-projects-id-rfis' });
       const errorMessage = err instanceof Error ? err.message : String(err);
       if (errorMessage.includes('requires an index')) {
         setError('Database index required. Please deploy indexes.');
@@ -153,7 +154,7 @@ export default function RFIsPage() {
       setShowCreateModal(false);
       loadRFIs();
     } catch (error) {
-      console.error('Error creating RFI:', error);
+      logger.error('Error creating RFI', { error: error, page: 'dashboard-projects-id-rfis' });
       toast.error('Failed to create RFI');
     }
   };
@@ -187,7 +188,7 @@ export default function RFIsPage() {
       toast.success('Response added');
       loadRFIs();
     } catch (error) {
-      console.error('Error adding response:', error);
+      logger.error('Error adding response', { error: error, page: 'dashboard-projects-id-rfis' });
       toast.error('Failed to add response');
     }
   };
@@ -214,7 +215,7 @@ export default function RFIsPage() {
       setSelectedRFI(null);
       loadRFIs();
     } catch (error) {
-      console.error('Error updating RFI status:', error);
+      logger.error('Error updating RFI status', { error: error, page: 'dashboard-projects-id-rfis' });
       toast.error('Failed to update RFI status');
     }
   };

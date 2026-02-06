@@ -105,7 +105,7 @@ beforeEach(() => {
   });
 
   // Default mock for onSnapshot
-  (onSnapshot as jest.Mock).mockImplementation((query, onNext, onError) => {
+  (onSnapshot as jest.Mock).mockImplementation((_query, onNext, _onError) => {
     setTimeout(() => {
       onNext({ docs: [] });
     }, 0);
@@ -202,7 +202,7 @@ describe('useMaterialsCore', () => {
 
   describe('filtering', () => {
     it('should filter by category', async () => {
-      const { where, query } = require('firebase/firestore');
+      const { where } = require('firebase/firestore');
 
       renderHook(() => useMaterialsCore({ category: 'lumber' }));
 

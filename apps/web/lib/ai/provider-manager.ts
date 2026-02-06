@@ -9,6 +9,7 @@
  */
 
 import { AVAILABLE_MODELS, ModelConfig } from '@/lib/assistant/models/types';
+import { logger } from '@/lib/utils/logger';
 import type {
   AIProviderPriority,
   AIFeatureType,
@@ -339,10 +340,7 @@ export async function executeWithFallback<T>(
         onFallback(provider.providerId, nextProvider.providerId, lastError);
       }
 
-      console.warn(
-        `[ProviderManager] Provider ${provider.providerId} failed:`,
-        lastError.message
-      );
+      logger.warn(`Provider ${provider.providerId} failed: ${lastError.message}`, { module: 'provider-manager' });
     }
   }
 

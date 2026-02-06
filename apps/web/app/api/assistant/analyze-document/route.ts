@@ -20,6 +20,7 @@ import { getStorage } from 'firebase-admin/storage';
 import { initializeAdminApp } from '@/lib/assistant/firebase-admin-init';
 import { DOCUMENT_ANALYSIS_PROMPT, getDocumentPrompt } from '@/lib/ai/prompts';
 import type { DocumentAnalysis } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 // Configuration
 const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25MB
@@ -62,7 +63,7 @@ async function verifyAuth(request: NextRequest): Promise<{ uid: string; orgId: s
       email: decodedToken.email || null,
     };
   } catch (error) {
-    console.error('[Document Analysis] Auth error:', error);
+    logger.error('[Document Analysis] Auth error', { error, route: 'assistant-analyze-document' });
     return null;
   }
 }
@@ -186,7 +187,7 @@ async function analyzeWithGemini(
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error('[Document Analysis] Gemini API error:', errorText);
+    logger.error('[Document Analysis] Gemini API error', { error: errorText, route: 'assistant-analyze-document' });
     throw new Error(`AI API error: ${response.status}`);
   }
 
@@ -219,7 +220,7 @@ async function analyzeWithGemini(
       tags: parsed.tags || [],
     };
   } catch (parseError) {
-    console.error('[Document Analysis] Failed to parse AI response:', parseError);
+    logger.error('[Document Analysis] Failed to parse AI response', { error: parseError, route: 'assistant-analyze-document' });
     // Return partial data if parsing fails
     extractedData = {
       summary: responseText.slice(0, 500),
@@ -372,7 +373,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('[Document Analysis] Error:', error);
+    logger.error('[Document Analysis] Error', { error, route: 'assistant-analyze-document' });
 
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 

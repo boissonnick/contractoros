@@ -14,6 +14,7 @@ import {
   storeConnection,
 } from '@/lib/integrations/quickbooks/oauth';
 import { getCompanyInfo } from '@/lib/integrations/quickbooks/client';
+import { logger } from '@/lib/utils/logger';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -22,7 +23,7 @@ export async function GET(request: NextRequest) {
   const error = searchParams.get('error');
   if (error) {
     const errorDescription = searchParams.get('error_description') || 'Unknown error';
-    console.error('QBO OAuth error:', error, errorDescription);
+    logger.error('QBO OAuth error', { error, errorDescription, route: 'qbo-callback' });
 
     // Redirect to integrations page with error
     const errorUrl = new URL('/dashboard/settings/integrations', request.url);
@@ -36,7 +37,7 @@ export async function GET(request: NextRequest) {
   const state = searchParams.get('state');
 
   if (!code || !realmId || !state) {
-    console.error('QBO callback missing required parameters');
+    logger.error('QBO callback missing required parameters', { route: 'qbo-callback' });
     const errorUrl = new URL('/dashboard/settings/integrations', request.url);
     errorUrl.searchParams.set('qbo_error', 'Missing required OAuth parameters');
     return NextResponse.redirect(errorUrl);
@@ -67,11 +68,11 @@ export async function GET(request: NextRequest) {
       await storeConnection(authState.orgId, tokens, companyName);
     } catch (companyError) {
       // Non-fatal: we still have the connection, just not the company name
-      console.error('Failed to fetch QBO company info:', companyError);
+      logger.error('Failed to fetch QBO company info', { error: companyError, route: 'qbo-callback' });
     }
 
     // Log successful connection
-    console.log(`QBO connected for org ${authState.orgId}: ${companyName} (${realmId})`);
+    logger.info(`QBO connected for org ${authState.orgId}: ${companyName} (${realmId})`, { route: 'qbo-callback' });
 
     // Redirect to success page
     const successUrl = new URL(authState.returnUrl || '/dashboard/settings/integrations', request.url);
@@ -80,7 +81,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(successUrl);
 
   } catch (error) {
-    console.error('QBO callback error:', error);
+    logger.error('QBO callback error', { error, route: 'qbo-callback' });
 
     const errorMessage = error instanceof Error ? error.message : 'Failed to complete connection';
     const errorUrl = new URL('/dashboard/settings/integrations', request.url);

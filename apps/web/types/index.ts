@@ -111,12 +111,17 @@ export interface EmergencyContact {
   phone: string;
 }
 
+export type CertificationCategory = 'license' | 'insurance' | 'training' | 'safety' | 'other';
+export type CertificationStatus = 'valid' | 'expiring' | 'expired';
+
 export interface Certification {
   name: string;
   issuingBody?: string;
   number?: string;
   expiryDate?: string; // ISO date string
   fileURL?: string;
+  category?: CertificationCategory;
+  status?: CertificationStatus;
 }
 
 export const CONSTRUCTION_TRADES = [
@@ -697,6 +702,14 @@ export interface UserWithOnboarding extends UserProfile {
 // Time Tracking Types (Legacy - preserved for backwards compatibility)
 // ============================================
 
+export interface TimesheetReviewEntry {
+  action: 'approved' | 'rejected';
+  reviewedBy: string;
+  reviewedByName?: string;
+  reviewedAt: Date;
+  reason?: string;
+}
+
 export interface WeeklyTimesheet {
   id: string;
   orgId: string;
@@ -709,7 +722,11 @@ export interface WeeklyTimesheet {
   status: 'draft' | 'submitted' | 'approved' | 'rejected';
   submittedAt?: Date;
   approvedBy?: string;
+  approvedByName?: string;
   approvedAt?: Date;
+  rejectionReason?: string;
+  reviewedBy?: string;
+  reviewHistory?: TimesheetReviewEntry[];
 }
 
 // Full TimeEntry and related types are defined in the
@@ -1071,6 +1088,75 @@ export const SUBCONTRACTOR_SCORE_CATEGORIES: Record<SubcontractorScoreCategory, 
   communication: { label: 'Communication', icon: 'ChatBubbleLeftRightIcon', weight: 0.15 },
   price_competitiveness: { label: 'Price', icon: 'CurrencyDollarIcon', weight: 0.2 },
   safety: { label: 'Safety', icon: 'ShieldCheckIcon', weight: 0.1 },
+};
+
+
+// ============================================
+// Sub Compliance & Performance (Sprint 116)
+// ============================================
+
+export type ComplianceDocType = 'insurance_coi' | 'w9' | 'business_license' | 'workers_comp' | 'bond' | 'safety_cert' | 'other';
+export type ComplianceStatus = 'valid' | 'expiring_soon' | 'expired' | 'missing';
+
+export interface ComplianceDocument {
+  id: string;
+  orgId: string;
+  subcontractorId: string;
+  type: ComplianceDocType;
+  name: string;
+  fileUrl?: string;
+  fileName?: string;
+  issueDate?: Date;
+  expiryDate?: Date;
+  status: ComplianceStatus;
+  notes?: string;
+  verifiedBy?: string;
+  verifiedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface SubPerformanceMetrics {
+  subcontractorId: string;
+  orgId: string;
+  totalProjects: number;
+  completedProjects: number;
+  onTimePercentage: number;
+  averageQualityRating: number; // 1-5
+  totalBidsSubmitted: number;
+  bidsWon: number;
+  winRate: number;
+  averageResponseTime: number; // hours
+  lastUpdated: Date;
+}
+
+export type SubOnboardingStepId = 'company_info' | 'insurance' | 'w9' | 'banking' | 'safety_certs' | 'agreement';
+export type SubOnboardingStepStatus = 'pending' | 'in_progress' | 'completed' | 'skipped';
+
+export interface SubOnboardingStep {
+  id: SubOnboardingStepId;
+  label: string;
+  description: string;
+  status: SubOnboardingStepStatus;
+  completedAt?: Date;
+  requiredDocType?: ComplianceDocType;
+}
+
+export const COMPLIANCE_DOC_TYPE_LABELS: Record<ComplianceDocType, string> = {
+  insurance_coi: 'Certificate of Insurance',
+  w9: 'W-9 Form',
+  business_license: 'Business License',
+  workers_comp: "Workers' Compensation",
+  bond: 'Surety Bond',
+  safety_cert: 'Safety Certification',
+  other: 'Other',
+};
+
+export const COMPLIANCE_STATUS_LABELS: Record<ComplianceStatus, string> = {
+  valid: 'Valid',
+  expiring_soon: 'Expiring Soon',
+  expired: 'Expired',
+  missing: 'Missing',
 };
 
 // ============================================
@@ -2762,6 +2848,59 @@ export interface Payment {
   createdAt: Date;
 }
 
+// ============================================
+// Recurring Invoice Types (Sprint 107)
+// ============================================
+
+export type RecurringFrequency = 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'annually';
+
+export interface RecurringInvoice {
+  id: string;
+  orgId: string;
+
+  // Template info (used to create each invoice)
+  templateName: string;
+  type: InvoiceType;
+  clientId?: string;
+  clientName: string;
+  clientEmail?: string;
+  clientPhone?: string;
+  billingAddress?: string;
+  projectId?: string;
+  projectName?: string;
+  projectAddress?: string;
+  lineItems: InvoiceLineItem[];
+  paymentTerms: string;
+  taxRate?: number;
+  retainage?: number;
+  discount?: number;
+  discountType?: 'percent' | 'fixed';
+  notes?: string;
+
+  // Schedule
+  frequency: RecurringFrequency;
+  startDate: Date;
+  endDate?: Date;
+  nextGenerationDate: Date;
+  dayOfMonth?: number; // For monthly: which day (1-28)
+  dayOfWeek?: number; // For weekly: 0=Sun, 1=Mon, etc.
+
+  // Auto-send
+  autoSend: boolean;
+
+  // Status
+  isActive: boolean;
+  lastGeneratedAt?: Date;
+  lastGeneratedInvoiceId?: string;
+  totalGenerated: number;
+
+  // Metadata
+  createdBy: string;
+  createdByName: string;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
 // Lien Waiver types
 export type LienWaiverType = 'conditional_progress' | 'unconditional_progress' | 'conditional_final' | 'unconditional_final';
 
@@ -3279,8 +3418,34 @@ export interface Message {
   attachmentURL?: string;
   attachmentName?: string;
   isEdited: boolean;
+  readBy?: Record<string, Date>; // userId → readAt timestamp
   createdAt: Date;
   updatedAt?: Date;
+}
+
+// ============================================
+// Message Templates & Search (Sprint 115)
+// ============================================
+
+export type MessageTemplateCategory = 'general' | 'project_update' | 'scheduling' | 'payment' | 'change_order' | 'custom';
+
+export interface MessageTemplate {
+  id: string;
+  orgId: string;
+  name: string;
+  category: MessageTemplateCategory;
+  content: string;
+  variables: string[]; // e.g. ['{{projectName}}', '{{clientName}}']
+  isDefault: boolean;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ReadReceipt {
+  userId: string;
+  userName: string;
+  readAt: Date;
 }
 
 export type NotificationType =
@@ -4764,6 +4929,24 @@ export interface TimeOffRequest {
 }
 
 /**
+ * PTO / Time-Off balance tracking
+ */
+export interface PTOBalanceCategory {
+  accrued: number; // hours accrued
+  used: number;    // hours used
+  balance: number; // accrued - used
+}
+
+export interface PTOBalance {
+  userId: string;
+  orgId: string;
+  vacation: PTOBalanceCategory;
+  sick: PTOBalanceCategory;
+  personal: { total: number; used: number; balance: number };
+  asOfDate: Date;
+}
+
+/**
  * Weather forecast data
  */
 export interface WeatherForecast {
@@ -5224,6 +5407,52 @@ export interface EquipmentCheckout {
   // Metadata
   createdAt: Date;
   createdBy: string;
+}
+
+// ============================================
+// Material Request Types (Sprint 111)
+// ============================================
+
+export type MaterialRequestStatus = 'pending' | 'approved' | 'ordered' | 'delivered' | 'rejected';
+export type MaterialRequestPriority = 'low' | 'normal' | 'urgent';
+
+export const MATERIAL_REQUEST_STATUS_LABELS: Record<MaterialRequestStatus, string> = {
+  pending: 'Pending',
+  approved: 'Approved',
+  ordered: 'Ordered',
+  delivered: 'Delivered',
+  rejected: 'Rejected',
+};
+
+export const MATERIAL_REQUEST_PRIORITY_LABELS: Record<MaterialRequestPriority, string> = {
+  low: 'Low',
+  normal: 'Normal',
+  urgent: 'Urgent',
+};
+
+export interface MaterialRequestItem {
+  name: string;
+  quantity: number;
+  unit: string;
+  notes?: string;
+}
+
+export interface MaterialRequest {
+  id: string;
+  orgId: string;
+  projectId: string;
+  projectName: string;
+  requestedBy: string;
+  requestedByName: string;
+  items: MaterialRequestItem[];
+  priority: MaterialRequestPriority;
+  notes?: string;
+  status: MaterialRequestStatus;
+  reviewedBy?: string;
+  reviewedByName?: string;
+  reviewedAt?: Date;
+  createdAt: Date;
+  updatedAt?: Date;
 }
 
 /**
@@ -8293,6 +8522,10 @@ export interface OffboardingOptions {
   revokeSessionsImmediately?: boolean;
   /** Custom notes for the offboarding record */
   notes?: string;
+  /** Equipment IDs that need to be returned */
+  equipmentToReturn?: string[];
+  /** Whether equipment return has been verified */
+  equipmentReturnVerified?: boolean;
 }
 
 /**
@@ -8411,12 +8644,13 @@ export interface UserDataArchive {
  * Offboarding wizard step
  */
 export type OffboardingWizardStep =
-  | 'confirm'        // Step 1: Confirm user to offboard
-  | 'reassign'       // Step 2: Reassign tasks/projects
-  | 'data_handling'  // Step 3: Archive vs delete data
-  | 'review'         // Step 4: Review and confirm
-  | 'processing'     // Processing state
-  | 'complete';      // Final: Show completion report
+  | 'confirm'           // Step 1: Confirm user to offboard
+  | 'reassign'          // Step 2: Reassign tasks/projects
+  | 'equipment_return'  // Step 3: Verify equipment returned
+  | 'data_handling'     // Step 4: Archive vs delete data
+  | 'review'            // Step 5: Review and confirm
+  | 'processing'        // Processing state
+  | 'complete';         // Final: Show completion report
 
 /**
  * State for the offboarding wizard

@@ -23,6 +23,7 @@ import {
   MaterialPurchaseOrderStatus,
 } from '@/types';
 import { convertTimestamp } from './utils';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================
 // Purchase Orders Hook
@@ -85,7 +86,7 @@ export function usePurchaseOrders(options: UsePurchaseOrdersOptions = {}) {
         setLoading(false);
       },
       (err) => {
-        console.error('Error fetching purchase orders:', err);
+        logger.error('Error fetching purchase orders', { error: err, hook: 'usePurchaseOrders' });
         setError(err as Error);
         setLoading(false);
       }

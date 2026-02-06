@@ -23,6 +23,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { addDays, differenceInDays, startOfDay, isAfter } from 'date-fns';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================
 // Types
@@ -339,7 +340,7 @@ export async function getRetentionPolicies(
   orgId: string
 ): Promise<RetentionPolicy[]> {
   if (!orgId) {
-    console.warn('[DataRetention] Missing orgId');
+    logger.warn('[DataRetention] Missing orgId', { component: 'security-data-retention' });
     return [];
   }
 
@@ -377,7 +378,7 @@ export async function getRetentionPolicies(
 
     return policies;
   } catch (error) {
-    console.error('[DataRetention] Failed to get retention policies:', error);
+    logger.error('[DataRetention] Failed to get retention policies', { error: error, component: 'security-data-retention' });
     return getDefaultPolicies(orgId);
   }
 }
@@ -395,7 +396,7 @@ export async function getRetentionPolicy(
     const policies = await getRetentionPolicies(orgId);
     return policies.find((p) => p.resource === resource) || null;
   } catch (error) {
-    console.error('[DataRetention] Failed to get retention policy:', error);
+    logger.error('[DataRetention] Failed to get retention policy', { error: error, component: 'security-data-retention' });
     return null;
   }
 }
@@ -459,7 +460,7 @@ export async function updateRetentionPolicy(
 
     return { success: true };
   } catch (error) {
-    console.error('[DataRetention] Failed to update retention policy:', error);
+    logger.error('[DataRetention] Failed to update retention policy', { error: error, component: 'security-data-retention' });
     return { success: false, error: 'Failed to update policy' };
   }
 }
@@ -530,7 +531,7 @@ export async function updateRetentionPolicies(
 
     return { success: true };
   } catch (error) {
-    console.error('[DataRetention] Failed to update retention policies:', error);
+    logger.error('[DataRetention] Failed to update retention policies', { error: error, component: 'security-data-retention' });
     return { success: false, errors: ['Failed to update policies'] };
   }
 }
@@ -653,7 +654,7 @@ export async function getRetentionPreview(
       newestAffected,
     };
   } catch (error) {
-    console.error('[DataRetention] Failed to get retention preview:', error);
+    logger.error('[DataRetention] Failed to get retention preview', { error: error, component: 'security-data-retention' });
     return {
       resource,
       totalRecords: 0,
@@ -698,7 +699,7 @@ export async function getRetentionHistory(
       };
     });
   } catch (error) {
-    console.error('[DataRetention] Failed to get retention history:', error);
+    logger.error('[DataRetention] Failed to get retention history', { error: error, component: 'security-data-retention' });
     return [];
   }
 }

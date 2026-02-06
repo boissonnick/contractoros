@@ -32,9 +32,9 @@ jest.mock('@/lib/auth', () => ({
 }));
 
 // Mock Firestore
-const mockOnSnapshot = jest.fn();
-const mockAddDoc = jest.fn();
-const mockUpdateDoc = jest.fn();
+const _mockOnSnapshot = jest.fn();
+const _mockAddDoc = jest.fn();
+const _mockUpdateDoc = jest.fn();
 
 jest.mock('firebase/firestore', () => ({
   collection: jest.fn(),

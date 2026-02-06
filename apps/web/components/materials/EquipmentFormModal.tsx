@@ -15,6 +15,7 @@ import {
   EQUIPMENT_STATUSES,
   Supplier,
 } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 const equipmentSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -168,7 +169,7 @@ export default function EquipmentFormModal({
       });
       onClose();
     } catch (error) {
-      console.error('Error saving equipment:', error);
+      logger.error('Error saving equipment', { error: error, component: 'EquipmentFormModal' });
     } finally {
       setIsSubmitting(false);
     }

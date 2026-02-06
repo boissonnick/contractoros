@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { ReportPreferences, FinancialMetricId, MetricCardDefinition } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * Default metric card definitions for financial reports
@@ -166,7 +167,7 @@ export function useReportPreferences(orgId?: string, userId?: string) {
           setPreferences(getDefaultPreferences(orgId, userId));
         }
       } catch (err) {
-        console.error('Failed to load report preferences:', err);
+        logger.error('Failed to load report preferences', { error: err, hook: 'useReportPreferences' });
         setError(err as Error);
         // Fall back to defaults on error
         setPreferences(getDefaultPreferences(orgId, userId));
@@ -207,7 +208,7 @@ export function useReportPreferences(orgId?: string, userId?: string) {
         updatedAt: new Date(),
       });
     } catch (err) {
-      console.error('Failed to save report preferences:', err);
+      logger.error('Failed to save report preferences', { error: err, hook: 'useReportPreferences' });
       setError(err as Error);
       throw err;
     } finally {

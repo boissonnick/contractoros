@@ -9,6 +9,7 @@ import { storage } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/date-utils';
+import { logger } from '@/lib/utils/logger';
 
 interface SubDocumentsProps {
   sub: Subcontractor;
@@ -45,7 +46,7 @@ export default function SubDocuments({ sub, onUpdate }: SubDocumentsProps) {
       'state_changed',
       (snap) => setProgress(Math.round((snap.bytesTransferred / snap.totalBytes) * 100)),
       (err) => {
-        console.error('Upload error:', err);
+        logger.error('Upload error', { error: err, component: 'SubDocuments' });
         setUploading(false);
       },
       async () => {

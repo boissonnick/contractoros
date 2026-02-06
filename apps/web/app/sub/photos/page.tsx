@@ -35,6 +35,7 @@ import {
   XMarkIcon,
   MapPinIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 // Convert Firestore data to ProjectPhoto
 function photoFromFirestore(id: string, data: Record<string, unknown>): ProjectPhoto {
@@ -119,7 +120,7 @@ export default function SubPhotosPage() {
         }));
         setProjects(projectsData);
       } catch (error) {
-        console.error('Error fetching projects:', error);
+        logger.error('Error fetching projects', { error: error, page: 'sub-photos' });
       }
     };
 
@@ -153,7 +154,7 @@ export default function SubPhotosPage() {
         setLoading(false);
       },
       (error) => {
-        console.error('Error fetching photos:', error);
+        logger.error('Error fetching photos', { error: error, page: 'sub-photos' });
         setLoading(false);
       }
     );
@@ -254,7 +255,7 @@ export default function SubPhotosPage() {
       setUploadType('progress');
       setShowUploadModal(false);
     } catch (error) {
-      console.error('Upload error:', error);
+      logger.error('Upload error', { error: error, page: 'sub-photos' });
       toast.error('Failed to upload photos');
     } finally {
       setUploading(false);

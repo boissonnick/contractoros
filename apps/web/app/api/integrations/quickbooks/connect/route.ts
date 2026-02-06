@@ -12,6 +12,7 @@ import {
   generateNonce,
   isQuickBooksConfigured,
 } from '@/lib/integrations/quickbooks/oauth';
+import { logger } from '@/lib/utils/logger';
 
 export async function GET(request: NextRequest) {
   // Verify authentication
@@ -68,7 +69,7 @@ export async function GET(request: NextRequest) {
     // Direct redirect
     return NextResponse.redirect(authUrl);
   } catch (error) {
-    console.error('Error generating QBO auth URL:', error);
+    logger.error('Error generating QBO auth URL', { error, route: 'qbo-connect' });
     return NextResponse.json(
       { error: 'Failed to initiate QuickBooks connection' },
       { status: 500 }

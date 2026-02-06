@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { ExclamationTriangleIcon, ArrowPathIcon, HomeIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui';
+import { logger } from '@/lib/utils/logger';
 
 export default function DashboardError({
   error,
@@ -12,7 +13,7 @@ export default function DashboardError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error('Dashboard error:', error);
+    logger.error('Dashboard error', { error, page: 'dashboard-error' });
   }, [error]);
 
   return (

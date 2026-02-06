@@ -18,6 +18,7 @@ import {
   ClockIcon,
 } from '@heroicons/react/24/outline';
 import { formatDate } from '@/lib/date-utils';
+import { logger } from '@/lib/utils/logger';
 
 // Project status configuration for display
 const STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string }> = {
@@ -102,7 +103,7 @@ export default function ClientProjectsPage() {
 
         setProjects(projectsData);
       } catch (err) {
-        console.error('Error loading projects:', err);
+        logger.error('Error loading projects', { error: err, page: 'client-projects' });
       } finally {
         setLoading(false);
       }

@@ -16,6 +16,7 @@ import {
   LINE_ITEM_UNITS,
   Supplier,
 } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 const materialSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -181,7 +182,7 @@ export default function MaterialFormModal({
       });
       onClose();
     } catch (error) {
-      console.error('Error saving material:', error);
+      logger.error('Error saving material', { error: error, component: 'MaterialFormModal' });
     } finally {
       setIsSubmitting(false);
     }

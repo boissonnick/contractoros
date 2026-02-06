@@ -17,6 +17,7 @@ export {
   formatToE164,
   formatPhoneForDisplay,
 } from './phoneUtils';
+import { logger } from '@/lib/utils/logger';
 
 // Environment variables
 const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID;
@@ -25,7 +26,7 @@ const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
 const twilioWebhookUrl = process.env.TWILIO_WEBHOOK_URL;
 
 if (!twilioAccountSid && process.env.NODE_ENV === 'production') {
-  console.warn('Warning: TWILIO_ACCOUNT_SID is not set. SMS functionality will not work.');
+  logger.warn('Warning: TWILIO_ACCOUNT_SID is not set. SMS functionality will not work.', { component: 'sms-twilioClient' });
 }
 
 /**

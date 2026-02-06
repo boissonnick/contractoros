@@ -31,6 +31,7 @@ import {
   LinkIcon,
 } from '@heroicons/react/24/outline';
 import { formatDistanceToNow } from 'date-fns';
+import { logger } from '@/lib/utils/logger';
 
 const statusFilters: { value: SignatureRequestStatus | 'all'; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -83,7 +84,7 @@ export default function SignaturesDashboard() {
         toast.error(result.error || 'Failed to send reminder');
       }
     } catch (err) {
-      console.error('Error sending reminder:', err);
+      logger.error('Error sending reminder', { error: err, page: 'dashboard-signatures' });
       toast.error('Failed to send reminder');
     }
     setActionLoading(null);
@@ -100,7 +101,7 @@ export default function SignaturesDashboard() {
       toast.success('Signature request cancelled');
       refresh();
     } catch (err) {
-      console.error('Error cancelling request:', err);
+      logger.error('Error cancelling request', { error: err, page: 'dashboard-signatures' });
       toast.error('Failed to cancel request');
     }
     setActionLoading(null);

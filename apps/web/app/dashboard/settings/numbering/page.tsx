@@ -21,6 +21,7 @@ import {
   NumberableDocumentType,
   DEFAULT_NUMBERING_CONFIG,
 } from '@/lib/utils/auto-number';
+import { logger } from '@/lib/utils/logger';
 
 interface NumberingTypeConfig {
   type: NumberableDocumentType;
@@ -127,7 +128,7 @@ export default function NumberingSettingsPage() {
           change_order: coCounter,
         });
       } catch (error) {
-        console.error('Failed to load numbering settings:', error);
+        logger.error('Failed to load numbering settings', { error: error, page: 'dashboard-settings-numbering' });
         toast.error('Failed to load settings');
       } finally {
         setLoading(false);
@@ -212,7 +213,7 @@ export default function NumberingSettingsPage() {
       await saveNumberingSettings(orgId, settings);
       toast.success('Numbering settings saved');
     } catch (error) {
-      console.error('Failed to save numbering settings:', error);
+      logger.error('Failed to save numbering settings', { error: error, page: 'dashboard-settings-numbering' });
       toast.error('Failed to save settings');
     } finally {
       setSaving(false);

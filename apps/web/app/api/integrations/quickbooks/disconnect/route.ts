@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth, verifyAdminAccess } from '@/lib/api/auth';
 import { deleteConnection, getConnection } from '@/lib/integrations/quickbooks/oauth';
+import { logger } from '@/lib/utils/logger';
 
 export async function POST(request: NextRequest) {
   // Verify authentication
@@ -46,14 +47,14 @@ export async function POST(request: NextRequest) {
     // Delete the connection (this also revokes tokens)
     await deleteConnection(user.orgId);
 
-    console.log(`QBO disconnected for org ${user.orgId}`);
+    logger.info(`QBO disconnected for org ${user.orgId}`, { route: 'qbo-disconnect' });
 
     return NextResponse.json({
       success: true,
       message: 'QuickBooks disconnected successfully',
     });
   } catch (error) {
-    console.error('Error disconnecting QBO:', error);
+    logger.error('Error disconnecting QBO', { error, route: 'qbo-disconnect' });
     return NextResponse.json(
       { error: 'Failed to disconnect QuickBooks' },
       { status: 500 }

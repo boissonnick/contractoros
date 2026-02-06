@@ -39,6 +39,7 @@ import { useFirestoreCollection, createConverter } from '@/lib/hooks/useFirestor
 import { useFirestoreCrud } from '@/lib/hooks/useFirestoreCrud';
 import { Estimate, EstimateStatus, EstimateLineItem } from '@/types';
 import { reserveNumber } from '@/lib/utils/auto-number';
+import { logger } from '@/lib/utils/logger';
 
 // Collection path - estimates use root collection (backward compat)
 const getEstimatesCollectionPath = (orgId: string) => `organizations/${orgId}/estimates`;
@@ -268,7 +269,7 @@ export function useEstimate(
         setLoading(false);
       },
       (err) => {
-        console.error('Error fetching estimate:', err);
+        logger.error('Error fetching estimate', { error: err, hook: 'useEstimates' });
         setError(err as Error);
         setLoading(false);
       }
@@ -501,7 +502,7 @@ export async function createEstimate(
   if (!orgId) throw new Error('Organization ID required');
 
   // Calculate totals from line items
-  const { subtotal, taxAmount, markupAmount, total, depositRequired } = calculateEstimateTotals(
+  const { subtotal, taxAmount, markupAmount: _markupAmount, total, depositRequired } = calculateEstimateTotals(
     data.lineItems,
     data.taxRate,
     data.markupPercent,

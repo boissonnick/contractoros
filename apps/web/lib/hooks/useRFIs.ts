@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import type { RFI, RFIStatus } from '@/types';
+import { toast } from '@/components/ui/Toast';
 
 interface UseRFIsOptions {
   projectId: string;
@@ -43,6 +44,7 @@ export function useRFIs({ projectId, status }: UseRFIsOptions) {
     if (!res.ok) throw new Error('Failed to create RFI');
     const newRFI = await res.json();
     setRFIs(prev => [newRFI, ...prev]);
+    toast.success('RFI created');
     return newRFI;
   };
 
@@ -54,6 +56,7 @@ export function useRFIs({ projectId, status }: UseRFIsOptions) {
     });
     if (!res.ok) throw new Error('Failed to update RFI');
     await fetchRFIs();
+    toast.success('RFI updated');
   };
 
   const respondToRFI = async (rfiId: string, _responseText: string) => {

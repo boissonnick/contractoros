@@ -16,6 +16,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { ActivityLogEntry } from '@/lib/activity';
+import { logger } from '@/lib/utils/logger';
 
 function fromFirestore(id: string, data: Record<string, unknown>): ActivityLogEntry {
   return {
@@ -72,9 +73,9 @@ export function useActivityLog(orgId: string | undefined, maxItems = 20) {
       // Fail silently for missing index - activity log is not critical
       // Index can be deployed with: firebase deploy --only firestore:indexes
       if (err.message?.includes('requires an index')) {
-        console.warn('useActivityLog: Missing Firestore index for activityLog collection. Deploy indexes with: firebase deploy --only firestore:indexes');
+        logger.warn('useActivityLog: Missing Firestore index for activityLog collection. Deploy indexes with: firebase deploy --only firestore:indexes', { hook: 'useActivityLog' });
       } else {
-        console.error('useActivityLog error:', err);
+        logger.error('useActivityLog error', { error: err, hook: 'useActivityLog' });
       }
       setActivities([]);
       setLoading(false);
@@ -264,13 +265,13 @@ export function usePaginatedActivityLog(
         setHasMore(hasMoreItems);
         setInitialized(true);
       } catch (err) {
-        console.error('usePaginatedActivityLog error:', err);
+        logger.error('usePaginatedActivityLog error', { error: err, hook: 'usePaginatedActivityLog' });
         const errorMessage = err instanceof Error ? err.message : 'Failed to fetch activity log';
 
         // Check for missing index error
         if (errorMessage.includes('requires an index')) {
           setError('Missing Firestore index for activity log query. Deploy indexes with: firebase deploy --only firestore:indexes');
-          console.warn('usePaginatedActivityLog: Missing Firestore index for activityLog collection.');
+          logger.warn('usePaginatedActivityLog: Missing Firestore index for activityLog collection.', { hook: 'usePaginatedActivityLog' });
         } else {
           setError(errorMessage);
         }

@@ -6,6 +6,7 @@ import { useTaskComments } from '@/lib/hooks/useTaskComments';
 import { useAuth } from '@/lib/auth';
 import { Button, Avatar } from '@/components/ui';
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 interface TaskCommentsProps {
   taskId: string;
@@ -26,7 +27,7 @@ export default function TaskComments({ taskId }: TaskCommentsProps) {
       await addComment(newComment.trim());
       setNewComment('');
     } catch (err) {
-      console.error('Error adding comment:', err);
+      logger.error('Error adding comment', { error: err, component: 'TaskComments' });
     } finally {
       setSubmitting(false);
     }
@@ -39,7 +40,7 @@ export default function TaskComments({ taskId }: TaskCommentsProps) {
       setEditingId(null);
       setEditContent('');
     } catch (err) {
-      console.error('Error updating comment:', err);
+      logger.error('Error updating comment', { error: err, component: 'TaskComments' });
     }
   };
 
@@ -47,7 +48,7 @@ export default function TaskComments({ taskId }: TaskCommentsProps) {
     try {
       await deleteComment(commentId);
     } catch (err) {
-      console.error('Error deleting comment:', err);
+      logger.error('Error deleting comment', { error: err, component: 'TaskComments' });
     }
   };
 

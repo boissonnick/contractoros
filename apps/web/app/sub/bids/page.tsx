@@ -29,6 +29,7 @@ import {
   PaperAirplaneIcon,
   ArchiveBoxXMarkIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 // Bid status configuration for styling
 const BID_STATUS_CONFIG: Record<BidStatus, { label: string; color: string; bgColor: string; icon: React.ComponentType<{ className?: string }> }> = {
@@ -605,7 +606,7 @@ export default function SubBidsPage() {
     try {
       await withdrawBid(bidId);
     } catch (err) {
-      console.error('Failed to withdraw bid:', err);
+      logger.error('Failed to withdraw bid', { error: err, page: 'sub-bids' });
     }
   }, [withdrawBid]);
 

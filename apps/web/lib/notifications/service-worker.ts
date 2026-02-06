@@ -6,6 +6,8 @@
 
 'use client';
 
+import { logger } from '@/lib/utils/logger';
+
 // ============================================
 // Types
 // ============================================
@@ -43,7 +45,7 @@ export function isPushSupported(): boolean {
  */
 export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
   if (!isServiceWorkerSupported()) {
-    console.warn('Service workers are not supported');
+    logger.warn('Service workers are not supported', { component: 'notifications-service-worker' });
     return null;
   }
 
@@ -53,7 +55,6 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
     });
 
     swRegistration = registration;
-    console.log('Service Worker registered:', registration.scope);
 
     // Handle updates
     registration.addEventListener('updatefound', () => {
@@ -61,7 +62,7 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
       if (newWorker) {
         newWorker.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            console.log('New service worker available');
+
           }
         });
       }
@@ -69,7 +70,7 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
 
     return registration;
   } catch (error) {
-    console.error('Service Worker registration failed:', error);
+    logger.error('Service Worker registration failed', { error: error, component: 'notifications-service-worker' });
     return null;
   }
 }
@@ -105,7 +106,7 @@ export async function unregisterServiceWorker(): Promise<boolean> {
     }
     return result;
   } catch (error) {
-    console.error('Failed to unregister service worker:', error);
+    logger.error('Failed to unregister service worker', { error: error, component: 'notifications-service-worker' });
     return false;
   }
 }
@@ -140,20 +141,20 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
  */
 export async function subscribeToPush(): Promise<PushSubscription | null> {
   if (!isPushSupported()) {
-    console.warn('Push notifications are not supported');
+    logger.warn('Push notifications are not supported', { component: 'notifications-service-worker' });
     return null;
   }
 
   const vapidKey = getVapidPublicKey();
   if (!vapidKey) {
-    console.warn('VAPID public key not configured - push notifications disabled');
+    logger.warn('VAPID public key not configured - push notifications disabled', { component: 'notifications-service-worker' });
     return null;
   }
 
   try {
     const registration = await getRegistration();
     if (!registration) {
-      console.error('No service worker registration');
+      logger.error('No service worker registration', { component: 'notifications-service-worker' });
       return null;
     }
 
@@ -167,10 +168,9 @@ export async function subscribeToPush(): Promise<PushSubscription | null> {
       applicationServerKey: urlBase64ToUint8Array(vapidKey) as BufferSource,
     });
 
-    console.log('Push subscription created');
     return subscription;
   } catch (error) {
-    console.error('Failed to subscribe to push:', error);
+    logger.error('Failed to subscribe to push', { error: error, component: 'notifications-service-worker' });
     return null;
   }
 }
@@ -190,7 +190,7 @@ export async function unsubscribeFromPush(): Promise<boolean> {
 
     return await subscription.unsubscribe();
   } catch (error) {
-    console.error('Failed to unsubscribe from push:', error);
+    logger.error('Failed to unsubscribe from push', { error: error, component: 'notifications-service-worker' });
     return false;
   }
 }
@@ -265,7 +265,7 @@ export async function getServiceWorkerStatus(): Promise<ServiceWorkerStatus> {
  */
 export function postMessage(message: { type: string; payload?: unknown }): void {
   if (!navigator.serviceWorker.controller) {
-    console.warn('No active service worker');
+    logger.warn('No active service worker', { component: 'notifications-service-worker' });
     return;
   }
 
@@ -281,7 +281,7 @@ export async function showPushNotification(
 ): Promise<void> {
   const registration = await getRegistration();
   if (!registration) {
-    console.warn('No service worker registration');
+    logger.warn('No service worker registration', { component: 'notifications-service-worker' });
     return;
   }
 

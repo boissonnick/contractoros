@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useCallback } from 'react';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================================================
 // TYPES
@@ -86,7 +87,7 @@ export function PullToRefresh({
       try {
         await onRefresh();
       } catch (error) {
-        console.error('Refresh failed:', error);
+        logger.error('Refresh failed', { error: error, component: 'PullToRefresh' });
       } finally {
         setIsRefreshing(false);
         setPullDistance(0);

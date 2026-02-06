@@ -4,6 +4,7 @@
  */
 
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
+import { logger } from '@/lib/utils/logger';
 import {
   ModelAdapter,
   ChatRequest,
@@ -99,7 +100,7 @@ export class GeminiAdapter implements ModelAdapter {
         estimatedCost: this.estimateCost(inputTokens, outputTokens),
       };
     } catch (error) {
-      console.error('[GeminiAdapter] Chat error:', error);
+      logger.error('Chat error', { error, module: 'gemini-adapter' });
       throw this.handleError(error);
     }
   }
@@ -155,7 +156,7 @@ export class GeminiAdapter implements ModelAdapter {
 
       yield { type: 'done' };
     } catch (error) {
-      console.error('[GeminiAdapter] Stream error:', error);
+      logger.error('Stream error', { error, module: 'gemini-adapter' });
       yield {
         type: 'error',
         error: this.handleError(error).message,
@@ -173,7 +174,7 @@ export class GeminiAdapter implements ModelAdapter {
       const result = await model.generateContent('Say "ok"');
       return !!result.response.text();
     } catch (error) {
-      console.error('[GeminiAdapter] API key validation failed:', error);
+      logger.error('API key validation failed', { error, module: 'gemini-adapter' });
       return false;
     }
   }

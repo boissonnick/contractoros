@@ -15,6 +15,7 @@ import {
   logSettingsUpdate,
 } from '@/lib/audit';
 import { UserRole } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 interface UseAuditLogOptions {
   limit?: number;
@@ -43,7 +44,7 @@ export function useAuditLog(options: UseAuditLogOptions = {}) {
       });
       setEntries(data);
     } catch (err) {
-      console.error('Failed to fetch audit log:', err);
+      logger.error('Failed to fetch audit log', { error: err, hook: 'useAuditLog' });
       setError('Failed to load audit log');
     } finally {
       setLoading(false);

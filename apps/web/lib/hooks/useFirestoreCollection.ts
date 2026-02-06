@@ -39,6 +39,7 @@ import {
   QuerySnapshot,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { logger } from '@/lib/utils/logger';
 
 export interface UseFirestoreCollectionOptions<T> {
   /**
@@ -156,7 +157,7 @@ export function useFirestoreCollection<T>({
         ? query(collection(db, path), ...constraints)
         : query(collection(db, path));
     } catch (err) {
-      console.error(`Error building query for ${path}:`, err);
+      logger.error(`Error building query for ${path}`, { error: err, hook: 'useFirestoreCollection' });
       setError(err as Error);
       setLoading(false);
       return;
@@ -171,7 +172,7 @@ export function useFirestoreCollection<T>({
         setError(null);
         onData?.(data);
       } catch (err) {
-        console.error(`Error converting data for ${path}:`, err);
+        logger.error(`Error converting data for ${path}`, { error: err, hook: 'useFirestoreCollection' });
         setError(err as Error);
         setLoading(false);
         onError?.(err as Error);
@@ -179,7 +180,7 @@ export function useFirestoreCollection<T>({
     };
 
     const handleError = (err: Error) => {
-      console.error(`Error fetching ${path}:`, err);
+      logger.error(`Error fetching ${path}`, { error: err, hook: 'useFirestoreCollection' });
       setError(err);
       setLoading(false);
       onError?.(err);

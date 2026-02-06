@@ -18,6 +18,7 @@ import { db } from '@/lib/firebase/config';
 import { UserInvitation, InvitationStatus, UserRole } from '@/types';
 import { useAuth } from '@/lib/auth';
 import { toast } from '@/components/ui';
+import { logger } from '@/lib/utils/logger';
 
 // Generate a secure random token for invitation links
 function generateToken(): string {
@@ -62,7 +63,7 @@ export function useInvitations() {
         setLoading(false);
       },
       (err) => {
-        console.error('Error loading invitations:', err);
+        logger.error('Error loading invitations', { error: err, hook: 'useInvitations' });
         setError('Failed to load invitations');
         setLoading(false);
       }
@@ -126,7 +127,7 @@ export function useInvitations() {
         // In a real app, you would trigger an email here via Cloud Functions
         // For now, we'll just show a success message with the link
         const inviteUrl = `${window.location.origin}/invite/${token}`;
-        console.log('Invitation link:', inviteUrl);
+        logger.debug('Invitation link', { data: inviteUrl, hook: 'useInvitations' });
 
         toast.success(`Invitation sent to ${email}`);
 
@@ -137,7 +138,7 @@ export function useInvitations() {
           expiresAt,
         };
       } catch (err) {
-        console.error('Error sending invitation:', err);
+        logger.error('Error sending invitation', { error: err, hook: 'useInvitations' });
         toast.error('Failed to send invitation');
         return null;
       }
@@ -163,7 +164,7 @@ export function useInvitations() {
         toast.success('Invitation revoked');
         return true;
       } catch (err) {
-        console.error('Error revoking invitation:', err);
+        logger.error('Error revoking invitation', { error: err, hook: 'useInvitations' });
         toast.error('Failed to revoke invitation');
         return false;
       }
@@ -195,7 +196,7 @@ export function useInvitations() {
         toast.success('Invitation deleted');
         return true;
       } catch (err) {
-        console.error('Error deleting invitation:', err);
+        logger.error('Error deleting invitation', { error: err, hook: 'useInvitations' });
         toast.error('Failed to delete invitation');
         return false;
       }

@@ -27,6 +27,7 @@ import {
   ClockIcon,
   XCircleIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================================================
 // Types
@@ -215,7 +216,7 @@ export default function SMSConversationView({
       setNewMessage('');
     } catch (err) {
       // Error is handled in the parent
-      console.error('Failed to send message:', err);
+      logger.error('Failed to send message', { error: err, component: 'SMSConversationView' });
     } finally {
       setSending(false);
     }

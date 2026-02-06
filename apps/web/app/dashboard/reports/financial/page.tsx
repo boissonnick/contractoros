@@ -43,6 +43,7 @@ import {
   explainInsight,
   type FinancialDataInput,
 } from '@/lib/ai/insights-engine';
+import { logger } from '@/lib/utils/logger';
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat('en-US', {
@@ -463,7 +464,7 @@ export default function FinancialReportsPage() {
       });
       toast.success('PDF exported successfully');
     } catch (err) {
-      console.error('PDF export error:', err);
+      logger.error('PDF export error', { error: err, page: 'dashboard-reports-financial' });
       toast.error('Failed to export PDF');
     } finally {
       setIsExporting(false);
@@ -542,7 +543,7 @@ export default function FinancialReportsPage() {
       });
       toast.success('Excel exported successfully');
     } catch (err) {
-      console.error('Excel export error:', err);
+      logger.error('Excel export error', { error: err, page: 'dashboard-reports-financial' });
       toast.error('Failed to export Excel');
     } finally {
       setIsExporting(false);
@@ -597,7 +598,7 @@ export default function FinancialReportsPage() {
       });
       toast.success('CSV exported successfully');
     } catch (err) {
-      console.error('CSV export error:', err);
+      logger.error('CSV export error', { error: err, page: 'dashboard-reports-financial' });
       toast.error('Failed to export CSV');
     } finally {
       setIsExporting(false);

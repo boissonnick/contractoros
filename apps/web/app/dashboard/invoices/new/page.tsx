@@ -16,6 +16,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { addDays, format } from 'date-fns';
 import { reserveNumber, getNextNumber } from '@/lib/utils/auto-number';
+import { logger } from '@/lib/utils/logger';
 
 const invoiceTypeOptions: { value: InvoiceType; label: string; description: string }[] = [
   { value: 'standard', label: 'Standard Invoice', description: 'Simple line-item invoice' },
@@ -70,7 +71,7 @@ export default function NewInvoicePage() {
         const nextNum = await getNextNumber(profile.orgId, 'invoice');
         setInvoiceNumber(nextNum);
       } catch (error) {
-        console.error('Failed to load invoice number:', error);
+        logger.error('Failed to load invoice number', { error, page: 'new-invoice' });
         // Fallback to timestamp-based number
         setInvoiceNumber(`INV-${String(Date.now()).slice(-6)}`);
       } finally {
@@ -162,7 +163,7 @@ export default function NewInvoicePage() {
       toast.success('Invoice created');
       router.push(`/dashboard/invoices/${docRef.id}`);
     } catch (error) {
-      console.error('Error creating invoice:', error);
+      logger.error('Error creating invoice', { error, page: 'new-invoice' });
       toast.error('Failed to create invoice');
     } finally {
       setSaving(false);

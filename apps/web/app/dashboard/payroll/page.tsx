@@ -12,6 +12,8 @@ import Button from '@/components/ui/Button';
 import EmptyState from '@/components/ui/EmptyState';
 import Skeleton from '@/components/ui/Skeleton';
 import { PayrollRunCard, CreatePayrollModal, PayrollPreview } from '@/components/payroll';
+import { OvertimeAlertCard } from '@/components/payroll/OvertimeAlertCard';
+import { getOvertimeAlerts } from '@/lib/hooks/useTimeEntries';
 import {
   PlusIcon,
   BanknotesIcon,
@@ -23,6 +25,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { PayrollRun, PayPeriod, UserProfile } from '@/types';
 import { PayStubPdf, payrollEntryToPayStub } from '@/lib/payroll/pay-stub-pdf';
+import { logger } from '@/lib/utils/logger';
 
 // Roles allowed to access payroll (BUG #3 FIX)
 const PAYROLL_ALLOWED_ROLES = ['owner', 'finance'];
@@ -158,7 +161,7 @@ export default function PayrollDashboardPage() {
         // Small delay between downloads to avoid browser blocking
         await new Promise(resolve => setTimeout(resolve, 300));
       } catch (error) {
-        console.error(`Error generating pay stub for ${entry.employeeName}:`, error);
+        logger.error('Error generating pay stub', { error, employeeName: entry.employeeName, page: 'dashboard-payroll' });
       }
     }
   };
@@ -301,6 +304,22 @@ export default function PayrollDashboardPage() {
           </Card>
         </div>
       )}
+
+      {/* Overtime Alerts */}
+      {(() => {
+        const otAlerts = getOvertimeAlerts(
+          timeEntries,
+          settings?.dailyOvertimeThreshold || 8,
+          settings?.weeklyOvertimeThreshold || 40
+        );
+        return (otAlerts.exceeded.length > 0 || otAlerts.approaching.length > 0) ? (
+          <div className="space-y-3">
+            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Overtime Alerts</h2>
+            <OvertimeAlertCard alerts={otAlerts.exceeded} variant="exceeded" />
+            <OvertimeAlertCard alerts={otAlerts.approaching} variant="approaching" />
+          </div>
+        ) : null;
+      })()}
 
       {/* Alerts */}
       {summary?.alerts && summary.alerts.length > 0 && (

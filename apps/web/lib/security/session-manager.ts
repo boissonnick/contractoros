@@ -27,6 +27,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { logAuditEvent } from './audit-logger';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================
 // Types
@@ -420,7 +421,7 @@ export async function getActiveSessions(
 
     return sessions;
   } catch (error) {
-    console.error('[SessionManager] Failed to get active sessions:', error);
+    logger.error('[SessionManager] Failed to get active sessions', { error: error, component: 'security-session-manager' });
     return [];
   }
 }
@@ -476,7 +477,7 @@ export async function getSession(
       revokeReason: data.revokeReason,
     };
   } catch (error) {
-    console.error('[SessionManager] Failed to get session:', error);
+    logger.error('[SessionManager] Failed to get session', { error: error, component: 'security-session-manager' });
     return null;
   }
 }
@@ -499,7 +500,7 @@ export async function revokeSession(
     const session = await getSession(userId, sessionId);
 
     if (!session) {
-      console.warn('[SessionManager] Session not found:', sessionId);
+      logger.warn('[SessionManager] Session not found', { sessionId, component: 'security-session-manager' });
       return;
     }
 
@@ -526,7 +527,7 @@ export async function revokeSession(
       severity: 'info',
     });
   } catch (error) {
-    console.error('[SessionManager] Failed to revoke session:', error);
+    logger.error('[SessionManager] Failed to revoke session', { error: error, component: 'security-session-manager' });
     throw error;
   }
 }
@@ -586,7 +587,7 @@ export async function revokeAllSessions(
 
     return sessionsToRevoke.length;
   } catch (error) {
-    console.error('[SessionManager] Failed to revoke all sessions:', error);
+    logger.error('[SessionManager] Failed to revoke all sessions', { error: error, component: 'security-session-manager' });
     throw error;
   }
 }
@@ -609,7 +610,7 @@ export async function updateSessionActivity(
     });
   } catch (error) {
     // Silently fail - activity updates shouldn't break the app
-    console.warn('[SessionManager] Failed to update session activity:', error);
+    logger.warn('[SessionManager] Failed to update session activity', { error, component: 'security-session-manager' });
   }
 }
 
@@ -676,7 +677,7 @@ export async function cleanupExpiredSessions(userId: string): Promise<number> {
 
     return deletedCount;
   } catch (error) {
-    console.error('[SessionManager] Failed to cleanup sessions:', error);
+    logger.error('[SessionManager] Failed to cleanup sessions', { error: error, component: 'security-session-manager' });
     return 0;
   }
 }
@@ -745,7 +746,7 @@ export function subscribeToSessions(
       callback(sessions);
     },
     (error) => {
-      console.error('[SessionManager] Session subscription error:', error);
+      logger.error('[SessionManager] Session subscription error', { error: error, component: 'security-session-manager' });
       callback([]);
     }
   );

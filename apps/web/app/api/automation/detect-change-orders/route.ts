@@ -4,6 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/utils/logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest) {
       analyzedAt: new Date().toISOString()
     });
   } catch (error) {
-    console.error('[Change Order Detection] Error:', error);
+    logger.error('[Change Order Detection] Error', { error, route: 'automation-detect-change-orders' });
     return NextResponse.json({ error: 'Detection failed' }, { status: 500 });
   }
 }
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
       message: `Change order ${action} processed`
     });
   } catch (error) {
-    console.error('[Change Order Detection] Error:', error);
+    logger.error('[Change Order Detection] Error', { error, route: 'automation-detect-change-orders' });
     return NextResponse.json({ error: 'Action failed' }, { status: 500 });
   }
 }

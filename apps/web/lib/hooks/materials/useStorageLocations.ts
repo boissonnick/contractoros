@@ -16,6 +16,7 @@ import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
 import { StorageLocation } from '@/types';
 import { convertTimestamp } from './utils';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================
 // Storage Locations Hook
@@ -54,7 +55,7 @@ export function useStorageLocations() {
         setLoading(false);
       },
       (err) => {
-        console.error('Error fetching locations:', err);
+        logger.error('Error fetching locations', { error: err, hook: 'useStorageLocations' });
         setError(err as Error);
         setLoading(false);
       }

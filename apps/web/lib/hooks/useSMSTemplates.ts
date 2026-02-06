@@ -22,6 +22,7 @@ import {
 import { db } from '@/lib/firebase/config';
 import { SmsTemplate, SmsTemplateVariable } from '@/types';
 import { parseTemplateVariables, getDefaultTemplateVariables } from '@/lib/sms/smsUtils';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * SMS Template Category
@@ -174,7 +175,7 @@ export function useSMSTemplates(
         setLoading(false);
       },
       (err) => {
-        console.error('Error loading SMS templates:', err);
+        logger.error('Error loading SMS templates', { error: err, hook: 'useSMSTemplates' });
         setError('Failed to load SMS templates');
         setLoading(false);
       }

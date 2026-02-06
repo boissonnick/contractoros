@@ -3,6 +3,7 @@ import { stripe, isStripeConfigured } from '@/lib/payments/stripeClient';
 import { dollarsToCents } from '@/lib/payments/paymentUtils';
 import { adminDb, Timestamp } from '@/lib/firebase/admin';
 import { verifyAuthAndOrg } from '@/lib/api/auth';
+import { logger } from '@/lib/utils/logger';
 
 export const runtime = 'nodejs';
 
@@ -109,7 +110,7 @@ export async function POST(request: NextRequest) {
       amount: amountInCents,
     });
   } catch (error) {
-    console.error('Create payment intent error:', error);
+    logger.error('Create payment intent error', { error, route: 'api-payments' });
 
     if (error instanceof Error) {
       return NextResponse.json(
@@ -183,7 +184,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ payments });
   } catch (error) {
-    console.error('Get payments error:', error);
+    logger.error('Get payments error', { error, route: 'api-payments' });
     return NextResponse.json(
       { error: 'Failed to fetch payments' },
       { status: 500 }

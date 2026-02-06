@@ -27,6 +27,7 @@ import {
   CursorArrowRaysIcon,
 } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui';
+import { logger } from '@/lib/utils/logger';
 
 // Helper to get current year start
 function getYearStart(): Date {
@@ -84,7 +85,7 @@ export default function FinancesPage() {
         setProjects(projSnap.docs.map(d => ({ id: d.id, ...d.data() })) as Project[]);
         setClients(clientSnap.docs.map(d => ({ id: d.id, ...d.data() })) as Client[]);
       } catch (err: unknown) {
-        console.error('Error loading financials:', err);
+        logger.error('Error loading financials', { error: err, page: 'dashboard-finances' });
         const errorMessage = err instanceof Error ? err.message : String(err);
         if (errorMessage.includes('permission-denied')) {
           setError('Permission denied. Please check Firestore security rules.');

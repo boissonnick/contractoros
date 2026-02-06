@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * Notification payload interface for OS-level notifications
@@ -136,7 +137,7 @@ export function useServiceWorker(): UseServiceWorkerReturn {
       const result = await Notification.requestPermission();
       return result === 'granted';
     } catch (error) {
-      console.error('[useServiceWorker] Error requesting notification permission:', error);
+      logger.error('[useServiceWorker] Error requesting notification permission', { error: error, hook: 'useServiceWorker' });
       return false;
     }
   }, []);
@@ -146,7 +147,7 @@ export function useServiceWorker(): UseServiceWorkerReturn {
     // Check permission first
     const permission = getNotificationPermission();
     if (permission !== 'granted') {
-      console.warn('[useServiceWorker] Notification permission not granted');
+      logger.warn('[useServiceWorker] Notification permission not granted', { hook: 'useServiceWorker' });
       return false;
     }
 
@@ -154,7 +155,7 @@ export function useServiceWorker(): UseServiceWorkerReturn {
     const swReg = notificationSwReg || registration;
 
     if (!swReg?.active) {
-      console.warn('[useServiceWorker] No active service worker for notifications');
+      logger.warn('[useServiceWorker] No active service worker for notifications', { hook: 'useServiceWorker' });
 
       // Fall back to direct Notification API if service worker unavailable
       try {
@@ -169,7 +170,7 @@ export function useServiceWorker(): UseServiceWorkerReturn {
         });
         return true;
       } catch (error) {
-        console.error('[useServiceWorker] Direct notification failed:', error);
+        logger.error('[useServiceWorker] Direct notification failed', { error: error, hook: 'useServiceWorker' });
         return false;
       }
     }
@@ -182,7 +183,7 @@ export function useServiceWorker(): UseServiceWorkerReturn {
       });
       return true;
     } catch (error) {
-      console.error('[useServiceWorker] Failed to send notification via SW:', error);
+      logger.error('[useServiceWorker] Failed to send notification via SW', { error: error, hook: 'useServiceWorker' });
       return false;
     }
   }, [notificationSwReg, registration, getNotificationPermission]);
@@ -245,14 +246,14 @@ export function useServiceWorker(): UseServiceWorkerReturn {
 
       switch (type) {
         case 'NOTIFICATION_CLICKED':
-          console.log('[useServiceWorker] Notification clicked:', payload);
+          logger.debug('[useServiceWorker] Notification clicked', { data: payload, hook: 'useServiceWorker' });
           // Could dispatch an event or call a callback here
           break;
         case 'NOTIFICATION_SHOWN':
-          console.log('[useServiceWorker] Notification shown:', payload);
+          logger.debug('[useServiceWorker] Notification shown', { data: payload, hook: 'useServiceWorker' });
           break;
         case 'NOTIFICATION_DISMISSED':
-          console.log('[useServiceWorker] Notification dismissed:', payload);
+          logger.debug('[useServiceWorker] Notification dismissed', { data: payload, hook: 'useServiceWorker' });
           break;
         default:
           break;
@@ -279,7 +280,7 @@ export function useServiceWorker(): UseServiceWorkerReturn {
         });
       })
       .catch((err) => {
-        console.warn('[useServiceWorker] Main SW registration failed:', err);
+        logger.warn('[useServiceWorker] Main SW registration failed', { error: err, hook: 'useServiceWorker' });
       });
 
     // Register notification service worker
@@ -287,10 +288,10 @@ export function useServiceWorker(): UseServiceWorkerReturn {
       .register('/sw-notifications.js')
       .then((reg) => {
         setNotificationSwReg(reg);
-        console.log('[useServiceWorker] Notification SW registered:', reg.scope);
+        logger.debug('[useServiceWorker] Notification SW registered', { data: reg.scope, hook: 'useServiceWorker' });
       })
       .catch((err) => {
-        console.warn('[useServiceWorker] Notification SW registration failed:', err);
+        logger.warn('[useServiceWorker] Notification SW registration failed', { error: err, hook: 'useServiceWorker' });
       });
 
     return () => {

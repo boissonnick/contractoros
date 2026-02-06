@@ -11,6 +11,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { verifyAuth } from '@/lib/api/auth';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * GET /api/notifications
@@ -59,7 +60,7 @@ export async function GET(request: NextRequest) {
       count: notifications.length,
     });
   } catch (err) {
-    console.error('Error fetching notifications:', err);
+    logger.error('Error fetching notifications', { error: err, route: 'api-notifications' });
     return NextResponse.json(
       { error: 'Failed to fetch notifications' },
       { status: 500 }
@@ -133,7 +134,7 @@ export async function POST(request: NextRequest) {
       message: 'Notification created successfully',
     });
   } catch (err) {
-    console.error('Error creating notification:', err);
+    logger.error('Error creating notification', { error: err, route: 'api-notifications' });
     return NextResponse.json(
       { error: 'Failed to create notification' },
       { status: 500 }

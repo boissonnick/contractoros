@@ -141,7 +141,7 @@ export function useSessionManagement(
       const activeSessions = await getActiveSessions(user.uid, currentSessionId || undefined);
       setSessions(activeSessions);
     } catch (err) {
-      console.error('[useSessionManagement] Failed to fetch sessions:', err);
+      logger.error('[useSessionManagement] Failed to fetch sessions', { error: err, hook: 'useSessionManagement' });
       setError('Failed to load sessions');
     } finally {
       setLoading(false);
@@ -239,7 +239,7 @@ export function useSessionManagement(
         // Refresh list
         await fetchSessions();
       } catch (err) {
-        console.error('[useSessionManagement] Failed to revoke session:', err);
+        logger.error('[useSessionManagement] Failed to revoke session', { error: err, hook: 'useSessionManagement' });
         throw new Error('Failed to revoke session');
       }
     },
@@ -260,7 +260,7 @@ export function useSessionManagement(
         await fetchSessions();
         return count;
       } catch (err) {
-        console.error('[useSessionManagement] Failed to revoke other sessions:', err);
+        logger.error('[useSessionManagement] Failed to revoke other sessions', { error: err, hook: 'useSessionManagement' });
         throw new Error('Failed to revoke sessions');
       }
     },
@@ -283,7 +283,7 @@ export function useSessionManagement(
         setSessions([]);
         return count;
       } catch (err) {
-        console.error('[useSessionManagement] Failed to revoke all sessions:', err);
+        logger.error('[useSessionManagement] Failed to revoke all sessions', { error: err, hook: 'useSessionManagement' });
         throw new Error('Failed to revoke sessions');
       }
     },
@@ -326,7 +326,7 @@ export function useSessionManagement(
       await fetchSessions();
       return newSession;
     } catch (err) {
-      console.error('[useSessionManagement] Failed to create session:', err);
+      logger.error('[useSessionManagement] Failed to create session', { error: err, hook: 'useSessionManagement' });
       throw new Error('Failed to create session');
     }
   }, [user?.uid, profile?.orgId, config.maxConcurrentSessions, fetchSessions]);
@@ -376,3 +376,4 @@ export function useSessionManagement(
 
 export type { UserSession, SessionConfig } from '@/lib/security/session-manager';
 export { DEFAULT_SESSION_CONFIG, parseUserAgent, BROWSER_LABELS, OS_LABELS } from '@/lib/security/session-manager';
+import { logger } from '@/lib/utils/logger';

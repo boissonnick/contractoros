@@ -14,6 +14,7 @@ import { QBOWebhookPayload } from '@/lib/integrations/quickbooks/types';
 import { processPaymentWebhook } from '@/lib/integrations/quickbooks/sync-payments';
 import { pullCustomersFromQBO } from '@/lib/integrations/quickbooks/sync-customers';
 import { pullInvoiceUpdatesFromQBO } from '@/lib/integrations/quickbooks/sync-invoices';
+import { logger } from '@/lib/utils/logger';
 
 // Webhook verifier token from Intuit Developer Portal
 const WEBHOOK_VERIFIER_TOKEN = process.env.QUICKBOOKS_WEBHOOK_TOKEN;
@@ -26,7 +27,7 @@ function verifyWebhookSignature(
   signature: string
 ): boolean {
   if (!WEBHOOK_VERIFIER_TOKEN) {
-    console.error('QUICKBOOKS_WEBHOOK_TOKEN not configured');
+    logger.error('QUICKBOOKS_WEBHOOK_TOKEN not configured', { route: 'qbo-webhook' });
     return false;
   }
 
@@ -75,7 +76,7 @@ export async function POST(request: NextRequest) {
     // Verify signature
     const signature = request.headers.get('intuit-signature');
     if (!signature) {
-      console.warn('Missing intuit-signature header');
+      logger.warn('Missing intuit-signature header', { route: 'qbo-webhook' });
       return NextResponse.json(
         { error: 'Missing signature' },
         { status: 401 }
@@ -83,7 +84,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!verifyWebhookSignature(rawBody, signature)) {
-      console.warn('Invalid webhook signature');
+      logger.warn('Invalid webhook signature', { route: 'qbo-webhook' });
       return NextResponse.json(
         { error: 'Invalid signature' },
         { status: 401 }
@@ -116,7 +117,7 @@ export async function POST(request: NextRequest) {
       // Find the org for this realm
       const orgId = await getOrgIdFromRealmId(realmId);
       if (!orgId) {
-        console.warn(`No org found for realm ${realmId}`);
+        logger.warn(`No org found for realm ${realmId}`, { route: 'qbo-webhook' });
         continue;
       }
 
@@ -178,9 +179,8 @@ export async function POST(request: NextRequest) {
               });
           }
         } catch (error) {
-          console.error(
-            `Error processing webhook for ${entityType} ${entityId}:`,
-            error
+          logger.error(
+            `Error processing webhook for ${entityType} ${entityId}`, { error, route: 'qbo-webhook' }
           );
           results.push({
             realmId,
@@ -200,7 +200,7 @@ export async function POST(request: NextRequest) {
       results,
     });
   } catch (error) {
-    console.error('Webhook handler error:', error);
+    logger.error('Webhook handler error', { error, route: 'qbo-webhook' });
     // Still return 200 to prevent QBO from retrying
     return NextResponse.json({
       success: false,

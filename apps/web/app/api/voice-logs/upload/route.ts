@@ -12,6 +12,7 @@ import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { VoiceLog, VoiceLogCreate } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 // Initialize Firebase Admin if not already initialized
 if (!getApps().length) {
@@ -240,7 +241,7 @@ export async function POST(request: NextRequest) {
       message: 'Voice log uploaded successfully',
     });
   } catch (error) {
-    console.error('Voice log upload error:', error);
+    logger.error('Voice log upload error', { error, route: 'voice-logs-upload' });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

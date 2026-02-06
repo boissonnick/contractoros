@@ -22,6 +22,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
 import { format, addDays } from 'date-fns';
+import { logger } from '@/lib/utils/logger';
 
 // Subscription plans
 const PLANS = {
@@ -156,7 +157,7 @@ export default function BillingSettingsPage() {
           });
         }
       } catch (err) {
-        console.error('Error loading billing data:', err);
+        logger.error('Error loading billing data', { error: err, page: 'dashboard-settings-billing' });
         toast.error('Failed to load billing information');
       } finally {
         setLoading(false);

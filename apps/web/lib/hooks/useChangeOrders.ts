@@ -24,6 +24,7 @@ import {
 } from '@/types';
 import { useAuth } from '@/lib/auth';
 import { toast } from '@/components/ui/Toast';
+import { logger } from '@/lib/utils/logger';
 
 function fromFirestore(id: string, data: Record<string, unknown>): ChangeOrder {
   const approvals = ((data.approvals as unknown[]) || []).map((a: unknown) => {
@@ -117,7 +118,7 @@ export function useChangeOrders({ projectId }: UseChangeOrdersOptions) {
         setLoading(false);
       },
       (err) => {
-        console.error('useChangeOrders error:', err);
+        logger.error('useChangeOrders error', { error: err, hook: 'useChangeOrders' });
         if (err.message?.includes('requires an index')) {
           setError('Database index required. Please deploy indexes with: firebase deploy --only firestore:indexes');
         } else if (err.message?.includes('permission-denied')) {
@@ -176,7 +177,7 @@ export function useChangeOrders({ projectId }: UseChangeOrdersOptions) {
         await addDoc(collection(db, 'change_orders'), toFirestore(co));
         toast.success('Change order created');
       } catch (err) {
-        console.error('Failed to create change order:', err);
+        logger.error('Failed to create change order', { error: err, hook: 'useChangeOrders' });
         toast.error('Failed to create change order');
         throw err;
       }
@@ -190,7 +191,7 @@ export function useChangeOrders({ projectId }: UseChangeOrdersOptions) {
         await updateDoc(doc(db, 'change_orders', coId), toFirestore({ ...data, updatedAt: new Date() }));
         toast.success('Change order updated');
       } catch (err) {
-        console.error('Failed to update change order:', err);
+        logger.error('Failed to update change order', { error: err, hook: 'useChangeOrders' });
         toast.error('Failed to update change order');
         throw err;
       }
@@ -227,7 +228,7 @@ export function useChangeOrders({ projectId }: UseChangeOrdersOptions) {
         }));
         toast.success('Change order submitted for approval');
       } catch (err) {
-        console.error('Failed to submit change order:', err);
+        logger.error('Failed to submit change order', { error: err, hook: 'useChangeOrders' });
         toast.error('Failed to submit change order');
         throw err;
       }
@@ -273,7 +274,7 @@ export function useChangeOrders({ projectId }: UseChangeOrdersOptions) {
         }));
         toast.success('Change order approved');
       } catch (err) {
-        console.error('Failed to approve change order:', err);
+        logger.error('Failed to approve change order', { error: err, hook: 'useChangeOrders' });
         toast.error('Failed to approve change order');
         throw err;
       }
@@ -311,7 +312,7 @@ export function useChangeOrders({ projectId }: UseChangeOrdersOptions) {
         }));
         toast.info('Change order rejected');
       } catch (err) {
-        console.error('Failed to reject change order:', err);
+        logger.error('Failed to reject change order', { error: err, hook: 'useChangeOrders' });
         toast.error('Failed to reject change order');
         throw err;
       }

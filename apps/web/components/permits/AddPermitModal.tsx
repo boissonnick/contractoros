@@ -10,6 +10,7 @@ import { PermitType, PermitStatus, Project } from '@/types';
 import BaseModal from '@/components/ui/BaseModal';
 import Button from '@/components/ui/Button';
 import { FormInput, FormTextarea, FormSelect } from '@/components/ui/FormField';
+import { logger } from '@/lib/utils/logger';
 
 const permitSchema = z.object({
   description: z.string().min(1, 'Description is required'),
@@ -97,7 +98,7 @@ export default function AddPermitModal({ isOpen, onClose, projectId }: AddPermit
       reset();
       onClose();
     } catch (error) {
-      console.error('Error adding permit:', error);
+      logger.error('Error adding permit', { error: error, component: 'AddPermitModal' });
     } finally {
       setIsSubmitting(false);
     }

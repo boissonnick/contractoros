@@ -9,6 +9,7 @@ import { db } from '@/lib/firebase/config';
 import { verifyAuth } from '@/lib/api/auth';
 import { DashboardLayout, Widget } from '@/lib/dashboard-widgets/types';
 import { getDefaultLayout } from '@/lib/dashboard-widgets/layout-manager';
+import { logger } from '@/lib/utils/logger';
 
 const COLLECTION_PATH = 'users';
 const SUBCOLLECTION = 'dashboardConfig';
@@ -65,7 +66,7 @@ export async function GET(request: NextRequest) {
       isDefault: false,
     });
   } catch (err) {
-    console.error('Error fetching dashboard config:', err);
+    logger.error('Error fetching dashboard config', { error: err, route: 'dashboard-config' });
     return NextResponse.json(
       { error: 'Failed to fetch dashboard configuration' },
       { status: 500 }
@@ -136,7 +137,7 @@ export async function PUT(request: NextRequest) {
       },
     });
   } catch (err) {
-    console.error('Error saving dashboard config:', err);
+    logger.error('Error saving dashboard config', { error: err, route: 'dashboard-config' });
     return NextResponse.json(
       { error: 'Failed to save dashboard configuration' },
       { status: 500 }

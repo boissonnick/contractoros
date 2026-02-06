@@ -9,6 +9,7 @@ import {
   saveQueuedOperation,
   deleteQueuedOperation,
 } from './storage';
+import { logger } from '@/lib/utils/logger';
 
 const MAX_RETRIES = 5;
 
@@ -55,7 +56,7 @@ export async function addToQueue(
       const registration = await navigator.serviceWorker.ready;
       await (registration as ServiceWorkerRegistration & { sync: { register: (tag: string) => Promise<void> } }).sync.register('sync-pending-data');
     } catch (err) {
-      console.warn('Background sync registration failed:', err);
+      logger.warn('Background sync registration failed', { err, component: 'offline-sync-queue' });
     }
   }
 
@@ -171,7 +172,7 @@ export function subscribeToQueue(listener: QueueChangeListener): () => void {
   listeners.add(listener);
 
   // Immediately notify with current count
-  getQueueLength().then(listener).catch(console.error);
+  getQueueLength().then(listener).catch((err) => logger.error('Operation failed', { error: err, component: 'offline-sync-queue' }));
 
   return () => {
     listeners.delete(listener);

@@ -26,6 +26,7 @@ import {
 } from './types';
 import { Estimate, Organization } from '@/types';
 import { generateAndUploadEstimatePdf } from './pdf-service';
+import { logger } from '@/lib/utils/logger';
 
 const SIGNATURE_REQUESTS_COLLECTION = 'signatureRequests';
 const DEFAULT_EXPIRATION_DAYS = 30;
@@ -161,7 +162,7 @@ export async function createSignatureRequest(
       signingUrls,
     };
   } catch (error) {
-    console.error('Error creating signature request:', error);
+    logger.error('Error creating signature request', { error, module: 'signature-service' });
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to create signature request',
@@ -218,7 +219,7 @@ export async function sendSignatureRequest(
 
     return { success: true };
   } catch (error) {
-    console.error('Error sending signature request:', error);
+    logger.error('Error sending signature request', { error, module: 'signature-service' });
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to send signature request',
@@ -266,7 +267,7 @@ export async function cancelSignatureRequest(
 
     return { success: true };
   } catch (error) {
-    console.error('Error cancelling signature request:', error);
+    logger.error('Error cancelling signature request', { error, module: 'signature-service' });
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to cancel signature request',
@@ -304,7 +305,7 @@ export async function sendReminder(
 
     return { success: true };
   } catch (error) {
-    console.error('Error sending reminder:', error);
+    logger.error('Error sending reminder', { error, module: 'signature-service' });
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to send reminder',
@@ -333,7 +334,7 @@ export async function getProjectSignatureRequests(
       ...doc.data(),
     })) as SignatureRequest[];
   } catch (error) {
-    console.error('Error fetching project signature requests:', error);
+    logger.error('Error fetching project signature requests', { error, module: 'signature-service' });
     return [];
   }
 }
@@ -369,7 +370,7 @@ export async function getOrgSignatureRequests(
       ...doc.data(),
     })) as SignatureRequest[];
   } catch (error) {
-    console.error('Error fetching org signature requests:', error);
+    logger.error('Error fetching org signature requests', { error, module: 'signature-service' });
     return [];
   }
 }
@@ -387,7 +388,7 @@ export async function getSignatureRequest(
     }
     return { id: requestDoc.id, ...requestDoc.data() } as SignatureRequest;
   } catch (error) {
-    console.error('Error fetching signature request:', error);
+    logger.error('Error fetching signature request', { error, module: 'signature-service' });
     return null;
   }
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb, Timestamp } from '@/lib/firebase/admin';
+import { logger } from '@/lib/utils/logger';
 
 export const runtime = 'nodejs';
 
@@ -31,7 +32,7 @@ export async function GET(
       completedAt: data?.completedAt?.toDate?.()?.toISOString() || null,
     });
   } catch (error) {
-    console.error('Get payment error:', error);
+    logger.error('Get payment error', { error, route: 'payments-detail' });
     return NextResponse.json(
       { error: 'Failed to fetch payment' },
       { status: 500 }
@@ -81,7 +82,7 @@ export async function PATCH(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Update payment error:', error);
+    logger.error('Update payment error', { error, route: 'payments-detail' });
     return NextResponse.json(
       { error: 'Failed to update payment' },
       { status: 500 }

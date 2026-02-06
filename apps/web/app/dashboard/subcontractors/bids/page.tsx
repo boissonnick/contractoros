@@ -20,6 +20,7 @@ import {
   XCircleIcon,
   PaperAirplaneIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 interface BidWithDetails extends Bid {
   subcontractorName?: string;
@@ -99,7 +100,7 @@ export default function SubcontractorBidsPage() {
 
         setBids(bidsWithDetails);
       } catch (error) {
-        console.error('Error loading bids:', error);
+        logger.error('Error loading bids', { error: error, page: 'dashboard-subcontractors-bids' });
       } finally {
         setLoading(false);
       }

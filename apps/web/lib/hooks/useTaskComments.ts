@@ -15,6 +15,7 @@ import {
 import { db } from '@/lib/firebase/config';
 import { TaskComment } from '@/types';
 import { useAuth } from '@/lib/auth';
+import { logger } from '@/lib/utils/logger';
 
 function fromFirestore(id: string, data: Record<string, unknown>): TaskComment {
   return {
@@ -69,7 +70,7 @@ export function useTaskComments(taskId: string | null): UseTaskCommentsReturn {
         setError(null);
       },
       (err) => {
-        console.error('Task comments listener error:', err);
+        logger.error('Task comments listener error', { error: err, hook: 'useTaskComments' });
         setError(err.message);
         setLoading(false);
       }

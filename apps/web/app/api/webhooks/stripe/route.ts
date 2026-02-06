@@ -3,6 +3,7 @@ import { stripe, stripeWebhookSecret, isStripeConfigured } from '@/lib/payments/
 import { adminDb } from '@/lib/firebase/admin';
 import { Timestamp } from 'firebase-admin/firestore';
 import Stripe from 'stripe';
+import { logger } from '@/lib/utils/logger';
 
 export const runtime = 'nodejs';
 
@@ -35,7 +36,7 @@ export async function POST(request: NextRequest) {
     try {
       event = stripe.webhooks.constructEvent(body, signature, stripeWebhookSecret);
     } catch (err) {
-      console.error('Webhook signature verification failed:', err);
+      logger.error('Webhook signature verification failed', { error: err, route: 'stripe-webhook' });
       return NextResponse.json(
         { error: 'Webhook signature verification failed' },
         { status: 400 }
@@ -69,12 +70,12 @@ export async function POST(request: NextRequest) {
         break;
 
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        logger.info(`Unhandled event type: ${event.type}`, { route: 'stripe-webhook' });
     }
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error('Webhook error:', error);
+    logger.error('Webhook error', { error, route: 'stripe-webhook' });
     return NextResponse.json(
       { error: 'Webhook handler failed' },
       { status: 500 }
@@ -96,7 +97,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
     .get();
 
   if (snapshot.empty) {
-    console.error(`Payment not found for intent: ${stripePaymentIntentId}`);
+    logger.error(`Payment not found for intent: ${stripePaymentIntentId}`, { route: 'stripe-webhook' });
     return;
   }
 
@@ -132,7 +133,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
     await updateInvoicePaymentStatus(metadata.invoiceId, paymentIntent.amount);
   }
 
-  console.log(`Payment completed: ${snapshot.docs[0].id}`);
+  logger.info(`Payment completed: ${snapshot.docs[0].id}`, { route: 'stripe-webhook' });
 }
 
 /**
@@ -148,7 +149,7 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
     .get();
 
   if (snapshot.empty) {
-    console.error(`Payment not found for intent: ${stripePaymentIntentId}`);
+    logger.error(`Payment not found for intent: ${stripePaymentIntentId}`, { route: 'stripe-webhook' });
     return;
   }
 
@@ -162,7 +163,7 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
     updatedAt: Timestamp.now(),
   });
 
-  console.log(`Payment failed: ${snapshot.docs[0].id}`);
+  logger.info(`Payment failed: ${snapshot.docs[0].id}`, { route: 'stripe-webhook' });
 }
 
 /**
@@ -178,7 +179,7 @@ async function handlePaymentIntentCanceled(paymentIntent: Stripe.PaymentIntent) 
     .get();
 
   if (snapshot.empty) {
-    console.error(`Payment not found for intent: ${stripePaymentIntentId}`);
+    logger.error(`Payment not found for intent: ${stripePaymentIntentId}`, { route: 'stripe-webhook' });
     return;
   }
 
@@ -189,7 +190,7 @@ async function handlePaymentIntentCanceled(paymentIntent: Stripe.PaymentIntent) 
     updatedAt: Timestamp.now(),
   });
 
-  console.log(`Payment cancelled: ${snapshot.docs[0].id}`);
+  logger.info(`Payment cancelled: ${snapshot.docs[0].id}`, { route: 'stripe-webhook' });
 }
 
 /**
@@ -207,7 +208,7 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
     .get();
 
   if (snapshot.empty) {
-    console.error(`Payment not found for charge refund`);
+    logger.error('Payment not found for charge refund', { route: 'stripe-webhook' });
     return;
   }
 
@@ -223,7 +224,7 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
     updatedAt: Timestamp.now(),
   });
 
-  console.log(`Payment refunded: ${snapshot.docs[0].id}`);
+  logger.info(`Payment refunded: ${snapshot.docs[0].id}`, { route: 'stripe-webhook' });
 }
 
 /**
@@ -278,7 +279,7 @@ async function handlePaymentMethodAttached(paymentMethod: Stripe.PaymentMethod) 
   }
 
   await adminDb.collection('savedPaymentMethods').add(methodData);
-  console.log(`Payment method saved: ${id}`);
+  logger.info(`Payment method saved: ${id}`, { route: 'stripe-webhook' });
 }
 
 /**
@@ -300,7 +301,7 @@ async function handlePaymentMethodDetached(paymentMethod: Stripe.PaymentMethod) 
     updatedAt: Timestamp.now(),
   });
 
-  console.log(`Payment method removed: ${id}`);
+  logger.info(`Payment method removed: ${id}`, { route: 'stripe-webhook' });
 }
 
 /**
@@ -331,8 +332,8 @@ async function updateInvoicePaymentStatus(invoiceId: string, amountPaid: number)
     }
 
     await invoiceRef.update(updates);
-    console.log(`Invoice ${invoiceId} updated with payment`);
+    logger.info(`Invoice ${invoiceId} updated with payment`, { route: 'stripe-webhook' });
   } catch (error) {
-    console.error(`Failed to update invoice ${invoiceId}:`, error);
+    logger.error(`Failed to update invoice ${invoiceId}`, { error, route: 'stripe-webhook' });
   }
 }

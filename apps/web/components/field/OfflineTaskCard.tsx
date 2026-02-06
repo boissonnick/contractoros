@@ -14,6 +14,7 @@ import { CheckCircleIcon as CheckCircleSolidIcon } from '@heroicons/react/24/sol
 import { Task, TaskStatus } from '@/types';
 import { getOfflineTaskService, TASK_STATUS_OPTIONS } from '@/lib/offline/offline-tasks';
 import { useNetworkStatus } from '@/lib/offline/network-status';
+import { logger } from '@/lib/utils/logger';
 
 interface OfflineTaskCardProps {
   task: Task & { _pendingSync?: boolean };
@@ -72,7 +73,7 @@ export function OfflineTaskCard({
       setShowNotes(false);
       setCompletionNotes('');
     } catch (error) {
-      console.error('Failed to complete task:', error);
+      logger.error('Failed to complete task', { error: error, component: 'OfflineTaskCard' });
     } finally {
       setIsUpdating(false);
     }
@@ -88,7 +89,7 @@ export function OfflineTaskCard({
       await service.updateTaskStatus(task.id, task.projectId, orgId, newStatus);
       onStatusChange?.(task.id, newStatus);
     } catch (error) {
-      console.error('Failed to update task status:', error);
+      logger.error('Failed to update task status', { error: error, component: 'OfflineTaskCard' });
     } finally {
       setIsUpdating(false);
     }

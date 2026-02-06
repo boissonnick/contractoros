@@ -9,6 +9,7 @@
  */
 
 import { Timestamp } from 'firebase-admin/firestore';
+import { logger } from '@/lib/utils/logger';
 
 // Types for server context
 export interface ServerContext {
@@ -203,7 +204,7 @@ async function loadOrganization(
       primaryTrades: org.trades || [],
     };
   } catch (error) {
-    console.error('[ServerContext] Error loading organization:', error);
+    logger.error('Error loading organization', { error, module: 'server-context-loader' });
     return null;
   }
 }
@@ -249,7 +250,7 @@ async function loadProjects(
       list,
     };
   } catch (error) {
-    console.error('[ServerContext] Error loading projects:', error);
+    logger.error('Error loading projects', { error, module: 'server-context-loader' });
     return { activeCount: 0, totalCount: 0, list: [] };
   }
 }
@@ -302,7 +303,7 @@ async function loadClients(
       withOutstandingBalance,
     };
   } catch (error) {
-    console.error('[ServerContext] Error loading clients:', error);
+    logger.error('Error loading clients', { error, module: 'server-context-loader' });
     return { activeCount: 0, recent: [], withOutstandingBalance: [] };
   }
 }
@@ -341,7 +342,7 @@ async function loadEstimates(
       pending,
     };
   } catch (error) {
-    console.error('[ServerContext] Error loading estimates:', error);
+    logger.error('Error loading estimates', { error, module: 'server-context-loader' });
     return { pendingCount: 0, pending: [] };
   }
 }
@@ -397,7 +398,7 @@ async function loadSchedule(
       weekEvents: weekSnap.size,
     };
   } catch (error) {
-    console.error('[ServerContext] Error loading schedule:', error);
+    logger.error('Error loading schedule', { error, module: 'server-context-loader' });
     return { upcomingCount: 0, upcoming: [], todayEvents: 0, weekEvents: 0 };
   }
 }
@@ -470,7 +471,7 @@ async function loadFinancials(
       overdueAmount,
     };
   } catch (error) {
-    console.error('[ServerContext] Error loading financials:', error);
+    logger.error('Error loading financials', { error, module: 'server-context-loader' });
     return {
       monthlyRevenue: 0,
       monthlyExpenses: 0,
@@ -521,7 +522,7 @@ async function loadTeam(
       roleBreakdown,
     };
   } catch (error) {
-    console.error('[ServerContext] Error loading team:', error);
+    logger.error('Error loading team', { error, module: 'server-context-loader' });
     return { totalMembers: 0, members: [], roleBreakdown: {} };
   }
 }
@@ -557,7 +558,7 @@ async function loadInventory(
       recentOrders: recentOrdersSnap.data().count || 0,
     };
   } catch (error) {
-    console.error('[ServerContext] Error loading inventory:', error);
+    logger.error('Error loading inventory', { error, module: 'server-context-loader' });
     return { lowStockAlerts: 0, totalMaterials: 0, recentOrders: 0 };
   }
 }

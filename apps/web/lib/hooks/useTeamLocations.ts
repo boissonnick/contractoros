@@ -17,6 +17,7 @@ import {
 import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
 import { TeamMemberLocation, Vehicle, VehicleLocation, LocationHistoryEntry } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================
 // Team Member Locations Hook
@@ -75,7 +76,7 @@ export function useTeamLocations(orgId?: string) {
         setError(null);
       },
       (err) => {
-        console.error('Team locations subscription error:', err);
+        logger.error('Team locations subscription error', { error: err, hook: 'useTeamLocations' });
         setError(err);
         setLoading(false);
       }
@@ -153,7 +154,7 @@ export function useTeamLocations(orgId?: string) {
           sourceId: profile.uid,
         });
       } catch (err) {
-        console.error('Error updating location:', err);
+        logger.error('Error updating location', { error: err, hook: 'useTeamLocations' });
         throw err;
       }
     },
@@ -182,7 +183,7 @@ export function useTeamLocations(orgId?: string) {
         );
       }
     } catch (err) {
-      console.error('Error setting offline:', err);
+      logger.error('Error setting offline', { error: err, hook: 'useTeamLocations' });
     }
   }, [targetOrgId, profile]);
 
@@ -215,7 +216,7 @@ export function useTeamLocations(orgId?: string) {
           };
         });
       } catch (err) {
-        console.error('Error fetching location history:', err);
+        logger.error('Error fetching location history', { error: err, hook: 'useTeamLocations' });
         return [];
       }
     },
@@ -318,7 +319,7 @@ export function useVehicles(orgId?: string) {
         setLoading(false);
       },
       (err) => {
-        console.error('Vehicles subscription error:', err);
+        logger.error('Vehicles subscription error', { error: err, hook: 'useTeamLocations' });
         setError(err);
         setLoading(false);
       }
@@ -339,7 +340,7 @@ export function useVehicles(orgId?: string) {
         setVehicleLocations(snap.docs.map((d) => fromFirestoreVehicleLocation(d.id, d.data())));
       },
       (err) => {
-        console.error('Vehicle locations subscription error:', err);
+        logger.error('Vehicle locations subscription error', { error: err, hook: 'useTeamLocations' });
       }
     );
 
@@ -563,7 +564,7 @@ export function useLocationTracking(options?: {
           });
         },
         (err) => {
-          console.error('Location update error:', err);
+          logger.error('Location update error', { error: err, hook: 'useTeamLocations' });
         },
         { enableHighAccuracy: true }
       );

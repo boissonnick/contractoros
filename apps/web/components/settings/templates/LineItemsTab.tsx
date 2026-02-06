@@ -36,6 +36,7 @@ import {
   LINE_ITEM_TRADES,
   LINE_ITEM_UNITS,
 } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 interface LineItemFormData {
   name: string;
@@ -210,7 +211,7 @@ export function LineItemsTab() {
       }
       handleCloseModal();
     } catch (err) {
-      console.error('Error saving line item:', err);
+      logger.error('Error saving line item', { error: err, component: 'LineItemsTab' });
       toast.error('Failed to save line item');
     }
   };
@@ -223,7 +224,7 @@ export function LineItemsTab() {
       setDeleteConfirmOpen(false);
       setItemToDelete(null);
     } catch (err) {
-      console.error('Error deleting line item:', err);
+      logger.error('Error deleting line item', { error: err, component: 'LineItemsTab' });
       toast.error('Failed to delete line item');
     }
   };
@@ -241,7 +242,7 @@ export function LineItemsTab() {
       setBulkPriceChange(0);
       setBulkPriceReason('');
     } catch (err) {
-      console.error('Error updating pricing:', err);
+      logger.error('Error updating pricing', { error: err, component: 'LineItemsTab' });
       toast.error('Failed to update pricing');
     }
   };

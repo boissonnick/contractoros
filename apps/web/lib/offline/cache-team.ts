@@ -6,6 +6,7 @@
 import { saveOffline, getOfflineData } from './storage';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { logger } from '@/lib/utils/logger';
 
 // Cached team member
 export interface CachedTeamMember {
@@ -69,7 +70,7 @@ export async function cacheTeamForOffline(orgId: string): Promise<void> {
 
     await saveOffline(getCacheKey(orgId), cache, CACHE_TTL);
   } catch (error) {
-    console.error('Failed to cache team for offline:', error);
+    logger.error('Failed to cache team for offline', { error: error, component: 'offline-cache-team' });
     throw error;
   }
 }
@@ -92,7 +93,7 @@ export async function getCachedTeam(orgId: string): Promise<CachedTeamMember[]> 
 
     return cache.members;
   } catch (error) {
-    console.error('Failed to get cached team:', error);
+    logger.error('Failed to get cached team', { error: error, component: 'offline-cache-team' });
     return [];
   }
 }

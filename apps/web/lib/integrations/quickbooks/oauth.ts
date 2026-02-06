@@ -5,6 +5,7 @@
  */
 
 import { adminDb } from '@/lib/firebase/admin';
+import { logger } from '@/lib/utils/logger';
 import {
   QBOAuthConfig,
   QBOAuthState,
@@ -104,7 +105,7 @@ export async function exchangeCodeForTokens(
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error('QBO token exchange failed:', errorText);
+    logger.error('QBO token exchange failed', { error: errorText, module: 'qbo-oauth' });
     throw new Error(`Failed to exchange code for tokens: ${response.status}`);
   }
 
@@ -147,7 +148,7 @@ export async function refreshAccessToken(refreshToken: string): Promise<QBOToken
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error('QBO token refresh failed:', errorText);
+    logger.error('QBO token refresh failed', { error: errorText, module: 'qbo-oauth' });
     throw new Error(`Failed to refresh token: ${response.status}`);
   }
 
@@ -187,7 +188,7 @@ export async function revokeTokens(refreshToken: string): Promise<void> {
   });
 
   if (!response.ok) {
-    console.error('QBO token revocation failed:', await response.text());
+    logger.error('QBO token revocation failed', { module: 'qbo-oauth' });
     // Don't throw - we still want to clear local data
   }
 }
@@ -302,7 +303,7 @@ export async function deleteConnection(orgId: string): Promise<void> {
       try {
         await revokeTokens(data.refreshToken);
       } catch (error) {
-        console.error('Failed to revoke QBO tokens:', error);
+        logger.error('Failed to revoke QBO tokens', { error, module: 'qbo-oauth' });
       }
     }
   }
@@ -331,7 +332,7 @@ export async function getValidAccessToken(orgId: string): Promise<{
   if (now.getTime() > tokenExpiresAt.getTime() - bufferTime) {
     // Token is expired or about to expire, refresh it
     if (!connection.refreshToken) {
-      console.error('No refresh token available');
+      logger.error('No refresh token available', { module: 'qbo-oauth' });
       return null;
     }
 
@@ -343,7 +344,7 @@ export async function getValidAccessToken(orgId: string): Promise<{
         realmId: connection.realmId,
       };
     } catch (error) {
-      console.error('Failed to refresh QBO token:', error);
+      logger.error('Failed to refresh QBO token', { error, module: 'qbo-oauth' });
       return null;
     }
   }

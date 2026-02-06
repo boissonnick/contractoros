@@ -46,6 +46,15 @@ const eslintConfig = [
       'react-hooks/use-memo': 'warn',
       'react-hooks/globals': 'warn',
       'react-hooks/rules-of-hooks': 'warn',
+      // Prevent raw console.* usage — use logger from lib/utils/logger.ts instead
+      'no-console': ['warn'],
+    },
+  },
+  {
+    // Allow console.* in the logger utility itself
+    files: ['lib/utils/logger.ts'],
+    rules: {
+      'no-console': 'off',
     },
   },
   {

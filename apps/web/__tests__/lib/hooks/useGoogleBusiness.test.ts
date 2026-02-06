@@ -7,7 +7,7 @@
  * - useGoogleBusinessLocations: Fetch available locations
  */
 
-import { renderHook, waitFor, act } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import {
   useGoogleBusiness,
   useGoogleBusinessLocations,
@@ -55,7 +55,6 @@ global.fetch = mockFetch;
 
 // Import mocked modules for assertions
 import { useFirestoreCollection } from '@/lib/hooks/useFirestoreCollection';
-import { useFirestoreCrud } from '@/lib/hooks/useFirestoreCrud';
 
 const mockUseFirestoreCollection = useFirestoreCollection as jest.Mock;
 
@@ -270,7 +269,7 @@ describe('useGoogleBusiness', () => {
         result.current.initiateOAuth();
       });
 
-      expect(consoleSpy).toHaveBeenCalledWith('Cannot initiate OAuth without organization ID');
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Cannot initiate OAuth without organization ID'), expect.anything());
       consoleSpy.mockRestore();
     });
 
@@ -328,7 +327,7 @@ describe('useGoogleBusiness', () => {
         await result.current.disconnect('conn-1');
       });
 
-      expect(consoleSpy).toHaveBeenCalledWith('Failed to revoke Google OAuth tokens');
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Failed to revoke Google OAuth tokens'), expect.anything());
       expect(mockRemove).toHaveBeenCalledWith('conn-1');
       consoleSpy.mockRestore();
     });
@@ -343,7 +342,7 @@ describe('useGoogleBusiness', () => {
         await result.current.disconnect('conn-1');
       });
 
-      expect(consoleSpy).toHaveBeenCalledWith('Error calling disconnect API:', expect.any(Error));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Error calling disconnect API'), expect.anything());
       expect(mockRemove).toHaveBeenCalledWith('conn-1');
       consoleSpy.mockRestore();
     });
@@ -483,8 +482,8 @@ describe('useGoogleBusinessLocations', () => {
 
       expect(result.current.error?.message).toBe('Network error');
       expect(consoleSpy).toHaveBeenCalledWith(
-        'Error fetching Google Business locations:',
-        expect.any(Error)
+        expect.stringContaining('Error fetching Google Business locations'),
+        expect.anything()
       );
       consoleSpy.mockRestore();
     });

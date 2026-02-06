@@ -18,6 +18,7 @@ import {
 import { useNetworkStatus } from '@/lib/offline/network-status';
 import { useAuth } from '@/lib/auth';
 import { toast } from '@/components/ui/Toast';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================
 // Types
@@ -89,7 +90,7 @@ export function useOfflineProject(options: UseOfflineProjectOptions): UseOffline
         setOfflineData(null);
       }
     } catch (error) {
-      console.error('Failed to check offline status:', error);
+      logger.error('Failed to check offline status', { error: error, hook: 'useOfflineProject' });
     }
   }, [projectId]);
 
@@ -138,7 +139,7 @@ export function useOfflineProject(options: UseOfflineProjectOptions): UseOffline
 
       toast.success('Project downloaded for offline access');
     } catch (error) {
-      console.error('Failed to download project:', error);
+      logger.error('Failed to download project', { error: error, hook: 'useOfflineProject' });
       toast.error('Failed to download project. Please try again.');
     } finally {
       setIsDownloading(false);
@@ -165,7 +166,7 @@ export function useOfflineProject(options: UseOfflineProjectOptions): UseOffline
 
       toast.success('Offline data removed');
     } catch (error) {
-      console.error('Failed to remove offline data:', error);
+      logger.error('Failed to remove offline data', { error: error, hook: 'useOfflineProject' });
       toast.error('Failed to remove offline data');
     } finally {
       setIsRemoving(false);

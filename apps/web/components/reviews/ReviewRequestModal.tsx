@@ -5,6 +5,7 @@ import { FormModal } from '@/components/ui/FormModal';
 import { useReviewRequests } from '@/lib/hooks/useReviews';
 import { useClients } from '@/lib/hooks/useClients';
 import { ReviewRequestChannel } from '@/types/review';
+import { logger } from '@/lib/utils/logger';
 
 interface ReviewRequestModalProps {
   isOpen: boolean;
@@ -52,7 +53,7 @@ export function ReviewRequestModal({
       setProjectId('');
       setChannel('email');
     } catch (err) {
-      console.error('Failed to create review request:', err);
+      logger.error('Failed to create review request', { error: err, component: 'ReviewRequestModal' });
     } finally {
       setLoading(false);
     }

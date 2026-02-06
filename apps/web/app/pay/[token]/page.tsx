@@ -11,6 +11,7 @@ import {
   ClockIcon,
   BuildingOffice2Icon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 type PageStatus = 'loading' | 'valid' | 'expired' | 'used' | 'cancelled' | 'not_found' | 'error' | 'success';
 
@@ -83,7 +84,7 @@ export default function PublicPaymentPage() {
 
         setStatus('valid');
       } catch (error) {
-        console.error('Error fetching payment link:', error);
+        logger.error('Error fetching payment link', { error: error, page: 'pay-token' });
         setStatus('error');
         setErrorMessage('Failed to load payment information');
       }
@@ -117,7 +118,7 @@ export default function PublicPaymentPage() {
       const data = await response.json();
       setClientSecret(data.clientSecret);
     } catch (error) {
-      console.error('Error creating payment:', error);
+      logger.error('Error creating payment', { error: error, page: 'pay-token' });
       setErrorMessage('Failed to initialize payment. Please try again.');
     }
   };
@@ -138,7 +139,7 @@ export default function PublicPaymentPage() {
 
       setStatus('success');
     } catch (error) {
-      console.error('Error updating payment link:', error);
+      logger.error('Error updating payment link', { error: error, page: 'pay-token' });
       // Payment was still successful, just failed to update link status
       setStatus('success');
     }

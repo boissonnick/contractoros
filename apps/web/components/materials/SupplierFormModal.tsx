@@ -8,6 +8,7 @@ import BaseModal from '@/components/ui/BaseModal';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { Supplier, MATERIAL_CATEGORIES, MaterialCategory } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 const supplierSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -152,7 +153,7 @@ export default function SupplierFormModal({
       });
       onClose();
     } catch (error) {
-      console.error('Error saving supplier:', error);
+      logger.error('Error saving supplier', { error: error, component: 'SupplierFormModal' });
     } finally {
       setIsSubmitting(false);
     }

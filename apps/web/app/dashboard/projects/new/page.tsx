@@ -26,6 +26,7 @@ import {
   SparklesIcon,
 } from '@heroicons/react/24/outline';
 import { formatDate } from '@/lib/date-utils';
+import { logger } from '@/lib/utils/logger';
 
 type Step = 'basics' | 'scope' | 'address' | 'client' | 'preferences' | 'budget' | 'review';
 
@@ -101,7 +102,7 @@ export default function NewProjectPage() {
       ensurePhaseTemplates(profile.orgId)
         .then(setTemplates)
         .catch((err) => {
-          console.error('Failed to load templates:', err);
+          logger.error('Failed to load templates', { error: err, page: 'new-project' });
           toast.error('Failed to load project templates');
         })
         .finally(() => setLoadingTemplates(false));
@@ -225,7 +226,7 @@ export default function NewProjectPage() {
 
       router.push(`/dashboard/projects/${projectRef.id}`);
     } catch (error) {
-      console.error('Error creating project:', error);
+      logger.error('Error creating project', { error, page: 'new-project' });
       toast.error('Failed to create project. Please try again.');
     } finally {
       setSaving(false);

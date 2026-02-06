@@ -17,6 +17,7 @@ import { PortalNav, ApprovalCard, ApprovalItem } from '@/components/client-porta
 import { SkeletonList } from '@/components/ui/Skeleton';
 import { CheckCircleIcon } from '@heroicons/react/24/outline';
 import { toast } from '@/components/ui/Toast';
+import { logger } from '@/lib/utils/logger';
 
 interface ClientPortalData {
   projectId: string;
@@ -131,7 +132,7 @@ export default function ApprovalsPage() {
 
         setApprovals([...estimates, ...changeOrders]);
       } catch (err) {
-        console.error('Error fetching approvals:', err);
+        logger.error('Error fetching approvals', { error: err, page: 'client-approvals' });
         setError('Failed to load approvals');
       } finally {
         setLoading(false);
@@ -172,7 +173,7 @@ export default function ApprovalsPage() {
       setApprovals((prev) => prev.filter((a) => a.id !== id));
       toast.success('Approved successfully!');
     } catch (err) {
-      console.error('Error approving:', err);
+      logger.error('Error approving', { error: err, page: 'client-approvals' });
       toast.error('Failed to approve. Please try again.');
     }
   };
@@ -208,7 +209,7 @@ export default function ApprovalsPage() {
       setApprovals((prev) => prev.filter((a) => a.id !== id));
       toast.success('Feedback sent!');
     } catch (err) {
-      console.error('Error requesting changes:', err);
+      logger.error('Error requesting changes', { error: err, page: 'client-approvals' });
       toast.error('Failed to send feedback. Please try again.');
     }
   };

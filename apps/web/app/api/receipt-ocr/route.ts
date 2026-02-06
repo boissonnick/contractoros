@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { adminAuth } from '@/lib/firebase/admin';
+import { logger } from '@/lib/utils/logger';
 
 // Models
 const FLASH_MODEL = 'gemini-2.0-flash';
@@ -114,23 +115,23 @@ export async function POST(request: NextRequest) {
     const genAI = new GoogleGenerativeAI(apiKey);
 
     // Process with Flash first (fast, cheap)
-    console.log(`[OCR] Processing receipt for user ${userId}`);
+    logger.info(`Processing receipt for user ${userId}`, { route: 'receipt-ocr' });
     let result = await processWithGemini(genAI, FLASH_MODEL, imageBase64, mimeType, startTime);
 
     // If low confidence, retry with Pro
     if (result.confidence < CONFIDENCE_THRESHOLD) {
-      console.log(`[OCR] Low confidence (${result.confidence}), trying Pro`);
+      logger.info(`Low confidence (${result.confidence}), trying Pro model`, { route: 'receipt-ocr' });
       const proResult = await processWithGemini(genAI, PRO_MODEL, imageBase64, mimeType, startTime);
       if (proResult.confidence > result.confidence) {
         result = proResult;
       }
     }
 
-    console.log(`[OCR] Success: ${result.vendor}, $${result.total}, confidence: ${result.confidence}`);
+    logger.info(`OCR success: ${result.vendor}, $${result.total}, confidence: ${result.confidence}`, { route: 'receipt-ocr' });
 
     return NextResponse.json({ success: true, data: result });
   } catch (error) {
-    console.error('[OCR] Error:', error);
+    logger.error('OCR processing error', { error, route: 'receipt-ocr' });
     return NextResponse.json(
       {
         success: false,
@@ -178,7 +179,7 @@ async function processWithGemini(
     }
     parsed = JSON.parse(cleanText);
   } catch {
-    console.error('[OCR] Failed to parse response:', text);
+    logger.error('Failed to parse OCR response', { error: text, route: 'receipt-ocr' });
     throw new Error('Failed to parse AI response');
   }
 

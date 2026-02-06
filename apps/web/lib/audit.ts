@@ -8,6 +8,7 @@
 import { collection, addDoc, Timestamp, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { UserRole } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================
 // Types
@@ -114,7 +115,7 @@ export async function logAuditEvent(entry: AuditLogInput): Promise<string | null
     return docRef.id;
   } catch (err) {
     // Silent fail - audit logging should never block operations
-    console.warn('Failed to log audit event:', err);
+    logger.warn('Failed to log audit event', { error: err, module: 'audit' });
     return null;
   }
 }
@@ -156,7 +157,7 @@ export async function getRecentAuditEvents(
 
     return entries;
   } catch (err) {
-    console.error('Failed to fetch audit events:', err);
+    logger.error('Failed to fetch audit events', { error: err, module: 'audit' });
     return [];
   }
 }

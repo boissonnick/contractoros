@@ -17,6 +17,7 @@ import { getFirestore } from 'firebase/firestore';
 import { checkRateLimit, recordUsage, getRateLimitHeaders } from '@/lib/assistant/security/rate-limiter';
 import { validatePrompt, logSecurityEvent, getBlockedPromptMessage } from '@/lib/assistant/security/prompt-guard';
 import { logRateLimitExceeded } from '@/lib/security/audit-logger';
+import { logger } from '@/lib/utils/logger';
 
 // Initialize Anthropic client
 const anthropic = new Anthropic();
@@ -56,7 +57,7 @@ async function verifyAuthToken(idToken: string): Promise<{
       email: decodedToken.email || null,
     };
   } catch (error) {
-    console.error('[Assistant Stream API] Auth verification failed:', error);
+    logger.error('[Assistant Stream API] Auth verification failed', { error, route: 'assistant-stream' });
     throw new Error('Invalid authentication token');
   }
 }
@@ -76,7 +77,7 @@ async function getOrgIdFromUser(userId: string): Promise<string | null> {
     }
     return null;
   } catch (error) {
-    console.error('[Assistant Stream API] Failed to get orgId from user:', error);
+    logger.error('[Assistant Stream API] Failed to get orgId from user', { error, route: 'assistant-stream' });
     return null;
   }
 }
@@ -124,7 +125,7 @@ export async function POST(request: NextRequest) {
         verifiedOrgId = await getOrgIdFromUser(verifiedUserId);
       }
     } catch (authError) {
-      console.error('[Assistant Stream API] Auth verification failed:', authError);
+      logger.error('[Assistant Stream API] Auth verification failed', { error: authError, route: 'assistant-stream' });
       return new Response(
         JSON.stringify({ error: 'Invalid or expired authentication token.' }),
         { status: 401, headers: { 'Content-Type': 'application/json' } }
@@ -197,7 +198,7 @@ export async function POST(request: NextRequest) {
         );
       }
     } catch (rateLimitError) {
-      console.warn('[Assistant Stream] Rate limit check failed:', rateLimitError);
+      logger.warn('[Assistant Stream] Rate limit check failed', { error: rateLimitError, route: 'assistant-stream' });
       // Continue if rate limiting fails
     }
 
@@ -282,12 +283,12 @@ export async function POST(request: NextRequest) {
               modelKey: 'claude-sonnet',
             });
           } catch (usageError) {
-            console.warn('[Assistant Stream] Usage recording failed:', usageError);
+            logger.warn('[Assistant Stream] Usage recording failed', { error: usageError, route: 'assistant-stream' });
           }
 
           controller.close();
         } catch (error) {
-          console.error('Stream error:', error);
+          logger.error('Stream error', { error, route: 'assistant-stream' });
           const errorData = `data: ${JSON.stringify({ type: 'error', error: 'Stream interrupted' })}\n\n`;
           controller.enqueue(encoder.encode(errorData));
           controller.close();
@@ -303,7 +304,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Assistant stream error:', error);
+    logger.error('Assistant stream error', { error, route: 'assistant-stream' });
 
     if (error instanceof Anthropic.APIError) {
       if (error.status === 401) {

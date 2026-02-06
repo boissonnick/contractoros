@@ -25,6 +25,7 @@ import {
   ArrowsRightLeftIcon,
 } from '@heroicons/react/24/outline';
 import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
+import { logger } from '@/lib/utils/logger';
 
 interface ClientProject {
   id: string;
@@ -125,7 +126,7 @@ export default function ClientPhotosPage() {
 
         setProjects(projectList);
       } catch (err) {
-        console.error('Error loading projects:', err);
+        logger.error('Error loading projects', { error: err, page: 'client-photos' });
       }
     }
 
@@ -183,7 +184,7 @@ export default function ClientPhotosPage() {
         setPhotos(allPhotos);
         setBeforeAfterPairs(allPairs);
       } catch (err) {
-        console.error('Error loading photos:', err);
+        logger.error('Error loading photos', { error: err, page: 'client-photos' });
       } finally {
         setLoading(false);
       }

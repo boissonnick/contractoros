@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { doc, getDoc, collection, query, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { PortalNav, PhotoGallery, GalleryPhoto } from '@/components/client-portal';
+import { logger } from '@/lib/utils/logger';
 
 interface ClientPortalData {
   projectId: string;
@@ -95,7 +96,7 @@ export default function GalleryPage() {
         const uniquePhases = Array.from(phaseSet);
         setPhases(uniquePhases);
       } catch (err) {
-        console.error('Error fetching photos:', err);
+        logger.error('Error fetching photos', { error: err, page: 'client-gallery' });
         setError('Failed to load photos');
       } finally {
         setLoading(false);

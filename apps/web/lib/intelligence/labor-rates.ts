@@ -7,6 +7,7 @@
  * BLS API Documentation: https://www.bls.gov/developers/api_signature_v2.htm
  */
 
+import { logger } from '@/lib/utils/logger';
 import {
   LaborTradeCategory,
   LaborRateData,
@@ -24,7 +25,7 @@ const BLS_BASE_URL = 'https://api.bls.gov/publicAPI/v2';
 function getBlsApiKey(): string {
   const key = process.env.NEXT_PUBLIC_BLS_API_KEY || process.env.BLS_API_KEY;
   if (!key) {
-    console.warn('BLS_API_KEY not configured. Labor rates will use fallback data.');
+    logger.warn('BLS_API_KEY not configured. Labor rates will use fallback data.', { module: 'labor-rates' });
     return '';
   }
   return key;
@@ -175,14 +176,14 @@ async function _fetchBlsData(seriesIds: string[]): Promise<Map<string, number>> 
     });
 
     if (!response.ok) {
-      console.error(`BLS API error: ${response.status}`);
+      logger.error(`BLS API error: ${response.status}`, { module: 'labor-rates' });
       return new Map();
     }
 
     const data: BlsApiResponse = await response.json();
 
     if (data.status !== 'REQUEST_SUCCEEDED') {
-      console.error('BLS API request failed:', data.message);
+      logger.error('BLS API request failed', { error: data.message, module: 'labor-rates' });
       return new Map();
     }
 
@@ -198,7 +199,7 @@ async function _fetchBlsData(seriesIds: string[]): Promise<Map<string, number>> 
 
     return results;
   } catch (error) {
-    console.error('Error fetching BLS data:', error);
+    logger.error('Error fetching BLS data', { error, module: 'labor-rates' });
     return new Map();
   }
 }

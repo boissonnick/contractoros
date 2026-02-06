@@ -14,6 +14,7 @@ import {
   ExclamationCircleIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import { logger } from '@/lib/utils/logger';
 
 function getRedirectPath(role: UserRole): string {
   switch (role) {
@@ -68,7 +69,7 @@ export default function PhoneAuthPage() {
       setConfirmationResult(result);
       setStep('verify');
     } catch (err: any) {
-      console.error('Phone verification error:', err);
+      logger.error('Phone verification error', { error: err, page: 'phone-auth' });
       if (err.code === 'auth/too-many-requests') {
         setError('Too many attempts. Please try again later.');
       } else if (err.code === 'auth/invalid-phone-number') {
@@ -125,7 +126,7 @@ export default function PhoneAuthPage() {
         router.push('/onboarding');
       }
     } catch (err: any) {
-      console.error('Code verification error:', err);
+      logger.error('Code verification error', { error: err, page: 'phone-auth' });
       if (err.code === 'auth/invalid-verification-code') {
         setError('Invalid code. Please check and try again.');
       } else if (err.code === 'auth/code-expired') {

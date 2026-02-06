@@ -17,6 +17,7 @@ import { db } from '@/lib/firebase/config';
 import { Subcontractor, SubcontractorDocument, SubcontractorMetrics } from '@/types';
 import { useAuth } from '@/lib/auth';
 import { toast } from '@/components/ui/Toast';
+import { logger } from '@/lib/utils/logger';
 
 // Safe date conversion helper - handles Timestamp, Date, string, or undefined
 function safeToDate(value: unknown): Date | undefined {
@@ -165,7 +166,7 @@ export function useSubcontractors() {
         setLoading(false);
       },
       (err) => {
-        console.error('useSubcontractors error:', err);
+        logger.error('useSubcontractors error', { error: err, hook: 'useSubcontractors' });
         setError(err.message);
         setLoading(false);
       }
@@ -186,7 +187,7 @@ export function useSubcontractors() {
         }));
         toast.success('Subcontractor added');
       } catch (err) {
-        console.error('Failed to add subcontractor:', err);
+        logger.error('Failed to add subcontractor', { error: err, hook: 'useSubcontractors' });
         toast.error('Failed to add subcontractor');
         throw err;
       }
@@ -200,7 +201,7 @@ export function useSubcontractors() {
         await updateDoc(doc(db, 'subcontractors', subId), toFirestore({ ...data, updatedAt: new Date() }));
         toast.success('Subcontractor updated');
       } catch (err) {
-        console.error('Failed to update subcontractor:', err);
+        logger.error('Failed to update subcontractor', { error: err, hook: 'useSubcontractors' });
         toast.error('Failed to update subcontractor');
         throw err;
       }
@@ -214,7 +215,7 @@ export function useSubcontractors() {
         await deleteDoc(doc(db, 'subcontractors', subId));
         toast.success('Subcontractor deleted');
       } catch (err) {
-        console.error('Failed to delete subcontractor:', err);
+        logger.error('Failed to delete subcontractor', { error: err, hook: 'useSubcontractors' });
         toast.error('Failed to delete subcontractor');
         throw err;
       }

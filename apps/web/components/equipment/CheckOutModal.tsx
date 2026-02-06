@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Equipment, EquipmentCheckout, Project } from '@/types';
 import { XMarkIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 interface TeamMember {
   userId: string;
@@ -79,7 +80,7 @@ export function CheckOutModal({
       });
       onClose();
     } catch (error) {
-      console.error('Error checking out equipment:', error);
+      logger.error('Error checking out equipment', { error: error, component: 'CheckOutModal' });
     } finally {
       setLoading(false);
     }

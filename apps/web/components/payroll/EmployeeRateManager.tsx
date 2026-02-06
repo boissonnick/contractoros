@@ -15,6 +15,7 @@ import {
   ExclamationTriangleIcon,
   CheckIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 // Rate history entry
 interface RateHistoryEntry {
@@ -90,7 +91,7 @@ export function EmployeeRateManager({
       setShowEditModal(false);
       setReason('');
     } catch (error) {
-      console.error('Error updating rate:', error);
+      logger.error('Error updating rate', { error: error, component: 'EmployeeRateManager' });
     } finally {
       setIsSaving(false);
     }
@@ -102,7 +103,7 @@ export function EmployeeRateManager({
     try {
       await onUpdateEmployeeType(type);
     } catch (error) {
-      console.error('Error updating employee type:', error);
+      logger.error('Error updating employee type', { error: error, component: 'EmployeeRateManager' });
       setEmployeeType(employee.employeeType ?? 'hourly');
     }
   };
@@ -112,7 +113,7 @@ export function EmployeeRateManager({
     try {
       await onUpdateOvertimeMultiplier(parseFloat(overtimeMultiplier));
     } catch (error) {
-      console.error('Error updating overtime multiplier:', error);
+      logger.error('Error updating overtime multiplier', { error: error, component: 'EmployeeRateManager' });
     }
   };
 

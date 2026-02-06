@@ -86,7 +86,7 @@ export function useEmailTemplates({ orgId }: UseEmailTemplatesOptions): UseEmail
 
       setTemplates([...orgTemplates, ...defaultsToInclude]);
     } catch (err) {
-      console.error('Error fetching email templates:', err);
+      logger.error('Error fetching email templates', { error: err, hook: 'useEmailTemplates' });
       setError('Failed to load email templates');
     } finally {
       setLoading(false);
@@ -135,7 +135,7 @@ export function useEmailTemplates({ orgId }: UseEmailTemplatesOptions): UseEmail
         updatedAt: docSnap.data().updatedAt?.toDate?.() || new Date(),
       } as EmailTemplate;
     } catch (err) {
-      console.error('Error fetching template:', err);
+      logger.error('Error fetching template', { error: err, hook: 'useEmailTemplates' });
       return null;
     }
   };
@@ -295,7 +295,7 @@ export function useEmailHistory({ orgId, clientId, projectId, limit = 50 }: UseE
 
       setLogs(emailLogs);
     } catch (err) {
-      console.error('Error fetching email logs:', err);
+      logger.error('Error fetching email logs', { error: err, hook: 'useEmailTemplates' });
       setError('Failed to load email history');
     } finally {
       setLoading(false);
@@ -316,3 +316,4 @@ export function useEmailHistory({ orgId, clientId, projectId, limit = 50 }: UseE
 
 // Import EmailLog type for the hook
 import { EmailLog } from '@/types';
+import { logger } from '@/lib/utils/logger';

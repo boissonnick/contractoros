@@ -41,6 +41,7 @@ import {
   NewspaperIcon,
 } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
+import { logger } from '@/lib/utils/logger';
 
 type Tab = 'all' | 'notes' | 'activity';
 
@@ -171,7 +172,7 @@ export default function ActivityPage() {
       setNewNoteContent('');
       toast.success('Note added');
     } catch (error) {
-      console.error('Error adding note:', error);
+      logger.error('Error adding note', { error: error, page: 'dashboard-projects-id-activity' });
       toast.error('Failed to add note');
     } finally {
       setSubmitting(false);
@@ -191,7 +192,7 @@ export default function ActivityPage() {
       setEditingContent('');
       toast.success('Note updated');
     } catch (error) {
-      console.error('Error updating note:', error);
+      logger.error('Error updating note', { error: error, page: 'dashboard-projects-id-activity' });
       toast.error('Failed to update note');
     }
   };
@@ -203,7 +204,7 @@ export default function ActivityPage() {
       await deleteDoc(doc(db, 'projects', projectId, 'notes', noteId));
       toast.success('Note deleted');
     } catch (error) {
-      console.error('Error deleting note:', error);
+      logger.error('Error deleting note', { error: error, page: 'dashboard-projects-id-activity' });
       toast.error('Failed to delete note');
     }
   };
@@ -215,7 +216,7 @@ export default function ActivityPage() {
         updatedAt: Timestamp.now(),
       });
     } catch (error) {
-      console.error('Error toggling pin:', error);
+      logger.error('Error toggling pin', { error: error, page: 'dashboard-projects-id-activity' });
       toast.error('Failed to update note');
     }
   };

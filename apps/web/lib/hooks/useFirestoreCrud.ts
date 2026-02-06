@@ -39,6 +39,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { toast } from '@/components/ui/Toast';
+import { logger } from '@/lib/utils/logger';
 
 export interface UseFirestoreCrudOptions<T> {
   /**
@@ -160,7 +161,7 @@ export function useFirestoreCrud<T extends { id?: string }>(
 
         return docRef.id;
       } catch (error) {
-        console.error(`Error creating ${entityName}:`, error);
+        logger.error(`Error creating ${entityName}`, { error: error, hook: 'useFirestoreCrud' });
         if (showToast) {
           toast.error(
             `Failed to create ${entityName}`,
@@ -186,7 +187,7 @@ export function useFirestoreCrud<T extends { id?: string }>(
           toast.success(messages.updated || `${entityName} updated`);
         }
       } catch (error) {
-        console.error(`Error updating ${entityName}:`, error);
+        logger.error(`Error updating ${entityName}`, { error: error, hook: 'useFirestoreCrud' });
         if (showToast) {
           toast.error(
             `Failed to update ${entityName}`,
@@ -208,7 +209,7 @@ export function useFirestoreCrud<T extends { id?: string }>(
           toast.success(messages.deleted || `${entityName} deleted`);
         }
       } catch (error) {
-        console.error(`Error deleting ${entityName}:`, error);
+        logger.error(`Error deleting ${entityName}`, { error: error, hook: 'useFirestoreCrud' });
         if (showToast) {
           toast.error(
             `Failed to delete ${entityName}`,
@@ -246,7 +247,7 @@ export function useFirestoreCrud<T extends { id?: string }>(
 
         return ids;
       } catch (error) {
-        console.error(`Error batch creating ${entityName}s:`, error);
+        logger.error(`Error batch creating ${entityName}s`, { error: error, hook: 'useFirestoreCrud' });
         if (showToast) {
           toast.error(
             `Failed to create ${entityName}s`,
@@ -279,7 +280,7 @@ export function useFirestoreCrud<T extends { id?: string }>(
           toast.success(`${updates.length} ${entityName}s updated`);
         }
       } catch (error) {
-        console.error(`Error batch updating ${entityName}s:`, error);
+        logger.error(`Error batch updating ${entityName}s`, { error: error, hook: 'useFirestoreCrud' });
         if (showToast) {
           toast.error(
             `Failed to update ${entityName}s`,
@@ -307,7 +308,7 @@ export function useFirestoreCrud<T extends { id?: string }>(
           toast.success(`${ids.length} ${entityName}s deleted`);
         }
       } catch (error) {
-        console.error(`Error batch deleting ${entityName}s:`, error);
+        logger.error(`Error batch deleting ${entityName}s`, { error: error, hook: 'useFirestoreCrud' });
         if (showToast) {
           toast.error(
             `Failed to delete ${entityName}s`,

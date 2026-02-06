@@ -15,6 +15,7 @@ import {
   ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
+import { logger } from '@/lib/utils/logger';
 
 interface ClientDocument {
   id: string;
@@ -51,7 +52,17 @@ export default function ClientDocumentsPage() {
       try {
         const docs: ClientDocument[] = [];
 
-        // Load invoices for this client
+        // Step 1: Get client's project IDs for project-scoped queries
+        const projectsSnap = await getDocs(
+          query(collection(db, 'projects'), where('clientId', '==', user.uid))
+        );
+        const projectIds = projectsSnap.docs.map((d) => d.id);
+        const projectNameMap = new Map<string, string>();
+        projectsSnap.docs.forEach((d) => {
+          projectNameMap.set(d.id, d.data().name || 'Project');
+        });
+
+        // Step 2: Load invoices for this client
         const invSnap = await getDocs(
           query(collection(db, 'invoices'), where('clientId', '==', user.uid))
         );
@@ -61,14 +72,14 @@ export default function ClientDocumentsPage() {
             id: d.id,
             name: `Invoice #${data.invoiceNumber || d.id.slice(0, 6)}`,
             type: 'invoice',
-            projectName: data.projectName || '',
+            projectName: data.projectName || projectNameMap.get(data.projectId) || '',
             projectId: data.projectId || '',
             status: data.status || '',
             date: data.createdAt ? (data.createdAt as Timestamp).toDate() : new Date(),
           });
         });
 
-        // Load change orders
+        // Step 3: Load change orders
         const coSnap = await getDocs(
           query(collection(db, 'changeOrders'), where('clientId', '==', user.uid))
         );
@@ -78,18 +89,113 @@ export default function ClientDocumentsPage() {
             id: d.id,
             name: `Change Order: ${data.title || 'Untitled'}`,
             type: 'change_order',
-            projectName: data.projectName || '',
+            projectName: data.projectName || projectNameMap.get(data.projectId) || '',
             projectId: data.projectId || '',
             status: data.status || '',
             date: data.createdAt ? (data.createdAt as Timestamp).toDate() : new Date(),
           });
         });
 
+        // Step 4: Load signature requests (contracts)
+        const sigSnap = await getDocs(
+          query(collection(db, 'signatureRequests'), where('clientId', '==', user.uid))
+        );
+        sigSnap.docs.forEach((d) => {
+          const data = d.data();
+          docs.push({
+            id: d.id,
+            name: `Contract: ${data.title || data.documentName || 'Untitled'}`,
+            type: 'contract',
+            projectName: data.projectName || projectNameMap.get(data.projectId) || '',
+            projectId: data.projectId || '',
+            fileURL: data.signedDocumentUrl || data.documentUrl || undefined,
+            status: data.status || '',
+            date: data.createdAt ? (data.createdAt as Timestamp).toDate() : new Date(),
+          });
+        });
+
+        // Step 5: Load permits (project-scoped, batched for Firestore 'in' limit of 30)
+        if (projectIds.length > 0) {
+          for (let i = 0; i < projectIds.length; i += 30) {
+            const batch = projectIds.slice(i, i + 30);
+            const permitsSnap = await getDocs(
+              query(collection(db, 'permits'), where('projectId', 'in', batch))
+            );
+            permitsSnap.docs.forEach((d) => {
+              const data = d.data();
+              docs.push({
+                id: d.id,
+                name: `Permit: ${data.permitType || data.type || 'General'}${data.number ? ` #${data.number}` : ''}`,
+                type: 'permit',
+                projectName: projectNameMap.get(data.projectId) || '',
+                projectId: data.projectId || '',
+                fileURL: data.fileUrl || data.documentUrl || undefined,
+                status: data.status || '',
+                date: data.createdAt ? (data.createdAt as Timestamp).toDate() : new Date(),
+              });
+            });
+          }
+        }
+
+        // Step 6: Load warranties (project-scoped, with expiration status)
+        if (projectIds.length > 0) {
+          for (let i = 0; i < projectIds.length; i += 30) {
+            const batch = projectIds.slice(i, i + 30);
+            const warrantiesSnap = await getDocs(
+              query(collection(db, 'warranties'), where('projectId', 'in', batch))
+            );
+            warrantiesSnap.docs.forEach((d) => {
+              const data = d.data();
+              const expirationDate = data.expirationDate
+                ? (data.expirationDate as Timestamp).toDate()
+                : null;
+              const isExpired = expirationDate ? expirationDate < new Date() : false;
+              docs.push({
+                id: d.id,
+                name: `Warranty: ${data.type || data.itemName || 'General'}`,
+                type: 'warranty',
+                projectName: projectNameMap.get(data.projectId) || '',
+                projectId: data.projectId || '',
+                fileURL: data.fileUrl || data.documentUrl || undefined,
+                status: isExpired ? 'expired' : 'active',
+                date: data.createdAt ? (data.createdAt as Timestamp).toDate() : new Date(),
+              });
+            });
+          }
+        }
+
+        // Step 7: Load insurance certificates (project-scoped documents with type 'insurance')
+        if (projectIds.length > 0) {
+          for (let i = 0; i < projectIds.length; i += 30) {
+            const batch = projectIds.slice(i, i + 30);
+            const insuranceSnap = await getDocs(
+              query(
+                collection(db, 'documents'),
+                where('projectId', 'in', batch),
+                where('type', '==', 'insurance')
+              )
+            );
+            insuranceSnap.docs.forEach((d) => {
+              const data = d.data();
+              docs.push({
+                id: d.id,
+                name: data.name || 'Insurance Certificate',
+                type: 'insurance',
+                projectName: projectNameMap.get(data.projectId) || '',
+                projectId: data.projectId || '',
+                fileURL: data.url || data.fileUrl || undefined,
+                status: data.status || 'active',
+                date: data.createdAt ? (data.createdAt as Timestamp).toDate() : new Date(),
+              });
+            });
+          }
+        }
+
         // Sort by date descending
         docs.sort((a, b) => b.date.getTime() - a.date.getTime());
         setDocuments(docs);
       } catch (err) {
-        console.error('Error loading documents:', err);
+        logger.error('Error loading documents', { error: err, page: 'client-documents' });
       } finally {
         setLoading(false);
       }
@@ -133,7 +239,7 @@ export default function ClientDocumentsPage() {
           />
         </div>
         <div className="flex gap-1">
-          {['all', 'invoice', 'change_order', 'contract', 'permit', 'warranty'].map((t) => (
+          {['all', 'invoice', 'change_order', 'contract', 'permit', 'warranty', 'insurance'].map((t) => (
             <button
               key={t}
               onClick={() => setTypeFilter(t)}

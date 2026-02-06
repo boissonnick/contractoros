@@ -1,5 +1,6 @@
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { storage } from './config';
+import { logger } from '@/lib/utils/logger';
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -119,7 +120,7 @@ export async function deleteInspirationImage(
     await deleteObject(storageRef);
   } catch (error) {
     // If the ref from URL doesn't work, try extracting the path
-    console.error('Error deleting image:', error);
+    logger.error('Error deleting image', { error, module: 'upload-helpers' });
   }
 }
 

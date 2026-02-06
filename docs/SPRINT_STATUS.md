@@ -3,13 +3,17 @@
 > **Purpose:** Track current progress and enable seamless session handoffs.
 > **Last Updated:** 2026-02-06
 > **Current Phase:** Phase 17 - Development Build Phase
-> **Latest Sprint:** Sprint 106 - Estimates Hook & Estimate-to-Invoice Pipeline ✅ COMPLETE
-> **Next Sprint:** Sprint 107 - Invoice PDF & Email Delivery
+> **Latest Sprint:** Sprint 114 - Payroll & Team Management Polish ✅ COMPLETE
+> **Next Sprint:** Sprint 115 (see REPRIORITIZED_SPRINT_PLAN.md)
 > **Phases 1-14 COMPLETE:** 50 seed scripts, 1,502 tests, TypeScript clean, all upgrades done, Firebase deployed
-> **Sprint 106 DONE:** Created useEstimates hook (full CRUD + real-time), wired into 3 pages, estimate→invoice conversion, duplicate/revise/delete actions
-> **Next:** Invoice PDF + email delivery (Sprint 107), then Client Portal build (Sprint 108)
+> **Sprint 97 DONE:** Cloud Build + Cloud Run deployment successful — app live at https://contractoros-alpha-cajchtshqa-uw.a.run.app
+> **Sprint 110 DONE:** Auto-sync API routes, fire-and-forget invoice/expense sync, real account resolution, triggerSync wired to API
+> **Sprint 111 DONE:** Field portal hardening — issue reporting, safety incidents, equipment checkout, material requests (4 new field pages + 2 hooks)
+> **Sprint 113 DONE:** Console cleanup & structured logging — logger utility, 377 files migrated, <100 raw console.* remaining, no-console ESLint rule added
+> **Sprint 114 DONE:** Payroll & Team Management Polish — OT alerts, time-off page, certifications dashboard, timesheet approval polish, onboarding/offboarding enhancements
+> **Next:** See `docs/REPRIORITIZED_SPRINT_PLAN.md` for upcoming sprints
 > **Sprint Plan:** Sprints 106-120 — see `docs/REPRIORITIZED_SPRINT_PLAN.md` (Phase 17: Development Build)
-> **Sprints 97-105:** DEFERRED (deploy/testing phase — building features first)
+> **Sprints 98-105:** DEFERRED (testing/hardening phase — building features first)
 > **Historical Sprints:** Sprints 13B-25 archived in `.claude-coordination/archive/sprints-13b-25-history.md`
 > **Phase 3 sprints 52-55:** archived in `.claude-coordination/archive/sprints-52-55-history.md`
 > **Sprints 76-77:** archived in `.claude-coordination/archive/sprints-76-77-history.md`
@@ -30,6 +34,288 @@ Find your modules instantly instead of running Explore agents for 15 minutes.
 **What's in the registry:** All 25+ features, 83 hooks, 60 component directories, 36 dashboard routes
 
 **DO NOT run Explore agents without checking the registry first!**
+
+---
+
+## ✅ Sprint 97 - Docker Build, Cloud Run Deploy & Smoke Test - COMPLETE
+
+**Priority:** P0 - CRITICAL
+**Completed:** 2026-02-06
+
+**Goal:** Build amd64 Docker image via Cloud Build, deploy to Cloud Run, verify production app.
+
+### Cloud Build Setup
+- [x] **Secret Manager IAM fixed** — Cloud Build uses Compute Engine default SA (`424251610296-compute@developer.gserviceaccount.com`), granted `roles/secretmanager.secretAccessor` at project + per-secret level for all 7 NEXT_PUBLIC_* secrets
+- [x] **Cloud Build succeeded** — Build ID `4e6aff61-bb47-4c69-b3f4-f2a0ac44bc06`, all 4 steps passed (build, push SHA, push latest, deploy)
+- [x] **Build time:** ~8.5 minutes (Next.js 16 Turbopack production build)
+
+### Cloud Run Deployment
+- [x] **Service:** `contractoros-alpha` in `us-west1`
+- [x] **URL:** https://contractoros-alpha-cajchtshqa-uw.a.run.app
+- [x] **Config:** 1Gi memory, 1 CPU, min 1 / max 10 instances, CPU boost enabled
+- [x] **Image:** `us-west1-docker.pkg.dev/contractoros-483812/contractoros/contractoros-web:f3b8201`
+
+### Smoke Tests
+- [x] `/` → 200 (root/landing)
+- [x] `/login` → 200 (login page, title: "ContractorOS")
+- [x] `/register` → 200
+- [x] `/onboarding` → 200
+- [x] `/dashboard` → 307 redirect to login (auth working)
+- [x] `/client` → 307 redirect (auth working)
+- [x] `/sub` → 307 redirect (auth working)
+- [x] `/field` → 307 redirect (auth working)
+- [x] JS bundles loading correctly
+- [x] Cloud Run conditions: Ready ✅, ConfigurationsReady ✅, RoutesReady ✅
+
+### Key Learnings
+- **Cloud Build SA**: `gcloud builds submit` uses Compute Engine default SA, NOT the Cloud Build SA — must grant secrets to `{PROJECT_NUMBER}-compute@developer.gserviceaccount.com`
+- **Code must be committed**: Cloud Build uploads working directory but Docker build requires committed code to match
+- **Cold start**: First request ~5.4s, subsequent ~150ms (min-instances=1 helps)
+
+---
+
+## ✅ Sprint 114 - Payroll & Team Management Polish - COMPLETE
+
+**Priority:** P1
+**Completed:** 2026-02-06
+
+**Goal:** Polish payroll and team management features — overtime alerts, PTO management, certifications expiry, timesheet approval workflow, onboarding/offboarding enhancements.
+
+### Feature 1: Overtime Auto-Detection & Alerts
+- [x] `getOvertimeAlerts()` function added to `lib/hooks/useTimeEntries.ts` — scans current week, returns approaching/exceeded employees
+- [x] `components/payroll/OvertimeAlertCard.tsx` — NEW — amber (approaching) and red (exceeded) alert cards
+- [x] `app/dashboard/payroll/page.tsx` — OT alerts section added above payroll runs
+
+### Feature 2: PTO / Time-Off Management Page
+- [x] `app/dashboard/team/time-off/page.tsx` — NEW — 3 tabs: My Requests, Team Requests (OWNER/PM), Calendar
+- [x] `components/team/TimeOffRequestModal.tsx` — NEW — Submit time-off request form
+- [x] `components/team/TimeOffApprovalCard.tsx` — NEW — Approve/deny card with reason input
+- [x] PTO balance cards: Vacation, Sick, Personal with accrual tracking
+- [x] `getBalances()` added to `useTimeOffRequests` hook with configurable accrual rates
+- [x] `PTOBalance` type added to `types/index.ts`
+- [x] Nav item already exists at `/dashboard/team/time-off`
+
+### Feature 3: Team Certification Expiry Alerts
+- [x] `components/team/CertificationsDashboard.tsx` — NEW — Table of all team certs with expiry status
+- [x] `components/team/CertificationFormModal.tsx` — NEW — Add certification with file upload
+- [x] `app/dashboard/team/page.tsx` — 4th tab "Certifications" added with expiring count badge
+- [x] `Certification` type extended with `category` and `status` fields
+
+### Feature 4: Timesheet Approval Workflow Polish
+- [x] `lib/hooks/useWeeklyTimesheets.ts` — Fixed org-scoping to `organizations/{orgId}/weeklyTimesheets`, added rejection reason, review history
+- [x] `app/dashboard/timesheets/page.tsx` — Rebuilt from 40-line stub to full page with Pending/Approved/Rejected tabs, bulk approve
+- [x] `components/timesheets/TimesheetDetailModal.tsx` — NEW — Daily breakdown, OT flagging, review history
+- [x] `components/timesheets/TimesheetRejectionModal.tsx` — NEW — Rejection reason modal
+- [x] `WeeklyTimesheet` type extended with `rejectionReason`, `reviewedBy`, `reviewHistory[]`, `approvedByName`
+
+### Feature 5: Onboarding/Offboarding Enhancements
+- [x] `COMPLIANCE_CHECKLIST` added to `lib/onboarding/user-onboarding.ts` — 7 items (W-4, I-9, direct deposit, emergency contact, handbook, safety, state tax)
+- [x] `components/team/ComplianceChecklistCard.tsx` — NEW — Grouped checklist UI with progress bar
+- [x] `components/team/OnboardingChecklist.tsx` — Compliance section added at bottom
+- [x] `components/team/OffboardingWizard.tsx` — Equipment Return step added between Reassign and Data Handling
+- [x] `OffboardingOptions` extended with `equipmentToReturn`, `equipmentReturnVerified`
+- [x] `OffboardingWizardStep` type extended with `equipment_return`
+
+### Files Summary
+| Action | Count |
+|--------|-------|
+| New files created | 9 |
+| Files modified | 12 |
+| **Total files touched** | **21** |
+
+### TypeScript: ✅ Clean (0 errors)
+
+---
+
+## ✅ Sprint 113 - Console Cleanup & Structured Logging - COMPLETE
+
+**Priority:** P1
+**Completed:** 2026-02-06
+
+**Goal:** Replace ~1,100 raw console.* calls with structured logger utility; add no-console ESLint rule.
+
+### New File Created
+- [x] `lib/utils/logger.ts` — Structured logger with levels (debug/info/warn/error), environment awareness, setErrorReporter() hook for future Sentry
+
+### Files Modified
+- [x] **377 files** migrated from raw console.* to logger calls
+- [x] `lib/utils/error-handler.ts` — Uses logger internally
+- [x] `eslint.config.mjs` — Added `no-console: warn` rule with logger exemption
+- [x] `app/dashboard/messages/page.tsx` — Fixed pre-existing Python-style ternary syntax error
+
+### Results
+| Category | Before | After |
+|----------|--------|-------|
+| Actionable TS/TSX files | ~1,020 | 7 (4 logger + 3 JSDoc examples) |
+| Skip files (SW, seeds) | ~90 | 87 |
+| **Total raw console.*** | **~1,113** | **94** |
+
+### ESLint
+- `no-console: warn` added to main rules
+- `lib/utils/logger.ts` exempted with override block
+
+---
+
+## ✅ Sprint 111 - Field Portal Hardening - COMPLETE
+
+**Priority:** P1
+**Completed:** 2026-02-06
+
+**Goal:** Add 4 missing field worker capabilities — issue reporting, safety incidents, equipment checkout, material requests.
+
+### New Files Created
+- [x] `lib/hooks/useIssues.ts` — Real-time onSnapshot hook for `organizations/{orgId}/issues` collection, CRUD operations
+- [x] `lib/hooks/useMaterialRequests.ts` — Real-time onSnapshot hook for `organizations/{orgId}/materialRequests` collection, CRUD operations
+- [x] `app/field/issue/page.tsx` — Mobile-first issue reporting form + recent issues list (365 lines)
+- [x] `app/field/safety/page.tsx` — Safety incident form with OSHA auto-detection + recent incidents (483 lines)
+- [x] `app/field/equipment/page.tsx` — Equipment checkout/return with Available + My Checkouts tabs (446 lines)
+- [x] `app/field/materials/page.tsx` — Material request form with dynamic item rows + request history (395 lines)
+
+### Files Modified
+- [x] `types/index.ts` — Added MaterialRequest, MaterialRequestItem, MaterialRequestStatus, MaterialRequestPriority types + label constants
+- [x] `app/field/page.tsx` — Added 3 new quick action cards (Safety Report, Equipment, Request Materials) to home page grid
+
+### Key Design Decisions
+- **useIssues hook**: Org-scoped collection `organizations/{orgId}/issues`, onSnapshot real-time, limit(50)
+- **useMaterialRequests hook**: Org-scoped collection `organizations/{orgId}/materialRequests`, onSnapshot real-time, limit(50)
+- **Safety page**: Uses existing `useSafetyIncidents` hook from `useSafety.ts` — auto-checks OSHA reportable for medical/lost_time/fatality severity
+- **Equipment page**: Uses existing `useEquipment` hook — two-tab layout (Available / My Checkouts) with checkout/return slide-up panels
+- **Materials page**: Dynamic item rows (add/remove), 12 unit options, priority selector, filtered to current user's requests
+- **Home page**: 6 quick action cards in 2-column grid (Photos, Issues, Safety, Equipment) + full-width Materials row
+
+### TypeScript
+- `npx tsc --noEmit` → 0 errors ✅
+
+---
+
+## ✅ Sprint 110 - QuickBooks Online — Invoice & Expense Sync - COMPLETE
+
+**Priority:** P1
+**Completed:** 2026-02-06
+
+**Goal:** Wire auto-sync for invoices/expenses, fix account resolution placeholders, replace fake triggerSync with real API call.
+
+### New Files Created
+- [x] `app/api/integrations/quickbooks/sync/invoice/route.ts` — POST endpoint: verifies auth, checks QBO connection + `autoSyncInvoices` setting, calls `syncInvoiceOnSend()`
+- [x] `app/api/integrations/quickbooks/sync/expense/route.ts` — POST endpoint: verifies auth, checks QBO connection + `autoSyncExpenses` setting, calls `syncExpenseOnApproval()`
+
+### Files Modified
+- [x] `lib/hooks/useInvoices.ts` — Added fire-and-forget sync call in `sendInvoice()` after status update to 'sent'
+- [x] `lib/hooks/useExpenses.ts` — Added fire-and-forget sync call in `approveExpense()` after approval
+- [x] `lib/integrations/quickbooks/sync-expenses.ts` — Fixed `getExpenseAccountRef()`: queries QBO by name with caching, falls back to Expense-type account. Fixed `bankAccountRef`: loads from connection doc `defaultBankAccountId` or queries QBO for Bank-type account
+- [x] `lib/hooks/useAccountingConnection.ts` — Replaced `setTimeout` fake sync with real API call to `/api/integrations/quickbooks/sync` with `{ action: 'full' }`, proper error handling
+- [x] `components/settings/QBOAccountMapping.tsx` — Added `onSaveDefaults` + `defaultAccounts` props, save button for default income/expense/asset accounts
+
+### Key Design Decisions
+- **Fire-and-forget pattern**: Auto-sync calls are non-blocking — invoice send/expense approval never fails due to sync errors
+- **API routes (not direct imports)**: Sync functions use `adminDb` (firebase-admin) which is server-only, so client hooks call API routes
+- **QBO account caching**: Resolved accounts are cached in `accountingConnections/quickbooks.cachedAccounts` to avoid repeated QBO API calls
+- **Settings-gated**: Auto-sync only fires when `autoSyncInvoices`/`autoSyncExpenses` is enabled in sync settings
+
+### TypeScript
+- `npx tsc --noEmit` → 0 errors ✅
+
+---
+
+## ✅ Sprint 109 - QuickBooks Online — OAuth & Account Mapping - COMPLETE
+
+**Priority:** P1
+**Completed:** 2026-02-06
+
+**Goal:** Enhance the existing QBO integration with account mapping UI, chart of accounts, and sync history.
+
+### Key Discovery
+QBO infrastructure was already extensively built (prior sprints):
+- ✅ Real OAuth2 flow (connect/callback/disconnect API routes)
+- ✅ Customer sync (push/pull/auto-link by email)
+- ✅ Invoice sync (push/pull/void)
+- ✅ Expense sync (push/approval-triggered)
+- ✅ Payment sync (pull from QBO + webhook processing)
+- ✅ Entity mapping (bidirectional ID tracking)
+- ✅ Sync logger (audit trail with stats)
+- ✅ Webhook handler (signature verification)
+- ✅ Full QBO settings page (connection status, sync settings, manual sync)
+- ✅ QBO API client (query, create, update, delete, batch)
+
+### What Was Built (Gaps Filled)
+
+**New Files Created:**
+- [x] `app/api/integrations/quickbooks/accounts/route.ts` — GET endpoint fetching QBO chart of accounts, maps QBO account types to `AccountingAccountType`
+- [x] `components/settings/QBOAccountMapping.tsx` — Full account mapping UI (698 lines):
+  - Fetches QBO accounts from API
+  - Displays/manages mapping rules with add/remove
+  - Default accounts section (Income, Expense, Asset)
+  - Grouped account dropdown by type (optgroup)
+  - Suggested construction categories (7 common)
+  - Collapsible suggestions section
+  - Mobile responsive
+- [x] `components/settings/QBOSyncStatus.tsx` — Sync health dashboard (605 lines):
+  - 4-stat overview grid (total syncs, successful, failed, items synced)
+  - Health badge (Healthy/Warning/Issues based on fail rate)
+  - Recent sync log list with per-action icons
+  - Expandable error details for failed syncs
+  - Auto-refresh every 30 seconds
+  - Duration formatting, relative time display
+  - Connection status awareness
+
+**Files Modified:**
+- [x] `app/dashboard/settings/integrations/quickbooks/page.tsx` — Integrated Account Mapping + Sync Status components, added `useAccountingConnection` hook
+
+### TypeScript
+- `npx tsc --noEmit` → 0 errors ✅
+
+---
+
+## ✅ Sprint 108 - Client Portal Full Experience Build - COMPLETE
+
+**Priority:** P0
+**Completed:** 2026-02-06
+
+**Goal:** Comprehensive client portal enhancement — two-way messaging, expanded document library, payment flow improvements, notification settings.
+
+### Created
+- [x] `app/client/settings/page.tsx` — Client notification preferences page (8 email toggles, contact preferences, phone number)
+
+### Modified
+- [x] `app/client/messages/page.tsx` — Added two-way messaging (compose/reply in each thread), switched to real-time onSnapshot, removed read-only banner
+- [x] `app/client/documents/page.tsx` — Expanded from 2 to 6 document types (contracts from signatureRequests, permits, warranties with expiration, insurance from documents collection)
+- [x] `app/client/invoices/page.tsx` — Added payment progress bars, overdue warnings with days count, PDF download button in modal, total paid summary
+- [x] `app/client/layout.tsx` — Added Settings nav item with Cog6ToothIcon
+
+### Key Enhancements
+- **Messages:** Clients can now reply directly in threads (was read-only). Real-time updates via onSnapshot.
+- **Documents:** 6 document types: invoices, change orders, contracts, permits, warranties, insurance certificates
+- **Invoices:** Payment progress visualization, overdue alerts, PDF download in detail modal
+- **Settings:** 8 configurable email notification types, preferred contact method, phone number editing. Stored in `clientPreferences/{userId}`
+
+### Existing Infrastructure Leveraged
+- useSelections hook — already had full selection/approval/budget workflow built
+- Photos page — already had before/after comparisons, date filters, project filters
+- usePayments hook — already had payment links, Stripe integration, saved methods
+- /pay/[token] page — already handled payment processing flow
+
+### TypeScript
+- [x] `npx tsc --noEmit` passes with 0 errors
+
+---
+
+## ✅ Sprint 107 - Invoice PDF & Email Delivery - COMPLETE
+
+**Priority:** P0
+**Completed:** 2026-02-06
+
+**Goal:** Build invoice detail page with PDF download and email actions, add recurring invoice support.
+
+### Created
+- [x] `app/dashboard/invoices/[id]/page.tsx` — Full invoice detail page (PDF download, Send Invoice, Mark Paid, Void, Delete)
+- [x] `lib/hooks/useRecurringInvoices.ts` — Recurring invoice hook (list, single, create, toggle)
+- [x] `RecurringInvoice` + `RecurringFrequency` types in `types/index.ts`
+
+### Existing Infrastructure Leveraged
+- InvoicePdf template, generateAndUploadInvoicePdf, sendInvoiceEmail Cloud Function — all already built
+
+### TypeScript
+- [x] `npx tsc --noEmit` passes with 0 errors
 
 ---
 

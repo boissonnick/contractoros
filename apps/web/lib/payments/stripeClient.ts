@@ -6,6 +6,7 @@
  */
 
 import Stripe from 'stripe';
+import { logger } from '@/lib/utils/logger';
 
 // Stripe API version - use the latest stable version
 const STRIPE_API_VERSION = '2023-10-16';
@@ -14,7 +15,7 @@ const STRIPE_API_VERSION = '2023-10-16';
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
 if (!stripeSecretKey && process.env.NODE_ENV === 'production') {
-  console.warn('Warning: STRIPE_SECRET_KEY is not set. Payment functionality will not work.');
+  logger.warn('Warning: STRIPE_SECRET_KEY is not set. Payment functionality will not work.', { component: 'payments-stripeClient' });
 }
 
 /**

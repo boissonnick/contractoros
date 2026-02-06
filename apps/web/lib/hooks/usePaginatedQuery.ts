@@ -15,6 +15,7 @@ import {
   Query,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { logger } from '@/lib/utils/logger';
 
 export interface PaginationState {
   page: number;
@@ -82,7 +83,7 @@ export function usePaginatedQuery<T extends { id: string }>({
         hasPreviousPage: prev.page > 1,
       }));
     } catch (err) {
-      console.error('Error fetching count:', err);
+      logger.error('Error fetching count', { error: err, hook: 'usePaginatedQuery' });
     }
   }, [collectionName, constraints, pageSize]);
 
@@ -142,7 +143,7 @@ export function usePaginatedQuery<T extends { id: string }>({
         hasPreviousPage: targetPage > 1,
       }));
     } catch (err) {
-      console.error('Error fetching page:', err);
+      logger.error('Error fetching page', { error: err, hook: 'usePaginatedQuery' });
       setError(err instanceof Error ? err : new Error('Failed to fetch data'));
     } finally {
       setLoading(false);

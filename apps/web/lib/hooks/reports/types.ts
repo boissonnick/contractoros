@@ -207,6 +207,89 @@ export const TASK_STATUS_COLORS: Record<string, string> = {
   completed: '#10B981',
 };
 
+// ============================================
+// Balance Sheet Types
+// ============================================
+
+export interface ARAgingBucket {
+  label: string;
+  amount: number;
+  count: number;
+}
+
+export interface BalanceSheetData {
+  asOfDate: Date;
+  assets: {
+    cashPosition: number;
+    accountsReceivable: number;
+    arAging: ARAgingBucket[];
+    equipmentValue: number;
+    totalAssets: number;
+  };
+  liabilities: {
+    accountsPayable: number;
+    accruedExpenses: number;
+    payrollLiabilities: number;
+    totalLiabilities: number;
+  };
+  equity: {
+    retainedEarnings: number;
+    ownersEquity: number;
+    totalEquity: number;
+  };
+}
+
+// ============================================
+// Cash Flow Statement Types
+// ============================================
+
+export interface CashFlowStatementData {
+  periodStart: Date;
+  periodEnd: Date;
+  operating: {
+    collectionsFromCustomers: number;
+    paymentsForMaterials: number;
+    paymentsForLabor: number;
+    paymentsToSubcontractors: number;
+    otherOperatingPayments: number;
+    changeInAR: number;
+    changeInAP: number;
+    netOperatingCashFlow: number;
+  };
+  investing: {
+    equipmentPurchases: number;
+    toolPurchases: number;
+    netInvestingCashFlow: number;
+  };
+  financing: {
+    ownerContributions: number;
+    ownerDraws: number;
+    netFinancingCashFlow: number;
+  };
+  netChangeInCash: number;
+  beginningCashBalance: number;
+  endingCashBalance: number;
+}
+
+// ============================================
+// Report Template Types
+// ============================================
+
+export interface ReportTemplate {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  category: 'financial' | 'operational' | 'executive';
+  href: string;
+  datePreset?: string;
+  isNew?: boolean;
+}
+
+// ============================================
+// Constants
+// ============================================
+
 export const CATEGORY_COLORS: Record<string, string> = {
   materials: '#3B82F6',
   labor: '#10B981',

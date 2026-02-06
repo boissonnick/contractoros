@@ -29,6 +29,7 @@ import { EmailTemplate, EmailTemplateFormData } from '@/lib/email/types';
 import { extractVariables } from '@/lib/email/template-engine';
 import { invoiceDueTemplate } from '@/lib/email/templates/invoice-due';
 import { TemplateEditor } from '@/components/email/TemplateEditor';
+import { logger } from '@/lib/utils/logger';
 
 export function EmailTemplatesTab() {
   const { profile } = useAuth();
@@ -72,7 +73,7 @@ export function EmailTemplatesTab() {
         setLoading(false);
       },
       (err) => {
-        console.error('Error loading email templates:', err);
+        logger.error('Error loading email templates', { error: err, component: 'EmailTemplatesTab' });
         toast.error('Failed to load templates');
         setLoading(false);
       }
@@ -132,7 +133,7 @@ export function EmailTemplatesTab() {
 
       handleCloseEditor();
     } catch (err) {
-      console.error('Error saving template:', err);
+      logger.error('Error saving template', { error: err, component: 'EmailTemplatesTab' });
       toast.error('Failed to save template');
     } finally {
       setSaving(false);
@@ -150,7 +151,7 @@ export function EmailTemplatesTab() {
       setDeleteConfirmOpen(false);
       setTemplateToDelete(null);
     } catch (err) {
-      console.error('Error deleting template:', err);
+      logger.error('Error deleting template', { error: err, component: 'EmailTemplatesTab' });
       toast.error('Failed to delete template');
     }
   };
@@ -169,7 +170,7 @@ export function EmailTemplatesTab() {
       });
       toast.success('Template duplicated');
     } catch (err) {
-      console.error('Error duplicating template:', err);
+      logger.error('Error duplicating template', { error: err, component: 'EmailTemplatesTab' });
       toast.error('Failed to duplicate template');
     }
   };
@@ -185,7 +186,7 @@ export function EmailTemplatesTab() {
       });
       toast.success('Default template created');
     } catch (err) {
-      console.error('Error creating default template:', err);
+      logger.error('Error creating default template', { error: err, component: 'EmailTemplatesTab' });
       toast.error('Failed to create template');
     }
   };

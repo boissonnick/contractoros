@@ -26,12 +26,13 @@ import {
   Timestamp,
   QueryConstraint,
 } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { auth, db } from '@/lib/firebase/config';
 import { convertTimestamps } from '@/lib/firebase/timestamp-converter';
 import { useFirestoreCollection, createConverter } from '@/lib/hooks/useFirestoreCollection';
 import { useFirestoreCrud } from '@/lib/hooks/useFirestoreCrud';
 import { Invoice, InvoiceStatus, InvoiceLineItem, Payment } from '@/types';
 import { reserveNumber } from '@/lib/utils/auto-number';
+import { logger } from '@/lib/utils/logger';
 
 // Collection path - invoices are org-scoped
 const getInvoicesCollectionPath = (orgId: string) => `organizations/${orgId}/invoices`;
@@ -261,7 +262,7 @@ export function useInvoice(
         setLoading(false);
       },
       (err) => {
-        console.error('Error fetching invoice:', err);
+        logger.error('Error fetching invoice', { error: err, hook: 'useInvoices' });
         setError(err as Error);
         setLoading(false);
       }
@@ -318,6 +319,18 @@ export function useInvoice(
       sentAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     });
+
+    // Fire-and-forget: sync to QuickBooks if auto-sync is enabled
+    auth.currentUser?.getIdToken().then((token) => {
+      fetch('/api/integrations/quickbooks/sync/invoice', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ invoiceId }),
+      }).catch(() => {});
+    }).catch(() => {});
   }, [invoiceId, invoice, orgId, collectionPath]);
 
   const voidInvoice = useCallback(

@@ -42,6 +42,7 @@ import {
   SparklesIcon,
 } from '@heroicons/react/24/outline';
 import { format, isAfter, isBefore, addDays } from 'date-fns';
+import { logger } from '@/lib/utils/logger';
 
 // ===========================================
 // PREMIUM STAT CARD COMPONENT
@@ -274,7 +275,7 @@ export default function DashboardPage() {
       }
 
     } catch (error: unknown) {
-      console.error('Error fetching dashboard data:', error);
+      logger.error('Error fetching dashboard data', { error, page: 'dashboard' });
       const errorMessage = error instanceof Error ? error.message : String(error);
       if (errorMessage.includes('requires an index')) {
         setFetchError('Database index required. Please run: firebase deploy --only firestore:indexes');
@@ -394,9 +395,74 @@ export default function DashboardPage() {
   if (authLoading || loading) {
     return (
       <div className="space-y-6">
-        <div className="h-20 bg-gray-100 rounded-2xl animate-pulse" />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <SkeletonList count={4} />
+        {/* Hero header skeleton */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <div className="h-6 w-32 bg-gray-200 rounded-full animate-pulse mb-2" />
+            <div className="h-10 w-64 bg-gray-200 rounded-2xl animate-pulse" />
+            <div className="h-5 w-80 bg-gray-100 rounded-lg animate-pulse mt-2" />
+          </div>
+          <div className="h-10 w-36 bg-gray-200 rounded-xl animate-pulse" />
+        </div>
+        {/* Stats grid skeleton */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="rounded-2xl border p-5 bg-white animate-pulse">
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="h-3 w-24 bg-gray-200 rounded mb-3" />
+                  <div className="h-7 w-16 bg-gray-200 rounded" />
+                  <div className="h-3 w-32 bg-gray-100 rounded mt-2" />
+                </div>
+                <div className="h-10 w-10 bg-gray-200 rounded-xl" />
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* Content skeleton */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8 items-start">
+          <div className="xl:col-span-2">
+            <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden">
+              <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                <div className="h-5 w-32 bg-gray-200 rounded animate-pulse" />
+                <div className="h-4 w-16 bg-gray-200 rounded animate-pulse" />
+              </div>
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="p-5 animate-pulse border-b border-gray-100 last:border-0">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="h-5 w-3/4 bg-gray-200 rounded mb-2" />
+                      <div className="flex gap-4">
+                        <div className="h-4 w-24 bg-gray-100 rounded" />
+                        <div className="h-4 w-20 bg-gray-100 rounded" />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="h-5 w-20 bg-gray-200 rounded mb-1.5" />
+                      <div className="h-1.5 w-24 bg-gray-100 rounded-full" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-6">
+            <div className="bg-gray-200 rounded-3xl p-6 animate-pulse h-48" />
+            <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-100">
+                <div className="h-4 w-28 bg-gray-200 rounded animate-pulse" />
+              </div>
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="p-4 flex gap-3 animate-pulse border-b border-gray-50 last:border-0">
+                  <div className="h-2 w-2 mt-2 rounded-full bg-gray-200" />
+                  <div className="flex-1">
+                    <div className="h-4 w-full bg-gray-100 rounded mb-1" />
+                    <div className="h-3 w-16 bg-gray-100 rounded" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     );

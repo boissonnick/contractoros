@@ -6,6 +6,7 @@
  */
 
 import { VoiceLogQueueItem, VoiceLogCreate } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 const DB_NAME = 'contractoros-voice-logs';
 const DB_VERSION = 1;
@@ -101,7 +102,7 @@ export class VoiceLogQueue {
     // Check for duplicate by content hash
     const existing = await this.findByContentHash(contentHash);
     if (existing) {
-      console.log('Voice log already queued (duplicate detected):', contentHash.slice(0, 8));
+      logger.info('Voice log already queued (duplicate detected)', { hashPrefix: contentHash.slice(0, 8), component: 'voice-logs-offline-queue' });
       return null;
     }
 

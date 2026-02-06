@@ -41,6 +41,7 @@ import {
   getSampleData,
   renderTemplatePreview,
 } from '@/lib/hooks/useSMSTemplates';
+import { logger } from '@/lib/utils/logger';
 
 const SMS_TEMPLATE_TYPES: { value: SmsTemplateType; label: string; description: string }[] = [
   { value: 'payment_reminder', label: 'Payment Reminder', description: 'Remind clients about upcoming or overdue payments' },
@@ -228,7 +229,7 @@ export function SmsTemplatesTab() {
         setLoading(false);
       },
       (err) => {
-        console.error('Error loading templates:', err);
+        logger.error('Error loading templates', { error: err, component: 'SmsTemplatesTab' });
         toast.error('Failed to load templates');
         setLoading(false);
       }
@@ -341,7 +342,7 @@ export function SmsTemplatesTab() {
 
       handleCloseModal();
     } catch (err) {
-      console.error('Error saving template:', err);
+      logger.error('Error saving template', { error: err, component: 'SmsTemplatesTab' });
       toast.error('Failed to save template');
     }
   };
@@ -355,7 +356,7 @@ export function SmsTemplatesTab() {
       setDeleteConfirmOpen(false);
       setTemplateToDelete(null);
     } catch (err) {
-      console.error('Error deleting template:', err);
+      logger.error('Error deleting template', { error: err, component: 'SmsTemplatesTab' });
       toast.error('Failed to delete template');
     }
   };
@@ -378,7 +379,7 @@ export function SmsTemplatesTab() {
       });
       toast.success('Template duplicated');
     } catch (err) {
-      console.error('Error duplicating template:', err);
+      logger.error('Error duplicating template', { error: err, component: 'SmsTemplatesTab' });
       toast.error('Failed to duplicate template');
     }
   };
@@ -403,7 +404,7 @@ export function SmsTemplatesTab() {
 
       toast.success(template.isDefault ? 'Default removed' : 'Set as default');
     } catch (err) {
-      console.error('Error toggling default:', err);
+      logger.error('Error toggling default', { error: err, component: 'SmsTemplatesTab' });
       toast.error('Failed to update template');
     }
   };

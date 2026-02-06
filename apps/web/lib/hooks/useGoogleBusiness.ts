@@ -20,6 +20,7 @@ import { convertTimestamps } from '@/lib/firebase/timestamp-converter';
 import { useFirestoreCollection, createConverter } from '@/lib/hooks/useFirestoreCollection';
 import { useFirestoreCrud } from '@/lib/hooks/useFirestoreCrud';
 import { GoogleBusinessConnection } from '@/types/review';
+import { logger } from '@/lib/utils/logger';
 
 // =============================================================================
 // COLLECTION PATH
@@ -99,7 +100,7 @@ export function useGoogleBusiness(orgId: string): UseGoogleBusinessReturn {
 
   const initiateOAuth = useCallback(() => {
     if (!orgId) {
-      console.error('Cannot initiate OAuth without organization ID');
+      logger.error('Cannot initiate OAuth without organization ID', { hook: 'useGoogleBusiness' });
       return;
     }
     // Redirect to OAuth initiation endpoint
@@ -119,11 +120,11 @@ export function useGoogleBusiness(orgId: string): UseGoogleBusinessReturn {
         });
 
         if (!response.ok) {
-          console.error('Failed to revoke Google OAuth tokens');
+          logger.error('Failed to revoke Google OAuth tokens', { hook: 'useGoogleBusiness' });
         }
       } catch (err) {
         // Log but continue - still delete the connection document
-        console.error('Error calling disconnect API:', err);
+        logger.error('Error calling disconnect API', { error: err, hook: 'useGoogleBusiness' });
       }
 
       // Delete connection document from Firestore
@@ -218,7 +219,7 @@ export function useGoogleBusinessLocations(orgId: string): UseGoogleBusinessLoca
       const data = await response.json();
       setLocations(data.locations || []);
     } catch (err) {
-      console.error('Error fetching Google Business locations:', err);
+      logger.error('Error fetching Google Business locations', { error: err, hook: 'useGoogleBusiness' });
       setError(err as Error);
     } finally {
       setLoading(false);

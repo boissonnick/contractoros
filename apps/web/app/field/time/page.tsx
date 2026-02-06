@@ -16,6 +16,7 @@ import {
   PlusIcon,
   ClockIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 function getWeekStart(date: Date): Date {
   const d = new Date(date);
@@ -53,7 +54,7 @@ export default function TimeTrackingPage() {
   // Initialize project cache for offline use
   useEffect(() => {
     if (profile?.orgId) {
-      initializeProjectCache(profile.orgId).catch(console.error);
+      initializeProjectCache(profile.orgId).catch((err) => logger.error('Failed to initialize project cache', { error: err, page: 'field-time' }));
     }
   }, [profile?.orgId]);
 

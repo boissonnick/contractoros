@@ -4,6 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/utils/logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -36,7 +37,7 @@ export async function GET(request: NextRequest) {
       byPriority: { high: 1, medium: 0, low: 0 }
     });
   } catch (error) {
-    console.error('[Reminders] Error:', error);
+    logger.error('[Reminders] Error', { error, route: 'automation-reminders' });
     return NextResponse.json({ error: 'Fetch failed' }, { status: 500 });
   }
 }
@@ -88,7 +89,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
   } catch (error) {
-    console.error('[Reminders] Error:', error);
+    logger.error('[Reminders] Error', { error, route: 'automation-reminders' });
     return NextResponse.json({ error: 'Action failed' }, { status: 500 });
   }
 }

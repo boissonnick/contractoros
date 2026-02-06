@@ -37,6 +37,10 @@ export type {
   InvoiceAging,
   OperationalMetrics,
   ProjectTimeline,
+  ARAgingBucket,
+  BalanceSheetData,
+  CashFlowStatementData,
+  ReportTemplate,
 } from './reports/types';
 
 // Re-export constants
@@ -51,6 +55,8 @@ export { useBaseReports } from './reports/useBaseReports';
 export { useDashboardReports } from './reports/useDashboardReports';
 export { useFinancialReports } from './reports/useFinancialReports';
 export { useOperationalReports } from './reports/useOperationalReports';
+export { useBalanceSheet } from './reports/useBalanceSheet';
+export { useCashFlowStatement } from './reports/useCashFlowStatement';
 
 // Legacy alias - useReports maps to useBaseReports for backward compatibility
 export { useBaseReports as useReports } from './reports/useBaseReports';

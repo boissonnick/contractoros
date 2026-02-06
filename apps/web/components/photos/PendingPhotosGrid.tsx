@@ -28,6 +28,7 @@ import {
 } from '@/lib/offline/offline-photos';
 import { useNetworkStatus } from '@/lib/offline/network-status';
 import { toast } from '@/components/ui/Toast';
+import { logger } from '@/lib/utils/logger';
 
 interface PendingPhotosGridProps {
   projectId?: string; // If provided, only show photos for this project
@@ -82,7 +83,7 @@ export default function PendingPhotosGrid({
       const pending = allPhotos.filter((p) => p.syncStatus !== 'completed');
       setPhotos(pending);
     } catch (error) {
-      console.error('Failed to load pending photos:', error);
+      logger.error('Failed to load pending photos', { error: error, component: 'PendingPhotosGrid' });
     } finally {
       setLoading(false);
     }
@@ -136,7 +137,7 @@ export default function PendingPhotosGrid({
       onPhotosUploaded?.(result);
       await loadPhotos();
     } catch (error) {
-      console.error('Sync failed:', error);
+      logger.error('Sync failed', { error: error, component: 'PendingPhotosGrid' });
       toast.error('Sync failed');
     } finally {
       setSyncing(false);
@@ -156,7 +157,7 @@ export default function PendingPhotosGrid({
         toast.success('Photo deleted');
         await loadPhotos();
       } catch (error) {
-        console.error('Failed to delete photo:', error);
+        logger.error('Failed to delete photo', { error: error, component: 'PendingPhotosGrid' });
         toast.error('Failed to delete photo');
       }
     },
@@ -183,7 +184,7 @@ export default function PendingPhotosGrid({
       setEditingPhoto(null);
       await loadPhotos();
     } catch (error) {
-      console.error('Failed to update photo:', error);
+      logger.error('Failed to update photo', { error: error, component: 'PendingPhotosGrid' });
       toast.error('Failed to update photo');
     }
   }, [editingPhoto, editCaption, editCategory, service, loadPhotos]);
@@ -210,7 +211,7 @@ export default function PendingPhotosGrid({
         }
         await loadPhotos();
       } catch (error) {
-        console.error('Retry failed:', error);
+        logger.error('Retry failed', { error: error, component: 'PendingPhotosGrid' });
         toast.error('Retry failed');
       }
     },

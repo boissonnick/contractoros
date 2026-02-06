@@ -7,6 +7,7 @@ import { FormModal } from '@/components/ui';
 import { toast } from '@/components/ui/Toast';
 import { UserProfile } from '@/types';
 import { formatBudgetCurrency } from '@/lib/budget-utils';
+import { logger } from '@/lib/utils/logger';
 
 interface TeamMemberCostRateModalProps {
   member: UserProfile;
@@ -40,7 +41,7 @@ export function TeamMemberCostRateModal({
       toast.success(`Cost rate updated for ${member.displayName}`);
       onClose();
     } catch (err) {
-      console.error('Error updating cost rate:', err);
+      logger.error('Error updating cost rate', { error: err, component: 'TeamMemberCostRateModal' });
       toast.error('Failed to update cost rate');
     } finally {
       setSaving(false);

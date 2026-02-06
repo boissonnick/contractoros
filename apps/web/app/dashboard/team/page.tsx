@@ -28,10 +28,12 @@ import {
 } from '@heroicons/react/24/outline';
 import { UserProfile, UserRole, CONSTRUCTION_TRADES } from '@/types';
 import { TeamMemberCostRateModal } from '@/components/team/TeamMemberCostRateModal';
-import { CurrencyDollarIcon } from '@heroicons/react/24/outline';
+import { CertificationsDashboard } from '@/components/team/CertificationsDashboard';
+import { CurrencyDollarIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useScheduleEvents } from '@/lib/hooks/useSchedule';
 import { useScheduleAssignments } from '@/lib/hooks/useScheduleAssignments';
+import { logger } from '@/lib/utils/logger';
 
 // Utilization thresholds as per requirements
 const UTILIZATION_THRESHOLDS = {
@@ -68,7 +70,7 @@ export default function TeamPage() {
   const [invites, setInvites] = useState<Invite[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'members' | 'invites' | 'availability'>('members');
+  const [activeTab, setActiveTab] = useState<'members' | 'invites' | 'availability' | 'certifications'>('members');
   const [memberFilter, setMemberFilter] = useState<'employees' | 'all'>('employees');
   const [selectedTrade, setSelectedTrade] = useState<string>('all');
   const [selectedTimeRange, setSelectedTimeRange] = useState<'this_week' | 'next_week' | 'this_month'>('this_week');
@@ -253,6 +255,24 @@ export default function TeamPage() {
     };
   }, [members, getMemberUtilization]);
 
+  // Count expiring/expired certifications across all members
+  const expiringCertCount = useMemo(() => {
+    let count = 0;
+    members.forEach((member) => {
+      if (member.certifications) {
+        member.certifications.forEach((cert) => {
+          if (!cert.expiryDate) {
+            count++;
+          } else {
+            const diffDays = (new Date(cert.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24);
+            if (diffDays <= 90) count++;
+          }
+        });
+      }
+    });
+    return count;
+  }, [members]);
+
   // Get week days for weekly view
   const getWeekDays = (startDate: Date) => {
     const days: Date[] = [];
@@ -376,7 +396,7 @@ export default function TeamPage() {
       }) as Invite[];
       setInvites(invitesData);
     } catch (error) {
-      console.error('Error loading team data:', error);
+      logger.error('Error loading team data', { error: error, page: 'dashboard-team' });
     } finally {
       setLoading(false);
     }
@@ -403,7 +423,7 @@ export default function TeamPage() {
       setInvites(invites.filter(i => i.id !== inviteId));
       toast.success('Invitation cancelled');
     } catch (error) {
-      console.error('Error canceling invite:', error);
+      logger.error('Error canceling invite', { error: error, page: 'dashboard-team' });
       toast.error('Failed to cancel invitation');
     }
   };
@@ -417,7 +437,7 @@ export default function TeamPage() {
       toast.success('Invitation resent successfully!');
       loadTeamData();
     } catch (error) {
-      console.error('Error resending invite:', error);
+      logger.error('Error resending invite', { error: error, page: 'dashboard-team' });
       toast.error('Failed to resend invitation.');
     }
   };
@@ -514,6 +534,17 @@ export default function TeamPage() {
                 Availability
               </button>
               <button
+                onClick={() => setActiveTab('certifications')}
+                className={cn(
+                  'px-4 py-2 rounded-md text-sm font-medium transition-colors',
+                  activeTab === 'certifications'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                )}
+              >
+                Certifications{expiringCertCount > 0 ? ` (${expiringCertCount})` : ''}
+              </button>
+              <button
                 onClick={() => setActiveTab('invites')}
                 className={cn(
                   'px-4 py-2 rounded-md text-sm font-medium transition-colors',
@@ -577,8 +608,29 @@ export default function TeamPage() {
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="bg-white rounded-xl border border-gray-200 p-5 animate-pulse">
+                <div className="flex items-start gap-4">
+                  <div className="h-12 w-12 bg-gray-200 rounded-full" />
+                  <div className="flex-1 min-w-0">
+                    <div className="h-5 w-32 bg-gray-200 rounded mb-2" />
+                    <div className="h-5 w-20 bg-gray-200 rounded-full" />
+                  </div>
+                </div>
+                <div className="mt-4 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="h-4 w-4 bg-gray-200 rounded" />
+                    <div className="h-4 w-40 bg-gray-100 rounded" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="h-4 w-4 bg-gray-200 rounded" />
+                    <div className="h-4 w-28 bg-gray-100 rounded" />
+                  </div>
+                  <div className="h-4 w-24 bg-gray-100 rounded" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : activeTab === 'members' ? (
           filteredMembers.length === 0 ? (
@@ -1036,6 +1088,8 @@ export default function TeamPage() {
               />
             )}
           </div>
+        ) : activeTab === 'certifications' ? (
+          <CertificationsDashboard members={members} />
         ) : (
           filteredInvites.length === 0 ? (
             <EmptyState

@@ -6,6 +6,7 @@ import { doc, getDoc, collection, query, orderBy, getDocs } from 'firebase/fires
 import { db } from '@/lib/firebase/config';
 import { PortalNav, ProjectTimeline, TimelinePhase } from '@/components/client-portal';
 import { SkeletonList } from '@/components/ui/Skeleton';
+import { logger } from '@/lib/utils/logger';
 
 interface ClientPortalData {
   projectId: string;
@@ -91,7 +92,7 @@ export default function TimelinePage() {
 
         setPhases(phasesData);
       } catch (err) {
-        console.error('Error fetching timeline:', err);
+        logger.error('Error fetching timeline', { error: err, page: 'client-timeline' });
         setError('Failed to load timeline');
       } finally {
         setLoading(false);

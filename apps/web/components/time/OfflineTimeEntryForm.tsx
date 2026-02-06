@@ -23,6 +23,7 @@ import { useNetworkStatus } from '@/lib/offline/network-status';
 import { getCachedProjectsWithRefresh, CachedProject } from '@/lib/offline/cache-projects';
 import { useAuth } from '@/lib/auth';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/utils/logger';
 
 const offlineEntrySchema = z.object({
   date: z.string().min(1, 'Date is required'),
@@ -82,7 +83,7 @@ export function OfflineTimeEntryForm({
         const cached = await getCachedProjectsWithRefresh(profile.orgId);
         setProjects(cached);
       } catch (error) {
-        console.error('Failed to load cached projects:', error);
+        logger.error('Failed to load cached projects', { error: error, component: 'OfflineTimeEntryForm' });
       } finally {
         setLoadingProjects(false);
       }
@@ -160,7 +161,7 @@ export function OfflineTimeEntryForm({
       setTimeout(() => setSubmitStatus('idle'), 2000);
       reset(defaultValues);
     } catch (error) {
-      console.error('Error submitting time entry:', error);
+      logger.error('Error submitting time entry', { error: error, component: 'OfflineTimeEntryForm' });
       setSubmitStatus('error');
       setTimeout(() => setSubmitStatus('idle'), 3000);
     } finally {

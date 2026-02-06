@@ -91,6 +91,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { parseTimeEntryVoice, type ParsedTimeEntry, type TimeEntryParserContext } from './time-entry-parser';
 import { parseDailyLogVoice, type ParsedDailyLog, type DailyLogParserContext } from './daily-log-parser';
 import { parseTaskVoice, type ParsedTaskCommand, type TaskParserContext } from './task-parser';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================================================
 // TYPES
@@ -416,7 +417,7 @@ export function useVoiceCommands(
       };
 
       recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-        console.error('Speech recognition error:', event.error);
+        logger.error('Speech recognition error', { error: event.error, component: 'useVoiceCommands' });
         let errorMessage = 'Voice recognition error';
 
         switch (event.error) {
@@ -477,7 +478,7 @@ export function useVoiceCommands(
         navigator.vibrate(50);
       }
     } catch (err) {
-      console.error('Failed to start voice recognition:', err);
+      logger.error('Failed to start voice recognition', { error: err, component: 'voice-useVoiceCommands' });
       setError('Failed to start voice input');
       setState('error');
     }

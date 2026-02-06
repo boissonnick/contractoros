@@ -22,6 +22,7 @@ import {
   Cog6ToothIcon,
   DocumentIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 const templateSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
@@ -264,7 +265,7 @@ export function QuoteTemplateFormModal({
       await onSubmit(templateData);
       onClose();
     } catch (error) {
-      console.error('Error saving template:', error);
+      logger.error('Error saving template', { error: error, component: 'QuoteTemplateFormModal' });
     } finally {
       setIsSubmitting(false);
     }

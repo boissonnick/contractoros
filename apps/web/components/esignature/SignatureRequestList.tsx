@@ -26,6 +26,7 @@ import {
   ClipboardDocumentIcon,
 } from '@heroicons/react/24/outline';
 import { format, formatDistanceToNow } from 'date-fns';
+import { logger } from '@/lib/utils/logger';
 
 interface SignatureRequestListProps {
   projectId?: string;
@@ -61,7 +62,7 @@ export default function SignatureRequestList({
       await sendReminder(request.id, signerIndex, profile.orgId);
       refresh();
     } catch (err) {
-      console.error('Error sending reminder:', err);
+      logger.error('Error sending reminder', { error: err, component: 'SignatureRequestList' });
       toast.error('Failed to send reminder');
     }
     setActionLoading(null);
@@ -77,7 +78,7 @@ export default function SignatureRequestList({
       await cancelSignatureRequest(request.id, profile.uid, profile.displayName);
       refresh();
     } catch (err) {
-      console.error('Error cancelling request:', err);
+      logger.error('Error cancelling request', { error: err, component: 'SignatureRequestList' });
       toast.error('Failed to cancel request');
     }
     setActionLoading(null);

@@ -22,6 +22,7 @@ import { toast } from '@/components/ui/Toast';
 import { cn } from '@/lib/utils';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/lib/auth';
+import { logger } from '@/lib/utils/logger';
 
 type Tab = 'assignments' | 'bids' | 'compare' | 'solicitations';
 
@@ -47,7 +48,7 @@ export default function ProjectSubsPage() {
         const phaseSnap = await getDocs(collection(db, 'projects', projectId, 'phases'));
         setPhases(phaseSnap.docs.map(d => ({ id: d.id, ...d.data() }) as ProjectPhase).sort((a, b) => a.order - b.order));
       } catch (err) {
-        console.error('Error fetching subs data:', err);
+        logger.error('Error fetching subs data', { error: err, page: 'dashboard-projects-id-subs' });
         toast.error('Failed to load subcontractor data');
       } finally {
         setLoading(false);

@@ -29,6 +29,7 @@ import {
   isSyncInProgress,
   getSyncStats,
 } from '@/lib/integrations/quickbooks/sync-logger';
+import { logger } from '@/lib/utils/logger';
 
 export async function POST(request: NextRequest) {
   // Verify authentication
@@ -176,49 +177,49 @@ export async function POST(request: NextRequest) {
         try {
           results.autoLink = await autoLinkClientsByEmail(user.orgId);
         } catch (error) {
-          console.error('Auto-link error:', error);
+          logger.error('Auto-link error', { error, route: 'qbo-sync' });
         }
 
         // Step 2: Push customers to QBO
         try {
           results.customers.push = await syncClientsToQBO(user.orgId);
         } catch (error) {
-          console.error('Customer push error:', error);
+          logger.error('Customer push error', { error, route: 'qbo-sync' });
         }
 
         // Step 3: Push invoices to QBO (after customers so they're linked)
         try {
           results.invoices.push = await syncInvoicesToQBO(user.orgId);
         } catch (error) {
-          console.error('Invoice push error:', error);
+          logger.error('Invoice push error', { error, route: 'qbo-sync' });
         }
 
         // Step 4: Push expenses to QBO
         try {
           results.expenses.push = await syncExpensesToQBO(user.orgId);
         } catch (error) {
-          console.error('Expense push error:', error);
+          logger.error('Expense push error', { error, route: 'qbo-sync' });
         }
 
         // Step 5: Pull customer updates from QBO
         try {
           results.customers.pull = await pullCustomersFromQBO(user.orgId, options);
         } catch (error) {
-          console.error('Customer pull error:', error);
+          logger.error('Customer pull error', { error, route: 'qbo-sync' });
         }
 
         // Step 6: Pull invoice updates from QBO (payment status)
         try {
           results.invoices.pull = await pullInvoiceUpdatesFromQBO(user.orgId, options);
         } catch (error) {
-          console.error('Invoice pull error:', error);
+          logger.error('Invoice pull error', { error, route: 'qbo-sync' });
         }
 
         // Step 7: Pull payments from QBO
         try {
           results.payments.pull = await pullPaymentsFromQBO(user.orgId, options);
         } catch (error) {
-          console.error('Payment pull error:', error);
+          logger.error('Payment pull error', { error, route: 'qbo-sync' });
         }
 
         return NextResponse.json({
@@ -235,7 +236,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error) {
-    console.error('Sync error:', error);
+    logger.error('Sync error', { error, route: 'qbo-sync' });
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Sync failed' },
       { status: 500 }
@@ -317,7 +318,7 @@ export async function GET(request: NextRequest) {
       stats,
     });
   } catch (error) {
-    console.error('Error getting sync status:', error);
+    logger.error('Error getting sync status', { error, route: 'qbo-sync' });
     return NextResponse.json(
       { error: 'Failed to get sync status' },
       { status: 500 }

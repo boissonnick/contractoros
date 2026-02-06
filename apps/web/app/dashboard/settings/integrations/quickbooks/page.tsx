@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, Badge, Button } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
+import { useAccountingConnection } from '@/lib/hooks/useAccountingConnection';
 import { db } from '@/lib/firebase/config';
 import { doc, onSnapshot, updateDoc, Timestamp } from 'firebase/firestore';
 import {
@@ -20,6 +21,9 @@ import {
   BanknotesIcon,
 } from '@heroicons/react/24/outline';
 import { QuickBooksLogo } from '@/components/integrations';
+import QBOAccountMapping from '@/components/settings/QBOAccountMapping';
+import QBOSyncStatus from '@/components/settings/QBOSyncStatus';
+import { logger } from '@/lib/utils/logger';
 
 interface QuickBooksConnection {
   provider: 'quickbooks';
@@ -56,6 +60,7 @@ export default function QuickBooksSettingsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { profile } = useAuth();
+  const { mappingRules, addMappingRule, removeMappingRule } = useAccountingConnection();
   const [connection, setConnection] = useState<QuickBooksConnection | null>(null);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState<string | null>(null);
@@ -108,7 +113,7 @@ export default function QuickBooksSettingsPage() {
         setLoading(false);
       },
       (error) => {
-        console.error('Error fetching QBO connection:', error);
+        logger.error('Error fetching QBO connection', { error: error, page: 'dashboard-settings-integrations-quickbooks' });
         setLoading(false);
       }
     );
@@ -207,7 +212,7 @@ export default function QuickBooksSettingsPage() {
           updatedAt: Timestamp.now(),
         });
       } catch (error) {
-        console.error('Failed to update sync settings:', error);
+        logger.error('Failed to update sync settings', { error: error, page: 'dashboard-settings-integrations-quickbooks' });
         setToast({ type: 'error', message: 'Failed to update settings' });
       }
     },
@@ -645,6 +650,16 @@ export default function QuickBooksSettingsPage() {
               </Button>
             </div>
           </Card>
+
+          {/* Account Mapping */}
+          <QBOAccountMapping
+            mappingRules={mappingRules}
+            onAddRule={addMappingRule}
+            onRemoveRule={removeMappingRule}
+          />
+
+          {/* Sync History & Status */}
+          <QBOSyncStatus />
 
           {/* Help Section */}
           <Card className="p-6 bg-blue-50 border-blue-100">

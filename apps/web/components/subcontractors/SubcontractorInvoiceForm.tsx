@@ -16,6 +16,7 @@ import {
   Project,
 } from '@/types';
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 // ---------- Zod schema ----------
 
@@ -203,7 +204,7 @@ export default function SubcontractorInvoiceForm({
       reset();
       onClose();
     } catch (error) {
-      console.error('Error submitting subcontractor invoice:', error);
+      logger.error('Error submitting subcontractor invoice', { error: error, component: 'SubcontractorInvoiceForm' });
     } finally {
       setIsSubmitting(false);
     }

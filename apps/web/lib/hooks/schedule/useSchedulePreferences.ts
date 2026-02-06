@@ -5,6 +5,7 @@ import { onSnapshot, setDoc, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
 import { ScheduleViewPreferences } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 // =============================================================================
 // HOOK
@@ -46,7 +47,7 @@ export function useSchedulePreferences() {
         setLoading(false);
       },
       (err) => {
-        console.error('Error loading schedule preferences:', err);
+        logger.error('Error loading schedule preferences', { error: err, hook: 'useSchedulePreferences' });
         setLoading(false);
       }
     );

@@ -25,6 +25,7 @@ import {
   XMarkIcon,
   Squares2X2Icon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 export function PhaseTemplatesTab() {
   const { profile } = useAuth();
@@ -56,7 +57,7 @@ export function PhaseTemplatesTab() {
         .sort((a, b) => a.name.localeCompare(b.name));
       setTemplates(data);
     } catch (error) {
-      console.error('Error loading templates:', error);
+      logger.error('Error loading templates', { error: error, component: 'PhaseTemplatesTab' });
       toast.error('Failed to load templates');
     } finally {
       setLoading(false);
@@ -94,7 +95,7 @@ export function PhaseTemplatesTab() {
       setNewPhases([{ name: '', order: 1 }]);
       loadTemplates();
     } catch (error) {
-      console.error('Error creating template:', error);
+      logger.error('Error creating template', { error: error, component: 'PhaseTemplatesTab' });
       toast.error('Failed to create template');
     }
   };
@@ -126,7 +127,7 @@ export function PhaseTemplatesTab() {
       setEditingId(null);
       loadTemplates();
     } catch (error) {
-      console.error('Error updating template:', error);
+      logger.error('Error updating template', { error: error, component: 'PhaseTemplatesTab' });
       toast.error('Failed to update template');
     }
   };
@@ -142,7 +143,7 @@ export function PhaseTemplatesTab() {
       if (editingId === templateId) setEditingId(null);
       loadTemplates();
     } catch (error) {
-      console.error('Error deleting template:', error);
+      logger.error('Error deleting template', { error: error, component: 'PhaseTemplatesTab' });
       toast.error('Failed to delete template');
     }
   };

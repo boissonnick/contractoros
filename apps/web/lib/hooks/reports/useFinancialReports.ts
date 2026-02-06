@@ -14,6 +14,7 @@ import type {
   ProjectPnLData,
 } from './types';
 import { CATEGORY_COLORS } from './types';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * Financial reports hook for revenue, expenses, invoicing, and P&L analysis
@@ -347,7 +348,7 @@ export function useFinancialReports(orgId?: string) {
       });
 
     } catch (err) {
-      console.error('Failed to fetch financial data:', err);
+      logger.error('Failed to fetch financial data', { error: err, hook: 'useFinancialReports' });
       setError(err as Error);
     } finally {
       setLoading(false);

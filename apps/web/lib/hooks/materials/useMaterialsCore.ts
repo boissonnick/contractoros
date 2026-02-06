@@ -24,6 +24,8 @@ import {
   MaterialTransaction,
 } from '@/types';
 import { convertTimestamp } from './utils';
+import { toast } from '@/components/ui/Toast';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================
 // Material Items Hook
@@ -93,7 +95,7 @@ export function useMaterialsCore(options: UseMaterialsOptions = {}) {
         setLoading(false);
       },
       (err) => {
-        console.error('Error fetching materials:', err);
+        logger.error('Error fetching materials', { error: err, hook: 'useMaterialsCore' });
         setError(err as Error);
         setLoading(false);
       }
@@ -117,6 +119,7 @@ export function useMaterialsCore(options: UseMaterialsOptions = {}) {
         createdBy: profile.uid,
       });
 
+      toast.success('Material created');
       return docRef.id;
     },
     [orgId, profile?.uid]
@@ -164,6 +167,7 @@ export function useMaterialsCore(options: UseMaterialsOptions = {}) {
 
       const materialRef = doc(db, 'organizations', orgId, 'materials', id);
       await deleteDoc(materialRef);
+      toast.success('Material deleted');
     },
     [orgId]
   );
@@ -223,6 +227,7 @@ export function useMaterialsCore(options: UseMaterialsOptions = {}) {
       });
 
       await batch.commit();
+      toast.success('Quantity adjusted');
     },
     [orgId, profile?.uid, profile?.displayName]
   );

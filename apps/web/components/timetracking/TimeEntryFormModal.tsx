@@ -9,6 +9,7 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { useProjects } from '@/lib/hooks/useQueryHooks';
 import { TimeEntry, TimeEntryBreak, Project } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 const timeEntrySchema = z.object({
   date: z.string().min(1, 'Date is required'),
@@ -123,7 +124,7 @@ export function TimeEntryFormModal({
       reset();
       onClose();
     } catch (error) {
-      console.error('Error submitting time entry:', error);
+      logger.error('Error submitting time entry', { error: error, component: 'TimeEntryFormModal' });
     } finally {
       setIsSubmitting(false);
     }

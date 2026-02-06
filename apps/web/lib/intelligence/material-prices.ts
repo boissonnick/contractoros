@@ -15,6 +15,7 @@ import {
   FRED_SERIES_CODES,
   MATERIAL_DISPLAY_NAMES,
 } from './types';
+import { logger } from '@/lib/utils/logger';
 
 const FRED_BASE_URL = 'https://api.stlouisfed.org/fred';
 
@@ -24,7 +25,7 @@ const FRED_BASE_URL = 'https://api.stlouisfed.org/fred';
 function getFredApiKey(): string {
   const key = process.env.NEXT_PUBLIC_FRED_API_KEY || process.env.FRED_API_KEY;
   if (!key) {
-    console.warn('FRED_API_KEY not configured. Material prices will not be available.');
+    logger.warn('FRED_API_KEY not configured. Material prices will not be available.', { component: 'intelligence-material-prices' });
     return '';
   }
   return key;
@@ -143,14 +144,14 @@ async function fetchFredSeries(
     );
 
     if (!response.ok) {
-      console.error(`FRED API error: ${response.status} ${response.statusText}`);
+      logger.error('FRED API error: ${response.status} ${response.statusText}', { component: 'intelligence-material-prices' });
       return [];
     }
 
     const data: FredSeriesResponse = await response.json();
     return data.observations.filter((obs) => obs.value !== '.');
   } catch (error) {
-    console.error('Error fetching FRED data:', error);
+    logger.error('Error fetching FRED data', { error: error, component: 'intelligence-material-prices' });
     return [];
   }
 }
@@ -187,7 +188,7 @@ export async function getMaterialPrice(
 ): Promise<MaterialPriceIndex | null> {
   const seriesId = FRED_SERIES_CODES[material];
   if (!seriesId) {
-    console.warn(`No FRED series ID for material: ${material}`);
+    logger.warn('No FRED series ID for material: ${material}', { component: 'intelligence-material-prices' });
     return null;
   }
 

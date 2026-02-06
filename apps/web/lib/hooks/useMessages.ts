@@ -12,10 +12,13 @@ import {
   doc,
   Timestamp,
   limit as firestoreLimit,
+  writeBatch,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { Message, MessageChannel, MessageChannelType } from '@/types';
 import { useAuth } from '@/lib/auth';
+import { toast } from '@/components/ui/Toast';
+import { logger } from '@/lib/utils/logger';
 
 function channelFromFirestore(id: string, data: Record<string, unknown>): MessageChannel {
   return {
@@ -46,6 +49,14 @@ function messageFromFirestore(id: string, data: Record<string, unknown>): Messag
     attachmentURL: data.attachmentURL as string | undefined,
     attachmentName: data.attachmentName as string | undefined,
     isEdited: (data.isEdited as boolean) || false,
+    readBy: data.readBy
+      ? Object.fromEntries(
+          Object.entries(data.readBy as Record<string, Timestamp>).map(([uid, ts]) => [
+            uid,
+            ts && typeof ts.toDate === 'function' ? ts.toDate() : new Date(),
+          ])
+        )
+      : undefined,
     createdAt: data.createdAt ? (data.createdAt as Timestamp).toDate() : new Date(),
     updatedAt: data.updatedAt ? (data.updatedAt as Timestamp).toDate() : undefined,
   };
@@ -79,6 +90,10 @@ export function useChannels() {
         });
       setChannels(items);
       setLoading(false);
+    }, (err) => {
+      logger.error('Error loading channels', { error: err, hook: 'useMessages' });
+      toast.error('Failed to load message channels');
+      setLoading(false);
     });
 
     return () => unsubscribe();
@@ -107,7 +122,20 @@ export function useChannels() {
     [profile, user]
   );
 
-  return { channels, loading, createChannel };
+  const getUnreadCount = useCallback(
+    (targetChannelId: string, allMessages: Message[]) => {
+      if (!user) return 0;
+      return allMessages.filter(
+        (m) =>
+          m.channelId === targetChannelId &&
+          m.senderId !== user.uid &&
+          (!m.readBy || !m.readBy[user.uid])
+      ).length;
+    },
+    [user]
+  );
+
+  return { channels, loading, createChannel, getUnreadCount };
 }
 
 export function useMessages(channelId: string | null) {
@@ -135,6 +163,10 @@ export function useMessages(channelId: string | null) {
         messageFromFirestore(d.id, d.data() as Record<string, unknown>)
       );
       setMessages(items);
+      setLoading(false);
+    }, (err) => {
+      logger.error('Error loading messages', { error: err, hook: 'useMessages' });
+      toast.error('Failed to load messages');
       setLoading(false);
     });
 
@@ -166,5 +198,52 @@ export function useMessages(channelId: string | null) {
     [channelId, user, profile]
   );
 
-  return { messages, loading, sendMessage };
+  const markAsRead = useCallback(async () => {
+    if (!channelId || !user || !profile) return;
+
+    const unread = messages.filter(
+      (m) => m.senderId !== user.uid && (!m.readBy || !m.readBy[user.uid])
+    );
+
+    if (unread.length === 0) return;
+
+    try {
+      const batch = writeBatch(db);
+      for (const msg of unread) {
+        batch.update(doc(db, 'messages', msg.id), {
+          [`readBy.${user.uid}`]: Timestamp.now(),
+        });
+      }
+      await batch.commit();
+    } catch (err) {
+      logger.error('Failed to mark messages as read', { error: err, hook: 'useMessages' });
+    }
+  }, [channelId, user, profile, messages]);
+
+  const markSingleAsRead = useCallback(
+    async (messageId: string) => {
+      if (!user || !profile) return;
+
+      try {
+        await updateDoc(doc(db, 'messages', messageId), {
+          [`readBy.${user.uid}`]: Timestamp.now(),
+        });
+      } catch (err) {
+        logger.error('Failed to mark single message as read', { error: err, hook: 'useMessages' });
+      }
+    },
+    [user, profile]
+  );
+
+  const getUnreadCount = useCallback(
+    (): number => {
+      if (!user) return 0;
+      return messages.filter(
+        (m) => m.senderId !== user.uid && (!m.readBy || !m.readBy[user.uid])
+      ).length;
+    },
+    [user, messages]
+  );
+
+  return { messages, loading, sendMessage, markAsRead, markSingleAsRead, getUnreadCount };
 }

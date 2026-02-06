@@ -16,7 +16,7 @@
  *
  * // Subscribe to status changes
  * const unsubscribe = SyncManager.onStatusChange((state) => {
- *   console.log('Pending:', state.pendingCount);
+ *   logger.info('Pending', { data: state.pendingCount, component: 'offline-sync-manager' });
  * });
  *
  * // Force sync
@@ -58,6 +58,7 @@ import {
   deleteQueuedOperation,
 } from './storage';
 import { checkNetworkStatus, subscribeToNetworkStatus } from './network-status';
+import { logger } from '@/lib/utils/logger';
 
 // Sync configuration
 const MAX_RETRIES = 5;
@@ -135,7 +136,7 @@ class SyncManagerClass {
       if (wasOffline) {
         this.state.wasOffline = true;
         // Trigger sync when coming back online
-        this.processQueue().catch(console.error);
+        this.processQueue().catch((err) => logger.error('Operation failed', { error: err, component: 'offline-sync-manager' }));
       }
 
       this.notifyStatusListeners();
@@ -145,7 +146,7 @@ class SyncManagerClass {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
       this.swMessageHandler = (event: MessageEvent) => {
         if (event.data?.type === 'SYNC_REQUESTED') {
-          this.processQueue().catch(console.error);
+          this.processQueue().catch((err) => logger.error('Operation failed', { error: err, component: 'offline-sync-manager' }));
         }
       };
       navigator.serviceWorker.addEventListener('message', this.swMessageHandler);
@@ -157,7 +158,7 @@ class SyncManagerClass {
     // Start periodic sync check (every 30 seconds when online)
     this.syncInterval = setInterval(() => {
       if (this.state.isOnline && this.state.pendingCount > 0) {
-        this.processQueue().catch(console.error);
+        this.processQueue().catch((err) => logger.error('Operation failed', { error: err, component: 'offline-sync-manager' }));
       }
     }, 30000);
   }
@@ -221,7 +222,7 @@ class SyncManagerClass {
     if (this.state.isOnline) {
       // Use setTimeout to not block the calling code
       setTimeout(() => {
-        this.processQueue().catch(console.error);
+        this.processQueue().catch((err) => logger.error('Operation failed', { error: err, component: 'offline-sync-manager' }));
       }, 100);
     }
 
@@ -420,7 +421,7 @@ class SyncManagerClass {
 
       return 'continue';
     } catch (error) {
-      console.error('Conflict check failed:', error);
+      logger.error('Conflict check failed', { error: error, component: 'offline-sync-manager' });
       // If we can't check, proceed with the operation
       return 'continue';
     }
@@ -471,7 +472,7 @@ class SyncManagerClass {
 
       // Try to sync immediately if online
       if (this.state.isOnline) {
-        this.processQueue().catch(console.error);
+        this.processQueue().catch((err) => logger.error('Operation failed', { error: err, component: 'offline-sync-manager' }));
       }
     }
   }
@@ -559,7 +560,7 @@ class SyncManagerClass {
       this.state.pendingCount = operations.filter((op) => op.status === 'pending').length;
       this.state.failedCount = operations.filter((op) => op.status === 'failed').length;
     } catch (error) {
-      console.error('Failed to refresh queue stats:', error);
+      logger.error('Failed to refresh queue stats', { error: error, component: 'offline-sync-manager' });
     }
   }
 
@@ -569,7 +570,7 @@ class SyncManagerClass {
       try {
         listener(state);
       } catch (error) {
-        console.error('Status listener error:', error);
+        logger.error('Status listener error', { error: error, component: 'offline-sync-manager' });
       }
     });
   }
@@ -579,7 +580,7 @@ class SyncManagerClass {
       try {
         listener(event);
       } catch (error) {
-        console.error('Event listener error:', error);
+        logger.error('Event listener error', { error: error, component: 'offline-sync-manager' });
       }
     });
   }
@@ -593,7 +594,7 @@ class SyncManagerClass {
         const registration = await navigator.serviceWorker.ready;
         await (registration as any).sync.register('sync-pending-data');
       } catch (error) {
-        console.warn('Background sync registration failed:', error);
+        logger.warn('Background sync registration failed', { error, component: 'offline-sync-manager' });
       }
     }
   }

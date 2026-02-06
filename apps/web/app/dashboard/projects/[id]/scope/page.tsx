@@ -8,6 +8,7 @@ import { ProjectPhase, QuoteSection, Scope, ScopeItem } from '@/types';
 import { useScopes } from '@/lib/hooks/useScopes';
 import { toast } from '@/components/ui/Toast';
 import ScopeBuilder from '@/components/projects/scope/ScopeBuilder';
+import { logger } from '@/lib/utils/logger';
 
 export default function ProjectScopePage() {
   const params = useParams();
@@ -35,7 +36,7 @@ export default function ProjectScopePage() {
           quoteSnap.docs.map((d) => ({ id: d.id, ...d.data() }) as QuoteSection)
         );
       } catch (err) {
-        console.error('Error fetching scope data:', err);
+        logger.error('Error fetching scope data', { error: err, page: 'dashboard-projects-id-scope' });
         toast.error('Failed to load scope data');
       } finally {
         setDataLoading(false);

@@ -10,6 +10,7 @@ import {
   ExclamationTriangleIcon,
   CheckIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 interface CreatePayrollModalProps {
   isOpen: boolean;
@@ -81,7 +82,7 @@ export function CreatePayrollModal({
       await onConfirm(payPeriod, Array.from(selectedEmployees));
       onClose();
     } catch (error) {
-      console.error('Error creating payroll run:', error);
+      logger.error('Error creating payroll run', { error: error, component: 'CreatePayrollModal' });
     } finally {
       setIsSubmitting(false);
     }

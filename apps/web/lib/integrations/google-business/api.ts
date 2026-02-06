@@ -5,6 +5,7 @@
 
 import { getValidAccessToken } from './oauth';
 import { GOOGLE_BUSINESS_API_BASE, GOOGLE_REVIEWS_API_BASE } from './types';
+import { logger } from '@/lib/utils/logger';
 
 interface GoogleBusinessAccount {
   name: string;
@@ -69,7 +70,7 @@ export async function fetchAccounts(
 
   if (!response.ok) {
     const error = await response.text();
-    console.error('Failed to fetch Google Business accounts:', error);
+    logger.error('Failed to fetch Google Business accounts', { error, module: 'google-business-api' });
     throw new Error(`Failed to fetch accounts: ${response.status}`);
   }
 
@@ -95,7 +96,7 @@ export async function fetchLocations(
 
   if (!response.ok) {
     const error = await response.text();
-    console.error('Failed to fetch Google Business locations:', error);
+    logger.error('Failed to fetch Google Business locations', { error, module: 'google-business-api' });
     throw new Error(`Failed to fetch locations: ${response.status}`);
   }
 
@@ -126,7 +127,7 @@ export async function fetchReviews(
 
   if (!response.ok) {
     const error = await response.text();
-    console.error('Failed to fetch Google reviews:', error);
+    logger.error('Failed to fetch Google reviews', { error, module: 'google-business-api' });
     throw new Error(`Failed to fetch reviews: ${response.status}`);
   }
 
@@ -161,7 +162,7 @@ export async function replyToReview(
 
   if (!response.ok) {
     const error = await response.text();
-    console.error('Failed to reply to review:', error);
+    logger.error('Failed to reply to review', { error, module: 'google-business-api' });
     throw new Error(`Failed to reply to review: ${response.status}`);
   }
 }
@@ -185,7 +186,7 @@ export async function deleteReviewReply(
 
   if (!response.ok) {
     const error = await response.text();
-    console.error('Failed to delete review reply:', error);
+    logger.error('Failed to delete review reply', { error, module: 'google-business-api' });
     throw new Error(`Failed to delete review reply: ${response.status}`);
   }
 }

@@ -29,6 +29,7 @@ import { SmsMessage, SmsConversation, SmsTemplate, SmsTemplateType } from '@/typ
 import { useAuth } from '@/lib/auth';
 import { toast } from '@/components/ui/Toast';
 import { formatToE164 } from '@/lib/sms/phoneUtils';
+import { logger } from '@/lib/utils/logger';
 
 // Convert Firestore data to SmsMessage
 function messageFromFirestore(id: string, data: Record<string, unknown>): SmsMessage {
@@ -160,7 +161,7 @@ export function useSms(options: UseSmsOptions = {}) {
         setLoading(false);
       },
       (err) => {
-        console.error('useSms error:', err);
+        logger.error('useSms error', { error: err, hook: 'useSms' });
         setLoading(false);
       }
     );
@@ -209,7 +210,7 @@ export function useSms(options: UseSmsOptions = {}) {
         toast.success('Message sent');
         return data;
       } catch (err) {
-        console.error('Send SMS error:', err);
+        logger.error('Send SMS error', { error: err, hook: 'useSms' });
         toast.error(err instanceof Error ? err.message : 'Failed to send message');
         return null;
       }
@@ -273,7 +274,7 @@ export function useSmsConversations() {
         setLoading(false);
       },
       (err) => {
-        console.error('useSmsConversations error:', err);
+        logger.error('useSmsConversations error', { error: err, hook: 'useSms' });
         setLoading(false);
       }
     );
@@ -326,7 +327,7 @@ export function useSmsTemplates() {
         setLoading(false);
       },
       (err) => {
-        console.error('useSmsTemplates error:', err);
+        logger.error('useSmsTemplates error', { error: err, hook: 'useSms' });
         setLoading(false);
       }
     );
@@ -520,7 +521,7 @@ export function useSMS(orgId: string | undefined): UseSMSResult {
         setLoading(false);
       },
       (err) => {
-        console.error('useSMS conversations error:', err);
+        logger.error('useSMS conversations error', { error: err, hook: 'useSms' });
         setError(err as Error);
         setLoading(false);
       }
@@ -564,7 +565,7 @@ export function useSMS(orgId: string | undefined): UseSMSResult {
 
         toast.success('Message sent');
       } catch (err) {
-        console.error('Send SMS error:', err);
+        logger.error('Send SMS error', { error: err, hook: 'useSms' });
         toast.error(err instanceof Error ? err.message : 'Failed to send message');
         throw err;
       }
@@ -610,10 +611,10 @@ export function useSMS(orgId: string | undefined): UseSMSResult {
         });
 
         if (!response.ok) {
-          console.error('Failed to mark conversation as read');
+          logger.error('Failed to mark conversation as read', { hook: 'useSms' });
         }
       } catch (err) {
-        console.error('Mark as read error:', err);
+        logger.error('Mark as read error', { error: err, hook: 'useSms' });
       }
     },
     [orgId]
@@ -721,7 +722,7 @@ export function useSMSMessages(
         combineAndSort();
       },
       (err) => {
-        console.error('useSMSMessages outbound error:', err);
+        logger.error('useSMSMessages outbound error', { error: err, hook: 'useSms' });
         setError(err as Error);
         setLoading(false);
       }
@@ -739,7 +740,7 @@ export function useSMSMessages(
         combineAndSort();
       },
       (err) => {
-        console.error('useSMSMessages inbound error:', err);
+        logger.error('useSMSMessages inbound error', { error: err, hook: 'useSms' });
         setError(err as Error);
         setLoading(false);
       }

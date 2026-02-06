@@ -13,6 +13,7 @@ import {
   fetchAccounts,
   fetchLocations,
 } from '@/lib/integrations/google-business/api';
+import { logger } from '@/lib/utils/logger';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -22,7 +23,7 @@ export async function GET(request: NextRequest) {
 
   // Handle OAuth error
   if (error) {
-    console.error('Google OAuth error:', error);
+    logger.error('Google OAuth error', { error, route: 'google-business-callback' });
     return NextResponse.redirect(
       new URL(
         '/dashboard/settings/integrations/google-business?error=oauth_denied',
@@ -88,8 +89,8 @@ export async function GET(request: NextRequest) {
       userId
     );
 
-    console.log(
-      `Google Business connected for org ${orgId}: ${firstLocation.title || firstLocation.locationName}`
+    logger.info(
+      `Google Business connected for org ${orgId}: ${firstLocation.title || firstLocation.locationName}`, { route: 'google-business-callback' }
     );
 
     // Redirect to success page
@@ -100,7 +101,7 @@ export async function GET(request: NextRequest) {
       )
     );
   } catch (err) {
-    console.error('Google OAuth callback error:', err);
+    logger.error('Google OAuth callback error', { error: err, route: 'google-business-callback' });
     return NextResponse.redirect(
       new URL(
         '/dashboard/settings/integrations/google-business?error=connection_failed',

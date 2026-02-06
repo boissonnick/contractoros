@@ -7,6 +7,7 @@ import { z } from 'zod';
 import BaseModal from '@/components/ui/BaseModal';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import { logger } from '@/lib/utils/logger';
 type APWaiverType = 'conditional' | 'unconditional';
 
 const lienWaiverSchema = z.object({
@@ -88,7 +89,7 @@ export default function LienWaiverModal({
       reset();
       onClose();
     } catch (error) {
-      console.error('Error requesting lien waiver:', error);
+      logger.error('Error requesting lien waiver', { error: error, component: 'LienWaiverModal' });
     } finally {
       setIsSubmitting(false);
     }

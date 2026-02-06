@@ -12,6 +12,7 @@ import {
   DocumentIcon,
   PhotoIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -85,7 +86,7 @@ export default function TaskAttachments({
 
       onAttachmentsChange([...attachments, ...newAttachments]);
     } catch (err) {
-      console.error('Error uploading file:', err);
+      logger.error('Error uploading file', { error: err, component: 'TaskAttachments' });
     } finally {
       setUploading(false);
       setUploadProgress(0);

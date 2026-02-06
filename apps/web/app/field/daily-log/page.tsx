@@ -21,6 +21,7 @@ import { cacheTeamForOffline } from '@/lib/offline/cache-team';
 import { OfflineDailyLogForm } from '@/components/field/OfflineDailyLogForm';
 import { useProjects } from '@/lib/hooks/useQueryHooks';
 import { Project } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 export default function FieldDailyLogPage() {
   const { user, profile, loading: authLoading } = useAuth();
@@ -63,7 +64,7 @@ export default function FieldDailyLogPage() {
   // Cache team when online
   useEffect(() => {
     if (isOnline && orgId) {
-      cacheTeamForOffline(orgId).catch(console.error);
+      cacheTeamForOffline(orgId).catch((err) => logger.error('Failed to cache team', { error: err, page: 'field-daily-log' }));
     }
   }, [isOnline, orgId]);
 

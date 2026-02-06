@@ -8,6 +8,7 @@ import { LegacyPayrollEntry, PayrollConfig } from '@/types';
 import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/utils/logger';
 
 interface PayrollPreviewReportProps {
   startDate: Date;
@@ -76,7 +77,7 @@ export default function PayrollPreviewReport({ startDate, endDate }: PayrollPrev
       setTotals({ totalRegular: result.totalRegular, totalOvertime: result.totalOvertime, totalPay: result.totalPay });
       setLoading(false);
     }).catch((err) => {
-      console.error('Error loading payroll data:', err);
+      logger.error('Error loading payroll data', { error: err, component: 'PayrollPreviewReport' });
       setError(err.message?.includes('permission-denied')
         ? 'Permission denied. Check Firestore security rules.'
         : 'Failed to load payroll data.');

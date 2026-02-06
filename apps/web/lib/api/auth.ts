@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth, adminDb } from '@/lib/firebase/admin';
+import { logger } from '@/lib/utils/logger';
 
 export interface AuthenticatedUser {
   uid: string;
@@ -87,7 +88,7 @@ export async function verifyAuth(request: NextRequest): Promise<AuthResult> {
       error: null,
     };
   } catch (error) {
-    console.error('Auth verification error:', error);
+    logger.error('Auth verification error', { error, module: 'api-auth' });
 
     // Check for specific Firebase Auth errors
     if (error instanceof Error) {

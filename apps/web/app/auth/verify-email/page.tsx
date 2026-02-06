@@ -7,6 +7,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { UserRole } from '@/types';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 function getRedirectPath(role: UserRole): string {
   switch (role) {
@@ -62,7 +63,7 @@ export default function VerifyEmailPage() {
           setTimeout(() => router.push('/onboarding'), 1500);
         }
       } catch (error: any) {
-        console.error('Magic link verification failed:', error);
+        logger.error('Magic link verification failed', { error, page: 'verify-email' });
         setStatus('error');
         if (error.code === 'auth/invalid-action-code') {
           setErrorMessage('This link has expired or already been used. Please request a new one.');

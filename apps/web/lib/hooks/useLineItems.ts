@@ -26,6 +26,7 @@ import {
   LineItemPriceHistory,
 } from '@/types';
 import { toast } from '@/components/ui/Toast';
+import { logger } from '@/lib/utils/logger';
 
 // =============================================================================
 // LINE ITEMS HOOK
@@ -132,7 +133,7 @@ export function useLineItems(options: UseLineItemsOptions = {}): UseLineItemsRet
         setError(null);
       },
       (err) => {
-        console.error('Error loading line items:', err);
+        logger.error('Error loading line items', { error: err, hook: 'useLineItems' });
         setError(err as Error);
         setLoading(false);
       }
@@ -555,7 +556,7 @@ export function useEstimateTemplates(): UseEstimateTemplatesReturn {
         setLoading(false);
       },
       (err) => {
-        console.error('Error loading estimate templates:', err);
+        logger.error('Error loading estimate templates', { error: err, hook: 'useLineItems' });
         setError(err as Error);
         setLoading(false);
       }
@@ -708,7 +709,7 @@ export function useLineItemPriceHistory(lineItemId: string) {
         setLoading(false);
       },
       (err) => {
-        console.error('Error loading price history:', err);
+        logger.error('Error loading price history', { error: err, hook: 'useLineItems' });
         setLoading(false);
       }
     );

@@ -15,14 +15,18 @@ import {
   ExclamationCircleIcon,
   CreditCardIcon,
   FunnelIcon,
+  ArrowDownTrayIcon,
+  ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
-import { format, isBefore } from 'date-fns';
+import { format, isBefore, differenceInDays } from 'date-fns';
+import { logger } from '@/lib/utils/logger';
 
 interface ClientInvoice {
   id: string;
   number: string;
   projectId: string;
   projectName: string;
+  clientId: string;
   status: 'draft' | 'sent' | 'viewed' | 'paid' | 'overdue' | 'cancelled';
   issueDate: Date;
   dueDate: Date;
@@ -32,6 +36,7 @@ interface ClientInvoice {
   amountPaid: number;
   balance: number;
   paymentToken?: string;
+  pdfUrl?: string;
   items: {
     description: string;
     quantity: number;
@@ -87,6 +92,7 @@ export default function ClientInvoicesPage() {
             number: data.number || data.invoiceNumber || d.id.slice(0, 8).toUpperCase(),
             projectId: data.projectId || '',
             projectName: data.projectName || 'Project',
+            clientId: data.clientId || user?.uid || '',
             status,
             issueDate,
             dueDate,
@@ -96,13 +102,14 @@ export default function ClientInvoicesPage() {
             amountPaid,
             balance: total - amountPaid,
             paymentToken: data.paymentToken,
+            pdfUrl: data.pdfUrl || data.pdfURL || undefined,
             items: data.items || [],
           } as ClientInvoice;
         });
 
         setInvoices(invoicesData);
       } catch (err) {
-        console.error('Error loading invoices:', err);
+        logger.error('Error loading invoices', { error: err, page: 'client-invoices' });
       } finally {
         setLoading(false);
       }
@@ -123,6 +130,14 @@ export default function ClientInvoicesPage() {
     return invoices
       .filter((i) => ['sent', 'viewed', 'overdue'].includes(i.status))
       .reduce((sum, i) => sum + i.balance, 0);
+  }, [invoices]);
+
+  const totalPaid = useMemo(() => {
+    return invoices.reduce((sum, i) => sum + i.amountPaid, 0);
+  }, [invoices]);
+
+  const overdueCount = useMemo(() => {
+    return invoices.filter((i) => i.status === 'overdue').length;
   }, [invoices]);
 
   const formatCurrency = (amount: number) => {
@@ -163,7 +178,37 @@ export default function ClientInvoicesPage() {
               <CurrencyDollarIcon className="h-8 w-8" />
             </div>
           </div>
+          {/* Payment progress across all invoices */}
+          {totalPaid > 0 && (
+            <div className="mt-4 pt-4 border-t border-white/20">
+              <div className="flex items-center justify-between text-sm mb-1.5">
+                <span className="text-white/70">Total paid across all invoices</span>
+                <span className="font-medium">{formatCurrency(totalPaid)}</span>
+              </div>
+              <div className="h-2 bg-white/20 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-white rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min((totalPaid / (totalPaid + totalPending)) * 100, 100)}%` }}
+                />
+              </div>
+            </div>
+          )}
         </Card>
+      )}
+
+      {/* Overdue Warning */}
+      {overdueCount > 0 && (
+        <div className="flex items-start gap-3 p-4 bg-red-50 rounded-xl border border-red-200">
+          <ExclamationTriangleIcon className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium text-red-800">
+              {overdueCount} invoice{overdueCount !== 1 ? 's are' : ' is'} past due
+            </p>
+            <p className="text-xs text-red-600 mt-0.5">
+              Please make a payment as soon as possible to avoid any late fees.
+            </p>
+          </div>
+        </div>
       )}
 
       {/* Filters */}
@@ -234,8 +279,22 @@ export default function ClientInvoicesPage() {
                   <div className="text-right flex-shrink-0">
                     <p className="text-lg font-bold text-gray-900">{formatCurrency(invoice.total)}</p>
                     {invoice.amountPaid > 0 && invoice.status !== 'paid' && (
-                      <p className="text-sm text-gray-500">
-                        {formatCurrency(invoice.balance)} remaining
+                      <>
+                        <p className="text-sm text-gray-500">
+                          {formatCurrency(invoice.balance)} remaining
+                        </p>
+                        {/* Mini payment progress bar */}
+                        <div className="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden mt-1 ml-auto">
+                          <div
+                            className="h-full bg-green-500 rounded-full"
+                            style={{ width: `${(invoice.amountPaid / invoice.total) * 100}%` }}
+                          />
+                        </div>
+                      </>
+                    )}
+                    {invoice.status === 'overdue' && (
+                      <p className="text-xs text-red-600 font-medium mt-0.5">
+                        {differenceInDays(new Date(), invoice.dueDate)} days past due
                       </p>
                     )}
                     {canPay && invoice.paymentToken && (
@@ -327,6 +386,19 @@ export default function ClientInvoicesPage() {
                         <span>Paid</span>
                         <span>-{formatCurrency(selectedInvoice.amountPaid)}</span>
                       </div>
+                      {/* Payment progress bar */}
+                      <div className="py-2">
+                        <div className="flex justify-between text-xs text-gray-500 mb-1">
+                          <span>{Math.round((selectedInvoice.amountPaid / selectedInvoice.total) * 100)}% paid</span>
+                          <span>{formatCurrency(selectedInvoice.balance)} remaining</span>
+                        </div>
+                        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-green-500 rounded-full transition-all duration-500"
+                            style={{ width: `${(selectedInvoice.amountPaid / selectedInvoice.total) * 100}%` }}
+                          />
+                        </div>
+                      </div>
                       <div className="flex justify-between font-bold text-blue-600">
                         <span>Balance Due</span>
                         <span>{formatCurrency(selectedInvoice.balance)}</span>
@@ -334,6 +406,16 @@ export default function ClientInvoicesPage() {
                     </>
                   )}
                 </div>
+
+                {/* Overdue warning in modal */}
+                {selectedInvoice.status === 'overdue' && (
+                  <div className="flex items-center gap-2 p-3 bg-red-50 rounded-lg border border-red-200">
+                    <ExclamationTriangleIcon className="h-4 w-4 text-red-600 flex-shrink-0" />
+                    <p className="text-sm text-red-800">
+                      This invoice is {differenceInDays(new Date(), selectedInvoice.dueDate)} days past due
+                    </p>
+                  </div>
+                )}
 
                 {/* Actions */}
                 <div className="flex gap-3 pt-4">
@@ -344,6 +426,17 @@ export default function ClientInvoicesPage() {
                   >
                     Close
                   </Button>
+                  {selectedInvoice.pdfUrl && (
+                    <a
+                      href={selectedInvoice.pdfUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      <ArrowDownTrayIcon className="h-4 w-4" />
+                      PDF
+                    </a>
+                  )}
                   {['sent', 'viewed', 'overdue'].includes(selectedInvoice.status) &&
                     selectedInvoice.balance > 0 &&
                     selectedInvoice.paymentToken && (

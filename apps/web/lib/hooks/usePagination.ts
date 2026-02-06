@@ -62,6 +62,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { convertTimestamps } from '@/lib/firebase/timestamp-converter';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * Options for configuring the pagination hook
@@ -344,7 +345,7 @@ export function usePagination<T extends { id: string }>(
         setHasMore(hasMoreItems);
         setInitialized(true);
       } catch (err) {
-        console.error(`Error fetching page ${page} from ${path}:`, err);
+        logger.error(`Error fetching page ${page} from ${path}`, { error: err, hook: 'usePagination' });
         setError(err instanceof Error ? err : new Error('Failed to fetch data'));
       } finally {
         setLoading(false);

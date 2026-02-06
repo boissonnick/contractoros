@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/api/auth';
 import { getConnection, isQuickBooksConfigured } from '@/lib/integrations/quickbooks/oauth';
+import { logger } from '@/lib/utils/logger';
 
 export async function GET(request: NextRequest) {
   // Verify authentication
@@ -61,7 +62,7 @@ export async function GET(request: NextRequest) {
       tokenExpiresAt: connection.tokenExpiresAt?.toISOString(),
     });
   } catch (error) {
-    console.error('Error checking QBO status:', error);
+    logger.error('Error checking QBO status', { error, route: 'qbo-status' });
     return NextResponse.json(
       { error: 'Failed to check QuickBooks status' },
       { status: 500 }

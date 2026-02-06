@@ -25,6 +25,7 @@ import { initializeAdminApp } from '@/lib/assistant/firebase-admin-init';
 import { loadServerContext, type ServerContext } from '@/lib/assistant/server-context-loader';
 import { getAuth } from 'firebase-admin/auth';
 import { logRateLimitExceeded } from '@/lib/security/audit-logger';
+import { logger } from '@/lib/utils/logger';
 
 interface RequestBody {
   message: string;
@@ -65,7 +66,7 @@ async function verifyAuthToken(idToken: string): Promise<{
       email: decodedToken.email || null,
     };
   } catch (error) {
-    console.error('[Assistant API] Auth verification failed:', error);
+    logger.error('[Assistant API] Auth verification failed', { error, route: 'api-assistant' });
     throw new Error('Invalid authentication token');
   }
 }
@@ -85,7 +86,7 @@ async function getOrgIdFromUser(userId: string): Promise<string | null> {
     }
     return null;
   } catch (error) {
-    console.error('[Assistant API] Failed to get orgId from user:', error);
+    logger.error('[Assistant API] Failed to get orgId from user', { error, route: 'api-assistant' });
     return null;
   }
 }
@@ -124,7 +125,7 @@ export async function POST(request: NextRequest) {
           verifiedOrgId = await getOrgIdFromUser(verifiedUserId);
         }
       } catch {
-        console.warn('[Assistant API] Auth verification failed, proceeding without server context');
+        logger.warn('[Assistant API] Auth verification failed, proceeding without server context', { route: 'api-assistant' });
       }
     }
 
@@ -171,7 +172,7 @@ export async function POST(request: NextRequest) {
             current: rateCheck.remaining.requests + 1,
             resetAt: rateCheck.resetAt,
             endpoint: '/api/assistant',
-          }).catch((err) => console.error('[Assistant API] Failed to log rate limit:', err));
+          }).catch((err) => logger.error('[Assistant API] Failed to log rate limit', { error: err, route: 'api-assistant' }));
 
           return NextResponse.json(
             {
@@ -186,7 +187,7 @@ export async function POST(request: NextRequest) {
         }
       } catch (rateLimitError) {
         // If rate limiting fails, log but continue (don't block the user)
-        console.warn('[Assistant] Rate limit check failed:', rateLimitError);
+        logger.warn('[Assistant] Rate limit check failed', { error: rateLimitError, route: 'api-assistant' });
       }
     }
 
@@ -214,19 +215,19 @@ export async function POST(request: NextRequest) {
 
     if (verifiedOrgId && verifiedUserId) {
       try {
-        console.log(`[Assistant API] Loading server context for org: ${verifiedOrgId}`);
+        logger.info(`[Assistant API] Loading server context for org: ${verifiedOrgId}`, { route: 'api-assistant' });
         serverContext = await loadServerContext(verifiedOrgId, verifiedUserId);
         // Build rich system prompt with server data
         systemPrompt = buildSystemPromptWithServerContext(serverContext, context);
-        console.log('[Assistant API] Server context loaded successfully');
+        logger.info('[Assistant API] Server context loaded successfully', { route: 'api-assistant' });
       } catch (contextError) {
-        console.error('[Assistant API] Failed to load server context:', contextError);
+        logger.error('[Assistant API] Failed to load server context', { error: contextError, route: 'api-assistant' });
         // Fall back to client-only context
         systemPrompt = buildSystemPrompt(context);
       }
     } else {
       // No verified auth - use client-provided context only
-      console.log('[Assistant API] No verified auth, using client context only');
+      logger.info('[Assistant API] No verified auth, using client context only', { route: 'api-assistant' });
       systemPrompt = buildSystemPrompt(context);
     }
 
@@ -260,7 +261,7 @@ export async function POST(request: NextRequest) {
     const outputResult = processOutput(response.content, systemPrompt);
 
     if (outputResult.warnings.length > 0) {
-      console.warn('[Assistant] Output warnings:', outputResult.warnings);
+      logger.warn('[Assistant] Output warnings', { warnings: outputResult.warnings, route: 'api-assistant' });
     }
 
     // =====================================
@@ -276,7 +277,7 @@ export async function POST(request: NextRequest) {
           modelKey,
         });
       } catch (usageError) {
-        console.warn('[Assistant] Usage recording failed:', usageError);
+        logger.warn('[Assistant] Usage recording failed', { error: usageError, route: 'api-assistant' });
       }
     }
 
@@ -305,7 +306,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('[Assistant API Error]:', error);
+    logger.error('[Assistant API Error]', { error, route: 'api-assistant' });
 
     // Return a generic error message
     return NextResponse.json(

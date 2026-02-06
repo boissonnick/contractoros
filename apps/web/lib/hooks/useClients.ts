@@ -45,6 +45,7 @@ import {
   Project,
   Invoice,
 } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 // Collection paths
 const getClientsCollectionPath = (orgId: string) => `organizations/${orgId}/clients`;
@@ -258,7 +259,7 @@ export function useClient(clientId: string | undefined, orgId: string): UseClien
         setLoading(false);
       },
       (err) => {
-        console.error('Error fetching client:', err);
+        logger.error('Error fetching client', { error: err, hook: 'useClients' });
         setError(err as Error);
         setLoading(false);
       }

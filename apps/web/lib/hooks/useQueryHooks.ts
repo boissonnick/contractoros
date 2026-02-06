@@ -22,6 +22,7 @@ import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
 import { useEffect } from 'react';
 import { toast } from '@/components/ui/Toast';
+import { logger } from '@/lib/utils/logger';
 
 // Query key factory for consistent key management
 export const queryKeys = {
@@ -491,7 +492,7 @@ export function useRealtimeQuery<T>(
         queryClient.setQueryData(queryKey, data);
       },
       (error) => {
-        console.error(`Realtime subscription error for ${collectionName}:`, error);
+        logger.error(`Realtime subscription error for ${collectionName}`, { error: error, hook: 'useQueryHooks' });
       }
     );
 

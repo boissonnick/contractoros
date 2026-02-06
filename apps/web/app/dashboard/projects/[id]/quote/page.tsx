@@ -18,6 +18,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useScopes } from '@/lib/hooks/useScopes';
 import { useBids } from '@/lib/hooks/useBids';
+import { logger } from '@/lib/utils/logger';
 
 export default function QuoteBuilderPage() {
   const params = useParams();
@@ -122,7 +123,7 @@ export default function QuoteBuilderPage() {
         const quoteSnap = await getDocs(collection(db, 'projects', projectId, 'quoteSections'));
         setSections(quoteSnap.docs.map(d => ({ id: d.id, ...d.data() }) as QuoteSection));
       } catch (error) {
-        console.error('Error fetching quote data:', error);
+        logger.error('Error fetching quote data', { error: error, page: 'dashboard-projects-id-quote' });
       } finally {
         setLoading(false);
       }
@@ -178,7 +179,7 @@ export default function QuoteBuilderPage() {
 
       setSections(prev => [...prev, { id: docRef.id, ...newSection }]);
     } catch (error) {
-      console.error('Error adding section:', error);
+      logger.error('Error adding section', { error: error, page: 'dashboard-projects-id-quote' });
       toast.error('Failed to add section');
     }
   };
@@ -203,7 +204,7 @@ export default function QuoteBuilderPage() {
         updatedAt: Timestamp.now(),
       });
     } catch (error) {
-      console.error('Error saving section:', error);
+      logger.error('Error saving section', { error: error, page: 'dashboard-projects-id-quote' });
       toast.error('Failed to save');
     }
   };
@@ -213,7 +214,7 @@ export default function QuoteBuilderPage() {
       await deleteDoc(doc(db, 'projects', projectId, 'quoteSections', sectionId));
       setSections(prev => prev.filter(s => s.id !== sectionId));
     } catch (error) {
-      console.error('Error deleting section:', error);
+      logger.error('Error deleting section', { error: error, page: 'dashboard-projects-id-quote' });
       toast.error('Failed to delete section');
     }
   };
@@ -230,7 +231,7 @@ export default function QuoteBuilderPage() {
       setProject(prev => prev ? { ...prev, quoteTotal: total } : null);
       toast.success('Quote total saved');
     } catch (error) {
-      console.error('Error saving total:', error);
+      logger.error('Error saving total', { error: error, page: 'dashboard-projects-id-quote' });
       toast.error('Failed to save quote total');
     } finally {
       setSaving(false);

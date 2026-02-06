@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import { initializeAdminApp } from '@/lib/assistant/firebase-admin-init';
+import { logger } from '@/lib/utils/logger';
 
 async function verifyAuth(request: NextRequest) {
   await initializeAdminApp();
@@ -60,7 +61,7 @@ export async function GET(
 
     return NextResponse.json({ records });
   } catch (error) {
-    console.error('Error fetching maintenance records:', error);
+    logger.error('Error fetching maintenance records', { error, route: 'equipment-maintenance' });
     return NextResponse.json({ error: 'Failed to fetch maintenance records' }, { status: 500 });
   }
 }
@@ -124,7 +125,7 @@ export async function POST(
       ...recordData
     }, { status: 201 });
   } catch (error) {
-    console.error('Error creating maintenance record:', error);
+    logger.error('Error creating maintenance record', { error, route: 'equipment-maintenance' });
     return NextResponse.json({ error: 'Failed to create maintenance record' }, { status: 500 });
   }
 }

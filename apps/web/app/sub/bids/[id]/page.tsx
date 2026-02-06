@@ -27,6 +27,7 @@ import {
   ArchiveBoxXMarkIcon,
   BuildingOfficeIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 // Bid status configuration
 const BID_STATUS_CONFIG: Record<BidStatus, { label: string; color: string; bgColor: string; icon: React.ComponentType<{ className?: string }> }> = {
@@ -150,10 +151,10 @@ export default function SubBidDetailPage() {
           });
         }
       } catch (projErr) {
-        console.error('Error fetching project:', projErr);
+        logger.error('Error fetching project', { error: projErr, page: 'sub-bids-id' });
       }
     } catch (err) {
-      console.error('Error fetching bid:', err);
+      logger.error('Error fetching bid', { error: err, page: 'sub-bids-id' });
       setError('Failed to load bid details');
     } finally {
       setLoading(false);
@@ -185,7 +186,7 @@ export default function SubBidDetailPage() {
       await fetchData();
       setIsEditing(false);
     } catch (err) {
-      console.error('Error saving bid:', err);
+      logger.error('Error saving bid', { error: err, page: 'sub-bids-id' });
       setError('Failed to save changes');
     } finally {
       setSaving(false);
@@ -220,7 +221,7 @@ export default function SubBidDetailPage() {
       await fetchData();
       setIsEditing(false);
     } catch (err) {
-      console.error('Error submitting bid:', err);
+      logger.error('Error submitting bid', { error: err, page: 'sub-bids-id' });
       setError('Failed to submit bid');
     } finally {
       setSaving(false);
@@ -243,7 +244,7 @@ export default function SubBidDetailPage() {
       });
       await fetchData();
     } catch (err) {
-      console.error('Error withdrawing bid:', err);
+      logger.error('Error withdrawing bid', { error: err, page: 'sub-bids-id' });
       setError('Failed to withdraw bid');
     } finally {
       setSaving(false);

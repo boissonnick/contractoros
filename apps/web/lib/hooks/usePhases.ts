@@ -16,6 +16,7 @@ import { db } from '@/lib/firebase/config';
 import { ProjectPhase, PhaseStatus, PhaseDocument, PhaseMilestone } from '@/types';
 import { useAuth } from '@/lib/auth';
 import { toast } from '@/components/ui/Toast';
+import { logger } from '@/lib/utils/logger';
 
 function fromFirestore(id: string, data: Record<string, unknown>): ProjectPhase {
   return {
@@ -109,7 +110,7 @@ export function usePhases({ projectId }: UsePhasesOptions) {
         setLoading(false);
       },
       (err) => {
-        console.error('usePhases error:', err);
+        logger.error('usePhases error', { error: err, hook: 'usePhases' });
         setError(err.message);
         setLoading(false);
       }
@@ -136,7 +137,7 @@ export function usePhases({ projectId }: UsePhasesOptions) {
         );
         toast.success('Phase created');
       } catch (err) {
-        console.error('Failed to add phase:', err);
+        logger.error('Failed to add phase', { error: err, hook: 'usePhases' });
         toast.error('Failed to create phase');
         throw err;
       }
@@ -151,7 +152,7 @@ export function usePhases({ projectId }: UsePhasesOptions) {
         await updateDoc(ref, toFirestore({ ...data, updatedAt: new Date() }));
         // Don't toast for minor updates
       } catch (err) {
-        console.error('Failed to update phase:', err);
+        logger.error('Failed to update phase', { error: err, hook: 'usePhases' });
         toast.error('Failed to update phase');
         throw err;
       }
@@ -166,7 +167,7 @@ export function usePhases({ projectId }: UsePhasesOptions) {
         await deleteDoc(ref);
         toast.success('Phase deleted');
       } catch (err) {
-        console.error('Failed to delete phase:', err);
+        logger.error('Failed to delete phase', { error: err, hook: 'usePhases' });
         toast.error('Failed to delete phase');
         throw err;
       }
@@ -185,7 +186,7 @@ export function usePhases({ projectId }: UsePhasesOptions) {
         });
         await batch.commit();
       } catch (err) {
-        console.error('Failed to reorder phases:', err);
+        logger.error('Failed to reorder phases', { error: err, hook: 'usePhases' });
         toast.error('Failed to reorder phases');
         throw err;
       }

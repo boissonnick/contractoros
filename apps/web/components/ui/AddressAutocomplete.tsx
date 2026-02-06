@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { logger } from '@/lib/utils/logger';
 
 declare global {
   interface Window {
@@ -41,7 +42,7 @@ function loadGoogleMaps(): Promise<void> {
     googleMapsLoading = true;
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     if (!apiKey) {
-      console.warn('Google Maps API key not configured');
+      logger.warn('Google Maps API key not configured', { component: 'AddressAutocomplete' });
       resolve();
       return;
     }

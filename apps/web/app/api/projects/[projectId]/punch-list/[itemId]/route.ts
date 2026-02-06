@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import { initializeAdminApp } from '@/lib/assistant/firebase-admin-init';
+import { logger } from '@/lib/utils/logger';
 
 async function verifyAuth(request: NextRequest) {
   await initializeAdminApp();
@@ -64,7 +65,7 @@ export async function PATCH(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error updating punch item:', error);
+    logger.error('Error updating punch item', { error, route: 'punch-list-item' });
     return NextResponse.json({ error: 'Failed to update' }, { status: 500 });
   }
 }
@@ -92,7 +93,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting punch item:', error);
+    logger.error('Error deleting punch item', { error, route: 'punch-list-item' });
     return NextResponse.json({ error: 'Failed to delete' }, { status: 500 });
   }
 }

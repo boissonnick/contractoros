@@ -31,6 +31,7 @@ import {
   MagnifyingGlassIcon,
   CalendarDaysIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 type ZoomLevel = 'day' | 'week' | 'month';
 
@@ -96,7 +97,7 @@ export default function ProjectsSchedulePage() {
       });
       setProjects(projectsData);
     } catch (error) {
-      console.error('Error fetching projects:', error);
+      logger.error('Error fetching projects', { error: error, page: 'projects-schedule' });
     } finally {
       setLoading(false);
     }

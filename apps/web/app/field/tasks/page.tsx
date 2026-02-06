@@ -23,6 +23,7 @@ import {
 } from '@/lib/offline/offline-tasks';
 import { OfflineTaskCard } from '@/components/field/OfflineTaskCard';
 import { Task, TaskStatus } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 type FilterStatus = 'all' | 'my_tasks' | 'pending' | 'in_progress' | 'completed';
 
@@ -53,7 +54,7 @@ export default function FieldTasksPage() {
   useEffect(() => {
     if (isOnline && onlineTasks.length > 0) {
       const service = getOfflineTaskService();
-      service.cacheTasks(onlineTasks).catch(console.error);
+      service.cacheTasks(onlineTasks).catch((err) => logger.error('Failed to cache tasks', { error: err, page: 'field-tasks' }));
     }
   }, [isOnline, onlineTasks]);
 
@@ -308,7 +309,7 @@ export default function FieldTasksPage() {
               onStatusChange={handleStatusChange}
               onTap={(t) => {
                 // Could navigate to task detail
-                console.log('Task tapped:', t.id);
+
               }}
             />
           ))

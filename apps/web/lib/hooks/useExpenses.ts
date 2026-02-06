@@ -15,7 +15,7 @@ import {
   Timestamp,
   QueryConstraint,
 } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { auth, db } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
 import { convertTimestampsDeep } from '@/lib/firebase/timestamp-converter';
 import { toast } from '@/components/ui/Toast';
@@ -26,6 +26,7 @@ import {
   ExpenseSummary,
   ExpenseReceipt,
 } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 interface UseExpensesOptions {
   projectId?: string;
@@ -240,7 +241,7 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
         setError(null);
       },
       (err) => {
-        console.error('Error fetching expenses:', err);
+        logger.error('Error fetching expenses', { error: err, hook: 'useExpenses' });
         if (err.message?.includes('requires an index')) {
           setError('Database index required. Please deploy Firestore indexes.');
         } else if (err.message?.includes('permission-denied')) {
@@ -283,7 +284,7 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
       toast.success('Expense created');
       return docRef.id;
     } catch (err) {
-      console.error('Create expense error:', err);
+      logger.error('Create expense error', { error: err, hook: 'useExpenses' });
       toast.error('Failed to create expense');
       throw err;
     }
@@ -318,7 +319,7 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
 
       await updateDoc(doc(db, `organizations/${orgId}/expenses/${expenseId}`), updateData);
     } catch (err) {
-      console.error('Update expense error:', err);
+      logger.error('Update expense error', { error: err, hook: 'useExpenses' });
       toast.error('Failed to update expense');
       throw err;
     }
@@ -331,7 +332,7 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
       await deleteDoc(doc(db, `organizations/${orgId}/expenses/${expenseId}`));
       toast.success('Expense deleted');
     } catch (err) {
-      console.error('Delete expense error:', err);
+      logger.error('Delete expense error', { error: err, hook: 'useExpenses' });
       toast.error('Failed to delete expense');
       throw err;
     }
@@ -359,7 +360,7 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
       });
       toast.success('Receipt added');
     } catch (err) {
-      console.error('Add receipt error:', err);
+      logger.error('Add receipt error', { error: err, hook: 'useExpenses' });
       toast.error('Failed to add receipt');
       throw err;
     }
@@ -378,7 +379,7 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
       });
       toast.success('Receipt removed');
     } catch (err) {
-      console.error('Remove receipt error:', err);
+      logger.error('Remove receipt error', { error: err, hook: 'useExpenses' });
       toast.error('Failed to remove receipt');
       throw err;
     }
@@ -397,7 +398,7 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
       });
       toast.success('Expense marked as under review');
     } catch (err) {
-      console.error('Start review error:', err);
+      logger.error('Start review error', { error: err, hook: 'useExpenses' });
       toast.error('Failed to start review');
       throw err;
     }
@@ -417,8 +418,20 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
         reviewNote: note,
       });
       toast.success('Expense approved');
+
+      // Fire-and-forget: sync to QuickBooks if auto-sync is enabled
+      auth.currentUser?.getIdToken().then((token) => {
+        fetch('/api/integrations/quickbooks/sync/expense', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ expenseId }),
+        }).catch(() => {});
+      }).catch(() => {});
     } catch (err) {
-      console.error('Approve expense error:', err);
+      logger.error('Approve expense error', { error: err, hook: 'useExpenses' });
       toast.error('Failed to approve expense');
       throw err;
     }
@@ -438,7 +451,7 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
       });
       toast.success('Expense rejected');
     } catch (err) {
-      console.error('Reject expense error:', err);
+      logger.error('Reject expense error', { error: err, hook: 'useExpenses' });
       toast.error('Failed to reject expense');
       throw err;
     }
@@ -458,7 +471,7 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
       });
       toast.success('Requested more information from employee');
     } catch (err) {
-      console.error('Request more info error:', err);
+      logger.error('Request more info error', { error: err, hook: 'useExpenses' });
       toast.error('Failed to request more info');
       throw err;
     }
@@ -479,7 +492,7 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
       });
       toast.success('Expense marked as paid');
     } catch (err) {
-      console.error('Mark paid error:', err);
+      logger.error('Mark paid error', { error: err, hook: 'useExpenses' });
       toast.error('Failed to mark expense as paid');
       throw err;
     }
@@ -504,7 +517,7 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
       await deleteExpense(expenseId);
       toast.success('Expense cancelled');
     } catch (err) {
-      console.error('Cancel expense error:', err);
+      logger.error('Cancel expense error', { error: err, hook: 'useExpenses' });
       toast.error('Failed to cancel expense');
       throw err;
     }

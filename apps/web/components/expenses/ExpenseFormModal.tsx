@@ -21,6 +21,7 @@ import { ReceiptOCRResult } from './ReceiptScanner';
 import OCRConfidenceAlert from './OCRConfidenceAlert';
 import LineItemsTable from './LineItemsTable';
 import { SparklesIcon } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 const expenseSchema = z.object({
   description: z.string().min(1, 'Description is required').max(200, 'Description too long'),
@@ -231,7 +232,7 @@ export function ExpenseFormModal({
       reset();
       onClose();
     } catch (error) {
-      console.error('Error submitting expense:', error);
+      logger.error('Error submitting expense', { error: error, component: 'ExpenseFormModal' });
     } finally {
       setIsSubmitting(false);
     }

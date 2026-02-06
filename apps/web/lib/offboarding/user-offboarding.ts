@@ -22,6 +22,7 @@ import {
   UserProfile,
   UserRole,
 } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * Get preview of what will be affected by offboarding a user
@@ -152,7 +153,7 @@ export async function revokeAccess(
     action.description = 'User account deactivated successfully';
   } catch (error) {
     action.error = error instanceof Error ? error.message : 'Unknown error revoking access';
-    console.error('Error revoking access:', error);
+    logger.error('Error revoking access', { error: error, component: 'offboarding-user-offboarding' });
   }
 
   return action;
@@ -216,7 +217,7 @@ export async function reassignTasks(
     action.metadata = { ...action.metadata, count };
   } catch (error) {
     action.error = error instanceof Error ? error.message : 'Unknown error reassigning tasks';
-    console.error('Error reassigning tasks:', error);
+    logger.error('Error reassigning tasks', { error: error, component: 'offboarding-user-offboarding' });
   }
 
   return action;
@@ -272,7 +273,7 @@ export async function transferProjects(
     action.metadata = { ...action.metadata, count };
   } catch (error) {
     action.error = error instanceof Error ? error.message : 'Unknown error transferring projects';
-    console.error('Error transferring projects:', error);
+    logger.error('Error transferring projects', { error: error, component: 'offboarding-user-offboarding' });
   }
 
   return action;
@@ -399,7 +400,7 @@ export async function archiveUserData(
     };
   } catch (error) {
     action.error = error instanceof Error ? error.message : 'Unknown error archiving data';
-    console.error('Error archiving user data:', error);
+    logger.error('Error archiving user data', { error: error, component: 'offboarding-user-offboarding' });
   }
 
   return action;
@@ -597,7 +598,7 @@ export async function restoreUser(
 
     return true;
   } catch (error) {
-    console.error('Error restoring user:', error);
+    logger.error('Error restoring user', { error: error, component: 'offboarding-user-offboarding' });
     throw error;
   }
 }

@@ -33,6 +33,7 @@ import {
 } from '@/lib/photo-processing';
 import { getOfflinePhotoService, PendingPhoto, PhotoCategory } from '@/lib/offline/offline-photos';
 import { useNetworkStatus } from '@/lib/offline/network-status';
+import { logger } from '@/lib/utils/logger';
 
 function photoFromFirestore(id: string, data: Record<string, unknown>): ProjectPhoto {
   return {
@@ -160,7 +161,7 @@ export function useProjectPhotos(projectId: string) {
         setLoading(false);
       },
       (err) => {
-        console.error('useProjectPhotos photos error:', err);
+        logger.error('useProjectPhotos photos error', { error: err, hook: 'useProjectPhotos' });
         setLoading(false);
       }
     );
@@ -184,7 +185,7 @@ export function useProjectPhotos(projectId: string) {
         setAlbums(snap.docs.map((d) => albumFromFirestore(d.id, d.data())));
       },
       (err) => {
-        console.error('useProjectPhotos albums error:', err);
+        logger.error('useProjectPhotos albums error', { error: err, hook: 'useProjectPhotos' });
       }
     );
 
@@ -207,7 +208,7 @@ export function useProjectPhotos(projectId: string) {
         setBeforeAfterPairs(snap.docs.map((d) => pairFromFirestore(d.id, d.data())));
       },
       (err) => {
-        console.error('useProjectPhotos pairs error:', err);
+        logger.error('useProjectPhotos pairs error', { error: err, hook: 'useProjectPhotos' });
       }
     );
 
@@ -223,7 +224,7 @@ export function useProjectPhotos(projectId: string) {
         const pending = await offlineService.getPendingPhotosForProject(projectId);
         setPendingPhotos(pending.filter((p) => p.syncStatus !== 'completed'));
       } catch (error) {
-        console.error('Failed to load pending photos:', error);
+        logger.error('Failed to load pending photos', { error: error, hook: 'useProjectPhotos' });
       }
     };
 
@@ -311,7 +312,7 @@ export function useProjectPhotos(projectId: string) {
         toast.success('Photo saved! Will upload when online.');
         return localId;
       } catch (error) {
-        console.error('Failed to capture photo offline:', error);
+        logger.error('Failed to capture photo offline', { error: error, hook: 'useProjectPhotos' });
         toast.error('Failed to save photo');
         return null;
       }
@@ -337,7 +338,7 @@ export function useProjectPhotos(projectId: string) {
       }
       return { success: result.successful, failed: result.failed };
     } catch (error) {
-      console.error('Sync failed:', error);
+      logger.error('Sync failed', { error: error, hook: 'useProjectPhotos' });
       toast.error('Sync failed');
       return { success: 0, failed: 0 };
     } finally {
@@ -352,7 +353,7 @@ export function useProjectPhotos(projectId: string) {
         await offlineService.deletePendingPhoto(localId);
         toast.success('Pending photo deleted');
       } catch (error) {
-        console.error('Failed to delete pending photo:', error);
+        logger.error('Failed to delete pending photo', { error: error, hook: 'useProjectPhotos' });
         toast.error('Failed to delete photo');
       }
     },
@@ -439,7 +440,7 @@ export function useProjectPhotos(projectId: string) {
         toast.success('Photo uploaded successfully');
         return docRef.id;
       } catch (err) {
-        console.error('Upload photo error:', err);
+        logger.error('Upload photo error', { error: err, hook: 'useProjectPhotos' });
         toast.error('Failed to upload photo');
         return null;
       }
@@ -472,7 +473,7 @@ export function useProjectPhotos(projectId: string) {
       await updateDoc(doc(db, 'photos', photoId), update);
       toast.success('Photo updated');
     } catch (err) {
-      console.error('Update photo error:', err);
+      logger.error('Update photo error', { error: err, hook: 'useProjectPhotos' });
       toast.error('Failed to update photo');
     }
   }, []);
@@ -494,7 +495,7 @@ export function useProjectPhotos(projectId: string) {
           }
         } catch {
           // Storage deletion failed, continue with doc deletion
-          console.warn('Failed to delete photo from storage');
+          logger.warn('Failed to delete photo from storage', { hook: 'useProjectPhotos' });
         }
 
         // Delete document
@@ -513,7 +514,7 @@ export function useProjectPhotos(projectId: string) {
 
         toast.success('Photo deleted');
       } catch (err) {
-        console.error('Delete photo error:', err);
+        logger.error('Delete photo error', { error: err, hook: 'useProjectPhotos' });
         toast.error('Failed to delete photo');
       }
     },
@@ -529,7 +530,7 @@ export function useProjectPhotos(projectId: string) {
       });
       toast.success(approved ? 'Photo approved' : 'Photo approval revoked');
     } catch (err) {
-      console.error('Approve photo error:', err);
+      logger.error('Approve photo error', { error: err, hook: 'useProjectPhotos' });
       toast.error('Failed to update approval status');
     }
   }, []);
@@ -556,7 +557,7 @@ export function useProjectPhotos(projectId: string) {
           updatedAt: Timestamp.now(),
         });
       } catch (err) {
-        console.error('Add annotation error:', err);
+        logger.error('Add annotation error', { error: err, hook: 'useProjectPhotos' });
         toast.error('Failed to add annotation');
       }
     },
@@ -576,7 +577,7 @@ export function useProjectPhotos(projectId: string) {
           updatedAt: Timestamp.now(),
         });
       } catch (err) {
-        console.error('Remove annotation error:', err);
+        logger.error('Remove annotation error', { error: err, hook: 'useProjectPhotos' });
         toast.error('Failed to remove annotation');
       }
     },
@@ -609,7 +610,7 @@ export function useProjectPhotos(projectId: string) {
         toast.success('Album created');
         return docRef.id;
       } catch (err) {
-        console.error('Create album error:', err);
+        logger.error('Create album error', { error: err, hook: 'useProjectPhotos' });
         toast.error('Failed to create album');
         return null;
       }
@@ -629,7 +630,7 @@ export function useProjectPhotos(projectId: string) {
       await updateDoc(doc(db, 'photoAlbums', albumId), update);
       toast.success('Album updated');
     } catch (err) {
-      console.error('Update album error:', err);
+      logger.error('Update album error', { error: err, hook: 'useProjectPhotos' });
       toast.error('Failed to update album');
     }
   }, []);
@@ -658,7 +659,7 @@ export function useProjectPhotos(projectId: string) {
         await deleteDoc(doc(db, 'photoAlbums', albumId));
         toast.success('Album deleted');
       } catch (err) {
-        console.error('Delete album error:', err);
+        logger.error('Delete album error', { error: err, hook: 'useProjectPhotos' });
         toast.error('Failed to delete album');
       }
     },
@@ -684,7 +685,7 @@ export function useProjectPhotos(projectId: string) {
         toast.success('Share link generated');
         return shareUrl;
       } catch (err) {
-        console.error('Generate share link error:', err);
+        logger.error('Generate share link error', { error: err, hook: 'useProjectPhotos' });
         toast.error('Failed to generate share link');
         return null;
       }
@@ -727,7 +728,7 @@ export function useProjectPhotos(projectId: string) {
         toast.success('Before/after pair created');
         return docRef.id;
       } catch (err) {
-        console.error('Create before/after pair error:', err);
+        logger.error('Create before/after pair error', { error: err, hook: 'useProjectPhotos' });
         toast.error('Failed to create before/after pair');
         return null;
       }
@@ -758,7 +759,7 @@ export function useProjectPhotos(projectId: string) {
         await deleteDoc(doc(db, 'beforeAfterPairs', pairId));
         toast.success('Before/after pair deleted');
       } catch (err) {
-        console.error('Delete before/after pair error:', err);
+        logger.error('Delete before/after pair error', { error: err, hook: 'useProjectPhotos' });
         toast.error('Failed to delete before/after pair');
       }
     },
@@ -1068,7 +1069,7 @@ export function usePaginatedPhotos(
         setHasMore(hasMoreItems);
         setInitialized(true);
       } catch (err) {
-        console.error('Error fetching paginated photos:', err);
+        logger.error('Error fetching paginated photos', { error: err, hook: 'useProjectPhotos' });
         setError(err instanceof Error ? err : new Error('Failed to fetch photos'));
       } finally {
         setLoading(false);

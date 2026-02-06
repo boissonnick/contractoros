@@ -4,6 +4,7 @@ import React from 'react';
 import { useAuth } from '@/lib/auth';
 import AuthGuard from '@/components/auth/AuthGuard';
 import AppShell from '@/components/ui/AppShell';
+import { SectionErrorBoundary } from '@/components/ui/SectionErrorBoundary';
 import { NavItem } from '@/types';
 import { FloatingSyncIndicator } from '@/components/offline/SyncStatusIndicator';
 import { VoiceActivationFAB } from '@/components/voice';
@@ -32,7 +33,9 @@ function FieldLayoutContent({ children }: { children: React.ReactNode }) {
       userDisplayName={profile?.displayName}
       onSignOut={signOut}
     >
-      {children}
+      <SectionErrorBoundary sectionName="Field Portal">
+        {children}
+      </SectionErrorBoundary>
       <VoiceActivationFAB
         context={{}}
         bottomOffset={80}

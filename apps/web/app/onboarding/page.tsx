@@ -10,6 +10,7 @@ import {
   CheckCircleIcon,
   ArrowRightIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 type Step = 'profile' | 'complete';
 
@@ -93,7 +94,7 @@ export default function OnboardingPage() {
         router.push(path);
       }, 2000);
     } catch (error) {
-      console.error('Error completing onboarding:', error);
+      logger.error('Error completing onboarding', { error: error, page: 'onboarding' });
       toast.error('Something went wrong. Please try again.');
     } finally {
       setSaving(false);

@@ -20,6 +20,7 @@ import {
 import { getCachedTeam, CachedTeamMember } from '@/lib/offline/cache-team';
 import { useNetworkStatus } from '@/lib/offline/network-status';
 import { DailyLogCategory, WeatherCondition } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 interface OfflineDailyLogFormProps {
   projectId: string;
@@ -144,7 +145,7 @@ export function OfflineDailyLogForm({
 
       onSave?.(localId);
     } catch (error) {
-      console.error('Failed to save daily log:', error);
+      logger.error('Failed to save daily log', { error: error, component: 'OfflineDailyLogForm' });
     } finally {
       setSaving(false);
     }

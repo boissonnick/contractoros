@@ -10,6 +10,7 @@ import { WarrantyItem, Project } from '@/types';
 import BaseModal from '@/components/ui/BaseModal';
 import Button from '@/components/ui/Button';
 import { FormInput, FormTextarea, FormSelect } from '@/components/ui/FormField';
+import { logger } from '@/lib/utils/logger';
 
 const warrantySchema = z.object({
   itemName: z.string().min(1, 'Item name is required'),
@@ -107,7 +108,7 @@ export default function EditWarrantyModal({ isOpen, onClose, warranty }: EditWar
 
       onClose();
     } catch (error) {
-      console.error('Error updating warranty:', error);
+      logger.error('Error updating warranty', { error: error, component: 'EditWarrantyModal' });
     } finally {
       setIsSubmitting(false);
     }

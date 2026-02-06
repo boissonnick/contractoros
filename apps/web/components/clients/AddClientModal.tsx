@@ -18,6 +18,7 @@ import {
   MapPinIcon,
   TagIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 const clientSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
@@ -120,7 +121,7 @@ export function AddClientModal({ orgId, isOpen, onClose, onSuccess }: AddClientM
       onClose();
       onSuccess?.(clientId);
     } catch (err) {
-      console.error('Error creating client:', err);
+      logger.error('Error creating client', { error: err, component: 'AddClientModal' });
       toast.error('Failed to create client');
     } finally {
       setIsSubmitting(false);

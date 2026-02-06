@@ -22,6 +22,7 @@ import {
   generateSubcontractorIntelligence,
   generateBidRecommendations,
 } from '@/lib/intelligence/bid-intelligence';
+import { logger } from '@/lib/utils/logger';
 
 interface UseBidIntelligenceOptions {
   /** All bids for the current project */
@@ -146,7 +147,7 @@ export function useBidIntelligence(options: UseBidIntelligenceOptions = {}): Use
           subIntelligence
         );
       } catch (err) {
-        console.error('Error generating bid recommendations:', err);
+        logger.error('Error generating bid recommendations', { error: err, hook: 'useBidIntelligence' });
         return null;
       }
     },

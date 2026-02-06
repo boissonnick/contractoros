@@ -25,9 +25,9 @@ import { Review, ReviewRequest, ReviewAutomationRule, ReviewResponseTemplate } f
 // =============================================================================
 
 // Mock Firestore
-const mockOnSnapshot = jest.fn();
-const mockUpdateDoc = jest.fn();
-const mockDoc = jest.fn();
+const _mockOnSnapshot = jest.fn();
+const _mockUpdateDoc = jest.fn();
+const _mockDoc = jest.fn();
 
 jest.mock('firebase/firestore', () => ({
   collection: jest.fn(),
@@ -396,7 +396,7 @@ describe('useReviews', () => {
 
 describe('useReview', () => {
   beforeEach(() => {
-    (onSnapshot as jest.Mock).mockImplementation((docRef, onNext, onError) => {
+    (onSnapshot as jest.Mock).mockImplementation((_docRef, _onNext, _onError) => {
       // Return unsubscribe function
       return jest.fn();
     });

@@ -10,6 +10,7 @@ import BaseModal from '@/components/ui/BaseModal';
 import Button from '@/components/ui/Button';
 import { FormInput, FormTextarea, FormSelect } from '@/components/ui/FormField';
 import { Project } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 const warrantySchema = z.object({
   itemName: z.string().min(1, 'Item name is required'),
@@ -93,7 +94,7 @@ export default function AddWarrantyModal({ isOpen, onClose, projectId }: AddWarr
       reset();
       onClose();
     } catch (error) {
-      console.error('Error adding warranty:', error);
+      logger.error('Error adding warranty', { error: error, component: 'AddWarrantyModal' });
     } finally {
       setIsSubmitting(false);
     }

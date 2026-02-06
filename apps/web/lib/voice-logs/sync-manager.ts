@@ -7,6 +7,7 @@
 
 import { VoiceLogQueueItem } from '@/types';
 import { getVoiceLogQueue } from './offline-queue';
+import { logger } from '@/lib/utils/logger';
 
 // Sync configuration
 const SYNC_TAG = 'voice-log-sync';
@@ -87,10 +88,10 @@ export class VoiceLogSyncManager {
         const registration = await navigator.serviceWorker.ready;
         // @ts-expect-error - SyncManager types may not be complete
         await registration.sync.register(SYNC_TAG);
-        console.log('Background sync registered');
+
       } catch {
         // Background sync not available, fall back to manual sync
-        console.log('Background sync not available, using manual sync');
+
       }
     }
   }
@@ -100,7 +101,7 @@ export class VoiceLogSyncManager {
    */
   async triggerSync(): Promise<void> {
     if (!this.isOnline) {
-      console.log('Offline, skipping sync');
+
       return;
     }
 
@@ -151,18 +152,17 @@ export class VoiceLogSyncManager {
         errorCount++;
         const errorMessage = error instanceof Error ? error.message : 'Upload failed';
         await queue.updateStatus(item.id, 'failed', errorMessage);
-        console.error('Failed to upload voice log:', item.id, error);
+        logger.error('Failed to upload voice log', { error: error, component: 'voice-logs-sync-manager' });
       }
 
       // Check if we went offline during sync
       if (!this.isOnline) {
-        console.log('Went offline during sync, stopping');
+
         this.setState('offline');
         return;
       }
     }
 
-    console.log(`Sync complete: ${successCount} uploaded, ${errorCount} failed`);
     this.setState('idle');
   }
 

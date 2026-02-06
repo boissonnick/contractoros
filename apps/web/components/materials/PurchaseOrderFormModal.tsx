@@ -16,6 +16,7 @@ import {
   LINE_ITEM_UNITS,
 } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
+import { logger } from '@/lib/utils/logger';
 
 const lineItemSchema = z.object({
   id: z.string(),
@@ -246,7 +247,7 @@ export default function PurchaseOrderFormModal({
       });
       onClose();
     } catch (error) {
-      console.error('Error saving purchase order:', error);
+      logger.error('Error saving purchase order', { error: error, component: 'PurchaseOrderFormModal' });
     } finally {
       setIsSubmitting(false);
     }

@@ -20,6 +20,7 @@ import {
   createProjectWeatherForecast,
   getWeatherSummary,
 } from '@/lib/services/weather';
+import { logger } from '@/lib/utils/logger';
 
 // Project with coordinates extracted from address
 interface ProjectWithCoords {
@@ -137,7 +138,7 @@ export function useWeatherRisk(orgId: string | undefined): UseWeatherRiskReturn 
 
       return projectForecast;
     } catch (err) {
-      console.error('Error getting project risk:', err);
+      logger.error('Error getting project risk', { error: err, hook: 'useWeatherRisk' });
       return null;
     }
   }, [orgId, projectForecasts, fetchForLocation]);

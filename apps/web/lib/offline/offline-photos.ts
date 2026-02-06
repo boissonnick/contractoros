@@ -9,6 +9,7 @@ import { db, storage } from '@/lib/firebase/config';
 import { compressPhoto, createThumbnail, blobToArrayBuffer, arrayBufferToBlob } from './photo-compression';
 import { checkNetworkStatus, subscribeToNetworkStatus } from './network-status';
 import { generatePhotoFilename } from '@/lib/photo-processing';
+import { logger } from '@/lib/utils/logger';
 
 // Photo categories for field documentation
 export type PhotoCategory = 'progress' | 'issue' | 'before' | 'after' | 'inspection' | 'safety' | 'material';
@@ -139,7 +140,7 @@ export class OfflinePhotoService {
     if (typeof window !== 'undefined') {
       this.networkUnsubscribe = subscribeToNetworkStatus((isOnline) => {
         if (isOnline && this.autoSyncEnabled) {
-          this.processUploadQueue().catch(console.error);
+          this.processUploadQueue().catch((err) => logger.error('Operation failed', { error: err, component: 'offline-offline-photos' }));
         }
       });
     }
@@ -526,7 +527,7 @@ export class OfflinePhotoService {
     listeners.add(listener);
 
     // Immediately notify with current count
-    this.getPendingCount().then(listener).catch(console.error);
+    this.getPendingCount().then(listener).catch((err) => logger.error('Operation failed', { error: err, component: 'offline-offline-photos' }));
 
     return () => {
       listeners.delete(listener);

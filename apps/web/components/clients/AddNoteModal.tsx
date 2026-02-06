@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { Button, Card } from '@/components/ui';
 import { toast } from '@/components/ui/Toast';
 import { XMarkIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 const noteSchema = z.object({
   content: z.string().min(1, 'Note content is required'),
@@ -40,7 +41,7 @@ export function AddNoteModal({ isOpen, onClose, onAdd }: AddNoteModalProps) {
       reset();
       onClose();
     } catch (err) {
-      console.error('Error adding note:', err);
+      logger.error('Error adding note', { error: err, component: 'AddNoteModal' });
       toast.error('Failed to add note');
     } finally {
       setIsSubmitting(false);

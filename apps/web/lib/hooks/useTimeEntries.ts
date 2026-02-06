@@ -36,6 +36,7 @@ import {
   WeeklyTimeSummary,
   BreakType,
 } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 // Extended TimeEntry with sync status for UI
 export interface TimeEntryWithSyncStatus extends TimeEntry {
@@ -206,7 +207,7 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
         });
         setEntries(merged);
       } catch (err) {
-        console.error('Error merging offline entries:', err);
+        logger.error('Error merging offline entries', { error: err, hook: 'useTimeEntries' });
         // Fallback to online entries only
         setEntries(onlineEntries.map(e => ({ ...e, syncStatus: 'synced' as const })));
       }
@@ -226,7 +227,7 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
         setError(null);
       },
       async (err) => {
-        console.error('Error fetching time entries:', err);
+        logger.error('Error fetching time entries', { error: err, hook: 'useTimeEntries' });
 
         // If offline, load from offline storage only
         if (!checkNetworkStatus()) {
@@ -246,7 +247,7 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
             setError('Showing offline entries only');
             return;
           } catch (offlineErr) {
-            console.error('Error loading offline entries:', offlineErr);
+            logger.error('Error loading offline entries', { error: offlineErr, hook: 'useTimeEntries' });
           }
         }
 
@@ -296,7 +297,7 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
         setRefreshTrigger(prev => prev + 1);
         return localId;
       } catch (err) {
-        console.error('Offline clock in error:', err);
+        logger.error('Offline clock in error', { error: err, hook: 'useTimeEntries' });
         toast.error('Failed to clock in offline');
         throw err;
       }
@@ -340,7 +341,7 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
       toast.success('Clocked in successfully');
       return docRef.id;
     } catch (err) {
-      console.error('Clock in error:', err);
+      logger.error('Clock in error', { error: err, hook: 'useTimeEntries' });
       toast.error('Failed to clock in', 'Please try again');
       throw err;
     }
@@ -390,7 +391,7 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
       });
       toast.success('Clocked out successfully');
     } catch (err) {
-      console.error('Clock out error:', err);
+      logger.error('Clock out error', { error: err, hook: 'useTimeEntries' });
       toast.error('Failed to clock out', 'Please try again');
       throw err;
     }
@@ -423,7 +424,7 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
       });
       toast.success('Break started');
     } catch (err) {
-      console.error('Start break error:', err);
+      logger.error('Start break error', { error: err, hook: 'useTimeEntries' });
       toast.error('Failed to start break');
       throw err;
     }
@@ -457,7 +458,7 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
       });
       toast.success('Break ended');
     } catch (err) {
-      console.error('End break error:', err);
+      logger.error('End break error', { error: err, hook: 'useTimeEntries' });
       toast.error('Failed to end break');
       throw err;
     }
@@ -490,7 +491,7 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
         setRefreshTrigger(prev => prev + 1);
         return localId;
       } catch (err) {
-        console.error('Offline create manual entry error:', err);
+        logger.error('Offline create manual entry error', { error: err, hook: 'useTimeEntries' });
         toast.error('Failed to create time entry offline');
         throw err;
       }
@@ -527,7 +528,7 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
       toast.success('Time entry created');
       return docRef.id;
     } catch (err) {
-      console.error('Create manual entry error:', err);
+      logger.error('Create manual entry error', { error: err, hook: 'useTimeEntries' });
       toast.error('Failed to create time entry');
       throw err;
     }
@@ -586,7 +587,7 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
       await updateDoc(doc(db, `organizations/${orgId}/timeEntries/${entryId}`), updateData);
       toast.success('Time entry updated');
     } catch (err) {
-      console.error('Update entry error:', err);
+      logger.error('Update entry error', { error: err, hook: 'useTimeEntries' });
       toast.error('Failed to update time entry');
       throw err;
     }
@@ -599,7 +600,7 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
       await deleteDoc(doc(db, `organizations/${orgId}/timeEntries/${entryId}`));
       toast.success('Time entry deleted');
     } catch (err) {
-      console.error('Delete entry error:', err);
+      logger.error('Delete entry error', { error: err, hook: 'useTimeEntries' });
       toast.error('Failed to delete time entry');
       throw err;
     }
@@ -618,7 +619,7 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
       });
       toast.success('Time entry submitted for approval');
     } catch (err) {
-      console.error('Submit for approval error:', err);
+      logger.error('Submit for approval error', { error: err, hook: 'useTimeEntries' });
       toast.error('Failed to submit for approval');
       throw err;
     }
@@ -639,7 +640,7 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
       });
       toast.success('Time entry approved');
     } catch (err) {
-      console.error('Approve entry error:', err);
+      logger.error('Approve entry error', { error: err, hook: 'useTimeEntries' });
       toast.error('Failed to approve time entry');
       throw err;
     }
@@ -661,7 +662,7 @@ export function useTimeEntries(options: UseTimeEntriesOptions = {}): UseTimeEntr
       });
       toast.success('Time entry rejected');
     } catch (err) {
-      console.error('Reject entry error:', err);
+      logger.error('Reject entry error', { error: err, hook: 'useTimeEntries' });
       toast.error('Failed to reject time entry');
       throw err;
     }
@@ -831,4 +832,81 @@ export function useTeamTimeEntries(options: {
     ...options,
     includeAllUsers: true,
   });
+}
+
+// Overtime alert types
+export interface OvertimeEmployeeAlert {
+  userId: string;
+  userName: string;
+  hoursWorked: number;
+  threshold: number;
+  type: 'daily' | 'weekly';
+  projectedWeeklyHours?: number;
+}
+
+export interface OvertimeAlerts {
+  approaching: OvertimeEmployeeAlert[];
+  exceeded: OvertimeEmployeeAlert[];
+}
+
+/**
+ * Scans time entries and returns employees approaching or exceeding OT thresholds.
+ * "Approaching" = within 2 hours of threshold.
+ */
+export function getOvertimeAlerts(
+  entries: TimeEntry[],
+  dailyThreshold = 8,
+  weeklyThreshold = 40,
+): OvertimeAlerts {
+  const now = new Date();
+
+  // Get the start of the current week (Sunday)
+  const weekStart = new Date(now);
+  weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+  weekStart.setHours(0, 0, 0, 0);
+
+  const todayStr = now.toISOString().split('T')[0];
+
+  // Group entries by userId
+  const byUser = new Map<string, { userName: string; dailyHours: number; weeklyHours: number }>();
+
+  for (const entry of entries) {
+    const entryDate = new Date(entry.clockIn);
+    if (entryDate < weekStart) continue;
+
+    const hours = (entry.totalMinutes || 0) / 60;
+    const entryDateStr = entryDate.toISOString().split('T')[0];
+    const existing = byUser.get(entry.userId) || { userName: entry.userName || 'Unknown', dailyHours: 0, weeklyHours: 0 };
+
+    existing.weeklyHours += hours;
+    if (entryDateStr === todayStr) {
+      existing.dailyHours += hours;
+    }
+    byUser.set(entry.userId, existing);
+  }
+
+  const approaching: OvertimeEmployeeAlert[] = [];
+  const exceeded: OvertimeEmployeeAlert[] = [];
+
+  for (const [userId, data] of Array.from(byUser.entries())) {
+    // Calculate projected weekly hours based on days elapsed
+    const daysElapsed = Math.max(1, Math.floor((now.getTime() - weekStart.getTime()) / (24 * 60 * 60 * 1000)) + 1);
+    const projectedWeeklyHours = (data.weeklyHours / daysElapsed) * 5; // project for 5 work days
+
+    // Daily check
+    if (data.dailyHours > dailyThreshold) {
+      exceeded.push({ userId, userName: data.userName, hoursWorked: data.dailyHours, threshold: dailyThreshold, type: 'daily', projectedWeeklyHours });
+    } else if (data.dailyHours >= dailyThreshold - 2) {
+      approaching.push({ userId, userName: data.userName, hoursWorked: data.dailyHours, threshold: dailyThreshold, type: 'daily', projectedWeeklyHours });
+    }
+
+    // Weekly check
+    if (data.weeklyHours > weeklyThreshold) {
+      exceeded.push({ userId, userName: data.userName, hoursWorked: data.weeklyHours, threshold: weeklyThreshold, type: 'weekly', projectedWeeklyHours });
+    } else if (data.weeklyHours >= weeklyThreshold - 2) {
+      approaching.push({ userId, userName: data.userName, hoursWorked: data.weeklyHours, threshold: weeklyThreshold, type: 'weekly', projectedWeeklyHours });
+    }
+  }
+
+  return { approaching, exceeded };
 }

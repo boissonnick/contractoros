@@ -5,6 +5,7 @@ import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import type { OperationalMetrics, ProjectTimeline } from './types';
 import { TASK_STATUS_COLORS } from './types';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * Safely convert any date-like value to a Date object.
@@ -163,7 +164,7 @@ export function useOperationalReports(orgId?: string) {
       });
 
     } catch (err) {
-      console.error('Failed to fetch operational data:', err);
+      logger.error('Failed to fetch operational data', { error: err, hook: 'useOperationalReports' });
       setError(err as Error);
     } finally {
       setLoading(false);

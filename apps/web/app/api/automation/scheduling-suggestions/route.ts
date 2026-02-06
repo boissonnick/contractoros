@@ -4,6 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/utils/logger';
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,7 +33,7 @@ export async function POST(request: NextRequest) {
       dateRange: { startDate, endDate }
     });
   } catch (error) {
-    console.error('[Scheduling Suggestions] Error:', error);
+    logger.error('[Scheduling Suggestions] Error', { error, route: 'automation-scheduling-suggestions' });
     return NextResponse.json({ error: 'Optimization failed' }, { status: 500 });
   }
 }

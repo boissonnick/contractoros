@@ -6,6 +6,7 @@
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { saveOffline, getOfflineData } from './storage';
+import { logger } from '@/lib/utils/logger';
 
 // Cache keys
 const PROJECTS_CACHE_KEY = 'cached-projects';
@@ -74,7 +75,7 @@ export async function cacheProjectsForOffline(orgId: string): Promise<void> {
     await saveOffline(getProjectsCacheKey(orgId), cachedProjects);
     await saveOffline(getTimestampKey(orgId), Date.now());
   } catch (error) {
-    console.error('[OfflineCache] Failed to cache projects:', error);
+    logger.error('[OfflineCache] Failed to cache projects', { error: error, component: 'offline-cache-projects' });
     throw error;
   }
 }
@@ -137,7 +138,7 @@ export async function getCachedProjectsWithRefresh(orgId: string): Promise<Cache
       await cacheProjectsForOffline(orgId);
     } catch {
       // Ignore refresh errors, will use existing cache
-      console.warn('[OfflineCache] Failed to refresh project cache, using existing');
+      logger.warn('[OfflineCache] Failed to refresh project cache, using existing', { component: 'offline-cache-projects' });
     }
   }
 
@@ -165,6 +166,6 @@ export async function initializeProjectCache(orgId: string): Promise<void> {
       await refreshCacheIfNeeded(orgId);
     }
   } catch (error) {
-    console.warn('[OfflineCache] Failed to initialize project cache:', error);
+    logger.warn('[OfflineCache] Failed to initialize project cache', { error, component: 'offline-cache-projects' });
   }
 }

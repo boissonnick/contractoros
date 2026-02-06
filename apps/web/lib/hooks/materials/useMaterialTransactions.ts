@@ -13,6 +13,7 @@ import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
 import { MaterialTransaction } from '@/types';
 import { convertTimestamp } from './utils';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================
 // Material Transactions Hook
@@ -67,7 +68,7 @@ export function useMaterialTransactions(materialId?: string, projectId?: string)
         setLoading(false);
       },
       (err) => {
-        console.error('Error fetching transactions:', err);
+        logger.error('Error fetching transactions', { error: err, hook: 'useMaterialTransactions' });
         setError(err as Error);
         setLoading(false);
       }

@@ -12,7 +12,7 @@ import {
   doc,
   Timestamp,
 } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { db, auth } from '@/lib/firebase/config';
 import {
   AccountingConnection,
   AccountingProvider,
@@ -21,6 +21,7 @@ import {
   AccountMappingRule,
 } from '@/types';
 import { useAuth } from '@/lib/auth';
+import { logger } from '@/lib/utils/logger';
 
 const DEFAULT_SYNC_SETTINGS: AccountingSyncSettings = {
   autoSyncInvoices: false,
@@ -55,7 +56,6 @@ export function useAccountingConnection() {
   // Listen for accounting connection
   useEffect(() => {
     if (!profile?.orgId) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- onSnapshot callback is an async event handler
       setLoading(false);
       return;
     }
@@ -147,19 +147,41 @@ export function useAccountingConnection() {
       updatedAt: Timestamp.now(),
     });
 
-    // Simulate sync (in production this would call a Cloud Function)
-    setTimeout(async () => {
-      if (!connection) return;
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) throw new Error('Not authenticated');
+
+      const response = await fetch('/api/integrations/quickbooks/sync', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ action: 'full' }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Sync failed');
+      }
+
+      await updateDoc(doc(db, 'accountingConnections', connection.id), {
+        lastSyncAt: Timestamp.now(),
+        lastSyncStatus: 'success' as AccountingSyncStatus,
+        updatedAt: Timestamp.now(),
+      });
+    } catch (err) {
+      logger.error('Sync error', { error: err, hook: 'useAccountingConnection' });
       try {
         await updateDoc(doc(db, 'accountingConnections', connection.id), {
-          lastSyncAt: Timestamp.now(),
-          lastSyncStatus: 'success' as AccountingSyncStatus,
+          lastSyncStatus: 'error' as AccountingSyncStatus,
+          lastSyncError: err instanceof Error ? err.message : 'Sync failed',
           updatedAt: Timestamp.now(),
         });
       } catch {
         // Connection may have changed
       }
-    }, 2000);
+    }
   }, [connection]);
 
   const addMappingRule = useCallback(

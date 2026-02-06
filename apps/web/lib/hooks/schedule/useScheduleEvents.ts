@@ -23,6 +23,7 @@ import {
   ScheduleConflict,
 } from '@/types';
 import { toast } from '@/components/ui/Toast';
+import { logger } from '@/lib/utils/logger';
 
 // =============================================================================
 // TYPES
@@ -173,7 +174,7 @@ export function useScheduleEvents(
         setError(null);
       },
       (err) => {
-        console.error('Error loading schedule events:', err);
+        logger.error('Error loading schedule events', { error: err, hook: 'useScheduleEvents' });
         setError(err as Error);
         setLoading(false);
       }

@@ -24,6 +24,7 @@ import {
 } from '@/lib/security/audit-logger';
 import { exportToCSV, exportToExcel } from '@/lib/exports';
 import { format } from 'date-fns';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================
 // Types
@@ -115,7 +116,7 @@ export function useAuditLogs(options: UseAuditLogsOptions = {}): UseAuditLogsRet
         setHasMore(result.hasMore);
         setCursor(result.lastDoc);
       } catch (err) {
-        console.error('Failed to fetch audit logs:', err);
+        logger.error('Failed to fetch audit logs', { error: err, hook: 'useAuditLogs' });
         setError('Failed to load audit logs');
       } finally {
         setLoading(false);

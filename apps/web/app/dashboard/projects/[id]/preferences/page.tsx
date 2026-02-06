@@ -12,6 +12,7 @@ import {
   LinkIcon,
   EnvelopeIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 const FINISH_FIELDS: { key: keyof NonNullable<ClientPreferences['finishes']>; label: string; placeholder: string }[] = [
   { key: 'flooring', label: 'Flooring', placeholder: 'e.g., Hardwood, tile, LVP...' },
@@ -59,7 +60,7 @@ export default function ClientPreferencesPage() {
           });
         }
       } catch (error) {
-        console.error('Error fetching preferences:', error);
+        logger.error('Error fetching preferences', { error, page: 'project-preferences' });
         toast.error('Failed to load preferences');
       } finally {
         setLoading(false);
@@ -84,7 +85,7 @@ export default function ClientPreferencesPage() {
       });
       toast.success('Preferences saved');
     } catch (error) {
-      console.error('Error saving preferences:', error);
+      logger.error('Error saving preferences', { error, page: 'project-preferences' });
       toast.error('Failed to save preferences');
     } finally {
       setSaving(false);
@@ -110,7 +111,7 @@ export default function ClientPreferencesPage() {
       await navigator.clipboard.writeText(link);
       toast.success('Client onboarding link copied to clipboard! Valid for 7 days.');
     } catch (error) {
-      console.error('Error generating link:', error);
+      logger.error('Error generating link', { error, page: 'project-preferences' });
       toast.error('Failed to generate link');
     } finally {
       setGeneratingLink(false);

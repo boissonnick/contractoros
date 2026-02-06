@@ -21,6 +21,7 @@ import TaskGantt from '@/components/projects/tasks/gantt/TaskGantt';
 import { TaskDetailModal } from '@/components/tasks';
 import TaskForm from '@/components/tasks/TaskForm';
 import BulkTaskToolbar from '@/components/tasks/BulkTaskToolbar';
+import { logger } from '@/lib/utils/logger';
 
 export default function ProjectTasksPage() {
   const params = useParams();
@@ -63,7 +64,7 @@ export default function ProjectTasksPage() {
           .sort((a, b) => a.order - b.order);
         setPhases(data);
       } catch (err) {
-        console.error('Error fetching phases:', err);
+        logger.error('Error fetching phases', { error: err, page: 'dashboard-projects-id-tasks' });
         toast.error('Failed to load phases');
       } finally {
         setPhasesLoading(false);
@@ -97,7 +98,7 @@ export default function ProjectTasksPage() {
         });
         setTeamMembers(members);
       } catch (err) {
-        console.error('Error fetching team members:', err);
+        logger.error('Error fetching team members', { error: err, page: 'dashboard-projects-id-tasks' });
         toast.error('Failed to load team members');
       } finally {
         setTeamLoading(false);

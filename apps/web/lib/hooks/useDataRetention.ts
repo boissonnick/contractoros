@@ -31,6 +31,7 @@ import {
   DEFAULT_RETENTION_CONFIG,
 } from '@/lib/security/data-retention';
 import { auditHelpers } from '@/lib/security/audit-logger';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================
 // Types
@@ -125,7 +126,7 @@ export function useDataRetention(
       const data = await getRetentionPolicies(profile.orgId);
       setPolicies(data);
     } catch (err) {
-      console.error('Failed to fetch retention policies:', err);
+      logger.error('Failed to fetch retention policies', { error: err, hook: 'useDataRetention' });
       setError('Failed to load retention policies');
     } finally {
       setLoading(false);
@@ -191,7 +192,7 @@ export function useDataRetention(
 
         return result;
       } catch (err) {
-        console.error('Failed to update retention policy:', err);
+        logger.error('Failed to update retention policy', { error: err, hook: 'useDataRetention' });
         return { success: false, error: 'Failed to update policy' };
       } finally {
         setUpdating(false);
@@ -243,7 +244,7 @@ export function useDataRetention(
 
         return result;
       } catch (err) {
-        console.error('Failed to update retention policies:', err);
+        logger.error('Failed to update retention policies', { error: err, hook: 'useDataRetention' });
         return { success: false, errors: ['Failed to update policies'] };
       } finally {
         setUpdating(false);
@@ -278,7 +279,7 @@ export function useDataRetention(
           [resource]: preview,
         }));
       } catch (err) {
-        console.error('Failed to load preview:', err);
+        logger.error('Failed to load preview', { error: err, hook: 'useDataRetention' });
       }
     },
     [profile?.orgId, policies, config]
@@ -292,7 +293,7 @@ export function useDataRetention(
       const data = await getRetentionHistory(profile.orgId);
       setHistory(data);
     } catch (err) {
-      console.error('Failed to load retention history:', err);
+      logger.error('Failed to load retention history', { error: err, hook: 'useDataRetention' });
     }
   }, [profile?.orgId]);
 

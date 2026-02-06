@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import { initializeAdminApp } from '@/lib/assistant/firebase-admin-init';
+import { logger } from '@/lib/utils/logger';
 
 async function verifyAuth(request: NextRequest) {
   await initializeAdminApp();
@@ -93,7 +94,7 @@ export async function POST(
       ...checkoutData
     }, { status: 201 });
   } catch (error) {
-    console.error('Error checking out equipment:', error);
+    logger.error('Error checking out equipment', { error, route: 'equipment-checkout' });
     return NextResponse.json({ error: 'Failed to check out equipment' }, { status: 500 });
   }
 }
@@ -153,7 +154,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error returning equipment:', error);
+    logger.error('Error returning equipment', { error, route: 'equipment-checkout' });
     return NextResponse.json({ error: 'Failed to return equipment' }, { status: 500 });
   }
 }

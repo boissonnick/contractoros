@@ -7,6 +7,8 @@
 
 'use client';
 
+import { logger } from '@/lib/utils/logger';
+
 // ============================================
 // Permission Management
 // ============================================
@@ -34,7 +36,7 @@ export function getNotificationPermissionStatus(): NotificationPermission | 'uns
  */
 export async function requestNotificationPermission(): Promise<boolean> {
   if (!isNotificationSupported()) {
-    console.warn('Browser does not support notifications');
+    logger.warn('Browser does not support notifications', { component: 'notifications-browser-notifications' });
     return false;
   }
 
@@ -45,7 +47,7 @@ export async function requestNotificationPermission(): Promise<boolean> {
 
   // Previously denied - can't re-request programmatically
   if (Notification.permission === 'denied') {
-    console.warn('Notification permission was previously denied');
+    logger.warn('Notification permission was previously denied', { component: 'notifications-browser-notifications' });
     return false;
   }
 
@@ -54,7 +56,7 @@ export async function requestNotificationPermission(): Promise<boolean> {
     const permission = await Notification.requestPermission();
     return permission === 'granted';
   } catch (error) {
-    console.error('Error requesting notification permission:', error);
+    logger.error('Error requesting notification permission', { error: error, component: 'notifications-browser-notifications' });
     return false;
   }
 }
@@ -86,7 +88,7 @@ export function showBrowserNotification(
   }
 
   if (Notification.permission !== 'granted') {
-    console.warn('Notification permission not granted');
+    logger.warn('Notification permission not granted', { component: 'notifications-browser-notifications' });
     return null;
   }
 
@@ -114,7 +116,7 @@ export function showBrowserNotification(
 
     return notification;
   } catch (error) {
-    console.error('Error showing notification:', error);
+    logger.error('Error showing notification', { error: error, component: 'notifications-browser-notifications' });
     return null;
   }
 }

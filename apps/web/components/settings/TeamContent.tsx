@@ -42,6 +42,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
+import { logger } from '@/lib/utils/logger';
 
 // Role configuration (using actual UserRole type from types/index.ts)
 const ROLE_CONFIG: Record<UserRole, {
@@ -179,7 +180,7 @@ export default function TeamContent() {
           });
         setMembers(data);
       } catch (err) {
-        console.error('Error loading team:', err);
+        logger.error('Error loading team', { error: err, component: 'TeamContent' });
         toast.error('Failed to load team members');
       } finally {
         setLoading(false);
@@ -199,7 +200,7 @@ export default function TeamContent() {
         const users = await getRestorableUsers(profile!.orgId);
         setRestorableUsers(users);
       } catch (err) {
-        console.error('Error loading restorable users:', err);
+        logger.error('Error loading restorable users', { error: err, component: 'TeamContent' });
       } finally {
         setLoadingRestorable(false);
       }
@@ -249,7 +250,7 @@ export default function TeamContent() {
         });
       }
     } catch (err) {
-      console.error('Error updating role:', err);
+      logger.error('Error updating role', { error: err, component: 'TeamContent' });
       toast.error('Failed to update role');
     } finally {
       setSaving(false);
@@ -293,7 +294,7 @@ export default function TeamContent() {
         'deactivated'
       );
     } catch (err) {
-      console.error('Error deactivating member:', err);
+      logger.error('Error deactivating member', { error: err, component: 'TeamContent' });
       toast.error('Failed to deactivate team member');
     }
   };
@@ -327,7 +328,7 @@ export default function TeamContent() {
         'activated'
       );
     } catch (err) {
-      console.error('Error reactivating member:', err);
+      logger.error('Error reactivating member', { error: err, component: 'TeamContent' });
       toast.error('Failed to reactivate team member');
     }
   };
@@ -366,7 +367,7 @@ export default function TeamContent() {
         'removed'
       );
     } catch (err) {
-      console.error('Error removing member:', err);
+      logger.error('Error removing member', { error: err, component: 'TeamContent' });
       toast.error('Failed to remove team member');
     }
   };
@@ -406,7 +407,7 @@ export default function TeamContent() {
 
     // Refresh restorable users list
     if (profile?.orgId) {
-      getRestorableUsers(profile.orgId).then(setRestorableUsers).catch(console.error);
+      getRestorableUsers(profile.orgId).then(setRestorableUsers).catch((err) => logger.error('Operation failed', { error: err, component: 'TeamContent' }));
     }
 
     // Log the offboarding (using 'deactivated' as the closest match)
@@ -473,7 +474,7 @@ export default function TeamContent() {
         'activated'
       );
     } catch (err) {
-      console.error('Error restoring user:', err);
+      logger.error('Error restoring user', { error: err, component: 'TeamContent' });
       toast.error(err instanceof Error ? err.message : 'Failed to restore user');
     }
   };

@@ -17,6 +17,7 @@ import {
   AIModelDisplayConfig,
 } from '@/types';
 import { getModelsForTier } from '@/lib/assistant/models/types';
+import { logger } from '@/lib/utils/logger';
 
 export interface UseOrganizationAISettingsReturn {
   settings: OrganizationAISettings | null;
@@ -80,14 +81,14 @@ export function useOrganizationAISettings(): UseOrganizationAISettingsReturn {
             });
             setSettings(defaults);
           } catch (err) {
-            console.error('[useOrganizationAISettings] Error creating defaults:', err);
+            logger.error('[useOrganizationAISettings] Error creating defaults', { error: err, hook: 'useOrganizationAISettings' });
             setError('Failed to initialize AI settings');
           }
         }
         setLoading(false);
       },
       (err) => {
-        console.error('[useOrganizationAISettings] Error loading settings:', err);
+        logger.error('[useOrganizationAISettings] Error loading settings', { error: err, hook: 'useOrganizationAISettings' });
         setError(err.message);
         setLoading(false);
       }
@@ -162,7 +163,7 @@ export function useOrganizationAISettings(): UseOrganizationAISettingsReturn {
           { merge: true }
         );
       } catch (err) {
-        console.error('[useOrganizationAISettings] Error updating settings:', err);
+        logger.error('[useOrganizationAISettings] Error updating settings', { error: err, hook: 'useOrganizationAISettings' });
         throw err;
       }
     },

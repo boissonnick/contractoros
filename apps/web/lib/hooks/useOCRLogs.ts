@@ -11,6 +11,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
+import { logger } from '@/lib/utils/logger';
 
 export interface OCRLogEntry {
   id: string;
@@ -107,7 +108,7 @@ export function useOCRLogs(): UseOCRLogsReturn {
         setLogs(entries);
       } catch (err) {
         if (cancelled) return;
-        console.error('Failed to fetch OCR logs:', err);
+        logger.error('Failed to fetch OCR logs', { error: err, hook: 'useOCRLogs' });
         setError(
           err instanceof Error ? err.message : 'Failed to fetch OCR logs'
         );

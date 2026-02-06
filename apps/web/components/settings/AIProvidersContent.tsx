@@ -42,6 +42,7 @@ import type {
   AIFeatureModelAssignment,
   AIFeatureType,
 } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================================================
 // Provider Icons
@@ -524,7 +525,7 @@ function ProviderPriorityTab({ connectedProviders: _connectedProviders }: Provid
       setHasChanges(false);
       toast.success('AI provider settings saved');
     } catch (err) {
-      console.error('Error saving settings:', err);
+      logger.error('Error saving settings', { error: err, component: 'AIProvidersContent' });
       toast.error('Failed to save settings');
     } finally {
       setSaving(false);
@@ -797,7 +798,7 @@ export default function AIProvidersContent() {
         setLoading(false);
       },
       (error) => {
-        console.error('Error loading AI provider configs:', error);
+        logger.error('Error loading AI provider configs', { error: error, component: 'AIProvidersContent' });
         toast.error('Failed to load AI provider configurations');
         setLoading(false);
       }
@@ -870,11 +871,9 @@ export default function AIProvidersContent() {
 
         // Note: In production, the API key should be sent to a secure backend
         // endpoint that stores it in GCP Secret Manager, not in Firestore
-        console.info(
-          `[AI Providers] ${provider} connected. Note: API key should be stored securely via backend endpoint.`
-        );
+        logger.info('[AI Providers] ${provider} connected. Note: API key should be stored securely via backend endpoint.', { component: 'AIProvidersContent' });
       } catch (error) {
-        console.error(`Error connecting ${provider}:`, error);
+        logger.error('Error connecting ${provider}', { error: error, component: 'AIProvidersContent' });
         toast.error(`Failed to connect ${AI_PROVIDER_INFO[provider].name}`);
       } finally {
         setConnecting(null);
@@ -894,7 +893,7 @@ export default function AIProvidersContent() {
         await disconnectProvider(orgId, provider, userId);
         toast.success(`${AI_PROVIDER_INFO[provider].name} disconnected`);
       } catch (error) {
-        console.error(`Error disconnecting ${provider}:`, error);
+        logger.error('Error disconnecting ${provider}', { error: error, component: 'AIProvidersContent' });
         toast.error(`Failed to disconnect ${AI_PROVIDER_INFO[provider].name}`);
       } finally {
         setDisconnecting(null);

@@ -16,6 +16,7 @@ import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
 import { Supplier } from '@/types';
 import { convertTimestamp } from './utils';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================
 // Suppliers Hook
@@ -55,7 +56,7 @@ export function useSuppliers() {
         setLoading(false);
       },
       (err) => {
-        console.error('Error fetching suppliers:', err);
+        logger.error('Error fetching suppliers', { error: err, hook: 'useSuppliers' });
         setError(err as Error);
         setLoading(false);
       }

@@ -17,6 +17,7 @@ import { StripePayment, PaymentLink, SavedPaymentMethod, PaymentStatus } from '@
 import { useAuth } from '@/lib/auth';
 import { toast } from '@/components/ui/Toast';
 import { generatePaymentLinkToken, getPaymentLinkExpiration } from '@/lib/payments/paymentUtils';
+import { logger } from '@/lib/utils/logger';
 
 // Convert Firestore data to StripePayment
 function paymentFromFirestore(id: string, data: Record<string, unknown>): StripePayment {
@@ -154,9 +155,9 @@ export interface UsePaymentsOptions {
  * const { getStats, payments } = usePayments({ projectId });
  * const stats = getStats();
  *
- * console.log(`Collected: $${stats.totalCollected}`);
- * console.log(`Pending: $${stats.totalPending}`);
- * console.log(`${stats.completed} completed, ${stats.pending} pending`);
+ * logger.info('Collected: $${stats.totalCollected}', { component: 'hooks-usePayments' });
+ * logger.info('Pending: $${stats.totalPending}', { component: 'hooks-usePayments' });
+ * logger.info('${stats.completed} completed, ${stats.pending} pending', { component: 'hooks-usePayments' });
  *
  * @example
  * // Process a refund
@@ -225,7 +226,7 @@ export function usePayments(options: UsePaymentsOptions = {}) {
         setLoading(false);
       },
       (err) => {
-        console.error('usePayments error:', err);
+        logger.error('usePayments error', { error: err, hook: 'usePayments' });
         setLoading(false);
       }
     );
@@ -259,7 +260,7 @@ export function usePayments(options: UsePaymentsOptions = {}) {
         setPaymentLinks(snapshot.docs.map((d) => paymentLinkFromFirestore(d.id, d.data())));
       },
       (err) => {
-        console.error('usePayments links error:', err);
+        logger.error('usePayments links error', { error: err, hook: 'usePayments' });
       }
     );
 
@@ -301,7 +302,7 @@ export function usePayments(options: UsePaymentsOptions = {}) {
         const data = await response.json();
         return data;
       } catch (err) {
-        console.error('Create payment intent error:', err);
+        logger.error('Create payment intent error', { error: err, hook: 'usePayments' });
         toast.error(err instanceof Error ? err.message : 'Failed to create payment');
         return null;
       }
@@ -352,7 +353,7 @@ export function usePayments(options: UsePaymentsOptions = {}) {
           expiresAt,
         };
       } catch (err) {
-        console.error('Create payment link error:', err);
+        logger.error('Create payment link error', { error: err, hook: 'usePayments' });
         toast.error('Failed to create payment link');
         return null;
       }
@@ -371,7 +372,7 @@ export function usePayments(options: UsePaymentsOptions = {}) {
       });
       toast.success('Payment link cancelled');
     } catch (err) {
-      console.error('Cancel payment link error:', err);
+      logger.error('Cancel payment link error', { error: err, hook: 'usePayments' });
       toast.error('Failed to cancel payment link');
     }
   }, []);
@@ -404,7 +405,7 @@ export function usePayments(options: UsePaymentsOptions = {}) {
         toast.success('Refund processed successfully');
         return true;
       } catch (err) {
-        console.error('Process refund error:', err);
+        logger.error('Process refund error', { error: err, hook: 'usePayments' });
         toast.error(err instanceof Error ? err.message : 'Failed to process refund');
         return false;
       }
@@ -508,7 +509,7 @@ export function useSavedPaymentMethods(clientId: string) {
         setLoading(false);
       },
       (err) => {
-        console.error('useSavedPaymentMethods error:', err);
+        logger.error('useSavedPaymentMethods error', { error: err, hook: 'usePayments' });
         setLoading(false);
       }
     );
@@ -541,7 +542,7 @@ export function useSavedPaymentMethods(clientId: string) {
 
         toast.success('Default payment method updated');
       } catch (err) {
-        console.error('Set default method error:', err);
+        logger.error('Set default method error', { error: err, hook: 'usePayments' });
         toast.error('Failed to update default payment method');
       }
     },
@@ -560,7 +561,7 @@ export function useSavedPaymentMethods(clientId: string) {
 
       toast.success('Payment method removed');
     } catch (err) {
-      console.error('Delete method error:', err);
+      logger.error('Delete method error', { error: err, hook: 'usePayments' });
       toast.error('Failed to remove payment method');
     }
   }, []);

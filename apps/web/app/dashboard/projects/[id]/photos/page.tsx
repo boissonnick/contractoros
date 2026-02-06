@@ -30,6 +30,7 @@ import {
 import { db } from '@/lib/firebase/config';
 import { collection, getDocs } from 'firebase/firestore';
 import { toast } from '@/components/ui/Toast';
+import { logger } from '@/lib/utils/logger';
 
 type ViewMode = 'all' | 'albums' | 'before-after';
 type DisplayMode = 'grid' | 'timeline';
@@ -126,7 +127,7 @@ export default function ProjectPhotosPage() {
       });
       toast.success(`Uploaded ${files.length} photo${files.length !== 1 ? 's' : ''}`);
     } catch (error) {
-      console.error('Upload failed:', error);
+      logger.error('Upload failed', { error: error, page: 'dashboard-projects-id-photos' });
       toast.error('Failed to upload photos');
     } finally {
       setUploading(false);
@@ -148,7 +149,7 @@ export default function ProjectPhotosPage() {
       setShowAlbumModal(false);
       setEditingAlbum(null);
     } catch (error) {
-      console.error('Album save failed:', error);
+      logger.error('Album save failed', { error: error, page: 'dashboard-projects-id-photos' });
       toast.error('Failed to save album');
     }
   };
@@ -163,7 +164,7 @@ export default function ProjectPhotosPage() {
         setSelectedAlbum(null);
       }
     } catch (error) {
-      console.error('Album delete failed:', error);
+      logger.error('Album delete failed', { error: error, page: 'dashboard-projects-id-photos' });
       toast.error('Failed to delete album');
     }
   };
@@ -195,7 +196,7 @@ export default function ProjectPhotosPage() {
       }
       toast.success('Annotations saved');
     } catch (error) {
-      console.error('Annotation save failed:', error);
+      logger.error('Annotation save failed', { error: error, page: 'dashboard-projects-id-photos' });
       toast.error('Failed to save annotations');
     }
   };

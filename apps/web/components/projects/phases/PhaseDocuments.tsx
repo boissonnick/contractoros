@@ -7,6 +7,7 @@ import { DocumentArrowUpIcon, TrashIcon, ArrowDownTrayIcon } from '@heroicons/re
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/auth';
+import { logger } from '@/lib/utils/logger';
 
 interface PhaseDocumentsProps {
   phase: ProjectPhase;
@@ -35,7 +36,7 @@ export default function PhaseDocuments({ phase, projectId, onUpdate }: PhaseDocu
       'state_changed',
       (snap) => setProgress(Math.round((snap.bytesTransferred / snap.totalBytes) * 100)),
       (err) => {
-        console.error('Upload error:', err);
+        logger.error('Upload error', { error: err, component: 'PhaseDocuments' });
         setUploading(false);
       },
       async () => {

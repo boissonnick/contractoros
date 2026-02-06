@@ -13,6 +13,7 @@ import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { initializeAdminApp } from '@/lib/assistant/firebase-admin-init';
 import { PROJECT_SUMMARY_PROMPT } from '@/lib/ai/prompts';
 import type { ProjectSummary } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * Verify Firebase auth token
@@ -42,7 +43,7 @@ async function verifyAuth(request: NextRequest): Promise<{ uid: string; orgId: s
       orgId: userData.orgId,
     };
   } catch (error) {
-    console.error('[Project Summary] Auth error:', error);
+    logger.error('[Project Summary] Auth error', { error, route: 'assistant-project-summary' });
     return null;
   }
 }
@@ -302,7 +303,7 @@ async function generateSummaryWithAI(
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error('[Project Summary] Gemini API error:', errorText);
+    logger.error('[Project Summary] Gemini API error', { error: errorText, route: 'assistant-project-summary' });
     throw new Error(`AI API error: ${response.status}`);
   }
 
@@ -331,7 +332,7 @@ async function generateSummaryWithAI(
       scheduleStatus: parsed.scheduleStatus,
     };
   } catch (parseError) {
-    console.error('[Project Summary] Failed to parse AI response:', parseError);
+    logger.error('[Project Summary] Failed to parse AI response', { error: parseError, route: 'assistant-project-summary' });
     summary = {
       overview: responseText.slice(0, 500),
       progressPercentage: 0,
@@ -426,7 +427,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('[Project Summary] Error:', error);
+    logger.error('[Project Summary] Error', { error, route: 'assistant-project-summary' });
 
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 

@@ -24,6 +24,7 @@ import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/utils/logger';
 
 type ViewMode = 'list' | 'record' | 'detail';
 
@@ -91,7 +92,7 @@ export default function VoiceLogsPage() {
 
   // Handle recording complete
   const handleRecordingComplete = (id: string) => {
-    console.log('Recording complete:', id);
+
     setViewMode('list');
   };
 
@@ -328,7 +329,7 @@ function EnhancedVoiceRecorder({
           });
         },
         (error) => {
-          console.warn('Could not get location:', error.message);
+          logger.warn('Could not get location', { errorMessage: error.message, page: 'field-voice-logs' });
         },
         { enableHighAccuracy: false, timeout: 10000 }
       );
@@ -397,7 +398,7 @@ function EnhancedVoiceRecorder({
         }
       }, 100);
     } catch (err) {
-      console.error('Failed to start recording:', err);
+      logger.error('Failed to start recording', { error: err, page: 'field-voice-logs' });
       setError('Could not access microphone. Please check permissions.');
     }
   };
@@ -522,7 +523,7 @@ function EnhancedVoiceRecorder({
         setSubmitState('error');
       }
     } catch (err) {
-      console.error('Failed to queue recording:', err);
+      logger.error('Failed to queue recording', { error: err, page: 'field-voice-logs' });
       setError(err instanceof Error ? err.message : 'Failed to save recording');
       setSubmitState('error');
     }
@@ -810,7 +811,7 @@ function PendingQueueSection() {
       ]);
       setQueueItems([...pending, ...failed]);
     } catch (err) {
-      console.error('Failed to load queue:', err);
+      logger.error('Failed to load queue', { error: err, page: 'field-voice-logs' });
     } finally {
       setLoading(false);
     }
@@ -849,7 +850,7 @@ function PendingQueueSection() {
 
       loadQueue();
     } catch (err) {
-      console.error('Failed to retry:', err);
+      logger.error('Failed to retry', { error: err, page: 'field-voice-logs' });
     }
   };
 
@@ -863,7 +864,7 @@ function PendingQueueSection() {
       await queue.remove(id);
       loadQueue();
     } catch (err) {
-      console.error('Failed to delete:', err);
+      logger.error('Failed to delete', { error: err, page: 'field-voice-logs' });
     }
   };
 
@@ -882,7 +883,7 @@ function PendingQueueSection() {
 
       loadQueue();
     } catch (err) {
-      console.error('Failed to retry all:', err);
+      logger.error('Failed to retry all', { error: err, page: 'field-voice-logs' });
     }
   };
 

@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { OfflineState, QueuedOperation, OperationType, SyncEvent } from '@/lib/offline/types';
 import { useNetworkStatus } from '@/lib/offline/network-status';
 import { SyncManager, SyncResult } from '@/lib/offline/sync-manager';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================
 // Types
@@ -52,7 +53,7 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
     if (initRef.current) return;
     initRef.current = true;
 
-    SyncManager.initialize().catch(console.error);
+    SyncManager.initialize().catch((err) => logger.error('Operation failed', { error: err, component: 'OfflineProvider' }));
 
     return () => {
       SyncManager.cleanup();
@@ -74,7 +75,7 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const unsubscribe = SyncManager.onSyncEvent((event: SyncEvent) => {
       if (process.env.NODE_ENV === 'development') {
-        console.log('[OfflineProvider] Sync event:', event);
+
       }
     });
 
@@ -91,7 +92,7 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
 
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === 'SYNC_REQUESTED') {
-        SyncManager.forceSync().catch(console.error);
+        SyncManager.forceSync().catch((err) => logger.error('Operation failed', { error: err, component: 'OfflineProvider' }));
       }
     };
 

@@ -17,6 +17,7 @@ import { db } from '@/lib/firebase/config';
 import { Permit, PermitStatus, PermitInspection, PermitType } from '@/types';
 import { useAuth } from '@/lib/auth';
 import { toast } from '@/components/ui/Toast';
+import { logger } from '@/lib/utils/logger';
 
 interface UsePermitsOptions {
   projectId?: string;
@@ -108,7 +109,7 @@ export function usePermits(options: UsePermitsOptions = {}) {
         setLoading(false);
       },
       (err) => {
-        console.error('Error loading permits:', err);
+        logger.error('Error loading permits', { error: err, hook: 'usePermits' });
         setLoading(false);
       }
     );

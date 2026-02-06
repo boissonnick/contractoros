@@ -22,6 +22,7 @@ import {
   QueryConstraint,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================
 // Types
@@ -338,7 +339,7 @@ export async function logAuditEvent(
   entry: AuditLogInput
 ): Promise<string | null> {
   if (!orgId) {
-    console.warn('[AuditLogger] Missing orgId, skipping audit log');
+    logger.warn('[AuditLogger] Missing orgId, skipping audit log', { component: 'security-audit-logger' });
     return null;
   }
 
@@ -369,22 +370,13 @@ export async function logAuditEvent(
 
     // Log critical events to console for immediate visibility
     if (severity === 'critical') {
-      console.error(`[AUDIT:CRITICAL] ${entry.action}`, {
-        orgId,
-        userId: entry.userId,
-        resource: entry.resource,
-        resourceId: entry.resourceId,
-        details: entry.details,
-      });
+      logger.error('Audit critical event', { action: entry.action, orgId, userId: entry.userId, resource: entry.resource, resourceId: entry.resourceId, component: 'security-audit-logger' });
     }
 
     return docRef.id;
   } catch (error) {
     // Don't throw - audit logging should not break the main flow
-    console.error('[AuditLogger] Failed to log audit event:', error, {
-      action: entry.action,
-      orgId,
-    });
+    logger.error('[AuditLogger] Failed to log audit event', { error: error, component: 'security-audit-logger' });
     return null;
   }
 }
@@ -475,7 +467,7 @@ export async function getAuditEvents(
       hasMore,
     };
   } catch (error) {
-    console.error('[AuditLogger] Failed to get audit events:', error);
+    logger.error('[AuditLogger] Failed to get audit events', { error: error, component: 'security-audit-logger' });
     return { entries: [], hasMore: false };
   }
 }

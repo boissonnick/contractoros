@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/auth';
 import { searchAll, saveRecentSearch, getRecentSearches } from '@/lib/search';
 import { SearchResult } from '@/lib/search/types';
 import SearchResultList from './SearchResultList';
+import { logger } from '@/lib/utils/logger';
 
 interface GlobalSearchBarProps {
   className?: string;
@@ -67,7 +68,7 @@ export function GlobalSearchBar({ className = '' }: GlobalSearchBarProps) {
         const searchResults = await searchAll(orgId, searchQuery);
         setResults(searchResults);
       } catch (error) {
-        console.error('Search error:', error);
+        logger.error('Search error', { error: error, component: 'GlobalSearchBar' });
         setResults([]);
       } finally {
         setLoading(false);

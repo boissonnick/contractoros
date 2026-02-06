@@ -21,6 +21,7 @@ import {
   LinkIcon,
   InformationCircleIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 export interface AIKeyManagerProps {
   provider: AIModelProvider;
@@ -129,7 +130,7 @@ export default function AIKeyManager({
         toast.error(result.error || 'Invalid API key');
       }
     } catch (error) {
-      console.error('[AIKeyManager] Validation error:', error);
+      logger.error('[AIKeyManager] Validation error', { error: error, component: 'AIKeyManager' });
       setLocalStatus('invalid');
       setErrorMessage('Failed to validate API key. Please try again.');
       toast.error('Failed to validate API key');
@@ -149,7 +150,7 @@ export default function AIKeyManager({
       setErrorMessage(null);
       toast.success(`${providerConfig.displayName} API key removed`);
     } catch (error) {
-      console.error('[AIKeyManager] Clear error:', error);
+      logger.error('[AIKeyManager] Clear error', { error: error, component: 'AIKeyManager' });
       toast.error('Failed to remove API key');
     }
   }, [provider, providerConfig.displayName, onKeyClear]);

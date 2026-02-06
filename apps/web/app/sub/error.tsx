@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { ExclamationTriangleIcon, ArrowPathIcon, HomeIcon } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 export default function SubcontractorPortalError({
   error,
@@ -11,7 +12,7 @@ export default function SubcontractorPortalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error('Subcontractor portal error:', error);
+    logger.error('Subcontractor portal error', { error: error, page: 'sub-error' });
   }, [error]);
 
   return (

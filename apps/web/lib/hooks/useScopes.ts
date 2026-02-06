@@ -15,6 +15,7 @@ import {
 import { db } from '@/lib/firebase/config';
 import { Scope, ScopeStatus, ScopeItem, ScopeApproval } from '@/types';
 import { useAuth } from '@/lib/auth';
+import { logger } from '@/lib/utils/logger';
 
 function fromFirestore(id: string, data: Record<string, unknown>): Scope {
   const approvals = ((data.approvals as unknown[]) || []).map((a: unknown) => {
@@ -86,7 +87,7 @@ export function useScopes({ projectId }: UseScopesOptions) {
         setLoading(false);
       },
       (err) => {
-        console.error('useScopes error:', err);
+        logger.error('useScopes error', { error: err, hook: 'useScopes' });
         setError(err.message);
         setLoading(false);
       }

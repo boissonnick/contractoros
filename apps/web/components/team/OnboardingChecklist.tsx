@@ -39,7 +39,10 @@ import {
   updateOnboardingStep,
   bulkInitiateOnboarding,
   ONBOARDING_STEPS,
+  COMPLIANCE_CHECKLIST,
 } from '@/lib/onboarding/user-onboarding';
+import { ComplianceChecklistCard } from '@/components/team/ComplianceChecklistCard';
+import { logger } from '@/lib/utils/logger';
 
 interface OnboardingChecklistProps {
   /** Optional filter to show only specific users */
@@ -226,7 +229,7 @@ export default function OnboardingChecklist({
           break;
       }
     } catch (error) {
-      console.error('Error triggering step:', error);
+      logger.error('Error triggering step', { error: error, component: 'OnboardingChecklist' });
       toast.error('Failed to update onboarding step');
     } finally {
       setProcessingUsers((prev) => prev.filter((id) => id !== userId));
@@ -241,7 +244,7 @@ export default function OnboardingChecklist({
       await initiateOnboarding(userId);
       toast.success('Onboarding initiated');
     } catch (error) {
-      console.error('Error initiating onboarding:', error);
+      logger.error('Error initiating onboarding', { error: error, component: 'OnboardingChecklist' });
       toast.error('Failed to initiate onboarding');
     } finally {
       setProcessingUsers((prev) => prev.filter((id) => id !== userId));
@@ -270,7 +273,7 @@ export default function OnboardingChecklist({
       setSelectedUsers([]);
       setShowBulkModal(false);
     } catch (error) {
-      console.error('Error in bulk onboarding:', error);
+      logger.error('Error in bulk onboarding', { error: error, component: 'OnboardingChecklist' });
       toast.error('Failed to process bulk onboarding');
     } finally {
       setBulkSending(false);
@@ -638,6 +641,23 @@ export default function OnboardingChecklist({
           </div>
         </div>
       </BaseModal>
+
+      {/* Compliance Documents Section */}
+      <Card className="mt-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-semibold text-gray-900">Compliance Documents</h3>
+          <span className="text-xs text-gray-500">
+            Required for new employee onboarding
+          </span>
+        </div>
+        <ComplianceChecklistCard
+          items={COMPLIANCE_CHECKLIST}
+          completedItems={{}}
+          onToggle={(key, completed) => {
+            logger.info('Compliance item toggled', { key, completed, component: 'OnboardingChecklist' });
+          }}
+        />
+      </Card>
     </div>
   );
 }

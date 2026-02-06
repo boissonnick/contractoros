@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import { initializeAdminApp } from '@/lib/assistant/firebase-admin-init';
+import { logger } from '@/lib/utils/logger';
 
 async function verifyAuth(request: NextRequest) {
   await initializeAdminApp();
@@ -57,7 +58,7 @@ export async function GET(
 
     return NextResponse.json({ items });
   } catch (error) {
-    console.error('Error fetching punch items:', error);
+    logger.error('Error fetching punch items', { error, route: 'punch-list' });
     return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 });
   }
 }
@@ -99,7 +100,7 @@ export async function POST(
 
     return NextResponse.json({ id: docRef.id, ...punchItem });
   } catch (error) {
-    console.error('Error creating punch item:', error);
+    logger.error('Error creating punch item', { error, route: 'punch-list' });
     return NextResponse.json({ error: 'Failed to create' }, { status: 500 });
   }
 }

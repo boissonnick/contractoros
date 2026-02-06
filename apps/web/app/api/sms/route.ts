@@ -3,6 +3,7 @@ import { twilio, isTwilioConfigured, getDefaultPhoneNumber, formatToE164 } from 
 import { adminDb, Timestamp } from '@/lib/firebase/admin';
 import { renderTemplate } from '@/lib/sms/smsUtils';
 import { verifyAuthAndOrg } from '@/lib/api/auth';
+import { logger } from '@/lib/utils/logger';
 
 export const runtime = 'nodejs';
 
@@ -128,14 +129,14 @@ export async function POST(request: NextRequest) {
         updatedAt: Timestamp.now(),
       });
 
-      console.error('Twilio send error:', twilioError);
+      logger.error('Twilio send error', { error: twilioError, route: 'sms-send' });
       return NextResponse.json(
         { error: errorMessage, code: errorCode },
         { status: 500 }
       );
     }
   } catch (error) {
-    console.error('SMS API error:', error);
+    logger.error('SMS API error', { error, route: 'sms-send' });
     return NextResponse.json(
       { error: 'Failed to send SMS' },
       { status: 500 }
@@ -202,7 +203,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ messages });
   } catch (error) {
-    console.error('Get SMS messages error:', error);
+    logger.error('Get SMS messages error', { error, route: 'sms-list' });
     return NextResponse.json(
       { error: 'Failed to fetch messages' },
       { status: 500 }

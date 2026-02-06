@@ -22,6 +22,7 @@ import {
   SwatchIcon,
   DocumentDuplicateIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 // Project status configuration for display
 const STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string; dotColor: string }> = {
@@ -130,7 +131,7 @@ export default function ClientProjectDetailPage() {
           // Tasks may not exist
         }
       } catch (err) {
-        console.error('Error loading project:', err);
+        logger.error('Error loading project', { error: err, page: 'client-project-detail' });
         setError('Failed to load project');
       } finally {
         setLoading(false);

@@ -14,6 +14,7 @@ import {
   UserGroupIcon,
 } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/utils/logger';
 
 const albumSchema = z.object({
   name: z.string().min(1, 'Album name is required').max(100, 'Name too long'),
@@ -96,7 +97,7 @@ export default function CreateAlbumModal({
       reset();
       onClose();
     } catch (error) {
-      console.error('Failed to save album:', error);
+      logger.error('Failed to save album', { error: error, component: 'CreateAlbumModal' });
     }
   };
 

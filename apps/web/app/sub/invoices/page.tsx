@@ -47,6 +47,7 @@ import {
   ChevronRightIcon,
   XCircleIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 // Status configuration with icons
 const statusConfig: Record<SubInvoiceStatus, { label: string; color: string; icon: React.ReactNode }> = {
@@ -250,7 +251,7 @@ function CreateInvoiceModal({
       onSuccess();
       onClose();
     } catch (error) {
-      console.error('Error creating invoice:', error);
+      logger.error('Error creating invoice', { error: error, page: 'sub-invoices' });
       toast.error('Failed to create invoice');
     } finally {
       setSaving(false);
@@ -615,7 +616,7 @@ export default function SubInvoicesPage() {
         setLoading(false);
       },
       (error) => {
-        console.error('Error fetching invoices:', error);
+        logger.error('Error fetching invoices', { error: error, page: 'sub-invoices' });
         setFetchError('Failed to load invoices. Please try again.');
         setLoading(false);
       }
@@ -654,7 +655,7 @@ export default function SubInvoicesPage() {
         });
         setAssignments(data);
       } catch (error) {
-        console.error('Error fetching assignments:', error);
+        logger.error('Error fetching assignments', { error: error, page: 'sub-invoices' });
       }
     };
 
@@ -671,7 +672,7 @@ export default function SubInvoicesPage() {
       });
       toast.success('Invoice submitted successfully');
     } catch (error) {
-      console.error('Error submitting invoice:', error);
+      logger.error('Error submitting invoice', { error: error, page: 'sub-invoices' });
       toast.error('Failed to submit invoice');
       throw error;
     }

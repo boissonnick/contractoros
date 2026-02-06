@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb, Timestamp } from '@/lib/firebase/admin';
 import { verifyAuth } from '@/lib/api/auth';
+import { logger } from '@/lib/utils/logger';
 
 export const runtime = 'nodejs';
 
@@ -94,7 +95,7 @@ export async function GET(request: NextRequest) {
       isAuthenticated: !!authenticatedUser,
     });
   } catch (error) {
-    console.error('Get payment link error:', error);
+    logger.error('Get payment link error', { error, route: 'payments-link' });
     return NextResponse.json(
       { error: 'Failed to fetch payment link' },
       { status: 500 }
@@ -186,7 +187,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Update payment link error:', error);
+    logger.error('Update payment link error', { error, route: 'payments-link' });
     return NextResponse.json(
       { error: 'Failed to update payment link' },
       { status: 500 }

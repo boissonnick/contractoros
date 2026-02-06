@@ -37,6 +37,7 @@ import {
   DocumentTextIcon,
   CalendarIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 const PAGE_SIZE = 25;
 
@@ -161,7 +162,7 @@ export default function EmailHistoryPage() {
         }
       }
     } catch (error) {
-      console.error('Error loading email logs:', error);
+      logger.error('Error loading email logs', { error: error, page: 'dashboard-settings-email-history' });
       toast.error('Failed to load email history');
     } finally {
       setLoading(false);

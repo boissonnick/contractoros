@@ -1,6 +1,6 @@
 # ContractorOS Module Registry
 
-**Last Updated:** 2026-02-05 (Sprint 76 - added Review Cloud Functions: onReviewRequestCreated, syncGoogleReviews)
+**Last Updated:** 2026-02-06 (Sprint 113 - added lib/utils/logger.ts structured logger, no-console ESLint rule, 377 files migrated)
 **Purpose:** Fast codebase navigation - eliminates 200k+ token waste from Explore agents
 **Usage:** Check this file BEFORE running Explore agents at sprint start
 
@@ -41,11 +41,13 @@
 | **Expense OCR Analytics** | useOCRLogs | expenses/ocr-analytics/page.tsx | BarChartCard | Admin OCR stats |
 | **Financial Intelligence** | useCompanyStats | intelligence/page.tsx | CompanyOverviewDashboard, ProjectProfitabilityLeaderboard, CashFlowRunwayDashboard | BI dashboards |
 | **AP Invoicing** | useSubcontractorInvoices | ap-invoicing/page.tsx | SubcontractorInvoiceForm, InvoiceApprovalCard, LienWaiverModal | Subcontractor AP workflow |
-| **Invoices** | useInvoices | invoices/page.tsx | InvoiceGenerator, InvoicePDF | PDF + Stripe |
+| **Issues (Field)** | useIssues | field/issue/page.tsx | (inline form) | Field issue reporting (Sprint 111) |
+| **Invoices** | useInvoices, useRecurringInvoices | invoices/page.tsx, invoices/[id]/page.tsx | InvoiceGenerator, InvoicePDF | PDF download + email + Stripe |
 | **Leads** | useLeads | leads/page.tsx | LeadCard | CRM pipeline |
+| **Material Requests (Field)** | useMaterialRequests | field/materials/page.tsx | (inline form) | Field material requests (Sprint 111) |
 | **Materials** | useMaterials | materials/page.tsx | MaterialCard | Inventory |
 | **Messages** | useMessages | messages/page.tsx | MessageThread, MessageComposer | Real-time |
-| **Payroll** | usePayroll | payroll/page.tsx | PayrollRun, PayrollTable | Calculations |
+| **Payroll** | usePayroll | payroll/page.tsx | PayrollRun, PayrollTable, OvertimeAlertCard | Calculations + OT alerts |
 | **Photos** | usePhotos | photos/page.tsx | PhotoGallery | Firebase Storage |
 | **Projects** | useProjects | projects/page.tsx | ProjectCard, ProjectTimeline | CRUD hook |
 | **Reports** | useReports | reports/page.tsx | ReportGenerator, ReportChart | Data aggregation |
@@ -58,22 +60,23 @@
 | **Subcontractors** | useSubcontractors | subcontractors/page.tsx | SubcontractorCard, BidList | Bidding |
 | **Submittals** | useSubmittals | submittals/page.tsx | SubmittalCard | Document tracking |
 | **Tasks** | useTasks | tasks/page.tsx | TaskBoard, TaskCard | Drag & drop |
-| **Team** | useTeamMembers | team/page.tsx | TeamMemberCard, TeamMemberCostRateModal | User management |
-| **Time Tracking** | useTimeEntries | time/page.tsx | TimeTracker, TimeEntryList | Real-time tracking |
-| **Timesheets** | useTimesheets | timesheets/page.tsx | TimesheetTable | Payroll integration |
+| **Team** | useTeamMembers | team/page.tsx | TeamMemberCard, TeamMemberCostRateModal, CertificationsDashboard, CertificationFormModal | User management + Certs |
+| **Time Off** | useTimeOffRequests | team/time-off/page.tsx | TimeOffRequestModal, TimeOffApprovalCard | PTO/time-off requests |
+| **Time Tracking** | useTimeEntries | time/page.tsx | TimeTracker, TimeEntryList | Real-time + OT detection |
+| **Timesheets** | useWeeklyTimesheets | timesheets/page.tsx | TimesheetDetailModal, TimesheetRejectionModal, TimesheetApprovalList | Approval workflow |
 | **Warranties** | useWarranties | warranties/page.tsx | WarrantyCard | Warranty tracking |
 
 ---
 
 ## All Hooks (`lib/hooks/`) - Alphabetical
 
-**Total: 83 hooks**
+**Total: 85 hooks**
 
 ### Data Fetching Hooks (Firestore Collections)
 
 | Hook | File | Collection | Returns | Purpose |
 |------|------|------------|---------|---------|
-| useAccountingConnection | useAccountingConnection.ts | accountingConnections | {connection, loading, error} | QBO integration |
+| useAccountingConnection | useAccountingConnection.ts | accountingConnections, accountMappingRules | {connection, mappingRules, loading, addMappingRule, removeMappingRule, triggerSync} | QBO integration + account mapping + full sync |
 | useActivityLog | useActivityLog.ts | activityLogs | {logs, loading, error} | Activity feed |
 | useAIProviderSettings | useAIProviderSettings.ts | aiProviderSettings | {settings, loading, error} | AI config |
 | useAssistant | useAssistant.ts | - | {sendMessage, loading} | AI assistant |
@@ -101,8 +104,10 @@
 | useFieldReports | useFieldReports.ts | fieldReports | {reports, loading, error} | Field reports |
 | useInspections | useInspections.ts | inspections | {inspections, loading, error} | Inspections |
 | useInvoices | useInvoices.ts | invoices | {invoices, loading, error} | Invoicing |
+| useIssues | useIssues.ts | issues | {issues, loading, error, addIssue, updateIssue} | Issue reporting (Sprint 111) |
 | useLeads | useLeads.ts | leads | {leads, loading, error} | Lead management |
 | useLienWaivers | useLienWaivers.ts | lienWaivers | {waivers, loading, error} | Lien waivers |
+| useMaterialRequests | useMaterialRequests.ts | materialRequests | {requests, loading, error, addRequest, updateRequest} | Material requests (Sprint 111) |
 | useMaterials | useMaterials.ts | materials | {materials, loading, error} | Material tracking |
 | useMessages | useMessages.ts | messages | {messages, loading, error} | Messaging |
 | useNotifications | useNotifications.ts | notifications | {notifications, loading, error} | Notifications |
@@ -261,6 +266,7 @@ Core reusable components used everywhere:
 | /dashboard/search | search/page.tsx | GlobalSearch | Multiple | Global search |
 | /dashboard/service-tickets | service-tickets/page.tsx | ServiceTicketCard | useServiceTickets | Service tickets |
 | /dashboard/settings | settings/page.tsx | SettingsPanel | useSessionManagement | User settings |
+| /dashboard/settings/integrations/quickbooks | quickbooks/page.tsx | QBOAccountMapping, QBOSyncStatus | useAccountingConnection | QBO integration (Sprint 109) |
 | /dashboard/signatures | signatures/page.tsx | SignatureFlow | useSignatureRequests | E-signatures |
 | /dashboard/subcontractors | subcontractors/page.tsx | SubcontractorCard | useSubcontractors | Subcontractor mgmt |
 | /dashboard/submittals | submittals/page.tsx | SubmittalCard | useSubmittals | Submittals |
@@ -270,6 +276,50 @@ Core reusable components used everywhere:
 | /dashboard/timesheets | timesheets/page.tsx | TimesheetTable | useTimesheets | Timesheet management |
 | /dashboard/tools | tools/page.tsx | ToolCard | useTools | Tool tracking |
 | /dashboard/warranties | warranties/page.tsx | WarrantyCard | useWarranties | Warranty tracking |
+
+---
+
+## Client Portal Pages (`app/client/`)
+
+**Total: 15 routes** (Sprint 108 enhanced)
+
+| Route | File | Features | Status |
+|-------|------|----------|--------|
+| /client | page.tsx | Dashboard: active project, stats, recent photos, invoices | ✅ |
+| /client/projects | projects/page.tsx | Project list with status | ✅ |
+| /client/projects/[id] | projects/[id]/page.tsx | Project detail: progress, phases, task stats, quick links | ✅ |
+| /client/projects/[id]/scope | projects/[id]/scope/page.tsx | Scope of work view | ✅ |
+| /client/projects/[id]/selections | projects/[id]/selections/page.tsx | Selection approval with budget, notes, option selection | ✅ |
+| /client/projects/[id]/change-orders | projects/[id]/change-orders/page.tsx | Change order review | ✅ |
+| /client/messages | messages/page.tsx | Two-way messaging with real-time updates (Sprint 108) | ✅ Enhanced |
+| /client/invoices | invoices/page.tsx | Invoice list with Pay Now, payment progress, overdue warnings (Sprint 108) | ✅ Enhanced |
+| /client/documents | documents/page.tsx | 6 document types: invoices, change orders, contracts, permits, warranties, insurance (Sprint 108) | ✅ Enhanced |
+| /client/photos | photos/page.tsx | Photo gallery with before/after comparisons, date/project filters | ✅ |
+| /client/settings | settings/page.tsx | Notification preferences, contact method, phone (Sprint 108) | ✅ New |
+| /client/[token]/timeline | [token]/timeline/page.tsx | Public project timeline | ✅ |
+| /client/[token]/gallery | [token]/gallery/page.tsx | Public photo gallery | ✅ |
+| /client/[token]/messages | [token]/messages/page.tsx | Public messages view | ✅ |
+| /client/[token]/approvals | [token]/approvals/page.tsx | Public approvals | ✅ |
+
+---
+
+## Field Portal Pages (`app/field/`)
+
+**Total: 11 routes** (Sprint 111 added 4)
+
+| Route | File | Hook Used | Purpose |
+|-------|------|-----------|---------|
+| /field | page.tsx | (direct queries) | Home — clock in/out, tasks, quick actions |
+| /field/time | time/page.tsx | useTimeEntries | Time clock |
+| /field/schedule | schedule/page.tsx | useSchedule | Daily schedule |
+| /field/tasks | tasks/page.tsx | useTasks | Task list |
+| /field/photos | photos/page.tsx | usePhotos | Photo capture |
+| /field/daily-log | daily-log/page.tsx | useDailyLogs | Daily log |
+| /field/voice-logs | voice-logs/page.tsx | - | Voice logs |
+| /field/issue | issue/page.tsx | useIssues | Issue reporting (Sprint 111) |
+| /field/safety | safety/page.tsx | useSafetyIncidents | Safety incidents (Sprint 111) |
+| /field/equipment | equipment/page.tsx | useEquipment | Equipment checkout/return (Sprint 111) |
+| /field/materials | materials/page.tsx | useMaterialRequests | Material requests (Sprint 111) |
 
 ---
 
@@ -322,7 +372,9 @@ Core reusable components used everywhere:
 | estimates | Estimates | clientId, status, total | clientId+status, createdAt |
 | expenses | Expenses | projectId, amount, date | projectId+date |
 | invoices | Invoices | clientId, status, dueDate, total | clientId+status, dueDate |
+| issues | Issues (field) | projectId, reportedBy, severity, status | projectId+createdAt |
 | leads | Leads | name, status, source | status, createdAt |
+| materialRequests | Material requests | projectId, requestedBy, priority, status | projectId+createdAt |
 | materials | Materials | projectId, name, quantity | projectId+name |
 | messages | Messages | threadId, senderId, timestamp | threadId+timestamp |
 | notifications | Notifications | userId, read, timestamp | userId+read+timestamp |

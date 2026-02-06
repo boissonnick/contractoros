@@ -29,6 +29,7 @@ import {
   Project,
 } from '@/types';
 import { formatCurrency } from '@/lib/date-utils';
+import { logger } from '@/lib/utils/logger';
 
 export interface ExpenseDetailsFilter {
   category?: ExpenseCategory;
@@ -198,7 +199,7 @@ export function ExpenseDetailsModal({
       try {
         await approveExpense(expense.id);
       } catch (err) {
-        console.error(`Failed to approve expense ${expense.id}:`, err);
+        logger.error('Failed to approve expense ${expense.id}', { error: err, component: 'ExpenseDetailsModal' });
       }
     }
     setSelectedExpenses(new Set());
@@ -215,7 +216,7 @@ export function ExpenseDetailsModal({
       try {
         await rejectExpense(expense.id, reason);
       } catch (err) {
-        console.error(`Failed to reject expense ${expense.id}:`, err);
+        logger.error('Failed to reject expense ${expense.id}', { error: err, component: 'ExpenseDetailsModal' });
       }
     }
     setSelectedExpenses(new Set());

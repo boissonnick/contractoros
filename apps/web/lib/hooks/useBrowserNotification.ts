@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
+import { logger } from '@/lib/utils/logger';
 
 export type BrowserPermissionState = 'granted' | 'denied' | 'default' | 'unsupported';
 
@@ -81,7 +82,7 @@ export function useBrowserNotification(): UseBrowserNotificationReturn {
       setPermissionState(permission as BrowserPermissionState);
       return permission === 'granted';
     } catch (error) {
-      console.error('Error requesting notification permission:', error);
+      logger.error('Error requesting notification permission', { error: error, hook: 'useBrowserNotification' });
       return false;
     } finally {
       setIsRequesting(false);
@@ -112,7 +113,7 @@ export function useBrowserNotification(): UseBrowserNotificationReturn {
       };
     } catch (error) {
       // Fallback for browsers that require service worker for notifications
-      console.error('Error sending test notification:', error);
+      logger.error('Error sending test notification', { error: error, hook: 'useBrowserNotification' });
     }
   }, [isSupported]);
 

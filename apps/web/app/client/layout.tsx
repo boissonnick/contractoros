@@ -4,6 +4,7 @@ import React from 'react';
 import { useAuth } from '@/lib/auth';
 import AuthGuard from '@/components/auth/AuthGuard';
 import AppShell from '@/components/ui/AppShell';
+import { SectionErrorBoundary } from '@/components/ui/SectionErrorBoundary';
 import { NavItem } from '@/types';
 import {
   HomeIcon,
@@ -12,6 +13,7 @@ import {
   ChatBubbleLeftRightIcon,
   DocumentTextIcon,
   CreditCardIcon,
+  Cog6ToothIcon,
 } from '@heroicons/react/24/outline';
 
 const navItems: NavItem[] = [
@@ -21,6 +23,7 @@ const navItems: NavItem[] = [
   { label: 'Invoices', href: '/client/invoices', icon: CreditCardIcon },
   { label: 'Messages', href: '/client/messages', icon: ChatBubbleLeftRightIcon },
   { label: 'Documents', href: '/client/documents', icon: DocumentTextIcon },
+  { label: 'Settings', href: '/client/settings', icon: Cog6ToothIcon },
 ];
 
 function ClientLayoutContent({ children }: { children: React.ReactNode }) {
@@ -32,7 +35,9 @@ function ClientLayoutContent({ children }: { children: React.ReactNode }) {
       userDisplayName={profile?.displayName}
       onSignOut={signOut}
     >
-      {children}
+      <SectionErrorBoundary sectionName="Client Portal">
+        {children}
+      </SectionErrorBoundary>
     </AppShell>
   );
 }

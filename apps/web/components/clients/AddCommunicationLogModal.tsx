@@ -14,6 +14,7 @@ import {
   UserGroupIcon,
   DocumentTextIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 const logSchema = z.object({
   type: z.enum(['phone', 'email', 'text', 'meeting', 'site_visit', 'note'] as const),
@@ -71,7 +72,7 @@ export function AddCommunicationLogModal({ isOpen, onClose, onAdd }: AddCommunic
       reset();
       onClose();
     } catch (err) {
-      console.error('Error logging communication:', err);
+      logger.error('Error logging communication', { error: err, component: 'AddCommunicationLogModal' });
       toast.error('Failed to log communication');
     } finally {
       setIsSubmitting(false);

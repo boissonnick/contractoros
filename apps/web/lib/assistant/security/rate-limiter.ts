@@ -16,6 +16,7 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { RATE_LIMITS, ModelTier, RateLimitConfig } from '../models/types';
+import { logger } from '@/lib/utils/logger';
 
 export interface RateLimitCheck {
   allowed: boolean;
@@ -125,7 +126,7 @@ export async function checkRateLimit(
 
     return evaluateLimits(usage, config);
   } catch (error) {
-    console.error('[RateLimiter] Error checking rate limit:', error);
+    logger.error('Error checking rate limit', { error, module: 'rate-limiter' });
     // On error, allow the request but log it
     return {
       allowed: true,
@@ -247,7 +248,7 @@ export async function recordUsage(
     const cacheKey = `${orgId}:${todayKey}`;
     rateLimitCache.delete(cacheKey);
   } catch (error) {
-    console.error('[RateLimiter] Error recording usage:', error);
+    logger.error('Error recording usage', { error, module: 'rate-limiter' });
     // Don't throw - recording failure shouldn't break the response
   }
 }
@@ -328,7 +329,7 @@ export function cleanupStaleCache(maxAgeMs: number = 60 * 60 * 1000): number {
   });
 
   if (cleanedCount > 0) {
-    console.log(`[RateLimiter] Cleaned up ${cleanedCount} stale cache entries`);
+    logger.debug(`Cleaned up ${cleanedCount} stale cache entries`, { module: 'rate-limiter' });
   }
 
   return cleanedCount;

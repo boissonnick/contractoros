@@ -25,6 +25,7 @@ import {
   DailyLogSummary,
   DailyLogPhoto,
 } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 interface UseDailyLogsOptions {
   projectId?: string;
@@ -130,7 +131,7 @@ export function useDailyLogs(options: UseDailyLogsOptions = {}): UseDailyLogsRet
         setError(null);
       },
       (err) => {
-        console.error('Error fetching daily logs:', err);
+        logger.error('Error fetching daily logs', { error: err, hook: 'useDailyLogs' });
         setError(err.message);
         setLoading(false);
       }

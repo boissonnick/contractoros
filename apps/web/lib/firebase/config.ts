@@ -10,6 +10,7 @@ import {
 } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import { logger } from "@/lib/utils/logger";
 
 // Firebase configuration - requires environment variables
 // Copy .env.example to .env.local and fill in your Firebase project values
@@ -35,7 +36,7 @@ if (typeof window !== 'undefined') {
 
   for (const { key, value } of configChecks) {
     if (!value) {
-      console.error(`Firebase config missing: ${key}. Rebuild with environment variables.`);
+      logger.error(`Firebase config missing: ${key}. Rebuild with environment variables.`, { module: 'firebase-config' });
     }
   }
 }

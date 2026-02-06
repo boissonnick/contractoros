@@ -7,6 +7,7 @@ import { saveOffline, getOfflineData } from './storage';
 import { addToQueue, subscribeToQueue } from './sync-queue';
 import { checkNetworkStatus } from './network-status';
 import { DailyLogCategory, WeatherCondition } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 // Offline daily log with sync tracking
 export interface OfflineDailyLog {
@@ -315,7 +316,7 @@ export class OfflineDailyLogService {
       this.pendingCount = logs.filter((l) => l.syncStatus === 'pending').length;
       this.listeners.forEach((listener) => listener(this.pendingCount));
     } catch (err) {
-      console.error('Failed to update pending count:', err);
+      logger.error('Failed to update pending count', { error: err, component: 'offline-offline-daily-logs' });
     }
   }
 }

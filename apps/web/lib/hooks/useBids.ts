@@ -16,6 +16,7 @@ import {
 import { db } from '@/lib/firebase/config';
 import { Bid, BidStatus, BidSolicitation, BidSolicitationStatus } from '@/types';
 import { useAuth } from '@/lib/auth';
+import { logger } from '@/lib/utils/logger';
 
 function bidFromFirestore(id: string, data: Record<string, unknown>): Bid {
   return {
@@ -100,7 +101,7 @@ export function useBids(projectId: string) {
       setBids(snap.docs.map(d => bidFromFirestore(d.id, d.data())));
       setLoading(false);
     }, (err) => {
-      console.error('useBids error:', err);
+      logger.error('useBids error', { error: err, hook: 'useBids' });
       if (err.message?.includes('requires an index')) {
         setError('Database index required. Please deploy indexes.');
       } else if (err.message?.includes('permission-denied')) {
@@ -122,7 +123,7 @@ export function useBids(projectId: string) {
     const unsub2 = onSnapshot(solQ, (snap) => {
       setSolicitations(snap.docs.map(d => solicitationFromFirestore(d.id, d.data())));
     }, (err) => {
-      console.error('useBidSolicitations error:', err);
+      logger.error('useBidSolicitations error', { error: err, hook: 'useBids' });
       setSolicitations([]);
     });
 

@@ -21,6 +21,7 @@ import {
   CheckCircleIcon,
   ExclamationCircleIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 interface Signer {
   id: string;
@@ -186,7 +187,7 @@ export default function SendForSignatureModal({
       setStep('success');
       onSuccess?.(result.signatureRequestId, result.signingUrls || []);
     } catch (err) {
-      console.error('Error sending for signature:', err);
+      logger.error('Error sending for signature', { error: err, component: 'SendForSignatureModal' });
       setError(err instanceof Error ? err.message : 'An unexpected error occurred');
       setStep('error');
     }

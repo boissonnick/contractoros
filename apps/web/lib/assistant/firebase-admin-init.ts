@@ -6,6 +6,7 @@
  */
 
 import { initializeApp, getApps, cert, App } from 'firebase-admin/app';
+import { logger } from '@/lib/utils/logger';
 
 let adminApp: App | null = null;
 
@@ -32,7 +33,7 @@ export async function initializeAdminApp(): Promise<App> {
         projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
       });
     } catch (error) {
-      console.error('[Firebase Admin] Failed to parse service account key:', error);
+      logger.error('Failed to parse service account key', { error, module: 'firebase-admin-init' });
       throw new Error('Invalid FIREBASE_SERVICE_ACCOUNT_KEY');
     }
   } else {

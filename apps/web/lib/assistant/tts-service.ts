@@ -3,6 +3,8 @@
  * Uses the Web Speech API for browser-native TTS functionality
  */
 
+import { logger } from '@/lib/utils/logger';
+
 export interface TTSOptions {
   voiceURI?: string;
   rate?: number;        // 0.5 - 2.0
@@ -200,7 +202,7 @@ function processQueue(options: TTSOptions): void {
   };
 
   utterance.onerror = (event) => {
-    console.error('[TTS] Speech error:', event.error);
+    logger.error('Speech error', { error: event.error, module: 'tts-service' });
     isProcessingQueue = false;
     _currentUtterance = null;
     // Continue with next chunk on error
@@ -216,7 +218,7 @@ function processQueue(options: TTSOptions): void {
  */
 export function speak(text: string, options: TTSOptions = {}): void {
   if (!isTTSSupported()) {
-    console.warn('[TTS] Speech synthesis not supported in this browser');
+    logger.warn('Speech synthesis not supported in this browser', { module: 'tts-service' });
     return;
   }
 

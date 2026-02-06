@@ -28,6 +28,7 @@ import {
   getAllLaborRates,
   getStateFromZipPrefix,
 } from '@/lib/intelligence/labor-rates';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * Main intelligence hook
@@ -126,7 +127,7 @@ export function useTopMaterialMovers(limit: number = 5) {
         const data = await getTopMovers(limit);
         setMovers(data);
       } catch (e) {
-        console.error('Failed to fetch top movers:', e);
+        logger.error('Failed to fetch top movers', { error: e, hook: 'useIntelligence' });
       } finally {
         setLoading(false);
       }
@@ -158,7 +159,7 @@ export function useMaterialAlerts(thresholdPercent: number = 5) {
         const data = await checkPriceAlerts(thresholdPercent);
         setAlerts(data);
       } catch (e) {
-        console.error('Failed to check price alerts:', e);
+        logger.error('Failed to check price alerts', { error: e, hook: 'useIntelligence' });
       } finally {
         setLoading(false);
       }
@@ -237,7 +238,7 @@ export function usePriceSuggestion(
         const generated = await generateSuggestion(description, trade, projectType, zipCode);
         setSuggestion(generated);
       } catch (e) {
-        console.error('Failed to get price suggestion:', e);
+        logger.error('Failed to get price suggestion', { error: e, hook: 'useIntelligence' });
         setSuggestion(null);
       } finally {
         setLoading(false);
@@ -410,7 +411,7 @@ export function useMarketBenchmark(
 
         setBenchmark(sampleBenchmark);
       } catch (e) {
-        console.error('Failed to fetch benchmark:', e);
+        logger.error('Failed to fetch benchmark', { error: e, hook: 'useIntelligence' });
         setBenchmark(null);
       } finally {
         setLoading(false);
@@ -566,7 +567,7 @@ export function useEstimateConfidence(
           sampleSize: itemsWithData * 5, // Approximate sample size
         });
       } catch (e) {
-        console.error('Failed to calculate estimate confidence:', e);
+        logger.error('Failed to calculate estimate confidence', { error: e, hook: 'useIntelligence' });
         setConfidence(null);
       } finally {
         setLoading(false);

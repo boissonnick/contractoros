@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getFirestore } from 'firebase-admin/firestore';
 import { initializeAdminApp } from '@/lib/assistant/firebase-admin-init';
+import { logger } from '@/lib/utils/logger';
 
 async function validateClientToken(token: string) {
   await initializeAdminApp();
@@ -93,7 +94,7 @@ export async function GET(
       availableTypes: CLIENT_VISIBLE_TYPES
     });
   } catch (error) {
-    console.error('Error fetching documents:', error);
+    logger.error('Error fetching documents', { error, route: 'client-documents' });
     return NextResponse.json({ error: 'Failed to fetch documents' }, { status: 500 });
   }
 }

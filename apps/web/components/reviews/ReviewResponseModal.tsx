@@ -6,6 +6,7 @@ import { useReview, useReviewResponseTemplates } from '@/lib/hooks/useReviews';
 import { useAuth } from '@/lib/auth';
 import { Review } from '@/types/review';
 import { StarIcon } from '@heroicons/react/24/solid';
+import { logger } from '@/lib/utils/logger';
 
 interface ReviewResponseModalProps {
   isOpen: boolean;
@@ -47,7 +48,7 @@ export function ReviewResponseModal({
       await respondToReview(responseText, profile.uid);
       onClose();
     } catch (err) {
-      console.error('Failed to respond to review:', err);
+      logger.error('Failed to respond to review', { error: err, component: 'ReviewResponseModal' });
     } finally {
       setLoading(false);
     }

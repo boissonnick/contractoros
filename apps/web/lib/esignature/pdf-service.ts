@@ -4,6 +4,7 @@
  */
 
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import { logger } from '@/lib/utils/logger';
 
 // Lazy-load @react-pdf/renderer to reduce initial bundle size (~3MB)
 async function renderPdfToBlob(document: any): Promise<Blob> {
@@ -88,7 +89,7 @@ export async function generateAndUploadEstimatePdf(
       blob,
     };
   } catch (error) {
-    console.error('Error generating estimate PDF:', error);
+    logger.error('Error generating estimate PDF', { error, module: 'pdf-service' });
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to generate PDF',
@@ -163,7 +164,7 @@ export async function generateAndUploadContractPdf(
     const url = await getDownloadURL(storageRef);
     return { success: true, url, blob };
   } catch (error) {
-    console.error('Error generating contract PDF:', error);
+    logger.error('Error generating contract PDF', { error, module: 'pdf-service' });
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to generate PDF',
@@ -200,7 +201,7 @@ export async function generateAndUploadChangeOrderPdf(
     const url = await getDownloadURL(storageRef);
     return { success: true, url, blob };
   } catch (error) {
-    console.error('Error generating change order PDF:', error);
+    logger.error('Error generating change order PDF', { error, module: 'pdf-service' });
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to generate PDF',
@@ -237,7 +238,7 @@ export async function generateAndUploadScopeOfWorkPdf(
     const url = await getDownloadURL(storageRef);
     return { success: true, url, blob };
   } catch (error) {
-    console.error('Error generating scope of work PDF:', error);
+    logger.error('Error generating scope of work PDF', { error, module: 'pdf-service' });
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to generate PDF',
@@ -274,7 +275,7 @@ export async function generateAndUploadInvoicePdf(
     const url = await getDownloadURL(storageRef);
     return { success: true, url, blob };
   } catch (error) {
-    console.error('Error generating invoice PDF:', error);
+    logger.error('Error generating invoice PDF', { error, module: 'pdf-service' });
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to generate PDF',
@@ -310,7 +311,7 @@ export async function generateAndUploadLienWaiverPdf(
     const url = await getDownloadURL(storageRef);
     return { success: true, url, blob };
   } catch (error) {
-    console.error('Error generating lien waiver PDF:', error);
+    logger.error('Error generating lien waiver PDF', { error, module: 'pdf-service' });
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to generate PDF',
@@ -534,7 +535,7 @@ export async function generateSignedPdf(
       blob: modifiedBlob,
     };
   } catch (error) {
-    console.error('Error generating signed PDF:', error);
+    logger.error('Error generating signed PDF', { error, module: 'pdf-service' });
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to generate signed PDF',
@@ -573,7 +574,7 @@ export async function uploadPdfBlob(
       blob,
     };
   } catch (error) {
-    console.error('Error uploading PDF:', error);
+    logger.error('Error uploading PDF', { error, module: 'pdf-service' });
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to upload PDF',

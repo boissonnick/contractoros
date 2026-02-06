@@ -18,6 +18,7 @@ import {
   ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
+import { logger } from '@/lib/utils/logger';
 
 type SigningPageStatus = 'loading' | 'ready' | 'signing' | 'signed' | 'declined' | 'expired' | 'invalid';
 
@@ -109,7 +110,7 @@ export default function SigningPage() {
           updatedAt: Timestamp.now(),
         });
       } catch (error) {
-        console.error('Error recording view:', error);
+        logger.error('Error recording view', { error: error, page: 'sign-token' });
       }
     }
 
@@ -213,7 +214,7 @@ export default function SigningPage() {
           error: null,
         });
       } catch (error) {
-        console.error('Error fetching signature request:', error);
+        logger.error('Error fetching signature request', { error: error, page: 'sign-token' });
         setState((s) => ({
           ...s,
           status: 'invalid',
@@ -274,7 +275,7 @@ export default function SigningPage() {
 
       setState((s) => ({ ...s, status: 'signed' }));
     } catch (error) {
-      console.error('Error signing document:', error);
+      logger.error('Error signing document', { error: error, page: 'sign-token' });
       setState((s) => ({ ...s, error: 'Failed to sign document. Please try again.' }));
     } finally {
       setIsSubmitting(false);
@@ -325,7 +326,7 @@ export default function SigningPage() {
       setState((s) => ({ ...s, status: 'declined' }));
       setShowDeclineModal(false);
     } catch (error) {
-      console.error('Error declining document:', error);
+      logger.error('Error declining document', { error: error, page: 'sign-token' });
       setState((s) => ({ ...s, error: 'Failed to decline document. Please try again.' }));
     } finally {
       setIsSubmitting(false);

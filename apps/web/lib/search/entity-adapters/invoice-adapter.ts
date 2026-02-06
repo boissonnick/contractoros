@@ -5,6 +5,7 @@
 import { db } from '@/lib/firebase/config';
 import { collection, getDocs, query, limit } from 'firebase/firestore';
 import { SearchResult } from '../types';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * Search invoices by invoice number, client name, project name, and amount
@@ -78,7 +79,7 @@ export async function searchInvoices(
     results.sort((a, b) => b.score - a.score);
     return results.slice(0, 20);
   } catch (error) {
-    console.error('Error searching invoices:', error);
+    logger.error('Error searching invoices', { error: error, component: 'search-entity-adapters-invoice-adapter' });
     return [];
   }
 }

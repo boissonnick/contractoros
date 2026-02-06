@@ -38,6 +38,7 @@ import {
   TagIcon,
 } from '@heroicons/react/24/outline';
 import { format, formatDistanceToNow } from 'date-fns';
+import { logger } from '@/lib/utils/logger';
 
 type TabType = 'overview' | 'projects' | 'communication' | 'notes' | 'financials';
 
@@ -97,7 +98,7 @@ export default function ClientDetailPage() {
       toast.success('Client deleted');
       router.push('/dashboard/clients');
     } catch (err) {
-      console.error('Error deleting client:', err);
+      logger.error('Error deleting client', { error: err, page: 'client-detail' });
       toast.error('Failed to delete client');
     }
   };
@@ -107,7 +108,7 @@ export default function ClientDetailPage() {
       await updateClient({ status: newStatus });
       toast.success('Status updated');
     } catch (err) {
-      console.error('Error updating status:', err);
+      logger.error('Error updating status', { error: err, page: 'client-detail' });
       toast.error('Failed to update status');
     }
   };

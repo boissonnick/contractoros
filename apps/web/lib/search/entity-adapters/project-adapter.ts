@@ -5,6 +5,7 @@
 import { db } from '@/lib/firebase/config';
 import { collection, getDocs, query, limit } from 'firebase/firestore';
 import { SearchResult } from '../types';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * Search projects by name, address, and description
@@ -77,7 +78,7 @@ export async function searchProjects(
 
     return results.slice(0, 20);
   } catch (error) {
-    console.error('Error searching projects:', error);
+    logger.error('Error searching projects', { error: error, component: 'search-entity-adapters-project-adapter' });
     return [];
   }
 }

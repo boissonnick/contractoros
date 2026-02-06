@@ -10,6 +10,7 @@ import type {
   TeamPerformance,
 } from './types';
 import { STATUS_COLORS } from './types';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * Dashboard reports hook for KPIs, charts, and aggregated metrics
@@ -189,7 +190,7 @@ export function useDashboardReports(orgId?: string) {
       setTeamPerformance(teamData);
 
     } catch (err) {
-      console.error('Failed to fetch dashboard data:', err);
+      logger.error('Failed to fetch dashboard data', { error: err, hook: 'useDashboardReports' });
       setError(err as Error);
     } finally {
       setLoading(false);

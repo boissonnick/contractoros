@@ -7,8 +7,9 @@
  */
 
 import { adminDb } from '@/lib/firebase/admin';
+import { logger } from '@/lib/utils/logger';
 import { Expense, ExpenseCategory, AccountMappingRule } from '@/types';
-import { qboCreate, qboUpdate, QBOClientError } from './client';
+import { qboCreate, qboUpdate, qboQuery, QBOClientError } from './client';
 import { QBOPurchase, QBOPurchaseLine, QBORef } from './types';
 import {
   getMapping,
@@ -135,12 +136,39 @@ export async function pushExpenseToQBO(
     accountMappings
   );
 
-  // Get bank/payment account reference
-  // In production, this should come from organization settings
-  const bankAccountRef: QBORef = {
-    value: '35', // Default checking account ID - should be configured
-    name: 'Checking',
-  };
+  // Get bank/payment account reference from org settings or QBO
+  let bankAccountRef: QBORef = { value: '35', name: 'Checking' };
+  try {
+    const connectionDoc = await adminDb
+      .collection('organizations')
+      .doc(orgId)
+      .collection('accountingConnections')
+      .doc('quickbooks')
+      .get();
+
+    const data = connectionDoc.data();
+    if (data?.defaultBankAccountId && data?.defaultBankAccountName) {
+      bankAccountRef = {
+        value: data.defaultBankAccountId,
+        name: data.defaultBankAccountName,
+      };
+    } else {
+      // Query QBO for first Bank-type account
+      const result = await qboQuery<{ Id: string; Name: string }>(
+        orgId,
+        'Account',
+        "AccountType = 'Bank'",
+        1
+      );
+
+      const accounts = (result as unknown as { QueryResponse: { Account?: { Id: string; Name: string }[] } }).QueryResponse?.Account;
+      if (accounts && accounts.length > 0) {
+        bankAccountRef = { value: accounts[0].Id, name: accounts[0].Name };
+      }
+    }
+  } catch {
+    // Use fallback
+  }
 
   // Check for existing mapping
   const existingMapping = await getMapping(orgId, 'expense', expense.id);
@@ -304,7 +332,7 @@ export async function syncExpenseOnApproval(
   try {
     return await pushExpenseToQBO(orgId, expense);
   } catch (error) {
-    console.error(`Failed to sync expense ${expenseId} to QBO:`, error);
+    logger.error(`Failed to sync expense ${expenseId} to QBO`, { error, module: 'qbo-sync-expenses' });
     return null;
   }
 }
@@ -333,13 +361,81 @@ async function getExpenseAccountRef(
     };
   }
 
-  // Use default mapping
   const defaultAccountName = DEFAULT_ACCOUNT_MAPPINGS[category] || 'Miscellaneous Expense';
 
-  // In production, you would query QBO for the actual account ID
-  // For now, return a placeholder
+  // Check cached accounts in the connection doc
+  try {
+    const connectionDoc = await adminDb
+      .collection('organizations')
+      .doc(orgId)
+      .collection('accountingConnections')
+      .doc('quickbooks')
+      .get();
+
+    const cachedAccounts = connectionDoc.data()?.cachedAccounts as Record<string, { id: string; name: string }> | undefined;
+    if (cachedAccounts?.[defaultAccountName]) {
+      return {
+        value: cachedAccounts[defaultAccountName].id,
+        name: cachedAccounts[defaultAccountName].name,
+      };
+    }
+  } catch {
+    // Continue to QBO query
+  }
+
+  // Query QBO for account by name
+  try {
+    const result = await qboQuery<{ Id: string; Name: string }>(
+      orgId,
+      'Account',
+      `Name = '${defaultAccountName}'`
+    );
+
+    const accounts = (result as unknown as { QueryResponse: { Account?: { Id: string; Name: string }[] } }).QueryResponse?.Account;
+    if (accounts && accounts.length > 0) {
+      const account = accounts[0];
+
+      // Cache for future use
+      try {
+        await adminDb
+          .collection('organizations')
+          .doc(orgId)
+          .collection('accountingConnections')
+          .doc('quickbooks')
+          .set(
+            { cachedAccounts: { [defaultAccountName]: { id: account.Id, name: account.Name } } },
+            { merge: true }
+          );
+      } catch {
+        // Cache failure is non-critical
+      }
+
+      return { value: account.Id, name: account.Name };
+    }
+  } catch {
+    // Continue to fallback
+  }
+
+  // Fallback: query for first Expense-type account
+  try {
+    const result = await qboQuery<{ Id: string; Name: string }>(
+      orgId,
+      'Account',
+      "AccountType = 'Expense'",
+      1
+    );
+
+    const accounts = (result as unknown as { QueryResponse: { Account?: { Id: string; Name: string }[] } }).QueryResponse?.Account;
+    if (accounts && accounts.length > 0) {
+      return { value: accounts[0].Id, name: accounts[0].Name };
+    }
+  } catch {
+    // Fall through to placeholder
+  }
+
+  // Final fallback: placeholder
   return {
-    value: '1', // Placeholder - should be resolved from QBO
+    value: '1',
     name: defaultAccountName,
   };
 }

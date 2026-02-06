@@ -14,9 +14,14 @@ import {
   ClockIcon,
   ExclamationCircleIcon,
   ArrowRightIcon,
+  ShieldCheckIcon,
+  RocketLaunchIcon,
 } from '@heroicons/react/24/outline';
+import PerformanceScorecard from '@/components/sub-portal/PerformanceScorecard';
+import { SectionErrorBoundary } from '@/components/ui/SectionErrorBoundary';
 import { FirestoreError } from '@/components/ui';
 import { formatDate } from '@/lib/date-utils';
+import { logger } from '@/lib/utils/logger';
 
 const bidStatusConfig: Record<BidStatus, { label: string; color: string; icon: React.ComponentType<{ className?: string }> }> = {
   draft: { label: 'Draft', color: 'bg-gray-100 text-gray-700', icon: DocumentTextIcon },
@@ -71,7 +76,7 @@ export default function SubDashboard() {
         totalEarnings: bidsData.filter(b => b.status === 'accepted').reduce((sum, b) => sum + b.amount, 0),
       });
     } catch (error) {
-      console.error('Error fetching sub data:', error);
+      logger.error('Error fetching sub data', { error: error, page: 'sub' });
       setFetchError('Failed to load data. The database may be unreachable.');
     } finally {
       setLoading(false);
@@ -109,6 +114,15 @@ export default function SubDashboard() {
           Manage your bids, schedule, and invoices
         </p>
       </div>
+
+      {/* Performance Scorecard */}
+      {user?.uid && (
+        <SectionErrorBoundary sectionName="Performance Scorecard">
+          <div className="bg-white rounded-xl border p-6">
+            <PerformanceScorecard subcontractorId={user.uid} />
+          </div>
+        </SectionErrorBoundary>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -267,6 +281,20 @@ export default function SubDashboard() {
             className="inline-flex items-center px-4 py-2 bg-brand-primary text-white rounded-lg font-medium hover:bg-brand-900 transition-colors"
           >
             Submit Expense
+          </Link>
+          <Link
+            href="/sub/compliance"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary text-white rounded-lg font-medium hover:bg-brand-900 transition-colors"
+          >
+            <ShieldCheckIcon className="h-4 w-4" />
+            Compliance Docs
+          </Link>
+          <Link
+            href="/sub/onboarding"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-brand-primary text-white rounded-lg font-medium hover:bg-brand-900 transition-colors"
+          >
+            <RocketLaunchIcon className="h-4 w-4" />
+            Get Started
           </Link>
         </div>
       </div>

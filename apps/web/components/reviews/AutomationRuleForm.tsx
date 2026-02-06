@@ -9,6 +9,7 @@ import {
   REVIEW_REQUEST_CHANNEL_LABELS,
   ReviewAutomationRule,
 } from '@/types/review';
+import { logger } from '@/lib/utils/logger';
 
 interface AutomationRuleFormProps {
   isOpen: boolean;
@@ -49,7 +50,7 @@ export function AutomationRuleForm({
       setDelayDays(3);
       setChannel('email');
     } catch (err) {
-      console.error('Failed to create automation rule:', err);
+      logger.error('Failed to create automation rule', { error: err, component: 'AutomationRuleForm' });
     } finally {
       setLoading(false);
     }

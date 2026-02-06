@@ -9,6 +9,7 @@ import { useScopes } from '@/lib/hooks/useScopes';
 import { useAuth } from '@/lib/auth';
 import ScopePhaseGroup from '@/components/projects/scope/ScopePhaseGroup';
 import ScopeApprovalPanel from '@/components/projects/scope/ScopeApprovalPanel';
+import { logger } from '@/lib/utils/logger';
 
 function fmt(n: number): string {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
@@ -40,7 +41,7 @@ export default function ClientScopePage() {
           quoteSnap.docs.map((d) => ({ id: d.id, ...d.data() }) as QuoteSection)
         );
       } catch (err) {
-        console.error('Error fetching scope data:', err);
+        logger.error('Error fetching scope data', { error: err, page: 'client-project-scope' });
       } finally {
         setDataLoading(false);
       }

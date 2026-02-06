@@ -16,6 +16,7 @@ import { RFIFormModal } from '@/components/rfis/RFIFormModal';
 import { SubmittalCard, Submittal } from '@/components/submittals/SubmittalCard';
 import { SubmittalFormModal } from '@/components/submittals/SubmittalFormModal';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/utils/logger';
 
 // Mock data - replace with actual hooks
 const MOCK_RFIS: RFI[] = [];
@@ -92,17 +93,17 @@ export default function RFILogPage() {
 
   // Handlers
   const handleRFISubmit = async (data: any, isDraft: boolean) => {
-    console.log('RFI submitted:', data, isDraft);
+
     // TODO: Implement API call
   };
 
   const handleSubmittalSubmit = async (data: any) => {
-    console.log('Submittal submitted:', data);
+
     // TODO: Implement API call
   };
 
   const handleExport = (format: 'pdf' | 'csv') => {
-    console.log(`Exporting ${selectedTab === 0 ? 'RFIs' : 'Submittals'} as ${format}`);
+
     // TODO: Implement export
   };
 
@@ -255,9 +256,9 @@ export default function RFILogPage() {
                   <RFICard
                     key={rfi.id}
                     rfi={rfi}
-                    onView={(r) => console.log('View RFI:', r.id)}
-                    onRespond={(r) => console.log('Respond to RFI:', r.id)}
-                    onClose={(r) => console.log('Close RFI:', r.id)}
+                    onView={() => {}}
+                    onRespond={() => {}}
+                    onClose={() => {}}
                   />
                 ))}
               </div>
@@ -286,9 +287,9 @@ export default function RFILogPage() {
                   <SubmittalCard
                     key={submittal.id}
                     submittal={submittal}
-                    onView={(s) => console.log('View Submittal:', s.id)}
-                    onReview={(s) => console.log('Review Submittal:', s.id)}
-                    onRevise={(s) => console.log('Revise Submittal:', s.id)}
+                    onView={() => {}}
+                    onReview={() => {}}
+                    onRevise={() => {}}
                   />
                 ))}
               </div>

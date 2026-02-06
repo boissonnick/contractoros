@@ -17,6 +17,8 @@ import {
 import { db } from '@/lib/firebase/config';
 import { AppNotification, NotificationPreferences, QuietHoursConfig, DayOfWeek } from '@/types';
 import { useAuth } from '@/lib/auth';
+import { toast } from '@/components/ui/Toast';
+import { logger } from '@/lib/utils/logger';
 
 function fromFirestore(id: string, data: Record<string, unknown>): AppNotification {
   return {
@@ -221,7 +223,8 @@ export function useNotificationPreferences() {
 
         return true;
       } catch (error) {
-        console.error('Failed to update notification preference:', error);
+        logger.error('Failed to update notification preference', { error: error, hook: 'useNotifications' });
+        toast.error('Failed to update notification preference: ' + (error as Error).message);
         return false;
       }
     },
@@ -249,7 +252,8 @@ export function useNotificationPreferences() {
         }
         return true;
       } catch (error) {
-        console.error('Failed to update quiet hours:', error);
+        logger.error('Failed to update quiet hours', { error: error, hook: 'useNotifications' });
+        toast.error('Failed to update quiet hours: ' + (error as Error).message);
         return false;
       }
     },

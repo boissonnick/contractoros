@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { ExclamationTriangleIcon, ArrowPathIcon, HomeIcon } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 export default function Error({
   error,
@@ -13,7 +14,7 @@ export default function Error({
 }) {
   useEffect(() => {
     // Log error to console in development
-    console.error('Application error:', error);
+    logger.error('Application error', { error: error, page: 'app-error' });
   }, [error]);
 
   return (

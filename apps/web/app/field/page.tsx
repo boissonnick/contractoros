@@ -21,6 +21,7 @@ import {
 import { FirestoreError } from '@/components/ui';
 import { formatDate } from '@/lib/date-utils';
 import { OfflineProjectButton } from '@/components/offline/OfflineProjectButton';
+import { logger } from '@/lib/utils/logger';
 
 export default function FieldPage() {
   const { user, profile } = useAuth();
@@ -42,7 +43,7 @@ export default function FieldPage() {
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         (pos) => setLocation(pos),
-        (err) => console.error('Location error:', err)
+        (err) => logger.error('Location error', { error: err, page: 'field' })
       );
     }
   }, []);
@@ -98,7 +99,7 @@ export default function FieldPage() {
           setActiveEntry({ id: activeSnap.docs[0].id, ...activeSnap.docs[0].data() } as TimeEntry);
         }
       } catch (err) {
-        console.warn('Could not fetch time entries:', err);
+        logger.warn('Could not fetch time entries', { err, page: 'field' });
       }
 
       // 2. Fetch today's tasks
@@ -111,7 +112,7 @@ export default function FieldPage() {
         const tasksSnap = await getDocs(tasksQuery);
         setTodaysTasks(tasksSnap.docs.map(d => ({ id: d.id, ...d.data() })) as Task[]);
       } catch (err) {
-        console.warn('Could not fetch tasks:', err);
+        logger.warn('Could not fetch tasks', { err, page: 'field' });
       }
 
       // 3. Fetch projects for org
@@ -124,7 +125,7 @@ export default function FieldPage() {
         const projectsSnap = await getDocs(projectsQuery);
         setProjects(projectsSnap.docs.map(d => ({ id: d.id, name: (d.data() as { name: string }).name })));
       } catch (err) {
-        console.warn('Could not fetch projects:', err);
+        logger.warn('Could not fetch projects', { err, page: 'field' });
       }
 
       // 4. Fetch geofences for org
@@ -136,10 +137,10 @@ export default function FieldPage() {
         const geofencesSnap = await getDocs(geofencesQuery);
         setGeofences(geofencesSnap.docs.map(d => ({ id: d.id, ...d.data() })) as Geofence[]);
       } catch (err) {
-        console.warn('Could not fetch geofences:', err);
+        logger.warn('Could not fetch geofences', { err, page: 'field' });
       }
     } catch (error) {
-      console.error('Error fetching field data:', error);
+      logger.error('Error fetching field data', { error: error, page: 'field' });
       setFetchError('Failed to load data. The database may be unreachable.');
     } finally {
       setLoading(false);
@@ -190,7 +191,7 @@ export default function FieldPage() {
       const docRef = await addDoc(collection(db, `organizations/${profile.orgId}/timeEntries`), entry);
       setActiveEntry({ id: docRef.id, ...entry } as TimeEntry);
     } catch (error) {
-      console.error('Error clocking in:', error);
+      logger.error('Error clocking in', { error: error, page: 'field' });
     } finally {
       setClockingIn(false);
     }
@@ -215,7 +216,7 @@ export default function FieldPage() {
       });
       setActiveEntry(null);
     } catch (error) {
-      console.error('Error clocking out:', error);
+      logger.error('Error clocking out', { error: error, page: 'field' });
     } finally {
       setClockingIn(false);
     }
@@ -401,6 +402,45 @@ export default function FieldPage() {
           </div>
           <p className="font-medium text-gray-900">Report Issue</p>
           <p className="text-sm text-gray-500">Flag a blocker</p>
+        </Link>
+
+        <Link
+          href="/field/safety"
+          className="bg-white rounded-xl border p-4 text-center hover:shadow-md transition-shadow"
+        >
+          <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
+          </div>
+          <p className="font-medium text-gray-900">Safety Report</p>
+          <p className="text-sm text-gray-500">Log an incident</p>
+        </Link>
+
+        <Link
+          href="/field/equipment"
+          className="bg-white rounded-xl border p-4 text-center hover:shadow-md transition-shadow"
+        >
+          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085" />
+            </svg>
+          </div>
+          <p className="font-medium text-gray-900">Equipment</p>
+          <p className="text-sm text-gray-500">Check out / return</p>
+        </Link>
+
+        <Link
+          href="/field/materials"
+          className="bg-white rounded-xl border p-4 text-center hover:shadow-md transition-shadow col-span-2"
+        >
+          <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+            </svg>
+          </div>
+          <p className="font-medium text-gray-900">Request Materials</p>
+          <p className="text-sm text-gray-500">Submit a material request for your project</p>
         </Link>
       </div>
 

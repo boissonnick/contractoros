@@ -22,6 +22,7 @@ import {
   ChevronDownIcon,
   ArrowPathIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 const STATUS_TRANSITIONS: Record<ProjectStatus, ProjectStatus[]> = {
   lead: ['bidding', 'planning', 'cancelled'],
@@ -106,7 +107,7 @@ export default function ProjectDetailPage() {
         const quoteSnap = await getDocs(collection(db, 'projects', projectId, 'quoteSections'));
         setQuoteSections(quoteSnap.docs.map(d => ({ id: d.id, ...d.data() }) as QuoteSection));
       } catch (error) {
-        console.error('Error fetching project:', error);
+        logger.error('Error fetching project', { error, page: 'project-detail' });
       } finally {
         setLoading(false);
       }
@@ -179,7 +180,7 @@ export default function ProjectDetailPage() {
         toast.success(`Status updated to ${STATUS_LABELS[newStatus]}`);
       }
     } catch (error) {
-      console.error('Error updating status:', error);
+      logger.error('Error updating status', { error, page: 'project-detail' });
       toast.error('Failed to update status');
     }
   };

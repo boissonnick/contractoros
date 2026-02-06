@@ -4,6 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/utils/logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('[Budget Analysis] Error:', error);
+    logger.error('[Budget Analysis] Error', { error, route: 'automation-budget-analysis' });
     return NextResponse.json({ error: 'Analysis failed' }, { status: 500 });
   }
 }

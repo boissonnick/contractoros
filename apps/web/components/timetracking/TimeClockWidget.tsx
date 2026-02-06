@@ -15,6 +15,7 @@ import Badge from '@/components/ui/Badge';
 import { useActiveTimeEntry } from '@/lib/hooks/useTimeEntries';
 import { useProjects } from '@/lib/hooks/useQueryHooks';
 import { TimeEntry, TimeEntryLocation, BreakType, BREAK_TYPES, Project } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 interface TimeClockWidgetProps {
   showProjectSelector?: boolean;
@@ -113,7 +114,7 @@ export function TimeClockWidget({
 
       onClockIn?.(entryId);
     } catch (error) {
-      console.error('Clock in error:', error);
+      logger.error('Clock in error', { error: error, component: 'TimeClockWidget' });
     } finally {
       setIsLoading(false);
     }
@@ -129,7 +130,7 @@ export function TimeClockWidget({
       await clockOut(activeEntry.id, { location: location || undefined });
       onClockOut?.(activeEntry);
     } catch (error) {
-      console.error('Clock out error:', error);
+      logger.error('Clock out error', { error: error, component: 'TimeClockWidget' });
     } finally {
       setIsLoading(false);
     }
@@ -145,7 +146,7 @@ export function TimeClockWidget({
       await startBreak(activeEntry.id, type, breakInfo?.isPaid);
       setShowBreakMenu(false);
     } catch (error) {
-      console.error('Start break error:', error);
+      logger.error('Start break error', { error: error, component: 'TimeClockWidget' });
     } finally {
       setIsLoading(false);
     }
@@ -162,7 +163,7 @@ export function TimeClockWidget({
     try {
       await endBreak(activeEntry.id, activeBreak.id);
     } catch (error) {
-      console.error('End break error:', error);
+      logger.error('End break error', { error: error, component: 'TimeClockWidget' });
     } finally {
       setIsLoading(false);
     }

@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import { initializeAdminApp } from '@/lib/assistant/firebase-admin-init';
+import { logger } from '@/lib/utils/logger';
 
 async function verifyAuth(request: NextRequest) {
   await initializeAdminApp();
@@ -75,7 +76,7 @@ export async function POST(
       notificationType,
     });
   } catch (error) {
-    console.error('Error sending RFI notification:', error);
+    logger.error('Error sending RFI notification', { error, route: 'rfi-notify' });
     return NextResponse.json({ error: 'Failed to send notification' }, { status: 500 });
   }
 }

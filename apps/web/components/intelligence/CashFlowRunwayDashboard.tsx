@@ -15,6 +15,7 @@ import { Card, StatusBadge } from '@/components/ui';
 import { BarChartCard } from '@/components/charts/BarChartCard';
 import { cn } from '@/lib/utils';
 import type { StatusType } from '@/components/ui';
+import { logger } from '@/lib/utils/logger';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -106,7 +107,7 @@ export default function CashFlowRunwayDashboard({ className }: CashFlowRunwayDas
 
         setInvoices(records);
       } catch (err) {
-        console.error('CashFlowRunwayDashboard: failed to load invoices', err);
+        logger.error('CashFlowRunwayDashboard: failed to load invoices', { error: err, component: 'CashFlowRunwayDashboard' });
       } finally {
         setLoading(false);
       }

@@ -10,6 +10,7 @@ import BaseModal from '@/components/ui/BaseModal';
 import Button from '@/components/ui/Button';
 import { FormInput, FormTextarea, FormSelect } from '@/components/ui/FormField';
 import { toast } from '@/components/ui/Toast';
+import { logger } from '@/lib/utils/logger';
 
 const leadSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -85,7 +86,7 @@ export default function AddLeadModal({ isOpen, onClose }: AddLeadModalProps) {
       reset();
       onClose();
     } catch (error) {
-      console.error('Error adding lead:', error);
+      logger.error('Error adding lead', { error: error, component: 'AddLeadModal' });
       toast.error('Failed to add lead');
     } finally {
       setIsSubmitting(false);

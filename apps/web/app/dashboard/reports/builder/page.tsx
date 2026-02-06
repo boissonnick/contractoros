@@ -40,6 +40,7 @@ import { ReportScheduleModal } from '@/components/reports/ReportScheduleModal';
 import { ReportShareModal } from '@/components/reports/ReportShareModal';
 import { useReportSchedules } from '@/lib/hooks/useReportSchedules';
 import { useReportShares } from '@/lib/hooks/useReportShares';
+import { logger } from '@/lib/utils/logger';
 
 export default function ReportBuilderPage() {
   const router = useRouter();
@@ -152,7 +153,7 @@ export default function ReportBuilderPage() {
       }
       setHasUnsavedChanges(false);
     } catch (error) {
-      console.error('Failed to save report:', error);
+      logger.error('Failed to save report', { error: error, page: 'dashboard-reports-builder' });
     } finally {
       setSaving(false);
       setShowSaveModal(false);
@@ -176,7 +177,7 @@ export default function ReportBuilderPage() {
       setConfig({ id: generateReportId(), ...createDefaultReportConfig() });
       setHasUnsavedChanges(false);
     } catch (error) {
-      console.error('Failed to delete report:', error);
+      logger.error('Failed to delete report', { error: error, page: 'dashboard-reports-builder' });
     }
     setShowDeleteConfirm(false);
   }, [reportId, deleteReport, router]);

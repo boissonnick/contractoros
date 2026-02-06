@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { adminDb, Timestamp } from '@/lib/firebase/admin';
 import { isOptOutRequest, isOptInRequest } from '@/lib/sms/smsUtils';
+import { logger } from '@/lib/utils/logger';
 
 export const runtime = 'nodejs';
 
@@ -17,7 +18,7 @@ function verifyTwilioSignature(
   signature: string
 ): boolean {
   if (!TWILIO_AUTH_TOKEN) {
-    console.error('TWILIO_AUTH_TOKEN not configured');
+    logger.error('TWILIO_AUTH_TOKEN not configured', { route: 'sms-webhook' });
     return false;
   }
 
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
   try {
     // Security: Verify TWILIO_AUTH_TOKEN is configured
     if (!TWILIO_AUTH_TOKEN) {
-      console.error('TWILIO_AUTH_TOKEN not configured - rejecting webhook');
+      logger.error('TWILIO_AUTH_TOKEN not configured - rejecting webhook', { route: 'sms-webhook' });
       return NextResponse.json(
         { error: 'Webhook not configured' },
         { status: 403 }
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
     // Security: Verify X-Twilio-Signature header is present
     const twilioSignature = request.headers.get('X-Twilio-Signature');
     if (!twilioSignature) {
-      console.warn('Missing X-Twilio-Signature header');
+      logger.warn('Missing X-Twilio-Signature header', { route: 'sms-webhook' });
       return NextResponse.json(
         { error: 'Missing signature' },
         { status: 403 }
@@ -83,7 +84,7 @@ export async function POST(request: NextRequest) {
     // Use the full URL from the request
     const webhookUrl = request.url;
     if (!verifyTwilioSignature(webhookUrl, data, twilioSignature)) {
-      console.warn('Invalid Twilio signature - rejecting webhook');
+      logger.warn('Invalid Twilio signature - rejecting webhook', { route: 'sms-webhook' });
       return NextResponse.json(
         { error: 'Invalid signature' },
         { status: 403 }
@@ -107,7 +108,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error('Webhook error:', error);
+    logger.error('Webhook error', { error, route: 'sms-webhook' });
     return NextResponse.json(
       { error: 'Webhook processing failed' },
       { status: 500 }
@@ -132,7 +133,7 @@ async function handleStatusCallback(
       .get();
 
     if (snapshot.empty) {
-      console.log(`Message not found for SID: ${messageSid}`);
+      logger.info(`Message not found for SID: ${messageSid}`, { route: 'sms-webhook' });
       return NextResponse.json({ received: true });
     }
 
@@ -161,10 +162,10 @@ async function handleStatusCallback(
 
     await docRef.update(updates);
 
-    console.log(`Updated message ${messageSid} to status: ${status}`);
+    logger.info(`Updated message ${messageSid} to status: ${status}`, { route: 'sms-webhook' });
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error('Status callback error:', error);
+    logger.error('Status callback error', { error, route: 'sms-webhook' });
     return NextResponse.json(
       { error: 'Failed to process status callback' },
       { status: 500 }
@@ -225,7 +226,7 @@ async function handleIncomingMessage(
       await updateConversation(orgId, from, body, 'inbound');
     }
 
-    console.log(`Received message from ${from}: ${body.substring(0, 50)}...`);
+    logger.info(`Received message from ${from}: ${body.substring(0, 50)}...`, { route: 'sms-webhook' });
 
     // Return TwiML response (empty to not send auto-reply)
     return new NextResponse(
@@ -235,7 +236,7 @@ async function handleIncomingMessage(
       }
     );
   } catch (error) {
-    console.error('Incoming message error:', error);
+    logger.error('Incoming message error', { error, route: 'sms-webhook' });
     return NextResponse.json(
       { error: 'Failed to process incoming message' },
       { status: 500 }
@@ -270,9 +271,9 @@ async function handleOptOut(phoneNumber: string, orgId: string | null) {
       });
     }
 
-    console.log(`Opt-out recorded for ${phoneNumber}`);
+    logger.info(`Opt-out recorded for ${phoneNumber}`, { route: 'sms-webhook' });
   } catch (error) {
-    console.error('Opt-out error:', error);
+    logger.error('Opt-out error', { error, route: 'sms-webhook' });
   }
 }
 
@@ -290,10 +291,10 @@ async function handleOptIn(phoneNumber: string, _orgId: string | null) {
 
     if (!snapshot.empty) {
       await snapshot.docs[0].ref.delete();
-      console.log(`Opt-in recorded for ${phoneNumber}`);
+      logger.info(`Opt-in recorded for ${phoneNumber}`, { route: 'sms-webhook' });
     }
   } catch (error) {
-    console.error('Opt-in error:', error);
+    logger.error('Opt-in error', { error, route: 'sms-webhook' });
   }
 }
 
@@ -345,6 +346,6 @@ async function updateConversation(
       });
     }
   } catch (error) {
-    console.error('Update conversation error:', error);
+    logger.error('Update conversation error', { error, route: 'sms-webhook' });
   }
 }

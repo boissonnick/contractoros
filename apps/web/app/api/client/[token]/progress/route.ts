@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getFirestore } from 'firebase-admin/firestore';
 import { initializeAdminApp } from '@/lib/assistant/firebase-admin-init';
+import { logger } from '@/lib/utils/logger';
 
 async function validateClientToken(token: string) {
   await initializeAdminApp();
@@ -100,7 +101,7 @@ export async function GET(
 
     return NextResponse.json({ progress });
   } catch (error) {
-    console.error('Error fetching progress:', error);
+    logger.error('Error fetching progress', { error, route: 'client-progress' });
     return NextResponse.json({ error: 'Failed to fetch progress' }, { status: 500 });
   }
 }

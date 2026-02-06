@@ -20,6 +20,7 @@ import {
   WEATHER_CONDITIONS,
   Project,
 } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 const dailyLogSchema = z.object({
   projectId: z.string().min(1, 'Project is required'),
@@ -175,7 +176,7 @@ export function DailyLogFormModal({
       reset();
       onClose();
     } catch (error) {
-      console.error('Error submitting daily log:', error);
+      logger.error('Error submitting daily log', { error: error, component: 'DailyLogFormModal' });
     } finally {
       setIsSubmitting(false);
     }

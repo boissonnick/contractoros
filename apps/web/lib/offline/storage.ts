@@ -4,6 +4,7 @@
  */
 
 import { DB_NAME, DB_VERSION, STORES, QueuedOperation, CacheEntry } from './types';
+import { logger } from '@/lib/utils/logger';
 
 let dbInstance: IDBDatabase | null = null;
 
@@ -103,7 +104,7 @@ export async function getOfflineData<T>(key: string): Promise<T | null> {
       // Check if expired
       if (entry.expiresAt && Date.now() > entry.expiresAt) {
         // Delete expired entry
-        deleteOfflineData(key).catch(console.error);
+        deleteOfflineData(key).catch((err) => logger.error('Operation failed', { error: err, component: 'offline-storage' }));
         resolve(null);
         return;
       }

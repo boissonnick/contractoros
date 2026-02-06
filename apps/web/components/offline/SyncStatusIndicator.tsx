@@ -14,6 +14,7 @@ import { useOffline } from './OfflineProvider';
 import { cn } from '@/lib/utils';
 import { SyncEvent } from '@/lib/offline/types';
 import { SyncManager } from '@/lib/offline/sync-manager';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * SyncStatusIndicator
@@ -152,7 +153,7 @@ export function FloatingSyncIndicator({
     try {
       await syncNow();
     } catch (error) {
-      console.error('Force sync failed:', error);
+      logger.error('Force sync failed', { error: error, component: 'SyncStatusIndicator' });
     }
   };
 

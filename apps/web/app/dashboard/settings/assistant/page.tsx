@@ -27,6 +27,7 @@ import AIKeyManager from '@/components/settings/AIKeyManager';
 import { AIModelProvider, AIKeyConfig, AIKeyAuthMethod } from '@/types';
 import { db } from '@/lib/firebase/config';
 import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
+import { logger } from '@/lib/utils/logger';
 
 // Toggle component
 interface ToggleProps {
@@ -314,7 +315,7 @@ export default function AIAssistantSettingsPage() {
           setAuthMethod('api_key');
         }
       } catch (error) {
-        console.error('[AIAssistantSettingsPage] Error loading key configs:', error);
+        logger.error('[AIAssistantSettingsPage] Error loading key configs', { error: error, page: 'dashboard-settings-assistant' });
       } finally {
         setLoadingKeys(false);
       }
@@ -476,7 +477,7 @@ export default function AIAssistantSettingsPage() {
       setHasChanges(false);
       toast.success('AI Assistant settings saved');
     } catch (error) {
-      console.error('Error saving settings:', error);
+      logger.error('Error saving settings', { error: error, page: 'dashboard-settings-assistant' });
       toast.error('Failed to save settings');
     }
   };

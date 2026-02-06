@@ -33,6 +33,7 @@ import {
   XMarkIcon,
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
+import { logger } from '@/lib/utils/logger';
 
 // Channel type labels and icons
 const CHANNEL_TYPE_CONFIG: Record<string, { label: string; icon: React.ComponentType<{ className?: string }>; description: string }> = {
@@ -388,7 +389,7 @@ export default function ProjectMessagesPage() {
         });
         setTeamMembers(members);
       } catch (err) {
-        console.error('Error fetching team members:', err);
+        logger.error('Error fetching team members', { error: err, page: 'dashboard-projects-id-messages' });
       }
     }
     fetchTeamMembers();

@@ -94,6 +94,7 @@ import {
   deleteConversation,
   Conversation,
 } from '@/lib/assistant/conversation-service';
+import { logger } from '@/lib/utils/logger';
 
 // Generate unique ID for messages
 function generateId(): string {
@@ -259,7 +260,7 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
         }
         conversationLoadedRef.current = true;
       } catch (err) {
-        console.error('Failed to load recent conversation:', err);
+        logger.error('Failed to load recent conversation', { error: err, hook: 'useAssistant' });
         conversationLoadedRef.current = true;
       }
     };
@@ -275,7 +276,7 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
       try {
         await saveMessageToFirestore(profile.orgId, conversationId, message);
       } catch (err) {
-        console.error('Failed to persist message:', err);
+        logger.error('Failed to persist message', { error: err, hook: 'useAssistant' });
       }
     },
     [profile?.orgId, conversationId]
@@ -291,7 +292,7 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
       setState((prev) => ({ ...prev, messages: [] }));
       setError(null);
     } catch (err) {
-      console.error('Failed to create new conversation:', err);
+      logger.error('Failed to create new conversation', { error: err, hook: 'useAssistant' });
       setError('Failed to create new conversation');
     }
   }, [profile?.orgId, profile?.uid]);
@@ -307,7 +308,7 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
         setState((prev) => ({ ...prev, messages }));
         setError(null);
       } catch (err) {
-        console.error('Failed to load conversation:', err);
+        logger.error('Failed to load conversation', { error: err, hook: 'useAssistant' });
         setError('Failed to load conversation');
       }
     },
@@ -326,7 +327,7 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
       try {
         await deleteConversation(profile.orgId, conversationId);
       } catch (err) {
-        console.error('Failed to delete conversation:', err);
+        logger.error('Failed to delete conversation', { error: err, hook: 'useAssistant' });
       }
     }
 
@@ -353,7 +354,7 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
           currentConvId = await createConversation(profile.orgId, profile.uid);
           setConversationId(currentConvId);
         } catch (err) {
-          console.error('Failed to create conversation:', err);
+          logger.error('Failed to create conversation', { error: err, hook: 'useAssistant' });
         }
       }
 
@@ -375,7 +376,7 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
       // Persist user message
       if (profile?.orgId && currentConvId) {
         saveMessageToFirestore(profile.orgId, currentConvId, userMessage).catch((err) =>
-          console.error('Failed to persist user message:', err)
+          logger.error('Failed to persist user message', { error: err, hook: 'useAssistant' })
         );
       }
 
@@ -399,7 +400,7 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
         // Persist quick response
         if (profile?.orgId && currentConvId) {
           saveMessageToFirestore(profile.orgId, currentConvId, assistantMessage).catch((err) =>
-            console.error('Failed to persist assistant message:', err)
+            logger.error('Failed to persist assistant message', { error: err, hook: 'useAssistant' })
           );
         }
         return;
@@ -447,11 +448,11 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
         // Persist assistant response
         if (profile?.orgId && currentConvId) {
           saveMessageToFirestore(profile.orgId, currentConvId, assistantMessage).catch((err) =>
-            console.error('Failed to persist assistant message:', err)
+            logger.error('Failed to persist assistant message', { error: err, hook: 'useAssistant' })
           );
         }
       } catch (err) {
-        console.error('Assistant error:', err);
+        logger.error('Assistant error', { error: err, hook: 'useAssistant' });
         setError(err instanceof Error ? err.message : 'Failed to get response');
 
         // Add error message
@@ -489,7 +490,7 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
           currentConvId = await createConversation(profile.orgId, profile.uid);
           setConversationId(currentConvId);
         } catch (err) {
-          console.error('Failed to create conversation:', err);
+          logger.error('Failed to create conversation', { error: err, hook: 'useAssistant' });
         }
       }
 
@@ -524,7 +525,7 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
       // Persist user message
       if (profile?.orgId && currentConvId) {
         saveMessageToFirestore(profile.orgId, currentConvId, userMessage).catch((err) =>
-          console.error('Failed to persist user message:', err)
+          logger.error('Failed to persist user message', { error: err, hook: 'useAssistant' })
         );
       }
 
@@ -551,7 +552,7 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
         // Persist quick response
         if (profile?.orgId && currentConvId) {
           saveMessageToFirestore(profile.orgId, currentConvId, finalMessage).catch((err) =>
-            console.error('Failed to persist assistant message:', err)
+            logger.error('Failed to persist assistant message', { error: err, hook: 'useAssistant' })
           );
         }
         return;
@@ -611,13 +612,13 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
             // Persist final assistant message
             if (profile?.orgId && currentConvId) {
               saveMessageToFirestore(profile.orgId, currentConvId, finalMessage).catch((err) =>
-                console.error('Failed to persist assistant message:', err)
+                logger.error('Failed to persist assistant message', { error: err, hook: 'useAssistant' })
               );
             }
           }
         }
       } catch (err) {
-        console.error('Assistant stream error:', err);
+        logger.error('Assistant stream error', { error: err, hook: 'useAssistant' });
         setError(err instanceof Error ? err.message : 'Failed to get response');
 
         // Update the message with error
@@ -676,7 +677,7 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
       };
 
       recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-        console.error('Speech recognition error:', event.error);
+        logger.error('Speech recognition error', { error: event.error, hook: 'useAssistant' });
         setError(`Voice error: ${event.error}`);
         setState((prev) => ({ ...prev, voiceState: 'error' }));
 
@@ -698,7 +699,7 @@ export function useAssistant(options: UseAssistantOptions = {}): UseAssistantRet
       recognitionRef.current = recognition;
       recognition.start();
     } catch (err) {
-      console.error('Failed to start voice recognition:', err);
+      logger.error('Failed to start voice recognition', { error: err, hook: 'useAssistant' });
       setError('Failed to start voice input');
     }
   }, [handleSendMessage]);

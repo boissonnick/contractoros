@@ -30,6 +30,7 @@ import {
   CurrencyDollarIcon,
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
+import { logger } from '@/lib/utils/logger';
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
   draft: { label: 'Draft', color: 'bg-gray-100 text-gray-700', icon: <PencilSquareIcon className="h-4 w-4" /> },
@@ -93,7 +94,7 @@ export default function EstimateDetailPage() {
       await markAsSent();
       toast.success('Estimate marked as sent');
     } catch (error) {
-      console.error('Error updating estimate:', error);
+      logger.error('Error updating estimate', { error, page: 'estimate-detail' });
       toast.error('Failed to update estimate');
     }
   };
@@ -105,7 +106,7 @@ export default function EstimateDetailPage() {
       toast.success('Estimate duplicated');
       router.push(`/dashboard/estimates/${newId}`);
     } catch (error) {
-      console.error('Error duplicating estimate:', error);
+      logger.error('Error duplicating estimate', { error, page: 'estimate-detail' });
       toast.error('Failed to duplicate estimate');
     }
   };
@@ -117,7 +118,7 @@ export default function EstimateDetailPage() {
       toast.success('Estimate deleted');
       router.push('/dashboard/estimates');
     } catch (error) {
-      console.error('Error deleting estimate:', error);
+      logger.error('Error deleting estimate', { error, page: 'estimate-detail' });
       toast.error('Failed to delete estimate');
     }
   };
@@ -134,7 +135,7 @@ export default function EstimateDetailPage() {
       toast.success('Invoice created from estimate');
       router.push(`/dashboard/invoices/${invoiceId}`);
     } catch (error) {
-      console.error('Error converting to invoice:', error);
+      logger.error('Error converting to invoice', { error, page: 'estimate-detail' });
       toast.error('Failed to convert to invoice');
     }
   };
@@ -151,7 +152,7 @@ export default function EstimateDetailPage() {
       toast.success('Revision created');
       router.push(`/dashboard/estimates/${newId}`);
     } catch (error) {
-      console.error('Error creating revision:', error);
+      logger.error('Error creating revision', { error, page: 'estimate-detail' });
       toast.error('Failed to create revision');
     }
   };

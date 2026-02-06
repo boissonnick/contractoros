@@ -10,6 +10,7 @@ import {
 } from '@/types';
 import { useAuth } from '@/lib/auth';
 import { mapUserRoleToImpersonationRole } from '@/lib/auth/role-utils';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================
 // Types
@@ -108,7 +109,7 @@ export function ImpersonationProvider({ children }: { children: React.ReactNode 
   // Reset to actual user role (defined before switchRole since switchRole calls it)
   const resetImpersonation = useCallback(() => {
     if (state.isImpersonating) {
-      console.log(`[Impersonation] User ${state.actualUserId} exited impersonation mode`);
+      logger.info(`User ${state.actualUserId} exited impersonation mode`, { module: 'impersonation' });
     }
 
     setState({
@@ -125,7 +126,7 @@ export function ImpersonationProvider({ children }: { children: React.ReactNode 
   // Switch to a different role
   const switchRole = useCallback((role: ImpersonationRole) => {
     if (!user || !profile || !canImpersonate) {
-      console.warn('Cannot impersonate: insufficient permissions');
+      logger.warn('Cannot impersonate: insufficient permissions', { module: 'impersonation' });
       return;
     }
 
@@ -152,7 +153,7 @@ export function ImpersonationProvider({ children }: { children: React.ReactNode 
     }));
 
     // Log impersonation event (could send to analytics/audit log)
-    console.log(`[Impersonation] User ${user.uid} switched to ${role} view`);
+    logger.info(`User ${user.uid} switched to ${role} view`, { module: 'impersonation' });
   }, [user, profile, canImpersonate, resetImpersonation]);
 
   // Get current effective role
