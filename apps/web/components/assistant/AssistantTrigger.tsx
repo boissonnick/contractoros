@@ -12,7 +12,7 @@ export function AssistantTrigger({ onClick, hasUnread }: AssistantTriggerProps) 
   return (
     <button
       onClick={onClick}
-      className="fixed bottom-36 md:bottom-6 right-4 md:right-6 z-40 flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-2"
+      className="fixed bottom-36 md:bottom-6 right-4 md:right-6 z-40 flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-r from-brand-600 to-brand-800 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:ring-offset-2"
       aria-label="Open AI Assistant"
     >
       <SparklesIcon className="h-6 w-6" />
@@ -41,7 +41,7 @@ export function AssistantTriggerMini({
   return (
     <button
       onClick={onClick}
-      className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-violet-600 bg-violet-50 hover:bg-violet-100 rounded-lg transition-colors"
+      className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-brand-600 bg-brand-50 hover:bg-brand-100 rounded-lg transition-colors"
     >
       <SparklesIcon className="h-3.5 w-3.5" />
       {label}

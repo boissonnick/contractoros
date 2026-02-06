@@ -45,7 +45,7 @@ export default function MaterialItemCard({
     return (
       <div
         onClick={onClick}
-        className={`flex items-center justify-between p-3 bg-white rounded-lg border hover:border-brand-primary hover:shadow-sm cursor-pointer transition-all ${
+        className={`flex items-center justify-between p-3 bg-white rounded-2xl border hover:border-brand-primary hover:shadow-sm cursor-pointer transition-all ${
           isLowStock ? 'border-amber-200 bg-amber-50' : 'border-gray-200'
         }`}
       >
@@ -89,7 +89,7 @@ export default function MaterialItemCard({
   return (
     <div
       onClick={onClick}
-      className={`p-4 bg-white rounded-lg border hover:border-brand-primary hover:shadow-md cursor-pointer transition-all ${
+      className={`p-4 bg-white rounded-2xl border hover:border-brand-primary hover:shadow-md cursor-pointer transition-all ${
         isLowStock ? 'border-amber-200' : 'border-gray-200'
       }`}
     >
@@ -150,13 +150,13 @@ export default function MaterialItemCard({
             <div>
               <p className="text-xs text-gray-500">Reserved</p>
               <p className="font-medium text-gray-700">
-                {material.quantityReserved} {unitInfo?.abbr}
+                {material.quantityReserved ?? 0} {unitInfo?.abbr}
               </p>
             </div>
             <div>
               <p className="text-xs text-gray-500">Available</p>
               <p className="font-medium text-green-600">
-                {material.quantityAvailable} {unitInfo?.abbr}
+                {material.quantityAvailable ?? 0} {unitInfo?.abbr}
               </p>
             </div>
           </div>

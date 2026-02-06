@@ -23,7 +23,7 @@ export default function TeamInvitePage() {
               <ArrowLeftIcon className="h-5 w-5 text-gray-600" />
             </Link>
             <div>
-              <h1 className="text-xl font-semibold font-heading tracking-tight text-gray-900">Invite Team Members</h1>
+              <h1 className="text-xl font-semibold tracking-tight text-gray-900">Invite Team Members</h1>
               <p className="text-sm text-gray-500">Add employees, contractors, subcontractors, or clients</p>
             </div>
           </div>

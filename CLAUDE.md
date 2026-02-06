@@ -4,17 +4,30 @@
 
 ---
 
+## Current Sprint
+
+**Sprint 107 — Invoice PDF & Email Delivery**
+- **Phase:** 17 - Development Build Phase
+- **Priority:** P0
+- **What:** Wire InvoicePdf template, add PDF download/email actions, recurring invoice support
+- **Sprint 106 DONE:** useEstimates hook created, wired into 3 pages, estimate→invoice conversion built
+
+**Next Sprints (108-120):** See `docs/REPRIORITIZED_SPRINT_PLAN.md` (Phase 17)
+**Sprints 97-105:** DEFERRED (deploy/testing — building features first)
+
+---
+
 ## Session Quick Start
 
 ```bash
-# 0. Check for implementation brief FIRST (skip plan mode entirely!)
-ls docs/specs/sprint-*-brief.md 2>/dev/null
+# 0. Check current status + next sprint
+cat docs/SPRINT_STATUS.md | head -30
 
 # 1. Check module locations (eliminates 200k+ token Explore waste!)
 cat docs/MODULE_REGISTRY.md | head -100
 
-# 2. Check current status
-cat docs/SPRINT_STATUS.md | head -100
+# 2. Check sprint plan
+cat docs/NEXT_SPRINTS_GUIDE.md | head -80
 
 # 3. Verify environment
 cd apps/web && npx tsc --noEmit
@@ -740,24 +753,22 @@ Demo org: "Horizon Construction Co." with orgId matching your user's orgId (set 
 ## Known Issues / Tech Debt
 
 - Pagination only on Clients + Expenses — other lists may need it at scale
-- Limited unit tests (9 files, 5 hooks tested out of 95) — Sprint 70 planned
-- Mobile UI needs ongoing polish
-- AuthProvider architecture needs refactoring — Sprint 71 planned
-- Some silent error handling (especially auth profile loading)
+- Unit tests at 1,502 (42 suites) — Sprint 101 targets 1,800+
+- ESLint: 1,050 warnings — Sprint 100 targets <400
+- Some silent error handling — Sprint 102 addresses this
+- Not yet deployed to production — Sprint 96-97 handles deploy
 
 ---
 
 ## Session Startup Checklist
 
 1. [ ] Read this CLAUDE.md completely
-2. [ ] **CHECK for implementation brief:** `ls docs/specs/sprint-{N}-brief.md`
-   - **Brief exists?** Read it, skip plan mode, start coding immediately
-   - **No brief?** Continue to step 3
+2. [ ] **CHECK `docs/SPRINT_STATUS.md`** for current sprint and next actions
 3. [ ] **CHECK `docs/MODULE_REGISTRY.md`** for module locations (avoids 200k+ token Explore agents!)
-4. [ ] Check `docs/SPRINT_STATUS.md` for current sprint progress
+4. [ ] **CHECK `docs/NEXT_SPRINTS_GUIDE.md`** for sprint plan and subagent assignments
 5. [ ] Run `npx tsc --noEmit` to verify build
-6. [ ] If no brief exists: enter plan mode, then generate brief for this sprint AND next 2
-7. [ ] Identify parallel tasks from brief's work plan (or from registry)
+6. [ ] If brief exists: `ls docs/specs/sprint-{N}-brief.md` — skip plan mode, start coding
+7. [ ] Identify parallel tasks from sprint plan
 8. [ ] Launch sub-agents for independent work
 
 ---
@@ -784,29 +795,29 @@ Step 1: Task(general-purpose): "Add Firestore rules for new collection"
 Step 2: After rules deployed, Task(general-purpose): "Build UI using new collection"
 ```
 
-### Current Sprint Quick-Start
+### Current Sprint Quick-Start (Sprint 107)
 
-**ALWAYS check MODULE_REGISTRY.md first:**
+**Sprint 107 — Invoice PDF & Email Delivery**
 
 ```bash
-# 1. Find your modules (no exploration needed!)
-cat docs/MODULE_REGISTRY.md | grep -i "feature_name"
+# 1. Verify build
+cd apps/web && npx tsc --noEmit
 
-# 2. Check current sprint tasks
-cat docs/SPRINT_STATUS.md | head -100
+# 2. Check existing PDF service
+cat apps/web/lib/esignature/pdf-service.ts | head -50
+
+# 3. Check useInvoices hook
+cat apps/web/lib/hooks/useInvoices.ts | head -50
+
+# 4. Check email templates
+ls apps/web/lib/email/ functions/src/email/
 ```
 
-**If module NOT in registry:**
-- Run Explore agent to find it
-- UPDATE MODULE_REGISTRY.md with findings so future sprints don't repeat
-
-**Then launch parallel work:**
+**Sprint 107 Parallel Work:**
 ```
-# Data completeness (can run in parallel)
-Task(Bash, background): "cd scripts/seed-demo && npx ts-node seed-tasks.ts"
-Task(Bash, background): "cd scripts/seed-demo && npx ts-node seed-rfis.ts"
-
-# Feature development (can run in parallel)
-Task(general-purpose): "Build ComponentA..."
-Task(general-purpose): "Build ComponentB..."
+# Agent 1 (general-purpose): Wire InvoicePdf into useInvoices + download button
+# Agent 2 (general-purpose): Build invoice email template + Cloud Function
+# Agent 3 (general-purpose): Add recurring invoice schedule support
 ```
+
+**Full sprint plan (106-120):** Check `docs/NEXT_SPRINTS_GUIDE.md` and `docs/REPRIORITIZED_SPRINT_PLAN.md`

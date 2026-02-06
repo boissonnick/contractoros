@@ -57,7 +57,7 @@ export default function ServiceTicketsPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight">Service Tickets</h1>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Service Tickets</h1>
           <p className="text-gray-500 mt-1">Manage post-project service requests</p>
         </div>
         <Button variant="primary" size="sm">
@@ -70,7 +70,7 @@ export default function ServiceTicketsPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="p-4 text-center">
           <TicketIcon className="h-6 w-6 text-gray-400 mx-auto mb-2" />
-          <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.total}</p>
+          <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats.total}</p>
           <p className="text-xs text-gray-500">Total Tickets</p>
         </Card>
         <Card className="p-4 text-center">

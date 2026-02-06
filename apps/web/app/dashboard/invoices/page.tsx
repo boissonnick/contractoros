@@ -267,7 +267,7 @@ export default function InvoicesPage() {
 
       {/* Mobile Header */}
       <div className="md:hidden">
-        <h1 className="text-xl font-bold font-heading tracking-tight text-gray-900">Invoices</h1>
+        <h1 className="text-xl font-bold tracking-tight text-gray-900">Invoices</h1>
         <p className="text-xs text-gray-500">Manage invoices and payments</p>
       </div>
 
@@ -279,7 +279,7 @@ export default function InvoicesPage() {
               <BanknotesIcon className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{formatCurrency(stats.outstandingAmount)}</p>
+              <p className="text-2xl font-bold tracking-tight text-gray-900">{formatCurrency(stats.outstandingAmount)}</p>
               <p className="text-xs text-gray-500">Outstanding ({stats.outstandingCount})</p>
             </div>
           </div>
@@ -290,7 +290,7 @@ export default function InvoicesPage() {
               <ExclamationCircleIcon className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{formatCurrency(stats.overdueAmount)}</p>
+              <p className="text-2xl font-bold tracking-tight text-gray-900">{formatCurrency(stats.overdueAmount)}</p>
               <p className="text-xs text-gray-500">Overdue ({stats.overdueCount})</p>
             </div>
           </div>
@@ -301,7 +301,7 @@ export default function InvoicesPage() {
               <CurrencyDollarIcon className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{formatCurrency(stats.paidThisMonth)}</p>
+              <p className="text-2xl font-bold tracking-tight text-gray-900">{formatCurrency(stats.paidThisMonth)}</p>
               <p className="text-xs text-gray-500">Paid This Month</p>
             </div>
           </div>
@@ -312,7 +312,7 @@ export default function InvoicesPage() {
               <DocumentTextIcon className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{stats.total}</p>
+              <p className="text-2xl font-bold tracking-tight text-gray-900">{stats.total}</p>
               <p className="text-xs text-gray-500">Total Invoices</p>
             </div>
           </div>

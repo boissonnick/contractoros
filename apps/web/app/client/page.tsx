@@ -101,7 +101,7 @@ export default function ClientDashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900">
           Welcome, {profile?.displayName?.split(' ')[0]}
         </h1>
         <p className="text-gray-500 mt-1">
@@ -118,7 +118,7 @@ export default function ClientDashboard() {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-white/70 text-sm font-medium mb-1">Active Project</p>
-              <h2 className="text-xl font-bold font-heading tracking-tight mb-2">{activeProject.name}</h2>
+              <h2 className="text-xl font-bold tracking-tight mb-2">{activeProject.name}</h2>
               <p className="text-white/80 text-sm">
                 {activeProject.address.street}, {activeProject.address.city}
               </p>
@@ -140,7 +140,7 @@ export default function ClientDashboard() {
       ) : (
         <div className="bg-white rounded-xl border p-6 text-center">
           <HomeIcon className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-          <h3 className="text-lg font-medium font-heading tracking-tight text-gray-900 mb-1">No Active Projects</h3>
+          <h3 className="text-lg font-medium tracking-tight text-gray-900 mb-1">No Active Projects</h3>
           <p className="text-gray-500">Your contractor will add projects here when work begins</p>
         </div>
       )}
@@ -153,7 +153,7 @@ export default function ClientDashboard() {
               <HomeIcon className="h-5 w-5 text-brand-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{projects.length}</p>
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">{projects.length}</p>
               <p className="text-sm text-gray-500">Total Projects</p>
             </div>
           </div>
@@ -165,7 +165,7 @@ export default function ClientDashboard() {
               <PhotoIcon className="h-5 w-5 text-purple-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{recentPhotos.length}</p>
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">{recentPhotos.length}</p>
               <p className="text-sm text-gray-500">Recent Photos</p>
             </div>
           </div>
@@ -177,7 +177,7 @@ export default function ClientDashboard() {
               <CurrencyDollarIcon className={`h-5 w-5 ${pendingAmount > 0 ? 'text-yellow-600' : 'text-green-600'}`} />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">${pendingAmount.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">${pendingAmount.toLocaleString()}</p>
               <p className="text-sm text-gray-500">
                 {pendingAmount > 0 ? 'Balance Due' : 'All Paid Up'}
               </p>
@@ -190,7 +190,7 @@ export default function ClientDashboard() {
         {/* Recent Photos */}
         <div className="bg-white rounded-xl border p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900">Recent Progress</h2>
+            <h2 className="text-lg font-semibold tracking-tight text-gray-900">Recent Progress</h2>
             <Link href="/client/photos" className="text-sm text-brand-600 hover:text-brand-700 flex items-center gap-1">
               All photos <ArrowRightIcon className="h-4 w-4" />
             </Link>
@@ -230,7 +230,7 @@ export default function ClientDashboard() {
         {/* Recent Invoices */}
         <div className="bg-white rounded-xl border p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900">Invoices</h2>
+            <h2 className="text-lg font-semibold tracking-tight text-gray-900">Invoices</h2>
             <Link href="/client/documents" className="text-sm text-brand-600 hover:text-brand-700 flex items-center gap-1">
               All documents <ArrowRightIcon className="h-4 w-4" />
             </Link>
@@ -283,7 +283,7 @@ export default function ClientDashboard() {
 
       {/* Contact Card */}
       <div className="bg-white rounded-xl border p-6">
-        <h3 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">Need Help?</h3>
+        <h3 className="text-lg font-semibold tracking-tight text-gray-900 mb-4">Need Help?</h3>
         <p className="text-gray-600 mb-4">
           If you have questions about your project, reach out to your contractor directly.
         </p>

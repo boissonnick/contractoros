@@ -144,7 +144,7 @@ export default function CompanyOverviewDashboard({
                 )}
               </div>
               <p className="text-xs text-gray-500 mb-1">{kpi.label}</p>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{kpi.value}</p>
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">{kpi.value}</p>
               <p className="text-xs text-gray-400 mt-1">{kpi.subtext}</p>
             </Card>
           );

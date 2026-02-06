@@ -157,7 +157,7 @@ function StatCard({
   label,
   value,
   icon: Icon,
-  iconBg: _iconBg = 'bg-brand-primary/10',
+  iconBg = 'bg-white shadow-sm ring-1 ring-black/5',
   iconColor = 'text-brand-primary',
   change,
   description,
@@ -173,14 +173,14 @@ function StatCard({
       <div className="p-5">
         <div className="flex items-center gap-4">
           {Icon && (
-            <div className={`p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-black/5 ${iconColor}`}>
+            <div className={`p-2.5 rounded-xl ${iconBg} ${iconColor}`}>
               <Icon className={`h-6 w-6 ${iconColor}`} />
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold uppercase tracking-wider text-gray-400 font-heading truncate">{label}</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-gray-400 truncate">{label}</p>
             <div className="flex items-baseline gap-2 mt-1">
-              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 tabular-nums truncate font-heading tracking-tight">
+              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 tabular-nums truncate tracking-tight">
                 {typeof value === 'number' ? value.toLocaleString() : value}
               </p>
               {change && (

@@ -205,7 +205,7 @@ export default function ExpensesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">Expenses & Reimbursements</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900">Expenses & Reimbursements</h1>
           <p className="text-sm text-gray-500 mt-1">
             Track expenses, submit reimbursement requests, and manage approvals
           </p>
@@ -236,7 +236,7 @@ export default function ExpensesPage() {
             </div>
           </div>
           <div className="text-sm text-gray-500">Total Expenses</div>
-          <div className="text-2xl font-bold font-heading tracking-tight text-gray-900 mt-1">
+          <div className="text-2xl font-bold tracking-tight text-gray-900 mt-1">
             {formatCurrency(summary.totalExpenses)}
           </div>
           <div className="text-xs text-gray-400 mt-1">
@@ -250,7 +250,7 @@ export default function ExpensesPage() {
             </div>
           </div>
           <div className="text-sm text-gray-500">Pending Review</div>
-          <div className="text-2xl font-bold font-heading tracking-tight text-yellow-600 mt-1">
+          <div className="text-2xl font-bold tracking-tight text-yellow-600 mt-1">
             {formatCurrency(summary.totalPending + summary.totalUnderReview)}
           </div>
           <div className="text-xs text-gray-400 mt-1">
@@ -264,7 +264,7 @@ export default function ExpensesPage() {
             </div>
           </div>
           <div className="text-sm text-gray-500">Ready for Payment</div>
-          <div className="text-2xl font-bold font-heading tracking-tight text-green-600 mt-1">
+          <div className="text-2xl font-bold tracking-tight text-green-600 mt-1">
             {formatCurrency(summary.totalApproved)}
           </div>
           <div className="text-xs text-gray-400 mt-1">
@@ -278,7 +278,7 @@ export default function ExpensesPage() {
             </div>
           </div>
           <div className="text-sm text-gray-500">Paid</div>
-          <div className="text-2xl font-bold font-heading tracking-tight text-blue-600 mt-1">
+          <div className="text-2xl font-bold tracking-tight text-blue-600 mt-1">
             {formatCurrency(summary.totalPaid)}
           </div>
           <div className="text-xs text-gray-400 mt-1">
@@ -292,7 +292,7 @@ export default function ExpensesPage() {
             </div>
           </div>
           <div className="text-sm text-gray-500">Reimbursable Total</div>
-          <div className="text-2xl font-bold font-heading tracking-tight text-purple-600 mt-1">
+          <div className="text-2xl font-bold tracking-tight text-purple-600 mt-1">
             {formatCurrency(summary.totalReimbursable)}
           </div>
           <div className="text-xs text-gray-400 mt-1">
@@ -473,7 +473,7 @@ export default function ExpensesPage() {
       {/* Category Breakdown (if expenses exist) */}
       {expenses.length > 0 && (
         <Card className="p-4">
-          <h3 className="text-sm font-medium font-heading tracking-tight text-gray-700 mb-3">Expenses by Category</h3>
+          <h3 className="text-sm font-medium tracking-tight text-gray-700 mb-3">Expenses by Category</h3>
           <div className="space-y-2">
             {EXPENSE_CATEGORIES
               .filter(cat => summary.byCategory[cat.value] > 0)

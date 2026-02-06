@@ -179,7 +179,7 @@ export default function FieldTasksPage() {
           >
             <ChevronLeftIcon className="h-6 w-6" />
           </button>
-          <h1 className="text-lg font-semibold font-heading tracking-tight">My Tasks</h1>
+          <h1 className="text-lg font-semibold tracking-tight">My Tasks</h1>
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}

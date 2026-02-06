@@ -142,7 +142,7 @@ export function EmployeeRateManager({
               <CurrencyDollarIcon className="h-4 w-4" />
               {employeeType === 'salaried' ? 'Annual Salary' : 'Hourly Rate'}
             </div>
-            <div className="text-xl font-semibold text-gray-900 font-heading tracking-tight">
+            <div className="text-xl font-semibold text-gray-900 tracking-tight">
               {employeeType === 'salaried'
                 ? formatCurrency(employee.salary ?? 0)
                 : formatCurrency(employee.hourlyRate ?? 0)}
@@ -184,7 +184,7 @@ export function EmployeeRateManager({
               <ChartBarIcon className="h-4 w-4" />
               Annual (Est.)
             </div>
-            <div className="text-xl font-semibold text-gray-900 font-heading tracking-tight">
+            <div className="text-xl font-semibold text-gray-900 tracking-tight">
               {formatCurrency(annualEstimate)}
             </div>
             <div className="text-xs text-gray-500">

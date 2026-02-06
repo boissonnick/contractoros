@@ -60,7 +60,7 @@ export default function ClientChangeOrdersPage() {
     return (
       <div className="space-y-6">
         <button onClick={() => setSelectedCO(null)} className="text-sm text-blue-600 hover:underline">← Back</button>
-        <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900">{activeCO.number}: {activeCO.title}</h2>
+        <h2 className="text-lg font-semibold tracking-tight text-gray-900">{activeCO.number}: {activeCO.title}</h2>
 
         <ChangeOrderApprovalPanel
           co={activeCO}

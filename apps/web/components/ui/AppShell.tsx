@@ -37,7 +37,7 @@ function CollapsibleNavItem({
       >
         <div className="flex items-center">
           <Icon className={cn('mr-3 h-5 w-5', isActive ? 'text-brand-accent' : 'text-gray-500Group-hover:text-white')} />
-          <span className="font-heading">{item.label}</span>
+          <span>{item.label}</span>
         </div>
         <ChevronDownIcon
           className={cn(
@@ -126,7 +126,7 @@ export default function AppShell({
         )}
       >
         <item.icon className={cn('mr-3 h-5 w-5 transition-colors', isActive ? 'text-brand-accent' : 'text-gray-500 group-hover:text-white')} />
-        <span className="font-heading tracking-wide">{item.label}</span>
+        <span className="tracking-wide">{item.label}</span>
       </Link>
     );
   };
@@ -140,7 +140,7 @@ export default function AppShell({
           <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-lg shadow-brand-500/20">
             <span className="text-white font-bold text-xl">C</span>
           </div>
-          <Link href="/dashboard" className="font-heading font-bold text-xl text-white tracking-tight">
+          <Link href="/dashboard" className="font-bold text-xl text-white tracking-tight">
             ContractorOS
           </Link>
         </div>
@@ -153,11 +153,11 @@ export default function AppShell({
         <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar">
           {/* If sections are provided, render grouped navigation */}
           {navSections && navSections.length > 0 ? (
-            <div className="space-y-6 pt-2">
+            <div className="space-y-1 pt-2">
               {navSections.map((section) => (
                 <div key={section.id}>
                     {section.title && (
-                        <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 font-heading">
+                        <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
                             {section.title}
                         </h3>
                     )}
@@ -202,13 +202,13 @@ export default function AppShell({
               />
             </div>
             <div className="ml-3 min-w-0">
-              <p className="text-sm font-medium text-white truncate font-heading">{userDisplayName}</p>
+              <p className="text-sm font-medium text-white truncate">{userDisplayName}</p>
               <p className="text-xs text-gray-500 truncate">View Profile</p>
             </div>
           </div>
           <button
             onClick={onSignOut}
-            className="w-full flex items-center justify-center px-4 py-2 border border-white/10 shadow-sm text-sm font-medium rounded-lg text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 transition-all font-heading"
+            className="w-full flex items-center justify-center px-4 py-2 border border-white/10 shadow-sm text-sm font-medium rounded-lg text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 transition-all"
           >
             Sign Out
           </button>
@@ -233,10 +233,8 @@ export default function AppShell({
       />
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto pb-24 md:pb-0 bg-gray-50/50">
-        <div className="max-w-screen-2xl mx-auto p-4 md:p-8 lg:p-10 animation-delay-200 animate-fade-in relative z-10">
-            {/* Ambient Background Glow */}
-            <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-brand-100/50 to-transparent -z-10 pointer-events-none" />
+      <main className="flex-1 overflow-auto pb-24 md:pb-0">
+        <div className="p-4 md:p-6">
             {children}
         </div>
       </main>

@@ -132,7 +132,7 @@ export default function ClientPreferencesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight">Client Preferences</h1>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Client Preferences</h1>
           <p className="text-sm text-gray-500 mt-1">
             Capture and manage client design and budget preferences
           </p>

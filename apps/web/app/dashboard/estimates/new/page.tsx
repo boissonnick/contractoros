@@ -3,11 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
-import { db } from '@/lib/firebase/config';
-import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { Button, Card } from '@/components/ui';
 import { toast } from '@/components/ui/Toast';
 import { Estimate, EstimateLineItem } from '@/types';
+import { createEstimate, calculateEstimateTotals } from '@/lib/hooks/useEstimates';
 import {
   ArrowLeftIcon,
   PlusIcon,
@@ -18,7 +17,7 @@ import {
   CalculatorIcon,
 } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
-import { reserveNumber, getNextNumber } from '@/lib/utils/auto-number';
+import { getNextNumber } from '@/lib/utils/auto-number';
 
 const unitOptions = [
   { value: 'each', label: 'Each' },
@@ -287,26 +286,31 @@ export default function NewEstimatePage() {
 
     setSaving(true);
     try {
-      // Reserve the number atomically to prevent duplicates
-      const number = await reserveNumber(profile.orgId, 'estimate');
-
-      const newEstimate = {
-        ...estimate,
-        number,
-        orgId: profile.orgId,
-        lineItems,
-        subtotal,
-        taxAmount,
-        total,
-        createdBy: user.uid,
-        createdByName: profile.displayName,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
-      };
-
-      const docRef = await addDoc(collection(db, 'estimates'), newEstimate);
+      const estimateId = await createEstimate(
+        {
+          name: estimate.name || '',
+          clientName: estimate.clientName || '',
+          clientEmail: estimate.clientEmail,
+          clientPhone: estimate.clientPhone,
+          clientAddress: estimate.clientAddress,
+          projectName: estimate.projectName,
+          projectAddress: estimate.projectAddress,
+          lineItems,
+          taxRate: estimate.taxRate,
+          markupPercent: estimate.markupPercent,
+          paymentTerms: estimate.paymentTerms,
+          depositPercent: estimate.depositPercent,
+          validUntil: estimate.validUntil,
+          scopeOfWork: estimate.scopeOfWork,
+          exclusions: estimate.exclusions,
+          notes: estimate.notes,
+        },
+        profile.orgId,
+        user.uid,
+        profile.displayName
+      );
       toast.success('Estimate created');
-      router.push(`/dashboard/estimates/${docRef.id}`);
+      router.push(`/dashboard/estimates/${estimateId}`);
     } catch (error) {
       console.error('Error creating estimate:', error);
       toast.error('Failed to create estimate');
@@ -328,7 +332,7 @@ export default function NewEstimatePage() {
               >
                 <ArrowLeftIcon className="h-5 w-5" />
               </button>
-              <h1 className="text-xl font-semibold font-heading tracking-tight text-gray-900">New Estimate</h1>
+              <h1 className="text-xl font-semibold tracking-tight text-gray-900">New Estimate</h1>
             </div>
             <div className="flex items-center gap-3">
               <Button variant="outline" onClick={() => router.back()}>
@@ -348,7 +352,7 @@ export default function NewEstimatePage() {
           <div className="col-span-2 space-y-6">
             {/* Basic Info */}
             <Card className="p-6">
-              <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">Estimate Details</h2>
+              <h2 className="text-lg font-semibold tracking-tight text-gray-900 mb-4">Estimate Details</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -407,7 +411,7 @@ export default function NewEstimatePage() {
 
             {/* Client Info */}
             <Card className="p-6">
-              <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">Client Information</h2>
+              <h2 className="text-lg font-semibold tracking-tight text-gray-900 mb-4">Client Information</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -463,7 +467,7 @@ export default function NewEstimatePage() {
             {/* Line Items */}
             <Card className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900">Line Items</h2>
+                <h2 className="text-lg font-semibold tracking-tight text-gray-900">Line Items</h2>
                 <Button variant="outline" size="sm" onClick={addLineItem}>
                   <PlusIcon className="h-4 w-4 mr-1" />
                   Add Item
@@ -517,7 +521,7 @@ export default function NewEstimatePage() {
 
             {/* Scope of Work */}
             <Card className="p-6">
-              <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">Scope & Terms</h2>
+              <h2 className="text-lg font-semibold tracking-tight text-gray-900 mb-4">Scope & Terms</h2>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -563,7 +567,7 @@ export default function NewEstimatePage() {
           <div className="space-y-6">
             {/* Totals */}
             <Card className="p-6 sticky top-24">
-              <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4 flex items-center gap-2">
+              <h2 className="text-lg font-semibold tracking-tight text-gray-900 mb-4 flex items-center gap-2">
                 <CurrencyDollarIcon className="h-5 w-5" />
                 Pricing
               </h2>
@@ -599,7 +603,7 @@ export default function NewEstimatePage() {
 
                 <div className="flex items-center justify-between py-3 border-t-2 border-gray-200">
                   <span className="text-lg font-semibold text-gray-900">Total</span>
-                  <span className="text-2xl font-bold text-gray-900 font-heading tracking-tight">
+                  <span className="text-2xl font-bold text-gray-900 tracking-tight">
                     ${total.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </span>
                 </div>

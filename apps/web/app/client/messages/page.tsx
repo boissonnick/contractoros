@@ -293,7 +293,7 @@ export default function ClientMessagesPage() {
                               </div>
                               <div className="min-w-0 flex-1">
                                 <div className="flex items-center gap-2">
-                                  <h3 className="font-medium font-heading tracking-tight text-gray-900 truncate">
+                                  <h3 className="font-medium tracking-tight text-gray-900 truncate">
                                     {thread.channel.name}
                                   </h3>
                                   {thread.unreadCount > 0 && (
@@ -403,7 +403,7 @@ export default function ClientMessagesPage() {
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-white shadow-sm ring-1 ring-black/5 mb-3">
                 <EnvelopeIcon className="h-6 w-6 text-brand-primary" />
               </div>
-              <h3 className="text-lg font-medium font-heading tracking-tight text-gray-900 mb-2">
+              <h3 className="text-lg font-medium tracking-tight text-gray-900 mb-2">
                 Need to Reply?
               </h3>
               <p className="text-gray-600 mb-4 max-w-md mx-auto">

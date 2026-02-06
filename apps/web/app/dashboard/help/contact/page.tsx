@@ -41,7 +41,7 @@ export default function ContactSupportPage() {
         {/* Contact Options */}
         <div className="space-y-4">
           <Card className="p-6">
-            <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">Contact Options</h2>
+            <h2 className="text-lg font-semibold tracking-tight text-gray-900 mb-4">Contact Options</h2>
             <div className="space-y-4">
               <a
                 href="mailto:support@contractoros.com"
@@ -77,7 +77,7 @@ export default function ContactSupportPage() {
           <Card className="p-6">
             <div className="flex items-center gap-3 mb-4">
               <ClockIcon className="h-5 w-5 text-gray-400" />
-              <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900">Support Hours</h2>
+              <h2 className="text-lg font-semibold tracking-tight text-gray-900">Support Hours</h2>
             </div>
             <div className="space-y-2 text-sm text-gray-600">
               <div className="flex justify-between">
@@ -101,7 +101,7 @@ export default function ContactSupportPage() {
 
         {/* Support Form */}
         <Card className="p-6">
-          <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">Send a Message</h2>
+          <h2 className="text-lg font-semibold tracking-tight text-gray-900 mb-4">Send a Message</h2>
 
           {formSubmitted ? (
             <div className="text-center py-8">

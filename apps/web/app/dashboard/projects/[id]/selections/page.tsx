@@ -164,23 +164,23 @@ export default function ProjectSelectionsPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <Card className="p-4 text-center">
-          <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.total}</p>
+          <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats.total}</p>
           <p className="text-xs text-gray-500">Total Items</p>
         </Card>
         <Card className="p-4 text-center">
-          <p className="text-2xl font-bold text-orange-600 font-heading tracking-tight">{stats.pending}</p>
+          <p className="text-2xl font-bold text-orange-600 tracking-tight">{stats.pending}</p>
           <p className="text-xs text-gray-500">Awaiting Selection</p>
         </Card>
         <Card className="p-4 text-center">
-          <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{formatCurrency(stats.totalBudget)}</p>
+          <p className="text-2xl font-bold text-gray-900 tracking-tight">{formatCurrency(stats.totalBudget)}</p>
           <p className="text-xs text-gray-500">Total Budget</p>
         </Card>
         <Card className="p-4 text-center">
-          <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{formatCurrency(stats.totalSelected)}</p>
+          <p className="text-2xl font-bold text-gray-900 tracking-tight">{formatCurrency(stats.totalSelected)}</p>
           <p className="text-xs text-gray-500">Selected Total</p>
         </Card>
         <Card className={cn('p-4 text-center', stats.variance >= 0 ? 'ring-1 ring-green-200' : 'ring-1 ring-red-200')}>
-          <p className={cn('text-2xl font-bold font-heading tracking-tight', stats.variance >= 0 ? 'text-green-700' : 'text-red-700')}>
+          <p className={cn('text-2xl font-bold tracking-tight', stats.variance >= 0 ? 'text-green-700' : 'text-red-700')}>
             {formatCurrency(stats.variance)}
           </p>
           <p className="text-xs text-gray-500">Budget Variance</p>
@@ -212,7 +212,7 @@ export default function ProjectSelectionsPage() {
       {/* Add Form */}
       {showAddForm && (
         <Card className="p-5">
-          <h3 className="font-semibold text-gray-900 font-heading tracking-tight mb-4">New Selection Category</h3>
+          <h3 className="font-semibold text-gray-900 tracking-tight mb-4">New Selection Category</h3>
           <div className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>

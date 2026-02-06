@@ -193,7 +193,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white font-heading tracking-tight">ContractorOS</h1>
+          <h1 className="text-3xl font-bold text-white tracking-tight">ContractorOS</h1>
           <p className="text-brand-200 mt-2">Field-first operations system</p>
         </div>
 

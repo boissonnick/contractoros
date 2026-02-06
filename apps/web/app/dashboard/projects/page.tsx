@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
@@ -94,9 +94,7 @@ export default function ProjectsPage() {
   const [pageSize, setPageSize] = useState<PageSize>(25);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
-  const [firstDoc, setFirstDoc] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
-  const [pageHistory, setPageHistory] = useState<QueryDocumentSnapshot<DocumentData>[]>([]);
+  // Pagination cursor state moved to refs (see below fetchProjects)
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -112,6 +110,11 @@ export default function ProjectsPage() {
       archivedAt: data.archivedAt?.toDate?.(),
     } as Project;
   };
+
+  // Use refs for pagination cursors to avoid infinite re-render loops
+  const lastDocRef = useRef<QueryDocumentSnapshot<DocumentData> | null>(null);
+  const firstDocRef = useRef<QueryDocumentSnapshot<DocumentData> | null>(null);
+  const pageHistoryRef = useRef<QueryDocumentSnapshot<DocumentData>[]>([]);
 
   const fetchProjects = React.useCallback(async (direction: 'first' | 'next' | 'prev' = 'first') => {
     if (!profile?.orgId) {
@@ -139,16 +142,16 @@ export default function ProjectsPage() {
         limit(pageSize)
       );
 
-      if (direction === 'next' && lastDoc) {
+      if (direction === 'next' && lastDocRef.current) {
         q = query(
           collection(db, 'projects'),
           where('orgId', '==', profile.orgId),
           orderBy('createdAt', 'desc'),
-          startAfter(lastDoc),
+          startAfter(lastDocRef.current),
           limit(pageSize)
         );
-      } else if (direction === 'prev' && pageHistory.length >= 2) {
-        const prevPageStart = pageHistory[pageHistory.length - 2];
+      } else if (direction === 'prev' && pageHistoryRef.current.length >= 2) {
+        const prevPageStart = pageHistoryRef.current[pageHistoryRef.current.length - 2];
         q = query(
           collection(db, 'projects'),
           where('orgId', '==', profile.orgId),
@@ -162,17 +165,17 @@ export default function ProjectsPage() {
       const projectsData = snapshot.docs.map(parseProjectDoc);
       setProjects(projectsData);
 
-      // Update pagination cursors
+      // Update pagination cursors via refs (no re-render trigger)
       if (snapshot.docs.length > 0) {
-        setFirstDoc(snapshot.docs[0]);
-        setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
+        firstDocRef.current = snapshot.docs[0];
+        lastDocRef.current = snapshot.docs[snapshot.docs.length - 1];
 
         if (direction === 'next') {
-          setPageHistory(prev => [...prev, firstDoc!]);
+          pageHistoryRef.current = [...pageHistoryRef.current, firstDocRef.current];
         } else if (direction === 'prev') {
-          setPageHistory(prev => prev.slice(0, -1));
+          pageHistoryRef.current = pageHistoryRef.current.slice(0, -1);
         } else {
-          setPageHistory([]);
+          pageHistoryRef.current = [];
         }
       }
     } catch (error) {
@@ -181,14 +184,15 @@ export default function ProjectsPage() {
     } finally {
       setLoading(false);
     }
-  }, [profile?.orgId, pageSize, lastDoc, firstDoc, pageHistory]);
+  }, [profile?.orgId, pageSize]);
 
   useEffect(() => {
     if (profile?.orgId) {
       setCurrentPage(1);
       fetchProjects('first');
     }
-  }, [profile?.orgId, pageSize, fetchProjects]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.orgId, pageSize]);
 
   const goToNextPage = () => {
     if (currentPage < totalPages) {
@@ -207,7 +211,7 @@ export default function ProjectsPage() {
   const handlePageSizeChange = (newSize: PageSize) => {
     setPageSize(newSize);
     setCurrentPage(1);
-    setPageHistory([]);
+    pageHistoryRef.current = [];
   };
 
   // Get all unique tags across projects
@@ -451,7 +455,7 @@ export default function ProjectsPage() {
       <div className="md:hidden">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold font-heading tracking-tight text-gray-900">Projects</h1>
+            <h1 className="text-xl font-bold tracking-tight text-gray-900">Projects</h1>
             <p className="text-xs text-gray-500">
               {showArchived ? `${stats.archived} archived` : `${stats.total} total`}
             </p>
@@ -480,7 +484,7 @@ export default function ProjectsPage() {
                 <ChartBarIcon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{stats.active}</p>
+                <p className="text-2xl font-bold tracking-tight text-gray-900">{stats.active}</p>
                 <p className="text-xs text-gray-500">Active</p>
               </div>
             </div>
@@ -491,7 +495,7 @@ export default function ProjectsPage() {
                 <FolderIcon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{stats.planning}</p>
+                <p className="text-2xl font-bold tracking-tight text-gray-900">{stats.planning}</p>
                 <p className="text-xs text-gray-500">In Pipeline</p>
               </div>
             </div>
@@ -502,7 +506,7 @@ export default function ProjectsPage() {
                 <FolderIcon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{stats.completed}</p>
+                <p className="text-2xl font-bold tracking-tight text-gray-900">{stats.completed}</p>
                 <p className="text-xs text-gray-500">Completed</p>
               </div>
             </div>
@@ -513,7 +517,7 @@ export default function ProjectsPage() {
                 <ChartBarIcon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{formatCurrency(stats.totalBudget)}</p>
+                <p className="text-2xl font-bold tracking-tight text-gray-900">{formatCurrency(stats.totalBudget)}</p>
                 <p className="text-xs text-gray-500">Total Budget</p>
               </div>
             </div>
@@ -690,7 +694,7 @@ export default function ProjectsPage() {
 
                 <Link href={`/dashboard/projects/${project.id}`} prefetch={false} className="block p-3">
                   <div className="flex items-start justify-between mb-1.5">
-                    <h3 className="font-semibold font-heading tracking-tight text-gray-900 truncate pr-8 text-sm" title={project.name}>{project.name}</h3>
+                    <h3 className="font-semibold tracking-tight text-gray-900 truncate pr-8 text-sm" title={project.name}>{project.name}</h3>
                   </div>
                   <div className="flex items-center gap-1.5 mb-1.5">
                     <Badge className={statusConfig[project.status].color}>
@@ -759,7 +763,7 @@ export default function ProjectsPage() {
                     <div className="flex items-center gap-4 flex-1 min-w-0">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <h3 className="font-medium font-heading tracking-tight text-gray-900 truncate">{project.name}</h3>
+                          <h3 className="font-medium tracking-tight text-gray-900 truncate">{project.name}</h3>
                           <Badge className={cn(statusConfig[project.status].color, 'text-xs')}>
                             {statusConfig[project.status].label}
                           </Badge>

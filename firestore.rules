@@ -2806,6 +2806,60 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // ==========================================
+    // Subcontractor Invoices Collection (Sprint 69 — AP Automation)
+    // ==========================================
+    match /organizations/{orgId}/subcontractorInvoices/{invoiceId} {
+      allow read: if isSameOrg(orgId);
+      allow write: if isSameOrg(orgId);
+    }
+
+    // ==========================================
+    // Lien Waivers Collection (Sprint 69 — AP Automation)
+    // ==========================================
+    match /organizations/{orgId}/lienWaivers/{waiverId} {
+      allow read: if isSameOrg(orgId);
+      allow write: if isSameOrg(orgId);
+    }
+
+    // ==========================================
+    // Reviews & Reputation Management Collections
+    // ==========================================
+    match /organizations/{orgId}/reviews/{reviewId} {
+      allow read: if isSameOrg(orgId);
+      allow create: if isSameOrg(orgId);
+      allow update: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+      allow delete: if isAdmin();
+    }
+
+    match /organizations/{orgId}/reviewRequests/{requestId} {
+      allow read: if isSameOrg(orgId);
+      allow create: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+      allow update: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+      allow delete: if isAdmin();
+    }
+
+    match /organizations/{orgId}/reviewAutomationRules/{ruleId} {
+      allow read: if isSameOrg(orgId);
+      allow create: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+      allow update: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+      allow delete: if isAdmin();
+    }
+
+    match /organizations/{orgId}/googleBusinessConnections/{connectionId} {
+      allow read: if isSameOrg(orgId);
+      allow create: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+      allow update: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+      allow delete: if isAdmin();
+    }
+
+    match /organizations/{orgId}/reviewResponseTemplates/{templateId} {
+      allow read: if isSameOrg(orgId);
+      allow create: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+      allow update: if isSameOrg(orgId) && getUserProfile().role in ['OWNER', 'PM'];
+      allow delete: if isAdmin();
+    }
+
     // Default deny all other access
     match /{document=**} {
       allow read, write: if false;

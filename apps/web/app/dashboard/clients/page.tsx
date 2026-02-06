@@ -154,7 +154,7 @@ export default function ClientsPage() {
 
       {/* Mobile Header */}
       <div className="md:hidden">
-        <h1 className="text-xl font-bold font-heading tracking-tight text-gray-900">Clients</h1>
+        <h1 className="text-xl font-bold tracking-tight text-gray-900">Clients</h1>
         <p className="text-xs text-gray-500">Manage relationships & projects</p>
       </div>
 
@@ -166,7 +166,7 @@ export default function ClientsPage() {
               <UserGroupIcon className="h-4 w-4 text-gray-600" />
             </div>
             <div>
-              <p className="text-lg font-bold font-heading tracking-tight text-gray-900">{stats.total}</p>
+              <p className="text-lg font-bold tracking-tight text-gray-900">{stats.total}</p>
               <p className="text-[10px] text-gray-500">Total</p>
             </div>
           </div>
@@ -177,7 +177,7 @@ export default function ClientsPage() {
               <BriefcaseIcon className="h-4 w-4 text-green-600" />
             </div>
             <div>
-              <p className="text-lg font-bold font-heading tracking-tight text-gray-900">{stats.active}</p>
+              <p className="text-lg font-bold tracking-tight text-gray-900">{stats.active}</p>
               <p className="text-[10px] text-gray-500">Active</p>
             </div>
           </div>
@@ -188,7 +188,7 @@ export default function ClientsPage() {
               <CurrencyDollarIcon className="h-4 w-4 text-blue-600" />
             </div>
             <div>
-              <p className="text-lg font-bold font-heading tracking-tight text-gray-900">{formatCurrency(stats.totalLifetimeValue)}</p>
+              <p className="text-lg font-bold tracking-tight text-gray-900">{formatCurrency(stats.totalLifetimeValue)}</p>
               <p className="text-[10px] text-gray-500">Revenue</p>
             </div>
           </div>
@@ -200,7 +200,7 @@ export default function ClientsPage() {
                 <ExclamationCircleIcon className="h-4 w-4 text-orange-600" />
               </div>
               <div>
-                <p className="text-lg font-bold font-heading tracking-tight text-orange-600">{formatCurrency(stats.totalOutstanding)}</p>
+                <p className="text-lg font-bold tracking-tight text-orange-600">{formatCurrency(stats.totalOutstanding)}</p>
                 <p className="text-[10px] text-orange-700">Outstanding</p>
               </div>
             </div>
@@ -216,7 +216,7 @@ export default function ClientsPage() {
               <UserGroupIcon className="h-5 w-5 text-gray-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{stats.total}</p>
+              <p className="text-2xl font-bold tracking-tight text-gray-900">{stats.total}</p>
               <p className="text-xs text-gray-500">Total Clients</p>
             </div>
           </div>
@@ -227,7 +227,7 @@ export default function ClientsPage() {
               <BriefcaseIcon className="h-5 w-5 text-green-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{stats.active}</p>
+              <p className="text-2xl font-bold tracking-tight text-gray-900">{stats.active}</p>
               <p className="text-xs text-gray-500">Active Clients</p>
             </div>
           </div>
@@ -238,7 +238,7 @@ export default function ClientsPage() {
               <CurrencyDollarIcon className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{formatCurrency(stats.totalLifetimeValue)}</p>
+              <p className="text-2xl font-bold tracking-tight text-gray-900">{formatCurrency(stats.totalLifetimeValue)}</p>
               <p className="text-xs text-gray-500">Lifetime Revenue</p>
             </div>
           </div>
@@ -249,7 +249,7 @@ export default function ClientsPage() {
               <ExclamationCircleIcon className="h-5 w-5 text-orange-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{formatCurrency(stats.totalOutstanding)}</p>
+              <p className="text-2xl font-bold tracking-tight text-gray-900">{formatCurrency(stats.totalOutstanding)}</p>
               <p className="text-xs text-gray-500">Outstanding Balance</p>
             </div>
           </div>
@@ -335,7 +335,7 @@ export default function ClientsPage() {
       ) : displayError ? (
         <Card className="p-8 text-center">
           <ExclamationCircleIcon className="h-12 w-12 text-red-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium font-heading tracking-tight text-gray-900 mb-2">Error Loading Clients</h3>
+          <h3 className="text-lg font-medium tracking-tight text-gray-900 mb-2">Error Loading Clients</h3>
           <p className="text-gray-500">{displayError.message}</p>
         </Card>
       ) : displayClients.length === 0 ? (

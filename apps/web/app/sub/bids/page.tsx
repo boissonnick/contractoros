@@ -77,7 +77,7 @@ function BidCard({
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="font-semibold font-heading tracking-tight text-gray-900 truncate">
+              <h3 className="font-semibold tracking-tight text-gray-900 truncate">
                 {bid.projectName || `Project ${bid.projectId.slice(-6)}`}
               </h3>
               <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${config.bgColor} ${config.color}`}>
@@ -326,7 +326,7 @@ function BidDetailModal({
                 />
               </div>
             ) : (
-              <p className="text-lg font-semibold text-gray-900 font-heading tracking-tight">{formatCurrency(bid.amount)}</p>
+              <p className="text-lg font-semibold text-gray-900 tracking-tight">{formatCurrency(bid.amount)}</p>
             )}
           </div>
 
@@ -472,7 +472,7 @@ function BidDetailModal({
         {/* Response Notes */}
         {bid.responseNotes && mode === 'view' && (
           <div className={`p-4 rounded-lg ${bid.status === 'accepted' ? 'bg-green-50' : bid.status === 'rejected' ? 'bg-red-50' : 'bg-gray-50'}`}>
-            <h4 className="font-medium font-heading tracking-tight text-gray-900 mb-1">Contractor Response</h4>
+            <h4 className="font-medium tracking-tight text-gray-900 mb-1">Contractor Response</h4>
             <p className={`text-sm ${bid.status === 'accepted' ? 'text-green-700' : bid.status === 'rejected' ? 'text-red-700' : 'text-gray-700'}`}>
               {bid.responseNotes}
             </p>
@@ -504,7 +504,7 @@ function BidStats({ bids }: { bids: BidWithProject[] }) {
             <ClockIcon className="h-5 w-5 text-blue-600" />
           </div>
           <div>
-            <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.active}</p>
+            <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats.active}</p>
             <p className="text-sm text-gray-500">Active Bids</p>
           </div>
         </div>
@@ -516,7 +516,7 @@ function BidStats({ bids }: { bids: BidWithProject[] }) {
             <CheckCircleIcon className="h-5 w-5 text-green-600" />
           </div>
           <div>
-            <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.won}</p>
+            <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats.won}</p>
             <p className="text-sm text-gray-500">Won Bids</p>
           </div>
         </div>
@@ -528,7 +528,7 @@ function BidStats({ bids }: { bids: BidWithProject[] }) {
             <DocumentTextIcon className="h-5 w-5 text-gray-600" />
           </div>
           <div>
-            <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.pending}</p>
+            <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats.pending}</p>
             <p className="text-sm text-gray-500">Drafts</p>
           </div>
         </div>
@@ -540,7 +540,7 @@ function BidStats({ bids }: { bids: BidWithProject[] }) {
             <BanknotesIcon className="h-5 w-5 text-purple-600" />
           </div>
           <div>
-            <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{formatCurrency(stats.totalWonValue)}</p>
+            <p className="text-2xl font-bold text-gray-900 tracking-tight">{formatCurrency(stats.totalWonValue)}</p>
             <p className="text-sm text-gray-500">Won Value</p>
           </div>
         </div>
@@ -716,7 +716,7 @@ export default function SubBidsPage() {
       {/* Pending Bid Requests Section */}
       {solicitations.length > 0 && (
         <div className="mt-8">
-          <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">
+          <h2 className="text-lg font-semibold tracking-tight text-gray-900 mb-4">
             Open Bid Requests ({solicitations.length})
           </h2>
           <div className="space-y-3">
@@ -727,7 +727,7 @@ export default function SubBidsPage() {
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <h3 className="font-semibold font-heading tracking-tight text-gray-900">{solicitation.title}</h3>
+                    <h3 className="font-semibold tracking-tight text-gray-900">{solicitation.title}</h3>
                     {solicitation.description && (
                       <p className="text-sm text-gray-600 mt-1">{solicitation.description}</p>
                     )}

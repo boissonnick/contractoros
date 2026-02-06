@@ -46,6 +46,16 @@ export {
   qboManualSync,
 } from "./integrations/qbo-scheduled-sync";
 
+// Review Management — automated review solicitation & Google sync
+export {
+  onReviewRequestCreated,
+  onProjectStatusChange,
+  onInvoiceStatusChange,
+  syncGoogleReviewsScheduled,
+  syncGoogleReviewsManual,
+  processScheduledReviewRequests,
+} from "./reviews";
+
 // Initialize Firebase Admin SDK
 admin.initializeApp();
 

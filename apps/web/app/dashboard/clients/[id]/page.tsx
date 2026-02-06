@@ -155,7 +155,7 @@ export default function ClientDetailPage() {
           </Button>
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{client.displayName}</h1>
+              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{client.displayName}</h1>
               <Badge className={statusColors[client.status]}>
                 {CLIENT_STATUS_LABELS[client.status]}
               </Badge>
@@ -200,7 +200,7 @@ export default function ClientDetailPage() {
               <BriefcaseIcon className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">
                 {client.financials?.totalProjects || 0}
               </p>
               <p className="text-xs text-gray-500">Total Projects</p>
@@ -213,7 +213,7 @@ export default function ClientDetailPage() {
               <CheckCircleIcon className="h-5 w-5 text-green-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">
                 {client.financials?.completedProjects || 0}
               </p>
               <p className="text-xs text-gray-500">Completed</p>
@@ -226,7 +226,7 @@ export default function ClientDetailPage() {
               <ArrowTrendingUpIcon className="h-5 w-5 text-purple-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">
                 {formatCurrency(client.financials?.lifetimeValue || 0)}
               </p>
               <p className="text-xs text-gray-500">Lifetime Value</p>
@@ -239,7 +239,7 @@ export default function ClientDetailPage() {
               <ExclamationCircleIcon className="h-5 w-5 text-orange-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">
                 {formatCurrency(client.financials?.outstandingBalance || 0)}
               </p>
               <p className="text-xs text-gray-500">Outstanding</p>
@@ -252,7 +252,7 @@ export default function ClientDetailPage() {
               <CurrencyDollarIcon className="h-5 w-5 text-gray-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">
                 {formatCurrency(client.financials?.averageProjectValue || 0)}
               </p>
               <p className="text-xs text-gray-500">Avg Project</p>
@@ -686,7 +686,7 @@ function FinancialsTab({
           </div>
           <div>
             <p className="text-sm text-gray-500">Average Project Value</p>
-            <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">
+            <p className="text-2xl font-bold text-gray-900 tracking-tight">
               {formatCurrency(financials.averageProjectValue || 0)}
             </p>
           </div>
@@ -694,7 +694,7 @@ function FinancialsTab({
             <p className="text-sm text-gray-500">Last Payment</p>
             {financials.lastPaymentDate ? (
               <>
-                <p className="text-lg font-bold text-gray-900 font-heading tracking-tight">
+                <p className="text-lg font-bold text-gray-900 tracking-tight">
                   {formatCurrency(financials.lastPaymentAmount || 0)}
                 </p>
                 <p className="text-xs text-gray-500">

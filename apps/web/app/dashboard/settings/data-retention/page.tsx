@@ -154,7 +154,7 @@ export default function DataRetentionPage() {
     return (
       <div className="flex flex-col items-center justify-center py-16">
         <ShieldCheckIcon className="h-16 w-16 text-gray-300 mb-4" />
-        <h2 className="text-xl font-semibold text-gray-900 font-heading tracking-tight mb-2">Access Restricted</h2>
+        <h2 className="text-xl font-semibold text-gray-900 tracking-tight mb-2">Access Restricted</h2>
         <p className="text-gray-500 text-center max-w-md">
           Data retention settings are only accessible to organization owners for security
           and compliance purposes.
@@ -169,7 +169,7 @@ export default function DataRetentionPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 font-heading tracking-tight">Data Retention</h2>
+            <h2 className="text-lg font-semibold text-gray-900 tracking-tight">Data Retention</h2>
             <p className="text-sm text-gray-500">
               Configure how long different types of data are retained before cleanup.
             </p>

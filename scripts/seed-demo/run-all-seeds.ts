@@ -71,8 +71,51 @@ const SEED_SCRIPTS = [
 
   // Phase 7: Financial data
   { name: 'finances', file: 'seed-finances.ts', description: 'Seed comprehensive finance data' },
+  { name: 'financials', file: 'seed-financials.ts', description: 'Seed 45 invoices across all projects' },
+  { name: 'payments', file: 'seed-payments.ts', description: 'Seed 38 payments linked to invoices' },
+  { name: 'expenses', file: 'seed-expenses.ts', description: 'Seed 80+ categorized expenses' },
+  { name: 'historical-revenue', file: 'seed-historical-revenue.ts', description: 'Seed historical revenue data (Nov-Jan)' },
+  { name: 'sub-payments', file: 'seed-sub-payments.ts', description: 'Seed sub payments for P&L reports' },
   { name: 'payroll', file: 'seed-payroll.ts', description: 'Seed payroll data' },
   { name: 'reports-data', file: 'seed-reports-data.ts', description: 'Seed historical reports data' },
+
+  // Phase 8: Time & photos
+  { name: 'time-entries', file: 'seed-time-entries.ts', description: 'Seed time tracking entries' },
+  { name: 'timesheets', file: 'seed-timesheets.ts', description: 'Seed weekly timesheets (48 records, 6 team members x 8 weeks)' },
+  { name: 'photos', file: 'seed-photos.ts', description: 'Seed project photos' },
+
+  // Phase 9: Equipment & materials
+  { name: 'equipment', file: 'seed-equipment.ts', description: 'Seed equipment, checkouts, maintenance' },
+  { name: 'materials', file: 'seed-materials.ts', description: 'Seed materials, suppliers, purchase orders' },
+
+  // Phase 10: Advanced features
+  { name: 'estimates', file: 'seed-estimates.ts', description: 'Seed estimates and proposals' },
+  { name: 'messages', file: 'seed-messages.ts', description: 'Seed messaging channels and messages' },
+  { name: 'progress-updates', file: 'seed-progress-updates.ts', description: 'Seed project progress updates' },
+  { name: 'job-costing', file: 'seed-job-costing.ts', description: 'Seed job costing data' },
+  { name: 'project-profitability', file: 'seed-project-profitability.ts', description: 'Seed project profitability metrics' },
+  { name: 'activities', file: 'seed-activities.ts', description: 'Seed 200+ daily logs/activities' },
+  { name: 'milestones', file: 'seed-milestones.ts', description: 'Seed project milestones for progress dashboards' },
+  { name: 'comprehensive-reports', file: 'seed-comprehensive-reports-data.ts', description: 'Seed comprehensive reports data (6mo history)' },
+  { name: 'punch-quotes', file: 'seed-punch-quotes.ts', description: 'Seed punch list and quotes data' },
+
+  // Phase 11: Reviews & AP
+  { name: 'reviews', file: 'seed-reviews.ts', description: 'Seed reviews, requests, automation rules' },
+  { name: 'subcontractor-invoices', file: 'seed-subcontractor-invoices.ts', description: 'Seed AP invoices and lien waivers' },
+  { name: 'email-data', file: 'seed-email-data.ts', description: 'Seed email templates and logs' },
+
+  // Phase 12: Project detail hydration
+  { name: 'project-notes', file: 'seed-project-notes.ts', description: 'Seed project notes and activity feed entries' },
+  { name: 'sms-conversations', file: 'seed-sms-conversations.ts', description: 'Seed SMS conversations and messages' },
+  { name: 'documents', file: 'seed-documents.ts', description: 'Seed project documents (contracts, permits, drawings)' },
+
+  // Phase 13: Demo Data Hydration (Sprint 91+)
+  { name: 'leads', file: 'seed-leads.ts', description: 'Seed leads, service tickets for CRM pipeline' },
+  { name: 'safety', file: 'seed-safety.ts', description: 'Seed safety inspections, incidents, toolbox talks' },
+  { name: 'notifications', file: 'seed-notifications.ts', description: 'Seed in-app notifications' },
+  { name: 'signatures', file: 'seed-signatures.ts', description: 'Seed e-signature requests' },
+  { name: 'selections', file: 'seed-selections.ts', description: 'Seed material/design selections' },
+  { name: 'phases', file: 'seed-phases.ts', description: 'Seed project phases with milestones' },
 ];
 
 interface RunOptions {
@@ -140,7 +183,7 @@ async function runSeed(scriptFile: string, description: string): Promise<boolean
 async function main() {
   const options = parseArgs();
 
-  logHeader('ContractorOS Demo Data Seeder - Sprint 38');
+  logHeader('ContractorOS Demo Data Seeder');
 
   log('Options:', colors.yellow);
   log(`  Skip existing: ${options.skipExisting}`);

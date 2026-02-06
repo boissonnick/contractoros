@@ -21,7 +21,7 @@ export default function SubcontractorPortalError({
           <ExclamationTriangleIcon className="h-7 w-7 text-amber-600" />
         </div>
 
-        <h2 className="text-xl font-bold font-heading tracking-tight text-gray-900 mb-2">
+        <h2 className="text-xl font-bold tracking-tight text-gray-900 mb-2">
           Page Error
         </h2>
 

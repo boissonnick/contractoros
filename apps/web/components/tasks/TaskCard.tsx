@@ -45,7 +45,7 @@ export default function TaskCard({ task, onClick, compact = false, className, is
   return (
     <div
       className={cn(
-        'bg-white rounded-lg border border-gray-200 shadow-sm cursor-pointer',
+        'bg-white rounded-2xl border border-gray-200 shadow-sm cursor-pointer',
         'hover:shadow-md hover:border-gray-300 transition-all duration-150',
         isOverdue && 'border-red-300 bg-red-50/30',
         isSelected && 'ring-2 ring-blue-500 border-blue-400 bg-blue-50/30',

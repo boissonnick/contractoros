@@ -508,7 +508,7 @@ export default function TeamContent() {
       {/* Header with Invite Button */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 font-heading tracking-tight">Team Management</h2>
+          <h2 className="text-lg font-semibold text-gray-900 tracking-tight">Team Management</h2>
           <p className="text-sm text-gray-500">
             Manage team members, roles, and invitations.
           </p>

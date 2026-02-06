@@ -72,7 +72,7 @@ export function MobileProjectCard({
       <div className={`px-4 ${compact ? 'py-3' : 'py-4'}`}>
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <h3 className={`font-semibold text-gray-900 truncate ${compact ? 'text-sm' : 'text-base'}`}>
+            <h3 className={`font-semibold text-gray-900 line-clamp-2 ${compact ? 'text-sm' : 'text-base'}`}>
               {project.name}
             </h3>
             <Badge className={`mt-1.5 ${statusConfig.color}`}>
@@ -88,7 +88,7 @@ export function MobileProjectCard({
         {project.address && (
           <div className="flex items-center gap-1.5 mt-3 text-sm text-gray-500">
             <MapPinIcon className="h-4 w-4 flex-shrink-0" />
-            <span className="truncate">
+            <span className="line-clamp-1">
               {project.address.city}{project.address.state ? `, ${project.address.state}` : ''}
             </span>
           </div>
@@ -98,7 +98,7 @@ export function MobileProjectCard({
         {showClient && project.clientName && (
           <div className="flex items-center gap-1.5 mt-1.5 text-sm text-gray-500">
             <UserGroupIcon className="h-4 w-4 flex-shrink-0" />
-            <span className="truncate">{project.clientName}</span>
+            <span className="line-clamp-1">{project.clientName}</span>
           </div>
         )}
       </div>

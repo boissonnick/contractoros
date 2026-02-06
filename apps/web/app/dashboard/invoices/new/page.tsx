@@ -182,7 +182,7 @@ export default function NewInvoicePage() {
               >
                 <ArrowLeftIcon className="h-5 w-5" />
               </button>
-              <h1 className="text-xl font-semibold font-heading tracking-tight text-gray-900">New Invoice</h1>
+              <h1 className="text-xl font-semibold tracking-tight text-gray-900">New Invoice</h1>
             </div>
             <div className="flex items-center gap-3">
               <Button variant="outline" onClick={() => router.back()}>
@@ -199,7 +199,7 @@ export default function NewInvoicePage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* Invoice Type */}
         <Card className="p-6">
-          <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">Invoice Type</h2>
+          <h2 className="text-lg font-semibold tracking-tight text-gray-900 mb-4">Invoice Type</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {invoiceTypeOptions.map((type) => (
               <button
@@ -220,7 +220,7 @@ export default function NewInvoicePage() {
 
         {/* Client & Project Info */}
         <Card className="p-6">
-          <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">Bill To</h2>
+          <h2 className="text-lg font-semibold tracking-tight text-gray-900 mb-4">Bill To</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -288,7 +288,7 @@ export default function NewInvoicePage() {
         {/* Line Items */}
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900">Line Items</h2>
+            <h2 className="text-lg font-semibold tracking-tight text-gray-900">Line Items</h2>
             <Button variant="outline" size="sm" onClick={addLineItem}>
               <PlusIcon className="h-4 w-4 mr-1" />
               Add Item
@@ -372,7 +372,7 @@ export default function NewInvoicePage() {
         <div className="grid grid-cols-2 gap-6">
           {/* Payment Terms */}
           <Card className="p-6">
-            <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">Payment Terms</h2>
+            <h2 className="text-lg font-semibold tracking-tight text-gray-900 mb-4">Payment Terms</h2>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -416,7 +416,7 @@ export default function NewInvoicePage() {
 
           {/* Totals */}
           <Card className="p-6">
-            <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">Totals</h2>
+            <h2 className="text-lg font-semibold tracking-tight text-gray-900 mb-4">Totals</h2>
             <div className="space-y-3">
               <div className="flex justify-between py-2">
                 <span className="text-gray-600">Subtotal</span>
@@ -449,14 +449,14 @@ export default function NewInvoicePage() {
 
               <div className="flex justify-between py-3 border-t-2 border-gray-200">
                 <span className="text-lg font-semibold text-gray-900">Total</span>
-                <span className="text-2xl font-bold text-gray-900 font-heading tracking-tight">
+                <span className="text-2xl font-bold text-gray-900 tracking-tight">
                   ${total.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </span>
               </div>
 
               <div className="flex justify-between py-2 bg-blue-50 px-3 rounded-lg">
                 <span className="font-medium text-blue-800">Amount Due</span>
-                <span className="text-xl font-bold text-blue-800 font-heading tracking-tight">
+                <span className="text-xl font-bold text-blue-800 tracking-tight">
                   ${amountDue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </span>
               </div>

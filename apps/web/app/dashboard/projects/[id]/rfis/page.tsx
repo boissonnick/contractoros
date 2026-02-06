@@ -232,7 +232,7 @@ export default function RFIsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900 font-heading tracking-tight">RFIs</h1>
+          <h1 className="text-xl font-semibold text-gray-900 tracking-tight">RFIs</h1>
           <p className="text-sm text-gray-500 mt-1">
             Request for Information tracking
           </p>

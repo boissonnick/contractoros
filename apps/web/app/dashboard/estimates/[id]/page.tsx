@@ -4,12 +4,13 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { db } from '@/lib/firebase/config';
-import { doc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { Button, Card, Badge } from '@/components/ui';
 import { toast } from '@/components/ui/Toast';
-import { Estimate, Organization } from '@/types';
+import { Organization } from '@/types';
 import { SendForSignatureModal, SignatureRequestList } from '@/components/esignature';
 import { useSignatureRequests } from '@/lib/hooks/useSignatureRequests';
+import { useEstimate, convertEstimateToInvoice, reviseEstimate } from '@/lib/hooks/useEstimates';
 import { cn } from '@/lib/utils';
 import {
   ArrowLeftIcon,
@@ -43,12 +44,18 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.R
 export default function EstimateDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
   const estimateId = params.id as string;
 
-  const [estimate, setEstimate] = useState<Estimate | null>(null);
+  const {
+    estimate,
+    loading,
+    markAsSent,
+    deleteEstimate,
+    duplicateEstimate: duplicateEstimateAction,
+  } = useEstimate(estimateId, profile?.orgId || '');
+
   const [, setOrganization] = useState<Organization | null>(null);
-  const [loading, setLoading] = useState(true);
   const [showSignatureModal, setShowSignatureModal] = useState(false);
 
   // Get signature requests for this estimate
@@ -60,57 +67,17 @@ export default function EstimateDetailPage() {
     (r) => r.documentId === estimateId && r.documentType === 'estimate'
   );
 
-  // Load estimate and organization
+  // Load organization for branding
   useEffect(() => {
-    async function loadData() {
-      if (!estimateId || !profile?.orgId) return;
-
-      try {
-        setLoading(true);
-
-        // Load estimate
-        const estimateDoc = await getDoc(doc(db, 'estimates', estimateId));
-        if (!estimateDoc.exists()) {
-          toast.error('Estimate not found');
-          router.push('/dashboard/estimates');
-          return;
-        }
-
-        const estimateData = {
-          id: estimateDoc.id,
-          ...estimateDoc.data(),
-          createdAt: estimateDoc.data().createdAt?.toDate(),
-          updatedAt: estimateDoc.data().updatedAt?.toDate(),
-          validUntil: estimateDoc.data().validUntil?.toDate(),
-          sentAt: estimateDoc.data().sentAt?.toDate(),
-          viewedAt: estimateDoc.data().viewedAt?.toDate(),
-          acceptedAt: estimateDoc.data().acceptedAt?.toDate(),
-        } as Estimate;
-
-        // Verify org access
-        if (estimateData.orgId !== profile.orgId) {
-          toast.error('Access denied');
-          router.push('/dashboard/estimates');
-          return;
-        }
-
-        setEstimate(estimateData);
-
-        // Load organization for branding
-        const orgDoc = await getDoc(doc(db, 'organizations', profile.orgId));
-        if (orgDoc.exists()) {
-          setOrganization({ id: orgDoc.id, ...orgDoc.data() } as Organization);
-        }
-      } catch (error) {
-        console.error('Error loading estimate:', error);
-        toast.error('Failed to load estimate');
-      } finally {
-        setLoading(false);
+    async function loadOrg() {
+      if (!profile?.orgId) return;
+      const orgDoc = await getDoc(doc(db, 'organizations', profile.orgId));
+      if (orgDoc.exists()) {
+        setOrganization({ id: orgDoc.id, ...orgDoc.data() } as Organization);
       }
     }
-
-    loadData();
-  }, [estimateId, profile?.orgId, router]);
+    loadOrg();
+  }, [profile?.orgId]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -122,14 +89,8 @@ export default function EstimateDetailPage() {
 
   const handleMarkAsSent = async () => {
     if (!estimate) return;
-
     try {
-      await updateDoc(doc(db, 'estimates', estimate.id), {
-        status: 'sent',
-        sentAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
-      });
-      setEstimate({ ...estimate, status: 'sent', sentAt: new Date() });
+      await markAsSent();
       toast.success('Estimate marked as sent');
     } catch (error) {
       console.error('Error updating estimate:', error);
@@ -137,8 +98,65 @@ export default function EstimateDetailPage() {
     }
   };
 
+  const handleDuplicate = async () => {
+    if (!estimate) return;
+    try {
+      const newId = await duplicateEstimateAction();
+      toast.success('Estimate duplicated');
+      router.push(`/dashboard/estimates/${newId}`);
+    } catch (error) {
+      console.error('Error duplicating estimate:', error);
+      toast.error('Failed to duplicate estimate');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm('Are you sure you want to delete this estimate?')) return;
+    try {
+      await deleteEstimate();
+      toast.success('Estimate deleted');
+      router.push('/dashboard/estimates');
+    } catch (error) {
+      console.error('Error deleting estimate:', error);
+      toast.error('Failed to delete estimate');
+    }
+  };
+
+  const handleConvertToInvoice = async () => {
+    if (!estimate || !user || !profile) return;
+    try {
+      const invoiceId = await convertEstimateToInvoice(
+        estimate,
+        profile.orgId,
+        user.uid,
+        profile.displayName
+      );
+      toast.success('Invoice created from estimate');
+      router.push(`/dashboard/invoices/${invoiceId}`);
+    } catch (error) {
+      console.error('Error converting to invoice:', error);
+      toast.error('Failed to convert to invoice');
+    }
+  };
+
+  const handleRevise = async () => {
+    if (!estimate || !user || !profile) return;
+    try {
+      const newId = await reviseEstimate(
+        estimate,
+        profile.orgId,
+        user.uid,
+        profile.displayName
+      );
+      toast.success('Revision created');
+      router.push(`/dashboard/estimates/${newId}`);
+    } catch (error) {
+      console.error('Error creating revision:', error);
+      toast.error('Failed to create revision');
+    }
+  };
+
   const handleSignatureSuccess = () => {
-    // Update estimate status to sent if it was draft
     if (estimate?.status === 'draft') {
       handleMarkAsSent();
     }
@@ -179,7 +197,7 @@ export default function EstimateDetailPage() {
             Back to Estimates
           </button>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{estimate.name}</h1>
+            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{estimate.name}</h1>
             <Badge className={statusConfig[estimate.status]?.color || 'bg-gray-100 text-gray-700'}>
               {statusConfig[estimate.status]?.icon}
               <span className="ml-1">{statusConfig[estimate.status]?.label || estimate.status}</span>
@@ -481,11 +499,33 @@ export default function EstimateDetailPage() {
                 variant="secondary"
                 size="sm"
                 className="w-full justify-start"
-                onClick={() => {/* duplicate logic */}}
+                onClick={handleDuplicate}
               >
                 <DocumentDuplicateIcon className="h-4 w-4 mr-2" />
                 Duplicate Estimate
               </Button>
+              {estimate.status === 'accepted' && (
+                <Button
+                  variant="primary"
+                  size="sm"
+                  className="w-full justify-start"
+                  onClick={handleConvertToInvoice}
+                >
+                  <CurrencyDollarIcon className="h-4 w-4 mr-2" />
+                  Convert to Invoice
+                </Button>
+              )}
+              {['sent', 'viewed', 'declined'].includes(estimate.status) && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="w-full justify-start"
+                  onClick={handleRevise}
+                >
+                  <DocumentTextIcon className="h-4 w-4 mr-2" />
+                  Create Revision
+                </Button>
+              )}
               {estimate.status === 'draft' && (
                 <Button
                   variant="secondary"
@@ -501,7 +541,7 @@ export default function EstimateDetailPage() {
                 variant="secondary"
                 size="sm"
                 className="w-full justify-start text-red-600 hover:bg-red-50"
-                onClick={() => {/* delete logic */}}
+                onClick={handleDelete}
               >
                 <TrashIcon className="h-4 w-4 mr-2" />
                 Delete Estimate

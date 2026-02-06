@@ -110,6 +110,116 @@ export default function OperationalReportsPage() {
     day: 'numeric',
   });
 
+  // Generate operational insights — must be before early returns to satisfy Rules of Hooks
+  const operationalInsights: AIInsight[] = useMemo(() => {
+    if (!metrics) return [];
+    const insights: AIInsight[] = [];
+    const now = new Date();
+
+    // On-time completion rate insight
+    if (metrics.onTimeCompletionRate < 70) {
+      insights.push({
+        id: `ops-ontime-${now.getTime()}`,
+        type: 'anomaly',
+        severity: metrics.onTimeCompletionRate < 50 ? 'critical' : 'warning',
+        category: 'operational',
+        title: 'Low On-Time Completion Rate',
+        description: `Only ${metrics.onTimeCompletionRate.toFixed(0)}% of projects are completing on time. Review project planning and resource allocation.`,
+        metric: 'On-Time Completion',
+        value: metrics.onTimeCompletionRate,
+        expectedValue: 80,
+        action: { label: 'View Projects', url: '/dashboard/projects', type: 'navigate' },
+        confidence: 0.9,
+        generatedAt: now,
+        source: 'rule_based',
+      });
+    }
+
+    // Pending change orders insight
+    if (metrics.pendingChangeOrders > 5) {
+      insights.push({
+        id: `ops-cos-${now.getTime()}`,
+        type: 'anomaly',
+        severity: metrics.pendingChangeOrders > 10 ? 'critical' : 'warning',
+        category: 'operational',
+        title: 'High Pending Change Orders',
+        description: `${metrics.pendingChangeOrders} change orders are pending approval. This may cause project delays and scope uncertainty.`,
+        metric: 'Pending Change Orders',
+        value: metrics.pendingChangeOrders,
+        expectedValue: 3,
+        action: { label: 'Review Change Orders', url: '/dashboard/change-orders', type: 'navigate' },
+        confidence: 1.0,
+        generatedAt: now,
+        source: 'rule_based',
+      });
+    }
+
+    // Average project duration insight
+    if (metrics.averageProjectDuration > 90) {
+      insights.push({
+        id: `ops-duration-${now.getTime()}`,
+        type: 'trend',
+        severity: 'info',
+        category: 'operational',
+        title: 'Long Average Project Duration',
+        description: `Average project duration is ${Math.round(metrics.averageProjectDuration)} days. Consider analyzing project phases for efficiency improvements.`,
+        metric: 'Avg Duration',
+        value: metrics.averageProjectDuration,
+        trend: 'stable',
+        confidence: 0.8,
+        generatedAt: now,
+        source: 'rule_based',
+      });
+    }
+
+    // Overdue projects insight
+    const overdueProjects = projectTimelines.filter(p => p.actual > p.planned && p.planned > 0);
+    if (overdueProjects.length > 0) {
+      insights.push({
+        id: `ops-overdue-${now.getTime()}`,
+        type: 'anomaly',
+        severity: overdueProjects.length > 3 ? 'critical' : 'warning',
+        category: 'project_health',
+        title: `${overdueProjects.length} Projects Behind Schedule`,
+        description: `${overdueProjects.map(p => p.name).slice(0, 3).join(', ')}${overdueProjects.length > 3 ? ' and more' : ''} are running behind schedule.`,
+        metric: 'Overdue Projects',
+        value: overdueProjects.length,
+        expectedValue: 0,
+        action: { label: 'View Timeline', url: '/dashboard/schedule', type: 'navigate' },
+        confidence: 1.0,
+        generatedAt: now,
+        source: 'rule_based',
+      });
+    }
+
+    // Tasks status insight
+    const blockedTasks = tasksByStatus.find(t => t.name.toLowerCase().includes('blocked'))?.value || 0;
+    if (blockedTasks > 5) {
+      insights.push({
+        id: `ops-blocked-${now.getTime()}`,
+        type: 'anomaly',
+        severity: blockedTasks > 10 ? 'critical' : 'warning',
+        category: 'productivity',
+        title: 'Blocked Tasks Detected',
+        description: `${blockedTasks} tasks are blocked. Review blockers to maintain project velocity.`,
+        metric: 'Blocked Tasks',
+        value: blockedTasks,
+        expectedValue: 0,
+        action: { label: 'View Tasks', url: '/dashboard/tasks?status=blocked', type: 'navigate' },
+        confidence: 1.0,
+        generatedAt: now,
+        source: 'rule_based',
+      });
+    }
+
+    return insights;
+  }, [metrics, projectTimelines, tasksByStatus]);
+
+  const operationalSummary = useMemo(
+    () => generateInsightSummary(operationalInsights, { periodLabel: 'this period', dataType: 'operational' }),
+    [operationalInsights]
+  );
+
   const handleExportPDF = async () => {
     if (!metrics) return;
     setExporting(true);
@@ -329,123 +439,12 @@ export default function OperationalReportsPage() {
     );
   }
 
-  // Generate operational insights
-  // eslint-disable-next-line react-hooks/rules-of-hooks -- useMemo always called; early returns above are for loading/error states
-  const operationalInsights: AIInsight[] = useMemo(() => {
-    const insights: AIInsight[] = [];
-    const now = new Date();
-
-    // On-time completion rate insight
-    if (metrics.onTimeCompletionRate < 70) {
-      insights.push({
-        id: `ops-ontime-${now.getTime()}`,
-        type: 'anomaly',
-        severity: metrics.onTimeCompletionRate < 50 ? 'critical' : 'warning',
-        category: 'operational',
-        title: 'Low On-Time Completion Rate',
-        description: `Only ${metrics.onTimeCompletionRate.toFixed(0)}% of projects are completing on time. Review project planning and resource allocation.`,
-        metric: 'On-Time Completion',
-        value: metrics.onTimeCompletionRate,
-        expectedValue: 80,
-        action: { label: 'View Projects', url: '/dashboard/projects', type: 'navigate' },
-        confidence: 0.9,
-        generatedAt: now,
-        source: 'rule_based',
-      });
-    }
-
-    // Pending change orders insight
-    if (metrics.pendingChangeOrders > 5) {
-      insights.push({
-        id: `ops-cos-${now.getTime()}`,
-        type: 'anomaly',
-        severity: metrics.pendingChangeOrders > 10 ? 'critical' : 'warning',
-        category: 'operational',
-        title: 'High Pending Change Orders',
-        description: `${metrics.pendingChangeOrders} change orders are pending approval. This may cause project delays and scope uncertainty.`,
-        metric: 'Pending Change Orders',
-        value: metrics.pendingChangeOrders,
-        expectedValue: 3,
-        action: { label: 'Review Change Orders', url: '/dashboard/change-orders', type: 'navigate' },
-        confidence: 1.0,
-        generatedAt: now,
-        source: 'rule_based',
-      });
-    }
-
-    // Average project duration insight
-    if (metrics.averageProjectDuration > 90) {
-      insights.push({
-        id: `ops-duration-${now.getTime()}`,
-        type: 'trend',
-        severity: 'info',
-        category: 'operational',
-        title: 'Long Average Project Duration',
-        description: `Average project duration is ${Math.round(metrics.averageProjectDuration)} days. Consider analyzing project phases for efficiency improvements.`,
-        metric: 'Avg Duration',
-        value: metrics.averageProjectDuration,
-        trend: 'stable',
-        confidence: 0.8,
-        generatedAt: now,
-        source: 'rule_based',
-      });
-    }
-
-    // Overdue projects insight
-    const overdueProjects = projectTimelines.filter(p => p.actual > p.planned && p.planned > 0);
-    if (overdueProjects.length > 0) {
-      insights.push({
-        id: `ops-overdue-${now.getTime()}`,
-        type: 'anomaly',
-        severity: overdueProjects.length > 3 ? 'critical' : 'warning',
-        category: 'project_health',
-        title: `${overdueProjects.length} Projects Behind Schedule`,
-        description: `${overdueProjects.map(p => p.name).slice(0, 3).join(', ')}${overdueProjects.length > 3 ? ' and more' : ''} are running behind schedule.`,
-        metric: 'Overdue Projects',
-        value: overdueProjects.length,
-        expectedValue: 0,
-        action: { label: 'View Timeline', url: '/dashboard/schedule', type: 'navigate' },
-        confidence: 1.0,
-        generatedAt: now,
-        source: 'rule_based',
-      });
-    }
-
-    // Tasks status insight
-    const blockedTasks = tasksByStatus.find(t => t.name.toLowerCase().includes('blocked'))?.value || 0;
-    if (blockedTasks > 5) {
-      insights.push({
-        id: `ops-blocked-${now.getTime()}`,
-        type: 'anomaly',
-        severity: blockedTasks > 10 ? 'critical' : 'warning',
-        category: 'productivity',
-        title: 'Blocked Tasks Detected',
-        description: `${blockedTasks} tasks are blocked. Review blockers to maintain project velocity.`,
-        metric: 'Blocked Tasks',
-        value: blockedTasks,
-        expectedValue: 0,
-        action: { label: 'View Tasks', url: '/dashboard/tasks?status=blocked', type: 'navigate' },
-        confidence: 1.0,
-        generatedAt: now,
-        source: 'rule_based',
-      });
-    }
-
-    return insights;
-  }, [metrics, projectTimelines, tasksByStatus]);
-
-  // eslint-disable-next-line react-hooks/rules-of-hooks -- useMemo always called; early returns above are for loading/error states
-  const operationalSummary = useMemo(
-    () => generateInsightSummary(operationalInsights, { periodLabel: 'this period', dataType: 'operational' }),
-    [operationalInsights]
-  );
-
   return (
     <div className="space-y-6">
       {/* Page Header with Export */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight">Operational Report</h1>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Operational Report</h1>
           <p className="text-sm text-gray-500 mt-1">{reportDate}</p>
         </div>
         <div className="relative">

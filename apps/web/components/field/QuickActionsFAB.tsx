@@ -180,8 +180,7 @@ export function QuickActionsFAB({
 
       {/* Action buttons */}
       <div
-        className={`fixed right-4 z-50 flex flex-col-reverse items-end gap-3 md:hidden ${className}`}
-        style={{ bottom: bottomOffset + 16 }}
+        className={`fixed right-4 bottom-24 z-50 flex flex-col-reverse items-end gap-3 md:hidden ${className}`}
       >
         {/* Expanded actions */}
         {isExpanded && displayActions.map((action, index) => {

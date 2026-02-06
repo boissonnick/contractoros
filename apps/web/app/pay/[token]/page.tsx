@@ -214,7 +214,7 @@ export default function PublicPaymentPage() {
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircleIcon className="h-8 w-8 text-green-600" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight mb-2">Payment Successful!</h1>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight mb-2">Payment Successful!</h1>
           <p className="text-gray-600 mb-6">
             Your payment of {paymentLink && formatCurrency(paymentLink.amount)} has been processed successfully.
             You will receive a receipt by email.
@@ -263,7 +263,7 @@ export default function PublicPaymentPage() {
               </div>
               <div className="text-right">
                 <p className="text-sm text-gray-600">Amount Due</p>
-                <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">
+                <p className="text-2xl font-bold text-gray-900 tracking-tight">
                   {paymentLink && formatCurrency(paymentLink.amount)}
                 </p>
               </div>
@@ -334,7 +334,7 @@ function ErrorState({
         }`}>
           <Icon className={`h-8 w-8 ${iconColor}`} />
         </div>
-        <h1 className="text-xl font-bold text-gray-900 font-heading tracking-tight mb-2">{title}</h1>
+        <h1 className="text-xl font-bold text-gray-900 tracking-tight mb-2">{title}</h1>
         <p className="text-gray-600">{message}</p>
       </div>
     </div>

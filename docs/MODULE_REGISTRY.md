@@ -1,6 +1,6 @@
 # ContractorOS Module Registry
 
-**Last Updated:** 2026-02-05 (Sprint 69 - added AP Invoicing, SubcontractorInvoiceForm, useSubcontractorInvoices)
+**Last Updated:** 2026-02-05 (Sprint 76 - added Review Cloud Functions: onReviewRequestCreated, syncGoogleReviews)
 **Purpose:** Fast codebase navigation - eliminates 200k+ token waste from Explore agents
 **Usage:** Check this file BEFORE running Explore agents at sprint start
 
@@ -49,6 +49,7 @@
 | **Photos** | usePhotos | photos/page.tsx | PhotoGallery | Firebase Storage |
 | **Projects** | useProjects | projects/page.tsx | ProjectCard, ProjectTimeline | CRUD hook |
 | **Reports** | useReports | reports/page.tsx | ReportGenerator, ReportChart | Data aggregation |
+| **Reviews** | useReviews, useGoogleBusiness | reviews/page.tsx | ReviewCard, ReviewRequestModal, ReviewResponseModal, AutomationRuleForm | Review management |
 | **RFIs** | useRFIs | rfis/page.tsx | RFICard, RFIFormModal | Request tracking |
 | **Safety** | useSafetyIncidents | safety/page.tsx | SafetyForm, IncidentReport | Compliance |
 | **Schedule** | useSchedule | schedule/page.tsx | ScheduleCalendar, ScheduleEvent | FullCalendar |

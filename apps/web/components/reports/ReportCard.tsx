@@ -120,7 +120,7 @@ export function ReportCard({
         </div>
       ) : (
         <>
-          <p className="text-2xl font-bold font-heading tracking-tight text-gray-900 truncate">{value}</p>
+          <p className="text-2xl font-bold tracking-tight text-gray-900 truncate">{value}</p>
 
           {/* Subtitle */}
           {subtitle && (

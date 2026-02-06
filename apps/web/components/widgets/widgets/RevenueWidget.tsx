@@ -116,7 +116,7 @@ export function RevenueWidget({ widget }: RevenueWidgetProps) {
     <div className="space-y-4">
       {/* Main stat */}
       <div>
-        <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">
+        <p className="text-2xl font-bold text-gray-900 tracking-tight">
           {formatCurrency(stats.thisMonth)}
         </p>
         <p className="text-sm text-gray-500">Revenue this month</p>

@@ -99,9 +99,9 @@ function StatCard({ title, value, icon: Icon, trend, trendUp, href, color, subti
 
       <div className="relative z-10 flex items-start justify-between">
         <div>
-          <p className="text-xs font-bold uppercase tracking-wider text-gray-400 font-heading">{title}</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-gray-400">{title}</p>
           <div className="mt-2 flex items-baseline gap-2">
-            <h3 className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{value}</h3>
+            <h3 className="text-2xl font-bold text-gray-900 tracking-tight">{value}</h3>
           </div>
           {subtitle && (
             <p className="mt-1 text-xs font-medium text-gray-500">{subtitle}</p>
@@ -410,7 +410,7 @@ export default function DashboardPage() {
           <div className="h-16 w-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <SparklesIcon className="h-8 w-8 text-amber-600" />
           </div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-3 font-heading">Complete Your Setup</h3>
+          <h3 className="text-2xl font-bold text-gray-900 mb-3">Complete Your Setup</h3>
           <p className="text-gray-500 mb-8 leading-relaxed">
             {!profile
               ? "Your profile hasn't been set up yet. Join the team to get started."
@@ -446,7 +446,7 @@ export default function DashboardPage() {
             </span>
             System Operational
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 font-heading tracking-tight">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
             Hello, {profile?.displayName?.split(' ')[0] || 'there'}
           </h1>
           <p className="text-gray-500 mt-2 text-lg">
@@ -531,7 +531,7 @@ export default function DashboardPage() {
           {/* Active Projects List */}
           <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
             <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-              <h2 className="font-heading font-bold text-lg text-gray-900 flex items-center gap-2">
+              <h2 className="font-bold text-lg text-gray-900 flex items-center gap-2">
                 <FolderIcon className="h-5 w-5 text-gray-400" />
                 Active Projects
               </h2>
@@ -548,7 +548,7 @@ export default function DashboardPage() {
                   <Link key={project.id} href={`/dashboard/projects/${project.id}`} className="block p-5 hover:bg-gray-50 transition-all group">
                     <div className="flex items-start justify-between gap-4">
                       <div className="min-w-0">
-                        <h3 className="font-semibold text-gray-900 group-hover:text-brand-primary transition-colors truncate">
+                        <h3 className="font-semibold text-gray-900 group-hover:text-brand-primary transition-colors line-clamp-2 sm:truncate">
                           {project.name}
                         </h3>
                         <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
@@ -565,7 +565,7 @@ export default function DashboardPage() {
                       <div className="text-right flex-shrink-0">
                         {project.budget ? (
                           <div>
-                            <p className="font-heading font-bold text-gray-900">{formatCurrency(project.budget)}</p>
+                            <p className="font-bold text-gray-900">{formatCurrency(project.budget)}</p>
                             <div className="mt-1.5 w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden ml-auto">
                               <div
                                 className={cn('h-full rounded-full', getBudgetBarColor(getBudgetStatus(percentUsed)))}
@@ -611,7 +611,7 @@ export default function DashboardPage() {
             {overdueTasksList.length > 0 && (
               <div className="bg-white rounded-3xl border border-red-100 shadow-sm overflow-hidden">
                 <div className="px-5 py-4 border-b border-red-100 bg-red-50/50 flex items-center justify-between">
-                  <h3 className="font-heading font-bold text-red-900 text-sm uppercase tracking-wider flex items-center gap-2">
+                  <h3 className="font-bold text-red-900 text-sm uppercase tracking-wider flex items-center gap-2">
                     <ExclamationCircleIcon className="h-4 w-4" />
                     Urgent Attention
                   </h3>
@@ -619,7 +619,7 @@ export default function DashboardPage() {
                 <div className="divide-y divide-red-50">
                   {overdueTasksList.map(task => (
                     <Link key={task.id} href={`/dashboard/projects/${task.projectId}/tasks`} className="block p-4 hover:bg-red-50/30 transition-colors">
-                      <p className="text-sm font-medium text-gray-900 truncate">{task.title}</p>
+                      <p className="text-sm font-medium text-gray-900 line-clamp-2 sm:truncate">{task.title}</p>
                       <p className="text-xs text-red-600 mt-1 font-medium">Due {task.dueDate ? format(new Date(task.dueDate), 'MMM d') : 'Overdue'}</p>
                     </Link>
                   ))}
@@ -631,7 +631,7 @@ export default function DashboardPage() {
           {/* Quick Actions Card */}
           <PermissionGuard anyOf={['canManageInvoices', 'canInviteUsers', 'canCreateProjects']} hide>
             <div className="bg-gradient-to-br from-brand-900 to-brand-800 rounded-3xl p-6 text-white shadow-xl shadow-brand-900/10">
-              <h3 className="font-heading font-bold text-lg mb-4">Quick Actions</h3>
+              <h3 className="font-bold text-lg mb-4">Quick Actions</h3>
               <div className="space-y-3">
                 <PermissionGuard permission="canCreateProjects" hide>
                   <Link href="/dashboard/projects/new" className="flex items-center gap-3 p-3 rounded-xl bg-white/10 hover:bg-white/20 transition-all border border-white/5 group">
@@ -656,7 +656,7 @@ export default function DashboardPage() {
           {/* Recent Activity */}
           <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="font-heading font-bold text-gray-900 text-sm uppercase tracking-wider">Recent Activity</h3>
+              <h3 className="font-bold text-gray-900 text-sm uppercase tracking-wider">Recent Activity</h3>
             </div>
             <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
               {activities.length > 0 ? activities.slice(0, 10).map((activity) => (
@@ -692,7 +692,7 @@ export default function DashboardPage() {
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={closeMobileQuickActions} />
             <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl p-6 pb-8 animate-slide-up">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="font-heading font-bold text-xl text-gray-900">Quick Actions</h3>
+                <h3 className="font-bold text-xl text-gray-900">Quick Actions</h3>
                 <button onClick={closeMobileQuickActions} className="p-2 bg-gray-100 rounded-full"><XMarkIcon className="h-6 w-6 text-gray-600" /></button>
               </div>
               <div className="grid grid-cols-2 gap-4">

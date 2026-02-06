@@ -78,7 +78,7 @@ export default function SubcontractorCard({
   return (
     <div
       className={cn(
-        'bg-white border border-gray-200 rounded-xl p-4',
+        'bg-white border border-gray-200 rounded-2xl p-4',
         'hover:shadow-md hover:border-gray-300 transition-all duration-200',
         className
       )}

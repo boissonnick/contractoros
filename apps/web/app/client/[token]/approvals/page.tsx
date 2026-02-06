@@ -230,7 +230,7 @@ export default function ApprovalsPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="text-center">
-          <h1 className="text-xl font-semibold font-heading tracking-tight text-gray-900 mb-2">
+          <h1 className="text-xl font-semibold tracking-tight text-gray-900 mb-2">
             {error || 'Something went wrong'}
           </h1>
           <p className="text-gray-500">Please contact your contractor for assistance.</p>
@@ -248,14 +248,14 @@ export default function ApprovalsPage() {
       />
 
       <main className="max-w-2xl mx-auto p-4">
-        <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">
+        <h2 className="text-lg font-semibold tracking-tight text-gray-900 mb-4">
           Pending Approvals ({approvals.length})
         </h2>
 
         {approvals.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
             <CheckCircleIcon className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium font-heading tracking-tight text-gray-900 mb-1">All caught up!</h3>
+            <h3 className="text-lg font-medium tracking-tight text-gray-900 mb-1">All caught up!</h3>
             <p className="text-gray-500">No items waiting for your approval.</p>
           </div>
         ) : (

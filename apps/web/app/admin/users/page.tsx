@@ -53,7 +53,7 @@ export default function AdminUsersPage() {
 
   return (
     <div className="p-6 max-w-4xl">
-      <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight mb-6">Users</h1>
+      <h1 className="text-2xl font-bold text-gray-900 tracking-tight mb-6">Users</h1>
 
       <div className="relative mb-4">
         <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />

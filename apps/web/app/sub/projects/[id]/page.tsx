@@ -85,7 +85,7 @@ export default function SubProjectPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold font-heading tracking-tight text-gray-900">{projectName}</h1>
+        <h1 className="text-xl font-semibold tracking-tight text-gray-900">{projectName}</h1>
         <p className="text-sm text-gray-500">
           {assignments.length} assignment{assignments.length !== 1 ? 's' : ''} · {tasks.length} task{tasks.length !== 1 ? 's' : ''}
         </p>
@@ -94,7 +94,7 @@ export default function SubProjectPage() {
       {/* Summary */}
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-white border border-gray-200 rounded-xl p-4 text-center">
-          <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{fmt(totalAgreed)}</p>
+          <p className="text-2xl font-bold text-gray-900 tracking-tight">{fmt(totalAgreed)}</p>
           <p className="text-xs text-gray-500">Contract Total</p>
         </div>
         <div className="bg-white border border-gray-200 rounded-xl p-4 text-center">
@@ -102,14 +102,14 @@ export default function SubProjectPage() {
           <p className="text-xs text-gray-500">Paid</p>
         </div>
         <div className="bg-white border border-gray-200 rounded-xl p-4 text-center">
-          <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{fmt(totalAgreed - totalPaid)}</p>
+          <p className="text-2xl font-bold text-gray-900 tracking-tight">{fmt(totalAgreed - totalPaid)}</p>
           <p className="text-xs text-gray-500">Remaining</p>
         </div>
       </div>
 
       {/* Assignments */}
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold font-heading tracking-tight text-gray-900">My Assignments</h3>
+        <h3 className="text-sm font-semibold tracking-tight text-gray-900">My Assignments</h3>
         {assignments.map((a) => {
           const target = a.type === 'phase'
             ? phases.find(p => p.id === a.phaseId)?.name
@@ -136,7 +136,7 @@ export default function SubProjectPage() {
       {/* Tasks */}
       {tasks.length > 0 && (
         <div className="space-y-3">
-          <h3 className="text-sm font-semibold font-heading tracking-tight text-gray-900">Assigned Tasks</h3>
+          <h3 className="text-sm font-semibold tracking-tight text-gray-900">Assigned Tasks</h3>
           {tasks.map((t) => (
             <div key={t.id} className="bg-white border border-gray-200 rounded-xl px-4 py-3">
               <div className="flex items-center justify-between">

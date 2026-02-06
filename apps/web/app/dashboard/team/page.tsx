@@ -466,7 +466,7 @@ export default function TeamPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight">Team</h1>
+              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Team</h1>
               <p className="text-gray-500 mt-1">
                 {members.length} members • {invites.length} pending invites
               </p>
@@ -599,7 +599,7 @@ export default function TeamPage() {
                     <Avatar name={member.displayName || ''} size="lg" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-gray-900 truncate font-heading tracking-tight">
+                        <h3 className="font-semibold text-gray-900 truncate tracking-tight">
                           {member.displayName}
                         </h3>
                         {member.uid === user?.uid && (
@@ -693,8 +693,8 @@ export default function TeamPage() {
               <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-200/50">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-wider text-gray-400 font-heading">Team Members</p>
-                    <p className="mt-2 text-2xl font-bold text-gray-900 font-heading tracking-tight">{teamStats.total}</p>
+                    <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Team Members</p>
+                    <p className="mt-2 text-2xl font-bold text-gray-900 tracking-tight">{teamStats.total}</p>
                   </div>
                   <div className="p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-black/5 text-blue-600">
                     <UserGroupIcon className="h-5 w-5" />
@@ -704,8 +704,8 @@ export default function TeamPage() {
               <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-200/50">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-wider text-gray-400 font-heading">Available</p>
-                    <p className="mt-2 text-2xl font-bold text-green-600 font-heading tracking-tight">{teamStats.available}</p>
+                    <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Available</p>
+                    <p className="mt-2 text-2xl font-bold text-green-600 tracking-tight">{teamStats.available}</p>
                     <p className="text-xs text-gray-500 mt-0.5">&lt;{UTILIZATION_THRESHOLDS.available}%</p>
                   </div>
                   <div className="p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-black/5 text-green-600">
@@ -716,8 +716,8 @@ export default function TeamPage() {
               <Card className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/5 border-yellow-200/50">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-wider text-gray-400 font-heading">Busy</p>
-                    <p className="mt-2 text-2xl font-bold text-yellow-600 font-heading tracking-tight">{teamStats.busy}</p>
+                    <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Busy</p>
+                    <p className="mt-2 text-2xl font-bold text-yellow-600 tracking-tight">{teamStats.busy}</p>
                     <p className="text-xs text-gray-500 mt-0.5">{UTILIZATION_THRESHOLDS.available}-{UTILIZATION_THRESHOLDS.busy}%</p>
                   </div>
                   <div className="p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-black/5 text-yellow-600">
@@ -728,8 +728,8 @@ export default function TeamPage() {
               <Card className="bg-gradient-to-br from-red-500/10 to-red-600/5 border-red-200/50">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-wider text-gray-400 font-heading">Overloaded</p>
-                    <p className="mt-2 text-2xl font-bold text-red-600 font-heading tracking-tight">{teamStats.overloaded}</p>
+                    <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Overloaded</p>
+                    <p className="mt-2 text-2xl font-bold text-red-600 tracking-tight">{teamStats.overloaded}</p>
                     <p className="text-xs text-gray-500 mt-0.5">&gt;{UTILIZATION_THRESHOLDS.busy}%</p>
                   </div>
                   <div className="p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-black/5 text-red-600">
@@ -740,8 +740,8 @@ export default function TeamPage() {
               <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-200/50">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-wider text-gray-400 font-heading">Avg Utilization</p>
-                    <p className="mt-2 text-2xl font-bold text-purple-600 font-heading tracking-tight">{teamStats.avgUtilization}%</p>
+                    <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Avg Utilization</p>
+                    <p className="mt-2 text-2xl font-bold text-purple-600 tracking-tight">{teamStats.avgUtilization}%</p>
                   </div>
                   <div className="p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-black/5 text-purple-600">
                     <ChartBarIcon className="h-5 w-5" />
@@ -754,7 +754,7 @@ export default function TeamPage() {
             {selectedTimeRange === 'this_week' && members.filter(m => selectedTrade === 'all' || m.trade === selectedTrade).length > 0 && (
               <Card className="overflow-hidden">
                 <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-                  <h3 className="text-sm font-semibold text-gray-900 font-heading tracking-tight">Weekly Availability Overview</h3>
+                  <h3 className="text-sm font-semibold text-gray-900 tracking-tight">Weekly Availability Overview</h3>
                   <p className="text-xs text-gray-500 mt-0.5">Hours scheduled per day - red indicates conflicts</p>
                 </div>
                 <div className="overflow-x-auto">
@@ -897,7 +897,7 @@ export default function TeamPage() {
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-gray-900 truncate font-heading tracking-tight">
+                          <h3 className="font-semibold text-gray-900 truncate tracking-tight">
                             {member.displayName}
                           </h3>
                           <div className="flex items-center gap-2 mt-0.5 flex-wrap">
@@ -949,7 +949,7 @@ export default function TeamPage() {
                       {/* Upcoming Assignments */}
                       <div className="mt-4 pt-3 border-t border-gray-100">
                         <div className="flex items-center justify-between mb-2">
-                          <p className="text-xs text-gray-500 uppercase tracking-wider font-bold font-heading">
+                          <p className="text-xs text-gray-500 uppercase tracking-wider font-bold">
                             Upcoming ({timeRangeLabels[selectedTimeRange]})
                           </p>
                           {assignments.length > 0 && (
@@ -1056,7 +1056,7 @@ export default function TeamPage() {
                     <div className="flex items-center gap-4">
                       <Avatar name={invite.name} size="md" />
                       <div>
-                        <h3 className="font-semibold text-gray-900 font-heading tracking-tight">{invite.name}</h3>
+                        <h3 className="font-semibold text-gray-900 tracking-tight">{invite.name}</h3>
                         <div className="flex items-center gap-3 mt-1">
                           <span className="text-sm text-gray-500">{invite.email}</span>
                           <span className={cn(

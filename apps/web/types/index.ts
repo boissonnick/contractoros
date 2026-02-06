@@ -11,6 +11,7 @@ export * from './communication';
 export * from './equipment';
 export * from './safety';
 export * from './ai';
+export * from './review';
 // Note: domains/client.ts types are defined inline in this file for backwards compatibility
 
 // ============================================
@@ -3910,6 +3911,7 @@ export type SmsTemplateType =
   | 'invoice_sent'
   | 'document_ready'
   | 'task_assigned'
+  | 'review_request'
   | 'custom';
 
 export interface SmsMessage {
@@ -7235,6 +7237,7 @@ export type EmailTemplateType =
   | 'document_ready'
   | 'signature_request'
   | 'welcome_client'
+  | 'review_request'
   | 'custom';
 
 /**

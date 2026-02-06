@@ -81,7 +81,7 @@ export function CardTitle({
   className?: string;
 }) {
   return (
-    <h3 className={cn('text-lg font-semibold text-gray-900 font-heading tracking-tight', className)}>
+    <h3 className={cn('text-lg font-semibold text-gray-900 tracking-tight', className)}>
       {children}
     </h3>
   );
@@ -172,8 +172,8 @@ export function StatCard({
       <Card hover={!!href} className={cn("relative overflow-hidden", gradientStyles[color])}>
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-gray-400 font-heading">{title}</p>
-            <p className="mt-2 text-3xl font-bold text-gray-900 font-heading tracking-tight">{value}</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-gray-400">{title}</p>
+            <p className="mt-2 text-3xl font-bold text-gray-900 tracking-tight">{value}</p>
             {trend && (
               <p
                 className={cn(

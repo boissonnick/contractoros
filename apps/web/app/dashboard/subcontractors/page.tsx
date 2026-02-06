@@ -14,9 +14,12 @@ import {
   StarIcon,
   ExclamationTriangleIcon,
   XCircleIcon,
+  ChartBarSquareIcon,
+  ListBulletIcon,
 } from '@heroicons/react/24/outline';
 import SubList from '@/components/subcontractors/SubList';
 import SubForm from '@/components/subcontractors/SubForm';
+import SubcontractorAnalyticsDashboard from '@/components/subcontractors/SubcontractorAnalyticsDashboard';
 import { toast } from '@/components/ui/Toast';
 
 export default function SubcontractorsPage() {
@@ -25,6 +28,7 @@ export default function SubcontractorsPage() {
   const [showAdd, setShowAdd] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState<'directory' | 'analytics'>('directory');
 
   // Calculate performance stats
   const stats = useMemo(() => {
@@ -176,7 +180,7 @@ export default function SubcontractorsPage() {
       <div className="md:hidden">
         <div className="flex items-center justify-between mb-2">
           <div>
-            <h1 className="text-xl font-bold text-gray-900 font-heading tracking-tight">Subcontractors</h1>
+            <h1 className="text-xl font-bold text-gray-900 tracking-tight">Subcontractors</h1>
             <p className="text-xs text-gray-500">Manage your network</p>
           </div>
           {selectionMode ? (
@@ -262,52 +266,84 @@ export default function SubcontractorsPage() {
         columns={4}
       />
 
-      {/* Insurance Alert Banner */}
-      {stats.expiringInsurance > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-          <div className="flex items-start gap-3">
-            <ExclamationTriangleIcon className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
-            <div>
-              <h3 className="text-sm font-medium text-amber-800 font-heading">Insurance Expiring Soon</h3>
-              <p className="text-sm text-amber-700 mt-1">
-                The following subcontractors have insurance expiring within 30 days:{' '}
-                <span className="font-medium">{stats.expiringSubNames.join(', ')}</span>
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Tab Navigation */}
+      <div className="flex gap-1 bg-gray-100 p-1 rounded-lg w-fit">
+        <button
+          onClick={() => setActiveTab('directory')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+            activeTab === 'directory'
+              ? 'bg-white text-gray-900 shadow-sm'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          <ListBulletIcon className="h-4 w-4" />
+          Directory
+        </button>
+        <button
+          onClick={() => setActiveTab('analytics')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+            activeTab === 'analytics'
+              ? 'bg-white text-gray-900 shadow-sm'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          <ChartBarSquareIcon className="h-4 w-4" />
+          Analytics
+        </button>
+      </div>
 
-      {/* Subcontractor List */}
-      {subs.length === 0 ? (
-        <EmptyState
-          icon={<WrenchScrewdriverIcon className="h-full w-full" />}
-          title="No subcontractors yet"
-          description="Build your network by adding subcontractors. Track their performance, manage insurance, and invite them to bid on projects."
-          action={{
-            label: 'Add Subcontractor',
-            onClick: () => setShowAdd(true),
-          }}
-          secondaryAction={{
-            label: 'Learn More',
-            href: '/help/subcontractors',
-          }}
-        />
+      {activeTab === 'directory' ? (
+        <>
+          {/* Insurance Alert Banner */}
+          {stats.expiringInsurance > 0 && (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+              <div className="flex items-start gap-3">
+                <ExclamationTriangleIcon className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="text-sm font-medium text-amber-800">Insurance Expiring Soon</h3>
+                  <p className="text-sm text-amber-700 mt-1">
+                    The following subcontractors have insurance expiring within 30 days:{' '}
+                    <span className="font-medium">{stats.expiringSubNames.join(', ')}</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Subcontractor List */}
+          {subs.length === 0 ? (
+            <EmptyState
+              icon={<WrenchScrewdriverIcon className="h-full w-full" />}
+              title="No subcontractors yet"
+              description="Build your network by adding subcontractors. Track their performance, manage insurance, and invite them to bid on projects."
+              action={{
+                label: 'Add Subcontractor',
+                onClick: () => setShowAdd(true),
+              }}
+              secondaryAction={{
+                label: 'Learn More',
+                href: '/help/subcontractors',
+              }}
+            />
+          ) : (
+            <SubList
+              subs={subs}
+              onSubClick={handleSubClick}
+              selectionMode={selectionMode}
+              selectedIds={selectedIds}
+              onSelectionChange={setSelectedIds}
+            />
+          )}
+        </>
       ) : (
-        <SubList
-          subs={subs}
-          onSubClick={handleSubClick}
-          selectionMode={selectionMode}
-          selectedIds={selectedIds}
-          onSelectionChange={setSelectedIds}
-        />
+        <SubcontractorAnalyticsDashboard subs={subs} />
       )}
 
       {/* Add Modal */}
       {showAdd && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-5">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 font-heading tracking-tight">New Subcontractor</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 tracking-tight">New Subcontractor</h3>
             <SubForm onSubmit={handleAdd} onCancel={() => setShowAdd(false)} />
           </div>
         </div>

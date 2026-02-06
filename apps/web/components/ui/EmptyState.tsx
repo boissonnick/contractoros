@@ -82,7 +82,7 @@ export default function EmptyState({
           </div>
         </div>
       )}
-      <h3 className={cn('font-semibold text-gray-900 mb-2 animate-in fade-in slide-in-from-bottom-2 duration-300 delay-100 font-heading tracking-tight', sizeConfig.title)}>
+      <h3 className={cn('font-semibold text-gray-900 mb-2 animate-in fade-in slide-in-from-bottom-2 duration-300 delay-100 tracking-tight', sizeConfig.title)}>
         {title}
       </h3>
       {description && (

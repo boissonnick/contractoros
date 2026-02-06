@@ -10,7 +10,6 @@ import {
   EventCard,
   EventFormModal,
   CrewAvailabilityPanel,
-  SimpleWeatherWidget,
   ConflictAlert,
   DayView,
   AssignmentModal,
@@ -324,26 +323,23 @@ export default function SchedulePage() {
     <div className="flex flex-col h-full min-h-[calc(100vh-200px)] space-y-4 md:space-y-6">
       {/* Desktop Header */}
       <div className="hidden md:block">
-        <div className="flex items-start justify-between gap-6">
-          <PageHeader
-            title="Schedule"
-            description="Manage jobs, inspections, and crew assignments"
-            actions={
-              <Button onClick={() => { setSelectedEvent(null); setShowEventModal(true); }}>
-                <PlusIcon className="h-4 w-4 mr-2" />
-                Add Event
-              </Button>
-            }
-          />
-          <SimpleWeatherWidget location="San Francisco, CA" className="w-72 flex-shrink-0" />
-        </div>
+        <PageHeader
+          title="Schedule"
+          description="Manage jobs, inspections, and crew assignments"
+          actions={
+            <Button onClick={() => { setSelectedEvent(null); setShowEventModal(true); }}>
+              <PlusIcon className="h-4 w-4 mr-2" />
+              Add Event
+            </Button>
+          }
+        />
       </div>
 
       {/* Mobile Header */}
       <div className="md:hidden">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-xl font-heading font-bold tracking-tight text-gray-900">Schedule</h1>
+            <h1 className="text-xl font-bold tracking-tight text-gray-900">Schedule</h1>
             <p className="text-xs text-gray-500">
               {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
             </p>
@@ -562,7 +558,7 @@ export default function SchedulePage() {
                     <ChevronRightIcon className="h-4 w-4" />
                   </Button>
                 </div>
-                <h2 className="text-lg font-heading font-semibold tracking-tight ml-2">{getHeaderText()}</h2>
+                <h2 className="text-lg font-semibold tracking-tight ml-2">{getHeaderText()}</h2>
               </div>
 
               <div className="flex items-center gap-3">
@@ -673,7 +669,7 @@ export default function SchedulePage() {
                       )} />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
-                          <h3 className="font-heading font-semibold tracking-tight text-gray-900 truncate">{event.title}</h3>
+                          <h3 className="font-semibold tracking-tight text-gray-900 truncate">{event.title}</h3>
                           <Badge
                             variant={
                               event.status === 'completed' ? 'success' :
@@ -921,7 +917,7 @@ export default function SchedulePage() {
 
           <div>
             <Card className="p-4">
-              <h3 className="font-heading font-semibold tracking-tight mb-4">Quick Date Select</h3>
+              <h3 className="font-semibold tracking-tight mb-4">Quick Date Select</h3>
               <div className="grid grid-cols-7 gap-1">
                 {weekDates.map((date, idx) => {
                   const isSelected = date.toDateString() === selectedDate.toDateString();
@@ -952,7 +948,7 @@ export default function SchedulePage() {
       {/* Time Off Tab */}
       {tab === 'time-off' && (
         <Card className="p-4">
-          <h3 className="font-heading font-semibold tracking-tight mb-4 hidden md:block">Time Off Requests</h3>
+          <h3 className="font-semibold tracking-tight mb-4 hidden md:block">Time Off Requests</h3>
 
           {timeOffRequests.length === 0 ? (
             <div className="text-center py-8 text-gray-500">

@@ -231,6 +231,25 @@ export const DEFAULT_EMAIL_TEMPLATES: DefaultEmailTemplate[] = [
     `.trim(),
     variables: ['clientName', 'portalLink', 'companyName', 'companyPhone'],
   },
+  {
+    type: 'review_request',
+    name: 'Review Request',
+    subject: 'How was your experience with {{companyName}}?',
+    body: `
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <p>Hi {{clientName}},</p>
+  <p>Thank you for choosing <strong>{{companyName}}</strong> for your <strong>{{projectName}}</strong>!</p>
+  <p>We hope you're thrilled with the results. Your feedback helps us continue delivering excellent service and helps other homeowners find quality contractors.</p>
+  <p>Would you mind taking a moment to share your experience?</p>
+  <p style="text-align: center; margin: 24px 0;">
+    <a href="{{reviewLink}}" style="display: inline-block; background: #f59e0b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Leave a Review</a>
+  </p>
+  <p style="color: #6b7280; font-size: 14px;">Thank you for your business!</p>
+  <p style="color: #6b7280; font-size: 14px;">{{companyName}}</p>
+</div>
+    `.trim(),
+    variables: ['clientName', 'projectName', 'reviewLink', 'companyName'],
+  },
 ];
 
 /**

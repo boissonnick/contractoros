@@ -110,7 +110,7 @@ export function ProjectStatusWidget({ widget: _widget }: ProjectStatusWidgetProp
     <div className="space-y-4">
       {/* Total count */}
       <div className="flex items-baseline gap-2">
-        <span className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{totalProjects}</span>
+        <span className="text-2xl font-bold text-gray-900 tracking-tight">{totalProjects}</span>
         <span className="text-sm text-gray-500">total projects</span>
       </div>
 

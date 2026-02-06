@@ -84,45 +84,60 @@ export default function FieldPage() {
     setLoading(true);
 
     try {
-      // Check for active time entry (org-scoped collection)
-      const activeQuery = query(
-        collection(db, `organizations/${profile.orgId}/timeEntries`),
-        where('userId', '==', user.uid),
-        where('status', '==', 'active')
-      );
-      const activeSnap = await getDocs(activeQuery);
-      if (!activeSnap.empty) {
-        setActiveEntry({ id: activeSnap.docs[0].id, ...activeSnap.docs[0].data() } as TimeEntry);
+      // Each query is independent - one failure shouldn't block others
+
+      // 1. Check for active time entry (org-scoped collection)
+      try {
+        const activeQuery = query(
+          collection(db, `organizations/${profile.orgId}/timeEntries`),
+          where('userId', '==', user.uid),
+          where('status', '==', 'active')
+        );
+        const activeSnap = await getDocs(activeQuery);
+        if (!activeSnap.empty) {
+          setActiveEntry({ id: activeSnap.docs[0].id, ...activeSnap.docs[0].data() } as TimeEntry);
+        }
+      } catch (err) {
+        console.warn('Could not fetch time entries:', err);
       }
 
-      // Fetch today's tasks
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const tasksQuery = query(
-        collection(db, 'tasks'),
-        where('assignedTo', 'array-contains', user.uid),
-        where('status', 'in', ['assigned', 'in_progress'])
-      );
-      const tasksSnap = await getDocs(tasksQuery);
-      setTodaysTasks(tasksSnap.docs.map(d => ({ id: d.id, ...d.data() })) as Task[]);
+      // 2. Fetch today's tasks
+      try {
+        const tasksQuery = query(
+          collection(db, 'tasks'),
+          where('assignedTo', 'array-contains', user.uid),
+          where('status', 'in', ['assigned', 'in_progress'])
+        );
+        const tasksSnap = await getDocs(tasksQuery);
+        setTodaysTasks(tasksSnap.docs.map(d => ({ id: d.id, ...d.data() })) as Task[]);
+      } catch (err) {
+        console.warn('Could not fetch tasks:', err);
+      }
 
-      // Fetch projects for org
-      const projectsQuery = query(
-        collection(db, 'projects'),
-        where('orgId', '==', profile.orgId),
-        where('status', '==', 'active')
-      );
-      const projectsSnap = await getDocs(projectsQuery);
-      setProjects(projectsSnap.docs.map(d => ({ id: d.id, name: (d.data() as { name: string }).name })));
+      // 3. Fetch projects for org
+      try {
+        const projectsQuery = query(
+          collection(db, 'projects'),
+          where('orgId', '==', profile.orgId),
+          where('status', '==', 'active')
+        );
+        const projectsSnap = await getDocs(projectsQuery);
+        setProjects(projectsSnap.docs.map(d => ({ id: d.id, name: (d.data() as { name: string }).name })));
+      } catch (err) {
+        console.warn('Could not fetch projects:', err);
+      }
 
-      // Fetch geofences for org
-      const geofencesQuery = query(
-        collection(db, 'geofences'),
-        where('orgId', '==', profile.orgId)
-      );
-      const geofencesSnap = await getDocs(geofencesQuery);
-      setGeofences(geofencesSnap.docs.map(d => ({ id: d.id, ...d.data() })) as Geofence[]);
-
+      // 4. Fetch geofences for org
+      try {
+        const geofencesQuery = query(
+          collection(db, 'geofences'),
+          where('orgId', '==', profile.orgId)
+        );
+        const geofencesSnap = await getDocs(geofencesQuery);
+        setGeofences(geofencesSnap.docs.map(d => ({ id: d.id, ...d.data() })) as Geofence[]);
+      } catch (err) {
+        console.warn('Could not fetch geofences:', err);
+      }
     } catch (error) {
       console.error('Error fetching field data:', error);
       setFetchError('Failed to load data. The database may be unreachable.');
@@ -225,7 +240,7 @@ export default function FieldPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900">
           {greeting}, {profile?.displayName?.split(' ')[0]}
         </h1>
         <p className="text-gray-500 mt-1">
@@ -314,7 +329,7 @@ export default function FieldPage() {
       {/* Today's Tasks */}
       <div className="bg-white rounded-xl border p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900">Today&apos;s Tasks</h2>
+          <h2 className="text-lg font-semibold tracking-tight text-gray-900">Today&apos;s Tasks</h2>
           <Link href="/field/tasks" className="text-sm text-brand-primary hover:text-brand-primary-dark">
             View all
           </Link>

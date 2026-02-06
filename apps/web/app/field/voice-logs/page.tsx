@@ -160,7 +160,7 @@ export default function VoiceLogsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold font-heading tracking-tight text-gray-900">Voice Logs</h1>
+          <h1 className="text-xl font-semibold tracking-tight text-gray-900">Voice Logs</h1>
           <p className="text-sm text-gray-500">
             Record your daily work summary
           </p>
@@ -244,7 +244,7 @@ export default function VoiceLogsPage() {
           <div className="w-16 h-16 rounded-full bg-brand-primary-light flex items-center justify-center mx-auto mb-4">
             <MicrophoneIcon className="h-8 w-8 text-brand-primary" />
           </div>
-          <h3 className="text-lg font-medium font-heading tracking-tight text-gray-900 mb-2">
+          <h3 className="text-lg font-medium tracking-tight text-gray-900 mb-2">
             No voice logs yet
           </h3>
           <p className="text-sm text-gray-500 mb-4 max-w-sm mx-auto">
@@ -535,7 +535,7 @@ function EnhancedVoiceRecorder({
         <div className="w-24 h-24 rounded-full bg-green-100 flex items-center justify-center mb-6 animate-scale-in">
           <CheckCircleIcon className="h-14 w-14 text-green-600" />
         </div>
-        <h2 className="text-2xl font-bold font-heading tracking-tight text-gray-900 mb-2">Recording Saved</h2>
+        <h2 className="text-2xl font-bold tracking-tight text-gray-900 mb-2">Recording Saved</h2>
         <p className="text-gray-500 text-center">Your voice log will be processed shortly.</p>
       </div>
     );
@@ -555,7 +555,7 @@ function EnhancedVoiceRecorder({
         </button>
 
         <div className="text-center mb-12">
-          <h2 className="text-2xl font-bold font-heading tracking-tight text-gray-900 mb-2">Daily Voice Log</h2>
+          <h2 className="text-2xl font-bold tracking-tight text-gray-900 mb-2">Daily Voice Log</h2>
           <p className="text-gray-500">Tap the button to start recording</p>
         </div>
 
@@ -675,7 +675,7 @@ function EnhancedVoiceRecorder({
         >
           <XMarkIcon className="h-6 w-6" />
         </button>
-        <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900">Review Recording</h2>
+        <h2 className="text-lg font-semibold tracking-tight text-gray-900">Review Recording</h2>
         <div className="w-12" /> {/* Spacer */}
       </div>
 

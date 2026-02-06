@@ -219,7 +219,7 @@ export default function ClientProjectDetailPage() {
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">{project.name}</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-gray-900">{project.name}</h1>
               <span className={cn(
                 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium',
                 statusConfig.bgColor,
@@ -260,7 +260,7 @@ export default function ClientProjectDetailPage() {
 
       {/* Progress Card */}
       <Card>
-        <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">Project Progress</h2>
+        <h2 className="text-lg font-semibold tracking-tight text-gray-900 mb-4">Project Progress</h2>
 
         <div className="mb-4">
           <div className="flex items-center justify-between text-sm mb-2">
@@ -309,7 +309,7 @@ export default function ClientProjectDetailPage() {
       {/* Project Phases Timeline */}
       {phases.length > 0 && (
         <Card>
-          <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">Project Phases</h2>
+          <h2 className="text-lg font-semibold tracking-tight text-gray-900 mb-4">Project Phases</h2>
           <div className="space-y-3">
             {phases.map((phase, index) => {
               const isCompleted = phase.status === 'completed';
@@ -364,7 +364,7 @@ export default function ClientProjectDetailPage() {
                   <link.icon className="h-5 w-5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-medium font-heading tracking-tight text-gray-900">{link.label}</h3>
+                  <h3 className="font-medium tracking-tight text-gray-900">{link.label}</h3>
                   <p className="text-sm text-gray-500 mt-0.5">{link.description}</p>
                 </div>
                 <ArrowRightIcon className="h-4 w-4 text-gray-400 flex-shrink-0 mt-1" />
@@ -376,7 +376,7 @@ export default function ClientProjectDetailPage() {
 
       {/* Contact Card */}
       <Card>
-        <h3 className="font-semibold font-heading tracking-tight text-gray-900 mb-2">Questions about your project?</h3>
+        <h3 className="font-semibold tracking-tight text-gray-900 mb-2">Questions about your project?</h3>
         <p className="text-gray-600 text-sm mb-4">
           Reach out to your contractor if you have any questions or concerns.
         </p>

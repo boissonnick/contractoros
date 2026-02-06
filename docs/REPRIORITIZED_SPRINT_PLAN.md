@@ -844,7 +844,853 @@ Follow docs/VERSION_AUDIT_FEB_2026.md section on Next.js migration."
 
 ---
 
-**Document Version:** 1.0
-**Last Updated:** 2026-02-04
-**Status:** 🔴 READY FOR EXECUTION
-**Next Action:** Start Sprint 47 (Node.js Upgrade)
+## Phase 9: Testing & Polish (Sprints 77-80) ✅ COMPLETE
+
+- **Sprint 77:** Unit Test Coverage ✅
+- **Sprint 78:** Unit Test Coverage Continuation ✅
+- **Sprint 79:** Full-Stack UI Debugging (Desktop + Mobile) ✅
+- **Sprint 80:** Unit Test Coverage Phase 3 ✅
+
+---
+
+## Phase 10: Launch Readiness (Sprints 81-84)
+
+### Sprint 81: Review & Google Business Completion
+**Priority:** P0 - HIGH | **Hours:** 8-10 | **Status:** 📋 NEXT
+
+Complete the remaining 25% of review management. Code is written (types, hooks, UI, Cloud Functions all in codebase). Sprint focuses on Firestore rules, indexes, deployment, GCP secrets, and demo seed data.
+
+**Deliverables:**
+- Firestore rules for 5 review collections (reviews, reviewRequests, reviewAutomationRules, reviewResponseTemplates, googleBusinessConnections)
+- Composite indexes for review collections
+- Deploy Cloud Functions (6 functions already exported in `functions/src/index.ts`)
+- Configure GCP Secrets: GOOGLE_BUSINESS_CLIENT_ID, GOOGLE_BUSINESS_CLIENT_SECRET
+- Seed demo reviews (15-20 Google reviews, 5-10 requests, 2-3 automation rules)
+- E2E verification: create review request -> Cloud Function triggers -> status updates
+
+### Sprint 82: Email Template Builder & History
+**Priority:** P1 - HIGH | **Hours:** 10-12
+
+Complete email template system. Hook (`useEmailTemplates`) and default templates exist. Add visual builder, scheduling, and email history tracking.
+
+**Deliverables:**
+- Enhanced template builder UI with rich text editing and variable autocomplete
+- Email send scheduling (scheduledFor field on email queue)
+- Email history page content (`/dashboard/settings/email-history/`)
+- `useEmailHistory` hook for tracking sent emails with status
+- Cloud Function: `onEmailSent` trigger to log email history
+- Email analytics display (open rate, click rate, bounce rate)
+
+### Sprint 83: Demo Data Completeness
+**Priority:** P1 - HIGH | **Hours:** 8-10 | **Depends on:** Sprint 81
+
+Fill all demo data gaps for sales-ready demos. Currently ~30% complete.
+
+**Deliverables:**
+- All projects: categories, client assignments, budgets, dates
+- Tasks: 15-25/project with Gantt dependencies
+- RFIs: 10+, Submittals: 8+, Punch list: 15+, Change orders: 5+
+- Historical financial data: 6 months revenue/expenses/invoices
+- Schedule events: 30+, Sub performance data for 5+ subs, Payroll runs: 3-4
+
+### Sprint 84: E2E Regression & Smoke Testing
+**Priority:** P1 - HIGH | **Hours:** 10-14 | **Depends on:** Sprints 81-83
+
+Quality gate before new features. Run all E2E suites, fix critical/high issues.
+
+**Deliverables:**
+- Smoke test: 100% pass (all pages load)
+- Auth/RBAC: 100% pass
+- Mobile (375x812): 95%+ pass
+- Desktop (1440px): 95%+ pass
+- Full regression suite pass
+- All critical bugs fixed, results documented
+
+---
+
+## Phase 11: Differentiators & Gap Filling (Sprints 85-88)
+
+### Sprint 85: Settings Consolidation & Configuration
+**Priority:** P2 - MEDIUM | **Hours:** 8-10
+
+Complete settings to 95%. Fiscal year, payroll periods, tax settings, corporate structure, template management hub, document numbering config, data retention UI.
+
+### Sprint 86: Subcontractor Analytics & Advanced Reporting
+**Priority:** P2 - MEDIUM | **Hours:** 10-12 | **Depends on:** Sprint 83
+
+Subcontractor performance analytics dashboard, cost comparison by trade, utilization charts. Report drill-down (summary -> project -> task), PDF export with branding, Excel export with formatting.
+
+### Sprint 87: Notification Enhancements & Browser Push
+**Priority:** P2 - MEDIUM | **Hours:** 8-10
+
+Browser push notifications (Web Push API + VAPID), quiet hours enforcement, DND/snooze mode, notification digest emails, granular per-project controls, `processNotificationDigest` Cloud Function.
+
+### Sprint 88: Offline Mode Foundation (PWA)
+**Priority:** P2 - MEDIUM | **Hours:** 10-12
+
+PWA manifest, service worker with workbox caching, background sync for offline queued operations, reconnection flow, field portal offline indicator. Types, sync queue, IndexedDB storage, offline forms, and OfflineProvider already exist.
+
+---
+
+## Phase 12: Intelligence & Polish (Sprints 89-90)
+
+### Sprint 89: AI Intelligence Dashboard & Recommendations
+**Priority:** P3 - MEDIUM-LOW | **Hours:** 8-10 | **Depends on:** Sprint 83
+
+Surface existing AI infrastructure (anomaly detection, budget analyzer, material predictor, project intelligence) in a unified dashboard. AI alerts panel on main dashboard, anomaly timeline, portfolio health score, smart recommendations.
+
+### Sprint 90: Final Polish, Unit Tests & Launch Prep
+**Priority:** P1 - HIGH | **Hours:** 10-14 | **Depends on:** All
+
+Final quality sprint. Target 1,700+ tests (from 1,502), full E2E regression, ESLint warnings <800 (from 1,050), MODULE_REGISTRY/SPRINT_STATUS/CLAUDE.md updates, Docker build verification, Cloud Run readiness, GCP secrets audit.
+
+---
+
+## Phase 13: Demo Data Hydration (Sprints 91-98)
+
+> **Source:** Full platform browser audit (`docs/specs/DEMO_DATA_AUDIT.md`)
+> **Problem:** Of ~40 audited pages, ~28 are completely empty or severely under-seeded. Sprint 83 achieved ~70% data completeness but the audit revealed massive gaps remain — **zero invoices, zero revenue, zero time entries, zero schedule events** cascade into broken financials, reports, and intelligence dashboards.
+> **Goal:** Bring demo data completeness from ~70% to 100% with ~800 new records across ~25 seed scripts.
+
+### Sprint 91: Bug Fixes & Financial Foundation
+**Priority:** P0 - CRITICAL | **Hours:** 10-14 | **Depends on:** Sprint 90
+**Focus:** Fix blocking bugs + seed invoices, payments, and estimates — the foundation everything else depends on.
+
+**Phase A: Bug Fixes (2-3 hours)**
+
+| Bug | Location | Fix |
+|-----|----------|-----|
+| Change Orders missing Firestore index | Project > Change Orders tab | Deploy composite index for `changeOrders` collection |
+| Selections page infinite loading | Project > Selections tab | Debug and fix loading logic in selections hook/page |
+| "Failed to load financial data" toast | Project > Finances tab | Fix data loading error in project finances page |
+| Field Portal clock stuck at 174+ hours | Field Portal | Reset clock state / fix timer persistence bug |
+| Material "Available" shows 0 for items with stock | Materials inventory | Fix available quantity calculation |
+| Payroll runs all share same Run ID #202606 | Payroll page | Fix run ID generation in seed script or payroll logic |
+| 99 overdue tasks (all past due dates) | Reports / Business Command Center | Update task due dates to realistic future dates |
+
+**Phase B: Financial Seed Scripts (8-10 hours)**
+
+| Script | Records | What It Seeds |
+|--------|---------|---------------|
+| `seed-invoices.ts` | 25-30 | Invoices across 8-10 projects with statuses: draft (3), sent (5), paid (12), overdue (5), partially paid (3). Tied to real projects and clients. Historical dates spanning 6 months. |
+| `seed-payments.ts` | 15-20 | Payment records tied to paid/partially-paid invoices. Creates revenue data. Various methods (check, ACH, credit card). |
+| `seed-estimates.ts` | 10-12 | Estimates with statuses: draft (2), sent (3), accepted (4), declined (2), expired (1). Pipeline value $200K-400K. |
+
+**Data relationships created:**
+- Invoices → Payments → Revenue ($450K-600K YTD)
+- Invoices → AR Aging (current, 30, 60, 90+ days → $40K-80K outstanding)
+- Estimates → Pipeline Value ($200K-400K)
+- Revenue - Expenses → Profit Margin (15-25% target)
+
+**Acceptance Criteria:**
+- [ ] All 7 bugs fixed and verified in browser
+- [ ] Dashboard shows realistic revenue ($450K-600K YTD)
+- [ ] Finance page shows revenue, AR aging, profit margins
+- [ ] Intelligence dashboards show real data (not $0)
+- [ ] Cash flow runway shows realistic inflow/outflow
+- [ ] Estimates page shows pipeline with win rate
+- [ ] `npx tsc --noEmit` passes
+
+**Seed Scripts to Create:** 3 new (`seed-invoices.ts`, `seed-payments.ts`, `seed-estimates.ts`)
+**Files to Modify:** Bug fixes across 5-7 existing files
+**Parallel Plan:** Bug fixes (Agent 1) + Invoice seeder (Agent 2) + Estimate seeder (Agent 3)
+
+---
+
+### Sprint 92: Project Detail Hydration
+**Priority:** P1 - HIGH | **Hours:** 10-14 | **Depends on:** Sprint 91
+**Focus:** Hydrate per-project data — scopes, quotes, tasks, activity, change orders, phases, selections, and client assignments.
+
+| Script | Records | What It Seeds |
+|--------|---------|---------------|
+| `seed-scopes-quotes.ts` | 40-60 | Scope items + quote line items for 5-8 active projects. Labor + material categories with quantities, unit prices, and totals. Quote sections (Demolition, Framing, Electrical, Plumbing, Finishes). |
+| `seed-activity-notes.ts` | 100-150 | Activity feed entries (20-30 per active project) + notes (5-10 per project). Types: task_completed, invoice_sent, photo_added, change_order_approved, comment_added. |
+| `seed-change-orders.ts` | 8-10 | Change orders across 5 projects. Statuses: draft (2), pending (3), approved (3), rejected (1), completed (1). With line items, reasons, cost impact. |
+| `seed-phases.ts` | 30-40 | Project phases for 6-8 projects. 4-6 phases each (Planning, Foundation, Framing, MEP, Finishes, Punch List). Start/end dates, % complete, dependencies. |
+| `seed-selections.ts` | 20-30 | Client selections for 4-5 projects. Categories: Flooring, Countertops, Fixtures, Paint, Hardware. Statuses: pending, selected, approved, ordered. With budget vs actual. |
+| `update-client-assignments.ts` | 0 (updates) | Link all 23 projects to appropriate clients from the 13 existing clients. Fix "Not assigned" projects. |
+| `update-task-dates.ts` | 0 (updates) | Reset 99 overdue tasks to realistic future dates. Mix statuses: pending (40%), in_progress (25%), completed (30%), blocked (5%). Add assignees. |
+
+**Acceptance Criteria:**
+- [ ] 5-8 projects have populated scope items and quote line items
+- [ ] Project activity feeds show realistic history
+- [ ] Change orders load and display across projects (index deployed)
+- [ ] Project phases visible with timeline and progress
+- [ ] Selections page loads with real data
+- [ ] All projects assigned to clients
+- [ ] Tasks show mixed completion states (not all overdue)
+- [ ] `npx tsc --noEmit` passes
+
+**Seed Scripts to Create:** 5 new + 2 update scripts
+**Parallel Plan:** Scopes/Quotes (Agent 1) + Activity/Notes (Agent 2) + Change Orders + Phases (Agent 3) + Selections + Updates (Agent 4)
+
+---
+
+### Sprint 93: Schedule, Time Tracking & Timesheets
+**Priority:** P1 - HIGH | **Hours:** 8-10 | **Depends on:** Sprint 91
+**Focus:** Populate the schedule calendar, time tracking, and timesheet review queues.
+
+| Script | Records | What It Seeds |
+|--------|---------|---------------|
+| `seed-schedule-events.ts` | 40-50 | Calendar events spanning Jan-Mar 2026. Types: job_site (20), inspection (8), meeting (6), delivery (4), milestone (5), time_off (3). Assigned to team members and projects. Recurring events for weekly meetings. |
+| `seed-time-entries.ts` | 200-250 | Time entries across 6 team members over 8 weeks. 6-10 hours/day, 5 days/week. Tied to real projects. Break entries, overtime flagging. Task-level assignment. |
+| `seed-timesheets.ts` | 24-30 | Weekly timesheets for 6 team members × 4 weeks. Statuses: submitted (8), approved (12), pending (6), rejected (2). Linked to time entries. Manager approval workflow data. |
+
+**Acceptance Criteria:**
+- [ ] Schedule calendar shows events across Jan-Mar 2026
+- [ ] Time tracking page shows 200+ hours logged this week
+- [ ] Timesheets page has items to review/approve
+- [ ] Field portal schedule shows assigned events
+- [ ] Field portal time clock works (clock reset from Sprint 91)
+- [ ] Weekly hours logged: 200-240hrs (6 FTE × 40hrs)
+- [ ] `npx tsc --noEmit` passes
+
+**Seed Scripts to Create:** 3 new (schedule may enhance existing)
+**Parallel Plan:** Schedule events (Agent 1) + Time entries (Agent 2) + Timesheets (Agent 3)
+
+---
+
+### Sprint 94: Subcontractors, Leads & Sales Pipeline
+**Priority:** P1 - HIGH | **Hours:** 8-10 | **Depends on:** Sprint 91
+**Focus:** Build out subcontractor network, lead pipeline, and service tickets.
+
+| Script | Records | What It Seeds |
+|--------|---------|---------------|
+| `seed-subcontractors-full.ts` | 10-12 | Subcontractors across trades: plumbing (2), electrical (2), HVAC (1), concrete (1), framing (1), roofing (1), painting (1), landscaping (1), drywall (update existing), flooring (1). With insurance expiry, license #, contact info, performance ratings (1-5 stars), on-time %, completed project count. |
+| `seed-bids.ts` | 12-15 | Bid solicitations + responses. Statuses: pending (4), accepted (5), declined (3), expired (2). Tied to real projects and subcontractors. With line items, amounts, notes. |
+| `seed-leads.ts` | 12-15 | CRM leads across pipeline stages: new (3), contacted (3), qualified (2), proposal_sent (3), won (2), lost (2). With source (referral, Google, website, social), estimated value, next action dates, notes. |
+| `seed-service-tickets.ts` | 6-8 | Service/warranty tickets. Statuses: open (2), scheduled (2), in_progress (1), completed (2), closed (1). Tied to completed projects and clients. Priority levels. |
+| `update-team-rates.ts` | 0 (updates) | Set hourly cost rates for all 6 team members ($25-$65/hr based on trade/role). Update trade assignments for any missing. |
+
+**Acceptance Criteria:**
+- [ ] Subcontractors page shows 10-12 subs across trades
+- [ ] Sub performance metrics display ratings and on-time %
+- [ ] Bids page shows solicitations with various statuses
+- [ ] Leads pipeline shows $200K-400K in pipeline value
+- [ ] Service tickets page has active tickets
+- [ ] Team members all have cost rates set
+- [ ] `npx tsc --noEmit` passes
+
+**Seed Scripts to Create:** 4 new + 1 update script
+**Parallel Plan:** Subs + Bids (Agent 1) + Leads + Service Tickets (Agent 2) + Team Rates (Agent 3)
+
+---
+
+### Sprint 95: Communication & Notifications
+**Priority:** P1 - HIGH | **Hours:** 6-8 | **Depends on:** Sprint 91
+**Focus:** Populate messaging channels, SMS conversations, and notification feed.
+
+| Script | Records | What It Seeds |
+|--------|---------|---------------|
+| `seed-messages.ts` | 40-60 | 4-5 project message channels with 8-12 messages each. Channel names: "Kitchen Reno - General", "Foundation Issues", "Material Delays", "Punch List Items". Messages from mix of team members. Threaded replies. |
+| `seed-sms-conversations.ts` | 30-40 | 10-15 SMS conversations with clients and subs. 2-4 messages per conversation. Topics: scheduling, material questions, change requests, payment reminders. Realistic timestamps. |
+| `seed-notifications.ts` | 20-25 | Notification feed entries. Types: task_assigned (5), approval_requested (4), message_received (3), invoice_paid (3), change_order_pending (2), schedule_updated (2), document_shared (2), milestone_reached (2). Mix of read/unread. |
+
+**Acceptance Criteria:**
+- [ ] Messages page shows project channels with threads
+- [ ] SMS messaging page shows conversations
+- [ ] Notifications bell shows unread count
+- [ ] Notifications page has realistic entries
+- [ ] `npx tsc --noEmit` passes
+
+**Seed Scripts to Create:** 3 new
+**Parallel Plan:** Messages (Agent 1) + SMS (Agent 2) + Notifications (Agent 3)
+
+---
+
+### Sprint 96: Compliance, Safety, RFIs & Submittals
+**Priority:** P2 - MEDIUM | **Hours:** 8-10 | **Depends on:** Sprint 92
+**Focus:** Populate compliance/safety records and project documentation workflows.
+
+| Script | Records | What It Seeds |
+|--------|---------|---------------|
+| `seed-rfis-full.ts` | 10-12 | RFIs across 4-5 projects. Statuses: open (3), responded (4), closed (3), overdue (2). With questions, responses, linked drawings, assigned to team/subs. Response times. |
+| `seed-submittals.ts` | 10-12 | Submittals across 4-5 projects. Statuses: pending_review (3), approved (4), needs_revision (2), rejected (1), resubmitted (2). Types: shop drawings, material samples, product data. Linked to spec sections. |
+| `seed-safety.ts` | 20-25 | Safety inspections (10-12): passed (7), failed (3), pending (2). Safety incidents (2-3): reported, investigated, resolved. Toolbox talks (5-8): topics like fall protection, electrical safety, PPE, heat stress. |
+| `seed-documents.ts` | 15-20 | Document references (metadata only, no file upload). Types: contract (4), permit (3), insurance_cert (3), lien_waiver (3), plan/drawing (4), change_order_doc (3). Tied to projects. |
+| `seed-signatures.ts` | 8-10 | E-signature requests. Statuses: pending (3), viewed (2), signed (3), declined (1), expired (1). Tied to estimates and change orders. |
+
+**Acceptance Criteria:**
+- [ ] RFIs page shows 10-12 items across projects
+- [ ] Submittals page shows items in various review states
+- [ ] Safety page shows inspections, incidents, toolbox talks
+- [ ] Documents page shows categorized documents
+- [ ] Signatures page shows requests in various statuses
+- [ ] `npx tsc --noEmit` passes
+
+**Seed Scripts to Create:** 5 new (seed-rfis-full.ts enhances existing)
+**Parallel Plan:** RFIs + Submittals (Agent 1) + Safety (Agent 2) + Documents + Signatures (Agent 3)
+
+---
+
+### Sprint 97: Equipment, Expenses & Materials Enhancement
+**Priority:** P2 - MEDIUM | **Hours:** 6-8 | **Depends on:** Sprint 91
+**Focus:** Fill equipment inventory, expand expenses, and enhance material data.
+
+| Script | Records | What It Seeds |
+|--------|---------|---------------|
+| `seed-equipment.ts` | 12-15 | Equipment items: excavator (1), skid steer (1), trucks (2), trailer (1), scaffolding (2), power tools (3-4), generators (1), compressors (1). With purchase date, value, maintenance schedule, current assignment (project/warehouse), condition. |
+| `seed-expenses-full.ts` | 50-70 | Expanded expenses across categories: materials (20), labor (10), equipment_rental (8), fuel (8), insurance (4), permits (4), office (4), misc (6). Spanning 6 months. Realistic amounts ($50-$15,000). Tied to projects. Various approval statuses. |
+| `update-materials.ts` | 0 (updates) | Fix material availability calculation. Update existing 20 materials with realistic stock levels, reorder points, and recent transaction history. Add low-stock alerts for 3-4 items. |
+
+**Acceptance Criteria:**
+- [ ] Equipment page shows 12-15 items with details
+- [ ] Equipment checkout/assignment visible
+- [ ] Expenses total $30K-60K/month (realistic)
+- [ ] Expense categories populated across all types
+- [ ] Material availability shows correct "Available" counts
+- [ ] Low-stock alerts appear for appropriate items
+- [ ] Monthly expenses on dashboard are realistic
+- [ ] `npx tsc --noEmit` passes
+
+**Seed Scripts to Create:** 2 new + 1 update script
+**Parallel Plan:** Equipment (Agent 1) + Expenses (Agent 2) + Materials update (Agent 3)
+
+---
+
+### Sprint 98: Portal Users, Photos & Final Verification
+**Priority:** P1 - HIGH | **Hours:** 8-10 | **Depends on:** Sprints 91-97
+**Focus:** Create portal demo users, add photo references, and run full platform verification.
+
+| Script | Records | What It Seeds |
+|--------|---------|---------------|
+| `seed-portal-users.ts` | 2-3 | Demo users: 1 client user (linked to existing client, CLIENT role), 1 sub user (linked to existing sub, SUBCONTRACTOR role), optionally 1 field worker (EMPLOYEE role with field assignments). Firebase Auth accounts + Firestore profiles. |
+| `seed-photos.ts` | 30-50 | Photo reference records (using placeholder URLs or Unsplash construction images). Categories: progress (15), before/after (10), issue (5), inspection (5), material (5). Tied to projects. With descriptions, dates, tagged team members. |
+| `seed-job-costing.ts` | 20-30 | Job costing data for 5-8 projects. Cost codes, budget allocations, actual costs (from seeded expenses + time entries). Creates realistic budget vs actual comparisons. |
+| `verify-platform.ts` | 0 | Verification script — queries all seeded collections and outputs completeness report. Validates data relationships (invoices→payments, projects→clients, time→timesheets). |
+
+**Acceptance Criteria:**
+- [ ] Client portal accessible with demo client user
+- [ ] Client portal shows project progress, invoices, timeline, messages
+- [ ] Sub portal accessible with demo sub user
+- [ ] Sub portal shows assigned projects, bids, schedule
+- [ ] Field portal shows tasks, schedule, photos for field user
+- [ ] Photos page shows images across projects
+- [ ] Job costing shows budget vs actual on project finances
+- [ ] Business health score reflects realistic data (75-85/100)
+- [ ] All dashboard KPIs show realistic values (not $0 or -100%)
+- [ ] `verify-platform.ts` reports 100% data completeness
+- [ ] `npx tsc --noEmit` passes
+- [ ] Full browser smoke test passes (all pages load with data)
+
+**Seed Scripts to Create:** 3 new + 1 verification script
+**Parallel Plan:** Portal users (Agent 1) + Photos + Job Costing (Agent 2) + Verification (Agent 3)
+
+---
+
+### Phase 13 Summary
+
+| Sprint | Focus | Scripts | Records | Hours |
+|--------|-------|---------|---------|-------|
+| **91** | Bug Fixes + Financial Foundation | 3 new | ~65 | 10-14 |
+| **92** | Project Detail Hydration | 5 new + 2 update | ~250 | 10-14 |
+| **93** | Schedule, Time & Timesheets | 3 new | ~290 | 8-10 |
+| **94** | Subs, Leads & Sales | 4 new + 1 update | ~55 | 8-10 |
+| **95** | Communication & Notifications | 3 new | ~100 | 6-8 |
+| **96** | Compliance, Safety, RFIs, Submittals | 5 new | ~75 | 8-10 |
+| **97** | Equipment, Expenses & Materials | 2 new + 1 update | ~80 | 6-8 |
+| **98** | Portal Users, Photos & Verification | 3 new + 1 verify | ~65 | 8-10 |
+| **TOTAL** | | **28 new + 4 updates + 1 verify** | **~980** | **65-84** |
+
+### Phase 13 Dependency Graph
+
+```
+Sprint 91 (Financial Foundation) ───┬──> Sprint 92 (Project Detail)
+                                    ├──> Sprint 93 (Schedule & Time) ──┐
+                                    ├──> Sprint 94 (Subs & Leads)      │
+                                    ├──> Sprint 95 (Communication)     ├──> Sprint 98 (Portals & Verify)
+                                    └──> Sprint 97 (Equipment & $$$)   │
+                                                                       │
+                        Sprint 92 ──────> Sprint 96 (Compliance) ──────┘
+```
+
+**Parallelization:** Sprints 93+94+95+97 can run in parallel after Sprint 91. Sprint 96 needs Sprint 92. Sprint 98 is the final verification after all others.
+
+### Key Metric Targets (Post Phase 13)
+
+| Metric | Before | After | Source |
+|--------|--------|-------|--------|
+| Revenue YTD | $0 | $450K-600K | Sprint 91 (invoices + payments) |
+| Outstanding AR | $0 | $40K-80K | Sprint 91 (unpaid invoices) |
+| Pipeline Value | $0 | $200K-400K | Sprint 91 (estimates) |
+| Profit Margin | -100% | 15-25% | Sprint 91 (revenue - expenses) |
+| Subcontractors | 1 | 10-12 | Sprint 94 |
+| Weekly Hours Logged | 0 | 200-240 | Sprint 93 |
+| Monthly Expenses | $2.5K | $30K-60K | Sprint 97 |
+| Schedule Events | 0 | 40-50 | Sprint 93 |
+| Data Completeness | ~70% | 100% | Sprint 98 (verification) |
+| Business Health Score | 65/100 | 75-85/100 | All sprints combined |
+
+---
+
+## Phase 14: Deployment & Execution (Sprints 96-99)
+
+> **Goal:** Get ContractorOS running in production with real data. Everything built in Phases 1-13 is local — this phase deploys it, seeds it, and verifies it end-to-end.
+
+### Sprint 96: Firebase Deployment & Seed Execution
+**Priority:** P0 - CRITICAL | **Hours:** 4-6 | **Depends on:** Sprint 95
+**Focus:** Deploy all pending Firestore indexes/rules, Cloud Functions, and execute all 50 seed scripts against the live database.
+
+**Subagent Plan (parallel):**
+| Agent | Type | Task | Files |
+|-------|------|------|-------|
+| Agent 1 | Bash | Deploy Firestore rules + indexes | `firestore.rules`, `firestore.indexes.json` |
+| Agent 2 | Bash | Deploy Cloud Functions | `functions/src/` |
+| Agent 3 | Bash (background) | Run `run-all-seeds.ts` orchestrator (50 scripts) | `scripts/seed-demo/` |
+| Main session | Manual | Add GCP secrets (GOOGLE_BUSINESS_CLIENT_ID, GOOGLE_BUSINESS_CLIENT_SECRET, FRED_API_KEY) | GCP Console |
+
+**Acceptance Criteria:**
+- [ ] All Firestore indexes show "Enabled" in Firebase Console
+- [ ] All Cloud Functions deployed (review, job-costing, AP, email)
+- [ ] Seed data visible in Firebase Console `contractoros` database
+- [ ] `npx tsc --noEmit` passes
+
+---
+
+### Sprint 97: Docker Build, Cloud Run Deploy & Smoke Test
+**Priority:** P0 - CRITICAL | **Hours:** 6-8 | **Depends on:** Sprint 96
+**Focus:** Build production Docker image, deploy to Cloud Run, verify basic functionality.
+
+**Subagent Plan:**
+| Agent | Type | Task | Files |
+|-------|------|------|-------|
+| Agent 1 | Bash | Docker build + local verification | `Dockerfile`, `docker-build-local.sh` |
+| Agent 2 | Bash | Cloud Build trigger + Cloud Run deploy | `cloudbuild.yaml` |
+| Agent 3 | Explore | Review deploy config for correctness | `cloudbuild.yaml`, `Dockerfile`, Cloud Run settings |
+| Main session | Chrome MCP | Production URL smoke test — login, dashboard, data check | Browser |
+
+**Acceptance Criteria:**
+- [ ] Docker image builds successfully
+- [ ] Container runs locally on port 3000/8080
+- [ ] Cloud Run revision deployed and serving traffic
+- [ ] Login works at production URL
+- [ ] Dashboard loads with seeded data visible
+- [ ] No JavaScript errors in browser console
+
+---
+
+### Sprint 98: E2E Regression in Browser
+**Priority:** P1 - HIGH | **Hours:** 8-12 | **Depends on:** Sprint 97
+**Focus:** Run full E2E test suites against running app, fix critical/high issues found.
+
+**Subagent Plan:**
+| Agent | Type | Task | Files |
+|-------|------|------|-------|
+| Main session | Chrome MCP | Execute `e2e/suites/00-smoke.md` (all pages load) | `apps/web/e2e/suites/` |
+| Main session | Chrome MCP | Execute `e2e/suites/22-ui-ux-mobile.md` at 375x812 | `apps/web/e2e/suites/` |
+| Agent 1 | general-purpose | Fix critical/high bugs found during E2E | Various |
+| Agent 2 | general-purpose | Fix medium bugs found during E2E | Various |
+
+**Acceptance Criteria:**
+- [ ] Smoke test: 100% pass (all pages load without errors)
+- [ ] Mobile test: 95%+ pass at 375x812
+- [ ] All critical bugs found during E2E fixed
+- [ ] Results documented in `e2e/results/sprint-98-regression.md`
+
+---
+
+### Sprint 99: Data Verification & Portal Testing
+**Priority:** P1 - HIGH | **Hours:** 6-8 | **Depends on:** Sprint 98
+**Focus:** Walk all 4 portals in browser, verify data integrity, fix empty states.
+
+**Subagent Plan:**
+| Agent | Type | Task | Files |
+|-------|------|------|-------|
+| Main session | Chrome MCP | Walk Dashboard, Client, Sub, Field portals — verify data | Browser |
+| Agent 1 | general-purpose | Fix data relationship issues (orphaned records, missing refs) | Seeds + hooks |
+| Agent 2 | Bash | Create `verify-platform.ts` — queries all collections, reports completeness | `scripts/seed-demo/` |
+| Agent 3 | general-purpose | Fix empty-state pages that should show data | Page files |
+
+**Acceptance Criteria:**
+- [ ] All 4 portals show realistic data
+- [ ] `verify-platform.ts` reports 95%+ data completeness
+- [ ] No empty-state pages for features that have seed data
+- [ ] Financial KPIs show realistic values ($450K+ revenue, 15-25% margins)
+- [ ] Intelligence dashboards populated with real metrics
+
+---
+
+## Phase 15: Production Hardening (Sprints 100-102)
+
+> **Goal:** Code quality, test coverage, and error resilience before opening to users. All 3 sprints can run in **parallel** after Sprint 99.
+
+### Sprint 100: ESLint Warning Cleanup Phase 2
+**Priority:** P2 - MEDIUM | **Hours:** 6-8 | **Depends on:** Sprint 99
+**Target:** 1,050 warnings → <400 warnings
+**Focus:** Clean up unused imports/vars, convert img→next/image, fix hook deps.
+
+**Subagent Plan (4 agents, no file overlap):**
+| Agent | Type | Warnings Targeted | File Scope |
+|-------|------|-------------------|------------|
+| Agent 1 | general-purpose | `no-unused-vars` (~350) | `components/**` |
+| Agent 2 | general-purpose | `no-unused-vars` (~350) | `app/**`, `lib/**` |
+| Agent 3 | general-purpose | `no-img-element` (40) | All `<img>` tags → `next/image` |
+| Agent 4 | general-purpose | `exhaustive-deps` (54) | All hooks with missing deps |
+
+**Acceptance Criteria:**
+- [ ] ESLint warnings <400
+- [ ] `npx tsc --noEmit` passes
+- [ ] All 1,502+ tests still pass
+- [ ] No visual regressions from import cleanup
+
+---
+
+### Sprint 101: Unit Test Coverage Phase 4
+**Priority:** P2 - MEDIUM | **Hours:** 8-10 | **Depends on:** Sprint 99
+**Target:** 1,502 → 1,800+ tests
+**Focus:** Cover remaining high-value hooks and utility functions.
+
+**Subagent Plan (4 agents, each creates separate test files):**
+| Agent | Type | Hooks to Test | Est. Tests |
+|-------|------|---------------|------------|
+| Agent 1 | general-purpose | `useInvoices`, `useEstimates`, `useDocuments` | ~75 |
+| Agent 2 | general-purpose | `useTimesheets`, `useTimeEntries`, `useAvailability` | ~60 |
+| Agent 3 | general-purpose | `useProjects`, `useClients` | ~50 |
+| Agent 4 | general-purpose | Utils: `formatCurrency`, `formatDate`, `formatPhoneNumber`, form validators | ~60 |
+
+**New test files:**
+- `__tests__/lib/hooks/useInvoices.test.ts`
+- `__tests__/lib/hooks/useEstimates.test.ts`
+- `__tests__/lib/hooks/useDocuments.test.ts`
+- `__tests__/lib/hooks/useTimesheets.test.ts`
+- `__tests__/lib/hooks/useTimeEntries.test.ts`
+- `__tests__/lib/hooks/useAvailability.test.ts`
+- `__tests__/lib/hooks/useProjects.test.ts`
+- `__tests__/lib/hooks/useClients.test.ts`
+- `__tests__/lib/utils/formatters.test.ts`
+- `__tests__/lib/utils/form-validators.test.ts`
+
+**Acceptance Criteria:**
+- [ ] 1,800+ tests total
+- [ ] All tests passing (no OOM regressions)
+- [ ] Newly tested hooks have >80% branch coverage
+
+---
+
+### Sprint 102: Error Handling & Edge Cases
+**Priority:** P2 - MEDIUM | **Hours:** 6-8 | **Depends on:** Sprint 99
+**Focus:** Add error boundaries, fix silent catch blocks, add skeleton screens.
+
+**Subagent Plan (4 agents, no file overlap):**
+| Agent | Type | Task | Files |
+|-------|------|------|-------|
+| Agent 1 | general-purpose | Add error boundaries to all portal root layouts | `dashboard/layout.tsx`, `client/layout.tsx`, `sub/layout.tsx`, `field/layout.tsx` |
+| Agent 2 | general-purpose | Audit all catch blocks — no silent swallows, add toast errors | `lib/hooks/*.ts` |
+| Agent 3 | general-purpose | Add skeleton loading to 10 highest-traffic pages | Dashboard, Projects, Clients, Invoices, Expenses, Schedule, Team, Messages, Reports, Settings pages |
+| Agent 4 | general-purpose | Fix stale data — ensure hooks unsubscribe on unmount, no memory leaks | `lib/hooks/*.ts` (different hooks than Agent 2) |
+
+**Acceptance Criteria:**
+- [ ] Error boundaries on all 4 portal layouts
+- [ ] No silent catch blocks (all errors surfaced to user)
+- [ ] 10 pages have skeleton loading instead of spinners
+- [ ] No `useEffect` cleanup warnings in React strict mode
+- [ ] `npx tsc --noEmit` passes
+
+---
+
+## Phase 16: Growth Features (Sprints 103-105)
+
+> **Goal:** Customer-facing polish and sales readiness. All 3 sprints can run in **parallel** after Phase 15.
+
+### Sprint 103: Client Portal Enhancement
+**Priority:** P2 - MEDIUM | **Hours:** 8-10 | **Depends on:** Sprint 102
+**Focus:** Make the client portal demo-worthy with project progress, invoice viewing, and documents.
+
+**Subagent Plan:**
+| Agent | Type | Task | Files |
+|-------|------|------|-------|
+| Agent 1 | general-purpose | Build project progress tracker (phase timeline, % complete, photo carousel) | `components/client-portal/ProjectProgress.tsx` |
+| Agent 2 | general-purpose | Build invoice viewer (view invoices, payment status, pay button stub) | `components/client-portal/InvoiceViewer.tsx` |
+| Agent 3 | general-purpose | Build document viewer (contracts, drawings, permits — read-only) | `components/client-portal/DocumentViewer.tsx` |
+| Main session | Wiring | Integrate components into `client/[token]/` pages | `app/client/[token]/*.tsx` |
+
+**Acceptance Criteria:**
+- [ ] Client portal shows project timeline with phase progress
+- [ ] Client portal shows invoice list with payment statuses
+- [ ] Client portal shows project documents (read-only)
+- [ ] Demo client user sees realistic data
+
+---
+
+### Sprint 104: Reporting & Export Polish
+**Priority:** P2 - MEDIUM | **Hours:** 8-10 | **Depends on:** Sprint 102
+**Focus:** PDF and CSV/Excel export for reports, pre-built report templates.
+
+**Subagent Plan:**
+| Agent | Type | Task | Files |
+|-------|------|------|-------|
+| Agent 1 | general-purpose | PDF export for financial reports (P&L, AR aging, project summary) | `lib/reports/exportPDF.ts`, `components/reports/ReportPDF.tsx` |
+| Agent 2 | general-purpose | CSV/Excel export for data tables (expenses, time, invoices) | `lib/reports/exportCSV.ts` |
+| Agent 3 | general-purpose | Report template selector (5 templates: Monthly P&L, Project Summary, AR Aging, Payroll Summary, Expense Report) | `components/reports/ReportTemplateSelector.tsx` |
+| Main session | Wiring | Integrate exports into report pages, add download buttons | `app/dashboard/reports/*.tsx` |
+
+**Acceptance Criteria:**
+- [ ] PDF export works for 3 report types
+- [ ] CSV export works for 3 data table types
+- [ ] 5 pre-built report templates selectable
+- [ ] Download buttons visible on all report pages
+
+---
+
+### Sprint 105: Demo Mode & Sales Readiness
+**Priority:** P1 - HIGH | **Hours:** 8-10 | **Depends on:** Sprint 102
+**Focus:** Enable sales demos with toggleable demo mode, multiple demo orgs, and guided walkthrough.
+
+**Subagent Plan:**
+| Agent | Type | Task | Files |
+|-------|------|------|-------|
+| Agent 1 | general-purpose | Build demo mode toggle (purple banner, "Demo Mode" indicator, optional read-only) | `components/demo/DemoModeBanner.tsx`, `lib/contexts/DemoContext.tsx` |
+| Agent 2 | general-purpose | Build demo org switcher (switch between 2 demo orgs for multi-tenant demo) | `components/demo/DemoOrgSwitcher.tsx` |
+| Agent 3 | general-purpose | Create second demo org seed script | `scripts/seed-demo/seed-second-org.ts` |
+| Main session | Docs | Write demo walkthrough script (`docs/DEMO_SCRIPT.md` — 15-min guided tour) | `docs/DEMO_SCRIPT.md` |
+
+**Acceptance Criteria:**
+- [ ] Demo mode toggle activates purple banner
+- [ ] 2 demo orgs switchable during demo
+- [ ] Demo walkthrough script covers all major features (15 min)
+- [ ] Demo mode doesn't affect production users
+
+---
+
+## Phases 14-16 Summary
+
+| Sprint | Phase | Focus | Agents | Hours |
+|--------|-------|-------|--------|-------|
+| **96** | 14 - Deploy | Firebase deploy + seed execution | 3 Bash + Main | 4-6 |
+| **97** | 14 - Deploy | Docker + Cloud Run production deploy | 3 + Main | 6-8 |
+| **98** | 14 - Verify | E2E regression in browser | 2 + Chrome MCP | 8-12 |
+| **99** | 14 - Verify | Data verification + portal testing | 3 + Chrome MCP | 6-8 |
+| **100** | 15 - Harden | ESLint cleanup (1050→<400) | 4 parallel | 6-8 |
+| **101** | 15 - Harden | Unit tests (1502→1800+) | 4 parallel | 8-10 |
+| **102** | 15 - Harden | Error handling + edge cases | 4 parallel | 6-8 |
+| **103** | 16 - Growth | Client portal enhancement | 3 + Main | 8-10 |
+| **104** | 16 - Growth | Report export (PDF/CSV) | 3 + Main | 8-10 |
+| **105** | 16 - Growth | Demo mode + sales readiness | 3 + Main | 8-10 |
+| **TOTAL** | | | | **69-90** |
+
+### Phases 14-16 Dependency Graph
+
+```
+Sprint 96 (Deploy Firebase) ──> Sprint 97 (Cloud Run) ──> Sprint 98 (E2E) ──> Sprint 99 (Verify)
+                                                                                       │
+                                     ┌─────────────────────┬──────────────────────────┘
+                                     ↓                     ↓                     ↓
+                              Sprint 100 (ESLint)    Sprint 101 (Tests)    Sprint 102 (Errors)
+                                     │                     │                     │
+                                     └─────────────────────┴─────────────────────┘
+                                                           │
+                                     ┌─────────────────────┼─────────────────────┐
+                                     ↓                     ↓                     ↓
+                              Sprint 103 (Client)    Sprint 104 (Reports)   Sprint 105 (Demo)
+```
+
+**Parallelization opportunities:**
+- **Phase 14:** Sequential (each depends on the prior)
+- **Phase 15:** Sprints 100+101+102 run in **parallel** after Sprint 99
+- **Phase 16:** Sprints 103+104+105 run in **parallel** after Phase 15
+- **Within each sprint:** 3-4 subagents run in parallel on non-overlapping files
+
+### Key Metric Targets (Post Phase 16)
+
+| Metric | Current (Sprint 95) | Target (Sprint 105) |
+|--------|---------------------|---------------------|
+| Production Deploy | Not deployed | Running on Cloud Run |
+| Data Completeness | Scripts written, not executed | 95%+ verified in browser |
+| ESLint Warnings | 1,050 | <400 |
+| Unit Tests | 1,502 | 1,800+ |
+| E2E Pass Rate | Not run | Smoke 100%, Mobile 95%+ |
+| Error Boundaries | Partial | All 4 portal layouts |
+| Report Exports | None | PDF + CSV for 5 types |
+| Demo Mode | None | Toggle + 2 orgs + script |
+| Client Portal | Basic | Progress + Invoices + Docs |
+
+---
+
+## PHASE 17: DEVELOPMENT BUILD PHASE (Sprints 106-120)
+
+> **Sprints 97-105 DEFERRED** — Building features first, testing comes after.
+> Phase 17 focuses on feature completeness, production-readiness, and client experience.
+
+### Sprint 106: Estimates Hook & Estimate-to-Invoice Pipeline ✅ COMPLETE
+
+**Priority:** P0 | **Hours:** 8-10 | **Completed:** 2026-02-06
+
+- Created `lib/hooks/useEstimates.ts` — full CRUD hook (useEstimates, useEstimate, useEstimateStats)
+- Standalone functions: createEstimate, calculateEstimateTotals, convertEstimateToInvoice, reviseEstimate
+- Wired hook into estimates/page.tsx, estimates/[id]/page.tsx, estimates/new/page.tsx
+- Added: Duplicate, Delete, Convert to Invoice, Create Revision, Mark as Sent/Accepted/Declined
+
+### Sprint 107: Invoice PDF & Email Delivery
+
+**Priority:** P0 | **Hours:** 6-8
+
+- Wire InvoicePdf template into useInvoices hook
+- "Download PDF" + "Send Invoice" (email with PDF attachment via Cloud Function)
+- Invoice email template with "Pay Now" button
+- Recurring invoice support (schedule, auto-generate drafts)
+- **Files:** useInvoices.ts, invoices/page.tsx, pdf-service.ts, functions/src/email/
+
+### Sprint 108: Client Portal — Full Experience Build
+
+**Priority:** P0 | **Hours:** 10-14
+
+- Two-way messaging (clients can reply)
+- Selection approval with budget display
+- Document library expansion (contracts, permits, warranties)
+- Photo gallery with before/after comparison
+- Payment integration ("Pay Now" via Stripe)
+- Notification preferences for clients
+
+### Sprint 109: QuickBooks Online — OAuth & Account Mapping
+
+**Priority:** P1 | **Hours:** 10-14
+
+- Real QBO OAuth2 connection
+- Account mapping UI (ContractorOS categories → QBO accounts)
+- Customer sync (bidirectional client ↔ QBO customer)
+- Chart of accounts pull, class/project mapping
+- Connection status dashboard
+
+### Sprint 110: QuickBooks Online — Invoice & Expense Sync
+
+**Priority:** P1 | **Hours:** 8-10
+
+- Push invoices to QBO on create/send
+- Pull payment updates from QBO
+- Expense sync with mapped accounts
+- QBO webhook support (real-time sync)
+- Sync conflict resolution + history UI
+
+### Sprint 111: Field Portal Hardening
+
+**Priority:** P1 | **Hours:** 8-10
+
+- Issue reporting flow (severity, photo, location)
+- Safety incident reporting (OSHA-style form)
+- Material request from field → office notification
+- Equipment checkout/return
+- Schedule + voice logs polish for mobile
+
+### Sprint 112: Advanced Reporting — Financial Statements & Exports
+
+**Priority:** P1 | **Hours:** 10-12
+
+- P&L Statement, Balance Sheet, Cash Flow Statement
+- Custom date ranges for all reports
+- PDF export with company branding (logo, colors)
+- Excel export (multi-sheet workbooks)
+- Report templates library (5-8 pre-built)
+
+### Sprint 113: Console Cleanup & Structured Logging
+
+**Priority:** P2 | **Hours:** 6-8
+
+- Create `lib/utils/logger.ts` (dev vs prod, levels, context)
+- Replace 1,041 console statements → structured logging or remove
+- Sentry-ready error reporting interface
+- Target: <100 console statements remaining
+- **Parallel:** 4 sub-agents by directory
+
+### Sprint 114: Payroll & Team Management Polish
+
+**Priority:** P1 | **Hours:** 8-10
+
+- Overtime auto-detect (>40 hrs/week, >8 hrs/day)
+- PTO/time-off accrual tracking
+- Team certifications with expiry alerts
+- Timesheet approval workflow (manager → approve → payroll)
+- Employee onboarding/offboarding checklists
+
+### Sprint 115: Messaging & Communication Overhaul
+
+**Priority:** P2 | **Hours:** 8-10
+
+- Unified inbox (internal, client, sub in one view)
+- Read receipts + file/image attachments
+- Message templates (meeting reminder, payment due, etc.)
+- Scheduled messages + SMS broadcast
+- Email integration in message thread context
+
+### Sprint 116: Subcontractor Portal & Workflow Enhancement
+
+**Priority:** P2 | **Hours:** 8-10
+
+- Bid response with line items in portal
+- Invoice submission from sub portal
+- Compliance tracking (insurance, license, W-9 upload)
+- Performance dashboard for subs
+- Schedule visibility + document sharing
+
+### Sprint 117: Error Handling, Boundaries & Loading States
+
+**Priority:** P2 | **Hours:** 6-8
+
+- SectionErrorBoundary on all dashboard widget sections
+- Audit catch blocks (no silent swallows, add toast errors)
+- Skeleton loading on 10 highest-traffic pages
+- Retry logic for failed Firestore operations
+- Graceful offline degradation
+
+### Sprint 118: Project Detail Page Polish
+
+**Priority:** P1 | **Hours:** 8-10
+
+- Activity feed on project (tasks, photos, messages, changes)
+- Project health score (budget + schedule + quality)
+- Quick actions bar (Add Task, Log Time, Upload Photo, Create Invoice)
+- Gantt chart: dependencies, critical path, drag-to-reschedule
+- Project summary PDF export
+
+### Sprint 119: Dashboard & Navigation Refresh
+
+**Priority:** P2 | **Hours:** 6-8
+
+- Configurable widget grid (users choose KPIs)
+- Smart quick actions based on role
+- Recent activity stream (org-wide)
+- Sidebar: collapsible sections, favorites, notification badges
+- Global search + keyboard shortcuts
+
+### Sprint 120: Refactoring & Tech Debt Cleanup
+
+**Priority:** P2 | **Hours:** 8-10 | **RUN LAST**
+
+- TODO/FIXME cleanup (17 files → 0)
+- Dead code removal (unused imports, functions, components)
+- Hook consistency (all return `{items, loading, error}`)
+- Type safety (fix `any` types, strict TypeScript)
+- Form validation (react-hook-form + Zod everywhere)
+- ESLint warnings: 1,050 → <400
+
+### Phase 17 Dependency Graph
+
+```
+Sprint 106 (Estimates) ──> Sprint 107 (Invoice PDF) ──> Sprint 108 (Client Portal)
+
+Sprint 109 (QBO OAuth) ──> Sprint 110 (QBO Sync)
+
+Sprints 111-119: Independent (any order)
+Sprint 120: LAST (cleanup after all building)
+```
+
+### Key Metric Targets (Post Phase 17)
+
+| Metric | Current (Sprint 106) | Target (Sprint 120) |
+|--------|---------------------|---------------------|
+| Estimate hook | ✅ Full CRUD + conversion | ✅ Done |
+| Invoice PDF | Not wired | Generate + email + download |
+| Client portal | 6 basic pages | 8+ with payments + replies |
+| QBO integration | Placeholder OAuth | Real bidirectional sync |
+| Field portal | 5 core pages | 8+ with safety, issues, materials |
+| Financial statements | None | P&L, Balance Sheet, Cash Flow |
+| Console statements | 1,041 | <100 |
+| ESLint warnings | 1,050 | <400 |
+| TODO/FIXME files | 17 | 0 |
+| Error boundaries | 5 portal-level | 30+ section-level |
+
+---
+
+**Document Version:** 5.0
+**Last Updated:** 2026-02-06
+**Status:** Phases 1-14 COMPLETE, Sprints 97-105 DEFERRED, Phase 17 IN PROGRESS (Sprint 106 complete)
+**Next Action:** Start Sprint 107 — Invoice PDF & Email Delivery

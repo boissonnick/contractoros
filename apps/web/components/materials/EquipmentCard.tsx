@@ -55,7 +55,7 @@ export default function EquipmentCard({
     return (
       <div
         onClick={onClick}
-        className={`flex items-center justify-between p-3 bg-white rounded-lg border hover:border-brand-primary hover:shadow-sm cursor-pointer transition-all ${
+        className={`flex items-center justify-between p-3 bg-white rounded-2xl border hover:border-brand-primary hover:shadow-sm cursor-pointer transition-all ${
           isOverdue ? 'border-red-200 bg-red-50' : 'border-gray-200'
         }`}
       >
@@ -99,7 +99,7 @@ export default function EquipmentCard({
   return (
     <div
       onClick={onClick}
-      className={`p-4 bg-white rounded-lg border hover:border-brand-primary hover:shadow-md cursor-pointer transition-all ${
+      className={`p-4 bg-white rounded-2xl border hover:border-brand-primary hover:shadow-md cursor-pointer transition-all ${
         isOverdue ? 'border-red-200' : 'border-gray-200'
       }`}
     >

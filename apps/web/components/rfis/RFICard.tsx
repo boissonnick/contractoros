@@ -76,7 +76,7 @@ export function RFICard({ rfi, onView, onRespond, onClose, compact = false }: RF
   const isOverdue = rfi.dueDate && new Date() > rfi.dueDate && rfi.status !== 'closed';
 
   return (
-    <div className="border border-gray-200 rounded-lg bg-white hover:shadow-md transition-shadow">
+    <div className="border border-gray-200 rounded-2xl bg-white hover:shadow-md transition-shadow">
       <div className="p-4">
         {/* Header */}
         <div className="flex items-start justify-between gap-3">

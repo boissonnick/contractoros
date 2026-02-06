@@ -260,7 +260,7 @@ export function AssistantPanel({
             <Dialog.Panel className="pointer-events-auto w-screen max-w-md">
               <div className="flex h-full flex-col bg-white shadow-2xl">
                 {/* Header */}
-                <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-violet-500 to-purple-600">
+                <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-brand-700 to-brand-900">
                   <div className="flex items-center gap-2">
                     <SparklesIcon className="h-5 w-5 text-white" />
                     <Dialog.Title className="text-base font-semibold text-white">
@@ -295,7 +295,7 @@ export function AssistantPanel({
                         className={({ selected }) =>
                           `flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors outline-none
                           ${selected
-                            ? 'text-violet-600 border-b-2 border-violet-600 bg-white'
+                            ? 'text-brand-600 border-b-2 border-brand-600 bg-white'
                             : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
                           }`
                         }
@@ -307,7 +307,7 @@ export function AssistantPanel({
                         className={({ selected }) =>
                           `flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors outline-none
                           ${selected
-                            ? 'text-violet-600 border-b-2 border-violet-600 bg-white'
+                            ? 'text-brand-600 border-b-2 border-brand-600 bg-white'
                             : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
                           }`
                         }
@@ -334,7 +334,7 @@ export function AssistantPanel({
                         <div className="space-y-4">
                           {/* Greeting */}
                           <div className="flex gap-3">
-                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-brand-700 to-brand-900 flex items-center justify-center">
                               <SparklesIcon className="w-5 h-5 text-white" />
                             </div>
                             <div className="flex-1">
@@ -364,8 +364,8 @@ export function AssistantPanel({
 
                           {/* Upload hint */}
                           {(onDocumentUpload || onPhotoUpload) && (
-                            <div className="mt-4 p-3 bg-violet-50 border border-violet-100 rounded-lg">
-                              <p className="text-xs text-violet-700">
+                            <div className="mt-4 p-3 bg-brand-50 border border-brand-100 rounded-lg">
+                              <p className="text-xs text-brand-700">
                                 <span className="font-medium">Tip:</span> You can upload documents or photos for AI analysis using the buttons below.
                               </p>
                             </div>
@@ -382,7 +382,7 @@ export function AssistantPanel({
                                   <button
                                     key={index}
                                     onClick={() => handleSuggestionClick(suggestion)}
-                                    className="w-full text-left text-sm px-3 py-2 bg-violet-50 border border-violet-100 rounded-lg text-violet-700 hover:bg-violet-100 transition-colors"
+                                    className="w-full text-left text-sm px-3 py-2 bg-brand-50 border border-brand-100 rounded-lg text-brand-700 hover:bg-brand-100 transition-colors"
                                   >
                                     {suggestion}
                                   </button>
@@ -458,7 +458,7 @@ export function AssistantPanel({
                       {/* Processing indicator */}
                       {isProcessing && (
                         <div className="flex gap-3">
-                          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+                          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-brand-700 to-brand-900 flex items-center justify-center">
                             <ArrowPathIcon className="w-4 h-4 text-white animate-spin" />
                           </div>
                           <div className="flex-1">
@@ -532,7 +532,7 @@ export function AssistantPanel({
                         <button
                           onClick={onStartVoice}
                           disabled={isProcessing || voiceState !== 'idle'}
-                          className="flex-shrink-0 p-2 text-gray-500 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors disabled:opacity-50"
+                          className="flex-shrink-0 p-2 text-gray-500 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors disabled:opacity-50"
                           title="Voice input"
                         >
                           <MicrophoneIcon className="h-5 w-5" />
@@ -544,8 +544,8 @@ export function AssistantPanel({
                             onClick={() => setShowUploadOptions(!showUploadOptions)}
                             className={`flex-shrink-0 p-2 rounded-lg transition-colors ${
                               showUploadOptions
-                                ? 'text-violet-600 bg-violet-50'
-                                : 'text-gray-500 hover:text-violet-600 hover:bg-violet-50'
+                                ? 'text-brand-600 bg-brand-50'
+                                : 'text-gray-500 hover:text-brand-600 hover:bg-brand-50'
                             }`}
                             title="Upload document or photo"
                           >
@@ -562,7 +562,7 @@ export function AssistantPanel({
                             onKeyDown={handleKeyDown}
                             placeholder="Ask me anything..."
                             rows={1}
-                            className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 pr-10 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none"
+                            className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 pr-10 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none"
                             style={{
                               minHeight: '40px',
                               maxHeight: '120px',
@@ -574,7 +574,7 @@ export function AssistantPanel({
                         <button
                           onClick={handleSend}
                           disabled={!inputValue.trim() || isProcessing}
-                          className="flex-shrink-0 p-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="flex-shrink-0 p-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <PaperAirplaneIcon className="h-5 w-5" />
                         </button>

@@ -249,7 +249,7 @@ export default function FieldPhotosPage() {
       {showCapture && selectedProjectId && profile?.orgId && (
         <div className="px-4 pb-4">
           <div className="bg-gray-50 rounded-lg p-4">
-            <h3 className="text-sm font-medium font-heading tracking-tight text-gray-700 mb-3">Capture Photo</h3>
+            <h3 className="text-sm font-medium tracking-tight text-gray-700 mb-3">Capture Photo</h3>
             <OfflinePhotoCapture
               projectId={selectedProjectId}
               orgId={profile.orgId}

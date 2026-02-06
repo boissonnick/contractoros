@@ -169,7 +169,7 @@ export default function ProjectLogsPage() {
     <div>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight">Daily Logs</h1>
+        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Daily Logs</h1>
         <Button
           variant="primary"
           onClick={() => setShowNewLog(true)}
@@ -184,7 +184,7 @@ export default function ProjectLogsPage() {
         {showNewLog && (
           <Card className="mb-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-900 font-heading tracking-tight">
+              <h2 className="text-lg font-semibold text-gray-900 tracking-tight">
                 Daily Log - {formatDate(new Date())}
               </h2>
               <button
@@ -346,7 +346,7 @@ export default function ProjectLogsPage() {
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <DocumentTextIcon className="h-8 w-8 text-gray-400" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 font-heading tracking-tight mb-2">No daily logs yet</h3>
+            <h3 className="text-lg font-semibold text-gray-900 tracking-tight mb-2">No daily logs yet</h3>
             <p className="text-gray-500 mb-6">Start documenting your project progress with daily logs.</p>
             <Button
               variant="primary"

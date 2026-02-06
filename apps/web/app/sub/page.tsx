@@ -101,7 +101,7 @@ export default function SubDashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900">
           Welcome, {profile?.displayName?.split(' ')[0]}
         </h1>
         <p className="text-gray-500 mt-1">
@@ -118,7 +118,7 @@ export default function SubDashboard() {
               <DocumentTextIcon className="h-5 w-5 text-brand-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.activeBids}</p>
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats.activeBids}</p>
               <p className="text-sm text-gray-500">Active Bids</p>
             </div>
           </div>
@@ -130,7 +130,7 @@ export default function SubDashboard() {
               <CheckCircleIcon className="h-5 w-5 text-green-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.acceptedBids}</p>
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats.acceptedBids}</p>
               <p className="text-sm text-gray-500">Won Jobs</p>
             </div>
           </div>
@@ -142,7 +142,7 @@ export default function SubDashboard() {
               <ClockIcon className="h-5 w-5 text-yellow-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">${stats.pendingPayments.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">${stats.pendingPayments.toLocaleString()}</p>
               <p className="text-sm text-gray-500">Pending Payment</p>
             </div>
           </div>
@@ -154,7 +154,7 @@ export default function SubDashboard() {
               <BanknotesIcon className="h-5 w-5 text-purple-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">${stats.totalEarnings.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">${stats.totalEarnings.toLocaleString()}</p>
               <p className="text-sm text-gray-500">Total Earned</p>
             </div>
           </div>
@@ -165,7 +165,7 @@ export default function SubDashboard() {
         {/* Pending Bids */}
         <div className="bg-white rounded-xl border p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900">Pending Bids</h2>
+            <h2 className="text-lg font-semibold tracking-tight text-gray-900">Pending Bids</h2>
             <Link href="/sub/bids" className="text-sm text-brand-600 hover:text-brand-700 flex items-center gap-1">
               View all <ArrowRightIcon className="h-4 w-4" />
             </Link>
@@ -209,7 +209,7 @@ export default function SubDashboard() {
         {/* Upcoming Schedule */}
         <div className="bg-white rounded-xl border p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900">Upcoming Work</h2>
+            <h2 className="text-lg font-semibold tracking-tight text-gray-900">Upcoming Work</h2>
             <Link href="/sub/schedule" className="text-sm text-brand-600 hover:text-brand-700 flex items-center gap-1">
               Full schedule <ArrowRightIcon className="h-4 w-4" />
             </Link>
@@ -248,7 +248,7 @@ export default function SubDashboard() {
 
       {/* Quick Actions */}
       <div className="bg-gradient-to-r from-brand-primary to-brand-primary-dark rounded-xl p-6 text-white">
-        <h3 className="text-lg font-semibold font-heading tracking-tight mb-4">Quick Actions</h3>
+        <h3 className="text-lg font-semibold tracking-tight mb-4">Quick Actions</h3>
         <div className="flex flex-wrap gap-3">
           <Link
             href="/sub/availability"

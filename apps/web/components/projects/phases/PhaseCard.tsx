@@ -39,7 +39,7 @@ export default function PhaseCard({ phase, onClick }: PhaseCardProps) {
     <div
       onClick={() => onClick?.(phase)}
       className={cn(
-        'border border-gray-200 rounded-xl p-4 bg-white hover:shadow-md transition-shadow',
+        'border border-gray-200 rounded-2xl p-4 bg-white hover:shadow-md transition-shadow',
         onClick && 'cursor-pointer'
       )}
     >

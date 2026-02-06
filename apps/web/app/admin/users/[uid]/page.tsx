@@ -102,7 +102,7 @@ export default function AdminUserDetailPage() {
 
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{user.displayName || 'Unnamed'}</h1>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{user.displayName || 'Unnamed'}</h1>
           <p className="text-gray-500">{user.email}</p>
         </div>
         <Button

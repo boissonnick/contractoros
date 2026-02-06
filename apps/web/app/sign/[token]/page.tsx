@@ -354,7 +354,7 @@ export default function SigningPage() {
           ) : (
             <ExclamationTriangleIcon className="h-16 w-16 text-red-500 mx-auto" />
           )}
-          <h1 className="mt-4 text-xl font-semibold font-heading tracking-tight text-gray-900">
+          <h1 className="mt-4 text-xl font-semibold tracking-tight text-gray-900">
             {state.status === 'expired' ? 'Link Expired' : 'Invalid Link'}
           </h1>
           <p className="mt-2 text-gray-600">
@@ -375,7 +375,7 @@ export default function SigningPage() {
           <div className="w-16 h-16 rounded-xl bg-white shadow-sm ring-1 ring-black/5 flex items-center justify-center mx-auto">
             <CheckCircleIcon className="h-10 w-10 text-green-600" />
           </div>
-          <h1 className="mt-4 text-xl font-semibold font-heading tracking-tight text-gray-900">Document Signed!</h1>
+          <h1 className="mt-4 text-xl font-semibold tracking-tight text-gray-900">Document Signed!</h1>
           <p className="mt-2 text-gray-600">
             Thank you for signing. A copy of the signed document will be sent to your email.
           </p>
@@ -397,7 +397,7 @@ export default function SigningPage() {
           <div className="w-16 h-16 rounded-xl bg-white shadow-sm ring-1 ring-black/5 flex items-center justify-center mx-auto">
             <XCircleIcon className="h-10 w-10 text-red-600" />
           </div>
-          <h1 className="mt-4 text-xl font-semibold font-heading tracking-tight text-gray-900">Document Declined</h1>
+          <h1 className="mt-4 text-xl font-semibold tracking-tight text-gray-900">Document Declined</h1>
           <p className="mt-2 text-gray-600">
             You have declined to sign this document. The sender has been notified.
           </p>
@@ -427,7 +427,7 @@ export default function SigningPage() {
                 className="h-8 w-auto object-contain"
               />
             ) : (
-              <span className="font-semibold font-heading tracking-tight text-gray-900">
+              <span className="font-semibold tracking-tight text-gray-900">
                 {state.organization?.name || 'ContractorOS'}
               </span>
             )}
@@ -449,7 +449,7 @@ export default function SigningPage() {
                 <div className="flex items-center gap-3">
                   <DocumentTextIcon className="h-6 w-6 text-gray-400" />
                   <div>
-                    <h2 className="font-semibold font-heading tracking-tight text-gray-900">
+                    <h2 className="font-semibold tracking-tight text-gray-900">
                       {state.request?.documentTitle}
                     </h2>
                     <p className="text-sm text-gray-500">
@@ -480,7 +480,7 @@ export default function SigningPage() {
           <div className="space-y-6">
             {/* Signer info */}
             <Card className="p-4">
-              <h3 className="text-sm font-medium font-heading tracking-tight text-gray-500 mb-2">Signing as</h3>
+              <h3 className="text-sm font-medium tracking-tight text-gray-500 mb-2">Signing as</h3>
               <p className="font-semibold text-gray-900">{state.signer?.name}</p>
               <p className="text-sm text-gray-600">{state.signer?.email}</p>
               {state.signer?.role && (
@@ -490,7 +490,7 @@ export default function SigningPage() {
 
             {/* Signature pad */}
             <Card className="p-4">
-              <h3 className="text-sm font-medium font-heading tracking-tight text-gray-900 mb-4">Your Signature</h3>
+              <h3 className="text-sm font-medium tracking-tight text-gray-900 mb-4">Your Signature</h3>
               <SignaturePad
                 onSignatureChange={setSignatureData}
                 height={120}
@@ -558,7 +558,7 @@ export default function SigningPage() {
       {showDeclineModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <Card className="max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-4">Decline to Sign</h3>
+            <h3 className="text-lg font-semibold tracking-tight text-gray-900 mb-4">Decline to Sign</h3>
             <p className="text-sm text-gray-600 mb-4">
               Are you sure you want to decline signing this document? The sender will be notified.
             </p>

@@ -206,7 +206,7 @@ export default function CompanySetupPage() {
       <div className="w-full max-w-lg">
         {/* Logo */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white font-heading tracking-tight">ContractorOS</h1>
+          <h1 className="text-3xl font-bold text-white tracking-tight">ContractorOS</h1>
           <p className="text-brand-200 mt-2">Set up your company</p>
         </div>
 
@@ -233,7 +233,7 @@ export default function CompanySetupPage() {
           {/* Step 1: Company Info */}
           {step === 'company' && (
             <div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2 font-heading tracking-tight">Company Information</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2 tracking-tight">Company Information</h2>
               <p className="text-gray-500 mb-6">Tell us about your business</p>
 
               <div className="space-y-4">
@@ -284,7 +284,7 @@ export default function CompanySetupPage() {
           {/* Step 2: Branding Colors */}
           {step === 'branding' && (
             <div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2 font-heading tracking-tight">Brand Colors</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2 tracking-tight">Brand Colors</h2>
               <p className="text-gray-500 mb-6">Choose colors to personalize your platform</p>
 
               <div className="space-y-5">
@@ -388,7 +388,7 @@ export default function CompanySetupPage() {
           {/* Step 3: Logo Upload */}
           {step === 'logo' && (
             <div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2 font-heading tracking-tight">Company Logo</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2 tracking-tight">Company Logo</h2>
               <p className="text-gray-500 mb-6">Upload your logo (optional). It will appear in your client portal and emails.</p>
 
               <input
@@ -479,7 +479,7 @@ export default function CompanySetupPage() {
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircleIcon className="h-8 w-8 text-green-600" />
               </div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2 font-heading tracking-tight">You&apos;re all set!</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2 tracking-tight">You&apos;re all set!</h2>
               <p className="text-gray-500">Your company is ready. Redirecting to your dashboard...</p>
               <div className="mt-4">
                 <div className="w-8 h-8 border-4 border-brand-600 border-t-transparent rounded-full animate-spin mx-auto" />

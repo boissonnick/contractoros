@@ -22,7 +22,7 @@ export default function ClientPortalError({
           <ExclamationTriangleIcon className="h-7 w-7 text-orange-600" />
         </div>
 
-        <h2 className="text-xl font-bold font-heading tracking-tight text-gray-900 mb-2">
+        <h2 className="text-xl font-bold tracking-tight text-gray-900 mb-2">
           Unable to Load Page
         </h2>
 

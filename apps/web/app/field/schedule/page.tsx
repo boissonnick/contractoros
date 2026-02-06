@@ -196,7 +196,7 @@ function DayView({ date, items, projectColorMap, onItemClick }: DayViewProps) {
     <Card className="overflow-hidden" padding="none">
       {/* Header */}
       <div className="bg-gray-50 px-4 py-3 border-b">
-        <h3 className="font-semibold font-heading tracking-tight text-gray-900">{formatDateFull(date)}</h3>
+        <h3 className="font-semibold tracking-tight text-gray-900">{formatDateFull(date)}</h3>
         <p className="text-sm text-gray-500 mt-0.5">
           {dayItems.length} {dayItems.length === 1 ? 'item' : 'items'} scheduled
         </p>
@@ -344,7 +344,7 @@ function WeekView({ startDate, items, projectColorMap, onItemClick, onDayClick }
     <Card className="overflow-hidden" padding="none">
       {/* Header */}
       <div className="bg-gray-50 px-4 py-3 border-b">
-        <h3 className="font-semibold font-heading tracking-tight text-gray-900">
+        <h3 className="font-semibold tracking-tight text-gray-900">
           {formatDateShort(weekDates[0])} - {formatDateShort(weekDates[6])}
         </h3>
         <p className="text-sm text-gray-500 mt-0.5">
@@ -469,7 +469,7 @@ function ItemDetailModal({ item, onClose, projectColorMap }: ItemDetailModalProp
         <div className="flex items-start gap-3">
           <div className={cn('w-1 h-12 rounded-full flex-shrink-0', dotColor)} />
           <div>
-            <h3 className="font-semibold font-heading tracking-tight text-lg text-gray-900">{item.title}</h3>
+            <h3 className="font-semibold tracking-tight text-lg text-gray-900">{item.title}</h3>
             {item.description && (
               <p className="text-sm text-gray-500 mt-1">{item.description}</p>
             )}
@@ -758,7 +758,7 @@ export default function FieldSchedulePage() {
     >
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">My Schedule</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900">My Schedule</h1>
         <p className="text-sm text-gray-500 mt-1">View your assigned tasks and events</p>
       </div>
 

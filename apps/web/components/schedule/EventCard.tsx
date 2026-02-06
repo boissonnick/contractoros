@@ -97,7 +97,7 @@ export default function EventCard({
     <div
       onClick={onClick}
       className={cn(
-        'rounded-lg border p-3 cursor-pointer hover:shadow-md transition-shadow bg-white',
+        'rounded-2xl border p-3 cursor-pointer hover:shadow-md transition-shadow bg-white',
         className
       )}
       style={{ borderLeftWidth: '4px', borderLeftColor: color }}

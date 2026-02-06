@@ -7,17 +7,20 @@ import {
   ChartBarSquareIcon,
   CurrencyDollarIcon,
   BanknotesIcon,
+  LightBulbIcon,
 } from '@heroicons/react/24/outline';
 import CompanyOverviewDashboard from '@/components/intelligence/CompanyOverviewDashboard';
 import ProjectProfitabilityLeaderboard from '@/components/intelligence/ProjectProfitabilityLeaderboard';
 import CashFlowRunwayDashboard from '@/components/intelligence/CashFlowRunwayDashboard';
+import AIRecommendationsPanel from '@/components/intelligence/AIRecommendationsPanel';
 
-type Tab = 'overview' | 'profitability' | 'cashflow';
+type Tab = 'overview' | 'profitability' | 'cashflow' | 'recommendations';
 
 const tabs: { id: Tab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: 'overview', label: 'The Pulse', icon: ChartBarSquareIcon },
   { id: 'profitability', label: 'Project Profitability', icon: CurrencyDollarIcon },
   { id: 'cashflow', label: 'Cash Flow & AR', icon: BanknotesIcon },
+  { id: 'recommendations', label: 'AI Recommendations', icon: LightBulbIcon },
 ];
 
 export default function IntelligencePage() {
@@ -31,7 +34,7 @@ export default function IntelligencePage() {
       <div className="p-6">
         <div className="text-center py-16">
           <ChartBarSquareIcon className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-          <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900 mb-1">
+          <h2 className="text-lg font-semibold tracking-tight text-gray-900 mb-1">
             Access Restricted
           </h2>
           <p className="text-sm text-gray-500">
@@ -47,7 +50,7 @@ export default function IntelligencePage() {
     <div className="p-6 space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900">
           Financial Intelligence
         </h1>
         <p className="text-gray-500 mt-1">
@@ -84,6 +87,7 @@ export default function IntelligencePage() {
       {activeTab === 'overview' && <CompanyOverviewDashboard />}
       {activeTab === 'profitability' && <ProjectProfitabilityLeaderboard />}
       {activeTab === 'cashflow' && <CashFlowRunwayDashboard />}
+      {activeTab === 'recommendations' && <AIRecommendationsPanel />}
     </div>
   );
 }

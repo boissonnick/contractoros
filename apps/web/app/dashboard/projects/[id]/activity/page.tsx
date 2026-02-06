@@ -291,7 +291,7 @@ export default function ActivityPage() {
       {/* Notes Section */}
       {(activeTab === 'all' || activeTab === 'notes') && (
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900 font-heading tracking-tight">Notes</h2>
+          <h2 className="text-lg font-semibold text-gray-900 tracking-tight">Notes</h2>
 
           {/* Add Note Form */}
           <Card className="p-4">
@@ -427,7 +427,7 @@ export default function ActivityPage() {
       {(activeTab === 'all' || activeTab === 'activity') && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900 font-heading tracking-tight">Activity Feed</h2>
+            <h2 className="text-lg font-semibold text-gray-900 tracking-tight">Activity Feed</h2>
             {activityTypes.length > 0 && (
               <div className="flex items-center gap-2">
                 <FunnelIcon className="h-4 w-4 text-gray-400" />

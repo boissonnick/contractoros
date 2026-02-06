@@ -407,7 +407,7 @@ export function VoiceActivationFAB({
         onClick={handleClick}
         disabled={state === 'processing'}
         className={`
-          fixed z-30 right-4 w-14 h-14 rounded-full
+          fixed z-40 left-4 sm:left-auto sm:right-4 bottom-24 sm:bottom-6 w-14 h-14 rounded-full
           flex items-center justify-center
           shadow-lg transition-all duration-200
           focus:outline-none focus:ring-4 ${ringClass}
@@ -416,7 +416,6 @@ export function VoiceActivationFAB({
           ${state === 'processing' ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'}
           ${className}
         `}
-        style={{ bottom: bottomOffset }}
         aria-label={label || 'Voice command'}
       >
         <Icon className="h-6 w-6 text-white" />

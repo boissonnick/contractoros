@@ -24,7 +24,7 @@ export default function Badge({
     success: 'bg-green-100 text-green-700',
     warning: 'bg-yellow-100 text-yellow-700',
     danger: 'bg-red-100 text-red-700',
-    info: 'bg-purple-100 text-purple-700',
+    info: 'bg-blue-100 text-blue-700',
   };
 
   const sizes = {
@@ -39,7 +39,7 @@ export default function Badge({
     success: 'bg-green-500',
     warning: 'bg-yellow-500',
     danger: 'bg-red-500',
-    info: 'bg-purple-500',
+    info: 'bg-blue-500',
   };
 
   return (

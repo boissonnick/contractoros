@@ -41,7 +41,7 @@ export default function SafetyPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight">Safety & Compliance</h1>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Safety & Compliance</h1>
           <p className="text-gray-500 mt-1">Manage inspections, incidents, and safety meetings</p>
         </div>
         <Button variant="primary" size="sm">
@@ -54,7 +54,7 @@ export default function SafetyPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="p-4 text-center">
           <ShieldCheckIcon className="h-6 w-6 text-blue-600 mx-auto mb-2" />
-          <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.totalInspections}</p>
+          <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats.totalInspections}</p>
           <p className="text-xs text-gray-500">Inspections</p>
         </Card>
         <Card className="p-4 text-center">
@@ -69,7 +69,7 @@ export default function SafetyPage() {
         </Card>
         <Card className="p-4 text-center">
           <MegaphoneIcon className="h-6 w-6 text-purple-600 mx-auto mb-2" />
-          <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.toolboxTalks}</p>
+          <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats.toolboxTalks}</p>
           <p className="text-xs text-gray-500">Toolbox Talks</p>
         </Card>
       </div>

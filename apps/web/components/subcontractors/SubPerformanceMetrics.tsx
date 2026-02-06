@@ -22,7 +22,7 @@ export default function SubPerformanceMetrics({ sub }: SubPerformanceMetricsProp
 
       <div className="grid grid-cols-2 gap-3">
         <div className="bg-gray-50 rounded-lg p-4 text-center">
-          <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{m.projectsCompleted}</p>
+          <p className="text-2xl font-bold text-gray-900 tracking-tight">{m.projectsCompleted}</p>
           <p className="text-xs text-gray-500">Projects Completed</p>
         </div>
         <div className="bg-gray-50 rounded-lg p-4 text-center">
@@ -34,12 +34,12 @@ export default function SubPerformanceMetrics({ sub }: SubPerformanceMetricsProp
         <div className="bg-gray-50 rounded-lg p-4 text-center">
           <div className="flex items-center justify-center gap-1">
             <StarIcon className="h-5 w-5 text-yellow-400" />
-            <span className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{m.avgRating > 0 ? m.avgRating.toFixed(1) : '—'}</span>
+            <span className="text-2xl font-bold text-gray-900 tracking-tight">{m.avgRating > 0 ? m.avgRating.toFixed(1) : '—'}</span>
           </div>
           <p className="text-xs text-gray-500">Avg Rating</p>
         </div>
         <div className="bg-gray-50 rounded-lg p-4 text-center">
-          <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{fmt(m.totalPaid)}</p>
+          <p className="text-2xl font-bold text-gray-900 tracking-tight">{fmt(m.totalPaid)}</p>
           <p className="text-xs text-gray-500">Total Paid</p>
         </div>
       </div>

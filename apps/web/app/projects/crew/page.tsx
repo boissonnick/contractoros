@@ -342,7 +342,7 @@ export default function ProjectsCrewPage() {
                 <UserGroupIcon className="h-5 w-5 text-brand-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{filteredMembers.length}</p>
+                <p className="text-2xl font-bold text-gray-900 tracking-tight">{filteredMembers.length}</p>
                 <p className="text-xs text-gray-500">Team Members</p>
               </div>
             </div>
@@ -353,7 +353,7 @@ export default function ProjectsCrewPage() {
                 <BuildingOffice2Icon className="h-5 w-5 text-purple-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{filteredProjects.length}</p>
+                <p className="text-2xl font-bold text-gray-900 tracking-tight">{filteredProjects.length}</p>
                 <p className="text-xs text-gray-500">Projects</p>
               </div>
             </div>
@@ -423,7 +423,7 @@ export default function ProjectsCrewPage() {
         {/* Assignment Grid */}
         <Card className="mt-6 overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-            <h3 className="text-sm font-semibold font-heading tracking-tight text-gray-900">
+            <h3 className="text-sm font-semibold tracking-tight text-gray-900">
               Crew vs Project Matrix ({timeRangeLabels[selectedTimeRange]})
             </h3>
             <p className="text-xs text-gray-500 mt-0.5">

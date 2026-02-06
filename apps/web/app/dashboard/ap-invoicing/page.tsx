@@ -193,7 +193,7 @@ export default function APInvoicingPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">AP Invoicing</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900">AP Invoicing</h1>
           <p className="text-sm text-gray-500 mt-1">
             Manage subcontractor invoices and payments
           </p>
@@ -210,14 +210,14 @@ export default function APInvoicingPage() {
           <div className="flex items-start justify-between">
             <div>
               <div className="text-sm text-gray-500">Pending Approval</div>
-              <div className="text-2xl font-bold font-heading tracking-tight text-yellow-600 mt-1">
+              <div className="text-2xl font-bold tracking-tight text-yellow-600 mt-1">
                 {stats.pendingCount}
               </div>
               <div className="text-xs text-gray-400 mt-1">
                 {formatCurrency(stats.pendingAmount)}
               </div>
             </div>
-            <div className="p-2 rounded-xl bg-gradient-to-br from-yellow-50 to-amber-100">
+            <div className="p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
               <ClockIcon className="h-5 w-5 text-yellow-600" />
             </div>
           </div>
@@ -227,14 +227,14 @@ export default function APInvoicingPage() {
           <div className="flex items-start justify-between">
             <div>
               <div className="text-sm text-gray-500">Approved</div>
-              <div className="text-2xl font-bold font-heading tracking-tight text-green-600 mt-1">
+              <div className="text-2xl font-bold tracking-tight text-green-600 mt-1">
                 {stats.approvedCount}
               </div>
               <div className="text-xs text-gray-400 mt-1">
                 {formatCurrency(stats.approvedAmount)} awaiting payment
               </div>
             </div>
-            <div className="p-2 rounded-xl bg-gradient-to-br from-green-50 to-emerald-100">
+            <div className="p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
               <CheckIcon className="h-5 w-5 text-green-600" />
             </div>
           </div>
@@ -244,12 +244,12 @@ export default function APInvoicingPage() {
           <div className="flex items-start justify-between">
             <div>
               <div className="text-sm text-gray-500">Total Paid</div>
-              <div className="text-2xl font-bold font-heading tracking-tight text-blue-600 mt-1">
+              <div className="text-2xl font-bold tracking-tight text-blue-600 mt-1">
                 {formatCurrency(stats.paidAmount)}
               </div>
               <div className="text-xs text-gray-400 mt-1">this period</div>
             </div>
-            <div className="p-2 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100">
+            <div className="p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
               <BanknotesIcon className="h-5 w-5 text-blue-600" />
             </div>
           </div>
@@ -259,12 +259,12 @@ export default function APInvoicingPage() {
           <div className="flex items-start justify-between">
             <div>
               <div className="text-sm text-gray-500">Lien Waivers Pending</div>
-              <div className="text-2xl font-bold font-heading tracking-tight text-purple-600 mt-1">
+              <div className="text-2xl font-bold tracking-tight text-purple-600 mt-1">
                 {stats.pendingWaiversCount}
               </div>
               <div className="text-xs text-gray-400 mt-1">awaiting signature</div>
             </div>
-            <div className="p-2 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100">
+            <div className="p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
               <ClipboardDocumentCheckIcon className="h-5 w-5 text-purple-600" />
             </div>
           </div>

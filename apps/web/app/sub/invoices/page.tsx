@@ -451,7 +451,7 @@ function InvoiceDetailModal({ invoice, isOpen, onClose, onSubmit }: InvoiceDetai
 
         {/* Line Items */}
         <div>
-          <h4 className="font-medium font-heading tracking-tight text-gray-900 mb-2">Line Items</h4>
+          <h4 className="font-medium tracking-tight text-gray-900 mb-2">Line Items</h4>
           <div className="border rounded-lg overflow-hidden">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -503,7 +503,7 @@ function InvoiceDetailModal({ invoice, isOpen, onClose, onSubmit }: InvoiceDetai
         {/* Payment History */}
         {invoice.payments.length > 0 && (
           <div>
-            <h4 className="font-medium font-heading tracking-tight text-gray-900 mb-2">Payment History</h4>
+            <h4 className="font-medium tracking-tight text-gray-900 mb-2">Payment History</h4>
             <div className="space-y-2">
               {invoice.payments.map((payment, index) => (
                 <div key={index} className="flex justify-between p-3 bg-green-50 rounded-lg">
@@ -526,7 +526,7 @@ function InvoiceDetailModal({ invoice, isOpen, onClose, onSubmit }: InvoiceDetai
         {/* Notes */}
         {invoice.notes && (
           <div>
-            <h4 className="font-medium font-heading tracking-tight text-gray-900 mb-2">Notes</h4>
+            <h4 className="font-medium tracking-tight text-gray-900 mb-2">Notes</h4>
             <p className="text-gray-600 text-sm">{invoice.notes}</p>
           </div>
         )}
@@ -541,7 +541,7 @@ function InvoiceDetailModal({ invoice, isOpen, onClose, onSubmit }: InvoiceDetai
 
         {/* Status Timeline */}
         <div>
-          <h4 className="font-medium font-heading tracking-tight text-gray-900 mb-2">Timeline</h4>
+          <h4 className="font-medium tracking-tight text-gray-900 mb-2">Timeline</h4>
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2 text-gray-600">
               <DocumentTextIcon className="h-4 w-4" />
@@ -729,7 +729,7 @@ export default function SubInvoicesPage() {
               <DocumentTextIcon className="h-5 w-5 text-gray-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.total}</p>
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats.total}</p>
               <p className="text-xs text-gray-500">Total Invoices</p>
             </div>
           </div>
@@ -740,7 +740,7 @@ export default function SubInvoicesPage() {
               <ClockIcon className="h-5 w-5 text-brand-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.pending}</p>
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats.pending}</p>
               <p className="text-xs text-gray-500">Pending</p>
             </div>
           </div>
@@ -751,7 +751,7 @@ export default function SubInvoicesPage() {
               <BanknotesIcon className="h-5 w-5 text-yellow-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{formatCurrency(stats.pendingAmount)}</p>
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">{formatCurrency(stats.pendingAmount)}</p>
               <p className="text-xs text-gray-500">Pending Amount</p>
             </div>
           </div>
@@ -762,7 +762,7 @@ export default function SubInvoicesPage() {
               <CheckCircleIcon className="h-5 w-5 text-green-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{formatCurrency(stats.paidAmount)}</p>
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">{formatCurrency(stats.paidAmount)}</p>
               <p className="text-xs text-gray-500">Total Paid</p>
             </div>
           </div>
@@ -838,7 +838,7 @@ export default function SubInvoicesPage() {
                     </Badge>
                   </div>
                   {invoice.projectName && (
-                    <h3 className="font-medium font-heading tracking-tight text-gray-900">{invoice.projectName}</h3>
+                    <h3 className="font-medium tracking-tight text-gray-900">{invoice.projectName}</h3>
                   )}
                   <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
                     <span>{invoice.lineItems.length} line item{invoice.lineItems.length !== 1 ? 's' : ''}</span>
@@ -847,7 +847,7 @@ export default function SubInvoicesPage() {
                 </div>
                 <div className="text-right flex items-center gap-3">
                   <div>
-                    <p className="text-lg font-semibold text-gray-900 font-heading tracking-tight">
+                    <p className="text-lg font-semibold text-gray-900 tracking-tight">
                       {formatCurrency(invoice.total)}
                     </p>
                     {invoice.amountPaid > 0 && invoice.amountPaid < invoice.total && (

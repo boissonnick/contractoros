@@ -292,7 +292,7 @@ export default function SubmittalsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight">Submittals</h1>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Submittals</h1>
           <p className="text-gray-500 mt-1">
             Track and manage project submittals
           </p>
@@ -314,7 +314,7 @@ export default function SubmittalsPage() {
               <DocumentArrowUpIcon className="h-5 w-5 text-gray-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.total}</p>
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats.total}</p>
               <p className="text-xs text-gray-500">Total</p>
             </div>
           </div>
@@ -325,7 +325,7 @@ export default function SubmittalsPage() {
               <ClockIcon className="h-5 w-5 text-yellow-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.pending}</p>
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats.pending}</p>
               <p className="text-xs text-gray-500">Pending</p>
             </div>
           </div>
@@ -336,7 +336,7 @@ export default function SubmittalsPage() {
               <CheckCircleIcon className="h-5 w-5 text-green-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.approved}</p>
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats.approved}</p>
               <p className="text-xs text-gray-500">Approved</p>
             </div>
           </div>
@@ -347,7 +347,7 @@ export default function SubmittalsPage() {
               <ArrowPathIcon className="h-5 w-5 text-orange-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.needsRevision}</p>
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats.needsRevision}</p>
               <p className="text-xs text-gray-500">Needs Revision</p>
             </div>
           </div>
@@ -358,7 +358,7 @@ export default function SubmittalsPage() {
               <XCircleIcon className="h-5 w-5 text-red-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.rejected}</p>
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats.rejected}</p>
               <p className="text-xs text-gray-500">Rejected</p>
             </div>
           </div>

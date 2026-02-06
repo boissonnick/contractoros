@@ -76,7 +76,7 @@ export default function ClientSelectionsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">Selections</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900">Selections</h1>
         <p className="text-gray-500 mt-1">Choose your finishes, fixtures, and materials</p>
       </div>
 
@@ -102,7 +102,7 @@ export default function ClientSelectionsPage() {
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="text-lg font-semibold font-heading tracking-tight text-gray-900">{sel.categoryName}</h3>
+                      <h3 className="text-lg font-semibold tracking-tight text-gray-900">{sel.categoryName}</h3>
                       <Badge className={STATUS_COLORS[sel.status]}>
                         {STATUS_LABELS[sel.status]}
                       </Badge>

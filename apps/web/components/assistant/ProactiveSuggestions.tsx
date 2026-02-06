@@ -193,7 +193,7 @@ export function ProactiveSuggestions({
           {hasMore && (
             <button
               onClick={() => setShowAll(!showAll)}
-              className="w-full text-center text-xs text-violet-600 hover:text-violet-700 py-2 hover:bg-violet-50 rounded transition-colors"
+              className="w-full text-center text-xs text-brand-600 hover:text-brand-700 py-2 hover:bg-brand-50 rounded transition-colors"
             >
               {showAll
                 ? 'Show less'
@@ -288,7 +288,7 @@ function SuggestionCard({
             {suggestion.actionUrl && (
               <Link
                 href={suggestion.actionUrl}
-                className="inline-flex items-center gap-1 text-xs text-violet-600 hover:text-violet-700 font-medium whitespace-nowrap"
+                className="inline-flex items-center gap-1 text-xs text-brand-600 hover:text-brand-700 font-medium whitespace-nowrap"
               >
                 {suggestion.actionLabel || 'View'}
                 <ArrowRightIcon className="h-3 w-3" />

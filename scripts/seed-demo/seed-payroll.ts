@@ -147,7 +147,7 @@ async function seedPayroll(): Promise<number> {
   for (let periodNum = 0; periodNum < 6; periodNum++) {
     const weeksAgo = periodNum * 2; // Bi-weekly
     const { startDate, endDate, payDate } = getPayPeriod(weeksAgo);
-    const runNumber = 2026 * 100 + (6 - periodNum); // e.g., 202606, 202605, etc.
+    const runNumber = periodNum + 1; // Sequential: 1, 2, 3, 4, 5, 6
 
     const payrollRunId = generateId('pr');
 

@@ -53,7 +53,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="p-6 max-w-6xl">
-      <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight mb-1">Admin Dashboard</h1>
+      <h1 className="text-2xl font-bold text-gray-900 tracking-tight mb-1">Admin Dashboard</h1>
       <p className="text-gray-500 mb-6">Platform overview and management</p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -65,7 +65,7 @@ export default function AdminDashboard() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">{label}</p>
-                <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">
+                <p className="text-2xl font-bold text-gray-900 tracking-tight">
                   {value !== null ? value : '—'}
                 </p>
               </div>

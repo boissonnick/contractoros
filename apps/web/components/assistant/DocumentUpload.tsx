@@ -150,7 +150,7 @@ export function DocumentUpload({
         return <ArrowUpTrayIcon className="h-5 w-5 text-blue-500 animate-pulse" />;
       case 'analyzing':
         return (
-          <div className="h-5 w-5 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
+          <div className="h-5 w-5 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
         );
       case 'complete':
         return <CheckCircleIcon className="h-5 w-5 text-green-500" />;
@@ -230,7 +230,7 @@ export function DocumentUpload({
           <div className="mt-2">
             <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
               <div
-                className="h-full bg-violet-500 transition-all duration-300"
+                className="h-full bg-brand-500 transition-all duration-300"
                 style={{
                   width:
                     currentAnalysis.status === 'uploading'
@@ -262,8 +262,8 @@ export function DocumentUpload({
           transition-colors duration-200
           ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
           ${isDragging
-            ? 'border-violet-500 bg-violet-50'
-            : 'border-gray-300 hover:border-violet-400 hover:bg-gray-50'
+            ? 'border-brand-500 bg-brand-50'
+            : 'border-gray-300 hover:border-brand-400 hover:bg-gray-50'
           }
         `}
       >
@@ -284,10 +284,10 @@ export function DocumentUpload({
           <div>
             <p className="text-sm text-gray-600">
               {isDragging ? (
-                <span className="text-violet-600 font-medium">Drop file here</span>
+                <span className="text-brand-600 font-medium">Drop file here</span>
               ) : (
                 <>
-                  <span className="text-violet-600 font-medium">Upload a file</span>
+                  <span className="text-brand-600 font-medium">Upload a file</span>
                   <span> or drag and drop</span>
                 </>
               )}
@@ -302,7 +302,7 @@ export function DocumentUpload({
         {uploadProgress > 0 && uploadProgress < 100 && (
           <div className="absolute inset-0 bg-white/80 flex items-center justify-center rounded-lg">
             <div className="flex items-center gap-2">
-              <div className="h-5 w-5 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
+              <div className="h-5 w-5 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
               <span className="text-sm text-gray-600">Uploading... {uploadProgress}%</span>
             </div>
           </div>

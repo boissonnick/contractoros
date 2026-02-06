@@ -199,6 +199,7 @@ export type EmailTemplateType =
   | 'task_assigned'
   | 'welcome'
   | 'password_reset'
+  | 'review_request'
   | 'custom';
 
 export interface EmailTemplate {

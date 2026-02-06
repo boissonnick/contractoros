@@ -74,7 +74,7 @@ export default function LeadsPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight">Lead Pipeline</h1>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Lead Pipeline</h1>
           <p className="text-gray-500 mt-1">Track and convert potential customers</p>
         </div>
         <Button variant="primary" size="sm" onClick={() => setIsAddModalOpen(true)}>
@@ -89,7 +89,7 @@ export default function LeadsPage() {
           <div className="flex items-center gap-3">
             <UserPlusIcon className="h-6 w-6 text-blue-600" />
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.total}</p>
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats.total}</p>
               <p className="text-xs text-gray-500">Total Leads</p>
             </div>
           </div>
@@ -98,7 +98,7 @@ export default function LeadsPage() {
           <div className="flex items-center gap-3">
             <FunnelIcon className="h-6 w-6 text-purple-600" />
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.pipeline}</p>
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats.pipeline}</p>
               <p className="text-xs text-gray-500">In Pipeline</p>
             </div>
           </div>
@@ -107,7 +107,7 @@ export default function LeadsPage() {
           <div className="flex items-center gap-3">
             <CurrencyDollarIcon className="h-6 w-6 text-orange-600" />
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{formatCurrency(stats.pipelineValue)}</p>
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">{formatCurrency(stats.pipelineValue)}</p>
               <p className="text-xs text-gray-500">Pipeline Value</p>
             </div>
           </div>

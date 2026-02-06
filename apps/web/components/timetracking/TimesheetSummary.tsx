@@ -128,7 +128,7 @@ export function TimesheetSummary({
         <div className="grid grid-cols-4 gap-4 mb-4">
           <div>
             <div className="text-sm text-gray-500">Total Hours</div>
-            <div className="text-2xl font-bold text-gray-900 font-heading tracking-tight">
+            <div className="text-2xl font-bold text-gray-900 tracking-tight">
               {weeklySummary ? formatHours(weeklySummary.totalHours) : '0h'}
             </div>
           </div>

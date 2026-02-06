@@ -376,11 +376,11 @@ export default function TimeTrackingPage() {
             {weeklySummary && (
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-white rounded-xl border border-gray-200 p-4">
-                  <div className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{weeklySummary.totalHours.toFixed(1)}</div>
+                  <div className="text-2xl font-bold text-gray-900 tracking-tight">{weeklySummary.totalHours.toFixed(1)}</div>
                   <div className="text-xs text-gray-500">Total Hours</div>
                 </div>
                 <div className="bg-white rounded-xl border border-gray-200 p-4">
-                  <div className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{weeklySummary.regularHours.toFixed(1)}</div>
+                  <div className="text-2xl font-bold text-gray-900 tracking-tight">{weeklySummary.regularHours.toFixed(1)}</div>
                   <div className="text-xs text-gray-500">Regular Hours</div>
                 </div>
                 {weeklySummary.overtimeHours > 0 && (

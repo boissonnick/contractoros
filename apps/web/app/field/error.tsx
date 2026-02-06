@@ -21,7 +21,7 @@ export default function FieldPortalError({
           <ExclamationTriangleIcon className="h-7 w-7 text-red-400" />
         </div>
 
-        <h2 className="text-xl font-bold font-heading tracking-tight text-white mb-2">
+        <h2 className="text-xl font-bold tracking-tight text-white mb-2">
           Something Went Wrong
         </h2>
 

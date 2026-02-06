@@ -152,7 +152,7 @@ export default function OCRAnalyticsPage() {
             <ArrowLeftIcon className="h-4 w-4" />
             Back to Expenses
           </Link>
-          <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">OCR Analytics</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900">OCR Analytics</h1>
         </div>
         <Card className="p-6 text-center">
           <XCircleIcon className="h-10 w-10 text-red-400 mx-auto mb-3" />
@@ -173,7 +173,7 @@ export default function OCRAnalyticsPage() {
           <ArrowLeftIcon className="h-4 w-4" />
           Back to Expenses
         </Link>
-        <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">OCR Analytics</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900">OCR Analytics</h1>
         <p className="text-sm text-gray-500 mt-1">
           Receipt scanning performance and model accuracy metrics
         </p>
@@ -190,7 +190,7 @@ export default function OCRAnalyticsPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Total Scans</p>
-                <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{stats.totalScans}</p>
+                <p className="text-2xl font-bold tracking-tight text-gray-900">{stats.totalScans}</p>
               </div>
             </div>
           </Card>
@@ -222,7 +222,7 @@ export default function OCRAnalyticsPage() {
               <div>
                 <p className="text-sm text-gray-500">Success Rate</p>
                 <div className="flex items-center gap-2">
-                  <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">
+                  <p className="text-2xl font-bold text-gray-900 tracking-tight">
                     {stats.successRate.toFixed(1)}%
                   </p>
                   <Badge
@@ -261,7 +261,7 @@ export default function OCRAnalyticsPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Avg Processing Time</p>
-                <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">
+                <p className="text-2xl font-bold tracking-tight text-gray-900">
                   {(stats.avgProcessingTime / 1000).toFixed(1)}s
                 </p>
               </div>

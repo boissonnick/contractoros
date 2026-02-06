@@ -103,7 +103,7 @@ export default function ClientScopePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold font-heading tracking-tight text-gray-900">Scope of Work — v{scope.version}</h2>
+        <h2 className="text-lg font-semibold tracking-tight text-gray-900">Scope of Work — v{scope.version}</h2>
         <p className="text-sm text-gray-500">{scope.items.length} items · {fmt(totalCost)}</p>
       </div>
 

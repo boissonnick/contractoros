@@ -165,7 +165,7 @@ export default function MessagingPage() {
         {/* Header */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between mb-3">
-            <h1 className="text-lg font-heading font-semibold tracking-tight text-gray-900">Messages</h1>
+            <h1 className="text-lg font-semibold tracking-tight text-gray-900">Messages</h1>
             {totalUnread > 0 && (
               <span className="px-2 py-0.5 bg-brand-primary text-white text-xs rounded-full">
                 {totalUnread}
@@ -240,7 +240,7 @@ export default function MessagingPage() {
           <div className="flex-1 flex flex-col">
             <div className="bg-white border-b border-gray-200 p-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-heading font-semibold tracking-tight text-gray-900">New Message</h2>
+                <h2 className="text-lg font-semibold tracking-tight text-gray-900">New Message</h2>
                 <button
                   onClick={() => setShowNewMessage(false)}
                   className="p-1 hover:bg-gray-100 rounded"
@@ -271,7 +271,7 @@ export default function MessagingPage() {
                   )}
                 </div>
                 <div>
-                  <h2 className="font-heading font-semibold tracking-tight text-gray-900">
+                  <h2 className="font-semibold tracking-tight text-gray-900">
                     {selectedConversation.participantName ||
                       formatPhoneForDisplay(selectedConversation.phoneNumber)}
                   </h2>
@@ -319,7 +319,7 @@ export default function MessagingPage() {
                     <ChatBubbleLeftRightIcon className="h-8 w-8" />
                   </div>
                   <div className="flex-1">
-                    <h2 className="text-xl font-heading font-bold tracking-tight text-gray-900 mb-2">
+                    <h2 className="text-xl font-bold tracking-tight text-gray-900 mb-2">
                       Welcome to SMS Messaging
                     </h2>
                     <p className="text-gray-600 mb-4">
@@ -344,7 +344,7 @@ export default function MessagingPage() {
 
               {/* Use cases */}
               <div>
-                <h3 className="text-lg font-heading font-semibold tracking-tight text-gray-900 mb-4 flex items-center gap-2">
+                <h3 className="text-lg font-semibold tracking-tight text-gray-900 mb-4 flex items-center gap-2">
                   <InformationCircleIcon className="h-5 w-5 text-blue-600" />
                   Common Use Cases
                 </h3>
@@ -355,7 +355,7 @@ export default function MessagingPage() {
                         <ClockIcon className="h-5 w-5 text-green-600" />
                       </div>
                       <div>
-                        <h4 className="font-heading font-medium text-gray-900">Appointment Reminders</h4>
+                        <h4 className="font-medium text-gray-900">Appointment Reminders</h4>
                         <p className="text-sm text-gray-500 mt-1">
                           Send automated reminders before scheduled site visits, inspections, or meetings.
                         </p>
@@ -369,7 +369,7 @@ export default function MessagingPage() {
                         <CalendarDaysIcon className="h-5 w-5 text-blue-600" />
                       </div>
                       <div>
-                        <h4 className="font-heading font-medium text-gray-900">Schedule Updates</h4>
+                        <h4 className="font-medium text-gray-900">Schedule Updates</h4>
                         <p className="text-sm text-gray-500 mt-1">
                           Notify clients and crew of schedule changes, delays, or completion dates.
                         </p>
@@ -383,7 +383,7 @@ export default function MessagingPage() {
                         <CurrencyDollarIcon className="h-5 w-5 text-yellow-600" />
                       </div>
                       <div>
-                        <h4 className="font-heading font-medium text-gray-900">Payment Reminders</h4>
+                        <h4 className="font-medium text-gray-900">Payment Reminders</h4>
                         <p className="text-sm text-gray-500 mt-1">
                           Send friendly payment reminders with invoice links for quick collection.
                         </p>
@@ -397,7 +397,7 @@ export default function MessagingPage() {
                         <DocumentTextIcon className="h-5 w-5 text-purple-600" />
                       </div>
                       <div>
-                        <h4 className="font-heading font-medium text-gray-900">Project Updates</h4>
+                        <h4 className="font-medium text-gray-900">Project Updates</h4>
                         <p className="text-sm text-gray-500 mt-1">
                           Share progress updates, milestone completions, and important announcements.
                         </p>
@@ -409,7 +409,7 @@ export default function MessagingPage() {
 
               {/* Quick tips */}
               <Card className="p-4 bg-gray-50 border-gray-200">
-                <h4 className="font-heading font-medium text-gray-900 mb-3 flex items-center gap-2">
+                <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
                   <QuestionMarkCircleIcon className="h-5 w-5 text-gray-600" />
                   Quick Tips
                 </h4>
@@ -439,7 +439,7 @@ export default function MessagingPage() {
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
               <ChatBubbleLeftRightIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-              <h2 className="text-lg font-heading font-medium tracking-tight text-gray-900 mb-2">
+              <h2 className="text-lg font-medium tracking-tight text-gray-900 mb-2">
                 Select a conversation
               </h2>
               <p className="text-gray-500 mb-4">

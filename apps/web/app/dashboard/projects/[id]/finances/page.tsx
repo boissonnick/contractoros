@@ -62,15 +62,15 @@ export default function ProjectFinancesPage() {
     async function loadData() {
       if (!profile?.orgId) return;
       try {
-        // Get project
+        // Get project (top-level collection)
         const projDoc = await getDoc(doc(db, 'projects', projectId));
         if (projDoc.exists()) {
           setProject({ id: projDoc.id, ...projDoc.data() } as Project);
         }
 
-        // Get invoices
+        // Get invoices (org-scoped collection)
         const invQuery = query(
-          collection(db, 'invoices'),
+          collection(db, `organizations/${profile.orgId}/invoices`),
           where('projectId', '==', projectId),
         );
         const invSnap = await getDocs(invQuery);
@@ -152,7 +152,7 @@ export default function ProjectFinancesPage() {
               <ChartBarIcon className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{formatCurrency(summary.budget)}</p>
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">{formatCurrency(summary.budget)}</p>
               <p className="text-xs text-gray-500">Budget</p>
             </div>
           </div>
@@ -165,7 +165,7 @@ export default function ProjectFinancesPage() {
               <ArrowTrendingDownIcon className="h-5 w-5 text-red-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{formatCurrency(summary.totalExpenses)}</p>
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">{formatCurrency(summary.totalExpenses)}</p>
               <p className="text-xs text-gray-500">Total Expenses</p>
             </div>
           </div>
@@ -178,7 +178,7 @@ export default function ProjectFinancesPage() {
               <ArrowTrendingUpIcon className="h-5 w-5 text-green-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{formatCurrency(summary.totalPaid)}</p>
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">{formatCurrency(summary.totalPaid)}</p>
               <p className="text-xs text-gray-500">Revenue Collected</p>
             </div>
           </div>
@@ -198,7 +198,7 @@ export default function ProjectFinancesPage() {
             </div>
             <div>
               <p className={cn(
-                'text-2xl font-bold font-heading tracking-tight',
+                'text-2xl font-bold tracking-tight',
                 summary.grossProfit >= 0 ? 'text-green-700' : 'text-red-700'
               )}>
                 {formatCurrency(summary.grossProfit)}
@@ -218,7 +218,7 @@ export default function ProjectFinancesPage() {
       {summary.budget > 0 && (
         <Card className="p-5">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-gray-900 font-heading tracking-tight">Budget Usage</h3>
+            <h3 className="font-semibold text-gray-900 tracking-tight">Budget Usage</h3>
             <span className={cn(
               'text-sm font-medium',
               summary.budgetUsed > 90 ? 'text-red-600' :
@@ -256,7 +256,7 @@ export default function ProjectFinancesPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Cost Breakdown by Category */}
         <Card className="p-5">
-          <h3 className="font-semibold text-gray-900 font-heading tracking-tight mb-4">Cost Breakdown</h3>
+          <h3 className="font-semibold text-gray-900 tracking-tight mb-4">Cost Breakdown</h3>
           {Object.keys(summary.byCategory).length === 0 ? (
             <p className="text-sm text-gray-400 italic">No expenses recorded yet</p>
           ) : (
@@ -290,7 +290,7 @@ export default function ProjectFinancesPage() {
 
         {/* Payment Summary */}
         <Card className="p-5">
-          <h3 className="font-semibold text-gray-900 font-heading tracking-tight mb-4">Payment Summary</h3>
+          <h3 className="font-semibold text-gray-900 tracking-tight mb-4">Payment Summary</h3>
           <div className="space-y-4">
             <div className="flex items-center justify-between py-2 border-b border-gray-100">
               <span className="text-sm text-gray-600">Contract Value</span>
@@ -329,7 +329,7 @@ export default function ProjectFinancesPage() {
       {/* Recent Expenses */}
       <Card className="p-5">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-gray-900 font-heading tracking-tight">Recent Expenses</h3>
+          <h3 className="font-semibold text-gray-900 tracking-tight">Recent Expenses</h3>
           <Button
             variant="outline"
             size="sm"

@@ -862,7 +862,7 @@ export default function OrganizationSettingsPage() {
             </div>
             <div className="flex-1">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-lg font-semibold text-gray-900 font-heading tracking-tight">Demo Data</h3>
+                <h3 className="text-lg font-semibold text-gray-900 tracking-tight">Demo Data</h3>
                 {/* Status indicator */}
                 {checkingDemoData ? (
                   <span className="text-xs text-gray-500 flex items-center gap-1">

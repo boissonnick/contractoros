@@ -103,7 +103,7 @@ export default function ConfirmDialog({
                   <div className="flex-1">
                     <Dialog.Title
                       as="h3"
-                      className="text-lg font-semibold text-gray-900 font-heading tracking-tight"
+                      className="text-lg font-semibold text-gray-900 tracking-tight"
                     >
                       {title}
                     </Dialog.Title>

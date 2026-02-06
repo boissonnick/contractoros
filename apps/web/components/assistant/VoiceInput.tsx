@@ -12,7 +12,7 @@ interface VoiceInputProps {
 
 export function VoiceInput({ voiceState, transcript, onStop }: VoiceInputProps) {
   return (
-    <div className="absolute inset-0 bg-gradient-to-b from-violet-600 to-purple-700 flex flex-col items-center justify-center p-8 text-white">
+    <div className="absolute inset-0 bg-gradient-to-b from-brand-700 to-brand-900 flex flex-col items-center justify-center p-8 text-white">
       {/* Animated circles */}
       <div className="relative mb-8">
         <div
@@ -43,17 +43,17 @@ export function VoiceInput({ voiceState, transcript, onStop }: VoiceInputProps) 
         {/* Main icon */}
         <div className="relative w-20 h-20 rounded-full bg-white flex items-center justify-center">
           {voiceState === 'listening' && (
-            <MicrophoneIcon className="h-10 w-10 text-violet-600 animate-pulse" />
+            <MicrophoneIcon className="h-10 w-10 text-brand-600 animate-pulse" />
           )}
           {voiceState === 'processing' && (
             <div className="flex items-center gap-1">
-              <span className="w-2 h-2 bg-violet-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-              <span className="w-2 h-2 bg-violet-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-              <span className="w-2 h-2 bg-violet-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              <span className="w-2 h-2 bg-brand-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="w-2 h-2 bg-brand-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="w-2 h-2 bg-brand-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
             </div>
           )}
           {voiceState === 'speaking' && (
-            <SpeakerWaveIcon className="h-10 w-10 text-violet-600 animate-pulse" />
+            <SpeakerWaveIcon className="h-10 w-10 text-brand-600 animate-pulse" />
           )}
           {voiceState === 'error' && (
             <span className="text-2xl">!</span>

@@ -7,6 +7,24 @@ import type { OperationalMetrics, ProjectTimeline } from './types';
 import { TASK_STATUS_COLORS } from './types';
 
 /**
+ * Safely convert any date-like value to a Date object.
+ * Handles Firestore Timestamps, Date objects, ISO strings, and epoch numbers.
+ */
+function safeToDate(value: unknown): Date | null {
+  if (!value) return null;
+  if (value instanceof Date) return value;
+  if (typeof value === 'string') return new Date(value);
+  if (typeof value === 'number') return new Date(value);
+  if (typeof value === 'object' && 'toDate' in value && typeof (value as { toDate: () => Date }).toDate === 'function') {
+    return (value as { toDate: () => Date }).toDate();
+  }
+  if (typeof value === 'object' && 'seconds' in value) {
+    return new Date((value as { seconds: number }).seconds * 1000);
+  }
+  return null;
+}
+
+/**
  * Operational reports hook for project timelines, task metrics, and resource utilization
  */
 export function useOperationalReports(orgId?: string) {
@@ -42,15 +60,15 @@ export function useOperationalReports(orgId?: string) {
       const timelines: ProjectTimeline[] = [];
 
       completedProjects.forEach(p => {
-        const startDate = (p as { startDate?: { toDate: () => Date } }).startDate;
-        const endDate = (p as { endDate?: { toDate: () => Date } }).endDate;
-        const plannedEndDate = (p as { plannedEndDate?: { toDate: () => Date } }).plannedEndDate;
+        const startDate = safeToDate((p as Record<string, unknown>).startDate);
+        const endDate = safeToDate((p as Record<string, unknown>).endDate);
+        const plannedEndDate = safeToDate((p as Record<string, unknown>).plannedEndDate);
 
         if (startDate && endDate) {
-          const duration = Math.ceil((endDate.toDate().getTime() - startDate.toDate().getTime()) / (1000 * 60 * 60 * 24));
+          const duration = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
           totalDuration += duration;
 
-          if (plannedEndDate && endDate.toDate() <= plannedEndDate.toDate()) {
+          if (plannedEndDate && endDate <= plannedEndDate) {
             onTimeCount++;
           }
         }
@@ -61,15 +79,15 @@ export function useOperationalReports(orgId?: string) {
         .filter(p => (p as { status?: string }).status === 'active')
         .slice(0, 8)
         .forEach(p => {
-          const startDate = (p as { startDate?: { toDate: () => Date } }).startDate;
-          const plannedEndDate = (p as { plannedEndDate?: { toDate: () => Date } }).plannedEndDate;
+          const startDate = safeToDate((p as Record<string, unknown>).startDate);
+          const plannedEndDate = safeToDate((p as Record<string, unknown>).plannedEndDate);
           const now = new Date();
 
           if (startDate) {
             const plannedDays = plannedEndDate
-              ? Math.ceil((plannedEndDate.toDate().getTime() - startDate.toDate().getTime()) / (1000 * 60 * 60 * 24))
+              ? Math.ceil((plannedEndDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
               : 0;
-            const actualDays = Math.ceil((now.getTime() - startDate.toDate().getTime()) / (1000 * 60 * 60 * 24));
+            const actualDays = Math.ceil((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
 
             timelines.push({
               name: ((p as { name?: string }).name || 'Unknown').substring(0, 15),

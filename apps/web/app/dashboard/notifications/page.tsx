@@ -72,7 +72,7 @@ export default function NotificationsPage() {
     <div className="p-6 max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">Notifications</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900">Notifications</h1>
           <p className="text-gray-500 mt-1">
             {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up'}
           </p>

@@ -104,7 +104,7 @@ export default function TimeTrackingPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">Time Tracking</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900">Time Tracking</h1>
           <p className="text-sm text-gray-500 mt-1">View your time entries and submit weekly timesheets.</p>
         </div>
         <Button
@@ -186,7 +186,7 @@ export default function TimeTrackingPage() {
           {/* Pending entries section */}
           {pendingEntries.length > 0 && (
             <div className="bg-amber-50 border-b border-amber-200 p-4">
-              <h3 className="font-medium font-heading tracking-tight text-amber-800 mb-2 flex items-center gap-2">
+              <h3 className="font-medium tracking-tight text-amber-800 mb-2 flex items-center gap-2">
                 <CloudArrowUpIcon className="w-4 h-4" />
                 Pending Sync ({pendingEntries.length})
               </h3>

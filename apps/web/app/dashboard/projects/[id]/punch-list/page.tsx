@@ -222,7 +222,7 @@ export default function PunchListPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight">Punch List</h1>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Punch List</h1>
           <p className="text-gray-500 mt-1">
             Track and resolve punch items before project close-out
           </p>
@@ -244,7 +244,7 @@ export default function PunchListPage() {
               <ClipboardDocumentListIcon className="h-5 w-5 text-gray-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.total}</p>
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats.total}</p>
               <p className="text-xs text-gray-500">Total</p>
             </div>
           </div>
@@ -255,7 +255,7 @@ export default function PunchListPage() {
               <ExclamationTriangleIcon className="h-5 w-5 text-red-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.open}</p>
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats.open}</p>
               <p className="text-xs text-gray-500">Open</p>
             </div>
           </div>
@@ -266,7 +266,7 @@ export default function PunchListPage() {
               <ArrowPathIcon className="h-5 w-5 text-yellow-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.inProgress}</p>
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats.inProgress}</p>
               <p className="text-xs text-gray-500">In Progress</p>
             </div>
           </div>
@@ -277,7 +277,7 @@ export default function PunchListPage() {
               <ClockIcon className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.review}</p>
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats.review}</p>
               <p className="text-xs text-gray-500">Review</p>
             </div>
           </div>
@@ -288,7 +288,7 @@ export default function PunchListPage() {
               <CheckCircleIcon className="h-5 w-5 text-green-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.approved}</p>
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats.approved}</p>
               <p className="text-xs text-gray-500">Approved</p>
             </div>
           </div>
@@ -299,7 +299,7 @@ export default function PunchListPage() {
               <CheckCircleIcon className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.completionRate}%</p>
+              <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats.completionRate}%</p>
               <p className="text-xs text-gray-500">Complete</p>
             </div>
           </div>

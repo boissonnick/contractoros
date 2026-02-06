@@ -327,7 +327,7 @@ export default function SubPhotosPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{totalPhotos}</p>
+          <p className="text-2xl font-bold text-gray-900 tracking-tight">{totalPhotos}</p>
           <p className="text-sm text-gray-500">Total Photos</p>
         </div>
         <div className="bg-white rounded-xl border border-gray-200 p-4">
@@ -335,7 +335,7 @@ export default function SubPhotosPage() {
           <p className="text-sm text-gray-500">Approved</p>
         </div>
         <div className="bg-white rounded-xl border border-gray-200 p-4 col-span-2 sm:col-span-1">
-          <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{projects.length}</p>
+          <p className="text-2xl font-bold text-gray-900 tracking-tight">{projects.length}</p>
           <p className="text-sm text-gray-500">Active Projects</p>
         </div>
       </div>
@@ -376,7 +376,7 @@ export default function SubPhotosPage() {
           onClick={() => fileInputRef.current?.click()}
         >
           <PhotoIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium font-heading tracking-tight text-gray-900 mb-1">No photos yet</h3>
+          <h3 className="text-lg font-medium tracking-tight text-gray-900 mb-1">No photos yet</h3>
           <p className="text-sm text-gray-500 mb-4">
             {projects.length === 0
               ? 'Get assigned to projects to start uploading photos'

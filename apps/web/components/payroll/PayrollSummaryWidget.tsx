@@ -183,15 +183,15 @@ export function PayrollSummaryWidget({
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           <div className="bg-gray-50 rounded-lg p-3">
             <div className="text-xs text-gray-500 mb-1">Total Runs (90d)</div>
-            <div className="text-xl font-semibold text-gray-900 font-heading tracking-tight">{summary.totalRuns}</div>
+            <div className="text-xl font-semibold text-gray-900 tracking-tight">{summary.totalRuns}</div>
           </div>
           <div className="bg-gray-50 rounded-lg p-3">
             <div className="text-xs text-gray-500 mb-1">Active Employees</div>
-            <div className="text-xl font-semibold text-gray-900 font-heading tracking-tight">{summary.totalEmployees}</div>
+            <div className="text-xl font-semibold text-gray-900 tracking-tight">{summary.totalEmployees}</div>
           </div>
           <div className="bg-gray-50 rounded-lg p-3">
             <div className="text-xs text-gray-500 mb-1">Gross Pay (90d)</div>
-            <div className="text-xl font-semibold text-gray-900 font-heading tracking-tight">
+            <div className="text-xl font-semibold text-gray-900 tracking-tight">
               {formatCurrency(summary.totalGrossPay)}
             </div>
           </div>

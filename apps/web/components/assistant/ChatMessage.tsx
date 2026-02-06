@@ -50,7 +50,7 @@ export function ChatMessage({ message, onActionClick, showTTSButton, ttsOptions 
             ? 'bg-brand-primary text-white'
             : isError
             ? 'bg-red-100 text-red-600'
-            : 'bg-gradient-to-br from-violet-500 to-purple-600 text-white'
+            : 'bg-gradient-to-br from-brand-700 to-brand-900 text-white'
         }`}
       >
         {isUser ? (
@@ -167,7 +167,7 @@ export function ChatMessage({ message, onActionClick, showTTSButton, ttsOptions 
           {!isUser && showTTSButton && !isStreaming && !isError && (
             <button
               onClick={handleSpeak}
-              className="p-1 text-gray-400 hover:text-violet-600 hover:bg-violet-50 rounded transition-colors"
+              className="p-1 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded transition-colors"
               title={speaking ? 'Stop speaking' : 'Read aloud'}
             >
               {speaking ? (
@@ -190,7 +190,7 @@ function SourceBadge({ source }: { source: DataSource }) {
   const colors: Record<DataSource['type'], string> = {
     material_price: 'bg-blue-50 text-blue-700 border-blue-200',
     labor_rate: 'bg-green-50 text-green-700 border-green-200',
-    market_benchmark: 'bg-purple-50 text-purple-700 border-purple-200',
+    market_benchmark: 'bg-brand-50 text-brand-700 border-brand-200',
     project_data: 'bg-orange-50 text-orange-700 border-orange-200',
     estimate_data: 'bg-cyan-50 text-cyan-700 border-cyan-200',
   };

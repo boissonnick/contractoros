@@ -308,7 +308,7 @@ export default function QuoteBuilderPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight">Quote Builder</h1>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Quote Builder</h1>
           <div className="flex items-center gap-2 mt-1">
             <span className={cn(
               'text-xs px-2 py-0.5 rounded-full font-medium',
@@ -383,7 +383,7 @@ export default function QuoteBuilderPage() {
                 ) : (
                   <ChevronRightIcon className="h-4 w-4 text-gray-400" />
                 )}
-                <h3 className="font-semibold text-gray-900 font-heading tracking-tight">{phase.name}</h3>
+                <h3 className="font-semibold text-gray-900 tracking-tight">{phase.name}</h3>
                 <span className="text-xs text-gray-400">({phaseSections.length} items)</span>
               </div>
               <span className="text-sm font-medium text-gray-700">{formatCurrency(phaseTotal)}</span>
@@ -411,7 +411,7 @@ export default function QuoteBuilderPage() {
         if (unassigned.length > 0 || phases.length === 0) {
           return (
             <Card>
-              <h3 className="font-semibold text-gray-900 font-heading tracking-tight mb-3">
+              <h3 className="font-semibold text-gray-900 tracking-tight mb-3">
                 {phases.length === 0 ? 'Quote Items' : 'General Items'}
               </h3>
               {unassigned.map(renderSectionRow)}

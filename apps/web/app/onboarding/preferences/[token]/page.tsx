@@ -150,7 +150,7 @@ export default function ClientPreferencesOnboarding() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
         <Card className="max-w-md text-center">
-          <h1 className="text-xl font-bold text-gray-900 mb-2 font-heading tracking-tight">Link Error</h1>
+          <h1 className="text-xl font-bold text-gray-900 mb-2 tracking-tight">Link Error</h1>
           <p className="text-gray-600">{error}</p>
         </Card>
       </div>
@@ -162,7 +162,7 @@ export default function ClientPreferencesOnboarding() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
         <Card className="max-w-md text-center">
           <CheckCircleIcon className="h-16 w-16 text-green-500 mx-auto mb-4" />
-          <h1 className="text-xl font-bold text-gray-900 mb-2 font-heading tracking-tight">Thank You!</h1>
+          <h1 className="text-xl font-bold text-gray-900 mb-2 tracking-tight">Thank You!</h1>
           <p className="text-gray-600">
             Your preferences have been submitted. Your contractor will review them shortly.
           </p>
@@ -175,7 +175,7 @@ export default function ClientPreferencesOnboarding() {
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight">Your Project Preferences</h1>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Your Project Preferences</h1>
           <p className="text-gray-500 mt-1">{projectName}</p>
           <p className="text-sm text-gray-400 mt-2">
             Help your contractor understand your vision by filling out your preferences below.

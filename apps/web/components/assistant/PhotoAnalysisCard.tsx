@@ -33,7 +33,7 @@ interface PhotoAnalysisCardProps {
 const TAG_CATEGORY_COLORS: Record<PhotoTag['category'], string> = {
   trade: 'bg-blue-100 text-blue-700 border-blue-200',
   material: 'bg-green-100 text-green-700 border-green-200',
-  phase: 'bg-purple-100 text-purple-700 border-purple-200',
+  phase: 'bg-brand-100 text-brand-700 border-brand-200',
   issue: 'bg-red-100 text-red-700 border-red-200',
   location: 'bg-orange-100 text-orange-700 border-orange-200',
   equipment: 'bg-gray-100 text-gray-700 border-gray-200',
@@ -90,9 +90,9 @@ export function PhotoAnalysisCard({
       case 'analyzing':
         return {
           text: 'Analyzing...',
-          color: 'text-violet-600',
+          color: 'text-brand-600',
           icon: (
-            <div className="h-4 w-4 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
+            <div className="h-4 w-4 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
           ),
         };
       case 'complete':
@@ -185,7 +185,7 @@ export function PhotoAnalysisCard({
         <div className="px-3 pb-3">
           <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
             <div
-              className="h-full bg-violet-500 rounded-full"
+              className="h-full bg-brand-500 rounded-full"
               style={{
                 width: analysis.status === 'uploading' ? '40%' : '80%',
                 animation: 'pulse 2s infinite',
@@ -222,7 +222,7 @@ export function PhotoAnalysisCard({
                       text-xs px-2 py-1 rounded-full border transition-all
                       ${TAG_CATEGORY_COLORS[tag.category]}
                       ${selectedTags.includes(tag.id)
-                        ? 'ring-2 ring-violet-500 ring-offset-1'
+                        ? 'ring-2 ring-brand-500 ring-offset-1'
                         : 'opacity-75 hover:opacity-100'
                       }
                     `}
@@ -285,7 +285,7 @@ export function PhotoAnalysisCard({
             <button
               onClick={handleAddToProject}
               disabled={isAdding}
-              className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-violet-600 text-white text-sm font-medium rounded-lg hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-brand-600 text-white text-sm font-medium rounded-lg hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isAdding ? (
                 <>

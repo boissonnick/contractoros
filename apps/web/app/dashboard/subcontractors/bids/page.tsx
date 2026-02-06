@@ -186,23 +186,23 @@ export default function SubcontractorBidsPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <Card className="p-4">
-          <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{bids.length}</p>
+          <p className="text-2xl font-bold tracking-tight text-gray-900">{bids.length}</p>
           <p className="text-sm text-gray-500">Total Bids</p>
         </Card>
         <Card className="p-4">
-          <p className="text-2xl font-bold font-heading tracking-tight text-blue-600">
+          <p className="text-2xl font-bold tracking-tight text-blue-600">
             {bids.filter(b => b.status === 'draft' || b.status === 'submitted' || b.status === 'under_review').length}
           </p>
           <p className="text-sm text-gray-500">Pending</p>
         </Card>
         <Card className="p-4">
-          <p className="text-2xl font-bold font-heading tracking-tight text-green-600">
+          <p className="text-2xl font-bold tracking-tight text-green-600">
             {bids.filter(b => b.status === 'accepted').length}
           </p>
           <p className="text-sm text-gray-500">Accepted</p>
         </Card>
         <Card className="p-4">
-          <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">
+          <p className="text-2xl font-bold tracking-tight text-gray-900">
             {formatCurrency(bids.filter(b => b.status === 'accepted').reduce((sum, b) => sum + (b.amount || 0), 0))}
           </p>
           <p className="text-sm text-gray-500">Total Awarded</p>

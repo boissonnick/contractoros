@@ -532,7 +532,7 @@ export default function ReportsPage() {
     return (
       <div className="p-8 text-center">
         <ExclamationCircleIcon className="h-12 w-12 text-red-400 mx-auto mb-4" />
-        <h3 className="text-lg font-heading font-medium tracking-tight text-gray-900">Not authenticated</h3>
+        <h3 className="text-lg font-medium tracking-tight text-gray-900">Not authenticated</h3>
         <p className="text-gray-500 mt-1">Please log in to view reports.</p>
       </div>
     );
@@ -542,7 +542,7 @@ export default function ReportsPage() {
     return (
       <div className="p-8 text-center">
         <ExclamationCircleIcon className="h-12 w-12 text-red-400 mx-auto mb-4" />
-        <h3 className="text-lg font-heading font-medium tracking-tight text-gray-900">Failed to load reports</h3>
+        <h3 className="text-lg font-medium tracking-tight text-gray-900">Failed to load reports</h3>
         <p className="text-gray-500 mt-1">{dashboardError.message}</p>
       </div>
     );
@@ -593,7 +593,7 @@ export default function ReportsPage() {
               </div>
             </div>
             <div>
-              <h2 className="text-lg font-heading font-semibold tracking-tight mb-1">Business Health</h2>
+              <h2 className="text-lg font-semibold tracking-tight mb-1">Business Health</h2>
               <p className={cn(
                 'text-sm font-medium',
                 healthScoreColor === 'green' && 'text-green-400',
@@ -650,7 +650,7 @@ export default function ReportsPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <div className="flex items-center gap-2 mb-4">
             <ShieldExclamationIcon className="h-5 w-5 text-amber-500" />
-            <h3 className="text-sm font-heading font-semibold text-gray-900">Attention Required</h3>
+            <h3 className="text-sm font-semibold text-gray-900">Attention Required</h3>
             <span className="ml-auto text-xs text-gray-500">{alerts.length} alert{alerts.length > 1 ? 's' : ''}</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -771,7 +771,7 @@ export default function ReportsPage() {
       <div className="bg-white rounded-xl border border-gray-200 p-4">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-sm font-heading font-semibold text-gray-900 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
               <BoltIcon className="h-4 w-4 text-blue-500" />
               Cash Flow Forecast
             </h3>
@@ -942,7 +942,7 @@ export default function ReportsPage() {
         return (
           <div className="bg-white rounded-xl border border-gray-200 p-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-heading font-semibold text-gray-900">
+              <h3 className="text-sm font-semibold text-gray-900">
                 Project Profitability
               </h3>
               {showProfitabilityPagination && (
@@ -1045,7 +1045,7 @@ export default function ReportsPage() {
         return (
           <div className="bg-white rounded-xl border border-gray-200 p-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-heading font-semibold text-gray-900">
+              <h3 className="text-sm font-semibold text-gray-900">
                 Team Performance
               </h3>
               {showTeamPagination && (

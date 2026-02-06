@@ -70,14 +70,14 @@ export default function ContractorOnboardingPage() {
     <div className="min-h-screen bg-gradient-to-br from-brand-900 to-brand-950 flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white font-heading tracking-tight">ContractorOS</h1>
+          <h1 className="text-3xl font-bold text-white tracking-tight">ContractorOS</h1>
           <p className="text-brand-200 mt-2">Contractor Setup</p>
         </div>
 
         <Card>
           {step === 'info' && (
             <div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2 font-heading tracking-tight">Your Information</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2 tracking-tight">Your Information</h2>
               <p className="text-gray-500 mb-6">Tell us about your contracting business.</p>
               <div className="space-y-4">
                 <Input label="Full Name" value={form.displayName} onChange={(e) => setForm(p => ({ ...p, displayName: e.target.value }))} autoFocus />
@@ -93,7 +93,7 @@ export default function ContractorOnboardingPage() {
 
           {step === 'w9' && (
             <div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2 font-heading tracking-tight">W-9 Form</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2 tracking-tight">W-9 Form</h2>
               <p className="text-gray-500 mb-6">As a 1099 contractor, we need your W-9 for end-of-year tax reporting. You can upload it now or later.</p>
 
               <input ref={fileInputRef} type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={handleW9Select} className="hidden" />
@@ -138,7 +138,7 @@ export default function ContractorOnboardingPage() {
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircleIcon className="h-8 w-8 text-green-600" />
               </div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2 font-heading tracking-tight">You&apos;re all set!</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2 tracking-tight">You&apos;re all set!</h2>
               <p className="text-gray-500">Redirecting to your dashboard...</p>
               <div className="mt-4"><div className="w-8 h-8 border-4 border-brand-600 border-t-transparent rounded-full animate-spin mx-auto" /></div>
             </div>

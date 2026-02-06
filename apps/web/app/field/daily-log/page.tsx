@@ -113,7 +113,7 @@ export default function FieldDailyLogPage() {
           >
             <ChevronLeftIcon className="h-6 w-6" />
           </button>
-          <h1 className="text-lg font-semibold font-heading tracking-tight">Daily Logs</h1>
+          <h1 className="text-lg font-semibold tracking-tight">Daily Logs</h1>
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
@@ -187,7 +187,7 @@ export default function FieldDailyLogPage() {
           <div className="p-4">
             <div className="bg-white rounded-xl border shadow-sm p-4">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="font-medium font-heading tracking-tight text-gray-900">
+                <h2 className="font-medium tracking-tight text-gray-900">
                   {new Date().toLocaleDateString('en-US', {
                     weekday: 'long',
                     month: 'long',
@@ -198,7 +198,7 @@ export default function FieldDailyLogPage() {
               </div>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
-                  <div className="text-2xl font-bold text-gray-900 font-heading tracking-tight">
+                  <div className="text-2xl font-bold text-gray-900 tracking-tight">
                     {offlineLogs.filter((l) => l.date === new Date().toISOString().split('T')[0]).length}
                   </div>
                   <div className="text-xs text-gray-500">Today&apos;s Logs</div>
@@ -210,7 +210,7 @@ export default function FieldDailyLogPage() {
                   <div className="text-xs text-gray-500">Pending Sync</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-gray-900 font-heading tracking-tight">
+                  <div className="text-2xl font-bold text-gray-900 tracking-tight">
                     {offlineLogs.length}
                   </div>
                   <div className="text-xs text-gray-500">Total Saved</div>
@@ -238,7 +238,7 @@ export default function FieldDailyLogPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-medium font-heading tracking-tight text-gray-900">
+                        <h3 className="font-medium tracking-tight text-gray-900">
                           {log.title}
                         </h3>
                         {log.syncStatus === 'pending' && (

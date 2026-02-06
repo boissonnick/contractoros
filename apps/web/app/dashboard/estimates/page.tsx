@@ -1,23 +1,13 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
-import { db } from '@/lib/firebase/config';
-import {
-  collection,
-  query,
-  where,
-  orderBy,
-  getDocs,
-  deleteDoc,
-  doc,
-} from 'firebase/firestore';
 import { Button, Card, Badge, EmptyState, PageHeader } from '@/components/ui';
-import { toast } from '@/components/ui/Toast';
 import { SkeletonList } from '@/components/ui/Skeleton';
 import { cn } from '@/lib/utils';
-import { Estimate, EstimateStatus } from '@/types';
+import { EstimateStatus } from '@/types';
+import { useEstimates, useEstimateStats } from '@/lib/hooks/useEstimates';
 import {
   PlusIcon,
   MagnifyingGlassIcon,
@@ -48,87 +38,16 @@ export default function EstimatesPage() {
   const router = useRouter();
   const { profile } = useAuth();
 
-  const [estimates, setEstimates] = useState<Estimate[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<EstimateStatus | 'all'>('all');
 
-  const loadEstimates = useCallback(async () => {
-    if (!profile?.orgId) return;
+  const { estimates: filteredEstimates, loading } = useEstimates({
+    orgId: profile?.orgId || '',
+    status: statusFilter,
+    search: searchQuery,
+  });
 
-    try {
-      setLoading(true);
-      const q = query(
-        collection(db, 'estimates'),
-        where('orgId', '==', profile.orgId),
-        orderBy('createdAt', 'desc')
-      );
-
-      const snapshot = await getDocs(q);
-      const items = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate(),
-        updatedAt: doc.data().updatedAt?.toDate(),
-        validUntil: doc.data().validUntil?.toDate(),
-        sentAt: doc.data().sentAt?.toDate(),
-        viewedAt: doc.data().viewedAt?.toDate(),
-        acceptedAt: doc.data().acceptedAt?.toDate(),
-      })) as Estimate[];
-
-      setEstimates(items);
-    } catch (error) {
-      console.error('Error loading estimates:', error);
-      toast.error('Failed to load estimates');
-    } finally {
-      setLoading(false);
-    }
-  }, [profile?.orgId]);
-
-  useEffect(() => {
-    if (profile?.orgId) {
-      loadEstimates();
-    }
-  }, [profile?.orgId, loadEstimates]);
-
-  const filteredEstimates = useMemo(() => {
-    return estimates.filter((estimate) => {
-      const matchesSearch =
-        estimate.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        estimate.number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        estimate.clientName?.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesStatus = statusFilter === 'all' || estimate.status === statusFilter;
-      return matchesSearch && matchesStatus;
-    });
-  }, [estimates, searchQuery, statusFilter]);
-
-  // Calculate stats
-  const stats = useMemo(() => {
-    const total = estimates.length;
-    const drafts = estimates.filter((e) => e.status === 'draft').length;
-    const sent = estimates.filter((e) => e.status === 'sent' || e.status === 'viewed').length;
-    const accepted = estimates.filter((e) => e.status === 'accepted').length;
-    const declined = estimates.filter((e) => e.status === 'declined').length;
-    const totalValue = estimates.reduce((sum, e) => sum + e.total, 0);
-    const wonValue = estimates
-      .filter((e) => e.status === 'accepted')
-      .reduce((sum, e) => sum + e.total, 0);
-    const winRate = sent > 0 ? Math.round((accepted / (accepted + declined || 1)) * 100) : 0;
-    return { total, drafts, sent, accepted, declined, totalValue, wonValue, winRate };
-  }, [estimates]);
-
-  const _handleDelete = async (estimateId: string) => {
-    if (!confirm('Are you sure you want to delete this estimate?')) return;
-
-    try {
-      await deleteDoc(doc(db, 'estimates', estimateId));
-      toast.success('Estimate deleted');
-      loadEstimates();
-    } catch (error) {
-      console.error('Error deleting estimate:', error);
-      toast.error('Failed to delete estimate');
-    }
-  };
+  const { stats } = useEstimateStats(profile?.orgId || '');
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -160,7 +79,7 @@ export default function EstimatesPage() {
 
       {/* Mobile Header */}
       <div className="md:hidden">
-        <h1 className="text-xl font-heading font-bold tracking-tight text-gray-900">Estimates</h1>
+        <h1 className="text-xl font-bold tracking-tight text-gray-900">Estimates</h1>
         <p className="text-xs text-gray-500">Create and manage proposals</p>
       </div>
 
@@ -172,7 +91,7 @@ export default function EstimatesPage() {
               <DocumentTextIcon className="h-5 w-5 text-gray-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{stats.total}</p>
+              <p className="text-2xl font-bold tracking-tight text-gray-900">{stats.total}</p>
               <p className="text-xs text-gray-500">Total Estimates</p>
             </div>
           </div>
@@ -183,7 +102,7 @@ export default function EstimatesPage() {
               <EnvelopeIcon className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{stats.sent}</p>
+              <p className="text-2xl font-bold tracking-tight text-gray-900">{stats.sentCount}</p>
               <p className="text-xs text-gray-500">Pending Response</p>
             </div>
           </div>
@@ -194,7 +113,7 @@ export default function EstimatesPage() {
               <CurrencyDollarIcon className="h-5 w-5 text-green-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{formatCurrency(stats.wonValue)}</p>
+              <p className="text-2xl font-bold tracking-tight text-gray-900">{formatCurrency(stats.wonValue)}</p>
               <p className="text-xs text-gray-500">Won Value</p>
             </div>
           </div>
@@ -205,7 +124,7 @@ export default function EstimatesPage() {
               <ArrowTrendingUpIcon className="h-5 w-5 text-purple-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold font-heading tracking-tight text-gray-900">{stats.winRate}%</p>
+              <p className="text-2xl font-bold tracking-tight text-gray-900">{stats.winRate}%</p>
               <p className="text-xs text-gray-500">Win Rate</p>
             </div>
           </div>
@@ -248,12 +167,12 @@ export default function EstimatesPage() {
       ) : filteredEstimates.length === 0 ? (
         <EmptyState
           icon={<DocumentTextIcon className="h-full w-full" />}
-          title={estimates.length === 0 ? "No estimates yet" : "No matching estimates"}
-          description={estimates.length === 0
+          title={stats.total === 0 ? "No estimates yet" : "No matching estimates"}
+          description={stats.total === 0
             ? "Create your first estimate to start winning work."
             : "Try adjusting your search or filter criteria."
           }
-          action={estimates.length === 0 ? {
+          action={stats.total === 0 ? {
             label: 'New Estimate',
             onClick: () => router.push('/dashboard/estimates/new'),
           } : undefined}
@@ -284,7 +203,7 @@ export default function EstimatesPage() {
                         </Badge>
                       )}
                     </div>
-                    <h3 className="font-heading font-medium text-gray-900">{estimate.name}</h3>
+                    <h3 className="font-medium text-gray-900">{estimate.name}</h3>
                     <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
                       <span>{estimate.clientName}</span>
                       <span>Created {format(new Date(estimate.createdAt), 'MMM d, yyyy')}</span>

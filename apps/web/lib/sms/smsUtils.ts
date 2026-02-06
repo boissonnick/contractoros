@@ -50,6 +50,7 @@ export function getTemplateTypeLabel(type: SmsTemplateType): string {
     invoice_sent: 'Invoice Sent',
     document_ready: 'Document Ready',
     task_assigned: 'Task Assigned',
+    review_request: 'Review Request',
     custom: 'Custom',
   };
   return labels[type] || type;
@@ -165,6 +166,11 @@ export function getDefaultTemplateVariables(type: SmsTemplateType): SmsTemplateV
       { name: 'projectName', description: 'Project name', required: false },
       { name: 'dueDate', description: 'Task due date', required: false },
     ],
+    review_request: [
+      ...commonVariables,
+      { name: 'projectName', description: 'Project name', required: true },
+      { name: 'reviewLink', description: 'Link to leave a review', required: true },
+    ],
     custom: commonVariables,
   };
 
@@ -183,6 +189,7 @@ export function getDefaultTemplate(type: SmsTemplateType): string {
     invoice_sent: `Hi {{clientName}}, invoice #{{invoiceNumber}} for {{amount}} is ready. Due: {{dueDate}}. View: {{viewLink}} - {{companyName}}`,
     document_ready: `Hi {{clientName}}, your {{documentName}} is ready for review. View it here: {{viewLink}} - {{companyName}}`,
     task_assigned: `Hi {{clientName}}, you have a new task: {{taskName}} for {{projectName}}. Due: {{dueDate}} - {{companyName}}`,
+    review_request: `Hi {{clientName}}, thank you for choosing {{companyName}} for your {{projectName}}! We'd love to hear about your experience. Please leave us a review: {{reviewLink}} - Thank you!`,
     custom: `Hi {{clientName}}, {{companyName}} has sent you a message.`,
   };
 

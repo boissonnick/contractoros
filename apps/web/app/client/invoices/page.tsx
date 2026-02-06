@@ -144,7 +144,7 @@ export default function ClientInvoicesPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">Invoices</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900">Invoices</h1>
         <p className="text-gray-500 mt-1">View and pay your project invoices</p>
       </div>
 
@@ -265,7 +265,7 @@ export default function ClientInvoicesPage() {
               onClick={() => setSelectedInvoice(null)}
             />
             <div className="relative bg-white rounded-xl shadow-xl max-w-lg w-full p-6">
-              <h2 className="text-xl font-bold font-heading tracking-tight text-gray-900 mb-4">
+              <h2 className="text-xl font-bold tracking-tight text-gray-900 mb-4">
                 Invoice #{selectedInvoice.number}
               </h2>
 

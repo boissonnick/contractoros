@@ -116,7 +116,7 @@ export default function ClientDocumentsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">Documents</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900">Documents</h1>
         <p className="text-gray-500 mt-1">Access contracts, invoices, change orders, and other project documents</p>
       </div>
 

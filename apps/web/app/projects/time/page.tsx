@@ -382,7 +382,7 @@ export default function ProjectsTimePage() {
       {/* Project Breakdown Table */}
       <Card padding="none">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold font-heading tracking-tight text-gray-900">Project Breakdown</h3>
+          <h3 className="text-lg font-semibold tracking-tight text-gray-900">Project Breakdown</h3>
           <p className="text-sm text-gray-500">Time and costs grouped by project</p>
         </div>
 

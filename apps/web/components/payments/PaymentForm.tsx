@@ -88,7 +88,7 @@ function PaymentFormInner({
       {/* Amount display */}
       <div className="bg-gray-50 rounded-lg p-4 text-center">
         <p className="text-sm text-gray-600">Amount to pay</p>
-        <p className="text-3xl font-bold text-gray-900 font-heading tracking-tight">{formatCurrency(amount)}</p>
+        <p className="text-3xl font-bold text-gray-900 tracking-tight">{formatCurrency(amount)}</p>
         {description && <p className="text-sm text-gray-500 mt-1">{description}</p>}
       </div>
 

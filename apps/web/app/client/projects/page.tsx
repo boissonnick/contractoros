@@ -146,7 +146,7 @@ export default function ClientProjectsPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">My Projects</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900">My Projects</h1>
           <p className="text-gray-500 mt-1">View the status and progress of your construction projects</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -162,7 +162,7 @@ export default function ClientProjectsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold font-heading tracking-tight text-gray-900">My Projects</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900">My Projects</h1>
         <p className="text-gray-500 mt-1">
           View the status and progress of your construction projects
         </p>
@@ -177,7 +177,7 @@ export default function ClientProjectsPage() {
                 <HomeIcon className="h-5 w-5 text-brand-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.total}</p>
+                <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats.total}</p>
                 <p className="text-sm text-gray-500">Total</p>
               </div>
             </div>
@@ -188,7 +188,7 @@ export default function ClientProjectsPage() {
                 <ClockIcon className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.active}</p>
+                <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats.active}</p>
                 <p className="text-sm text-gray-500">Active</p>
               </div>
             </div>
@@ -199,7 +199,7 @@ export default function ClientProjectsPage() {
                 <CheckCircleIcon className="h-5 w-5 text-gray-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.completed}</p>
+                <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats.completed}</p>
                 <p className="text-sm text-gray-500">Completed</p>
               </div>
             </div>

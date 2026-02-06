@@ -99,7 +99,7 @@ export default function PurchaseOrderCard({
           </div>
         </div>
         <div className="text-right">
-          <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">
+          <p className="text-2xl font-bold text-gray-900 tracking-tight">
             ${order.total.toLocaleString()}
           </p>
           <p className="text-sm text-gray-500">

@@ -324,7 +324,7 @@ export default function MaterialsPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
+            <div className="p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
               <CubeIcon className="w-6 h-6 text-blue-600" />
             </div>
             <div>
@@ -341,7 +341,7 @@ export default function MaterialsPage() {
 
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 rounded-lg">
+            <div className="p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
               <WrenchScrewdriverIcon className="w-6 h-6 text-green-600" />
             </div>
             <div>
@@ -356,7 +356,7 @@ export default function MaterialsPage() {
 
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
+            <div className="p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
               <DocumentTextIcon className="w-6 h-6 text-purple-600" />
             </div>
             <div>
@@ -371,7 +371,7 @@ export default function MaterialsPage() {
 
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg ${alerts.length > 0 ? 'bg-amber-100' : 'bg-gray-100'}`}>
+            <div className="p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-black/5">
               <ExclamationTriangleIcon
                 className={`w-6 h-6 ${alerts.length > 0 ? 'text-amber-600' : 'text-gray-400'}`}
               />

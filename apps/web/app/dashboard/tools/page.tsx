@@ -151,7 +151,7 @@ export default function ToolsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 font-heading tracking-tight">Tools & Equipment</h1>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Tools & Equipment</h1>
           <p className="text-gray-500 mt-1">Track and manage your tool inventory</p>
         </div>
         <div className="flex gap-2">
@@ -169,7 +169,7 @@ export default function ToolsPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="p-4 text-center">
-          <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">{stats.total}</p>
+          <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats.total}</p>
           <p className="text-xs text-gray-500">Total Equipment</p>
         </Card>
         <Card className="p-4 text-center">

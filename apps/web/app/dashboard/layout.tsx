@@ -34,6 +34,7 @@ import {
   TruckIcon,
   InboxIcon,
   ChartBarSquareIcon,
+  StarIcon,
 } from '@heroicons/react/24/outline';
 
 // =============================================================================
@@ -244,7 +245,7 @@ const clientNavItems: NavItem[] = [
 function createOwnerPmSections(permissions: RolePermissions): NavSection[] {
   const sections: NavSection[] = [];
 
-  // Projects & Work section - always visible
+  // Projects & Work section - always visible, core daily workflow
   sections.push({
     id: 'projects-work',
     title: 'Projects & Work',
@@ -269,43 +270,18 @@ function createOwnerPmSections(permissions: RolePermissions): NavSection[] {
         { label: 'Clients', href: '/dashboard/clients', icon: UserGroupIcon },
         { label: 'Estimates', href: '/dashboard/estimates', icon: CalculatorIcon },
         { label: 'E-Signatures', href: '/dashboard/signatures', icon: PencilSquareIcon },
+        { label: 'Reviews', href: '/dashboard/reviews', icon: StarIcon },
       ],
     });
   }
 
-  // Finance section - requires finance permissions
-  // Note: Reports link removed here - use dedicated Reports section instead
-  if (permissions.canViewAllFinances) {
-    sections.push({
-      id: 'finance',
-      title: 'Finance',
-      icon: BanknotesIcon,
-      defaultOpen: true,
-      items: [
-        {
-          label: 'Finance',
-          href: '/dashboard/finances',
-          icon: BanknotesIcon,
-          children: [
-            { label: 'Overview', href: '/dashboard/finances' },
-            { label: 'Invoices', href: '/dashboard/invoices' },
-            { label: 'AP Invoicing', href: '/dashboard/ap-invoicing' },
-            { label: 'Expenses', href: '/dashboard/expenses' },
-            { label: 'Payroll', href: '/dashboard/payroll' },
-          ],
-        },
-        { label: 'Intelligence', href: '/dashboard/intelligence', icon: ChartBarSquareIcon },
-      ],
-    });
-  }
-
-  // Team section - separate top-level for better organization
+  // Team & Subs — employees + subcontractors unified
   if (permissions.canViewTeam) {
     sections.push({
-      id: 'team',
-      title: 'Team',
+      id: 'team-subs',
+      title: 'Team & Subs',
       icon: UsersIcon,
-      defaultOpen: true,
+      defaultOpen: false,
       items: [
         {
           label: 'Team',
@@ -318,18 +294,6 @@ function createOwnerPmSections(permissions: RolePermissions): NavSection[] {
             { label: 'Time Off', href: '/dashboard/team/time-off' },
           ],
         },
-      ],
-    });
-  }
-
-  // Subcontractors section - separate top-level for better organization
-  if (permissions.canViewTeam) {
-    sections.push({
-      id: 'subcontractors',
-      title: 'Subcontractors',
-      icon: WrenchScrewdriverIcon,
-      defaultOpen: true,
-      items: [
         {
           label: 'Subcontractors',
           href: '/dashboard/subcontractors',
@@ -344,80 +308,89 @@ function createOwnerPmSections(permissions: RolePermissions): NavSection[] {
     });
   }
 
-  // Operations section - Equipment and Materials
+  // Operations — Finance + Equipment + Materials consolidated
+  const operationsItems: NavItem[] = [];
+  if (permissions.canViewAllFinances) {
+    operationsItems.push({
+      label: 'Finance',
+      href: '/dashboard/finances',
+      icon: BanknotesIcon,
+      children: [
+        { label: 'Overview', href: '/dashboard/finances' },
+        { label: 'Invoices', href: '/dashboard/invoices' },
+        { label: 'AP Invoicing', href: '/dashboard/ap-invoicing' },
+        { label: 'Expenses', href: '/dashboard/expenses' },
+        { label: 'Payroll', href: '/dashboard/payroll' },
+      ],
+    });
+  }
+  operationsItems.push(
+    { label: 'Equipment', href: '/dashboard/equipment', icon: TruckIcon },
+    { label: 'Materials', href: '/dashboard/materials', icon: InboxIcon },
+  );
   sections.push({
     id: 'operations',
     title: 'Operations',
     icon: TruckIcon,
-    defaultOpen: true,
-    items: [
-      { label: 'Equipment', href: '/dashboard/equipment', icon: TruckIcon },
-      { label: 'Materials', href: '/dashboard/materials', icon: InboxIcon },
-    ],
+    defaultOpen: false,
+    items: operationsItems,
   });
 
-  // Documents & Communication section
-  const docsItems: NavItem[] = [
-    { label: 'Messages', href: '/dashboard/messaging', icon: ChatBubbleLeftRightIcon },
-    { label: 'Documents', href: '/dashboard/documents', icon: DocumentIcon },
-  ];
+  // Reports & Intelligence — analytics consolidated
+  const analyticsItems: NavItem[] = [];
+  if (permissions.canViewProjectReports) {
+    analyticsItems.push({
+      label: 'Reports',
+      href: '/dashboard/reports',
+      icon: ClipboardDocumentListIcon,
+      children: [
+        { label: 'Overview', href: '/dashboard/reports' },
+        { label: 'Financial', href: '/dashboard/reports/financial' },
+        { label: 'Operational', href: '/dashboard/reports/operational' },
+        { label: 'Benchmarking', href: '/dashboard/reports/benchmarking' },
+        { label: 'Detailed', href: '/dashboard/reports/detailed' },
+        { label: 'Report Builder', href: '/dashboard/reports/builder' },
+      ],
+    });
+  }
+  if (permissions.canViewAllFinances) {
+    analyticsItems.push({ label: 'Intelligence', href: '/dashboard/intelligence', icon: ChartBarSquareIcon });
+  }
+  if (analyticsItems.length > 0) {
+    sections.push({
+      id: 'analytics',
+      title: 'Analytics',
+      icon: ChartBarSquareIcon,
+      defaultOpen: false,
+      items: analyticsItems,
+    });
+  }
 
+  // Documents & Communication
   sections.push({
     id: 'documents',
     title: 'Documents',
     icon: DocumentIcon,
-    defaultOpen: true,
-    items: docsItems,
-  });
-
-  // Reports section - requires report permissions
-  if (permissions.canViewProjectReports) {
-    sections.push({
-      id: 'reports',
-      title: 'Reports',
-      icon: ClipboardDocumentListIcon,
-      defaultOpen: false,
-      items: [
-        {
-          label: 'Reports',
-          href: '/dashboard/reports',
-          icon: ClipboardDocumentListIcon,
-          children: [
-            { label: 'Overview', href: '/dashboard/reports' },
-            { label: 'Financial', href: '/dashboard/reports/financial' },
-            { label: 'Operational', href: '/dashboard/reports/operational' },
-            { label: 'Benchmarking', href: '/dashboard/reports/benchmarking' },
-            { label: 'Detailed', href: '/dashboard/reports/detailed' },
-            { label: 'Report Builder', href: '/dashboard/reports/builder' },
-          ],
-        },
-      ],
-    });
-  }
-
-  // Settings & Help section - always at the bottom
-  const settingsItems: NavItem[] = [];
-  if (permissions.canViewSettings) {
-    settingsItems.push({ label: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon });
-  }
-  settingsItems.push({
-    label: 'Help & Support',
-    href: '/dashboard/help',
-    icon: QuestionMarkCircleIcon,
-    children: [
-      { label: 'Getting Started', href: '/dashboard/help' },
-      { label: 'Keyboard Shortcuts', href: '/dashboard/help/shortcuts' },
-      { label: 'Contact Support', href: '/dashboard/help/contact' },
-      { label: "What's New", href: '/dashboard/help/changelog' },
+    defaultOpen: false,
+    items: [
+      { label: 'Messages', href: '/dashboard/messaging', icon: ChatBubbleLeftRightIcon },
+      { label: 'Documents', href: '/dashboard/documents', icon: DocumentIcon },
     ],
   });
 
+  // Settings & Help — flat items at bottom, no nested dropdowns
+  const bottomItems: NavItem[] = [];
+  if (permissions.canViewSettings) {
+    bottomItems.push({ label: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon });
+  }
+  bottomItems.push({ label: 'Help & Support', href: '/dashboard/help', icon: QuestionMarkCircleIcon });
+
   sections.push({
     id: 'settings-help',
-    title: 'Settings & Help',
+    title: '',
     icon: Cog6ToothIcon,
-    defaultOpen: false,
-    items: settingsItems,
+    defaultOpen: true,
+    items: bottomItems,
   });
 
   return sections;
@@ -493,28 +466,23 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   }, [permissions, currentRole]);
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <>
       {/* Impersonation Banner at the very top */}
       <ImpersonationBanner />
 
       {/* Offline Banner */}
       <OfflineBanner />
 
-      {/* Global Search - integrated into sidebar header on desktop */}
-      {/* Search is now accessible via Cmd+K shortcut and sidebar placement */}
-
       {/* Main App Shell */}
-      <div className="flex-1">
-        <AppShell
-          navItems={filteredNavItems}
-          navSections={navSections}
-          userDisplayName={profile?.displayName}
-          onSignOut={signOut}
-          sidebarFooter={<SidebarDevTools />}
-        >
-          {children}
-        </AppShell>
-      </div>
+      <AppShell
+        navItems={filteredNavItems}
+        navSections={navSections}
+        userDisplayName={profile?.displayName}
+        onSignOut={signOut}
+        sidebarFooter={<SidebarDevTools />}
+      >
+        {children}
+      </AppShell>
 
       {/* AI Assistant */}
       <AssistantTrigger onClick={assistant.open} />
@@ -534,7 +502,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
       {/* Offline Sync Status Indicator - only shows when offline/syncing */}
       <FloatingSyncIndicator position="bottom-right" />
-    </div>
+    </>
   );
 }
 

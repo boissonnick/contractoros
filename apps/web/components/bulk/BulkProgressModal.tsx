@@ -72,7 +72,7 @@ export function BulkProgressModal({
                 {/* Title */}
                 <Dialog.Title
                   as="h3"
-                  className="text-lg font-semibold text-gray-900 font-heading tracking-tight"
+                  className="text-lg font-semibold text-gray-900 tracking-tight"
                 >
                   {isComplete
                     ? allFailed

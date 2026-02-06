@@ -260,7 +260,7 @@ export default function BillingSettingsPage() {
             </div>
           </div>
           <div className="text-right">
-            <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">
+            <p className="text-2xl font-bold text-gray-900 tracking-tight">
               ${currentPlan.price}
               <span className="text-sm font-normal text-gray-500">/{currentPlan.interval}</span>
             </p>
@@ -294,7 +294,7 @@ export default function BillingSettingsPage() {
                 <ExclamationTriangleIcon className="h-4 w-4 text-amber-500" />
               )}
             </div>
-            <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">
+            <p className="text-2xl font-bold text-gray-900 tracking-tight">
               {usage.projects}
               <span className="text-sm font-normal text-gray-500">
                 /{currentLimits.projects === -1 ? '∞' : currentLimits.projects}
@@ -325,7 +325,7 @@ export default function BillingSettingsPage() {
                 <ExclamationTriangleIcon className="h-4 w-4 text-amber-500" />
               )}
             </div>
-            <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">
+            <p className="text-2xl font-bold text-gray-900 tracking-tight">
               {usage.teamMembers}
               <span className="text-sm font-normal text-gray-500">
                 /{currentLimits.teamMembers === -1 ? '∞' : currentLimits.teamMembers}
@@ -353,7 +353,7 @@ export default function BillingSettingsPage() {
                 <span className="text-sm font-medium text-gray-700">Storage</span>
               </div>
             </div>
-            <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">
+            <p className="text-2xl font-bold text-gray-900 tracking-tight">
               {usage.storage.toFixed(1)}
               <span className="text-sm font-normal text-gray-500"> GB/{currentLimits.storage} GB</span>
             </p>
@@ -377,7 +377,7 @@ export default function BillingSettingsPage() {
                 <span className="text-sm font-medium text-gray-700">SMS This Month</span>
               </div>
             </div>
-            <p className="text-2xl font-bold text-gray-900 font-heading tracking-tight">
+            <p className="text-2xl font-bold text-gray-900 tracking-tight">
               {usage.smsThisMonth}
               <span className="text-sm font-normal text-gray-500">
                 /{subscription.plan === 'free' ? '0' : subscription.plan === 'pro' ? '100' : '∞'}

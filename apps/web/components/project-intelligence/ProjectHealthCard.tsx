@@ -74,7 +74,7 @@ export function ProjectHealthCard({
   const QualityIcon = qualityConfig.icon;
 
   return (
-    <div className={`bg-white rounded-lg border border-gray-200 shadow-sm ${className}`}>
+    <div className={`bg-white rounded-2xl border border-gray-200 shadow-sm ${className}`}>
       {/* Header with health score */}
       <div className="p-4 border-b border-gray-100">
         <div className="flex items-center justify-between">

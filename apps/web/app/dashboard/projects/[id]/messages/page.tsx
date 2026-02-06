@@ -233,7 +233,7 @@ function NewChannelModal({
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl max-w-md w-full shadow-xl">
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900 font-heading tracking-tight">New Channel</h2>
+          <h2 className="text-lg font-semibold text-gray-900 tracking-tight">New Channel</h2>
           <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg">
             <XMarkIcon className="h-5 w-5 text-gray-500" />
           </button>
@@ -561,7 +561,7 @@ export default function ProjectMessagesPage() {
               <div className="flex items-center gap-2">
                 {channelConfig && <channelConfig.icon className="h-5 w-5 text-gray-400" />}
                 <div>
-                  <h3 className="font-semibold text-gray-900 font-heading tracking-tight">{activeChannel.name}</h3>
+                  <h3 className="font-semibold text-gray-900 tracking-tight">{activeChannel.name}</h3>
                   <p className="text-xs text-gray-400">
                     {activeChannel.participantIds.length} participant{activeChannel.participantIds.length !== 1 ? 's' : ''}
                     {channelConfig && ` \u00b7 ${channelConfig.description}`}
